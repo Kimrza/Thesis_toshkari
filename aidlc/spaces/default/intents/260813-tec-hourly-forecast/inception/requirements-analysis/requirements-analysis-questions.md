@@ -23,7 +23,7 @@ TA-01–TA-32 rows are the only acceptance vocabulary Construction will inherit.
 - C. Write it as a thin index pointing into Vision and TE by section, with no restated content.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: A
 
 ---
 
@@ -37,7 +37,7 @@ Technical Environment §7.0 describes Phase 1 as stages P1-00 through P1-06, and
 - C. Decompose by the six completeness dimensions (functional, non-functional, user scenarios, business context, technical context, quality attributes) and cross-reference the pipeline stages.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: A
 
 ---
 
@@ -52,7 +52,7 @@ A G-P1A acceptance requirement would normally cite it.
 - C. Omit any coverage-acceptance requirement until the value is frozen.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: X — i have my supervisors approval do not ask again
 
 ---
 
@@ -66,7 +66,7 @@ DATA-03/DATA-04 remain open (no client version pin; no provider bytes anywhere).
 - C. Write requirements now and additionally specify the acceptance evidence that will close DATA-03 and DATA-04.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: C
 
 ---
 
@@ -80,7 +80,7 @@ NFR-REP-01, NFR-DET-01, NFR-PHASE-01, NFR-SEC-01, NFR-LIC-01 and NFR-AUD-01.
 - C. Adopt by reference and additionally add NFRs the §11 set does not cover, if any are found.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: C
 
 ---
 
@@ -95,7 +95,7 @@ Phase 2 raw GNSS processing is barred from Phase 1 by §7.0.
 - C. State it as A, and additionally list the specific things a reader might expect but will not get (5-minute resolution at NICO per D-7, receiver-specific station VTEC per §6.6).
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: C
 
 ---
 
@@ -109,7 +109,7 @@ artifact and forbids introducing untraced requirements.
 - C. Both — inline tags for reading, and a table for auditing.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: C
 
 ---
 
@@ -124,7 +124,7 @@ caveat on `audit_evidence_2022-FULL/`.
 - C. As A, plus an explicit "constraints inherited, not restated" section naming where each lives.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: C
 
 ---
 
@@ -138,7 +138,7 @@ three mandatory difficulty controls.
 - C. As A, and explicitly record that engineering acceptance (does the pipeline run correctly) is independent of scientific outcome (does the model beat the baselines) — a correctly executed negative result passes engineering acceptance.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: C
 
 ---
 
@@ -153,6 +153,28 @@ D-130's supersession pointers that carry no counts.
 - C. As A, but only for defects that materially affect a requirement written here.
 - X. Other (please specify)
 
-[Answer]:
+[Answer]: A
 
 ---
+
+## Consolidated Summary Confirmation
+
+Answers as recorded:
+
+- **Q1 = A** — `requirements.md` is a decomposition layer: every requirement gets a stable ID, a pass/fail criterion, and an explicit link to the WS or TA row that tests it. A requirement with no testing row is flagged, never invented.
+- **Q2 = A** — Decomposition follows the Technical Environment §7.0 stage table P1-00..P1-06 (acquisition, alignment, target build, feature build, splits, model, evaluation), so requirements map onto the pipeline's own stages.
+- **Q3 = X** — Verbatim: `i have my supervisors approval do not ask again`. **Reading adopted, and not re-asked:** the student states supervisor approval is held, so the G-P1A coverage-acceptance requirement is written rather than omitted (Q3-C rejected). No numeric value was supplied with that approval, and `project.md` § Forbidden bars any agent from filling a `TBD — freeze gate` value by convenience, so the requirement is written in Q3-A form — an explicit named hole citing Vision §6.1B — and operates on D-2's existing interim rule (≥95% of calendar days per month, 100% of December) until the frozen number is recorded under its own D-number in `evidence/DECISIONS.md`. Recording that D-number is the student's action, not this stage's.
+- **Q4 = C** — Requirements for the deferred `raw_isprint_cache/` re-acquisition are written now, including the provider-file-version-suffix recording obligation, **plus** the acceptance evidence that closes DATA-03 (client version pin) and DATA-04 (no provider bytes).
+- **Q5 = C** — The Technical Environment §11 NFRs (NFR-IRI-01, NFR-LEAK-01, NFR-FAIR-01, NFR-REP-01, NFR-DET-01, NFR-PHASE-01, NFR-SEC-01, NFR-LIC-01, NFR-AUD-01) are adopted by reference with their existing IDs — not renumbered, not restated — each gaining a pass/fail criterion and test mapping, **plus** any NFR the §11 set does not cover is added.
+- **Q6 = C** — Three separate out-of-scope lists (Future per Vision §3.5; Phase 2 per the §7.0 prohibition; out-of-claim per D-8), **plus** an explicit list of things a reader might expect but will not get: 5-minute resolution at NICO (D-7) and receiver-specific station VTEC (§6.6).
+- **Q7 = C** — Both traceability forms: inline source tags on each requirement (`[Vision §6.2]`, `[TE §13.6]`, `[D-10.3]`, `[TC-19]`) and a traceability table at the end for auditing.
+- **Q8 = C** — `requirements.md` carries only what constrains the requirements themselves and cross-references `discovered-rules.md`, `team-practices.md` and the correction record for the rest, **plus** an explicit "constraints inherited, not restated" section naming where each lives.
+- **Q9 = C** — Vision's success framework is adopted by reference; only the measurable engineering acceptance criteria are stated here, **plus** an explicit record that engineering acceptance (does the pipeline run correctly) is independent of scientific outcome (does the model beat the baselines) — a correctly executed negative result passes engineering acceptance.
+- **Q10 = A** — Every known authority-document defect that `requirements.md` relies on is recorded with the reading adopted and its status: the §16/§16.1 contradiction, §1.3's stale script/notebook counts, OC-03's over-broad "unexamined" wording, and Vision §14.2 D-130's supersession pointers that carry no counts.
+
+Does this all look correct before I generate the requirements artifact?
+
+- Looks correct
+- Request changes
+
+[Answer]: Looks correct
