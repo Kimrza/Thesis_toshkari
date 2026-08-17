@@ -1,0 +1,60 @@
+{
+  "retrieved_at_utc": "2026-08-12T19:25:22.350081+00:00",
+  "madrigal_url": "https://cedar.openmadrigal.org",
+  "madrigalWeb_version": "unknown",
+  "instrument_code": 8000,
+  "kindat_code": 3500,
+  "parameters_requested": [
+    "ut1_unix",
+    "gdlat",
+    "glon",
+    "tec",
+    "dtec"
+  ],
+  "stations": {
+    "ARUC": {
+      "lat": 40.286,
+      "lon": 44.086,
+      "source": "IGS network page -- cross-check against site log required",
+      "cell": {
+        "lat_min": 40,
+        "lat_max": 41,
+        "lon_min": 44,
+        "lon_max": 45
+      }
+    },
+    "BSHM": {
+      "lat": 32.778987,
+      "lon": 35.022987,
+      "source": "IGS network page -- cross-check against site log required",
+      "cell": {
+        "lat_min": 32,
+        "lat_max": 33,
+        "lon_min": 35,
+        "lon_max": 36
+      }
+    },
+    "NICO": {
+      "lat": 35.140989,
+      "lon": 33.39645,
+      "source": "IGS network page -- cross-check against site log required",
+      "cell": {
+        "lat_min": 35,
+        "lat_max": 36,
+        "lon_min": 33,
+        "lon_max": 34
+      }
+    }
+  },
+  "coordinate_to_cell_convention": "lower-left floor, 1deg x 1deg -- confirm against real bin edges before freezing",
+  "audit_year": 2022,
+  "run_months": [
+    10
+  ],
+  "partial_run": true,
+  "rows_fetched_total": 19062,
+  "rows_outside_audit_year_excluded": 0,
+  "file_level_errors": [],
+  "user_fullname": "Kimia Rezaei",
+  "user_affiliation": "Amirkabir University of Technology"
+}

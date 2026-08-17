@@ -1,0 +1,4 @@
+station,records_in_cell,unique_days,coverage_pct_days,unique_hourly_bins,december_days_present,december_coverage_pct,months_run
+ARUC,6408,32,8.767,768,0,0.0,8
+BSHM,8244,32,8.767,767,0,0.0,8
+NICO,4475,32,8.767,731,0,0.0,8

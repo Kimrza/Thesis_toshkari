@@ -1,0 +1,123 @@
+{
+  "generated_utc": "2026-08-15T19:51:03Z",
+  "obligation_1_kyoto_dst": {
+    "1": {
+      "file": "dst_provisional_202201.html",
+      "sha256": "98319fa4aa04ca3c3acb3aa476e0d81e8a958cd246d46118c90a9640b51ca1a0",
+      "bytes": 5714,
+      "expected_days": 31,
+      "day_rows_parsed": 31,
+      "missing_days": []
+    },
+    "2": {
+      "file": "dst_provisional_202202.html",
+      "sha256": "f6561832f996c3905b88587f16d5d0d5276ea6977843f7c1acdcf0c563cefdaa",
+      "bytes": 5407,
+      "expected_days": 28,
+      "day_rows_parsed": 28,
+      "missing_days": []
+    },
+    "3": {
+      "file": "dst_provisional_202203.html",
+      "sha256": "c4c96eff798eb539d4c4bafe34e1fabcb7d1d1716b4955d496445cb96ecb3ba4",
+      "bytes": 5714,
+      "expected_days": 31,
+      "day_rows_parsed": 31,
+      "missing_days": []
+    },
+    "4": {
+      "file": "dst_provisional_202204.html",
+      "sha256": "69656d10c05a4a6795346d06b1ca3a2879143117cc1b9f7e6d8966da70b08395",
+      "bytes": 5612,
+      "expected_days": 30,
+      "day_rows_parsed": 30,
+      "missing_days": []
+    },
+    "5": {
+      "file": "dst_provisional_202205.html",
+      "sha256": "70015482a17247347bdab4e38ad23c75080a3c1715e602e9f5ac90a4020370cc",
+      "bytes": 5714,
+      "expected_days": 31,
+      "day_rows_parsed": 31,
+      "missing_days": []
+    },
+    "6": {
+      "file": "dst_provisional_202206.html",
+      "sha256": "939d5149d0119eb523a9d0c5a5e2dfb9b23660d353cecf7126ae99ff25e7faea",
+      "bytes": 5612,
+      "expected_days": 30,
+      "day_rows_parsed": 30,
+      "missing_days": []
+    },
+    "7": {
+      "file": "dst_provisional_202207.html",
+      "sha256": "e5f1e10e2e0c82f518a866c1ed00a73bfb10353e2e754e3a3ff8943a4d1e8b8f",
+      "bytes": 5714,
+      "expected_days": 31,
+      "day_rows_parsed": 31,
+      "missing_days": []
+    },
+    "8": {
+      "file": "dst_provisional_202208.html",
+      "sha256": "272d8310eb4440d9f671596b7960918001a5d260bfbd767458c3b4752925f5f1",
+      "bytes": 5714,
+      "expected_days": 31,
+      "day_rows_parsed": 31,
+      "missing_days": []
+    },
+    "9": {
+      "file": "dst_provisional_202209.html",
+      "sha256": "477405ab43a8179196308bb3de61f1aa2beb859982183d8c820b0e7710d8e1ef",
+      "bytes": 5612,
+      "expected_days": 30,
+      "day_rows_parsed": 30,
+      "missing_days": []
+    },
+    "10": {
+      "file": "dst_provisional_202210.html",
+      "sha256": "a9ddc03aefdc7bd3a69a70cef2a20093186981e3ac62367c08b61406ec502240",
+      "bytes": 5714,
+      "expected_days": 31,
+      "day_rows_parsed": 31,
+      "missing_days": []
+    },
+    "11": {
+      "file": "dst_provisional_202211.html",
+      "sha256": "56562cf040e1b12b7fae5156d2bd1e4f5d2489fb215071fdd5883143864fb592",
+      "bytes": 5612,
+      "expected_days": 30,
+      "day_rows_parsed": 30,
+      "missing_days": []
+    },
+    "12": {
+      "file": "dst_provisional_202212.html",
+      "sha256": "0edd417ae93550d1ff91da8d4c8dd240472cd98a0909f827c425417ec7f9c26c",
+      "bytes": 5741,
+      "expected_days": 31,
+      "day_rows_parsed": 31,
+      "missing_days": []
+    }
+  },
+  "obligation_2_canadian_f107": {
+    "file": "fluxtable.txt",
+    "sha256": "4b7fbfde3b9d0140ef43e7487f5986fe18f93182dac5e1ee37a93fb6ebd690b9",
+    "bytes": 2170350,
+    "records_total": 23848,
+    "records_2022": 1101,
+    "dates_monotonic_non_decreasing": true,
+    "unparsed_lines": 0,
+    "unparsed_sample": [],
+    "days_expected_2022": 365,
+    "days_present_2022": 365,
+    "days_missing_2022": [],
+    "days_missing_from_2022_03_18": [],
+    "missing_runs": [],
+    "readings_per_day_distribution": {
+      "3": 360,
+      "4": 4,
+      "5": 1
+    },
+    "first_2022_date": "2022-01-01",
+    "last_2022_date": "2022-12-31"
+  }
+}
