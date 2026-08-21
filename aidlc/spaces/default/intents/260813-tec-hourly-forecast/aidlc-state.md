@@ -30,7 +30,7 @@
 - **In Progress**: units-generation
 
 ## Runtime State
-- **Revision Count**: 2
+- **Revision Count**: 3
 
 ## Phase Progress
 <!-- Status values: Pending, Active, Verified, Skipped -->
@@ -65,7 +65,7 @@
 - [ ] user-stories — SKIP
 - [ ] refined-mockups — SKIP
 - [x] application-design — EXECUTE
-- [-] units-generation — EXECUTE
+- [R] units-generation — EXECUTE
 - [ ] delivery-planning — EXECUTE
 
 ### CONSTRUCTION PHASE
@@ -92,7 +92,7 @@ Per unit: [TBD]
 - **Current Stage**: units-generation
 - **Next Stage**: delivery-planning
 - **Status**: Running
-- **Last Updated**: 2026-08-21T12:59:06Z
+- **Last Updated**: 2026-08-21T14:25:36Z
 
 ## Session Resume Point
 - **Last Completed Stage**: application-design

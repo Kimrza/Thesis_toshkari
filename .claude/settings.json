@@ -20,9 +20,9 @@
     "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/aidlc-statusline.ts\""
   },
   "env": {
-  "AWS_AIDLC_DEFAULT_SCOPE": "workshop"
-},
-"model": "opus",
+    "AWS_AIDLC_DEFAULT_SCOPE": "workshop"
+  },
+  "model": "opus",
   "effortLevel": "xhigh",
   "hooks": {
     "PreToolUse": [
@@ -75,7 +75,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "graphify hook-guard search"
+            "command": "C:/Users/s_inv/.local/bin/graphify.CMD hook-guard search"
           }
         ]
       },
@@ -84,7 +84,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "graphify hook-guard read"
+            "command": "C:/Users/s_inv/.local/bin/graphify.CMD hook-guard read"
           }
         ]
       }

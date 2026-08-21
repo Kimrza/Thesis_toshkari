@@ -1,0 +1,16 @@
+# graphify corpus exclusions for TEC_Project.
+#
+# evidence/ is 337 files / ~353 MB of raw Madrigal isprint dumps and driver
+# tables (fluxtable.txt, *_hdf5.txt, per-month raw_isprint_cache/). It is
+# scientific data cache, not code or prose: semantic extraction over it costs a
+# great deal and yields nothing a graph can use.
+#
+# evidence/locked_test_restricted/ is additionally BARRED on governance grounds,
+# not merely cost. It holds December 2022 locked-test material (e.g.
+# gps221231g.003). project.md requires locked-test predictions to be generated
+# exactly once after G-05 is signed and the pre-G-05 audit to stay
+# performance-blind; team.md requires every access to be recorded in the
+# experiment registry with locked_test_accessed = true. Indexing it through an
+# LLM would be an unlogged access. Do not remove this exclusion without a
+# D-number decision and a registry entry.
+evidence/
