@@ -4,9 +4,9 @@
 **Author:** Kimia Rezaei  
 **Supervisor:** Dr. Reza Saraf Shirazi  
 **Institution:** Amirkabir University of Technology, Faculty of Electrical Engineering  
-**Document version:** 3.2  
+**Document version:** 3.3  
 **Date:** 11 August 2026  
-**Status:** Draft for technical approval; subordinate to *Project Vision and Research Definition* v4.2
+**Status:** Draft for technical approval; subordinate to *Project Vision and Research Definition* v4.3
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### 1.1 Purpose and authority
 
-This document is the implementation specification for *Project Vision and Research Definition* v4.2 ("Vision Document"). It translates the approved scientific and methodological rules into software, data, environment, integration, testing, artifact, and reproducibility requirements.
+This document is the implementation specification for *Project Vision and Research Definition* v4.3 ("Vision Document"). It translates the approved scientific and methodological rules into software, data, environment, integration, testing, artifact, and reproducibility requirements.
 
 The Vision Document remains the normative source of truth. This document:
 
@@ -34,6 +34,7 @@ Terms such as **must**, **shall**, and **required** describe implementation obli
 | 3.0 | 11 August 2026 | Implemented the approved two-phase amendment, ICTP prepared-data gate, one TensorFlow/Keras stack, phase-transition freeze, cross-processor validation, code-reuse/licensing controls, and Phase 2 acceptance gates |
 | 3.1 | 11 August 2026 | Made the supplied Kaggle notebook the approved student-facing Phase 1 ICTP acquisition interface; added its output contract, integrity/provenance evidence, repository location, clean-run relationship, and acceptance checks |
 | 3.2 | 11 August 2026 | Recorded the executed ICTP audit as a failed source gate; rejected ICTP for model training; specified a conditional MIT Haystack Madrigal MAPGPS `gps` replacement workflow, gridded-target contract, audit evidence, risks, and blocking approvals |
+| 3.3 | 21 August 2026 | Annotated §1.5 and §19 TA-25 for the D-144 approval. Recorded downstream of Vision v4.3 and of decisions **D-15** (locked-month custody relocation), **D-16** (Phase 1 hourly aggregation statistic = median; zenith-weighted declared as a sensitivity and deferred as not computable from the five-column product) and **D-17** (Phase 1 target-row contract, defined from the audited product schema). §6.1's ten-field row contract and its provisional support minima are **not** rewritten here: they remain in conflict with Vision §6.6/§6.1A for Phase 1 and that conflict is recorded, open, at § Known defects row 10 of the requirements artifact. Amendments applied **in place with inline annotations** naming their change records |
 
 ### 1.3 What Changed in Version 2.0
 
@@ -87,7 +88,7 @@ Terms such as **must**, **shall**, and **required** describe implementation obli
 | CPU clean-run evidence accepted | Supervisor/reviewer | Thesis submission | Pending — G-07 |
 | Agent preflight passed | Student and supervisor | Any affected component is coded | Pending — G-09 |
 | ICTP Kaggle acquisition/audit interface | Student | ICTP source audit | **Executed — D-142; ZIP mechanics passed; G-P1A source viability failed under D-143** |
-| Phase 1 replacement provider/product and gridded-target definition | Student and supervisor | Replacement acquisition for training | **Pending — D-144; Madrigal MAPGPS `gps` recommended, not yet approved** |
+| Phase 1 replacement provider/product and gridded-target definition | Student and supervisor | Replacement acquisition for training | **Approved 2026-08-21 — D-144; Madrigal MAPGPS `gps` adopted.** Granted by the project owner under the recorded student/supervisor authority equivalence; no supervisor signature artifact exists and none is claimed. The gridded-target definition's two unfrozen sub-values — hourly aggregation statistic (Vision §6.6) and numerical coverage minimum (Vision §6.1B) — remain `TBD — supervisor freeze gate`. *[Amended in place 2026-08-21 per `governance/CHANGE_RECORD_2026-08-21_D-144.md`; effective version v3.3, not yet issued.]* |
 
 ---
 
@@ -1027,7 +1028,7 @@ This checklist approves implementation readiness only. It does not replace the V
 | TA-22 | Security review confirms no secrets in notebooks, code, configs, logs, or artifacts, and no PII is stored | Secret scan and review checklist | Pending |
 | TA-23 | **Agent preflight passes: zero `TBD` in required config fields, all gate tests green, supervisor sign-off recorded** | `aws_ai_dlc_preflight_report` | Pending |
 | TA-24 | This document has been checked against the current Vision version and marked superseded if the Vision changed | Document review record | Pending |
-| TA-25 | ICTP is excluded from training; the approved replacement's 2022 experiment/schema/cells/common timestamps pass G-P1A for all three coordinates, including F1–F4 and December | ICTP rejection record, replacement approval, prepared-source/cell manifest and coverage decision | **Blocked — D-144 and replacement audit pending** |
+| TA-25 | ICTP is excluded from training; the approved replacement's 2022 experiment/schema/cells/common timestamps pass G-P1A for all three coordinates, including F1–F4 and December | ICTP rejection record, replacement approval, prepared-source/cell manifest and coverage decision | **Blocked — replacement audit pending.** D-144 approved 2026-08-21; see Vision §14.2 and `governance/CHANGE_RECORD_2026-08-21_D-144.md`. The §6.1B experiment/schema/cell/coverage audit is the remaining blocker. *[Amended in place 2026-08-21; effective version v3.3, not yet issued.]* |
 | TA-26 | TensorFlow/Keras is the only NN stack; exact pins install; deterministic seed utility and serialization restore pass locally and on Kaggle | Environment, seed, checkpoint and parity tests | Pending |
 | TA-27 | Phase 1 cannot import raw GNSS modules and Phase 2 cannot change protected forecasting hashes | `test_phase_boundary.py` and `phase_transition_manifest` | Pending |
 | TA-28 | All copied/adapted code has compatible licensing, notices, immutable provenance, modification logs, citations and passing adapter tests | Source-reuse register and license review | Pending |

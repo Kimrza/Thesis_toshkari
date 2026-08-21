@@ -462,19 +462,412 @@ not fixed by this entry. Both remain open under Q-31.
 
 ---
 
+## D-12 — Vision §6.1B numerical coverage minimum (freeze)
+
+**Decision.** G-P1A acceptance requires, per station cell, per month:
+
+- at least **90% usable hourly coverage** (distinct in-month station-hours present, straddle days excluded), **and**
+- D-2's day rule: ≥95% of calendar days present per month, 100% of December days (31/31).
+
+Both conditions must pass. Neither substitutes for the other.
+
+**Rationale.** The figure is not new. Vision §6.12 already states "At least 90% usable
+hourly coverage per station" — as an *aspiration* with a supervisor-exception path. This
+decision promotes it to a hard gate and closes that exception path at G-P1A, so the
+project is held to a number its own approved Vision already names. No external threshold
+was invented: a literature survey on 2026-08-21 found no published TEC-completeness
+acceptance threshold to cite, and storm-sample sizes in the field span 11 to 170 events
+with no stated minimum anywhere.
+
+**Why both limbs.** D-7 records that the day measure conceals sub-daily sparsity — NICO
+holds 53.8% of its native 5-minute slots against 96.4% of its hourly bins — so a day-only
+rule can pass a month that is materially thin at the modelling cadence. The hourly gate
+closes that; the day rule still catches whole-day outages.
+
+**Measured position at freeze time** (in-month distinct station-hours, straddle days
+excluded, computed 2026-08-21 from the acquired evidence):
+
+| Month | ARUC | BSHM | NICO |
+|---|---|---|---|
+| 2022-01 | 99.9% | 100.0% | 98.9% |
+| 2022-02 | 100.0% | 100.0% | 98.5% |
+| 2022-03 | 99.5% | 99.9% | 97.8% |
+| 2022-05 | 99.6% | 100.0% | 97.6% |
+| 2022-06 | 99.9% | 99.3% | 94.0% |
+| 2022-08 | 100.0% | 99.9% | 95.0% |
+| 2022-09 | 100.0% | 99.9% | 93.2% |
+| 2022-10 | 99.9% | 99.9% | 95.3% |
+| 2022-11 | 99.2% | 100.0% | 94.2% |
+
+Every station-month clears 90%. 2022-04 and 2022-07 have no `raw_isprint_cache/`.
+December was deliberately **not** read for this table — see the limitation below.
+
+**Alternatives rejected.** (a) **95% hourly**: fails NICO in September (93.2%), November
+(94.2%) and June (94.0%), discarding data already held — including the month D-11's
+plumbing fixture lives in. (b) **Per-station two-tier** (95% ARUC/BSHM, 90% NICO): more
+precise but reads as fitting the criterion to the data, for no measured gain.
+(c) **Leaving §6.1B unfrozen on D-2 alone**: leaves a `TBD` inside the G-05/G-09 set, so
+§18.3's zero-TBD preflight cannot go green.
+
+**Limitation.** December 2022's own hourly coverage is not stated here. Producing it would
+have added a third — and unlogged — December read on top of the two already recorded, which
+`GOV-2026-08-20-RA-01` finding `VAL-2` is open against. The required pre-G-05 December
+coverage audit produces that figure, performance-blind, with an access-log row written
+**before** the read.
+
+**Approved** 2026-08-21 by the project owner under the recorded student/supervisor
+authority equivalence. Change record: `governance/CHANGE_RECORD_2026-08-21_freezes.md`.
+Fixed before any model performance was viewed — no model, prediction or metric exists.
+
+---
+
+## D-13 — H4 / SRQ-5 demotion threshold (freeze)
+
+**Decision.** H4 ("forecast-safe space-weather features improve disturbed-condition
+performance more than quiet-condition performance") and secondary research question 5
+remain **confirmatory** only if December 2022 contains **at least three independent storm
+events**. With fewer, both are predeclared **validation-fold-only** and reported as such,
+and the demotion is recorded **before** the G-05 freeze.
+
+Definitions are Vision §9.3's, unchanged: a storm event is a contiguous interval of
+\(Kp\ge5\); two events are independent if separated by at least 24 hours of \(Kp<4\);
+the reporting window for each event is −12 h to +24 h.
+
+**Rationale.** Vision §5.2 conditioned the demotion on "the supervisor-approved minimum"
+disturbed-hour count, and no such value existed. Rather than invent one, this decision
+reuses the threshold Vision §9.3 **already** freezes for the general storm-performance
+claim. Three consequences, all wanted: no new number enters the freeze set; nothing new
+has to be defended at examination; and H4's fate and the storm-claim rule turn on one
+measured quantity instead of two thresholds that could disagree.
+
+**Alternatives rejected.** A 72-hour disturbed floor (~10% of December) and a 48-hour
+floor (~6.5%) were both considered and rejected: each requires defending an unsourced
+figure, and the 2026-08-21 literature survey found no basis for either. A two-part floor
+(≥48 disturbed hours **and** ≥1 storm event) covers one extra failure shape but was
+rejected on the same ground for its hour limb.
+
+**Source of the count.** GFZ Kp/ap3 and Hp60/ap60 at a single recorded release grade.
+**D-11 bars provisional Dst from becoming a G-05 regime count**, so the December material
+in `.dst_summary.json` must not supply this figure. For the record, and as orientation
+only, that material is provisional *Dst*, not Kp: December 2022 shows a minimum of −68 nT
+(27 Dec), two days at or below −50 nT (7 and 27 Dec) and fifteen at or below −30 nT, and
+NOAA SWPC separately recorded a G1 storm on 29–30 December 2022. None of that is a
+Kp ≥ 5 event count, and none of it may be used as one.
+
+**Approved** 2026-08-21 by the project owner under the recorded authority equivalence.
+Change record: `governance/CHANGE_RECORD_2026-08-21_freezes.md`.
+
+---
+
+## D-14 — One-month all-station scientific fixture window (freeze, Q-31)
+
+**Decision.** The one-month all-station scientific walking-skeleton fixture is
+**March 2022, 2022-03-01 to 2022-03-31 inclusive, all three cells** (ARUC 40/44,
+BSHM 32/35, NICO 35/33).
+
+**Rationale.** Two criteria decided it. **Regime separation:** D-11's frozen seven-day
+plumbing window is 2022-11-01 to 2022-11-07, so placing the scientific fixture in a
+different season means the two fixtures probe different diurnal and seasonal structure,
+which is what a scientific fixture is for. March is an equinox month; November is late
+autumn. **Measured coverage:** March is the best-covered eligible month outside January
+and February — ARUC 99.5%, BSHM 99.9%, NICO 97.8% in-month hourly — with a 32-day run
+staged and `raw_isprint_cache/` present. Provisional Dst shows real activity (minimum
+−85 nT, four days at or below −50 nT), so the disturbed code path is exercised rather
+than idle.
+
+**Alternatives rejected.**
+
+- **2022-11**, the plumbing month: convenient and closest to December's regime, but it
+  concentrates all fixture evidence in one month, so a November-specific processing quirk
+  would be invisible to both fixtures — the weakness D-11's own limitation already warns
+  about. NICO 94.2%, the second-thinnest eligible month.
+- **2022-01**, best coverage (NICO 98.9%) and the closest seasonal analogue to December:
+  rejected because `audit_evidence_2022-01/` is the folder carrying the year-blind
+  predicate's custody irregularity — 743 December-2022 records, the copy still present
+  under `superseded_2026-08-16/` — and `GOV-2026-08-20-RA-01` findings `VAL-1` and
+  `VAL-3` are open against exactly those bytes. Siting the scientific fixture there
+  trades a statistical nicety for an audit problem.
+- **2022-10**: a middle path, but its regime is close enough to November that the
+  separation gain is modest, and NICO is 1.5 points thinner than March.
+
+**Mandatory limitation.** March 2022 is an equinox month and does not reproduce
+December's winter-solstice regime or its activity distribution. It is **not**
+representative of the locked test month, and no fixture result may be read as evidence
+about December behaviour.
+
+**Measured, not invented.** Per TE §15.1 and §15.2 the fixture's exact counts, tolerances,
+row-count ranges, support and missingness limits, timestamp tolerances, required outputs
+and expected CPU runtime range are **measured from the fixture run and frozen into**
+`tests/fixtures/scientific_1month/fixture_manifest.yaml`. The coverage figures above are
+selection evidence only.
+
+**Ownership.** Q-31 assigns fixture station, dates and acceptance tolerances to the
+Student, so no countersignature is required; recorded here under the same authority
+equivalence for consistency with D-12 and D-13.
+
+**Approved** 2026-08-21. Change record: `governance/CHANGE_RECORD_2026-08-21_freezes.md`.
+
+---
+
+## D-15 — Locked-month custody relocation (freeze)
+
+**Decision.** Every artifact containing December 2022 target values is relocated under the
+restricted custody root `evidence/locked_test_restricted/`, effective **2026-08-21**.
+
+| Old path | New path | Files |
+|---|---|---|
+| `evidence/audit_evidence_2022-12/` | `evidence/locked_test_restricted/audit_evidence_2022-12/` | 10 (incl. its own `superseded_2026-08-16/`) |
+| `evidence/audit_evidence_2022-FULL/` | `evidence/locked_test_restricted/audit_evidence_2022-FULL/` | 6 |
+| `evidence/audit_evidence_2022-01/superseded_2026-08-16/` | `evidence/locked_test_restricted/superseded_2026-08-16_from_2022-01/` | 5 |
+
+Twenty-one files moved with `git mv`, so rename history is preserved. **All 21 verified
+byte-identical after the move** against a pre-move SHA-256 inventory: 21 identical, 0
+changed, 0 missing, and no old path left behind. No file was deleted and no existing file
+was overwritten — the three target paths were confirmed absent before the move.
+
+**Custody rationale.** Technical Environment §12 states two obligations in one sentence:
+locked-test artifacts *"use restricted paths until G-05 is complete"* **and** must carry
+`locked_test_accessed = true` in the registry. Only the registry half had been
+decomposed into a requirement. Before this relocation, December 2022 `tec`/`dtec` values
+were readable from four unrestricted locations totalling roughly 58 MB — 21,258 December
+rows each in `audit_evidence_2022-12/`, `audit_evidence_2022-FULL/` and
+`audit_evidence_2022-12/superseded_2026-08-16/`, plus 743 in
+`audit_evidence_2022-01/superseded_2026-08-16/` — while the restricted path held a single
+isprint extract. Origin: `GOV-2026-08-20-RA-01` finding `VAL-1`, a Validation Auditor
+veto.
+
+**What the restricted path is, stated accurately.** A **governance boundary, not an access
+control.** The directory carries no special filesystem permission, no encryption and no
+ACL in this repository: any process that can read `evidence/` can read
+`evidence/locked_test_restricted/`. What it provides is (a) one declared location, so an
+unintended December read is a detectable path violation rather than an untraceable one,
+(b) a machine-checkable invariant — `tests/test_acquisition_window.py::test_locked_month_values_exist_only_under_the_restricted_path`
+— and (c) an unambiguous trigger for the Vision §8.3 access-log obligation. It must never
+be described as preventing access, and this decision does not claim that it does.
+
+**Affected manifests.** None required editing. Every `sha256_manifest.json` addresses its
+artifacts by bare filename, relative to its own directory, so all fifteen manifests
+continue to verify after the move: **60 of 60 declared artifacts verified**, 0 failed.
+`audit_evidence_2022-FULL/request_manifest.json` names its twelve `source_runs` by
+directory name (`audit_evidence_2022-01` … `-12`) rather than by path, so those
+references remain correct; the root each name now resolves under is recorded in this
+decision rather than by rewriting the manifest, which would have altered a hashed
+provenance record.
+
+**Access-log implications.** Access-log row **6** was written **before** the move, as
+FR-P1-02-3 now requires — the first December access in this project logged in advance.
+Row **5** was added at the same time and is marked **retrospective**: it records the
+2026-08-21 governance review's December row counts, which were themselves an unlogged
+December access. Rows 3 and 4 remain retrospective for the 2026-08-13 merge and the
+2026-08-16 correction. Six rows total; three retrospective, one logged in advance, two
+original.
+
+**Relationship to D-9.** D-9 promotes `audit_evidence_2022-FULL/` as the Phase 1
+acquisition input. That promotion is unchanged in substance — the artifact is the same
+bytes at a new path — but two consequences are recorded rather than left implicit:
+
+1. **Reading the D-9 input is now a logged December access.** FULL contains 21,258
+   December rows, so any consumer that opens it must write an access-log row first. This
+   is a real constraint on downstream work and is the intended effect of the custody
+   rule, not a side effect of the move.
+2. **FULL's provenance remains unresolved, independently of this move.** Its
+   `PROVENANCE_NOTICE.md` records that it must be re-merged from the corrected months or
+   have its provenance explicitly re-pointed, and its `merged_at_utc` of
+   `2026-08-13T06:27:03` predates the 2026-08-16 regeneration of the January and December
+   folders. D-15 does not cure that, and FULL must not be relied on at a freeze gate while
+   the notice stands.
+
+`scripts/merge_coverage_year.py` now resolves month folders under **both** roots and
+writes its output inside the restricted root, and refuses to run if a month resolves in
+both roots rather than guessing which copy is authoritative.
+
+**Approved** 2026-08-21 by the project owner under the recorded student/supervisor
+authority equivalence. No supervisor signature artifact exists and none is claimed.
+
+---
+
+## D-16 — Phase 1 hourly aggregation statistic (freeze)
+
+**Decision.** The Phase 1 hourly target aggregation statistic is the **median** of the
+valid provider VTEC samples falling inside the UTC hour \([h, h+1)\) for the station's
+frozen grid cell.
+
+**Zenith-weighted aggregation is a separately declared sensitivity analysis only.** It may
+be run only if (a) the data required to weight by zenith angle genuinely exists for the
+Phase 1 product, and (b) it is formally authorised as a named, registered run **before**
+training. Neither condition is met today: see the availability finding below.
+
+**No automatic substitution.** Where satellite-level or zenith-angle information is
+unavailable, **nothing is substituted for it** — not a proxy, not a default weight, not an
+assumed elevation. The affected quantity is reported as unavailable and the dependent
+analysis is not run.
+
+**Rationale.** Vision §6.6 marked *"the exact cell-selection and hourly statistic"* as
+`TBD — supervisor freeze gate`, and TE §18.2 lists the aggregation statistic as a
+Student + Supervisor forbidden choice. Median is not a new preference: TE §6.1 already
+defines `vtec_tecu` as a **median**, and Vision §6.6 makes median the default with
+zenith-weighted a declared sensitivity requiring approval before training. This decision
+records that default as frozen rather than leaving an implementer to infer it, and
+supersedes the earlier requirement text that described the aggregation as already frozen
+when no decision had frozen it (`GOV-2026-08-20-RA-01` findings `DATA-05` and
+`TEC-04`).
+
+**Availability finding, measured 2026-08-21.** The Phase 1 product cannot support
+zenith weighting as things stand. `request_manifest.json` records
+`parameters_requested = ["ut1_unix", "gdlat", "glon", "tec", "dtec"]` for every month, and
+the retrieved isprint extracts carry exactly those five columns. There is no elevation, no
+zenith angle, no satellite identifier and no per-IPP record in the Phase 1 data — so a
+zenith-weighted aggregate is not computable from it, and could only become available
+through a separately governed re-acquisition or in Phase 2. The sensitivity is therefore
+declared and **deferred**, not silently dropped.
+
+**Consequence for TE §6.1's definition.** TE §6.1 defines `vtec_tecu` as the median of
+valid VTEC *"at observed IPPs"*. On the Phase 1 gridded product there are no IPPs: the
+median is taken over the provider's binned cell samples within the hour. The statistic is
+the same; the population differs, and that difference is part of the target-domain shift
+already recorded under `target_definition_id`. See § Known defects in
+`requirements.md` and D-17.
+
+**Approved** 2026-08-21 by the project owner under the recorded authority equivalence.
+
+---
+
+## D-17 — Phase 1 target-row contract (freeze)
+
+**Decision.** The Phase 1 hourly target row carries exactly the fields below. The contract
+is defined from the **product that actually exists**, audited 2026-08-21, and no field is
+invented.
+
+**What the Phase 1 product genuinely provides.** `instrument_code 8000`,
+`kindat_code 3500` (Madrigal MAPGPS `gps` binned VTEC), with
+`parameters_requested = ["ut1_unix", "gdlat", "glon", "tec", "dtec"]` — five columns,
+confirmed identical across all twelve monthly request manifests and matching the retrieved
+isprint extracts. Native cadence inside a cell is 5-minutely, so an hour holds **at most
+12** samples per cell; measured range on a sampled day was 2 to 12. `dtec`, the provider's
+reported uncertainty, is populated on every record sampled.
+
+**Phase 1 target row.**
+
+| Field | Source | Status |
+|---|---|---|
+| `interval_start_utc` | derived from `ut1_unix`, hour start \([h,h+1)\) | available |
+| `station_id` | location key assigned by D-1's cell rule | available |
+| `cell_gdlat`, `cell_glon` | provider `gdlat`, `glon` (integer 1°×1° bin labels) | available |
+| `cell_lat_bounds`, `cell_lon_bounds` | D-1: half-open \([floor, floor+1)\) on both axes | available |
+| `vtec_tecu` | **median** of in-hour cell samples (D-16) | available |
+| `valid_observation_count` | count of provider samples contributing to the hour | **derivable** |
+| `within_hour_spread_tecu` | spread of those samples; statistic `TBD — freeze gate` | **derivable**, threshold open |
+| `largest_internal_gap_s` | largest gap between contributing samples | **derivable** |
+| `provider_dtec_summary` | summary of provider-reported `dtec` over contributing samples; statistic `TBD — freeze gate` | **available** (genuine provider uncertainty) |
+| `aggregation_config_id` | frozen hourly-target configuration snapshot | available |
+| `target_valid` | boolean; invalid primary targets are **never** imputed | available |
+| `phase_id`, `source_id`, `target_definition_id` | stamped per TE §13 | available |
+
+Release-level companions (`dataset_version`, `source_manifest_id`, `processor_config_id`,
+`target_qc_version`) are unchanged and do not replace row-level fields.
+
+**Explicitly NOT in the Phase 1 row, and not substituted.** `valid_satellite_count`;
+any per-satellite or per-IPP quantity; zenith angle or zenith weight; elevation; DCB;
+STEC; mapping function output; arc or cycle-slip statistics. None is derivable from a
+five-column gridded product, and TE §7.0 requires `test_phase_boundary.py` to **fail** if
+Phase 1 produces a satellite field. These remain Phase 2 quantities unless a separately
+recorded governance decision moves the boundary.
+
+`processor_qc_flags`: TE §6.1's codebook lists package, DCB, arc, elevation, slip,
+mapping and aggregation flags. Only **aggregation** flags are meaningful in Phase 1; the
+others are Phase 2 and are recorded as not-applicable rather than emitted empty.
+
+**Freeze-gate items, named as holes rather than defaulted.**
+
+1. `within_hour_spread_tecu` — statistic and threshold, `TBD — freeze gate` (TE §6.1
+   requires it to be *reported, not merely stored*).
+2. `largest_internal_gap_s` maximum — TE §6.1's provisional 1200 s is plausible against a
+   5-minute cadence but is not frozen.
+3. `provider_dtec_summary` — statistic and any acceptance threshold.
+4. `valid_observation_count` minimum — **and TE §6.1's provisional value of 20 is
+   unsatisfiable on this product.** An hour holds at most 12 native samples per cell, so a
+   minimum of 20 valid observations per hour would reject **every** row. The provisional
+   figure was written for the Phase 2 IPP population, where dozens of observations per hour
+   are normal. A Phase 1 minimum must be set on the 0–12 scale and is left as an explicit
+   freeze-gate hole; no default is assigned here.
+5. `valid_satellite_count` minimum — **not applicable in Phase 1** rather than open. The
+   quantity does not exist on this product; TE §6.1's provisional 4 applies to Phase 2.
+
+**Observation-quality strata** are aligned to what the product contains: bins over
+`valid_observation_count`, `within_hour_spread_tecu` and `provider_dtec_summary`. No
+stratum is defined on satellite count, elevation or zenith angle.
+
+**Related, and recorded rather than smoothed over.** D-4 decided to acquire
+`ut1_unix, gdlat, glon, tec, dtec, kp, dst, f10.7, ap3`. The executed requests took the
+first **five** only: no `kp`, `dst`, `f10.7` or `ap3` column is present in any retrieved
+extract or derived artifact. D-4's stated rationale — that the four drivers were free to
+retrieve alongside the target — was therefore never realised, and the drivers must come
+from their governed external sources per D-10.1 (GFZ, Kyoto WDC, Canadian Solar Radio
+Monitoring Program). One favourable side effect: no driver column of unrecorded release
+grade sits inside the Phase 1 target files, which was the concrete risk
+`GOV-2026-08-20-RA-01` finding `ML-01` raised against D-4.
+
+**Approved** 2026-08-21 by the project owner under the recorded authority equivalence.
+The unresolved Vision/TE schema conflict this contract sits inside is recorded, still
+open, at § Known defects row 10 of `requirements.md`; D-17 defines what Phase 1 will
+build **without** adopting a reading of that conflict, by enumerating only fields whose
+availability was measured.
+
+---
+
+## D-1 addendum — countersignature status of the coordinate-to-cell rule
+
+**2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
+the 1°×1° Madrigal bin identified by its lower-left floor corner,
+`cell = (floor(lat), floor(lon))`, tested **half-open** as \([floor, floor+1)\) on both
+axes — so a station exactly on a boundary belongs to the higher-indexed cell, and no
+station is counted in two cells. The three assignments are ARUC 40/44, BSHM 32/35,
+NICO 35/33, verified against executed 2022 output.
+
+**What was corrected.** `requirements.md` open question 2 previously described the cell
+rule as *"currently a self-labelled 'PROVISIONAL' inline function in the coverage
+notebook"*, implying no freeze existed. D-1 **is** the freeze. The notebook literal is a
+duplicate of a frozen decision awaiting migration into `configs/data.yaml` and
+`src/data/registry.py` (REQ-ENG-8), not the decision itself.
+
+**Governance condition, stated precisely.** TE §18.2 classes the coordinate-to-cell rule
+as a **Student + Supervisor** forbidden choice, so D-1 requires approval from both roles.
+The project owner approves it, 2026-08-21, and the standing student/supervisor authority
+equivalence recorded for this workspace is the documented delegation under which the
+supervisor role is exercised. On that basis the governance condition **is closed**, and
+the signature row is completed accordingly.
+
+**No signature is forged.** No signed document, email or minute from Dr. Reza Saraf
+Shirazi exists for D-1, and none is represented as existing. If the examining committee
+requires an independent supervisor signature distinct from the delegation, that
+requirement is outside this repository's control and would have to be satisfied
+separately; this addendum records the delegation actually relied on so a reader can judge
+it.
+
+**Separate and still open:** D-1's own recorded limitation. The station coordinates came
+from IGS network pages rather than the official IGS site-log PDFs, which rank higher in
+the Vision §6.2 evidence hierarchy. All three stations sit ≈0.14° or further from a cell
+edge, so a small coordinate correction would not change any assignment, but site-log
+validation remains outstanding (FR-P1-02-1, gate G-02).
+
+---
+
 ## Supervisor review
 
-D-3/D-144 is countersigned as of 2026-08-15. Every other decision above remains
-independently reversible. The supervisor may countersign the remaining items
+D-3/D-144 is countersigned as of 2026-08-15 and **expressly approved 2026-08-21**
+(see the D-3 row). D-2 is **approved 2026-08-21**. Every other decision above
+remains independently reversible. **D-1 remains uncountersigned** although TE
+§18.2 makes the coordinate-to-cell rule a Student + Supervisor forbidden choice,
+and twelve acquired months plus D-11's fixture already rest on it — flagged by
+`GOV-2026-08-20-RA-01` finding `DATA-05`/`TEC-04` and not yet ruled on. The supervisor may countersign the remaining items
 as a whole, or overturn individual items — D-2 (threshold set with partial
 sight of the data) and D-3 (taken on five months rather than twelve) are the two most
 exposed to challenge and should be read first.
 
 | Item | Countersigned | Date | Notes |
 |---|---|---|---|
-| D-1 Cell convention | | | |
-| D-2 Coverage minimum | | | |
-| D-3 D-144 source adoption | **Yes** | 2026-08-15 (recorded) | Countersigned by the supervisor. Recorded 2026-08-15 as reported by the student; no signature artifact (signed document, email or minute) is filed in this repository. Attach the evidence here when available. |
+| D-2 Coverage minimum | **Yes** | 2026-08-21 | **Approved 2026-08-21 by the project owner** under the recorded student/supervisor authority equivalence; no separate supervisor signature artifact exists and none is claimed. Approval accepts the interim rule (≥95% of calendar days per month, 100% of December) as the G-P1A acceptance criterion until Vision §6.1B's numerical minimum is frozen under its own D-number. **The disclosure above stands unaltered:** this threshold was set after five of twelve months had been seen at 100% day coverage and was not set blind; a reviewer should discount it accordingly. Raised as item 2 of `governance/COUNTERSIGNATURE_REQUEST_2026-08-21.md`; closed by `governance/reviews/GOV-2026-08-21-RA-01.md` Rec 5. |
+| D-3 D-144 source adoption | **Yes** | 2026-08-15 (recorded); **expressly approved 2026-08-21** | The 2026-08-15 entry was recorded as reported by the student, with **no signature artifact** (signed document, email or minute) filed in this repository, while Vision v4.2 §14.2 still carried D-144 as "Decision required". That conflict is closed by an express approval given **2026-08-21 by the project owner** under the recorded student/supervisor authority equivalence — see `governance/CHANGE_RECORD_2026-08-21_D-144.md` for the Vision §15.2 six-field record. No supervisor signature artifact exists and none is claimed. **Approval of D-144 does not freeze the four values Vision line 1357 attaches to it:** experiment/kindat and VTEC parameter/units (D-4), coordinate-to-cell rule (D-1, row below still blank), hourly aggregation statistic (`TBD`, Vision §6.6), numerical coverage minimum (`TBD`, Vision §6.1B). |
 | D-4 Parameter set | | | |
 | D-5 Gap policy | | | |
 | D-6 Citation form | | | |
@@ -483,3 +876,10 @@ exposed to challenge and should be read first.
 | D-9 Acquisition route | | | |
 | D-10 Driver sources / leakage | | | |
 | D-11 Fixture window | n/a | 2026-08-16 | Q-31 is Student-owned per TE §18.2; no countersignature required |
+| D-12 §6.1B coverage minimum | **Yes** | 2026-08-21 | Approved by the project owner under the recorded student/supervisor authority equivalence. Promotes Vision §6.12's 90% hourly aspiration to a hard G-P1A gate alongside D-2's day rule. Frozen before any model performance existed. |
+| D-13 H4 / SRQ-5 demotion threshold | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. Reuses Vision §9.3's three-independent-storm-event rule; introduces no new number. |
+| D-14 Scientific fixture window | n/a | 2026-08-21 | Q-31 is Student-owned per TE §18.2; no countersignature required. March 2022, all three cells. |
+| D-15 Custody relocation | **Yes** | 2026-08-21 | Approved by the project owner under the recorded student/supervisor authority equivalence. 21 files moved, all verified byte-identical. |
+| D-16 Hourly aggregation statistic | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. Median frozen; zenith-weighted declared as a sensitivity and deferred as not computable from the five-column product. TE §18.2 Student + Supervisor item, exercised under the recorded delegation. |
+| D-17 Phase 1 target-row contract | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. TE §18.2 Student + Supervisor item (support thresholds), exercised under the recorded delegation; four thresholds left as explicit freeze-gate holes rather than defaulted. |
+| D-1 Cell convention | **Yes** | 2026-08-21 | Approved by the project owner under the recorded student/supervisor authority equivalence — see the D-1 addendum above. No supervisor signature artifact exists and none is claimed. The IGS site-log validation limitation recorded in D-1 remains separately open. |

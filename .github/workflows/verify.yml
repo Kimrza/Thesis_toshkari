@@ -1,0 +1,92 @@
+name: verify
+
+# Governed-evidence verification suite.
+#
+# WHY THIS EXISTS. The remediation of 2026-08-21 added tests that cannot be executed on
+# the authoring machine: no Python interpreter is installed (the Windows Store `python3`
+# stub only), no `py` launcher, no virtualenv, no WSL distribution, and PyPI is
+# unreachable from that environment, so neither an interpreter nor pytest can be obtained
+# locally. This workflow is the executable path. It is committed but **not** pushed by the
+# agent that wrote it; pushing it, and therefore running it, is the owner's action.
+#
+# It deliberately does NOT install scientific dependencies. The three modules it runs are
+# stdlib-only by design (hashlib, csv, json, ast, pathlib), so a bare interpreter plus
+# pytest is the whole requirement. That keeps the reproducibility check independent of the
+# modelling stack, per NFR-REP-01.
+#
+# Authority: TE §9.1 (two governed platforms), §13.2 (ordered clean-run contract),
+# §13.7 (exact equality for hashes), §12 (`tests/` tree).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  governed-evidence:
+    name: governed evidence (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both platforms, because the defect this suite guards against -- line-ending
+        # normalization breaking every recorded SHA-256 -- is platform-dependent and was
+        # invisible on Linux. A Windows-only or Linux-only run would have missed it.
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out with line-ending conversion disabled
+        # autocrlf=false plus the committed .gitattributes is the combination that keeps
+        # governed bytes byte-exact. If a future change re-enables conversion, the hash
+        # assertions below fail rather than passing quietly.
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+        shell: bash
+
+      - uses: actions/checkout@v4
+
+      - name: Report the line-ending state of governed paths
+        run: |
+          git config core.autocrlf || true
+          git ls-files --eol evidence | head -20
+        shell: bash
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pytest only
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Release-hash verification (all manifests + EC-1 recorded hashes)
+        run: python -m pytest tests/test_release_hashes.py -v -rs
+
+      - name: Acquisition-window and locked-month custody
+        run: python -m pytest tests/test_acquisition_window.py -v -rs
+
+      - name: Phase-boundary enforcement
+        run: python -m pytest tests/test_phase_boundary.py -v -rs
+
+      - name: Full tests/ directory
+        run: python -m pytest tests/ -v -rs
+
+      - name: Restricted-path invariant, independent of pytest
+        # A second, deliberately redundant check: no December 2022 record outside the
+        # restricted custody root. Independent of the test module in case that module is
+        # ever narrowed the way its predecessor was (finding VAL-3).
+        shell: bash
+        run: |
+          set -euo pipefail
+          violations=0
+          while IFS= read -r f; do
+            case "$f" in evidence/locked_test_restricted/*) continue ;; esac
+            n=$(awk -F, 'NR==1{for(i=1;i<=NF;i++) if($i=="date") c=i; next} $c ~ /^2022-12/ {k++} END{print k+0}' "$f")
+            if [ "$n" -gt 0 ]; then
+              echo "VIOLATION: $f holds $n December 2022 records outside the restricted root"
+              violations=$((violations+1))
+            fi
+          done < <(find evidence -name 'madrigal_coverage_raw_records.csv')
+          echo "violations: $violations"
+          test "$violations" -eq 0

@@ -5,9 +5,30 @@ evidence folder with its own manifest and hashes. The G-P1A whole-year coverage 
 cannot be read off any one of those -- it has to be computed over the union of all of
 them. This script does that and nothing else: it derives, it never re-fetches.
 
-Input : evidence/audit_evidence_2022-MM/madrigal_coverage_raw_records.csv  (one per month)
-Output: evidence/audit_evidence_2022-FULL/ with the same artifact contract as a single run,
-        plus provenance fields recording that it was merged rather than retrieved.
+Input : evidence/audit_evidence_2022-MM/madrigal_coverage_raw_records.csv  (one per month),
+        plus any month relocated under evidence/locked_test_restricted/ -- see CUSTODY below.
+Output: evidence/locked_test_restricted/audit_evidence_2022-FULL/ with the same artifact
+        contract as a single run, plus provenance fields recording that it was merged
+        rather than retrieved. The output is restricted because the merged year contains
+        December 2022 target values.
+
+CUSTODY (decision D-15, 2026-08-21). Technical Environment section 12 requires locked-test
+artifacts to reside under a restricted path until G-05 is complete. December 2022 target
+values therefore live only under evidence/locked_test_restricted/, and this script resolves
+month folders under BOTH the ordinary evidence root and the restricted root. Two properties
+follow, and both are deliberate:
+
+  * a merge that needs December will find it, so the year figure stays computable;
+  * every month is reported with the root it was resolved from, so a run that silently
+    picked up a restricted month is visible in the log rather than invisible.
+
+WHAT THE RESTRICTED PATH IS AND IS NOT. It is a governance boundary, not an access control.
+The directory carries no special filesystem permission, no encryption and no ACL in this
+repository: anything that can read evidence/ can read evidence/locked_test_restricted/.
+What it provides is (a) a single declared location, so an unintended December read is a
+detectable path violation rather than an untraceable one, (b) an enforceable invariant,
+asserted by tests/test_acquisition_window.py, and (c) a place where the access-log
+obligation in Vision section 8.3 is unambiguous. Do not describe it as preventing access.
 
 Two things it is careful about:
 
@@ -31,7 +52,12 @@ from datetime import datetime, timezone
 
 AUDIT_YEAR = 2022
 EVIDENCE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'evidence')
-OUT_DIR = os.path.join(EVIDENCE_DIR, 'audit_evidence_%d-FULL' % AUDIT_YEAR)
+RESTRICTED_DIR = os.path.join(EVIDENCE_DIR, 'locked_test_restricted')
+# Roots searched for per-month evidence, in precedence order. The restricted root holds
+# every month carrying December 2022 target values (D-15).
+EVIDENCE_ROOTS = (EVIDENCE_DIR, RESTRICTED_DIR)
+# The merged year contains December, so it is written inside the restricted root.
+OUT_DIR = os.path.join(RESTRICTED_DIR, 'audit_evidence_%d-FULL' % AUDIT_YEAR)
 
 DAYS_IN_YEAR = 366 if (AUDIT_YEAR % 4 == 0 and (AUDIT_YEAR % 100 != 0 or AUDIT_YEAR % 400 == 0)) else 365
 DAYS_IN_MONTH = {1: 31, 2: 29 if DAYS_IN_YEAR == 366 else 28, 3: 31, 4: 30, 5: 31, 6: 30,
@@ -47,17 +73,43 @@ def sha256_of_file(path):
 
 
 def month_dirs():
-    """Every per-month evidence folder, in month order. Ignores any previous FULL merge."""
+    """Every per-month evidence folder, in month order, across both evidence roots.
+
+    Searches the ordinary evidence root and the restricted root (D-15). A month found in
+    both roots is an ambiguity, not a preference: the run stops rather than guessing which
+    copy is authoritative, because silently choosing one would make the merged year depend
+    on directory-listing order.
+
+    Ignores any previous FULL merge, and ignores superseded_* snapshots -- those are
+    retained history, not run inputs.
+    """
     found = {}
-    for name in sorted(os.listdir(EVIDENCE_DIR)):
-        path = os.path.join(EVIDENCE_DIR, name)
-        if not os.path.isdir(path) or name.endswith('-FULL'):
+    origins = {}
+    for root in EVIDENCE_ROOTS:
+        if not os.path.isdir(root):
             continue
-        suffix = name.rsplit('-', 1)[-1]
-        if not suffix.isdigit():
-            print('SKIP (unrecognised folder name):', name)
-            continue
-        found[int(suffix)] = path
+        for name in sorted(os.listdir(root)):
+            path = os.path.join(root, name)
+            if not os.path.isdir(path) or name.endswith('-FULL'):
+                continue
+            if not name.startswith('audit_evidence_'):
+                continue
+            suffix = name.rsplit('-', 1)[-1]
+            if not suffix.isdigit():
+                print('SKIP (unrecognised folder name):', name)
+                continue
+            month = int(suffix)
+            if month in found:
+                sys.exit(
+                    'Month %02d resolves in two roots:\n  %s\n  %s\n'
+                    'Refusing to guess which copy is authoritative. Remove or rename one, '
+                    'or record a decision naming the authoritative root.'
+                    % (month, found[month], path)
+                )
+            found[month] = path
+            origins[month] = 'restricted' if os.path.abspath(root) == os.path.abspath(RESTRICTED_DIR) else 'ordinary'
+    for month in sorted(found):
+        print('Month %02d resolved from the %s root: %s' % (month, origins[month], found[month]))
     return dict(sorted(found.items()))
 
 

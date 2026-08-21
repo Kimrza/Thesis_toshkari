@@ -5,7 +5,7 @@
 **Author:** Kimia Rezaei  
 **Supervisor:** Dr. Reza Saraf Shirazi  
 **Institution:** Amirkabir University of Technology, Faculty of Electrical Engineering  
-**Document version:** 4.2 — ICTP Source Rejection and Replacement Recommendation  
+**Document version:** 4.3 — Custody Remediation, Target-Definition Freeze and Reproducibility Safeguards  
 **Date:** 11 August 2026  
 **Status:** Project-owner-approved configuration; scientific readiness gates require the approvals listed in Section 13
 
@@ -40,7 +40,8 @@ This version adopts the answers recorded in the *TEC Project Finalization Decisi
 | 3.0 | 8 August 2026 | Applied Q-01–Q-33 questionnaire decisions. Primary story changed to independent local ML versus IRI benchmark; residual-correction models and GRU removed; climatology baseline added; GPS-only scope; F4 fold added; paired-loss estimand; vector block bootstrap; horizons split into required +1 h and optional +24 h | Superseded |
 | 4.0 | 11 August 2026 | Adopted Recommendations 1–8: one TensorFlow/Keras forecasting stack; prepared-data Phase 1 and raw-observation Phase 2; ICTP prepared VTEC source with an explicit coverage gate and Madrigal fallback; Phase 1 model/protocol freeze; cross-processor validation; external-method and code-reuse register; direct code reuse with licensing controls; Phase 2 acceptance gates | Superseded |
 | 4.1 | 11 August 2026 | Approved a student-executed Kaggle notebook as the Phase 1 ICTP acquisition interface; fixed its output, provenance, integrity, and coverage-gate evidence; retained the standalone Python downloader as the reusable automation companion | Superseded |
-| 4.2 | 11 August 2026 | Recorded the executed ICTP audit as a failed G-P1A source gate; rejected ICTP for confirmatory Phase 1 training; recommended MIT Haystack Madrigal MAPGPS binned VTEC as the single-source replacement candidate, subject to supervisor approval, exact 2022 coverage/schema audit, and explicit gridded-target limitations | **Current** |
+| 4.2 | 11 August 2026 | Recorded the executed ICTP audit as a failed G-P1A source gate; rejected ICTP for confirmatory Phase 1 training; recommended MIT Haystack Madrigal MAPGPS binned VTEC as the single-source replacement candidate, subject to supervisor approval, exact 2022 coverage/schema audit, and explicit gridded-target limitations | Superseded |
+| 4.3 | 21 August 2026 | Approved D-144 (§14.2, §17 annotated); froze the §6.1B numerical coverage minimum at ≥90% usable hourly coverage per station per month alongside D-2's day rule (**D-12**); fixed the §5.2 H4/SRQ-5 demotion threshold to §9.3's three-independent-storm-event rule (**D-13**). Amendments were applied **in place with inline annotations** naming their change records rather than by rewriting sections, so each amended row states its own provenance. Change records: `governance/CHANGE_RECORD_2026-08-21_D-144.md`, `governance/CHANGE_RECORD_2026-08-21_freezes.md`. Approved by the project owner under the recorded student/supervisor authority equivalence; no supervisor signature artifact exists and none is claimed | **Current** |
 
 ### 1.5 What Changed in Version 3.0
 
@@ -354,7 +355,7 @@ The project **may support** later research on regional ionospheric monitoring, G
 
 Failure to confirm a hypothesis is a valid scientific result.
 
-**Predeclaration for H4.** Before the G-05 freeze, the December regime and coverage audit permitted by Section 8.3 shall be completed. If it shows fewer disturbed hours than the supervisor-approved minimum, H4 and secondary research question 5 are predeclared as **validation-fold-only** hypotheses and are reported as such. This demotion is legitimate only if it is recorded before the freeze.
+**Predeclaration for H4.** Before the G-05 freeze, the December regime and coverage audit permitted by Section 8.3 shall be completed. The supervisor-approved minimum is **frozen as of 2026-08-21 (D-13)**: H4 and secondary research question 5 remain confirmatory only if December 2022 contains **at least three independent storm events**, using §9.3's definitions unchanged — a storm event is a contiguous interval of \(Kp\ge5\), and two events are independent if separated by at least 24 hours of \(Kp<4\). With fewer than three, H4 and SRQ-5 are predeclared as **validation-fold-only** hypotheses and are reported as such. No separate disturbed-hour count is introduced: the threshold reuses the storm-event rule §9.3 already freezes, so H4's fate and the general storm-claim rule turn on the same measured quantity. This demotion is legitimate only if it is recorded before the freeze. Approved by the project owner under the recorded authority equivalence; change record `governance/CHANGE_RECORD_2026-08-21_freezes.md`. *[Amended in place 2026-08-21; effective version v4.3, not yet issued.]*
 
 ### 5.3 Three Success Layers
 
@@ -438,7 +439,7 @@ Before Phase 1 training, the following pass/fail evidence is required for **each
 - no undocumented mixture of ICTP, Madrigal, GIM, or independently calculated VTEC within one confirmatory target;
 - a single physical target definition across ARUC, BSHM, and NICO.
 
-The numerical minimum for acceptable coverage is **TBD — supervisor freeze gate** and must be fixed before model performance is viewed. ICTP has failed this gate. Madrigal MAPGPS `gps` is the recommended replacement but must pass the gate independently; if it fails, the project must formally approve IONOLAB-TEC or a station/year redesign. Silent imputation, source mixing, retrospective split redesign after model performance is viewed, or treating a map value as station-observed VTEC is prohibited.
+The numerical minimum for acceptable coverage is **frozen as of 2026-08-21: at least 90% usable hourly coverage per station per month, applied as a hard pass/fail gate, together with D-2's day rule (≥95% of calendar days present per month, 100% of December days).** This promotes §6.12's 90% hourly figure from an aspiration to a gate; §6.12's exception-plus-claim-limitation path no longer applies at G-P1A, and no coverage below 90% hourly is acceptable at this gate. Recorded as **D-12** in `evidence/DECISIONS.md`; approved by the project owner under the recorded student/supervisor authority equivalence; change record `governance/CHANGE_RECORD_2026-08-21_freezes.md`. Fixed before any model performance was viewed — no model, prediction or metric exists. *[Amended in place 2026-08-21; effective version v4.3, not yet issued.]* ICTP has failed this gate. Madrigal MAPGPS `gps` is the recommended replacement but must pass the gate independently; if it fails, the project must formally approve IONOLAB-TEC or a station/year redesign. Silent imputation, source mixing, retrospective split redesign after model performance is viewed, or treating a map value as station-observed VTEC is prohibited.
 
 ### 6.2 Station Registry and Geographic Claim Gate
 
@@ -1262,7 +1263,7 @@ Decisions D-000 through D-036 were adopted in v2.0. Those that conflict with the
 | D-141 | R-08 | Enforce G-P1, G-P2, and G-P3 as blocking acceptance gates | Approved |
 | D-142 | R-09 | The student executes the supplied self-contained Kaggle notebook to acquire available ICTP ARUC/BSHM/NICO 2022 files and a ZIP; the executed notebook, archive/per-file hashes, manifests, and coverage evidence are retained, and §6.1B remains blocking | Executed; acquisition mechanics passed, source gate failed |
 | D-143 | R-03/R-09 | The measured ICTP audit is authoritative: ARUC 27/365 non-empty days, BSHM 35/365, NICO 0/365 with HTTP 404; ICTP is rejected for confirmatory Phase 1 training and retained only as audit evidence | **Approved by observed gate outcome** |
-| D-144 | R-10 | MIT Haystack Madrigal MAPGPS `gps` binned VTEC is the recommended single-source Phase 1 replacement, subject to supervisor approval of the gridded target and a successful §6.1B experiment/schema/cell/coverage audit; it is not yet adopted | **Decision required — Approve / Reject / Modify / Postpone** |
+| D-144 | R-10 | MIT Haystack Madrigal MAPGPS `gps` binned VTEC is the recommended single-source Phase 1 replacement, subject to supervisor approval of the gridded target and a successful §6.1B experiment/schema/cell/coverage audit | **Approved 2026-08-21** — granted by the project owner under the recorded student/supervisor authority equivalence; no supervisor signature artifact exists and none is claimed. The §6.1B experiment/schema/cell/coverage audit remains a separate open condition, so TA-25 stays `Blocked`. *[Amended in place 2026-08-21 per `governance/CHANGE_RECORD_2026-08-21_D-144.md`; effective version v4.3, not yet issued.]* |
 
 ---
 
@@ -1354,7 +1355,7 @@ Appendices should contain configuration manifests, station coverage, full hyperp
 ### Data
 
 - [x] ICTP 2022 file-level coverage/non-zero-size audit executed separately for ARUC, BSHM, and NICO; G-P1A failed and ICTP was rejected for training.
-- [ ] Supervisor decides D-144 and, if approved, freezes the Madrigal experiment/kindat, VTEC parameter/units, coordinate-to-cell rule, hourly aggregation and numerical coverage minimum.
+- [ ] Supervisor decides D-144 and, if approved, freezes the Madrigal experiment/kindat, VTEC parameter/units, coordinate-to-cell rule, hourly aggregation and numerical coverage minimum. *[Partially discharged 2026-08-21: **D-144 approved** (see §14.2). Of the five attached freezes, experiment/kindat and VTEC parameter/units are frozen by D-4 and the coordinate-to-cell rule by D-1 (uncountersigned); the **hourly aggregation statistic** (§6.6) and the **numerical coverage minimum** (§6.1B) remain `TBD — supervisor freeze gate`. This line stays unticked until all five are frozen. Change record: `governance/CHANGE_RECORD_2026-08-21_D-144.md`.]*
 - [ ] Approved replacement passes the 2022 file/cell/schema/units/common-date/December audit for all three coordinates.
 - [ ] Phase 1 prepared target uses one provider/product and one physical definition across all locations; the `target_definition_id` and gridded-versus-receiver limitation are recorded.
 - [ ] Station registry completed from official site logs with pinned IGRF.

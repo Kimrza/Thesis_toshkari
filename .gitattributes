@@ -1,0 +1,29 @@
+# Line-ending policy.
+#
+# Generic type rules come first; the governed-artifact overrides come LAST,
+# because in .gitattributes the last matching pattern wins.
+
+*.py                   text eol=lf
+*.yaml                 text eol=lf
+*.yml                  text eol=lf
+*.ts                   text eol=lf
+*.md                   text
+
+# Governed byte artifacts must never be line-ending normalized, in either
+# direction. Recorded SHA-256 values in sha256_manifest.json and in
+# evidence/audit_ec1_2026-08-15/EC1-AUDIT.md are computed over the exact
+# provider- or script-produced bytes. With core.autocrlf=true and no attributes,
+# Git checked these out CRLF-converted on Windows, so every recorded hash
+# mismatched the working tree while matching the index -- breaking the
+# verification chain that scripts/merge_coverage_year.py, TA-15, FR-P1-01-4 and
+# G-07's matched-artifact evidence all depend on, and making a real tampering
+# event indistinguishable from a checkout artifact.
+#
+# Origin: GOV-2026-08-20-RA-01 finding DATA-01, independently confirmed
+# 2026-08-21. Authority: Technical Environment section 13.7 -- exact equality is
+# required for hashes, schemas, partition membership, IDs and deterministic CPU
+# transformations.
+
+evidence/**            -text
+artifacts/**           -text
+tests/fixtures/**      -text

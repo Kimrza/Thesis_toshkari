@@ -86,7 +86,7 @@ original wording was unsatisfiable by any month:
   the `raw_isprint_cache/` re-acquisition, which FU-1=B sequences **after**
   requirements-analysis.
 - **Interim caveat, binding until that re-acquisition completes** (governance
-  finding DATA-07). `evidence/audit_evidence_2022-FULL/` — the artifact D-9
+  finding DATA-07). `evidence/audit_evidence_2022-FULL/` — relocated 2026-08-21 to `evidence/locked_test_restricted/audit_evidence_2022-FULL/` under D-15; the path as written was correct when this practice was affirmed — the artifact D-9
   promotes as the Phase 1 acquisition input — rests on twelve monthly runs whose
   provenance is **unverifiable in principle, not merely unverified**: no provider
   byte stream exists anywhere in the workspace, and three of the twelve months
