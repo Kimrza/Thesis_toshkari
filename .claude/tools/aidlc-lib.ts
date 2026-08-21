@@ -2889,8 +2889,19 @@ export function checkSummaryConfirmationEvidence(
     }
 
     const receiptIndex = events.indexOf(receipt);
+    // Windows drive-letter case is insignificant to the filesystem but
+    // significant to ===, and the two sides of the comparison below come from
+    // different sources: artifactAbs resolves against process.cwd() (which Node
+    // reports as `C:\...`) while the recorded File value originates from a tool
+    // call's file_path (which arrives as `c:/...` when the harness supplies the
+    // project dir that way). Comparing them raw made this gate blind to writes
+    // that were sitting in the audit trail, and no write could satisfy both this
+    // check and the recording gate in aidlc-write-audit-log.ts, which wanted the
+    // opposite case. Fold the drive letter on both sides for comparison only.
+    const foldDrive = (p: string): string =>
+      /^[A-Za-z]:[\\/]/.test(p) ? p[0].toLowerCase() + p.slice(1) : p;
     for (const artifact of summaryArtifactPaths(stage, question)) {
-      const artifactAbs = resolvePath(artifact);
+      const artifactAbs = foldDrive(resolvePath(artifact));
       let lastWrite = -1;
       for (let i = floor + 1; i < events.length; i++) {
         const entry = events[i];
@@ -2902,7 +2913,7 @@ export function checkSummaryConfirmationEvidence(
         }
         const file = auditBlockField(entry.block, "File");
         if (!file) continue;
-        const resolved = resolvePath(projectDir, file);
+        const resolved = foldDrive(resolvePath(projectDir, file));
         if (resolved === artifactAbs) lastWrite = i;
       }
       if (lastWrite <= receiptIndex) {

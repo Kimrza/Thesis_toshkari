@@ -22,6 +22,7 @@
 - ALWAYS raise a targeted follow-up when an answer would require building something before the work that specifies its contents; reinterpreting such an answer silently hides an ordering error that only surfaces once the wrong thing is built. (learned 2026-08-15) <!-- cid:approval-handoff:c3 -->
 - ALWAYS enumerate every open supervisor gate from the governing authority's gate table in a phase handoff, not only the gates on the visible critical path; a partial list makes the unlisted gates invisible to the receiving phase. (learned 2026-08-15) <!-- cid:approval-handoff:c1 -->
 - ALWAYS verify a fact independently before handing it to another reviewer as established input; a wrong fact promoted to established status is built upon rather than questioned, and the reviewer's conclusion inherits the error. (learned 2026-08-16) <!-- cid:practices-discovery:c-board-1 -->
+- ALWAYS derive a count programmatically from the artifact and print it before asserting it; never carry a count from adjacent prose, from a finding's text, or from an earlier revision. Three counts asserted this way in one session were all wrong (a release-manifest field count, an untested-requirement list size, and a test-module count claimed to appear in four places when it appears in two), while every count derived from the artifact was right. (learned 2026-08-21) <!-- cid:application-design:application-design:count-derivation -->
 ## Walking Skeleton
 
 <!-- Project-specific specialisation. Example: -->

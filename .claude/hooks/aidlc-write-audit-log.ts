@@ -56,7 +56,19 @@ try {
 const tool = parsed.tool_name ?? "";
 const file: string = parsed.tool_input?.file_path ?? "";
 const auditFileValue = file.replace(/\\/g, "/");
-const fileNorm = auditFileValue; // forward-slash form for all path matching below
+// Forward-slash form for all path matching below. On Windows the drive letter's
+// case is not significant to the filesystem but IS significant to string
+// comparison, and the two sides arrive from different places: this value comes
+// from the tool call's file_path, while recordRoot below derives from
+// CLAUDE_PROJECT_DIR. A `C:/...` write under a `c:/...` project dir compared
+// unequal, so the whole write went unrecorded and the approve-time
+// summary-confirmation gate in aidlc-lib.ts could never see it — a deadlock,
+// because that gate resolves the artifact against process.cwd() and therefore
+// wanted the opposite case. Lowercase both sides for MATCHING only;
+// auditFileValue keeps its original case for the audit record.
+const caseFold = (p: string): string =>
+  /^[A-Za-z]:\//.test(p) ? p[0].toLowerCase() + p.slice(1) : p;
+const fileNorm = caseFold(auditFileValue);
 
 // Only log writes to the active intent's RECORD tree, plus the space's codekb
 // tree. The record re-roots per intent (aidlc/spaces/<space>/intents/
@@ -72,11 +84,15 @@ const fileNorm = auditFileValue; // forward-slash form for all path matching bel
 // codekbDir(pd, "_") is <pd>/aidlc/spaces/<space>/codekb/_; its parent is the
 // codekb root for the active space (same idiom as producesDirsForStage in
 // aidlc-state.ts).
-const recordRoot = docsRoot(projectDir).replace(/\\/g, "/").replace(/\/$/, "");
+const recordRoot = caseFold(
+  docsRoot(projectDir).replace(/\\/g, "/").replace(/\/$/, ""),
+);
 const underRecord = fileNorm === recordRoot || fileNorm.startsWith(`${recordRoot}/`);
-const codekbRoot = join(codekbDir(projectDir, "_"), "..")
-  .replace(/\\/g, "/")
-  .replace(/\/$/, "");
+const codekbRoot = caseFold(
+  join(codekbDir(projectDir, "_"), "..")
+    .replace(/\\/g, "/")
+    .replace(/\/$/, ""),
+);
 const underCodekb = fileNorm.startsWith(`${codekbRoot}/`);
 hookDebug(projectDir, "write-audit-log", "path-gate", {
   tool,
