@@ -212,6 +212,14 @@ def main():
             w.writerow([m] + [len(monthly[m].get(s, ())) for s in stations] + [DAYS_IN_MONTH[m]])
 
     raw_path = os.path.join(OUT_DIR, 'madrigal_coverage_raw_records.csv')
+    # DETERMINISTIC ORDER. Rows are emitted sorted on the dedup key, so identical inputs
+    # produce a byte-identical artifact and therefore a stable SHA-256. Before this, output
+    # order followed the month-directory traversal and the dedup set's insertion order: the
+    # 2026-08-21 re-merge reproduced the record set exactly -- 223,586 rows, identical when
+    # sorted -- yet hashed differently from the 2026-08-13 merge, which is indistinguishable
+    # from a content change to anyone checking hashes. TE 13.7 requires exact equality for
+    # deterministic CPU transformations, and a merge is one.
+    merged.sort(key=lambda r: (r['station'], float(r['ut1_unix']), float(r['gdlat']), float(r['glon'])))
     with open(raw_path, 'w', newline='') as fh:
         w = csv.DictWriter(fh, fieldnames=fieldnames)
         w.writeheader()

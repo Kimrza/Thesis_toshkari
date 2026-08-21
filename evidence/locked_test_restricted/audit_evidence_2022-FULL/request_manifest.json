@@ -1,0 +1,209 @@
+{
+  "artifact_kind": "MERGED -- derived from per-month runs, NOT a fresh retrieval",
+  "merged_at_utc": "2026-08-21T09:28:17.482309+00:00",
+  "merge_tool": "scripts/merge_coverage_year.py",
+  "audit_year": 2022,
+  "months_merged": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "months_missing": [],
+  "partial_run": false,
+  "rows_merged_unique": 223586,
+  "cross_month_duplicate_rows_dropped": 6763,
+  "rows_outside_audit_year_excluded": 642,
+  "rows_contributed_per_month": {
+    "1": 20808,
+    "2": 17500,
+    "3": 18497,
+    "4": 18394,
+    "5": 19179,
+    "6": 17575,
+    "7": 18146,
+    "8": 18518,
+    "9": 17647,
+    "10": 18469,
+    "11": 17595,
+    "12": 21258
+  },
+  "source_runs": {
+    "1": {
+      "folder": "audit_evidence_2022-01",
+      "retrieved_at_utc": "2026-08-12T22:41:57.009983+00:00",
+      "run_months": [
+        1
+      ],
+      "rows_fetched_total": 21551,
+      "file_level_errors": 0,
+      "sha256_manifest": "ada5b5ea53d55cbc65a7f445b6b0b3958c5af4010ca7ae40ae1dba4a3dcccd22"
+    },
+    "2": {
+      "folder": "audit_evidence_2022-02",
+      "retrieved_at_utc": "2026-08-12T22:35:09.673909+00:00",
+      "run_months": [
+        2
+      ],
+      "rows_fetched_total": 18143,
+      "file_level_errors": 0,
+      "sha256_manifest": "328df2850868eef5995f93128c07a09e801ba3443f992846e3a84a3ddfb7323b"
+    },
+    "3": {
+      "folder": "audit_evidence_2022-03",
+      "retrieved_at_utc": "2026-08-12T22:41:11.040913+00:00",
+      "run_months": [
+        3
+      ],
+      "rows_fetched_total": 19097,
+      "file_level_errors": 0,
+      "sha256_manifest": "8673b8a3487840ba5615920adad0cb751ebf412425159468a5f5a1d7a05a99f3"
+    },
+    "4": {
+      "folder": "audit_evidence_2022-04",
+      "retrieved_at_utc": "2026-08-12T11:45:38.982780+00:00",
+      "run_months": [
+        4
+      ],
+      "rows_fetched_total": 18990,
+      "file_level_errors": 0,
+      "sha256_manifest": "dde76ec49899cd68d0e80b02244073ed918787fd64fb232c60a4962cb7f09f51"
+    },
+    "5": {
+      "folder": "audit_evidence_2022-05",
+      "retrieved_at_utc": "2026-08-12T22:44:40.362927+00:00",
+      "run_months": [
+        5
+      ],
+      "rows_fetched_total": 19802,
+      "file_level_errors": 0,
+      "sha256_manifest": "dbbcb04c9188e971c89fd04fbac3600152910136f9deea00dac0919650e0197a"
+    },
+    "6": {
+      "folder": "audit_evidence_2022-06",
+      "retrieved_at_utc": "2026-08-12T22:41:13.180098+00:00",
+      "run_months": [
+        6
+      ],
+      "rows_fetched_total": 18194,
+      "file_level_errors": 0,
+      "sha256_manifest": "d13c2e2ca6e478aa5a0fe63e0b810453633e714fb02c14841fcefac742b83244"
+    },
+    "7": {
+      "folder": "audit_evidence_2022-07",
+      "retrieved_at_utc": "2026-08-12T13:04:10.004072+00:00",
+      "run_months": [
+        7
+      ],
+      "rows_fetched_total": 18732,
+      "file_level_errors": 0,
+      "sha256_manifest": "9faf50c5a4e2736f0fa6ec06646db2c419efa6074280950e018562587132486b"
+    },
+    "8": {
+      "folder": "audit_evidence_2022-08",
+      "retrieved_at_utc": "2026-08-12T22:51:46.835056+00:00",
+      "run_months": [
+        8
+      ],
+      "rows_fetched_total": 19127,
+      "file_level_errors": 0,
+      "sha256_manifest": "eb3a8f3c6f4c058967d439b3059083e563a1f3f0d01c6c64717be582c08cabec"
+    },
+    "9": {
+      "folder": "audit_evidence_2022-09",
+      "retrieved_at_utc": "2026-08-12T22:52:41.334993+00:00",
+      "run_months": [
+        9
+      ],
+      "rows_fetched_total": 18249,
+      "file_level_errors": 0,
+      "sha256_manifest": "232fb04c37ed72784b9ecc8e639d972e9d6e83a6948040179dcf36adc98e8c84"
+    },
+    "10": {
+      "folder": "audit_evidence_2022-10",
+      "retrieved_at_utc": "2026-08-12T19:25:22.350081+00:00",
+      "run_months": [
+        10
+      ],
+      "rows_fetched_total": 19062,
+      "file_level_errors": 0,
+      "sha256_manifest": "a99d12a83d44674da7a9d89b48dacac386c986059e31319be1ac664c8e749185"
+    },
+    "11": {
+      "folder": "audit_evidence_2022-11",
+      "retrieved_at_utc": "2026-08-12T20:50:37.907738+00:00",
+      "run_months": [
+        11
+      ],
+      "rows_fetched_total": 18183,
+      "file_level_errors": 0,
+      "sha256_manifest": "6653d7fc44fc69f47beef72174571c1eb4ea2300dac4477dbd01ce45259676f6"
+    },
+    "12": {
+      "folder": "audit_evidence_2022-12",
+      "retrieved_at_utc": "2026-08-12T10:25:30.664675+00:00",
+      "run_months": [
+        12
+      ],
+      "rows_fetched_total": 22604,
+      "file_level_errors": 0,
+      "sha256_manifest": "5cb08ac7630645440967236374b9e1ed3b613f11e4934fa4ff164c65f78af00a"
+    }
+  },
+  "madrigal_url": "https://cedar.openmadrigal.org",
+  "instrument_code": 8000,
+  "kindat_code": 3500,
+  "parameters_requested": [
+    "ut1_unix",
+    "gdlat",
+    "glon",
+    "tec",
+    "dtec"
+  ],
+  "stations": {
+    "ARUC": {
+      "lat": 40.286,
+      "lon": 44.086,
+      "source": "IGS network page -- cross-check against site log required",
+      "cell": {
+        "lat_min": 40,
+        "lat_max": 41,
+        "lon_min": 44,
+        "lon_max": 45
+      }
+    },
+    "BSHM": {
+      "lat": 32.778987,
+      "lon": 35.022987,
+      "source": "IGS network page -- cross-check against site log required",
+      "cell": {
+        "lat_min": 32,
+        "lat_max": 33,
+        "lon_min": 35,
+        "lon_max": 36
+      }
+    },
+    "NICO": {
+      "lat": 35.140989,
+      "lon": 33.39645,
+      "source": "IGS network page -- cross-check against site log required",
+      "cell": {
+        "lat_min": 35,
+        "lat_max": 36,
+        "lon_min": 33,
+        "lon_max": 34
+      }
+    }
+  },
+  "coordinate_to_cell_convention": "lower-left floor, 1deg x 1deg -- confirm against real bin edges before freezing",
+  "user_fullname": "Kimia Rezaei",
+  "user_affiliation": "Amirkabir University of Technology"
+}

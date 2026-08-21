@@ -63,7 +63,7 @@ RAW_RECORDS = "madrigal_coverage_raw_records.csv"
 
 
 def _month_dirs() -> list[tuple[int, Path]]:
-    """Every per-month evidence folder as (month, path). Ignores the merged -FULL dir.
+    r"""Every per-month evidence folder as (month, path). Ignores the merged -FULL dir.
 
     SCOPE, STATED DELIBERATELY. This collector searches both evidence roots (ordinary and
     restricted, D-15) but is non-recursive within each, and matches only

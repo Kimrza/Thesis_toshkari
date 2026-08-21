@@ -46,6 +46,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EVIDENCE_DIR = REPO_ROOT / "evidence"
+RESTRICTED_DIR = EVIDENCE_DIR / "locked_test_restricted"
 GITATTRIBUTES = REPO_ROOT / ".gitattributes"
 EC1_REPORT = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "ec1-audit-report.json"
 KYOTO_DIR = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "kyoto_dst"
@@ -67,10 +68,17 @@ def _sha256(path: Path) -> str:
 
 
 def _manifests() -> list[Path]:
-    """Every declared per-month and merged-year hash manifest, sorted for stable ids."""
+    """Every declared hash manifest anywhere under evidence/, sorted for stable ids.
+
+    Searched RECURSIVELY and therefore across both evidence roots. A non-recursive glob
+    over the ordinary root alone found 11 of 15 after decision D-15 relocated the December
+    and merged-year artifacts under `evidence/locked_test_restricted/` -- so it stopped
+    verifying exactly the artifacts whose integrity matters most. Custody relocation must
+    never remove an artifact from hash verification.
+    """
     if not EVIDENCE_DIR.is_dir():
         return []
-    return sorted(EVIDENCE_DIR.glob("audit_evidence_2022-*/sha256_manifest.json"))
+    return sorted(EVIDENCE_DIR.rglob("sha256_manifest.json"))
 
 
 def _declared_artifacts() -> list[tuple[Path, str, str]]:
@@ -118,9 +126,19 @@ def test_manifests_are_present() -> None:
     """
     manifests = _manifests()
     assert manifests, f"no sha256_manifest.json found under {EVIDENCE_DIR}"
-    assert len(manifests) >= 13, (
-        f"expected at least 13 hash manifests (twelve months plus the merged year), "
-        f"found {len(manifests)}: {[m.parent.name for m in manifests]}"
+    # 15 as at 2026-08-21: twelve acquisition months, the merged year, and the two
+    # superseded_2026-08-16 snapshots. Asserted as a floor so adding evidence does not
+    # fail the suite, while a manifest silently disappearing does.
+    assert len(manifests) >= 15, (
+        f"expected at least 15 hash manifests (twelve months, the merged year, and two "
+        f"superseded snapshots), found {len(manifests)}: "
+        f"{[str(m.parent.relative_to(EVIDENCE_DIR)) for m in manifests]}"
+    )
+    restricted = [m for m in manifests if m.is_relative_to(RESTRICTED_DIR)]
+    assert restricted, (
+        "no manifest was found under the restricted custody root; after D-15 the December "
+        "and merged-year manifests live there, and a collector that misses them silently "
+        "stops verifying the locked month"
     )
 
 
