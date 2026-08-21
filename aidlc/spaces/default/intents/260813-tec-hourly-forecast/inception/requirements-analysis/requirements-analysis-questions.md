@@ -172,7 +172,63 @@ Answers as recorded:
 - **Q9 = C** — Vision's success framework is adopted by reference; only the measurable engineering acceptance criteria are stated here, **plus** an explicit record that engineering acceptance (does the pipeline run correctly) is independent of scientific outcome (does the model beat the baselines) — a correctly executed negative result passes engineering acceptance.
 - **Q10 = A** — Every known authority-document defect that `requirements.md` relies on is recorded with the reading adopted and its status: the §16/§16.1 contradiction, §1.3's stale script/notebook counts, OC-03's over-broad "unexamined" wording, and Vision §14.2 D-130's supersession pointers that carry no counts.
 
-Does this all look correct before I generate the requirements artifact?
+**Re-confirmation, 2026-08-21 — the stage was redone, so this checkpoint reopens.**
+The ten answers above stand unchanged; nothing in them is being re-asked. What has
+changed is the artifact they produced. Since these answers were given it has been
+through five revisions under four governance boards, and confirming this checkpoint
+now means confirming that the answers still describe what you want, given where the
+artifact ended up:
+
+- **Second and third revisions** applied `GOV-2026-08-20-RA-01`'s twelve blocking
+  recommendations and `GOV-2026-08-21-RA-01`'s sixteen, and froze D-12 through
+  D-19.
+- **Fourth revision** audited all 43 of `GOV-2026-08-20-RA-01`'s non-blocking
+  findings — 7 closed, 9 partial, 27 open — and remediated the 38 open-or-partial
+  ones, deferring exactly two with owners and gates. It also corrected three
+  defects neither board had raised, including a revision-record paragraph that
+  contradicted its own document on four counts.
+- **Fifth revision** remediated `GOV-2026-08-21-RA-02`'s `FAIL` (3 blocking, 3
+  major, 2 minor), two of whose blockers were defects in the fourth revision's own
+  remediation.
+- `GOV-2026-08-21-RA-03` returned **`CONDITIONAL PASS`**, conditioned on you
+  accepting a report whose Chair was conflicted: the agent that wrote the
+  revisions also reviewed them.
+
+Concretely, the artifact now holds **93 requirement rows**, of which **39 carry no
+§16 or §19 test row** and are listed as such rather than given invented ones —
+which is Q1's rule applied honestly, and the reason the untested list grew rather
+than shrank. Nine requirements were added and one, FR-P1-05-4, **lost** its test
+link because WS-18 could not test what it claimed to.
+
+Two things remain open by design, both supervisor calls, neither resolved by any
+revision: § Known defects **row 12** (the `plumbing_7day` fixture's station count —
+TE §15.1's "one station" against D-11's three cells, which blocks the fixture
+manifest) and **row 13** (NFR-SEC-01's PII prohibition against the Madrigal
+identity requirement, with a realized history breach). Both are recorded with **no
+reading adopted**.
+
+**Second re-confirmation, 2026-08-21.** You confirmed this checkpoint once already
+today. It reopens for a mechanical reason, not a substantive one: the framework's
+gate guard could not see the post-confirmation writes because the audit trail
+recorded them with a lowercase Windows drive letter (`c:\`) while the guard resolves
+the artifact with an uppercase one (`C:\`), so the two never compare equal. Clearing
+that required re-entering the stage, which resets the checkpoint. Nothing about your
+ten answers changed, and nothing above this line changed.
+
+Two defects the advisory reviewer found — and which I verified independently against
+the artifact — **will be fixed** in this pass rather than carried to the gate as
+open findings:
+
+- **FR-P1-02-5 cites `TA-29`** as its test row, while this document's own § Success
+  and acceptance lists TA-29 under *"Not applicable in Phase 1 — Phase 2 by
+  definition"*. The row therefore looks covered and never appears in
+  § Requirements with no testing row, which is the list stage 3.2 reads to assemble
+  the G-05 freeze manifest. Four governance boards did not catch this.
+- **FR-P1-05-18's criterion covers two of its four obligations.** The Vision §9.3
+  regime thresholds and the −12 h/+24 h event window, both added in the fourth
+  revision, have no pass/fail clause — an omission in my own edit.
+
+Does this all look correct before I finalize the requirements artifact?
 
 - Looks correct
 - Request changes
