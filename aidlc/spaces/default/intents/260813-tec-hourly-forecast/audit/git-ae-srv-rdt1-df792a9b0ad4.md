@@ -3562,3 +3562,795 @@
 **Duration ms**: 196
 
 ---
+
+## Session End
+**Timestamp**: 2026-08-21T14:46:29Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-08-21T14:46:29Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-08-21T14:46:29Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-08-21T14:46:29Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-08-21T14:46:29Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Resume
+**Timestamp**: 2026-08-21T14:46:51Z
+**Event**: SESSION_RESUMED
+**Source**: resume
+
+---
+
+## Session Start
+**Timestamp**: 2026-08-21T14:46:52Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Session Resume
+**Timestamp**: 2026-08-21T14:46:57Z
+**Event**: SESSION_RESUMED
+**Source**: resume
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T15:20:47Z
+**Event**: HUMAN_TURN
+
+---
+
+## Stage Awaiting Approval
+**Timestamp**: 2026-08-21T15:21:12Z
+**Event**: STAGE_AWAITING_APPROVAL
+**Stage**: units-generation
+**Details**: Re-entering gate after revision
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T15:23:36Z
+**Event**: HUMAN_TURN
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:30:25Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:30:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9e136237
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:30:26Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9e136237
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 211
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:30:26Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3fc6aa58
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:30:26Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3fc6aa58
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 182
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:30:34Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:30:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: 85500467
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:30:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: 85500467
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 194
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:30:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: 18f23fe8
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:30:35Z
+**Event**: SENSOR_PASSED
+**Fire id**: 18f23fe8
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 205
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-21T15:30:39Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: ad989b1c0074f48b2
+**Message**: READY\nMajor | Roll-up by unit table | Roll-up drops the inherited BLK-04 for `models-and-baselines` and `evaluation-and-comparison`, disagreeing with the unit-definitions table and each unit's own `**
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-21T15:30:52Z
+**Event**: REVIEW_COMPLETED
+**Stage**: units-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Iteration**: 1
+**Verdict**: READY
+**Artifact Fingerprint**: sha256:51dadb2c29ed1fd766424ff6c51afeb1c849a8092cda74fa05f3e7c2e163da60
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T15:32:58Z
+**Event**: HUMAN_TURN
+
+---
+
+## Gate Rejected
+**Timestamp**: 2026-08-21T15:33:07Z
+**Event**: GATE_REJECTED
+**Stage**: units-generation
+**Feedback**: Request Changes: fix the blocker roll-up table so it agrees with the unit-definitions Blockers column and the per-unit **Blockers.** lines - add the inherited BLK-04 to models-and-baselines and evaluation-and-comparison - and correct the closing row's 'both' to cover all three units it names.
+
+---
+
+## Stage Revising
+**Timestamp**: 2026-08-21T15:33:07Z
+**Event**: STAGE_REVISING
+**Stage**: units-generation
+**Revision count**: 4
+**Feedback**: Request Changes: fix the blocker roll-up table so it agrees with the unit-definitions Blockers column and the per-unit **Blockers.** lines - add the inherited BLK-04 to models-and-baselines and evaluation-and-comparison - and correct the closing row's 'both' to cover all three units it names.
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:33:20Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:33:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9068326d
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:33:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9068326d
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 180
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:33:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: 363534d7
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:33:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: 363534d7
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 195
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-21T15:33:47Z
+**Event**: REVIEW_REQUESTED
+**Stage**: units-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Iteration**: 1
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:44:38Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:44:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: db581c32
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:44:39Z
+**Event**: SENSOR_PASSED
+**Fire id**: db581c32
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 183
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:44:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2ec0c4dd
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:44:39Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2ec0c4dd
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 174
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-21T15:44:45Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: ac4f84415c169edad
+**Message**: READY\nMAJOR | unit-of-work.md § 12 `fixtures-and-reproducibility` / roll-up / dependency.md boundary+edges | `fixtures-and-reproducibility` directly consumes artifacts from `models-and-baselines`, `ev
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-21T15:45:00Z
+**Event**: REVIEW_COMPLETED
+**Stage**: units-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Iteration**: 1
+**Verdict**: READY
+**Artifact Fingerprint**: sha256:331fd8de961a42901c6b2ce6e12cf642e12254d2ea7f0d5b672d26590ec657fe
+
+---
+
+## Stage Awaiting Approval
+**Timestamp**: 2026-08-21T15:45:24Z
+**Event**: STAGE_AWAITING_APPROVAL
+**Stage**: units-generation
+**Details**: Re-entering gate after revision
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T15:45:53Z
+**Event**: HUMAN_TURN
+
+---
+
+## Gate Rejected
+**Timestamp**: 2026-08-21T15:46:02Z
+**Event**: GATE_REJECTED
+**Stage**: units-generation
+**Feedback**: Request Changes: add the inherited BLK-03 and BLK-04 to fixtures-and-reproducibility's **Blockers.** line, its roll-up row and the Blockers column, since it consumes artifacts from all four units carrying them; and give artifacts/ an explicit owner in foundation's Owns list, REQ-ENG-1 and TA-01 requiring it as a top-level directory.
+
+---
+
+## Stage Revising
+**Timestamp**: 2026-08-21T15:46:02Z
+**Event**: STAGE_REVISING
+**Stage**: units-generation
+**Revision count**: 5
+**Feedback**: Request Changes: add the inherited BLK-03 and BLK-04 to fixtures-and-reproducibility's **Blockers.** line, its roll-up row and the Blockers column, since it consumes artifacts from all four units carrying them; and give artifacts/ an explicit owner in foundation's Owns list, REQ-ENG-1 and TA-01 requiring it as a top-level directory.
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:46:22Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:22Z
+**Event**: SENSOR_FIRED
+**Fire id**: ea80d1e6
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:22Z
+**Event**: SENSOR_PASSED
+**Fire id**: ea80d1e6
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 206
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:22Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4ede6fd1
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:22Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4ede6fd1
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 182
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:46:29Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:29Z
+**Event**: SENSOR_FIRED
+**Fire id**: f3066f52
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:29Z
+**Event**: SENSOR_PASSED
+**Fire id**: f3066f52
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 191
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:30Z
+**Event**: SENSOR_FIRED
+**Fire id**: 96f6bcd3
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:30Z
+**Event**: SENSOR_PASSED
+**Fire id**: 96f6bcd3
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 209
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:46:38Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:38Z
+**Event**: SENSOR_FIRED
+**Fire id**: e3dbba01
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: e3dbba01
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 203
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: e10122f7
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:39Z
+**Event**: SENSOR_PASSED
+**Fire id**: e10122f7
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 197
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:46:51Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: de496134
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: de496134
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 187
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:46:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 59c50212
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:46:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 59c50212
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 192
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:47:01Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work-story-map.md
+**Context**: inception > units-generation > unit-of-work-story-map.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:47:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: 416be211
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work-story-map.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:47:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: 416be211
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work-story-map.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:47:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: da884947
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work-story-map.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:47:02Z
+**Event**: SENSOR_PASSED
+**Fire id**: da884947
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work-story-map.md
+**Duration ms**: 203
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-21T15:47:57Z
+**Event**: REVIEW_REQUESTED
+**Stage**: units-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Iteration**: 1
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-21T15:52:46Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Context**: inception > units-generation > unit-of-work.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:52:46Z
+**Event**: SENSOR_FIRED
+**Fire id**: d4ef73b2
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:52:46Z
+**Event**: SENSOR_PASSED
+**Fire id**: d4ef73b2
+**Sensor ID**: required-sections
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 191
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-21T15:52:46Z
+**Event**: SENSOR_FIRED
+**Fire id**: bc3c9357
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-21T15:52:47Z
+**Event**: SENSOR_PASSED
+**Fire id**: bc3c9357
+**Sensor ID**: upstream-coverage
+**Stage slug**: units-generation
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md
+**Duration ms**: 184
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-21T15:52:50Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: af3f141dd1691f15e
+**Message**: READY\nNo findings.
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-21T15:53:19Z
+**Event**: REVIEW_COMPLETED
+**Stage**: units-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Iteration**: 1
+**Verdict**: READY
+**Artifact Fingerprint**: sha256:0be1f6951e46ed40fb511f508d13ceb0da9eb9aaf4e61d9c810c5d97ae275f04
+
+---
+
+## Stage Awaiting Approval
+**Timestamp**: 2026-08-21T15:53:19Z
+**Event**: STAGE_AWAITING_APPROVAL
+**Stage**: units-generation
+**Details**: Re-entering gate after revision
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T15:55:51Z
+**Event**: HUMAN_TURN
+
+---
+
+## Gate Approved
+**Timestamp**: 2026-08-21T15:56:01Z
+**Event**: GATE_APPROVED
+**Stage**: units-generation
+**User Input**: Approve
+
+---
+
+## Stage Completion
+**Timestamp**: 2026-08-21T15:56:01Z
+**Event**: STAGE_COMPLETED
+**Stage**: units-generation
+**Details**: Stage Units Generation approved by gate
+**Tokens In**: 962
+**Tokens Out**: 785159
+**Cache Read**: 110831786
+**Cache Write**: 3601944
+**Cost USD**: 92.34
+**By Model**: opus-5=79.05; sonnet-5=13.29; <synthetic>=null
+**By Agent**: main=48.96; general-purpose=30.10; aidlc-architecture-reviewer-agent=13.29
+**Tokens By Model**: opus-5=658/653.2k/87M/2.5M; sonnet-5=304/132k/23.9M/1.1M
+**Tokens By Agent**: main=432/224.9k/67.3M/969.4k; general-purpose=226/428.3k/19.7M/1.5M; aidlc-architecture-reviewer-agent=304/132k/23.9M/1.1M
+
+---
+
+## Stage Start
+**Timestamp**: 2026-08-21T15:56:01Z
+**Event**: STAGE_STARTED
+**Stage**: delivery-planning
+**Agent**: aidlc-delivery-agent
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T15:57:51Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-21T16:14:13Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: a04c38699b5956680
+**Message**: **Governance review — Review Chair / Decision Owner seat · independent pass · AI-DLC stage 2.7 (units-generation) · intent `260813-tec-hourly-forecast` · 2026-08-21**\n\nScope of my pass: gate scope, ac
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T16:14:18Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-21T16:17:48Z
+**Event**: HUMAN_TURN
+
+---

@@ -53,7 +53,7 @@ and never duplicate its implementation.
 | 9 | `evaluation-and-comparison` | `library` | M | standalone | 4 | 1 | BLK-03 ↓, BLK-04 ↓ |
 | 10 | `statistical-inference` | `library` | M | embedded | 1 | 2 | BLK-03 ↓, BLK-04 ↓ |
 | 11 | `regimes-diagnostics-reporting` | `library` | L | embedded | 11 | 3 | BLK-03 ↓, BLK-04 ↓ |
-| 12 | `fixtures-and-reproducibility` | `library` | M | standalone | 8 | 4 | BLK-01, BLK-02 |
+| 12 | `fixtures-and-reproducibility` | `library` | M | standalone | 8 | 4 | BLK-01, BLK-02, BLK-03 ↓, BLK-04 ↓ |
 
 Blocker column: an unmarked ID is a blocker whose affected artifacts this unit
 owns; **↓** marks one inherited through a contract this unit consumes. **BLK-01
@@ -103,6 +103,7 @@ no frontend.
 - `src/data/config.py` — **NEW**: `load_configs`, per-run snapshot, config hash, `assert_no_tbd`, `assert_declared_sources_exist`, the `seed_everything` determinism helper, `ensure_process_determinism`, `resolve_platform_roots`
 - `src/data/release.py` — TE §13.3's ten manifest rows over fourteen fields, SHA-256 hashing, write-protection; the single home of the hashing helper the team practice consolidates
 - the run record and `experiment_registry.jsonl` append-only writer
+- `artifacts/` — the top-level output tree REQ-ENG-1 enumerates and TA-01 checks. Owned here because this unit creates the skeleton and owns the release API that writes into it; every other unit writes its released artifacts *into* this tree without owning it.
 - `tests/` tree and shared fixtures/conftest, `tests/test_determinism.py` (**NEW**), `tests/test_release_hashes.py`
 
 **Boundary.** The only unit that reads `configs/`, and (with `acquisition`) one of two permitted to construct a path into `evidence/`. Exposes `ConfigSnapshot`, the seeded-run contract, resolved platform roots and the release API. Imports nothing from any other unit — this is the DAG's first root.
@@ -459,7 +460,7 @@ Bold = no §16/§19 test row (2 of 8 here).
 
 **Acceptance rows (4).** WS-20, TA-09, TA-17, TA-21
 
-**Blockers.** **BLK-02** — owned scope blocked: `tests/fixtures/plumbing_7day/fixture_manifest.yaml` and every capability depending on it. The unit exists in the DAG with its nine dependencies recorded, but the manifest-dependent capability is blocked by `application-design` § Known defects row 12; **no manifest may be invented, inferred or substituted**, and this unit cannot pass its completion gate until the defect is resolved and the authoritative manifest is available and hash-verifiable. Approval authority: Supervisor. **BLK-01** — owned scope blocked: TE §13.2's `PYTHONHASHSEED` clean-run clause, which `test_clean_run.py`, WS-20 and TA-17 test as written. Approval authority: the authorized project decision owner. Status: both Open.
+**Blockers.** **BLK-02** — owned scope blocked: `tests/fixtures/plumbing_7day/fixture_manifest.yaml` and every capability depending on it. The unit exists in the DAG with its nine dependencies recorded, but the manifest-dependent capability is blocked by `application-design` § Known defects row 12; **no manifest may be invented, inferred or substituted**, and this unit cannot pass its completion gate until the defect is resolved and the authoritative manifest is available and hash-verifiable. Approval authority: Supervisor. **BLK-01** — owned scope blocked: TE §13.2's `PYTHONHASHSEED` clean-run clause, which `test_clean_run.py`, WS-20 and TA-17 test as written. Approval authority: the authorized project decision owner. **BLK-03 ↓**, **BLK-04 ↓** — inherited: this unit's `depends_on` includes all four units carrying those blockers (`models-and-baselines`, `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`), and the clean-run tolerance comparison and TA-21's traceability matrix consume their released artifacts, so what those two contracts permit bounds what WS-20 and TA-17 can be said to have reproduced. Approval authority: as recorded on BLK-03 and BLK-04. Status: all four Open.
 
 **Implementation notes and constraints.**
 
@@ -555,12 +556,16 @@ a whole and a partially-built unit must not read as covered.
 | `governance-guards` | BLK-01 | `src/data/locked_test.py`. `phase_contract.py` and `reuse_registry.py` are unblocked. |
 | `target-standardization` | BLK-05 | the D-17 schema test only. |
 | `features-and-splits` | BLK-04 | `transforms.py` and everything asserting NFR-LEAK-01 through it. |
-| `models-and-baselines` | BLK-03 | `train.py`'s confirmatory-prediction path. |
-| `evaluation-and-comparison` | BLK-03 (downstream) | anything consuming the confirmatory prediction. |
-| `statistical-inference` | BLK-03, BLK-04 (downstream) | the bootstrapped differential. |
-| `regimes-diagnostics-reporting` | BLK-03, BLK-04 (downstream) | every reported number derived from the above. |
-| `fixtures-and-reproducibility` | BLK-01, BLK-02 | the clean-run clause and the `plumbing_7day` manifest — jointly, its completion gate. |
-| `acquisition`, `inventory-and-registry`, `external-products` | — | none of their own; both depend on BLK-01's artifacts through the stage entry contract. |
+| `models-and-baselines` | BLK-03, BLK-04 ↓ | `train.py`'s confirmatory-prediction path (BLK-03); the training it performs on transform-fitted features (BLK-04, inherited). |
+| `evaluation-and-comparison` | BLK-03 ↓, BLK-04 ↓ | anything consuming the confirmatory prediction (BLK-03); every metric computed over transform-fitted features (BLK-04). Both inherited. |
+| `statistical-inference` | BLK-03 ↓, BLK-04 ↓ | the bootstrapped differential. Both inherited. |
+| `regimes-diagnostics-reporting` | BLK-03 ↓, BLK-04 ↓ | every reported number derived from the above. Both inherited. |
+| `fixtures-and-reproducibility` | BLK-01, BLK-02, BLK-03 ↓, BLK-04 ↓ | the clean-run clause and the `plumbing_7day` manifest — jointly, its completion gate (BLK-01, BLK-02). Inherited: the clean-run tolerance comparison and TA-21's traceability matrix consume artifacts from all four units carrying BLK-03 and BLK-04, so what those contracts permit bounds what a clean run can be said to reproduce. |
+| `acquisition`, `inventory-and-registry`, `external-products` | — | none of their own; all three depend on BLK-01's artifacts through the stage entry contract. |
+
+Roll-up notation matches the `Blockers` column in § Unit definitions and each
+unit's `**Blockers.**` line: an unmarked ID is owned here, **↓** is inherited
+through a consumed contract.
 
 Per Q7, no unit above may be described as independent-and-ready while a blocker
 naming it stands, and independence in `unit-of-work-dependency.md` § Independent
@@ -575,4 +580,34 @@ unit sets is a statement about the graph, never about readiness.
 - **Open, a `requirements.md` change.** The advisory NOT-READY finding on FR-P1-05-18 (no criterion tests the storm-event count's source) and the 40 requirements with no §16/§19 row. Both are inputs to stages 3.1 and 3.2, not resolvable here.
 - **Open, a §12 defect.** The `02` ordinal collision between the Phase 1 and Phase 2 target scripts, carried from `services.md` unresolved.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-21T15:52:15Z
+**Iteration:** 4 (advisory, single pass)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| — | — | — | None. | — |
+
+### Validation Tool Results
+
+No scripted validation tool is declared for this stage; checks below were performed by direct derivation against the artifact set and the named upstream contracts.
+
+- **The two carried-forward fixes hold.** `fixtures-and-reproducibility`'s `Blockers` column (line 56), its `**Blockers.**` prose (lines 463–464), the roll-up table (line 563), and `unit-of-work-story-map.md`'s "Open verification gaps" table (lines 280–291) all now carry `BLK-01, BLK-02, BLK-03 ↓, BLK-04 ↓` consistently. `artifacts/` (line 106) is owned by `foundation` with a stated reason ("this unit creates the skeleton and owns the release API that writes into it"), consistent with `components.md`'s layering (no package owns it either) and with TA-01/REQ-ENG-1's enumeration.
+- **Ownership exhaustively checked.** Enumerated every §12 tree item from `components.md` (six `src/` packages' modules), `services.md` (nine stage scripts + orchestrator, five notebooks), and `team.md`'s 17+2 mandated test modules against every unit's `Owns` list. Every Phase-1-applicable item resolves to exactly one owning unit, none twice. The four `src/gnss/*` modules, `scripts/02_build_vtec_target.py`, and the three Phase-2-only test modules (`test_rinex_schema.py`, `test_dcb_sign.py`, `test_hourly_target.py`) are correctly unowned — they are Phase 2 scope, and this document's title and every source package it draws on (`requirements.md`'s 105 FR-P1-* rows) are Phase 1 only.
+- **Counts independently derived, not carried.** Grepped `requirements.md` for exact-match `| <ID> |` rows: **105** distinct requirement IDs, matching the document's claim. Independently extracted the 40 `UNTESTED` rows by ID: **40**, matching both `unit-of-work.md` and the story-map's per-unit "no acceptance row" list ID-for-ID (summed the per-unit breakdown: 2+1+7+2+1+5+4+7+2+7+2 = 40). Per-unit requirement totals sum to 105; per-unit "Requirements carried… Bold" counts match the per-unit untested breakdown exactly. Acceptance-row primary-owner count sums to 39 (7+2+1+3+1+1+9+5+1+2+3+4). WS rows in Table 2: 13, distinct. TA rows: 27, distinct (26 enumerated + TA-27's first limb). Edge block: counted `depends_on` list lengths — 0+1+2+1+1+1+3+1+2+1+1+9 = **23** edges over 12 uniquely-named units, matching the claimed figure.
+- **DAG structure.** The edge block is acyclic by construction (a strictly increasing dependency layering with no back-edge), every `depends_on` name is a declared unit, no self-dependency, every `kind` is `library` (matches the Q6=X rule stated and applied). The one independent pair (`target-standardization` ∥ `external-products`) was verified by tracing reachability in both directions — no other pair in the 12-unit graph lacks a directed path either way.
+- **Blocker correctness against upstream.** `BLK-03`'s and `BLK-04`'s cited signatures (`three_seed_mean(predictions: Sequence[Prediction]) -> Prediction`, `fit_transforms(train: DataFrame, *, fold: FoldSpec) -> Transform`) match `component-methods.md` lines 386–387 and 419 verbatim in shape. `BLK-01`'s ADR-10 count caveat ("only REQ-ENG-4 and the external TE §12 tree are genuine loci… `team-practices.md` states a deliberately different figure and must not be edited to 19") matches `decisions.md`'s own Major finding at line 439 word for word in substance. No blocker is discharged by convenience: BLK-02 names no station count, BLK-03 names no seed values, BLK-05 names no test module — each explicitly declines to choose.
+- **Stage-boundary discipline.** No build order or critical path is stated anywhere in the three artifacts; both TC-06 and TE §9.2 are explicitly and correctly distinguished as an inter-unit edge versus an intra-unit ordering contract, per the project-level learning this stage itself produced on the prior iteration.
+- **Q&A fidelity.** Q1=C (hybrid), Q2=B (12, within the 9–12 band), Q3=A override (`test_determinism.py` stays in `foundation` — confirmed in `foundation`'s Owns list), Q5=A override (no separate phase-transition unit — `phase_contract.py` lives in `governance-guards`, confirmed), Q6=X (the stated `kind` rule is applied uniformly), Q7=A (independence framed as a graph property, not readiness, in both `unit-of-work-dependency.md` and the blocker register's cross-reference) all check out against the questions file.
+- **Carried-forward open items** — FR-P1-05-18's advisory NOT-READY, the `02` ordinal collision, the 40 untested requirements, TA-24's missing owner, D-122, the Q-31 fixture window, and the AGPLv3 question — are all present and unresolved-as-stated in `unit-of-work.md` § Assumptions & Open Questions and the story-map's § Open verification gaps, none silently dropped or resolved by convenience.
+
+### Summary
+
+Both Major findings from the prior pass are fixed and consistent across all five blocker representations and the `artifacts/` ownership fix. An exhaustive re-derivation of every count (105 requirements, 40 untested, 23 edges, 13 WS/27 TA rows, 1 independent pair) reproduces the artifact's own figures exactly, and ownership coverage across the §12 tree has no double- or un-owned Phase-1 item. No new Critical or Major issue surfaced this pass; the artifact set is implementable as topology without further architectural guidance.
 

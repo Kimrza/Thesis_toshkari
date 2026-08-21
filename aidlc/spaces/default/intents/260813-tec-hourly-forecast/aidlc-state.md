@@ -6,7 +6,7 @@
 - **Scope**: research-pipeline-governed
 - **Start Date**: 2026-08-13T07:22:54Z
 - **State Version**: 7
-- **Active Agent**: aidlc-architect-agent
+- **Active Agent**: aidlc-delivery-agent
 - **Worktree Path**:
 - **Bolt Refs**:
 - **Practices Affirmed Timestamp**: 2026-08-16T16:12:50Z
@@ -26,11 +26,11 @@
 
 ## Execution Plan Summary
 - **Total Stages**: 17
-- **Completed**: 9
-- **In Progress**: units-generation
+- **Completed**: 10
+- **In Progress**: delivery-planning
 
 ## Runtime State
-- **Revision Count**: 3
+- **Revision Count**: 5
 
 ## Phase Progress
 <!-- Status values: Pending, Active, Verified, Skipped -->
@@ -65,8 +65,8 @@
 - [ ] user-stories — SKIP
 - [ ] refined-mockups — SKIP
 - [x] application-design — EXECUTE
-- [R] units-generation — EXECUTE
-- [ ] delivery-planning — EXECUTE
+- [x] units-generation — EXECUTE
+- [-] delivery-planning — EXECUTE
 
 ### CONSTRUCTION PHASE
 Per unit: [TBD]
@@ -89,12 +89,12 @@ Per unit: [TBD]
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: units-generation
-- **Next Stage**: delivery-planning
+- **Current Stage**: delivery-planning
+- **Next Stage**: functional-design
 - **Status**: Running
-- **Last Updated**: 2026-08-21T14:25:36Z
+- **Last Updated**: 2026-08-21T15:56:01Z
 
 ## Session Resume Point
-- **Last Completed Stage**: application-design
-- **Next Action**: Execute Units Generation
+- **Last Completed Stage**: units-generation
+- **Next Action**: Execute Delivery Planning
 - **Pending Artifacts**: none
