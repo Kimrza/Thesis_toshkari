@@ -815,6 +815,112 @@ availability was measured.
 
 ---
 
+## D-18 — Merged-year re-merge and merge determinism (freeze)
+
+**Decision.** `evidence/locked_test_restricted/audit_evidence_2022-FULL/` is **regenerated**
+from the corrected per-month folders, discharging the re-merge obligation its
+`PROVENANCE_NOTICE.md` carried. The prior artifact is preserved, not overwritten, at
+`evidence/locked_test_restricted/superseded_2026-08-21_audit_evidence_2022-FULL/`.
+
+**Why.** The previous merge stamped `merged_at_utc = 2026-08-13T06:27:03Z`, predating the
+2026-08-16 acquisition-window correction of the January and December folders, so its
+`source_runs` digests referenced **superseded** per-month hashes. The notice's own terms
+were "re-merge from the corrected months, or record an explicit decision re-pointing FULL's
+provenance"; re-merging was chosen because it produces a verifiable artifact rather than a
+statement about one.
+
+**Executed** 2026-08-21 at `merged_at_utc = 2026-08-21T09:25:59Z` with a real interpreter
+(Python 3.11.9). All twelve per-month hash manifests verified first — the script prints
+`All per-month hash manifests verify.` and exits on any mismatch, which is the first time
+that check has passed on a Windows checkout since the `.gitattributes` repair.
+Access-log row **7** was written **before** the read.
+
+**What changed: provenance only.** The record set is identical to the 2026-08-13 merge —
+223,586 unique rows, 6,763 cross-month duplicates dropped, 642 out-of-year rows excluded
+from statistics, and byte-identical when sorted. `madrigal_coverage_summary.csv`
+(`b40304b5…`) and `madrigal_coverage_monthly.csv` (`6b53d385…`) are unchanged. Coverage
+remains ARUC/BSHM/NICO at 365/365 days, 100%, December 31/31.
+
+**A determinism defect was found and fixed.** The first regeneration hashed differently
+from the 2026-08-13 artifact **despite holding the identical record set**, because output
+order followed month-directory traversal and dedup insertion order. To anyone verifying
+hashes that is indistinguishable from a content change. `merge_coverage_year.py` now sorts
+rows on the dedup key `(station, ut1_unix, gdlat, glon)` before writing; two consecutive
+runs were confirmed byte-identical (`d1527eca…`). TE §13.7 requires exact equality for
+deterministic CPU transformations, and a merge is one — so this was a live reproducibility
+defect, not a cosmetic one.
+
+**Not cured by this re-merge**, and still travelling with every FULL-derived figure: the
+twelve monthly runs rest on retrievals whose provider byte streams were never retained;
+2022-04, 2022-07 and 2022-12 have no `raw_isprint_cache/`; `madrigalWeb_version` is
+`"unknown"` in all twelve manifests; and none captured TE §13.1's per-run environment
+fields.
+
+**Approved** 2026-08-21 by the project owner under the recorded student/supervisor authority
+equivalence.
+
+---
+
+## D-19 — Phase 1 support thresholds (freeze)
+
+**Decision.** The four support values D-17 left as freeze-gate holes are frozen from
+**measured** distributions, per TE §15.1's rule that such values are measured and frozen,
+never invented.
+
+| Field | Frozen value | Retention |
+|---|---|---|
+| `valid_observation_count` minimum | **3** contributing samples per cell-hour | keeps 95.24% of cell-hours |
+| `within_hour_spread_tecu` | statistic = **range (max − min)** of contributing samples; **10.0 TECU** threshold, above which the row is flagged and excluded from the primary target | p99 = 9.616 TECU |
+| `largest_internal_gap_s` maximum | **1800 s** (30 min) | keeps 93.39% |
+| `provider_dtec_summary` | statistic = **median** of provider-reported `dtec`; **1.5 TECU** quality-flag threshold | p99 = 1.314 TECU |
+
+**Measurement basis.** 23,709 deduplicated cell-hours over **January–November 2022 only**,
+all three cells, read 2026-08-21 from the eleven non-December acquisition folders.
+**December was excluded by construction** — it is the locked test month, and deriving a
+governed constant from it would let the locked month influence the freeze set. This
+measurement is therefore not a locked-test access.
+
+Measured distributions:
+
+- `valid_observation_count`: min 1, p05 3, p10 4, median 9, **max 12**. The histogram is
+  {1: 393, 2: 736, 3: 874, 4: 1119, 5: 1601, 6: 1977, 7: 2075, 8: 2085, 9: 2173, 10: 2090,
+  11: 1838, 12: 6748}.
+- `within_hour_spread_tecu`: min 0, median 2.357, p95 6.873, p99 9.616, max 51.206.
+- `largest_internal_gap_s`: **median 300 s**, confirming the 5-minute native cadence;
+  p95 2100, p99 3600.
+- median `dtec`: min 0.355, median 0.920, p95 1.305, p99 1.314, max 5.553.
+
+**Rationale for each choice.** The observation minimum of 3 matches the ≥95% retention
+posture D-2 already sets for day coverage, and three points is the smallest set on which a
+range and a gap statistic mean anything. The spread and `dtec` thresholds are set at the
+99th percentile so they flag genuine outliers rather than reshaping the dataset. The gap
+maximum of 1800 s tolerates five consecutive missing 5-minute slots; TE §6.1's provisional
+1200 s would keep 85.81%, and 2400 s (96.76%) was judged too permissive to detect a real
+outage.
+
+**TE §6.1's provisional minima are superseded for Phase 1, with the reason measured.** Its
+provisional `valid_observation_count >= 20` retains **zero** cell-hours: the deduplicated
+maximum is 12, because the product's native cadence is 5-minutely and an hour holds twelve
+slots. That figure was written for the Phase 2 IPP population, where dozens of observations
+per hour are normal. Its `valid_satellite_count >= 4` remains **not applicable** in Phase 1
+— the quantity does not exist on this product (D-17).
+
+**A measurement error found and corrected in the process, recorded so the number is
+trustworthy.** The first pass over the eleven months reported counts up to 24 and suggested
+a minimum of 20 was merely restrictive rather than impossible. That pass double-counted the
+documented straddle day, which appears in two adjacent months' folders, so every affected
+cell-hour was counted twice — the tell was that every value above 12 was exactly even. The
+figures above are from a pass deduplicated on `(station, ut1_unix, gdlat, glon)`, the same
+key `merge_coverage_year.py` uses, giving 201,686 records and a hard maximum of 12.
+
+**Approved** 2026-08-21 by the project owner under the recorded student/supervisor authority
+equivalence. TE §18.2 classes hourly support thresholds as a Student + Supervisor forbidden
+choice (Q-12); the supervisor role is exercised under the recorded delegation, and no
+signature is claimed. EV-06 requires the freeze before feature construction, which is
+satisfied — no feature has been built.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -882,4 +988,6 @@ exposed to challenge and should be read first.
 | D-15 Custody relocation | **Yes** | 2026-08-21 | Approved by the project owner under the recorded student/supervisor authority equivalence. 21 files moved, all verified byte-identical. |
 | D-16 Hourly aggregation statistic | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. Median frozen; zenith-weighted declared as a sensitivity and deferred as not computable from the five-column product. TE §18.2 Student + Supervisor item, exercised under the recorded delegation. |
 | D-17 Phase 1 target-row contract | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. TE §18.2 Student + Supervisor item (support thresholds), exercised under the recorded delegation; four thresholds left as explicit freeze-gate holes rather than defaulted. |
+| D-18 Year re-merge and merge determinism | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. Executed and verified; prior artifact preserved. |
+| D-19 Phase 1 support thresholds | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. TE §18.2 Student + Supervisor item (Q-12), exercised under the recorded delegation. Values measured from January–November only; December excluded by construction. |
 | D-1 Cell convention | **Yes** | 2026-08-21 | Approved by the project owner under the recorded student/supervisor authority equivalence — see the D-1 addendum above. No supervisor signature artifact exists and none is claimed. The IGS site-log validation limitation recorded in D-1 remains separately open. |
