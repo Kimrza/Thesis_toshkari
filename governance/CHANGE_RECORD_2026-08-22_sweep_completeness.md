@@ -258,11 +258,25 @@ per-file counts tabulated in `governance/reviews/GOV-2026-08-22-DP-01.md` § 3.
 `none of the four has a §16 or §19 row` · `16 citations` · `11 files` ·
 `31 lines` · `five finding IDs` · `the five IDs`.
 
-**A note on this list, which is the point of the record.** Of the sixteen literals
-above, only nine are numerals. The rest are superlatives (`the largest untested
-share of any unit`), status claims (`none of the four has a §16 or §19 row`) and
-cardinality words (`five of its seven`, `five finding IDs`). A sweep that searches
-only the numerals finds a little over half of what went stale here.
+**A note on this list, which is the point of the record.** Sixteen literals, of
+which **ten contain a digit and six do not** — derived, not counted by eye:
+
+```
+sed -n '/Superseded literals named/,/^$/p' <this file> | grep -o '`[^`]*`' | wc -l          -> 16
+sed -n '/Superseded literals named/,/^$/p' <this file> | grep -o '`[^`]*`' | grep -c "[0-9]" -> 10
+```
+
+The six with no digit are `five of its seven`, `Five of this unit's seven`, `the
+largest untested share of any unit`, `the joint largest untested share`, `five
+finding IDs` and `the five IDs` — two superlatives and four cardinalities spelled
+as words. Add `none of the four has a §16 or §19 row`, whose only digits are
+*section* numbers rather than the amended figure, and a sweep keyed to digits is
+searching for the wrong thing in seven of sixteen cases.
+
+**This is the whole finding in one list.** A number that went stale is easy to
+search for. A number spelled as a word, a superlative that depended on it, and a
+status claim it supported are all invisible to that search — and here they are the
+majority.
 
 **Sites found and their disposition:**
 
