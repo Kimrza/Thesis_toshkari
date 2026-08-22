@@ -575,3 +575,30 @@ Does this all look correct before I generate the artifact?
 - Request changes
 
 [Answer]: Looks correct
+
+### Re-confirmation, 2026-08-22 — after a redo jump for a fresh reviewer pass
+
+The first confirmation was recorded at this checkpoint and the three artifacts were
+generated and reviewed. The adversarial reviewer returned **NOT-READY twice**, and
+both verdicts were confirmed correct:
+
+- **Iteration 1** — the requirement-to-acceptance-row mapping was wrong in **8 of
+  14** cited rows and incomplete in **2** more; only 4 were right. It had been
+  reasoned from acceptance-row text rather than derived from story-map Table 1.
+- **Iteration 2** — the `Row owner` column added to *fix* iteration 1 was wrong in
+  **3 of its 4** multi-row entries (supporting units named as owners, and one unit
+  absent from the row entirely), and the explaining sentence carried an underived
+  count (13, actually 14).
+
+Both were corrected, every superseded value preserved in place. **Those corrections
+landed after the final reviewer pass, so they were unreviewed.** The project
+decision owner directed a **re-review of `foundation` before any further unit**,
+which required a redo jump to reset the exhausted 2-iteration budget. The jump also
+moved the receipt floor past the original confirmation, so the summary is
+re-presented here.
+
+**No question, option, answer or amendment status changed under either correction.**
+The eight base answers, the three follow-ups, the TA-03 verification and the three
+PENDING amendments all stand exactly as recorded above. What changed is confined to
+traceability citations in `business-logic-model.md` and `domain-entities.md`, and
+the per-rule acceptance lines in `business-rules.md`.
