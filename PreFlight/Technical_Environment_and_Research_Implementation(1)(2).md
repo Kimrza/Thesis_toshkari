@@ -4,9 +4,29 @@
 **Author:** Kimia Rezaei  
 **Supervisor:** Dr. Reza Saraf Shirazi  
 **Institution:** Amirkabir University of Technology, Faculty of Electrical Engineering  
-**Document version:** 3.3  
-**Date:** 11 August 2026  
+**Document version:** 3.4  
+**Date:** 22 August 2026  
 **Status:** Draft for technical approval; subordinate to *Project Vision and Research Definition* v4.3
+
+<!--
+  Version-header correction applied 2026-08-22 on the project decision owner's
+  ruling, against governance finding DP-CHAIR-01 (`GOV-2026-08-22-DP-01`).
+
+  The v3.4 amendment was approved and applied on 2026-08-22 under change record
+  `CR-2026-08-22-TE-AMEND` and is recorded in the §1.2 change history, but this
+  header field was left reading 3.3. Verified present in this document before the
+  correction was made: `src/data/config.py` and `src/data/locked_test.py` in the
+  §12 tree, `tests/test_determinism.py` in the §12 tests tree, and
+  `export PYTHONHASHSEED=0` in the §13.2 clean-run sequence.
+
+  ADMINISTRATIVE ONLY. Exactly two fields changed — the version number and the
+  date. No scientific value, technical requirement, gate, checklist row, or
+  governance rule was introduced, altered or removed under this correction, and
+  no new change record was opened: the amendment this header now names was
+  already approved under `CR-2026-08-22-TE-AMEND`.
+-->
+<!-- markdownlint-disable-line -->
+
 
 ---
 
@@ -35,6 +55,8 @@ Terms such as **must**, **shall**, and **required** describe implementation obli
 | 3.1 | 11 August 2026 | Made the supplied Kaggle notebook the approved student-facing Phase 1 ICTP acquisition interface; added its output contract, integrity/provenance evidence, repository location, clean-run relationship, and acceptance checks |
 | 3.2 | 11 August 2026 | Recorded the executed ICTP audit as a failed source gate; rejected ICTP for model training; specified a conditional MIT Haystack Madrigal MAPGPS `gps` replacement workflow, gridded-target contract, audit evidence, risks, and blocking approvals |
 | 3.3 | 21 August 2026 | Annotated §1.5 and §19 TA-25 for the D-144 approval. Recorded downstream of Vision v4.3 and of decisions **D-15** (locked-month custody relocation), **D-16** (Phase 1 hourly aggregation statistic = median; zenith-weighted declared as a sensitivity and deferred as not computable from the five-column product) and **D-17** (Phase 1 target-row contract, defined from the audited product schema). §6.1's ten-field row contract and its provisional support minima are **not** rewritten here: they remain in conflict with Vision §6.6/§6.1A for Phase 1 and that conflict is recorded, open, at § Known defects row 10 of the requirements artifact. Amendments applied **in place with inline annotations** naming their change records |
+
+| 3.4 | 22 August 2026 | Applied the §12 tree amendment for `tests/test_acquisition_window.py` **countersigned 2026-08-16**, which had never been written into this document. Added `src/data/config.py`, `src/data/locked_test.py` and `tests/test_determinism.py` to §12 and the `PYTHONHASHSEED` requirement to §13.2 under **ADR-10**, approved 2026-08-22 by the project owner under the recorded student/supervisor authority equivalence. Annotated §6.1 to record that **D-17**, **D-16** and **D-19** govern the Phase 1 target-row contract and support thresholds, preserving the provisional text. Clarified §19 TA-09's Phase 1 bound against approved FR-WS-4, and recorded that §13.2's script ordinals are phase-scoped. Change record `CR-2026-08-22-TE-AMEND`; governance report `GOV-2026-08-22-REM-01`. No scientific value was introduced or changed |
 
 ### 1.3 What Changed in Version 2.0
 
@@ -254,6 +276,21 @@ One record represents one station and UTC interval \([h,h+1)\), labeled by inter
 
 Release-level companion fields may include `dataset_version`, `source_manifest_id`, `processor_config_id`, and `target_qc_version`; these do not replace the ten required row-level fields.
 
+**Phase 1 supersession — annotation added 2026-08-22 (`CR-2026-08-22-TE-AMEND`). The provisional text above is preserved as written and is not deleted; the rows below record which approved decision governs each field in Phase 1.**
+
+The table above states the target contract in its original, largely **Phase 2-shaped** form. Two approved decisions govern Phase 1 and were made before this annotation; nothing here is a new scientific rule.
+
+| Field | Provisional text above | Phase 1 governing decision |
+|---|---|---|
+| Row contract as a whole | "Each row must retain exactly these fields" | **D-17** — the Phase 1 target-row contract. Fields the five-column Madrigal product (`ut1_unix`, `gdlat`, `glon`, `tec`, `dtec`) cannot yield are recorded **not applicable in Phase 1** rather than emitted empty |
+| `vtec_tecu` | median of valid VTEC at observed IPPs | **D-16** — Phase 1 hourly statistic frozen as the **median**; zenith-weighted aggregation declared a sensitivity and deferred as not computable from this product |
+| `valid_observation_count` | "Provisional minimum **20**" | **D-19** — Phase 1 minimum frozen at **3** contributing samples per cell-hour (retains 95.24%). **The provisional 20 is inapplicable to Phase 1, not merely strict: it retains zero cell-hours.** The product's native cadence is five-minutely, so an hour holds at most **12** slots, and the measured deduplicated maximum over 23,709 January–November cell-hours is exactly 12. The figure 20 was written for the Phase 2 IPP population, where dozens of observations per hour are normal |
+| `valid_satellite_count` | "Provisional minimum **4**" | **D-17 / D-19** — **not applicable in Phase 1.** The quantity does not exist on the prepared gridded product, which carries no per-satellite information. TE §7.0's Phase 1 hard prohibition separately requires `test_phase_boundary.py` to **fail** if Phase 1 produces a satellite field |
+| `within_hour_spread_tecu` | "Statistic and threshold TBD — freeze gate" | **D-19** — statistic frozen as **range (max − min)**; threshold **10.0 TECU**, above which the row is flagged and excluded from the primary target (p99 = 9.616) |
+| `largest_internal_gap_s` | "Provisional maximum **1200 s**" | **D-19** — Phase 1 maximum frozen at **1800 s** (retains 93.39%); 1200 s would retain 85.81% |
+
+D-19's values are **measured, not chosen**: 23,709 deduplicated cell-hours across all three cells, **January–November 2022 only, December excluded by construction**, so no locked-month record informed any of them. Both decisions were approved 2026-08-21 by the project owner under the recorded student/supervisor authority equivalence, TE §18.2 classing hourly support thresholds as a Student + Supervisor choice exercised under that delegation. **Phase 2 re-reads the provisional text above as its own starting point**; this annotation binds Phase 1 only.
+
 ### 6.2 ML feature dictionary — IRI-free schema
 
 **Binding rule.** This table is the complete permitted ML input space. No `iri_*` field, no IRI-derived residual, and no field computed from IRI may appear here or in any derived tensor. `tests/test_iri_denial.py` must fail if one does.
@@ -321,7 +358,7 @@ Reusable logic belongs in `src/`; the nine phase-aware stage scripts orchestrate
 | 1 | `01_inventory_and_registry.py` | Register files, providers, retrieval dates, hashes, stations, dates, immutable raw paths. Build station registry from official site logs; compute IGRF geomagnetic coordinates with a pinned version; cross-check RINEX headers; audit monthly coverage, observable codes, and cadence. | `src/data/inventory.py`, `src/data/registry.py` | `data.yaml` |
 | 2 | `02_build_vtec_target.py` | Decompress and parse GPS RINEX/CRX; validate L1C/L2W and C1C/C1W/C2W availability, station ID, dates, 30 s cadence, timestamps. Run `gnss-tec` plus the project calibration layer with frozen arc, slip, DCB, elevation, mapping, shell, and levelling settings. Aggregate valid IPP VTEC into the ten-field hourly contract. **Never impute targets.** | `src/gnss/rinex.py`, `src/gnss/calibration.py`, `src/gnss/target.py` | `data.yaml` |
 | 3 | `03_verify_processing.py` | Select six representative station-days by the documented rule **before** viewing results. Hand-check one satellite pass; run the reversed-sign DCB negative control. Run the 450/350 km, 30°/20°, 20/30 min, median/mean/zenith-weighted sensitivities. Compare against two independent references. Emit the **target uncertainty budget**. Evaluate acceptance criteria. | `src/gnss/verification.py` | `data.yaml` |
-| 4 | `04_build_external_products.py` | Generate the IRI-2016 benchmark table via `iricore` with the explicit 2000 km ceiling and forecast-safe drivers; validate 5–10 samples against the official interface. Parse and interpolate CODE final IONEX with longitude-rotation correction; hand-check one sample; audit input-network overlap. Build the space-weather availability matrix with observation and publication timestamps. **Write benchmark and comparator to separate tables.** | `src/external/iri.py`, `src/external/gim.py`, `src/external/spaceweather.py` | `data.yaml`, `features.yaml` |
+| 4 | `04_build_external_products.py` | Generate the IRI-2016 benchmark table via `iricore` with the explicit 2000 km ceiling and forecast-safe drivers; validate 5–10 samples against the official interface. Parse and interpolate CODE final IONEX with longitude-rotation correction; hand-check one sample; audit input-network overlap. Build the space-weather availability matrix with observation and publication timestamps **where the provider supplies them; for a series whose archive carries no publication timestamp, record the approved conservative availability convention and the documented absence in their place, and mark that series' publication latency unverified**. **Write benchmark and comparator to separate tables.** | `src/external/iri.py`, `src/external/gim.py`, `src/external/spaceweather.py` | `data.yaml`, `features.yaml` |
 | 5 | `05_build_features_and_splits.py` | Build causal VTEC lags and the 24-step sequence, cyclical time, local solar time, station representation, and forecast-safe space-weather inputs. **Assert the IRI-free contract.** Assign each target to exactly one F1–F4 or December partition; apply the 24-hour embargo; exclude windows crossing boundaries; exclude and count the first 24 hours. Fit scalers on training partitions only, per fold. Build shared flattened matrices and sequence tensors from the identical window. Validate schemas, counts, leakage, units, hashes; emit the immutable dataset release manifest. | `src/features/availability.py`, `src/features/build.py`, `src/features/transforms.py`, `src/features/windows.py`, `src/data/splits.py`, `src/data/release.py` | `features.yaml`, `experiment.yaml` |
 | 6 | `06_train_and_predict.py` | Run M-01 and M-02 as transparent index operations; fit M-03 climatology on training partitions only; tune M-04, M-05, M-06 over the exact frozen grids; select by mean per-fold skill across F1–F4 with the 1% simplicity rule; refit on Jan–Nov without changing hyperparameters; run the three final seeds; restore best checkpoints; execute the predeclared ablation runs of §7.2 on frozen Jan–Nov folds; write predictions and registry rows including failed runs. | `src/models/*`, `src/models/train.py`, `src/models/checkpoint.py` | `experiment.yaml`, `seeds.yaml` |
 | 7 | `07_evaluate_and_report.py` | Build comparison-wide intersection masks once per comparison set; run the IRI-free denial check; join the benchmark and comparator tables; compute paired loss differentials, RMSE and supporting metrics; run the vector time-block bootstrap; compute regimes, storm events, quality strata, and the top-1%-removed sensitivity; emit figures, tables, and hashes. | `src/evaluation/*` | `experiment.yaml` |
@@ -465,6 +502,27 @@ Google Colab and Google Drive are **no longer governed platforms**. There are ex
 **CPU is a complete execution path, not an emergency mode.** With roughly 26,000 rows and a compact LSTM of at most 64 units, the full workflow is CPU-feasible. GPU is an optional accelerator.
 
 - Run both walking-skeleton fixtures before any full-year job.
+
+**Definition of "full-year job" (added 2026-08-22, `CR-2026-08-22-SCOPE-DEFS`).** The term
+was used here, and as "full-year generation" in §7 and "full-year processing" in the source
+table of §10, without ever being defined. Three activity classes are now distinguished, and
+only the third is a full-year job:
+
+| Class | Activities | Fixture evidence required first? |
+|---|---|---|
+| **A — Raw acquisition and custody** | Retrieval of provider byte streams; secure storage; integrity verification (hashes, manifests, schema conformance); minimal inventory sufficient to identify and verify what was retrieved | **No.** No scientific processing is performed, and the fixtures cannot be built before their inputs exist |
+| **B — Fixture-scale development and testing** | Any development or test execution bounded to a frozen fixture window — `plumbing_7day` (D-11) or `scientific_1month` (D-14) | **No.** This class *is* the fixture work |
+| **C — Full-year scientific processing and evaluation** | Full-year standardization, feature generation, training, prediction, bootstrap, and evaluation | **Yes.** Both fixtures must have passed, in order, with real evidence |
+
+**Class A is not a licence.** Every locked-December restriction applies to it unchanged: no
+analytical inspection of December target values, no December performance quantity computed
+or examined, and every read or write under `evidence/locked_test_restricted/` routed
+through the single access-log chokepoint, which writes its record **before** the read.
+Integrity verification of December bytes is custody work, not analysis, and the distinction
+is what Class A turns on. **Existing data is not re-downloaded without an independently
+justified and recorded need** — the months already held are re-verified under the test
+suite, not re-acquired.
+
 - Baselines, climatology, ridge, and RF run on CPU.
 - Keep tuning strictly within the frozen grids: ridge 6, RF 18, LSTM 16 combinations.
 - LSTM training: maximum 100 epochs, patience 10, minimum improvement 1e-4 TECU, restore the lowest-validation-RMSE checkpoint.
@@ -563,12 +621,14 @@ tec-project/
 │   └── seeds.yaml
 ├── src/                              # six domain packages
 │   ├── data/
+│   │   ├── config.py                 # config load, per-run snapshot, hashes, determinism helper
 │   │   ├── inventory.py
 │   │   ├── prepared.py               # Phase 1 provider-file validation/standardization only
 │   │   ├── phase_contract.py         # boundary and transition-manifest hashes
 │   │   ├── reuse_registry.py         # external code/method provenance and license records
 │   │   ├── registry.py               # station registry, IGRF coordinates, coverage
 │   │   ├── splits.py                 # F1-F4, embargo, locked test
+│   │   ├── locked_test.py            # December path guard and access log
 │   │   └── release.py
 │   ├── gnss/
 │   │   ├── rinex.py                  # GPS L1C/L2W, C1C/C1W/C2W, 30 s
@@ -615,6 +675,9 @@ tec-project/
 │   │   ├── plumbing_7day/
 │   │   └── scientific_1month/
 │   ├── test_station_registry.py
+│   ├── test_acquisition_window.py    # run-window conformance; asserts the retrieved
+│   │                                 #   record dates fall inside the declared window
+│   ├── test_determinism.py           # PYTHONHASHSEED, seed plumbing, deterministic ops
 │   ├── test_rinex_schema.py
 │   ├── test_dcb_sign.py              # includes the reversed-sign negative control
 │   ├── test_hourly_target.py
@@ -630,6 +693,12 @@ tec-project/
 │   ├── test_bootstrap.py             # vector blocks, cross-station carry, seed reproducibility
 │   ├── test_locked_test_guard.py
 │   ├── test_release_hashes.py
+│   ├── test_prepared_target_schema.py # D-17 Phase 1 target-row contract: exact
+│   │                                  #   16-field set; excluded/additional field
+│   │                                  #   fails, missing required field fails
+│   ├── test_feature_leakage_guards.py # negative-path controls for TA-33..TA-36:
+│   │                                  #   dictionary closure, vtec_lag carry-forward,
+│   │                                  #   support-field rules, driver alignment
 │   └── test_clean_run.py
 ├── notebooks/                        # five
 │   ├── 00_acquire_phase1_vtec.ipynb  # replacement acquisition UI after D-144; download/manifest/audit only
@@ -650,6 +719,22 @@ tec-project/
     ├── logs/
     └── reproducibility/
 ```
+
+**Tree amendment provenance (added 2026-08-22, change record `CR-2026-08-22-TE-AMEND`).** Five entries above were added by amendment rather than in the original tree. They fall into **two distinct authority classes**, recorded separately because they were approved at different times by different acts:
+
+| Entry | Class | Authority |
+|---|---|---|
+| `tests/test_acquisition_window.py` | **Already-approved historical amendment, applied late** | Countersigned by the supervisor **2026-08-16** (`governance/COUNTERSIGNATURE_REQUEST_2026-08-16.md` item 1). The approval predates this record by six days; only its *application* to this document is new. No new approval was sought or granted for it |
+| `src/data/config.py` | **Newly approved amendment** | ADR-10, approved 2026-08-22 by the project owner under the recorded student/supervisor authority equivalence |
+| `src/data/locked_test.py` | **Newly approved amendment** | as above |
+| `tests/test_determinism.py` | **Newly approved amendment** | as above |
+| `PYTHONHASHSEED` in §13.2 | **Newly approved amendment** | as above |
+| `tests/test_prepared_target_schema.py` | **Newly approved amendment** | **BLK-05**, approved 2026-08-22 by the project owner under the recorded authority equivalence; change record `CR-2026-08-22-TARGET-SCHEMA-TEST`. Verifies the D-17 Phase 1 target-row contract: a valid row carrying exactly the approved 16 fields passes; a row carrying an excluded or additional field fails; a row missing any required field fails |
+| `tests/test_feature_leakage_guards.py` | **Newly approved amendment** | Approved 2026-08-22 by the project owner under the recorded authority equivalence; change record `CR-2026-08-22-LEAKAGE-TA`. Houses the four negative-path controls **TA-33 (FR-P1-04-12)**, **TA-34 (FR-P1-04-13)**, **TA-35 (FR-P1-04-16)** and **TA-36 (FR-P1-04-17)**. For TA-36 the **primary rejection test sits at the feature-building enforcement boundary** (`features.build_features`); any upstream `external-products` data-contract test is documented separately and does not replace it |
+
+Authority to create a module is **not** authority to write it: none of the six newly approved modules exists, and each remains subject to its own stage and to gate **G-09** before `code-generation` may create it.
+
+**Approving a filename does not resolve BLK-05.** Four limbs are distinguished and only the first two are complete: **naming** (approved 2026-08-22), **documentation** (this tree entry and the downstream artifact updates), **test implementation** (not started — the module does not exist), and **execution evidence** (none — the test has never been run, and no result of any kind is claimed).
 
 **Import-boundary rule, enforced by test.** `src/external/iri.py` and `src/external/gim.py` must never be imported, directly or transitively, by any module under `src/features/` or `src/models/`. They are imported only by `scripts/04_build_external_products.py` and `src/evaluation/`.
 
@@ -678,6 +763,7 @@ Python **3.11** exactly, with a `requirements.txt` of exact pins including trans
 The reproduction guide must provide one ordered sequence:
 
 ```bash
+export PYTHONHASHSEED=0        # required; set before any command below
 python scripts/run_walking_skeleton.py --config configs/ --fixture plumbing_7day
 python scripts/run_walking_skeleton.py --config configs/ --fixture scientific_1month
 
@@ -703,6 +789,10 @@ python scripts/07_evaluate_and_report.py          --config configs/ --phase 2
 ```
 
 Both fixtures must pass before full execution. The whole sequence must complete **on CPU**.
+
+**`PYTHONHASHSEED` (added 2026-08-22, `CR-2026-08-22-TE-AMEND`, ADR-10).** `PYTHONHASHSEED=0` is set once before the first command and holds for the whole sequence. It is part of the clean-run contract, so `tests/test_clean_run.py`, **WS-20** and **TA-17** test the sequence including this line, and `tests/test_determinism.py` covers the setting itself. This records an environment requirement; it introduces no scientific value and changes no result.
+
+**Script ordinals are phase-scoped (clarification added 2026-08-22, `CR-2026-08-22-TE-AMEND`, no behavioural change).** The ordinal prefix marks a script's position *within its own phase sequence*, not a globally unique key. Two distinct scripts therefore carry `02`: `02_standardize_prepared_target.py` occupies the target-processing position in **Phase 1**, and `02_build_vtec_target.py` occupies the same position in **Phase 2**. Both filenames are distinct and both live in `scripts/`; `03_verify_processing.py` appears in the Phase 2 sequence only. The §12 tree's "nine phase-aware stages" counts the nine **distinct scripts**, not the eight ordinals they span. No script is renamed, renumbered, reordered or removed by this clarification.
 
 The final contract records expected schemas, row-count ranges by station and stage, required output paths, numerical tolerances, runtime ranges, storage use, and accepted nondeterminism. Exact counts, tolerances, and runtimes are measured from the fixtures and frozen; they are not invented here.
 
@@ -917,7 +1007,7 @@ All TQ-01 through TQ-22 from v1.0 are closed by questionnaire decisions Q-01–Q
 | EV-09 | Target uncertainty budget values | Vision §6.9 | Levelling error, DCB stability, spread distribution, negative-VTEC rate, configuration spread | Practical-relevance policy and claims |
 | EV-10 | IRI implementation equivalence and workload | Q-14 Option A | 5–10 samples versus the official interface within tolerance; 26k-call timing; driver safety check | Benchmark generation |
 | EV-11 | GIM interpolation and network overlap | Q-15 Option A | Hand-calculated interpolation; input-network search for ARUC/BSHM/NICO | Comparator generation |
-| EV-12 | External-feature publication latency | Q-16 Option A | Provider release documentation; 2022 availability matrix; Hp60 availability | Feature freeze |
+| EV-12 | External-feature publication latency | Q-16 Option A | Provider release documentation **where the provider supplies it**; 2022 availability matrix; Hp60 availability. **Where a provider archive carries no publication timestamp, the matrix records instead (a) the approved conservative availability convention frozen for that series, (b) the documented absence of a provider publication timestamp, and (c) an explicit statement that actual publication latency is unverified. For F10.7 this is D-25.** | Feature freeze |
 | EV-13 | Fixture selection | Q-31 Option A | Coverage audit for March and candidate full months; runtime measurement | Walking-skeleton freeze |
 | EV-14 | CPU runtime, RAM, storage | Q-29 Option A | Install from pins on Kaggle and local; run skeleton; measure | Full clean run |
 | EV-15 | December regime composition | Vision §5.2, §8.3 | Kp/Hp60 histogram and disturbed-hour count, **without inspecting model performance** | G-05 |
@@ -1012,7 +1102,7 @@ This checklist approves implementation readiness only. It does not replace the V
 | TA-06 | DCB sign worked example passes and the reversed-sign control fails | `test_dcb_sign.py` | Pending |
 | TA-07 | **`test_iri_denial.py` fails on deliberate `iri_*` injection, and no module under `src/features` or `src/models` imports `src/external/iri.py`** | Denial test and import-boundary check | Pending |
 | TA-08 | Availability lag assertions pass; F10.7 mean is trailing; Dst is diagnostic-only; SSN is absent from the codebase | Availability tests and grep evidence | Pending |
-| TA-09 | Both walking-skeleton fixtures pass all 20 Section 16 checks with evidence links | Fixture test reports and artifact manifests | Pending |
+| TA-09 | Both walking-skeleton fixtures pass all 20 Section 16 checks with evidence links. **Phase 1 bound (clarification, 2026-08-22, `CR-2026-08-22-TE-AMEND`):** for a Phase 1 fixture run this means the approved Phase 1 acceptance set in FR-WS-4 — **WS-01 plus WS-09 through WS-20, 13 rows** — passes with evidence links; WS-02–WS-08 are deferred to G-P3A because §7.0's Phase 1 hard prohibition bars Phase 1 from producing their raw-processing evidence. This restates FR-WS-4 and §16.1 and establishes no new acceptance policy. The "all 20" wording continues to govern a Phase 2 run | Fixture test reports and artifact manifests | Pending |
 | TA-10 | Experiment registry is operational, append-safe, and records failed as well as successful runs | Registry tests and sample entries | Pending |
 | TA-11 | F1–F4 splits, 24 h embargo, train-only transforms, and comparison-wide mask tests pass, including the matched-window assertion | Test report | Pending |
 | TA-12 | All required model IDs M-01–M-06 plus B-01 and C-01 are represented in modules and configs; **residual and GRU modules are absent from the codebase** | Model/config inventory and grep evidence | Pending |
@@ -1036,5 +1126,33 @@ This checklist approves implementation readiness only. It does not replace the V
 | TA-30 | The common-mask 2×2 cross-target/model analysis is complete and clearly distinguished from within-phase primary results | Cross-phase results report | Pending |
 | TA-31 | The ICTP Kaggle audit notebook completed, produced a valid audit ZIP/manifests/hashes, and correctly blocked training when G-P1A failed | Executed notebook output, ZIP integrity result, manifests and D-143 review record | **Pass for audit mechanics; source viability failed** |
 | TA-32 | The replacement acquisition notebook runs only after D-144, retrieves the frozen prepared product, records permanent citations/requests/hashes, verifies schema/cells/common timestamps, and refuses training output until G-P1A passes | Executed replacement notebook, manifests, selected-cell and coverage reports | Pending |
+| TA-33 | **Leakage-sensitive negative control — feature-dictionary closure (FR-P1-04-12).** Prohibited: a field outside the §6.2 dictionary, or a tensor derived from one, entering training or inference; and a tuned history window. Invalid input: a field absent from §6.2 injected into feature construction, and separately an `experiment.yaml` placing the window length in a grid. Expected: construction **raises** rather than passing silently, and the tuned-window run **fails** rather than proceeding | `tests/test_feature_leakage_guards.py` — executed negative-path test output showing both rejections; feature manifest enumerating only §6.2 fields; `experiment.yaml` window length equal to 24 and absent from every grid | Pending |
+| TA-34 | **Leakage-sensitive negative control — target-derived lag contract (FR-P1-04-13).** Prohibited: a carried-forward `vtec_lag_*` value, and an incomplete `vtec_seq_24` window admitted rather than excluded. Invalid input: a `vtec_lag_*` value produced by carry-forward, and separately a 24-step sequence with a missing step. Expected: the carried-forward value **fails**; the incomplete window is **excluded and counted**. The ≤ 3 h carry-forward allowance is scoped to external drivers and must never reach `vtec_lag_*` | `tests/test_feature_leakage_guards.py` — executed negative-path test output showing both behaviours; feature manifest carrying the exact lag set `[1,2,3,24]`, the 24-step sequence, station one-hot columns and verified latitude; excluded-window count | Pending |
+| TA-35 | **Leakage-sensitive negative control — support-field rules (FR-P1-04-16).** Prohibited: a support field used as a model input without a recorded G-04 approval ID, and a support field read at or beyond hour *t*. Invalid input: a support field admitted as a feature with no approval ID, and separately one read at the target hour. Expected: feature construction **fails** in both cases; target-hour quality fields remain permanently forbidden | `tests/test_feature_leakage_guards.py` — executed negative-path test output showing both rejections; feature manifest marking every support field diagnostic unless an approval ID is present | Pending |
+| TA-36 | **Leakage-sensitive negative control — driver alignment contract (FR-P1-04-17, D-10.2).** Prohibited: a Kp value repeated outside its own 3-hour interval; a Dst value shifted to a neighbouring hour; any interpolation of a driver series at any stage. Invalid input: both misalignments injected as explicit negative controls. Expected: each **fails**; a code-level check finds no interpolation call on any driver series. Distinct from FR-P1-04-3's ≤ 3 h carry-forward, which governs a *missing* value where this governs how a *present* value maps onto the hourly grid | `tests/test_feature_leakage_guards.py` — executed negative-path test output carrying both negative controls, with the **primary rejection test at the feature-building enforcement boundary**; driver manifests recording per-series interval semantics; the no-interpolation check result | Pending |
+
+<!--
+  TA-33 through TA-36 added 2026-08-22 under Vision §15.2, change record
+  `CR-2026-08-22-LEAKAGE-TA`, on the project decision owner's explicit approval
+  ("Approve four distinct negative-path acceptance rows"). Origin: governance
+  finding DP-ML-01 (`GOV-2026-08-22-DP-01`).
+
+  Each row is derived from its requirement's existing pass/fail criterion in the
+  requirements artifact. No new scientific rule, threshold or value is created,
+  and no prohibition is widened or narrowed — what changes is that four
+  previously untested prohibitions now have an acceptance row that tests them.
+
+  Owning units: FR-P1-04-12, -13 and -16 are owned by `features-and-splits`
+  (Bolt 7); FR-P1-04-17 is owned by `external-products` (Bolt 5), while its
+  enforcement raise sits at `features.build_features` in `features-and-splits`.
+  Evidence production is therefore shared, and is recorded that way in the
+  story map rather than collapsed to one unit.
+
+  STATUS IS `Pending` FOR ALL FOUR. No test module exists, none is implemented,
+  none has been executed, and none has passed. Module placement for these four
+  tests is an open naming question of the same class as BLK-05 and is assigned
+  at functional design.
+-->
+<!-- markdownlint-disable-line -->
 
 Technical readiness is achieved only when all applicable rows pass, evidence paths resolve, and the supervisor-required gates remain separately approved. The locked December run remains blocked until G-05 is formally complete.

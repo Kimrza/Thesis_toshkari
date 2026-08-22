@@ -58,7 +58,7 @@ package that reads `configs/`, and the only one that writes release manifests.
 | `config.py` **NEW** | Load the four governed configs, snapshot them per run, hash them, and assert no required field is `TBD`. Hosts the determinism helper (Q6). | 1 and 2 | REQ-ENG-2, REQ-ENG-10, FR-WS-7, FR-P1-03-5 |
 | `inventory.py` | Source inventory: TE §5.1's nine fields per entry, including the configuration that consumes each source. | 1 and 2 | FR-P1-01-6, FR-P1-01-2 |
 | `prepared.py` | Phase 1 provider-file validation and standardization only. Schema, cell coverage, common timestamps. | **1 only** | FR-P1-01-1, FR-P1-01-4, FR-P1-03-1, FR-P1-03-5 |
-| `phase_contract.py` | The phase boundary: the runtime import guard (Q3), the transition manifest, and its fourteen protected hashes. | 1 and 2 | FR-P1-03-2, FR-P1-06-1, FR-P1-06-2 |
+| `phase_contract.py` | The phase boundary: the runtime import guard (Q3), the transition manifest, and the canonical protected set derived from TE §2.2 ∪ §7.0B — **final enumeration and cardinality deferred to stage 3.1**, stated neither here nor in this stage; see BLK-06. | 1 and 2 | FR-P1-03-2, FR-P1-06-1, FR-P1-06-2 |
 | `locked_test.py` **NEW** | The December path guard (Q4): one chokepoint for every read under the restricted root, writing the access-log row **before** the read. | 1 and 2 | FR-P1-02-3, FR-P1-02-6, FR-P1-05-12 |
 | `registry.py` | Station registry: coordinates, the coordinate-to-cell rule, and Vision §6.2's full content including one pinned IGRF version. | 1 and 2 | FR-P1-02-1, FR-P1-02-7 |
 | `splits.py` | F1–F4 folds, the 24-hour embargo, and the December locked partition — the execution half of the locked-test guard (Q4). | 1 and 2 | FR-P1-04-5, FR-P1-05-12 |
@@ -120,7 +120,7 @@ are externally sourced, not because it shares the benchmark's isolation.
 
 | Module | Responsibility | Requirements carried |
 |---|---|---|
-| `availability.py` | The availability matrix: observation timestamp, publication timestamp, release status and safe lag per feature. Asserts actual lag ≥ declared safe lag. | FR-P1-04-2, FR-P1-04-15, FR-P1-04-16 |
+| `availability.py` | The availability matrix: observation timestamp, publication timestamp **or, where the provider supplies no publication timestamp, the approved conservative availability convention plus the documented absence and an unverified-latency statement** (amended 2026-08-22, `CR-2026-08-22-EV-12`; for F10.7 this is **D-25**), release status and safe lag per feature. Asserts actual lag ≥ declared safe lag. | FR-P1-04-2, FR-P1-04-15, FR-P1-04-16 |
 | `build.py` | Feature construction. **Asserts the IRI-free contract** and the closed §6.2 dictionary. | FR-P1-04-1, FR-P1-04-12, FR-P1-04-13, FR-P1-04-17 |
 | `transforms.py` | Train-only fitting, per fold. Never fitted on the full dataset. | FR-P1-04-6 |
 | `windows.py` | One shared window definition producing both the flattened matrix and the sequence tensor, so every model family sees the same eligible information. | FR-P1-04-8 |

@@ -155,8 +155,8 @@ message queue and no shared mutable state between units.
 | release manifest + SHA-256 (TE §13.3, ten rows over fourteen fields) | `foundation` | every unit that releases an artifact | manifest file, write-protected or new version |
 | `experiment_registry.jsonl` | `foundation` writer, appended by every stage script | human review, `fixtures-and-reproducibility` | append-only JSONL; a derived, hashed CSV is regenerated, never merged |
 | `assert_phase_boundary`, `assert_no_raw_fields` | `governance-guards` | every stage script | call at stage entry, step 4 of six |
-| `open_restricted` (access-log row written before the read) | `governance-guards` | `inventory-and-registry` (coverage audit), `features-and-splits` (locked partition), `evaluation-and-comparison` (locked evaluation) | single chokepoint into `evidence/locked_test_restricted/` |
-| `phase_transition_manifest` + fourteen protected hashes | `governance-guards` | G-P2 / G-P3C | manifest file; a data contract, not a call surface |
+| `open_restricted` (access-log row written before the read) | `governance-guards` | `acquisition` (the D-9 input `audit_evidence_2022-FULL/` and any December re-acquisition — routing contract **not yet authored**, see `unit-of-work.md` **BLK-07**), `inventory-and-registry` (coverage audit), `features-and-splits` (locked partition), `evaluation-and-comparison` (locked evaluation) | single chokepoint into `evidence/locked_test_restricted/`. `component-dependency.md` § Shared resources states the rule without qualification — "nothing else may construct a path into it" — and **no unit may construct such a path directly**, `foundation` and `acquisition` included, notwithstanding their general permission to construct paths into `evidence/` |
+| `phase_transition_manifest` over the canonical protected set derived from TE §2.2 ∪ TE §7.0B; **final enumeration and cardinality deferred to stage 3.1**, and this artifact states neither — see `unit-of-work.md` **BLK-06** | `governance-guards` | G-P2 / G-P3C | manifest file; a data contract, not a call surface |
 | §10.1 reuse register rows | `governance-guards` | G-P2 | register file, written before the code is used |
 | provider files, `request_manifest.json`, `sha256_manifest.json` | `acquisition` | `inventory-and-registry` | released artifacts by release ID |
 | source inventory (TE §5.1, nine fields) + station registry | `inventory-and-registry` | `target-standardization`, `external-products` | released artifacts |
@@ -179,20 +179,46 @@ forbidden edge needs a test and an absent one does not.
 | any Phase 1 unit → `src/gnss/*` | TE §7.0 hard prohibition; NFR-PHASE-01 | `assert_phase_boundary` at every stage entry | `test_phase_boundary.py` | `governance-guards` |
 | a Phase 1 artifact carrying a DCB/STEC/mapping/satellite/arc field | TE §7.0, produced-field limb | `assert_no_raw_fields` | `test_phase_boundary.py`, second independent result | `governance-guards` |
 | `features-and-splits` or `models-and-baselines` → `iri.py`/`gim.py` | NFR-IRI-01; TE §12 | import-boundary check | `test_iri_denial.py` | `features-and-splits` |
-| any unit outside the two permitted → `iri.py`/`gim.py` | TE §12 allowlist | same check, allowlist form | `test_iri_denial.py` | `features-and-splits` |
+| any path outside the authorized two → `iri.py`/`gim.py` | TE §12 allowlist, stated at **module-path** granularity: permitted only in `scripts/04_build_external_products.py` and modules under `src/evaluation/`, subject to all applicable evaluation-stage, frozen-mask and locked-test restrictions. Modules under `src/evaluation/` are owned by three units — `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting` — so the grant is on the path, never on a whole unit's unrelated code, and directory membership never overrides a separate gate, access-logging, frozen-mask or locked-test restriction | same check, allowlist form | `test_iri_denial.py` | `features-and-splits` |
 | an `iri_*` field or IRI-derived residual reaching training or inference | Vision §7.1 | `features.build_features` raises | `test_iri_denial.py` — **must fail on deliberate injection** | `features-and-splits` |
 | a field outside the TE §6.2 dictionary entering features | FR-P1-04-12 | `features.build_features` raises | **no §16/§19 row** | `features-and-splits` |
 | a carried-forward `vtec_lag_*` value | FR-P1-04-13 | `features.build_features` raises | **no §16/§19 row** | `features-and-splits` |
-| a driver repeated outside its own interval, or interpolated | FR-P1-04-17 | `features.build_features` raises | **no §16/§19 row** | `features-and-splits` |
+| a driver repeated outside its own interval, or interpolated | FR-P1-04-17 | `features.build_features` raises | **TA-36** (added 2026-08-22, `CR-2026-08-22-LEAKAGE-TA`); primary rejection test at the feature-building enforcement boundary, in `tests/test_feature_leakage_guards.py` | **Enforcement + acceptance test:** `features-and-splits`. **Data production:** `external-products` — see the reconciliation below |
 | a support field used as a model input without G-04 approval | FR-P1-04-16 | `features.build_features` raises | **no §16/§19 row** | `features-and-splits` |
 | a December read without a preceding access-log row | FR-P1-05-12 | `locked_test.open_restricted` writes then reads | `test_locked_test_guard.py` | `governance-guards` (module) / `features-and-splits` (test) |
 | December execution before G-05 | FR-P1-05-12 | `splits.materialise_locked_partition` raises | `test_locked_test_guard.py`, WS-18 | `features-and-splits` |
 | `models-and-baselines` → `evaluation-and-comparison` | dependency direction | none needed — the inverted import would be a cycle | — | — |
 
-Five of these have no §16/§19 row and are exactly the leakage paths a governance
-board flagged as "criterion states it, nothing tests it". Each is a raise at a
-named call site so a test *can* assert it; writing the criteria is a
-`requirements.md` change carried to stage 3.2.
+**Four of the five gained acceptance rows on 2026-08-22.** TA-33, TA-34, TA-35 and
+TA-36 were approved under Vision §15.2 (`CR-2026-08-22-LEAKAGE-TA`) for
+FR-P1-04-12, FR-P1-04-13, FR-P1-04-16 and FR-P1-04-17 — the leakage paths a
+governance board flagged as "criterion states it, nothing tests it". **One
+remains without a row: FR-P1-04-10**, carried to stage 3.2. All four new rows
+carry status `Pending`: the criteria exist, the module `tests/test_feature_leakage_guards.py`
+is named and documented but **not written, not executed and not passing**.
+
+### FR-P1-04-17 — ownership reconciliation, recorded 2026-08-22
+
+The story map assigned FR-P1-04-17 to `external-products`; this table's
+enforcement column put the raise in `features.build_features`, owned by
+`features-and-splits`. Both were right about different things, and the
+inconsistency was carried silently until governance review surfaced it. It is
+resolved here by distinguishing four ownerships rather than picking one unit:
+
+| Ownership | Unit / Bolt | What it covers |
+|---|---|---|
+| **Upstream data production** | `external-products` / Bolt 5 | Building the driver series so each value carries its own interval semantics — Kp/ap3 on its 3-hour interval, Dst on its hourly averaging interval, F10.7 daily — and performing no interpolation at any stage |
+| **Enforcement** | `features-and-splits` / Bolt 7 | The raise at `features.build_features` when a driver value is repeated outside its own interval or shifted to a neighbouring hour |
+| **Primary negative-path acceptance test** | `features-and-splits` / Bolt 7 | TA-36, sited at the feature-building enforcement boundary, in `tests/test_feature_leakage_guards.py` |
+| **Upstream evidence and data-contract responsibility** | `external-products` / Bolt 5 | Driver manifests recording per-series interval semantics and release grade; any upstream contract test is **documented separately and does not replace** the primary rejection test |
+
+**This allocation is the default and stands unless functional design produces
+verified evidence for a better one.** Functional design owns the confirmation; if
+it reallocates, it records the reason and updates both artifacts rather than one.
+The story map's Table 1 keeps `external-products` as the requirement's primary
+unit (data production is where the obligation originates) with
+`features-and-splits` named as supporting on TA-36 — so the two artifacts now
+agree.
 
 ## Independent unit sets
 
@@ -215,9 +241,18 @@ manufacturing more by dropping real edges.
 be described as free to begin while it carries a governance restriction — an
 unsigned amendment, an unresolved locked-test authorization, or a Phase 1
 boundary it would breach. `unit-of-work.md` § Blocker register carries BLK-01
-through BLK-05, each naming its affected artifacts, owning unit, downstream
-units, required resolution, approval authority and status — nine of the twelve
-units are named there, and structural presence in this graph is not readiness.
+through **BLK-07**, each naming its affected artifacts, owning unit, downstream
+units, required resolution, approval authority and status. **Ten of the twelve units
+carry a blocker row, owned or inherited** — `inventory-and-registry` and
+`external-products` carry none of their own. That is the sense in which "ten" is meant;
+BLK-01's `config.py` row names *every* unit as a downstream, so counting downstream
+mentions would give twelve (clarified 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 10).
+Structural presence in this graph is not readiness.
+BLK-06, added 2026-08-22, named no unit that was not already listed; **BLK-07**,
+added 2026-08-22, adds `acquisition`, which is why the figure is now ten rather
+than nine. **BLK-01 is closed** (2026-08-22, `CR-2026-08-22-TE-AMEND`) and its row
+is retained in the register as a closed row rather than deleted; BLK-02 through
+BLK-07 are open.
 
 TE §9.2's fixture ordering is worth separating from TC-06 for the same reason:
 TC-06 is an inter-unit edge in the block above, while §9.2 is an intra-unit

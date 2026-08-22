@@ -160,7 +160,12 @@ field. Neither this nor `assert_phase_boundary` substitutes for the other.
 ```python
 @dataclass(frozen=True)
 class TransitionManifest:
-    protected_hashes: Mapping[str, str]   # exactly the fourteen §2.2 + §7.0B items
+    protected_hashes: Mapping[str, str]   # exactly the canonical protected set
+                                          # derived from TE §2.2 u §7.0B. Final
+                                          # enumeration and cardinality are
+                                          # DEFERRED TO STAGE 3.1; this design
+                                          # states neither. See BLK-06 in
+                                          # unit-of-work.md
     phase1_artifacts: Mapping[str, str]   # artifact id -> sha256, evidence-backed
     phase1_schema: Sequence[str]          # the OBSERVED Phase 1 columns, D-17
     config_hashes: Mapping[str, str]
@@ -186,8 +191,21 @@ five-column product; the Phase 2 ten-field contract is not represented here and
 is not imposed on it. `unresolved_phase2` names open Phase 2 decisions rather
 than freezing unsupported values. `diff_protected_hashes` returns the differing
 keys with both values; an empty mapping is the G-P3C pass condition, and its
-`protected_hashes` key list is asserted equal to the fourteen-item enumeration so
-a short list cannot pass silently.
+`protected_hashes` key list is asserted equal to **the canonical protected set
+derived from the union of TE §2.2 and TE §7.0B**, so a short list cannot pass
+silently. **The final enumeration and its cardinality are deferred to stage 3.1
+(`functional-design`); this design states neither, and no number is carried into
+this artifact.** The assertion is only as strong as the canonical set behind it,
+and that set is not yet established: `requirements.md` FR-P1-06-1 carries the
+current approved candidate list, but its derivation from §7.0B is incomplete —
+`history window`, `station encoding` and `baselines` are named immutable in
+§7.0B and appear in none of its items, with no deduplication or subsumption rule
+recorded anywhere. Until `functional-design` (3.1) discharges **BLK-06**
+(`unit-of-work.md` § Blocker register), an empty `diff_protected_hashes` result
+must not be read as proof that no protected item changed. Annotated 2026-08-22
+per governance finding `UG-01` (`GOV-2026-08-21-UG-01`), on the authorized
+project decision owner's directive; no scientific value and no design decision
+changed, and no replacement number was invented.
 
 ---
 

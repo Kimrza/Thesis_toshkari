@@ -42,9 +42,9 @@ and never duplicate its implementation.
 
 | # | Unit | Kind | Complexity | Deployment | Requirements | Acceptance rows | Blockers |
 |---|---|---|---|---|---|---|---|
-| 1 | `foundation` | `library` | M | shared | 16 | 7 | BLK-01 |
-| 2 | `governance-guards` | `library` | M | shared | 10 | 2 | BLK-01 |
-| 3 | `acquisition` | `library` | L | standalone | 15 | 1 | — |
+| 1 | `foundation` | `library` | M | shared | 16 | 7 | — (BLK-01 closed 2026-08-22) |
+| 2 | `governance-guards` | `library` | M | shared | 10 | 2 | BLK-06 (BLK-01 closed 2026-08-22) |
+| 3 | `acquisition` | `library` | L | standalone | 15 | 1 | BLK-07 |
 | 4 | `inventory-and-registry` | `library` | M | standalone | 7 | 3 | — |
 | 5 | `target-standardization` | `library` | M | standalone | 6 | 1 | BLK-05 |
 | 6 | `external-products` | `library` | L | standalone | 7 | 1 | — |
@@ -53,13 +53,14 @@ and never duplicate its implementation.
 | 9 | `evaluation-and-comparison` | `library` | M | standalone | 4 | 1 | BLK-03 ↓, BLK-04 ↓ |
 | 10 | `statistical-inference` | `library` | M | embedded | 1 | 2 | BLK-03 ↓, BLK-04 ↓ |
 | 11 | `regimes-diagnostics-reporting` | `library` | L | embedded | 11 | 3 | BLK-03 ↓, BLK-04 ↓ |
-| 12 | `fixtures-and-reproducibility` | `library` | M | standalone | 8 | 4 | BLK-01, BLK-02, BLK-03 ↓, BLK-04 ↓ |
+| 12 | `fixtures-and-reproducibility` | `library` | M | standalone | 8 | 4 | BLK-02, BLK-03 ↓, BLK-04 ↓ (BLK-01 closed 2026-08-22) |
 
 Blocker column: an unmarked ID is a blocker whose affected artifacts this unit
-owns; **↓** marks one inherited through a contract this unit consumes. **BLK-01
-additionally reaches every unit** through the six-step stage entry contract and
-is listed only against the two units that own its files, so the column stays
-readable. § Blocker register below carries each blocker in full — affected
+owns; **↓** marks one inherited through a contract this unit consumes. **BLK-01,
+closed 2026-08-22, formerly reached every unit** through the six-step stage entry
+contract and was listed only against the two units that owned its files; its
+closure is recorded in § Blocker register and the column no longer carries it as
+open. § Blocker register below carries each blocker in full — affected
 artifact, owning unit, downstream units, required resolution, approval authority
 and status — with a per-unit roll-up of exactly which scope is blocked. A unit
 with a blocker is present in this DAG and is **not** ready.
@@ -106,7 +107,7 @@ no frontend.
 - `artifacts/` — the top-level output tree REQ-ENG-1 enumerates and TA-01 checks. Owned here because this unit creates the skeleton and owns the release API that writes into it; every other unit writes its released artifacts *into* this tree without owning it.
 - `tests/` tree and shared fixtures/conftest, `tests/test_determinism.py` (**NEW**), `tests/test_release_hashes.py`
 
-**Boundary.** The only unit that reads `configs/`, and (with `acquisition`) one of two permitted to construct a path into `evidence/`. Exposes `ConfigSnapshot`, the seeded-run contract, resolved platform roots and the release API. Imports nothing from any other unit — this is the DAG's first root.
+**Boundary.** The only unit that reads `configs/`, and (with `acquisition`) one of two permitted to construct a path into `evidence/` — **except `evidence/locked_test_restricted/`, which only `src/data/locked_test.py` may reach**. `component-dependency.md` § Shared resources fixes that carve-out without qualification ("nothing else may construct a path into it"), and D-15 records why it matters: the restricted root is a governance boundary, not an access control, so it holds only while exactly one code path reaches it. See **BLK-07**. Exposes `ConfigSnapshot`, the seeded-run contract, resolved platform roots and the release API. Imports nothing from any other unit — this is the DAG's first root.
 
 **Requirements carried (16).** REQ-ENG-1, REQ-ENG-2, REQ-ENG-3, REQ-ENG-4, REQ-ENG-6, **REQ-ENG-7**, REQ-ENG-8, **REQ-ENG-10**, REQ-ENG-11, FR-P1-01-10, FR-P1-04-11, FR-P1-05-13, FR-WS-7, NFR-AUD-01, NFR-SEC-01, NFR-DET-01
 
@@ -114,12 +115,12 @@ Bold = no §16/§19 test row (2 of 16 here).
 
 **Acceptance rows (7).** TA-01, TA-02, TA-03, TA-10, TA-15, TA-22, TA-23
 
-**Blockers.** **BLK-01** — owned scope blocked: `src/data/config.py`, `tests/test_determinism.py`. Approval authority: the authorized project decision owner (student, supervisor countersignature). Status: Open. This unit is present in the DAG and its blocked scope is **not** Ready, Approved or complete; its other owned artifacts are unblocked.
+**Blockers.** **None open. BLK-01 closed 2026-08-22** (`CR-2026-08-22-TE-AMEND`, on `GOV-2026-08-22-REM-01` Recs 1 and 4): `src/data/config.py` and `tests/test_determinism.py` are now named in TE §12. **Authority only** — neither module exists, and creating them stays gated by **G-09**, TE §18.3's stop-and-report rule and stage **3.5 `code-generation`**. This unit's other owned artifacts were never blocked. See § Blocker register.
 
 **Implementation notes and constraints.**
 
-- `src/data/config.py` and `tests/test_determinism.py` have **no authority backing** until ADR-10's four-part §12/§13.2 amendment is countersigned. `code-generation` must not create them on the strength of ADR-10 alone.
-- ADR-10's third row moves REQ-ENG-4's test-module count 18 → 19. Per the advisory finding on `decisions.md`, only REQ-ENG-4 and the external TE §12 tree are genuine loci of that count; `team-practices.md` § Testing Posture states a deliberately different figure (17 §12-tree modules) and must not be edited to 19.
+- `src/data/config.py` and `tests/test_determinism.py` now have authority backing: ADR-10's four-part §12/§13.2 amendment was approved 2026-08-22 by the project owner under the recorded student/supervisor authority equivalence and applied to TE §12 under `CR-2026-08-22-TE-AMEND` (TE v3.4). **Authority to name a module is not authority to write one** — neither module exists, and `code-generation` must not create either before G-09.
+- ADR-10's third row moved REQ-ENG-4's test-module count 18 → 19, and that move was **applied 2026-08-22**: REQ-ENG-4 now reads 19, re-derived from the amended TE §12 tree by enumerating its `test_*.py` entries rather than carried from prose. The advisory finding on `decisions.md` named only REQ-ENG-4 and the external TE §12 tree as genuine loci of that count; **that claim was inherited without independent verification and is corrected here — there are three.** The third is `requirements.md` § Intent analysis, which read "the remaining fifteen of REQ-ENG-4's eighteen test modules" and was wrong twice against the amended tree (the total is 19, and with three modules existing the remainder is 16); it was corrected 2026-08-22 under `GOV-2026-08-22-UG-02` Rec 3. Separately, `team-practices.md` § Testing Posture states a deliberately different figure (17 §12-tree modules), is now stale on it, and **must still not be edited here** — `org.md` reserves that file for the practices-affirmation gate, and the correction is tracked as **RES-02**.
 - `ensure_process_determinism` must be the first statement of every stage script's `main()`, before any framework import — a re-exec after TensorFlow loads is pointless (FU-1 = D).
 - No machine path may enter the four governed configs, so moving a directory never changes a governed hash (ADR-07).
 - Two-tier error posture: integrity violations exit non-zero naming the file and the violated expectation; completeness shortfalls are recorded as machine-readable manifest fields.
@@ -130,11 +131,11 @@ Bold = no §16/§19 test row (2 of 16 here).
 
 **Kind** `library` · **Complexity** M · **Deployment** shared · **Depends on** `foundation`
 
-**Responsibility.** The runtime prohibitions that must hold before any scientific work runs, and the transition contract that closes Phase 1: the phase-boundary import limb and produced-field limb, the transition manifest with its fourteen protected hashes, the single chokepoint for every read under the restricted December root with its access-log-before-read ordering, and the §10.1 external-code reuse register.
+**Responsibility.** The runtime prohibitions that must hold before any scientific work runs, and the transition contract that closes Phase 1: the phase-boundary import limb and produced-field limb, the transition manifest over the **canonical protected set derived from the union of TE §2.2 and TE §7.0B**, whose **final enumeration and cardinality are deferred to stage 3.1** (`functional-design`) — this artifact states neither, and **BLK-06** carries the obligation — the single chokepoint for every read under the restricted December root with its access-log-before-read ordering, and the §10.1 external-code reuse register.
 
 **Owns.**
 
-- `src/data/phase_contract.py` — `assert_phase_boundary`, `assert_no_raw_fields`, `phase_transition_manifest` and its fourteen protected hashes
+- `src/data/phase_contract.py` — `assert_phase_boundary`, `assert_no_raw_fields`, and the `phase_transition_manifest` artifact TE §2.2 names (built by `build_transition_manifest(...) -> TransitionManifest`, whose `protected_hashes` field carries the keys; `diff_protected_hashes` compares them — `component-methods.md` defines no function called `phase_transition_manifest`, and the design surface is named here so stage 3.1 searches for the right symbol) over the canonical protected set derived from TE §2.2 ∪ TE §7.0B; **final enumeration and cardinality deferred to stage 3.1** — this artifact states neither — **BLK-06**
 - `src/data/locked_test.py` — **NEW**: `open_restricted`, the access-log row written **before** the read
 - `src/data/reuse_registry.py` — the §10.1 register, all fifteen fields, recorded before the code is used
 - `tests/test_phase_boundary.py`, `tests/test_reuse_registry.py`
@@ -147,11 +148,12 @@ Bold = no §16/§19 test row (1 of 10 here).
 
 **Acceptance rows (2).** TA-27, TA-28
 
-**Blockers.** **BLK-01** — owned scope blocked: `src/data/locked_test.py`. Downstream units affected through its contract: `inventory-and-registry` (pre-G-05 coverage audit), `features-and-splits` (locked partition), `evaluation-and-comparison` (locked evaluation). Approval authority: the authorized project decision owner. Status: Open. `phase_contract.py` and `reuse_registry.py` are unblocked; the unit as a whole is **not** Approved while `locked_test.py` stands unbacked.
+**Blockers.** **BLK-06** — owned scope blocked: `src/data/phase_contract.py`'s `TransitionManifest.protected_hashes` (built by `build_transition_manifest`; the `phase_transition_manifest` artifact of TE §2.2) and `diff_protected_hashes`, whose protected-key list has no stated derivation from TE §7.0B. Status: Open. **BLK-01 closed 2026-08-22** (`CR-2026-08-22-TE-AMEND`): `src/data/locked_test.py` is now named in TE §12 — **authority only**, the module does not exist and creating it stays gated by G-09 and stage 3.5. Its downstream consumers through the `open_restricted` contract are `inventory-and-registry` (pre-G-05 coverage audit), `acquisition` (the D-9 input and any December re-acquisition — **BLK-07**), `features-and-splits` (locked partition) and `evaluation-and-comparison` (locked evaluation). `reuse_registry.py` and the `assert_phase_boundary` / `assert_no_raw_fields` limbs carry no blocker.
 
 **Implementation notes and constraints.**
 
-- `src/data/locked_test.py` is the second module with no authority backing until ADR-10 is countersigned.
+- `src/data/locked_test.py` gained its authority backing on 2026-08-22 with the rest of ADR-10's amendment (TE §12, `CR-2026-08-22-TE-AMEND`). It remains unwritten and gated by G-09.
+- `open_restricted` is the **only** path into `evidence/locked_test_restricted/`. `component-dependency.md` § Shared resources states the rule without qualification — "nothing else may construct a path into it" — and **BLK-07** carries the one unit whose routing through it was not recorded.
 - ADR-03 splits the locked-test guard deliberately: the access-log limb here, the execution limb in `features-and-splits`'s `splits.py`. `tests/test_locked_test_guard.py` covers both limbs and is owned by `features-and-splits` to keep this unit a root.
 - The guard is at run time, not only in tests, because a Kaggle session carries no git working tree and a local suite run proves nothing about the environment a governed run executes in (ADR-02, Q3 = B).
 - NFR-PHASE-01's transition-manifest hash-diff test has no module in the §12 tree and needs frozen artifacts from every later unit; it is carried as an acceptance row on `fixtures-and-reproducibility` with this unit supporting.
@@ -172,7 +174,7 @@ Bold = no §16/§19 test row (1 of 10 here).
 - `request_manifest.json` and `sha256_manifest.json` writers
 - `tests/test_acquisition_window.py`
 
-**Boundary.** The producer of every raw input the pipeline consumes. Hands downstream units resolved artifact paths and release IDs, never provider clients or credentials. Credentials reach the provider client directly from the environment via `foundation`'s resolution — never through a config file, log, registry note or notebook.
+**Boundary.** The producer of every raw input the pipeline consumes. Hands downstream units resolved artifact paths and release IDs, never provider clients or credentials. Credentials reach the provider client directly from the environment via `foundation`'s resolution — never through a config file, log, registry note or notebook. It may construct a path into `evidence/` but **never directly into `evidence/locked_test_restricted/`**: every read or write under that root goes through `governance-guards.open_restricted`, which writes the access-log row before the read. That routing contract is **BLK-07** and is not yet authored.
 
 **Requirements carried (15).** REQ-ENG-13, FR-P1-00-1, FR-P1-00-2, FR-P1-01-1, FR-P1-01-2, FR-P1-01-3, FR-P1-01-4, **FR-P1-01-5**, FR-P1-01-6, **FR-P1-01-7**, **FR-P1-01-8**, **FR-P1-01-9**, **FR-P1-01-11**, **REQ-NFR-A1**, **REQ-NFR-A2**
 
@@ -180,9 +182,12 @@ Bold = no §16/§19 test row (7 of 15 here).
 
 **Acceptance rows (1).** TA-32
 
+**Blockers.** **BLK-07** — owned scope blocked: every read or write this unit performs under `evidence/locked_test_restricted/`, including the `audit_evidence_2022-FULL/` artifact D-9 promotes as Phase 1's acquisition input and any re-acquisition touching calendar 2022-12. Required resolution: a governed contract routing all such access through `governance-guards.open_restricted`, so the `locked_test_accessed = true` row is written **before** the first December record is read. Approval authority: `functional-design` (3.1) for the contract. Status: Open — an **exit** condition on stage 3.1, and **no acquisition run may touch calendar 2022-12** while it stands. This unit's provider-retrieval, provenance, manifest-hashing and NaN-at-acquisition scope is unblocked.
+
 **Implementation notes and constraints.**
 
 - The `evidence/locked_test_restricted/audit_evidence_2022-FULL/` artifact D-9 promotes as Phase 1's acquisition input rests on twelve monthly runs whose provenance is unverifiable in principle: no provider byte stream exists in the workspace, and three of the twelve months (2022-04, 2022-07, and 2022-12, the locked month) have no `raw_isprint_cache/` at all. Every artifact produced before the re-acquisition carries that caveat, and FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes.
+- **Reading that D-9 input is a logged December access.** D-15 relocated FULL under `evidence/locked_test_restricted/` on 2026-08-21 and states the consequence directly: FULL carries 21,258 December rows, so *"any consumer that opens it must write an access-log row first."* D-15 is equally explicit that the restricted root is *"a governance boundary, not an access control"* — no permission, no ACL, no encryption — so the boundary holds only while exactly one code path reaches it. **BLK-07** carries the routing obligation, and **RES-01** records that permitted-read access logging is **NOT TESTED**, so nothing downstream would catch an omission.
 - Re-acquisition must record each file's full provider filename including version suffix (`g.002` vs `g.003`), retrieval date and SHA-256, and surface rather than silently accept any mismatch against a previously recorded suffix.
 - Membership is derived from record timestamps only — never from a directory name or filename. The year-blind predicate that filed locked-month records into `audit_evidence_2022-01/` is the realized defect this rule closes.
 - `audit_ec1_drivers.py` and `merge_coverage_year.py` migrate onto the §12 structure here and in `external-products`/`inventory-and-registry` respectively; `audit_ec1_drivers.py:184` returning 0 regardless of missing months is a known gap against the two-tier error posture, to be fixed at migration.
@@ -230,7 +235,7 @@ Bold = no §16/§19 test row (2 of 7 here).
 - `src/data/prepared.py`
 - `scripts/02_standardize_prepared_target.py`
 - `scripts/03_verify_processing.py` (Phase 1 scope)
-- the D-17 target-schema test — **unnamed, and deliberately so: see BLK-05.** FR-P1-03-5's criterion implies a test that exists in none of the mandated test-module sets (the 17 in TE §12's tree, `test_acquisition_window.py` as the countersigned 18th, `tests/test_determinism.py` as ADR-10's proposed 19th). Naming it is a §12 tree amendment and therefore supervisor-owned; this stage records the obligation and chooses no name.
+- the D-17 target-schema test — **unnamed, and deliberately so: see BLK-05.** FR-P1-03-5's criterion implies a test that exists in none of the **19** modules TE §12's amended tree enumerates (`CR-2026-08-22-TE-AMEND`, TE v3.4 — the count re-derived from that tree by listing its `test_*.py` entries, not carried from prose; `test_acquisition_window.py` and `tests/test_determinism.py` are both inside it, the first as an already-approved 2026-08-16 countersignature applied late, the second as a newly approved ADR-10 entry). Naming it is a §12 tree amendment and therefore supervisor-owned; this stage records the obligation and chooses no name.
 
 **Boundary.** Phase 1 only. Reads validated provider files and the registry; emits the target rows every downstream unit consumes. Must never produce a DCB, STEC, mapping, satellite or arc field, and must never label the gridded product a receiver-specific station observation.
 
@@ -261,7 +266,7 @@ Bold = no §16/§19 test row (1 of 6 here).
 - `src/external/spaceweather.py`, `src/external/iri.py`, `src/external/gim.py`
 - `scripts/04_build_external_products.py`
 
-**Boundary.** `iri.py` and `gim.py` are importable by exactly two places — this unit's own `scripts/04_build_external_products.py` and `evaluation-and-comparison`'s `src/evaluation/` — stated as an allowlist, so an import from `src/data`, `src/gnss`, a training script or a notebook violates it identically. `spaceweather.py` is deliberately outside that restriction: drivers are model inputs subject to the availability lags.
+**Boundary.** The allowlist is stated at **module-path** granularity, exactly as TE §12's import-boundary rule states it: IRI/GIM imports are permitted only in `scripts/04_build_external_products.py` and modules under `src/evaluation/`, subject to all applicable evaluation-stage, frozen-mask and locked-test restrictions. Modules under `src/evaluation/` are owned by **three** distinct units — `evaluation-and-comparison` (`masks.py`, `metrics.py`), `statistical-inference` (`bootstrap.py`) and `regimes-diagnostics-reporting` (`regimes.py`, `diagnostics.py`, `plots.py`) — so the allowlist grants an authorized *path*, never a whole unit's unrelated code. An import from `src/data`, `src/features`, `src/models`, `src/gnss`, a training script or a notebook violates it identically. `spaceweather.py` is deliberately outside that restriction: drivers are model inputs subject to the availability lags.
 
 **Requirements carried (7).** **REQ-ENG-9**, FR-P1-04-3, **FR-P1-04-4**, FR-P1-04-9, **FR-P1-04-15**, **FR-P1-04-17**, **FR-P1-04-18**
 
@@ -301,7 +306,7 @@ Bold = no §16/§19 test row (4 of 11 here).
 
 **Acceptance rows (9).** WS-10, WS-11, WS-12, WS-13, WS-18, TA-07, TA-08, TA-11, TA-18
 
-**Blockers.** **BLK-04** — owned scope blocked: `src/features/transforms.py`'s `fit_transforms` / `apply_transforms` pair, and every assertion of NFR-LEAK-01 that runs through it. Downstream units affected: `models-and-baselines`, `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting` — every reported number inherits the fit. Required resolution: a governed cross-unit contract enforcing train-only fitting per fold, defining input and output types, alignment requirements, ownership of the fitted state, allowed partitions (the named fold's training partition only) and failure conditions (`LeakageError` when `train`'s index is not a subset of that partition), so validation and locked-test leakage are prevented by the contract rather than by review. Approval authority: `functional-design` (3.1) for the contract; Supervisor for the leakage evidence at G-04 and G-05. Status: Open — must be discharged **before** this unit or any downstream unit above enters functional design or implementation.
+**Blockers.** **BLK-04** — owned scope blocked: `src/features/transforms.py`'s `fit_transforms` / `apply_transforms` pair, and every assertion of NFR-LEAK-01 that runs through it. Downstream units affected: `models-and-baselines`, `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting` — every reported number inherits the fit. Required resolution: a governed cross-unit contract enforcing train-only fitting per fold, defining input and output types, alignment requirements, ownership of the fitted state, allowed partitions (the named fold's training partition only) and failure conditions (`LeakageError` when `train`'s index is not a subset of that partition), so validation and locked-test leakage are prevented by the contract rather than by review. Approval authority: `functional-design` (3.1) for the contract; Supervisor for the leakage evidence at G-04 and G-05. Status: Open. **Exit condition on stage 3.1, not an entry condition — ruled 2026-08-22 by the project decision owner (`GOV-2026-08-22-REM-01` Rec 2).** `features-and-splits` and the downstream units above **may enter** `functional-design` (3.1); that is where the contract is authored. **No affected unit may complete or exit 3.1 without its approved contract**, and **no implementation may proceed** while this blocker stands. The leakage safeguard is unchanged and is not weakened: per-fold train-only fitting on the named fold's training partition only, with a `LeakageError` when `train`'s index is not a subset of that partition, and NFR-LEAK-01's evidence still owed to the Supervisor at G-04 and G-05.
 
 **Implementation notes and constraints.**
 
@@ -333,7 +338,7 @@ Bold = no §16/§19 test row (7 of 9 here).
 
 **Acceptance rows (5).** WS-14, WS-15, TA-12, TA-13, TA-26
 
-**Blockers.** **BLK-03** — owned scope blocked: `src/models/train.py`'s confirmatory-prediction path, this being the unit that owns confirmatory-prediction construction. Downstream units consuming that prediction: `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`. Required resolution: a governed cross-unit contract defining input and output types, alignment requirements, ownership of the frozen seed set, allowed partitions and failure conditions, with the frozen set arriving as a parameter from `ConfigSnapshot.seeds` — never inlined in `src/models`, never weakened to a distinctness check. Approval authority: `functional-design` (3.1) for the contract; Supervisor for the seed values, D-122's sign-off still pending per Vision §14.2. **BLK-04 ↓** inherited from `features-and-splits`. Status: Open — BLK-03 must be discharged **before** this unit or any downstream unit above enters functional design or implementation.
+**Blockers.** **BLK-03** — owned scope blocked: `src/models/train.py`'s confirmatory-prediction path, this being the unit that owns confirmatory-prediction construction. Downstream units consuming that prediction: `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`. Required resolution: a governed cross-unit contract defining input and output types, alignment requirements, ownership of the frozen seed set, allowed partitions and failure conditions, with the frozen set arriving as a parameter from `ConfigSnapshot.seeds` — never inlined in `src/models`, never weakened to a distinctness check. Approval authority: `functional-design` (3.1) for the contract. The seed values themselves: **closed 2026-08-22** — D-122's supervisor sign-off was closed by the project owner under the recorded student/supervisor authority equivalence (Vision §14.2; `CR-2026-08-22-TE-AMEND`), with the values verified unchanged before closure: development seed 42 and final seeds {1337, 2024, 7}. The bootstrap seed **20221201** is frozen separately by TE §13.6 / TC-19 (Q-27) and is **not** part of D-122’s item set — attribution corrected 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 11. **That closes authority, not implementation** — the values reach `three_seed_mean` as a parameter from `ConfigSnapshot.seeds` via `configs/seeds.yaml` and **must never be inlined in `src/models` or any other implementation file** (TC-03e; the forbidden pattern this blocker names). **BLK-04 ↓** inherited from `features-and-splits`. Status: Open. **Exit condition on stage 3.1, not an entry condition — ruled 2026-08-22 by the project decision owner (`GOV-2026-08-22-REM-01` Rec 2).** `models-and-baselines` and the downstream units above **may enter** `functional-design` (3.1); that is where the contract is authored. **No affected unit may complete or exit 3.1 without its approved contract**, and **no implementation may proceed** while this blocker stands. The confirmatory-seed safeguard is unchanged and is not weakened: the frozen set reaches `three_seed_mean` as a parameter from `ConfigSnapshot.seeds`, never inlined in `src/models`, and never weakened to a pairwise-distinctness check.
 
 **Implementation notes and constraints.**
 
@@ -358,7 +363,7 @@ Bold = no §16/§19 test row (7 of 9 here).
 - `scripts/07_evaluate_and_report.py`
 - `tests/test_common_masks.py`
 
-**Boundary.** The only unit permitted, with `external-products`'s own build script, to import `src/external/iri.py` and `src/external/gim.py`, and it does so at evaluation time against the already-frozen mask. Imports `models-and-baselines` outputs; nothing imports it except the two units whose logic runs inside its script.
+**Boundary.** Owns two of the modules the IRI/GIM allowlist authorizes — `src/evaluation/masks.py` and `src/evaluation/metrics.py` — and imports `src/external/iri.py` and `src/external/gim.py` at evaluation time against the already-frozen mask. The allowlist is a module-path grant covering `scripts/04_build_external_products.py` and every module under `src/evaluation/` (TE §12), so it also reaches `statistical-inference`'s `bootstrap.py` and `regimes-diagnostics-reporting`'s `regimes.py`, `diagnostics.py` and `plots.py`; this unit is **not** the sole permitted importer, and no unit-level narrowing of TE §12 is asserted here. Imports `models-and-baselines` outputs; nothing imports it except the two units whose logic runs inside its script.
 
 **Requirements carried (4).** FR-P1-04-7, **FR-P1-05-7**, **FR-P1-05-17**, NFR-FAIR-01
 
@@ -366,7 +371,7 @@ Bold = no §16/§19 test row (2 of 4 here).
 
 **Acceptance rows (1).** WS-16
 
-**Blockers.** **BLK-03 ↓** — this unit consumes the confirmatory prediction, so its masks and paired loss differential inherit whatever `three_seed_mean`'s contract turns out to permit. **BLK-04 ↓** — every metric it computes inherits the transform fit. Neither is owned here; both must be discharged before this unit enters functional design or implementation. Approval authority: as recorded on BLK-03 and BLK-04. Status: Open (inherited).
+**Blockers.** **BLK-03 ↓** — this unit consumes the confirmatory prediction, so its masks and paired loss differential inherit whatever `three_seed_mean`'s contract turns out to permit. **BLK-04 ↓** — every metric it computes inherits the transform fit. Neither is owned here. Approval authority: as recorded on BLK-03 and BLK-04. Status: Open (inherited). **Both are exit conditions on stage 3.1, not entry conditions — ruled 2026-08-22 (`GOV-2026-08-22-REM-01` Rec 2).** This unit **may enter** `functional-design` (3.1); it **may not complete or exit** 3.1 while either contract is unapproved, and **no implementation may proceed** while they stand.
 
 **Implementation notes and constraints.**
 
@@ -396,7 +401,7 @@ Bold = no §16/§19 test row (0 of 1 here).
 
 **Acceptance rows (2).** WS-17, TA-14
 
-**Blockers.** **BLK-03 ↓**, **BLK-04 ↓** — the bootstrapped differential is computed from the confirmatory prediction over transform-fitted features, so both inherited contracts bound what this unit's intervals mean. Neither is owned here. Approval authority: as recorded on BLK-03 and BLK-04. Status: Open (inherited) — discharge required before functional design or implementation.
+**Blockers.** **BLK-03 ↓**, **BLK-04 ↓** — the bootstrapped differential is computed from the confirmatory prediction over transform-fitted features, so both inherited contracts bound what this unit's intervals mean. Neither is owned here. Approval authority: as recorded on BLK-03 and BLK-04. Status: Open (inherited). **Both are exit conditions on stage 3.1, not entry conditions — ruled 2026-08-22 (`GOV-2026-08-22-REM-01` Rec 2).** This unit **may enter** `functional-design` (3.1); it **may not complete or exit** 3.1 while either contract is unapproved, and **no implementation may proceed** while they stand.
 
 **Implementation notes and constraints.**
 
@@ -426,7 +431,7 @@ Bold = no §16/§19 test row (7 of 11 here).
 
 **Acceptance rows (3).** WS-19, TA-16, TA-20
 
-**Blockers.** **BLK-03 ↓**, **BLK-04 ↓** — every reported number, breakdown, figure and claim in this unit derives from the confirmatory prediction and the transform-fitted features, so both inherited contracts bound what may be claimed. Neither is owned here. Approval authority: as recorded on BLK-03 and BLK-04. Status: Open (inherited) — discharge required before functional design or implementation.
+**Blockers.** **BLK-03 ↓**, **BLK-04 ↓** — every reported number, breakdown, figure and claim in this unit derives from the confirmatory prediction and the transform-fitted features, so both inherited contracts bound what may be claimed. Neither is owned here. Approval authority: as recorded on BLK-03 and BLK-04. Status: Open (inherited). **Both are exit conditions on stage 3.1, not entry conditions — ruled 2026-08-22 (`GOV-2026-08-22-REM-01` Rec 2).** This unit **may enter** `functional-design` (3.1); it **may not complete or exit** 3.1 while either contract is unapproved, and **no implementation may proceed** while they stand.
 
 **Implementation notes and constraints.**
 
@@ -460,13 +465,13 @@ Bold = no §16/§19 test row (2 of 8 here).
 
 **Acceptance rows (4).** WS-20, TA-09, TA-17, TA-21
 
-**Blockers.** **BLK-02** — owned scope blocked: `tests/fixtures/plumbing_7day/fixture_manifest.yaml` and every capability depending on it. The unit exists in the DAG with its nine dependencies recorded, but the manifest-dependent capability is blocked by `application-design` § Known defects row 12; **no manifest may be invented, inferred or substituted**, and this unit cannot pass its completion gate until the defect is resolved and the authoritative manifest is available and hash-verifiable. Approval authority: Supervisor. **BLK-01** — owned scope blocked: TE §13.2's `PYTHONHASHSEED` clean-run clause, which `test_clean_run.py`, WS-20 and TA-17 test as written. Approval authority: the authorized project decision owner. **BLK-03 ↓**, **BLK-04 ↓** — inherited: this unit's `depends_on` includes all four units carrying those blockers (`models-and-baselines`, `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`), and the clean-run tolerance comparison and TA-21's traceability matrix consume their released artifacts, so what those two contracts permit bounds what WS-20 and TA-17 can be said to have reproduced. Approval authority: as recorded on BLK-03 and BLK-04. Status: all four Open.
+**Blockers.** **BLK-02** — owned scope blocked: `tests/fixtures/plumbing_7day/fixture_manifest.yaml` and every capability depending on it. The unit exists in the DAG with its nine dependencies recorded, but the manifest-dependent capability is blocked by `requirements.md` § Known defects row 12 — **on its station-selection limb only**. That row's reading limb was settled by the D-11 clarification of 2026-08-22 and the row was amended in place to record it. **The station was subsequently selected and frozen on 2026-08-22 as BSHM 32/35 (D-20)**, on the only complete observed coverage of the window (168/168 hourly bins). **No manifest may be invented, inferred or substituted**, and this unit still cannot pass its completion gate until the authoritative manifest exists and is hash-verifiable — none exists, and the fixture has never been run. Approval authority: the project owner under Q-31. **BLK-01 closed 2026-08-22** — TE §13.2 now carries the `PYTHONHASHSEED=0` clean-run clause (`CR-2026-08-22-TE-AMEND`), so `test_clean_run.py`, WS-20 and TA-17 test the amended sequence rather than an unamended one. **BLK-03 ↓**, **BLK-04 ↓** — inherited: this unit's `depends_on` includes all four units carrying those blockers (`models-and-baselines`, `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`), and the clean-run tolerance comparison and TA-21's traceability matrix consume their released artifacts, so what those two contracts permit bounds what WS-20 and TA-17 can be said to have reproduced. Approval authority: as recorded on BLK-03 and BLK-04. Status: BLK-02 Open; BLK-03 ↓ and BLK-04 ↓ Open (inherited), both **exit conditions on stage 3.1**; BLK-01 **Closed 2026-08-22**.
 
 **Implementation notes and constraints.**
 
-- **Blocked.** § Known defects row 12 — the `plumbing_7day` station count — is contested: TE §15.1 mandates one station, D-11 froze the window across all three cells, and no reading is adopted. The fixture manifest cannot state its identity until a supervisor resolves it, and `run_walking_skeleton.py` reads that manifest.
+- **Blocked — on the station selection, not on the reading.** `requirements.md` § Known defects row 12's reading limb is settled: the **D-11 clarification of 2026-08-22** records D-11's `Stations:` line as the **eligibility evidence** for the frozen window and retains TE §15.1's **one-station execution scope**, and row 12 was amended in place on 2026-08-22 to record it (`GOV-2026-08-22-UG-02` Rec 7). **The station was selected and frozen on 2026-08-22 as BSHM 32/35 (D-20)**, so the fixture can now state its identity. What remains open is the manifest itself: it does not exist, the fixture has never been run, and **no measured value may be invented, inferred or substituted.** ARUC's one-bin shortfall on five of the seven days is **dormant, not discharged** — it attaches to ARUC, which is not selected.
 - The seven-day fixture is never scientific evidence — it may not be cited, plotted as a result, or interpreted as skill.
-- D-11 froze the plumbing window as 2022-11-01 to 2022-11-07 inclusive, all three cells, with measured completeness ARUC 163/168, BSHM 168/168, NICO 155/168 and 7/7 day presence in every cell, carrying the limitation that it reproduces neither December's winter-solstice regime nor its activity distribution. The one-month all-station scientific window remains open under Q-31.
+- D-11 froze the plumbing window as 2022-11-01 to 2022-11-07 inclusive, all three cells, with measured completeness ARUC 163/168, BSHM 168/168, NICO 155/168 and 7/7 day presence in every cell, carrying the limitation that it reproduces neither December's winter-solstice regime nor its activity distribution. The one-month all-station scientific window is **frozen as D-14 — March 2022, all three cells** (`CR-2026-08-21-FREEZES`), carrying its own mandatory limitation that March is an equinox month reproducing neither December's regime nor its activity distribution; it is no longer open under Q-31 (corrected 2026-08-22, finding `UG-08`).
 - No record whose observation date falls in December 2022 may enter either fixture, asserted on record dates rather than on the folder a file was filed under.
 - The critical test set and both fixtures must run **inside the Kaggle session** before any governed run executed there — a Kaggle session carries no git working tree, so a commit hook cannot fire and a local suite run proves nothing about the environment the governed run executes in.
 - NFR-PHASE-01's transition-manifest hash-diff test is carried here as an acceptance row, with `governance-guards` supporting: the test has no §12 module and its evidence needs the frozen artifacts every earlier unit produces.
@@ -485,24 +490,49 @@ unit, the affected scope is what is blocked — the unit's other work is not
 blessed by the narrowness, and the register names the files so the boundary is
 checkable rather than asserted.
 
-Nothing in this register is resolved here. Every row names the authority that
-discharges it.
+Nothing in this register is resolved by this stage. Every row names the authority
+that discharges it, and where a row has since been discharged the register records
+the act, its date and its change record rather than deleting the row. **BLK-01 is
+closed; BLK-02 through BLK-07 are open.** Seven blockers are registered, and **ten of
+the twelve units carry a blocker row, owned or inherited** — `inventory-and-registry`
+and `external-products` carry none of their own. That is the only sense in which "ten"
+is meant: BLK-01's `config.py` row names *every* unit as downstream, so a reading that
+counted downstream mentions would give twelve.
 
-### BLK-01 — ADR-10's §12/§13.2 amendment is unsigned
+### BLK-01 — ADR-10's §12/§13.2 amendment (unsigned at registration; **closed 2026-08-22**)
 
 Tracked per unit **and** per file, because approval arrives for the amendment as
 a whole and a partially-built unit must not read as covered.
 
 | Affected artifact | Owning unit | Downstream units | Status |
 |---|---|---|---|
-| `src/data/config.py` | `foundation` | every unit — the six-step stage entry contract calls `load_configs`, `assert_no_tbd` and `resolve_platform_roots` before any domain work | Open — no authority backing |
-| `tests/test_determinism.py` | `foundation` | `models-and-baselines` (TA-26's deterministic seed utility and serialization restore), `statistical-inference` | Open — no authority backing |
-| `src/data/locked_test.py` | `governance-guards` | `inventory-and-registry` (the pre-G-05 coverage audit), `features-and-splits` (the locked partition), `evaluation-and-comparison` (the locked evaluation) | Open — no authority backing |
-| TE §13.2's `PYTHONHASHSEED` clean-run clause | `fixtures-and-reproducibility` | none — terminal, but `test_clean_run.py`, WS-20 and TA-17 test the sequence **as written** | Open — clause not yet amended |
+| `src/data/config.py` | `foundation` | every unit — the six-step stage entry contract calls `load_configs`, `assert_no_tbd` and `resolve_platform_roots` before any domain work | **Closed 2026-08-22** — in TE §12 under `CR-2026-08-22-TE-AMEND`. Authority only; the module does not exist and creation stays gated by G-09 and stage 3.5 |
+| `tests/test_determinism.py` | `foundation` | `models-and-baselines` (TA-26's deterministic seed utility and serialization restore), `statistical-inference` | **Closed 2026-08-22** — in TE §12 under `CR-2026-08-22-TE-AMEND`. Authority only; the module does not exist and creation stays gated by G-09 and stage 3.5 |
+| `src/data/locked_test.py` | `governance-guards` | `inventory-and-registry` (the pre-G-05 coverage audit), `features-and-splits` (the locked partition), `evaluation-and-comparison` (the locked evaluation) | **Closed 2026-08-22** — in TE §12 under `CR-2026-08-22-TE-AMEND`. Authority only; the module does not exist and creation stays gated by G-09 and stage 3.5 |
+| TE §13.2's `PYTHONHASHSEED` clean-run clause | `fixtures-and-reproducibility` | none — terminal, but `test_clean_run.py`, WS-20 and TA-17 test the sequence **as written** | **Closed 2026-08-22** — `PYTHONHASHSEED=0` added to TE §13.2 under `CR-2026-08-22-TE-AMEND`; `test_clean_run.py`, WS-20 and TA-17 now test the amended sequence |
 
 - **Required resolution.** ADR-10's four-part amendment recorded and countersigned as one change record, the way `test_acquisition_window.py`'s addition was countersigned on 2026-08-16. REQ-ENG-4's test-module count moves 18 → 19 in its two genuine loci (REQ-ENG-4 itself and the external TE §12 tree); `team-practices.md` § Testing Posture states a deliberately different figure and is not one of them.
 - **Approval authority.** The authorized project decision owner — student, with supervisor countersignature. `project.md` § Forbidden bars an agent from filling a supervisor-owned value by convenience, and a tree amendment is that class of change.
 - **Consequence while open.** `code-generation` must not create these three modules or the amended clean-run command on the strength of ADR-10 alone.
+
+#### BLK-01 status: **CLOSED 2026-08-22**
+
+Approved by the project owner under the recorded student/supervisor authority equivalence and applied under change record **`CR-2026-08-22-TE-AMEND`** (`governance/CHANGE_RECORD_2026-08-22_TE_amendment.md`), on governance report `GOV-2026-08-22-REM-01` Recommendations 1 and 4. Closure is claimed because every required amendment and the traceability update **have actually landed in the authoritative documents** — each verified in place:
+
+| Required item | Landed | Where |
+|---|---|---|
+| `src/data/config.py` | ✅ | TE §12 tree, `src/data/` |
+| `src/data/locked_test.py` | ✅ | TE §12 tree, `src/data/` |
+| `tests/test_determinism.py` | ✅ | TE §12 tree, `tests/` |
+| `PYTHONHASHSEED` clean-run clause | ✅ | TE §13.2, set before the first command, with its WS-20 / TA-17 / `test_clean_run.py` implication recorded |
+| REQ-ENG-4 count 18 → 19 | ✅ | `requirements.md` REQ-ENG-4, **re-derived from the amended tree** by enumerating its `test_*.py` entries and counting them — not assumed |
+| `requirements.md` § Intent analysis count | ✅ | **Added 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 3.** The sentence read "the remaining fifteen of REQ-ENG-4's eighteen test modules" and survived the first closure unpropagated — wrong twice against the amended tree. Corrected to sixteen of nineteen. **The original closure asserted "every" amendment had landed while this site had not, and that over-claim is recorded here rather than quietly dropped.** |
+| TE §1.2 change-history row | ✅ | v3.4, 22 August 2026 |
+
+A finding raised during closure and fixed in the same act: the **2026-08-16 countersigned** amendment adding `tests/test_acquisition_window.py` had **never been written into TE §12** (`REM-01`). It is now applied, and TE §12's provenance table keeps it distinct from the newly approved ADR-10 entries — an already-approved historical amendment applied late, not a new approval.
+
+- **What closure does NOT authorize.** **Authority to name a module is not authority to write one.** None of the four modules exists. Creating them remains gated by **G-09** ("before any affected component is coded"), by TE §18.3's rule that an agent must stop and report rather than choose a default, and by stage **3.5 `code-generation`**. The workflow is at stage 2.8; nothing here advances it.
+- **Related but separate, still open.** BLK-05's D-17 target-schema module is a **further** §12 tree amendment, not covered by this closure, and no module for it may be created until stage 3.1 names it and its own amendment is approved.
 
 ### BLK-02 — the `plumbing_7day` fixture manifest cannot state its identity
 
@@ -511,9 +541,44 @@ a whole and a partially-built unit must not read as covered.
 | Affected artifact | `tests/fixtures/plumbing_7day/fixture_manifest.yaml` |
 | Owning unit | `fixtures-and-reproducibility` |
 | Downstream units | none — the unit is terminal. The block reaches WS-20, TA-09 and TA-17, and through TE §9.2's intra-unit ordering contract it reaches every full-year job. |
-| Required resolution | `application-design` § Known defects row 12 resolved: TE §15.1 mandates one station, D-11 froze the window across all three cells, and no reading is adopted. The authoritative manifest must then be available and hash-verifiable. |
-| Approval authority | Supervisor |
-| Status | Open. **No manifest may be invented, inferred or substituted**, and the unit cannot pass its completion gate until the defect is discharged. |
+| Required resolution | **Partly discharged 2026-08-22; the remainder is open.** The §15.1-versus-D-11 reading is now settled by the **D-11 clarification of 2026-08-22** (`evidence/DECISIONS.md`, approved by the project owner under the recorded authority equivalence, on `GOV-2026-08-22-REM-01` Rec 3 option C): D-11's `Stations:` line is the **eligibility evidence** for the frozen window, and TE §15.1's **one-station execution scope is retained**. `requirements.md` § Known defects row 12 was **amended in place on 2026-08-22** to record it (`GOV-2026-08-22-UG-02` Recommendation 7, option 2, approved by the project owner; the board had recommended tracking it as a residual instead, and the owner ruled for direct amendment). **Station selected and frozen 2026-08-22 — BSHM 32/35 (D-20).** What remains open: the authoritative manifest must exist and be hash-verifiable, and the fixture must actually run. Neither has happened. |
+| Approval authority | The station identity: **the project owner under Q-31** (TE §18.2 assigns fixture station, dates and tolerances to the Student), exercised under the recorded student/supervisor authority equivalence. |
+| Status | **Open on implementation; station-selection limb RESOLVED 2026-08-22.** See the limb table below. |
+
+#### BLK-02 limb status, synchronized 2026-08-22
+
+| Limb | Status | Evidence |
+|---|---|---|
+| §15.1-versus-D-11 reading | **Resolved** 2026-08-22 | D-11 clarification; §15.1's one-station execution scope retained |
+| **Station selection** | **RESOLVED 2026-08-22 — BSHM 32/35** | **D-20**. Selected on the only complete observed coverage of D-11's window: **168/168 hourly bins**, 7/7 days present, 1,810 records, from `evidence/audit_evidence_2022-11/madrigal_coverage_raw_records.csv` |
+| ARUC's one-bin shortfall on five of seven days | **DORMANT — conditional, and explicitly NOT resolved** | See the dormancy rule below |
+| Fixture manifest implementation | **PENDING** | `tests/fixtures/plumbing_7day/fixture_manifest.yaml` does not exist |
+| Fixture execution | **PENDING** | The fixture has never been run |
+| Measured evidence (row counts, tolerances, support and missingness limits, timestamp tolerances, CPU runtime range) | **PENDING** | §15.1 requires these measured from a run and frozen. **No value exists and none is claimed.** Selecting a station supplies identity, not content |
+
+**ARUC and NICO** remain the appropriate candidates for **separate** missing-data and
+robustness tests, where their gaps are the subject rather than a confound in a plumbing
+smoke test.
+
+#### The ARUC dormancy rule, recorded 2026-08-22
+
+D-11 observed that **ARUC 40/44 is short exactly one hourly bin on five of the seven days
+of the frozen window (3–7 November 2022)** — 163/168 bins — and called the uniformity
+suggestive of *"a systematic single-bin gap rather than random loss"*, requiring it to be
+explained before the manifest is frozen.
+
+**Status: DORMANT. It is NOT resolved, and must not be recorded as resolved.**
+
+- **Why it is dormant:** BSHM was selected as the plumbing-fixture station (**D-20**), so
+  the obligation — which attaches to ARUC — does not gate the current fixture.
+- **Reactivation condition:** the obligation **revives in full** the moment ARUC is
+  proposed for any fixture whose evidence depends on the affected coverage.
+- **What reactivation requires:** an **evidence-backed explanation** of the systematic
+  single-bin gap — not an acknowledgement, not an assumption, and not a tolerance widened
+  to absorb it — recorded **before** that fixture's manifest is frozen.
+- **What dormancy does not do:** it does not close the finding, does not discharge D-11's
+  pre-freeze obligation, and does not license using ARUC's window coverage figures as
+  though the gap were understood.
 
 ### BLK-03 — `three_seed_mean` cannot express the frozen-seed check
 
@@ -523,8 +588,8 @@ a whole and a partially-built unit must not read as covered.
 | Owning unit | `models-and-baselines` (confirmatory-prediction construction) |
 | Downstream units | `evaluation-and-comparison` (masks and the paired loss differential consume the confirmatory prediction), `statistical-inference` (bootstraps that differential), `regimes-diagnostics-reporting` (reports it) |
 | Required resolution | A governed cross-unit contract fixing input and output types, alignment requirements, ownership of the frozen seed set, allowed partitions, and failure conditions. The frozen set reaches the function as a parameter sourced from `ConfigSnapshot.seeds` — never inlined, since `{1337, 2024, 7}` in `src/models` is the forbidden pattern, and never weakened to a pairwise-distinctness check a wrong-but-distinct triple would pass. |
-| Approval authority | The contract: `functional-design` (3.1). The seed values themselves: Supervisor — D-122's sign-off is still pending per Vision §14.2. |
-| Status | Open. Must be discharged **before** `models-and-baselines` or any downstream unit above enters functional design or implementation. |
+| Approval authority | The contract: `functional-design` (3.1) — **still open**. The seed values themselves: **closed 2026-08-22.** D-122's pending supervisor sign-off was closed by the project owner under the recorded student/supervisor authority equivalence (Vision §14.2; `CR-2026-08-22-TE-AMEND`), so the frozen set is authoritative: development seed 42 and final seeds {1337, 2024, 7}. The bootstrap seed **20221201** is frozen separately by TE §13.6 / TC-19 (Q-27) and is **not** part of D-122’s item set — attribution corrected 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 11. **This closes authority, not implementation** — the values are supplied to `three_seed_mean` from `ConfigSnapshot.seeds` via `configs/seeds.yaml` and **must never be inlined in `src/models` or any other implementation file** (TC-03e; the forbidden pattern this blocker names). |
+| Status | Open. **Exit condition on stage 3.1, not an entry condition — ruled 2026-08-22 by the project decision owner (GOV-2026-08-22-REM-01 Rec 2).** `models-and-baselines` and the downstream units above **may enter** `functional-design` (3.1); that is where the contract is authored. **No affected unit may complete or exit 3.1 without its approved contract**, and **no implementation may proceed** while this blocker stands. The prior wording ("must be discharged before … enters functional design") was unsatisfiable, since 3.1 is named as the contract's own approval authority. The substantive protection is unchanged and is not weakened: the confirmatory-seed safeguard stands in full — the frozen set reaches `three_seed_mean` as a parameter from `ConfigSnapshot.seeds`, never inlined in `src/models`, and never weakened to a pairwise-distinctness check. |
 
 ### BLK-04 — `fit_transforms` leaves the full-dataset fit representable
 
@@ -535,7 +600,7 @@ a whole and a partially-built unit must not read as covered.
 | Downstream units | `models-and-baselines` (trains on the transformed features), `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting` — every reported number inherits the fit |
 | Required resolution | A governed cross-unit contract that enforces train-only fitting per fold: input and output types, alignment requirements, ownership of the fitted state, allowed partitions (the named fold's training partition only), and failure conditions — a `LeakageError` when `train`'s index is not a subset of that partition. The two-function split prevents the single-call convenience shape and nothing more; the contract is what closes the leak. |
 | Approval authority | The contract: `functional-design` (3.1). The leakage evidence it produces: Supervisor, at G-04 and G-05 (NFR-LEAK-01). |
-| Status | Open. Must be discharged **before** `features-and-splits` or any downstream unit above enters functional design or implementation. |
+| Status | Open. **Exit condition on stage 3.1, not an entry condition — ruled 2026-08-22 by the project decision owner (GOV-2026-08-22-REM-01 Rec 2).** `features-and-splits` and the downstream units above **may enter** `functional-design` (3.1); that is where the contract is authored. **No affected unit may complete or exit 3.1 without its approved contract**, and **no implementation may proceed** while this blocker stands. The prior wording ("must be discharged before … enters functional design") was unsatisfiable, since 3.1 is named as the contract's own approval authority. The substantive protection is unchanged and is not weakened: the leakage safeguard stands in full — per-fold train-only fitting on the named fold's training partition only, with a `LeakageError` when `train`'s index is not a subset of that partition, and NFR-LEAK-01's evidence still owed to the Supervisor at G-04 and G-05. |
 
 ### BLK-05 — the D-17 target-schema test has no module and no §12 entry
 
@@ -544,24 +609,92 @@ a whole and a partially-built unit must not read as covered.
 | Affected artifact | the D-17 target-schema test implied by FR-P1-03-5's criterion — present in no mandated test-module set |
 | Owning unit | `target-standardization` |
 | Downstream units | `features-and-splits` (consumes the target rows the test would validate) |
-| Required resolution | `functional-design` (3.1) names the module. Because TE §12 fixes the tree to file level, adding it is a further tree amendment whose count impact is tracked the way ADR-10's 18 → 19 is tracked. **This stage chooses no name.** |
-| Approval authority | Supervisor — a §12 tree amendment |
-| Status | Open |
+| Required resolution | `functional-design` (3.1) names the module. Because TE §12 fixes the tree to file level, adding it is a further tree amendment whose count impact is tracked the way ADR-10's 18 → 19 is tracked. |
+| Approval authority | Project decision owner under the recorded student/supervisor authority equivalence — a §12 tree amendment |
+| Status | **Open on implementation; naming and documentation limbs RESOLVED 2026-08-22.** See the limb table below. |
+
+#### BLK-05 limb status, synchronized 2026-08-22
+
+**Approving a filename does not resolve the blocker.** Two limbs are complete, two are not.
+
+| Limb | Status | Evidence |
+|---|---|---|
+| **Module naming** | **RESOLVED 2026-08-22** — `tests/test_prepared_target_schema.py` | Approved by the project decision owner; change record `CR-2026-08-22-TARGET-SCHEMA-TEST` |
+| **Documentation** — §12 tree entry and downstream artifact updates | **RESOLVED 2026-08-22** | Added to the TE §12 `tests/` tree with its responsibility comment, and to the §12 amendment-provenance table. The tree now enumerates **20** test modules |
+| **Test implementation** | **PENDING** | The module does not exist. Creation stays gated by **G-09** and stage 3.5 |
+| **Execution evidence** | **PENDING** | The test has never been run. **No result of any kind is claimed** |
+
+**Approved acceptance behaviour**, fixed by the owner and recorded so implementation
+cannot narrow it: a valid row containing exactly D-17's approved 16 fields **passes**; a
+row containing an excluded or additional field **fails**; a row missing any required field
+**fails**.
+
+### BLK-06 — the canonical protected set is not established; enumeration and cardinality deferred to stage 3.1
+
+| Field | Value |
+|---|---|
+| Affected artifact | `src/data/phase_contract.py` — the `protected_hashes` key list on `TransitionManifest`, built by `build_transition_manifest` (this is the `phase_transition_manifest` **artifact** TE §2.2 names; `component-methods.md` defines no function of that name, and the design surface is given here so stage 3.1 searches the right symbol), and `diff_protected_hashes`' pass condition |
+| Owning unit | `governance-guards` |
+| Downstream units | none by import. The block reaches **G-P2** and **G-P3C**, whose pass condition is an empty protected-hash diff, and `fixtures-and-reproducibility` as the supporting unit on TA-27's hash-diff evidence. |
+| What this stage states | **Nothing about the enumeration or its size.** Every artifact in this stage, and the 2.6 design artifacts it consumes, now refer only to "the canonical protected set derived from the union of TE §2.2 and TE §7.0B". **The final enumeration and cardinality are deferred to stage 3.1** by direction of the authorized project decision owner, 2026-08-22. **No cardinality for the canonical set is stated, invented or carried.** Source-document item counts appearing in the rows below (§2.2's twelve, §7.0B's sixteen, FR-P1-06-1's fourteen) are quoted as facts about those documents, never as the canonical size — scoped 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 5, the earlier wording having read as an unqualified "no number" that the next rows appeared to contradict. |
+| Current approved candidate, recorded not adopted | `requirements.md` **FR-P1-06-1** carries a fourteen-item candidate list — model source; TensorFlow/Keras environment; architecture serialization; feature manifest; target contract; split/mask manifests; grids; selected hyperparameters; optimizer/loss policy; seeds; metrics; statistical configuration; bootstrap; reporting hierarchy — origin `IMPL-1` (`GOV-2026-08-20-RA-01`). It is named here as the starting point 3.1 must validate, **not** as the canonical set. FR-P1-06-1 is an approved requirement and is **not** edited by this stage. |
+| Why it is a candidate rather than the canonical set | FR-P1-06-1 states the set as "the union of TE §2.2 and §7.0B" but records no deduplication or subsumption rule, and §7.0B names immutables its list does not visibly carry. Derived against the authority: TE §2.2's `phase_transition_manifest` sentence lists **12** items; TE §7.0B's post-Phase-1 immutables sentence lists **16**; (both cited by anchor text rather than line number — the line numbers this row carried, 121 and 333, pointed at §2.2's *Exit evidence* row and the §7.0A heading respectively after v3.4's line shifts, and were corrected 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 4) FR-P1-06-1's list is §2.2's twelve plus `bootstrap` and `reporting hierarchy`. **`history window`**, **`station encoding`** and **`baselines`** appear in §7.0B and in none of its items. `history window` and `station encoding` are plausibly inside `feature manifest`, and `embargo` inside `split/mask manifests`, but no artifact says so; **`baselines` has no plausible home in that list at all.** |
+| Consequence while open | `diff_protected_hashes` can return the empty mapping that *is* G-P3C's pass condition while a Phase 2 confirmatory run has changed a baseline definition (M-01 persistence, M-02 seasonal persistence, M-03 climatology), a history window or a station encoding. That is protected-protocol drift passing undetected at a full-board gate. |
+| Required resolution — stage 3.1 (`functional-design`), before it designs `phase_contract.py` | (a) **Extract** every protected item from TE §2.2 and TE §7.0B. (b) **Define and document the deduplication rule**, including every subsumption it relies on. (c) **Produce the canonical item-by-item protected enumeration.** (d) **Calculate the actual cardinality from that enumeration** — derived and printed, never carried from prose, a finding's text or an earlier revision. (e) Ensure **`protected_hashes.keys()` exactly matches the canonical protected set**. (f) **Fail validation if any protected item is missing, extra, renamed or changed.** (g) **Require approval of the canonical enumeration before the phase-transition gate (G-P2, and G-P3C's "protected hashes unchanged" condition) can pass.** |
+| Recorded tension — status **amendment conditionally required** | FR-P1-06-1's acceptance criterion asserts the hash-diff test's key list "equal to the fourteen-item enumeration". If 3.1's canonical enumeration differs from that list in content or cardinality, FR-P1-06-1 must be amended through **Vision §15.2** change control before the difference is treated as official. This stage adopts no reading on which is right, **does not silently reinterpret or rewrite FR-P1-06-1**, and amends neither the requirement nor the Technical Environment. |
+| Precedence, where the two disagree | **The canonical authority-derived content takes precedence over preserving an unsupported count.** The derived set must **not** be forced to equal fourteen merely to keep FR-P1-06-1 intact, and no replacement cardinality may be assumed or hard-coded before the derivation is performed. Precedence settles what the manifest must hash; it does **not** waive the reconciliation — FR-P1-06-1 must still be formally amended under §15.2 before the phase-transition gate can pass. |
+| What this blocker does and does not block | It does **not** block stage 3.1 from performing the derivation — that is the work 3.1 is obliged to do. It **does** block (a) implementing `TransitionManifest.protected_hashes`' key list to any fixed size before the derivation exists, and (b) final acceptance at **G-P2** and **G-P3C** until the canonical set either matches FR-P1-06-1 or FR-P1-06-1 is amended under §15.2. Tracked as **RES-03** in § Residual governance obligations. |
+| Approval authority | The canonical enumeration: the authorized project decision owner, under the recorded student/supervisor authority equivalence. Any change to FR-P1-06-1's item set or to TE §2.2/§7.0B: Vision §15.2 change control, as with every other governed-artifact amendment in this project. No governing document makes a separate supervisor signature mandatory for either step beyond that equivalence. |
+| Status | **Open. Enumeration-method and enumeration limbs RESOLVED 2026-08-22; implementation limb open.** See the limb table below. Registered 2026-08-22 per governance finding `UG-01` (`GOV-2026-08-21-UG-01`). |
+
+#### BLK-06 limb status, synchronized 2026-08-22
+
+**BLK-06 is NOT fully closed.** Four limbs are resolved and two are not.
+
+| Limb | Status | Evidence |
+|---|---|---|
+| **Canonical enumeration approach** — deduplicated union of the authoritative lists | **RESOLVED 2026-08-22** | **D-24**. Deduplication rule stated explicitly; §2.2 (12 items) and §7.0B (16 items) both enumerated by hand from the authority |
+| **Required additions** — `history window`, `station encoding`, `baselines` | **RESOLVED 2026-08-22** | D-24. Each mapped onto no item of the previous fourteen; `baselines` had no plausible home at all, which is why a Phase 2 baseline change could otherwise pass G-P3C's empty-diff condition |
+| **Final canonical list and actual cardinality** | **RESOLVED 2026-08-22 — 17 items** | D-24's enumeration. **Cardinality calculated from that enumeration** (14 carried forward + 3 added), not assumed |
+| **FR-P1-06-1 amendment** | **APPLIED 2026-08-22** | Vision §15.2, change record `CR-2026-08-22-PROTECTED-SET`. Amended 14 → 17; prior text preserved in an inline audit comment |
+| **Precise protected artifacts — per-item binding to concrete config fields and file paths** | **PENDING** | D-24 names each item's governing artifact and intended hashable representation. **None of the four config files or six `src/` packages exists**, so no field path is claimed to exist today. Binding completes at functional design |
+| **Implementation evidence** | **PENDING** | `TransitionManifest.protected_hashes` and `diff_protected_hashes` do not exist. Not implemented, not executed, not passing. Creation stays gated by **G-09** and stage 3.5 |
+
+**Baselines — what item 17 protects**, enumerated as D-24 requires: M-01 persistence,
+M-02 24-hour seasonal persistence, M-03 station×month×hour climatology, **B-01 the
+IRI-2016 benchmark with its frozen generation configuration including the 2000 km
+ceiling**, and C-01 the CODE final GIM comparator with its frozen product identity and
+interpolation rule.
+
+### BLK-07 — `acquisition`'s access under the restricted December root is not routed through the chokepoint
+
+| Field | Value |
+|---|---|
+| Affected artifact | `scripts/00_acquire_prepared_vtec.py` and `notebooks/00_acquire_phase1_vtec.ipynb` — every read or write under `evidence/locked_test_restricted/`, including the `audit_evidence_2022-FULL/` artifact D-9 promotes as Phase 1's acquisition input, and any re-acquisition touching calendar 2022-12 |
+| Owning unit | `acquisition` |
+| Downstream units | none by import. The block reaches **G-P1A**, **G-05** and **G-06** through the access record every December read owes, and `inventory-and-registry`, whose G-P1A coverage audit consumes this unit's released artifacts |
+| Required resolution | A governed contract routing **every** `acquisition` read or write under `evidence/locked_test_restricted/` through `governance-guards.open_restricted`, so the access-log row carrying `locked_test_accessed = true` is written **before** the first December record is read. `acquisition` constructs no path into the restricted root directly. |
+| Why it exists | Stage 2.6 fixes the rule without qualification (`component-dependency.md` § Shared resources): `evidence/locked_test_restricted/` is owned by `data.locked_test` and **"nothing else may construct a path into it"**, serialised through one chokepoint. This artifact previously granted `foundation` and `acquisition` unqualified path construction into `evidence/` with no carve-out for the restricted subtree, and omitted `acquisition` from the `open_restricted` consumer list — while naming FULL, which sits under that root, as acquisition's D-9 input. **D-15** states the consequence directly: *"Reading the D-9 input is now a logged December access. FULL contains 21,258 December rows, so any consumer that opens it must write an access-log row first."* |
+| What makes it consequential | D-15 records that the restricted root is **"a governance boundary, not an access control"** — no filesystem permission, no ACL, no encryption. The boundary holds only while exactly one code path reaches it; a second sanctioned path is not a weaker boundary, it is none. **RES-01** separately records that permitted-read access logging is **NOT TESTED**, so no downstream check would catch the omission. |
+| Consequence while open | An implemented `acquisition` could open the D-9 input, or write re-acquired December bytes, with no access-log row — a December access with no record, in breach of Vision §8.3, D-15 and FR-P1-02-3, discoverable only after the fact and not retrospectively curable except as a retrospective entry, as D-15's own rows 3, 4 and 5 already are. |
+| Approval authority | The contract: `functional-design` (3.1). The artifact statements applied 2026-08-22: the authorized project decision owner. |
+| Status | **Open. Exit condition on stage 3.1, on the BLK-03 / BLK-04 pattern.** `acquisition` **may enter** `functional-design` (3.1); it **may not complete or exit** 3.1 without the approved routing contract, and **no acquisition run may touch calendar 2022-12** while this blocker stands. Registered 2026-08-22 per governance finding `UG2-01` (`GOV-2026-08-22-UG-02` Recommendation 1, option 2, approved by the project owner). **No December record was opened in raising or applying it.** |
 
 ### Roll-up by unit
 
 | Unit | Blockers | Blocked scope |
 |---|---|---|
-| `foundation` | BLK-01 | `src/data/config.py`, `tests/test_determinism.py`. The unit's other owned artifacts are unblocked. |
-| `governance-guards` | BLK-01 | `src/data/locked_test.py`. `phase_contract.py` and `reuse_registry.py` are unblocked. |
-| `target-standardization` | BLK-05 | the D-17 schema test only. |
+| `foundation` | — | None open. **BLK-01 closed 2026-08-22**: `src/data/config.py` and `tests/test_determinism.py` are authorized by name only, remain unwritten, and stay gated by G-09 and stage 3.5. |
+| `governance-guards` | BLK-06 (implementation limb) | `phase_contract.py`'s `TransitionManifest.protected_hashes` (built by `build_transition_manifest`) and `diff_protected_hashes` (BLK-06) — its `assert_phase_boundary` / `assert_no_raw_fields` limbs and `reuse_registry.py` are unblocked. **BLK-01 closed 2026-08-22**: `src/data/locked_test.py` is authorized by name only and remains unwritten. |
+| `acquisition` | BLK-07 | every read or write under `evidence/locked_test_restricted/` — the `open_restricted` routing contract. Its provider-retrieval, provenance, manifest-hashing and NaN-at-acquisition scope is unblocked. |
+| `target-standardization` | BLK-05 (implementation limb) | the D-17 schema test only. Module named `tests/test_prepared_target_schema.py` and documented 2026-08-22; **not implemented, not executed**. |
 | `features-and-splits` | BLK-04 | `transforms.py` and everything asserting NFR-LEAK-01 through it. |
 | `models-and-baselines` | BLK-03, BLK-04 ↓ | `train.py`'s confirmatory-prediction path (BLK-03); the training it performs on transform-fitted features (BLK-04, inherited). |
 | `evaluation-and-comparison` | BLK-03 ↓, BLK-04 ↓ | anything consuming the confirmatory prediction (BLK-03); every metric computed over transform-fitted features (BLK-04). Both inherited. |
 | `statistical-inference` | BLK-03 ↓, BLK-04 ↓ | the bootstrapped differential. Both inherited. |
 | `regimes-diagnostics-reporting` | BLK-03 ↓, BLK-04 ↓ | every reported number derived from the above. Both inherited. |
-| `fixtures-and-reproducibility` | BLK-01, BLK-02, BLK-03 ↓, BLK-04 ↓ | the clean-run clause and the `plumbing_7day` manifest — jointly, its completion gate (BLK-01, BLK-02). Inherited: the clean-run tolerance comparison and TA-21's traceability matrix consume artifacts from all four units carrying BLK-03 and BLK-04, so what those contracts permit bounds what a clean run can be said to reproduce. |
-| `acquisition`, `inventory-and-registry`, `external-products` | — | none of their own; all three depend on BLK-01's artifacts through the stage entry contract. |
+| `fixtures-and-reproducibility` | BLK-02 (implementation limb), BLK-03 ↓, BLK-04 ↓ | the `plumbing_7day` manifest — hence its completion gate. **Station resolved 2026-08-22 as BSHM (D-20); manifest, execution and measured evidence still pending.** Inherited: the clean-run tolerance comparison and TA-21's traceability matrix consume artifacts from all four units carrying BLK-03 and BLK-04, so what those contracts permit bounds what a clean run can be said to reproduce. **BLK-01 closed 2026-08-22**: TE §13.2 now carries the `PYTHONHASHSEED=0` clause, so the clean-run contract is no longer blocked on its absence. |
+| `inventory-and-registry`, `external-products` | — | none of their own; both call `foundation`'s now-authorized stage entry contract, and `inventory-and-registry`'s December coverage audit is already routed through `open_restricted`. |
 
 Roll-up notation matches the `Blockers` column in § Unit definitions and each
 unit's `**Blockers.**` line: an unmarked ID is owned here, **↓** is inherited
@@ -571,12 +704,113 @@ Per Q7, no unit above may be described as independent-and-ready while a blocker
 naming it stands, and independence in `unit-of-work-dependency.md` § Independent
 unit sets is a statement about the graph, never about readiness.
 
+## Residual governance obligations — carried to stages 3.1 and 3.2
+
+**Four** obligations are **not** discharged by this stage's remediation — three from
+`GOV-2026-08-21-UG-01` and **RES-04**, added 2026-08-22 from `GOV-2026-08-22-DP-01`. The
+original three from `GOV-2026-08-21-UG-01` are **not** discharged by this
+stage's remediation. Each is recorded here with a truthful status, an owner and
+the closure evidence that would actually discharge it. **None is closed,
+verified, resolved or fully tested**, and none may be described in those terms
+until the closure evidence in its row exists. This section is a handoff record:
+stage 2.8 (`delivery-planning`) carries it into Construction, and stages 3.1
+(`functional-design`) and 3.2 (`nfr-requirements`) are its named consumers.
+
+| ID | Obligation | Status | Owner | Due stage / gate | Closure evidence required |
+|---|---|---|---|---|---|
+| **RES-01** (UG-03 option C) | No dedicated acceptance criterion verifies that a **permitted** December read — including the required pre-G-05 coverage and regime audit — writes its access-log row **before** the first December record is read | **Ownership remediated; dedicated test coverage open.** This scenario is explicitly **NOT TESTED** | `inventory-and-registry` performs the read; the criterion is authored by stage **3.2** (`nfr-requirements`) | Candidate §19 TA row routed through **Vision §15.2** change control and the 3.2 / G-05 freeze-manifest workflow; due before **G-05** | An approved §19 TA row that (a) distinguishes permitted coverage-audit access from prohibited pre-G-05 performance execution, and (b) asserts `locked_test_accessed = true` is recorded **before** the first December record is read; plus a passing test result against it |
+| **RES-02** (UG-06) | `team-practices.md` § Testing Posture is stale on two separate figures: it defines the Phase 1 acceptance set as **WS-09 through WS-20**, omitting FR-WS-4's WS-01 exception; and it states **17** §12-tree test modules, where the amended TE §12 tree and REQ-ENG-4 now both read **19** | **Deferred to authorized gate** | Practices-affirmation gate owner | Next authorized **practices-affirmation gate** | The affirmed-practices text amended at that gate to match FR-WS-4's 13-row set **and** the 19-module count re-derived from the amended TE §12 tree |
+| **RES-04** (GOV-2026-08-22-DP-01) | No captured report exists for the 2026-08-21 run of the three existing test modules, all of which reach the restricted December root by recursive traversal | **Open — not started.** Deliberately not attempted; running them before `open_restricted` exists would manufacture the breach | `governance-guards` (mechanism); execution at build-and-test (3.6) and the Bolt 12 in-Kaggle run | Prerequisite: `open_restricted` exists and enforces. Due before **G-05** | A captured rerun report, with the access-log entry written **before** the read, fail-closed on logging failure, real date and time recorded, and linked to the historical gap without rewriting it. Preferred route: unrestricted months and synthetic fixtures, which cover most of the intended behaviour |
+| **RES-03** (UG-01) | FR-P1-06-1 required `protected_hashes.keys()` to equal a "fourteen-item enumeration" while the canonical protected set had not been derived from TE §2.2 and TE §7.0B | **Derivation and amendment COMPLETE 2026-08-22; implementation binding PENDING** | Derived and frozen as **D-24** (17 items, cardinality calculated); FR-P1-06-1 amended 14 → 17 under `CR-2026-08-22-PROTECTED-SET`; per-item binding and implementation owned by stage **3.1** and gated by G-09 | Binding before `phase_contract.py` is designed; implementation evidence before **G-P2** and G-P3C |  Closed limbs: the item-by-item enumeration with its explicit deduplication rule, the calculated cardinality, and the §15.2 amendment — all recorded in D-24 and the change record. Open limbs: per-item binding to concrete config fields (no config file exists) and the implementation of `protected_hashes` / `diff_protected_hashes` (not written, not executed) |
+
+### RES-04 — documented rerun of the three existing test modules under `open_restricted`
+
+Registered 2026-08-22 by project-owner decision, against the evidence gap recorded in
+`evidence/experiment_registry.md`.
+
+| Field | Value |
+|---|---|
+| **Obligation** | A **new, independently documented rerun** of `tests/test_acquisition_window.py`, `tests/test_phase_boundary.py` and `tests/test_release_hashes.py`, producing a captured report as new evidence |
+| **Why it exists** | The 2026-08-21 run left **no run log, no captured output and no evidence record**. All three modules reach `evidence/locked_test_restricted/` through recursive traversal rooted at `evidence/`, and their reads are content reads. Whether those reads executed is **unproven**, and the `open_restricted` chokepoint did not exist |
+| **Status** | **Open — not started, and deliberately not attempted.** The tests were **not** run during the 2026-08-22 governance work: executing them then would have manufactured the breach rather than documented it |
+| **Owner** | `governance-guards` owns the `open_restricted` mechanism the rerun depends on; execution sits with whoever runs the suite at **build-and-test (3.6)** and the Bolt 12 in-Kaggle run |
+| **Prerequisite — hard** | `src/data/locked_test.py`'s `open_restricted` **exists and enforces** the approved access procedure. That module is unwritten and gated by **G-09** and stage 3.5, and its routing contract is **BLK-07**, an exit condition on functional design |
+| **Due gate** | Before **G-05**, alongside RES-01, whose test gap this rerun is the practical counterpart of |
+
+**What the rerun must do, in order.** Each step is a requirement, not a description:
+
+1. **Establish that the requested access is authorized** — recorded before anything opens.
+2. **Write and preserve the access-log entry BEFORE the restricted artifact is opened.**
+3. **Fail closed if logging fails.** No read proceeds on a failed or unwritten log entry.
+4. **Execute the permitted inspection or verification** — the performance-blind class only.
+5. **Capture the resulting report as new evidence**, retained rather than transient.
+6. **Record the actual rerun date and time** — the real ones, at the time it runs.
+7. **Link the new report to the historical evidence gap** without rewriting the historical
+   record.
+
+**Preferred route — synthetic or non-December first, and most of it can be.** Assessed
+2026-08-22 against what each module actually does:
+
+- `test_release_hashes.py` — hashes `sha256_manifest.json` artifacts. Verifiable in full
+  against the **unrestricted** months (2022-01 through 2022-11) and synthetic fixtures.
+- `test_phase_boundary.py` — checks forbidden field names against the D-17 contract.
+  Verifiable against unrestricted artifacts and synthetic rows carrying deliberately
+  forbidden fields.
+- `test_acquisition_window.py` — asserts record dates fall inside declared windows.
+  Its **primary** assertion (no December-dated record appears in a non-December folder) is
+  verifiable **entirely on unrestricted months**, which is precisely the defect it was
+  written for.
+
+**What genuinely needs the restricted root** is narrower than the whole suite: confirming
+that the restricted root's *own* artifacts pass the same checks. **That part is not
+performed until the applicable gate explicitly permits the access**, and it is not
+performed to satisfy this obligation early.
+
+**What this obligation does not do.** It does **not** repair the 2026-08-21 gap, does not
+retrospectively authorize that run, and **a passing rerun is never evidence that the
+original event was properly logged.** The historical record stands as written.
+
+**RES-01 — what must not be claimed.** Adding `inventory-and-registry` to the
+Supporting column of WS-18 and TA-18 assigns **evidence ownership only**. It does
+**not** create dedicated test coverage for permitted-read logging, and UG-03's
+durable test gap is **not** closed by it. WS-18 and TA-18 as written test the
+execution guard — they block *unauthorized* pre-G-05 December performance
+execution — which is a different scenario from an *authorized* coverage-audit
+read that must still be logged before access. No new acceptance criterion is
+created or approved in this stage: the required Vision §15.2 authority is not
+available here.
+
+**RES-03 — the derivation rules, stated so 3.1 cannot shortcut them.** No
+replacement cardinality may be assumed or hard-coded before the derivation is
+performed. The canonical set is derived item by item from TE §2.2 and TE §7.0B
+under an explicit deduplication rule, and its cardinality is calculated from the
+resulting enumeration. **The derived set must not be forced to equal fourteen
+merely to preserve FR-P1-06-1.** Where the two disagree, the
+**authority-derived content takes precedence over preserving an unsupported
+count** — and FR-P1-06-1 must still be formally reconciled through Vision §15.2
+before the phase-transition gate can pass. FR-P1-06-1 is **not** silently
+reinterpreted or rewritten by this stage.
+
+**RES-03 — what FR-P1-06-1 does and does not block.** It does **not** block
+stage 3.1 from performing the derivation; the derivation is precisely the work
+3.1 is obliged to do, and nothing in FR-P1-06-1 forbids it. It **does** block
+(a) implementing `TransitionManifest.protected_hashes`' key list to any fixed size before
+the derivation exists, and (b) final acceptance at **G-P2** and **G-P3C** until
+either the canonical set is shown to match FR-P1-06-1 or FR-P1-06-1 is amended
+under §15.2. See **BLK-06**.
+
 ## Assumptions & Open Questions
 
 - **[assumption]** `REQ-ENG-5` ("every hard rule has a negative-path test") is a property of the whole suite rather than of one module. It is assigned to `governance-guards` as the unit that owns the negative-control discipline and the independent checks, with `features-and-splits`, `models-and-baselines` and `fixtures-and-reproducibility` recorded as supporting. No other unit was a better single owner, and leaving it unassigned would have broken both-direction coverage.
 - **[assumption]** `FR-P1-01-10` (credentials and secrets) is assigned to `foundation`, which owns the environment and platform-root resolution that supplies them, with `acquisition` supporting as the unit that consumes them. The requirement sits in the FR-P1-01 acquisition group, so this placement follows the mechanism rather than the numbering.
 - **Upstream drift, recorded not propagated.** `components.md` states "94 requirement rows"; the count derived from `requirements.md` here is **105**, the difference being IDs added in stage 2.3's fourth through sixth revisions. This stage uses 105.
-- **Open, supervisor-owned.** ADR-10's four-part §12/§13.2 amendment; D-122's sign-off; § Known defects row 12 (the `plumbing_7day` station count); the one-month all-station scientific fixture window (Q-31).
+- **Closed 2026-08-22, recorded so the earlier open status is not carried forward.** ADR-10's four-part §12/§13.2 amendment (**BLK-01** — applied to TE v3.4 under `CR-2026-08-22-TE-AMEND`) and **D-122's sign-off** (closed at Vision §14.2, seed values verified unchanged before closure: development seed 42 and final seeds {1337, 2024, 7}. The bootstrap seed **20221201** is frozen separately by TE §13.6 / TC-19 (Q-27) and is **not** part of D-122’s item set — attribution corrected 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 11). Both closures are **authority only**: none of the four ADR-10 modules exists, and the seed values reach `three_seed_mean` as a parameter from `ConfigSnapshot.seeds` via `configs/seeds.yaml` and **must never be inlined in `src/models` or any other implementation file** (TC-03e). BLK-03's contract limb stays open.
+- **Still open — all six, enumerated rather than sampled** (corrected 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 6; the earlier bullet named three of six, the shape `project.md` § Way of Working forbids in a handoff). **BLK-02** — `requirements.md` § Known defects row 12's station-selection limb; the reading is settled, the single station is not selected. **BLK-03** — the confirmatory-prediction contract limb; the seed *authority* is closed, the contract is not. **BLK-04** — the per-fold train-only transform contract. **BLK-05** — the D-17 target-schema test has no module name and no §12 entry. **BLK-06** — the canonical protected-set derivation and its three unmapped TE §7.0B immutables. **BLK-07** — `acquisition`'s `open_restricted` routing contract for reads under the restricted December root. BLK-03, BLK-04 and BLK-07 are stage 3.1 **exit** conditions; BLK-02 and BLK-05 are owner/supervisor decisions; BLK-06 blocks G-P2 and G-P3C. § Blocker register and § Roll-up by unit carry each in full.
+- **Closed since this artifact's first draft, corrected 2026-08-22.** The one-month all-station scientific fixture window is **no longer open under Q-31**: it was frozen as **D-14** — March 2022, all three cells — by `CR-2026-08-21-FREEZES`, which also records the mandatory limitation that March is an equinox month reproducing neither December's winter-solstice regime nor its activity distribution. An earlier revision of this artifact carried it as open; the freeze supersedes that. Corrected per governance finding `UG-08` (`GOV-2026-08-21-UG-01`).
+- **Open, a recorded textual conflict in the governing texts — not resolved here, and not resolved by inference.** Vision §6.6 and TE §6.1 remain in textual conflict on the Phase 1 target contract: §6.6's "Each row must retain exactly these fields" reads over TE §6.1's Phase 2-shaped ten-field list, which includes `valid_satellite_count` and defines `vtec_tecu` "at observed IPPs", while TE §7.0 requires `test_phase_boundary.py` to fail if Phase 1 produces a satellite field. **D-17 governs the approved practical Phase 1 interpretation** — the contract enumerated from the audited five-column product (`ut1_unix`, `gdlat`, `glon`, `tec`, `dtec`), with `valid_satellite_count` recorded not-applicable in Phase 1 and nothing substituted — and `target-standardization` is defined against D-17 on that basis. The underlying source-text conflict has **not** been silently resolved, amended or adopted by inference; it is recorded at `requirements.md` § Known defects row 10. Any permanent reconciliation of §6.6 and TE §6.1 runs through Vision §15.2 change control. Recorded per governance finding `UG-02`.
+- **`RES-02` — status: Deferred to authorized gate.** `team-practices.md` § Testing Posture still defines Phase 1's acceptance set as "WS-09 through WS-20". Approved requirement **FR-WS-4** additionally includes **WS-01 as a named exception** (WS-09–WS-20 countersigned 2026-08-16; the WS-01 exception approved 2026-08-21 under the recorded authority equivalence). **Current and downstream work follows the approved FR-WS-4 interpretation: WS-01 plus WS-09 through WS-20.** `team-practices.md` remains textually stale; correcting it is deferred to the next authorized practices-affirmation gate, `org.md` reserving that file for that gate, and it is **not** edited here or anywhere in this remediation. This discrepancy must **not** be read as an unapproved change to the accepted test set — the accepted set is FR-WS-4's. The separate "17 §12-tree modules" figure in the same file is a **second** stale figure, and it is now stale in a way it was not before: **BLK-01 closed 2026-08-22**, the amended TE §12 tree enumerates **19** test modules, and REQ-ENG-4 was re-derived to 19 from that tree. The 17-versus-19 question is therefore settled **in the authority documents**; what is not settled is `team-practices.md`, which is **untouched here and must stay untouched** — `org.md` reserves that file for the practices-affirmation gate. Both stale figures are carried on the same `RES-02` row. Recorded per governance finding `UG-06`; tracked as `RES-02` in § Residual governance obligations.
+- **`RES-01` — status: Ownership remediated; dedicated test coverage open. This scenario is NOT TESTED.** No dedicated acceptance criterion verifies that a **permitted** December read — including the required pre-G-05 coverage and regime audit — writes its `locked_test_accessed = true` access-log row **before** the first December record is read. Adding `inventory-and-registry` to WS-18's and TA-18's Supporting column assigns evidence ownership and creates **no** test coverage; WS-18 and TA-18 as written test the execution guard against *unauthorized* pre-G-05 performance execution, a different scenario. The candidate criterion is routed to stage **3.2** through **Vision §15.2** change control and must distinguish permitted coverage-audit access from prohibited pre-G-05 performance execution. **No new acceptance criterion is created or approved in this stage** — the required §15.2 authority is not available here. UG-03's durable test gap is **not** closed. Tracked as `RES-01`.
+- **`RES-03` — status: Pending canonical derivation; amendment conditionally required.** FR-P1-06-1 still requires `protected_hashes.keys()` to equal a "fourteen-item enumeration". Stage **3.1** must derive the canonical protected set item by item from TE §2.2 and TE §7.0B under an explicit deduplication rule; **no replacement cardinality may be assumed or hard-coded before that derivation**, and the derived set must **not** be forced to equal fourteen merely to preserve FR-P1-06-1. Where the canonical set differs in content or cardinality, the **authority-derived content takes precedence over preserving an unsupported count**, and FR-P1-06-1 must still be formally amended through §15.2 before the phase-transition gate can pass. FR-P1-06-1 is **not** silently reinterpreted or rewritten here. Tracked as `RES-03`; see **BLK-06**.
 - **Open, a `requirements.md` change.** The advisory NOT-READY finding on FR-P1-05-18 (no criterion tests the storm-event count's source) and the 40 requirements with no §16/§19 row. Both are inputs to stages 3.1 and 3.2, not resolvable here.
 - **Open, a §12 defect.** The `02` ordinal collision between the Phase 1 and Phase 2 target scripts, carried from `services.md` unresolved.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -587,6 +821,35 @@ unit sets is a statement about the graph, never about readiness.
 **Reviewer:** aidlc-architecture-reviewer-agent
 **Date:** 2026-08-21T15:52:15Z
 **Iteration:** 4 (advisory, single pass)
+
+> **Scope annotation added 2026-08-22 — this receipt does not cover the current text.**
+>
+> The verdict above was issued against the **2026-08-21 revision** of these artifacts.
+> The set has since been materially rewritten twice: on 2026-08-22 under
+> `CR-2026-08-22-TE-AMEND` / `GOV-2026-08-22-REM-01` (BLK-01 closed, BLK-02 partly
+> discharged, BLK-03 and BLK-04 reworded from entry to exit conditions, BLK-06
+> registered, the D-14 fixture-window correction applied), and again on 2026-08-22
+> under `GOV-2026-08-22-UG-02` Recommendations 1–8 (BLK-07 registered, BLK-01 and
+> D-122 closures propagated, the restricted-root carve-out stated, `requirements.md`
+> row 12 amended).
+>
+> **No re-review has been run against the current text**, and the verdict above must
+> not be read as covering it. The statements below that are stale by that change are
+> **preserved rather than edited**, because a reviewer's receipt is a record and not a
+> working document. Enumerated rather than counted (an earlier version of this
+> annotation asserted "two", underived, in an annotation whose whole subject is
+> unreliable counts — corrected 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 8):
+>
+> 1. the BLK-01 count caveat, which the register has since closed;
+> 2. **D-122**, listed among "carried-forward open items", closed 2026-08-22;
+> 3. **the Q-31 fixture window**, listed as open, frozen as **D-14** (March 2022);
+> 4. the roll-up table's line reference (563), which has moved to 613–624;
+> 5. the `**Blockers.**` prose line reference (463–464), now 468;
+> 6. the story-map gaps-table line reference (280–291), now roughly 283–297.
+>
+> A fresh advisory pass is an outstanding item recorded in `GOV-2026-08-22-UG-02`
+> § Human decisions still required; the owner approved Recommendation 5 option 3 —
+> annotate now, re-review after remediation lands.
 
 ### Findings
 

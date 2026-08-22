@@ -19,10 +19,51 @@
 - **Review Override**: 
 
 ## Workspace State
-- **Project Root**: C:\Users\LOTUS\Desktop\Thesis_toshkari
-- **Languages**: TypeScript
+- **Project Root**: c:\Users\s_inv\Desktop\test
+- **Languages**: Python 3.11
 - **Frameworks**: Unknown
 - **Build System**: Unknown
+
+<!--
+  Workspace-state corrections applied 2026-08-22 per governance report
+  GOV-2026-08-21-UG-01, PART 2, on the project decision owner's instruction.
+  Corrected by hand: `aidlc-state.ts set` refuses direct writes ("workflow
+  lifecycle transitions are engine-owned") and offers no path for these two
+  workspace-detection fields, so no tool route exists. Only these two fields
+  changed; no lifecycle field, checkbox, phase, stage pointer or governance
+  record was touched.
+
+  ORIGINAL VALUES, preserved for the audit trail:
+    Project Root : C:\Users\LOTUS\Desktop\Thesis_toshkari
+    Languages    : TypeScript
+
+  WHY Project Root changed: the recorded path does not exist on this machine and
+  is not this workspace. Direct inspection confirms the active project root is
+  c:\Users\s_inv\Desktop\test — it holds PreFlight/, evidence/, governance/,
+  scripts/, notebooks/, tests/ and the aidlc/ record tree this file lives in.
+  The original value is a stale artifact of workspace detection run on a
+  different machine.
+
+  WHY Languages changed: the original value traced to the AI-DLC framework's own
+  tooling (.claude/tools/*.ts, .claude/hooks/*.ts), which is workflow
+  infrastructure rather than a project deliverable. The research code is Python
+  3.11 — scripts/audit_ec1_drivers.py, scripts/merge_coverage_year.py,
+  tests/test_acquisition_window.py, tests/test_phase_boundary.py,
+  tests/test_release_hashes.py (bytecode confirms cpython-311, pytest 8.3.5), and
+  notebooks/madrigal_phase1_coverage_audit.ipynb (kernelspec python3,
+  language_info 3.11). Technical Environment §8.1 pins Python 3.11 and §8.3 makes
+  Python-only a hard normative rule, prohibiting R, Julia and MATLAB for the
+  pipeline. team-practices.md § Code Style recorded this correction as needed and
+  it had never been applied. TypeScript remains the language of the workflow
+  tooling; it is not a project language.
+
+  Frameworks and Build System are left as "Unknown" deliberately: no
+  pyproject.toml, requirements.txt or src/ exists yet, so any value would be
+  invented rather than detected. See PART 10 of the governance report.
+-->
+
+<!-- markdownlint-disable-line -->
+
 
 ## Execution Plan Summary
 - **Total Stages**: 17

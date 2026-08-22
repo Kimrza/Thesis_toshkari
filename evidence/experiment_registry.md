@@ -32,13 +32,83 @@ fact a G-06 reviewer must be able to establish.
 
 | 7 | Year re-merge under **D-18** (`scripts/merge_coverage_year.py`) | 2026-08-21 | December 2022 rows re-read from `evidence/locked_test_restricted/audit_evidence_2022-12/` and merged into a regenerated year artifact | Deduplicated record union, per-day/per-month coverage counts and hashes for the full year, December included | No — none exists to inspect | `true` | **Written BEFORE the read.** Discharges the `PROVENANCE_NOTICE.md` obligation: the previous FULL was merged 2026-08-13T06:27:03Z, before the 2026-08-16 correction of the January and December folders, so its provenance pointed at superseded per-month hashes. Authorised by the project owner, 2026-08-21. The prior FULL is preserved, not overwritten |
 
-**Rows 3, 4 and 5 are retrospective; row 6 is not.** Rows 3 and 4 were recorded in § Acquisition runs below, a table with no
+| 8 | Governance re-review of AI-DLC stage 2.8 (`GOV-2026-08-22-DP-01` remediation) — restricted-root inspection | **Access: 2026-08-22, during the session; exact clock time not captured per command.** **This row created: 2026-08-22T10:47:50Z** | `evidence/locked_test_restricted/` — a directory listing (entry names, sizes, modification times), and a recursive string search over `*.md` / `*.json` / `*.jsonl` that reached `sha256_manifest.json` files beneath the restricted root | **Nothing computed.** No coverage statistic, no day count, no record count, no hash. The string search was for the literal `locked_test_accessed` and returned no match beneath the restricted root | No — none exists to inspect | `true` | **Retrospective row, created 2026-08-22. Logged AFTER the read, not before** — the same ordering defect row 5 records. Actor: the AI assistant conducting the governance re-review, on the project owner's instruction. **Scope: metadata and manifest-class file contents only. No December VTEC target value, coverage figure or performance quantity was read, parsed, computed, ranked, plotted or summarised.** Authorization: governance verification directed by the project owner; the purpose is custody assessment, not analysis, which is the class Vision §8.3 permits performance-blind. **The pre-read logging obligation was not met, and this row does not repair that** |
+
+**Rows 3, 4, 5 and 8 are retrospective; rows 6 and 7 are not.** Rows 3 and 4 were recorded in § Acquisition runs below, a table with no
 `locked_test_accessed` column, so a reviewer reconstructing custody from this log found
 two events while the manifests showed four. Row 5 was not recorded anywhere until now.
-All three are marked retrospective rather than back-dated: the rows did not exist before
-the reads, and no row can be made to have preceded them. The registry itself was created
-2026-08-16, after events 1 to 4. What these rows close is the discrepancy; what they
-cannot close is the ordering.
+**Row 8 was added 2026-08-22.** All four are marked retrospective rather than back-dated:
+the rows did not exist before the reads, and no row can be made to have preceded them. The
+registry itself was created 2026-08-16, after events 1 to 4. What these rows close is the
+discrepancy; what they cannot close is the ordering.
+
+**Row 8 records a metadata-and-manifest read, not a data read**, and the distinction is
+kept because collapsing it would make the log less useful rather than more cautious. What
+a G-06 reviewer needs to establish is when December *target values* were seen. Row 8 saw
+none. It is logged anyway because FR-P1-02-3's scope is *access*, unqualified, and row 6
+set the precedent of logging even a byte-level hash read where no field was parsed.
+
+### Evidence gap — the 2026-08-21 test-suite run is NOT logged, and deliberately so
+
+Recorded 2026-08-22 as a **governance finding rather than an access-log row**, because the
+access event cannot be substantiated to the standard this log requires.
+
+**What is established.** Three test modules exist — `tests/test_acquisition_window.py`,
+`tests/test_phase_boundary.py`, `tests/test_release_hashes.py`. Each resolves a
+`RESTRICTED_DIR` path, and each reaches it through a **recursive** traversal rooted at
+`evidence/`, so the restricted root is inside their search scope by construction rather
+than by intent. Their reads are content reads, not metadata: `csv.DictReader` over
+`madrigal_coverage_raw_records.csv`, `csv.reader` over `madrigal_coverage_*.csv`, and
+`hashlib.sha256` over whole artifacts opened in binary. `__pycache__` holds bytecode dated
+2026-08-21 13:24–13:25 under CPython 3.11 / pytest 8.3.5, and `.pytest_cache/v/cache/nodeids`
+records **226 collected node IDs**, last written 2026-08-21T16:09. No `lastfailed` file
+exists, which is consistent with a last run carrying no failures.
+
+**What is NOT established, and why no row was written.** *Which assertions executed.* The
+cache proves collection and a completed run; it does not prove that any particular test
+body ran, and several of these tests `pytest.skip(...)` when their subject is absent. **No
+run log, no captured output, no report and no evidence record exists for that run.** So
+the access is **highly likely on the code path and unproven in execution**. Inventing a
+row — with an access time, a scope and an authorization basis — would fabricate exactly the
+fields this register exists to make trustworthy. The owner's instruction is explicit: where
+the event cannot be substantiated, register an evidence gap, not an access record.
+
+**Why it matters anyway.** If those reads did execute, they were December reads with **no
+access-log row**, since `governance-guards.open_restricted` — the chokepoint BLK-07
+requires — does not exist. That is BLK-07's registered hazard occurring in fact rather than
+in principle, and it is the second independent reason RES-01's "permitted-read logging is
+NOT TESTED" matters.
+
+**What would close this gap — tracked as `RES-04`.** A rerun producing a captured report,
+executed **after** the `open_restricted` chokepoint exists and **after** its access-log row
+is written — never before. **The tests were deliberately NOT executed during the 2026-08-22
+re-review**, for precisely this reason: running them then would have manufactured the
+breach rather than documented it.
+
+The obligation is registered with an owner, a hard prerequisite and a due gate in
+`aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md`
+§ RES-04. Its required sequence: establish authorization; **write and preserve the
+access-log entry before opening**; **fail closed if logging fails**; execute the permitted
+inspection; capture the report as new evidence; record the **actual** rerun date and time;
+and link that report back to this gap **without rewriting this record**.
+
+**Preferred route, and most of the suite qualifies:** the intended behaviour of
+`test_release_hashes.py` and `test_phase_boundary.py` is verifiable in full against the
+**unrestricted** months (2022-01 to 2022-11) and synthetic fixtures, and
+`test_acquisition_window.py`'s primary assertion — that no December-dated record appears in
+a non-December folder — is verifiable **entirely on unrestricted months**, that being the
+defect it was written for. What genuinely needs the restricted root is narrower: confirming
+that the root's own artifacts pass the same checks. **That part waits until the applicable
+gate explicitly permits the access.**
+
+**A passing rerun will never be evidence that the 2026-08-21 event was properly logged.**
+This record stands as written, and no future report amends it.
+
+**Owner decision this gap does not take.** Whether the 2026-08-21 run constituted an
+unauthorized December access is **not resolved here**. Retrospective logging would not
+resolve it either — an unauthorized access stays unauthorized once logged. The scope, had
+it executed, is coverage-record and byte-level hash reading, which is the performance-blind
+class Vision §8.3 permits; what is missing is the pre-read record, not the authority.
 
 **Row 6 is the first December access logged in advance**, which is the standard from this
 point (FR-P1-02-3, FR-P1-05-12).

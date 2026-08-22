@@ -460,6 +460,45 @@ definition exists, and this one is adopted for characterisation only.
 (TC-03f permits a single station); the one-month all-station scientific fixture window is
 not fixed by this entry. Both remain open under Q-31.
 
+### D-11 clarification — scope of the `Stations:` line (2026-08-22)
+
+**Approved 2026-08-22 by the project owner** under the recorded student/supervisor
+authority equivalence, on governance finding `REM-03` (`GOV-2026-08-22-REM-01` Rec 3,
+option C). Q-31 assigns fixture station, dates and tolerances to the Student, so this
+clarification is student-owned and needs no separate countersignature.
+
+**This clarification resolves a tension inside D-11's own text. It is not a statement
+that the entry was already unambiguous.** D-11 contains two statements about stations:
+
+- under **Decision**, "**Stations:** all three governed cells — ARUC 40/44, BSHM 32/35,
+  NICO 35/33";
+- under **Not decided here**, "the seven-day plumbing fixture's **station is not fixed by
+  this entry** (TC-03f permits a single station)".
+
+Read together with the surrounding text, the `Stations:` line describes **the scope over
+which the seven-day window was evaluated and frozen** — the same three cells the
+"Measured VTEC completeness in the selected window" table reports, which is the evidence
+the window's eligibility rests on. It does **not** set the plumbing fixture's execution
+scope, which the "Not decided here" paragraph expressly leaves open. Where the two are in
+tension the more specific statement governs, and "Not decided here" is the sentence that
+speaks about the plumbing fixture.
+
+**What is therefore settled and what is not:**
+
+| Dimension | Status |
+|---|---|
+| Fixture **window** — 2022-11-01…07, November 2022 | **Frozen by D-11.** Unchanged by this clarification |
+| Three-cell completeness figures | **Eligibility evidence** for that window. Unchanged, and not a claim about execution scope |
+| Plumbing fixture **station count** | **One**, per `Technical Environment` §15.1 ("One station") and TC-03f. This clarification retains §15.1's execution scope rather than displacing it |
+| Plumbing fixture **station identity** | **OPEN.** Not selected, not frozen. Reserved to the project owner under Q-31 |
+
+**No authority document is amended by this clarification** — §15.1's "One station" stands
+as written, and no window, measured figure, tolerance or scientific value changes.
+**BLK-02 remains open** until the single station is explicitly selected and approved and
+the manifest evidence exists. D-11's standing pre-freeze obligation is unaffected: ARUC's
+one-bin shortfall on five of seven days must be explained before the manifest is frozen,
+and that obligation applies to any option in which ARUC is the selected station.
+
 ---
 
 ## D-12 — Vision §6.1B numerical coverage minimum (freeze)
@@ -921,6 +960,387 @@ satisfied — no feature has been built.
 
 ---
 
+## D-20 — Plumbing fixture station (freeze, Q-31)
+
+**Decision date:** 2026-08-22. **Decided by:** the project decision owner under the
+recorded student/supervisor authority equivalence. **Authority:** Q-31 assigns fixture
+station, dates and acceptance tolerances to the Student (TE §18.2).
+
+**Decision.** The `plumbing_7day` walking-skeleton fixture executes on **BSHM 32/35**, the
+single station TE §15.1 mandates. D-11's window (2022-11-01 to 2022-11-07 inclusive) is
+unchanged; this decision supplies only the station identity D-11 left open.
+
+**Measured basis** — from D-11, sourced from
+`evidence/audit_evidence_2022-11/madrigal_coverage_raw_records.csv`:
+
+| Cell | Days present | Hourly bins | Records |
+|---|---|---|---|
+| **BSHM 32/35 — selected** | 7/7 | **168/168 (100.00%)** | 1,810 |
+| ARUC 40/44 | 7/7 | 163/168 (97.02%) | 1,195 |
+| NICO 35/33 | 7/7 | 155/168 (92.26%) | 964 |
+
+**Rationale.** BSHM is the only candidate with complete observed coverage of the window.
+The plumbing fixture is a smoke test of pipeline wiring (TC-03f), so avoidable missingness
+in it would confound a plumbing failure with a data gap. ARUC and NICO remain available —
+and are the better choices — for **separate** missing-data and robustness tests, where
+their gaps are the point rather than a confound.
+
+**What this closes and what it does not.** It closes **BLK-02**'s station limb, so
+`tests/fixtures/plumbing_7day/fixture_manifest.yaml` can now state its identity. It does
+**not** supply any manifest content: per TE §15.1 and §15.2 every count, tolerance,
+row-count range, support and missingness limit, timestamp tolerance and CPU runtime range
+is **measured from the fixture run and frozen**, and none exists yet because no fixture has
+been run. **ARUC's unexplained one-bin shortfall on five of seven days** — D-11's pre-freeze
+obligation — is **not** discharged and does not need to be, because ARUC is not selected;
+it revives only if ARUC is later chosen for this fixture.
+
+**Limitation carried from D-11, unchanged.** The window does not reproduce December's
+winter-solstice regime or activity distribution and is not representative of the locked
+month. The seven-day fixture is never scientific evidence.
+
+---
+
+## D-21 — F10.7 daily value and its availability rule (freeze)
+
+**Decision date:** 2026-08-22. **Decided by:** the project decision owner under the
+recorded authority equivalence. **Authority:** EC1-R-2 (decide and freeze the F10.7
+daily-value selection rule), due G-04 before G-05; TE §18.2 Q-16/Q-17 (any feature, its
+safe lag, or its missing rule) is a Student + Supervisor item exercised under the recorded
+delegation.
+
+**Decision.** The canonical daily F10.7 value is the **median of that UT day's observed
+flux readings** (`fluxobsflux`, observed and **not** 1-AU-adjusted, per D-10.3).
+
+**Measured basis**, derived 2026-08-22 from the held provider file
+`evidence/audit_ec1_2026-08-15/nrcan_f107/fluxtable.txt` (SHA-256 recorded in
+`evidence/audit_ec1_2026-08-15/EC1-AUDIT.md`):
+
+- **At calendar-day granularity, at least one observation is present on 365 of 365 days of
+  2022** — 1,101 readings across those days, 360 days with 3 readings, 4 with 4, 1 with 5.
+  This does **not** assert uninterrupted within-day coverage or uninterrupted provider
+  availability, and is not a claim of "zero outage".
+- Three daily observing slots, whose UT drifts seasonally: **(17, 20, 23) UT on 245 days**
+  and **(18, 20, 22) UT on 120 days**. 20 UT is the only slot present on every day.
+- On the four high-spread days the observed outlier occurs at **18 UT** (2022-01-18),
+  **20 UT** (2022-03-31), **20 UT** (2022-08-28) and **17 UT** (2022-08-29). **Because
+  outliers occur across multiple UT slots, fixed-hour selection without quality controls
+  can retain contaminated observations.** The median returns the uncontaminated value on
+  all four of these days.
+
+  *Bounded deliberately.* This decision does **not** claim that no single slot is clean, or
+  that no fixed-hour convention is safe. Neither stronger statement has been independently
+  demonstrated; what is demonstrated is the four-day distribution above.
+
+**Availability rule — binding, and the reason the median is usable at all.** A daily
+median is not available until every reading it is computed from has been observed.
+
+- **Observation-completion time of day *D*'s median** is the timestamp of *D*'s **last**
+  reading: **23 UT on 245 days and 22 UT on 120 days** of 2022, derived from the same file.
+  Worst case is 23 UT on day *D*.
+- **The value used at a forecast origin is the most recent daily median whose
+  observation-completion time is strictly earlier than that origin.** Under D-10.3's
+  previous-day contract this is `median(D-1)` for any origin on day *D*: complete by 23 UT
+  on *D-1* at the latest, which precedes the earliest possible origin (00 UT on *D*) by at
+  least one hour.
+- **No same-day look-ahead.** `median(D)` is never used at any origin on day *D*.
+- **Carry-forward on unavailability.** Where the next daily median is not yet available at
+  an origin, the **most recent previously available approved value** is used, and the
+  carry-forward is recorded. This composes with, and does not override, the ≤ 3 h
+  carry-forward bound on external drivers.
+- The **trailing 81-day mean** is computed over daily medians ending at the safe-lagged
+  day, never centered.
+
+**One limb evidenced, one limb open — stated rather than assumed.** The rule above is
+enforced on **observation availability**, which is fully derivable from the held file. The
+provider's **publication** latency is **not** derivable from it: `fluxtable.txt` carries
+observation date and time but no publication timestamp, and `EC1-AUDIT.md` records that the
+file "carries no qualifier, flag or provenance column". So this decision fixes the
+observation-availability rule and leaves publication latency as an **open obligation**
+(EC1-R-4: ask NRCan directly). Until it is established, the ≥ 1 hour observation margin
+above is the whole of the guarantee, and it is not claimed to cover publication delay.
+
+**Not a model feature.** This decision fixes a predictor value and its availability. It
+creates no quality-control feature — see D-23.
+
+---
+
+## D-22 — F10.7 duplicate-UT record handling (freeze)
+
+**Decision date:** 2026-08-22. **Decided by:** the project decision owner under the
+recorded authority equivalence. **Authority:** EC1-R-2's duplicate-stamp tie-break limb.
+
+**Decision.** Where two or more readings share one UT timestamp, the **mean of the
+duplicated measurements** is taken as that timestamp's value, with the **duplicate count
+logged** and a **quality-control flag** set on the affected day.
+
+**Provider-correction precedence, and why it is currently unexercisable.** If authoritative
+provider documentation or the source data establishes that one duplicate is an official
+correction or replacement, **the provider's correction semantics take precedence over the
+mean.** On the evidence held today that clause cannot be exercised: `fluxtable.txt` has
+exactly seven columns — `fluxdate`, `fluxtime`, `fluxjulian`, `fluxcarrington`,
+`fluxobsflux`, `fluxadjflux`, `fluxursi` — and **no correction, revision, version or
+provenance column**, which `EC1-AUDIT.md` records independently. Nothing in the file
+distinguishes a correction from a repeat measurement. The precedence clause therefore
+stands as a standing rule that activates if NRCan documentation is later obtained
+(EC1-R-4); it is **not** applied by inference now.
+
+**No day is silently discarded.** All five affected days remain in the primary dataset:
+
+| Date | UT slots as recorded | Duplicated slot |
+|---|---|---|
+| 2022-03-26 | 17, 20, 23, 23 | 23 UT |
+| 2022-09-20 | 17, 20, 23, 23 | 23 UT |
+| 2022-10-17 | 17, 20, 23, 23 | 23 UT |
+| 2022-10-23 | 17, 20, 20, 23 | 20 UT |
+| 2022-12-08 | 18, 18, 20, 22, 22 | 18 UT and 22 UT |
+
+**On 2022-12-08.** It is a December date in a **driver** series, not a target value or a
+performance quantity. `EC1-AUDIT.md` already records that its year-wide predictor scan
+touched no seal: no VTEC target, model, prediction or December performance quantity was
+accessed. Handling it under this rule is predictor bookkeeping and is **not** a locked-test
+access under Vision §8.3.
+
+---
+
+## D-23 — F10.7 high-spread day handling (freeze)
+
+**Decision date:** 2026-08-22. **Decided by:** the project decision owner under the
+recorded authority equivalence. **Authority:** EC1-R-3.
+
+**Decision.** High-spread days are **flagged and retained**. The D-21 daily median is the
+representative daily value; the day stays in the primary dataset.
+
+**Affected dates, spreads and slot of the outlier**, derived 2026-08-22 from the held file.
+"High spread" is within-day range (max − min) exceeding 20% of the day's median:
+
+| Date | min | max | median | Spread | % of median | Outlier at |
+|---|---|---|---|---|---|---|
+| 2022-01-18 | 111.6 | 148.8 | 114.5 | 37.2 | 32.5% | 18 UT |
+| 2022-03-31 | 148.7 | 239.5 | 149.8 | 90.8 | 60.6% | 20 UT |
+| 2022-08-28 | 133.5 | 251.9 | 151.6 | 118.4 | 78.1% | 20 UT |
+| 2022-08-29 | 123.0 | 357.1 | 130.6 | 234.1 | 179.2% | 17 UT |
+
+**No exclusion.** None of the four is dropped from the primary dataset. Exclusion would
+require a separately approved scientific decision under its own D-number, and none exists.
+
+**The quality-control flag is not a model feature.** It is recorded in the driver manifest
+as a diagnostic. Admitting it as a model input requires **explicit approval and a causality
+check** establishing that the flag is derivable from information available at the forecast
+origin — the same availability discipline every predictor is held to. Until then it is
+excluded from the feature dictionary, and FR-P1-04-12's closed-input-space assertion is
+what keeps it out.
+
+---
+
+## D-24 — Canonical protected set for the phase-transition manifest (freeze)
+
+**Decision date:** 2026-08-22. **Decided by:** the project decision owner under the
+recorded authority equivalence. **Authority:** BLK-06; TE §2.2, §7.0B; Vision §15.2 for the
+consequent FR-P1-06-1 amendment.
+
+**Decision.** The canonical protected set hashed by `phase_transition_manifest` is the
+**deduplicated union of TE §2.2 and TE §7.0B**, with the three previously unmapped §7.0B
+immutables — **history window**, **station encoding** and **baselines** — carried as
+explicit items rather than left as assumed subsumptions.
+
+**Both source lists enumerated from the authority, 2026-08-22.** TE §2.2 lists **12**
+items; TE §7.0B lists **16**. FR-P1-06-1's existing list is §2.2's twelve plus `bootstrap`
+and `reporting hierarchy` — **14**.
+
+**Deduplication rule, stated explicitly as BLK-06 requires.** A §7.0B item maps onto a §2.2
+item only where the §2.2 item's name covers it without inference:
+`feature schema and safe lags` → `feature manifest`; `target cadence/horizon` →
+`target contract`; `loss` and `optimizer policy` → `optimizer/loss policy`; `splits`,
+`embargo` and `comparison-set masks` → `split/mask manifests`; `TensorFlow/Keras model
+source and serialized architecture` → `model source` + `architecture serialization`.
+`history window`, `station encoding` and `baselines` map onto nothing and are added.
+
+**The canonical set — 17 items. The cardinality is calculated from the enumeration below,
+not assumed** (14 carried forward + 3 added = 17).
+
+| # | Protected item | Governing artifact | Hashable representation |
+|---|---|---|---|
+| 1 | Model source | `src/models/` | Source-file content hash of every model module |
+| 2 | Architecture serialization | TF/Keras serialized architecture | Serialized-architecture hash |
+| 3 | TensorFlow/Keras environment | `requirements.txt` + per-run `pip freeze` | Environment hash (TE §13.1) |
+| 4 | Feature manifest | `configs/features.yaml` | Config-section hash |
+| 5 | **History window** *(added)* | `configs/experiment.yaml` | Field hash — frozen at 24 h and absent from every grid |
+| 6 | **Station encoding** *(added)* | `configs/features.yaml` | Field hash — `station_onehot_*` plus verified `station_lat` |
+| 7 | Target contract | D-17 contract as recorded in `configs/data.yaml` | Config-section hash |
+| 8 | Split/mask manifests | Fold, embargo and comparison-mask manifests | Manifest hashes; covers splits, the 24-hour embargo, and comparison-set masks |
+| 9 | Grids | `configs/experiment.yaml` | Config-section hash — ridge 6, RF 18, LSTM 16 |
+| 10 | Selected hyperparameters | Run record | Selected-value hash |
+| 11 | Optimizer/loss policy | `configs/experiment.yaml` | Config-section hash; covers §7.0B's separate `loss` and `optimizer policy` |
+| 12 | Seeds | `configs/seeds.yaml` | Config hash |
+| 13 | Metrics | `src/evaluation/metrics.py` + config | Source + config-section hash |
+| 14 | Statistical configuration | `configs/experiment.yaml` | Config-section hash |
+| 15 | Bootstrap | `src/evaluation/bootstrap.py` + `configs/seeds.yaml` | Source + parameter hash — 24-hour vector blocks, 10,000 replicates, seed 20221201 |
+| 16 | Reporting hierarchy | `configs/experiment.yaml` | Config-section hash |
+| 17 | **Baselines** *(added)* | See the enumeration below | Source + config hash of every listed method |
+
+**Item 17 — what "baselines" protects, enumerated as required.** The frozen comparison
+methods and their configuration artifacts:
+
+- **M-01** persistence — `src/models/persistence.py` + its `experiment.yaml` entry.
+- **M-02** 24-hour seasonal persistence — same module + entry.
+- **M-03** station×month×hour climatology, fitted on training partitions only —
+  `src/models/climatology.py` + entry.
+- **B-01 — IRI-2016 benchmark**, included on the owner's explicit instruction:
+  `src/external/iri.py` plus its frozen generation configuration — implementation,
+  switches, topside option and the **2000 km altitude ceiling** (TE §18.2 Q-14).
+- **C-01 — CODE final GIM comparator**: `src/external/gim.py` plus the frozen product
+  identity and interpolation rule (TE §18.2 Q-15).
+
+**Consequences, both recorded rather than assumed.**
+
+1. **FR-P1-06-1 conflicts and must be amended under Vision §15.2.** It requires
+   `protected_hashes.keys()` to equal a "fourteen-item enumeration"; the approved canonical
+   set has **17**. The owner authorized the amendment in advance; it is applied against
+   this decision and annotated in place.
+2. **Binding to concrete files completes at functional design.** The "hashable
+   representation" column names the intended form. None of the four config files or six
+   `src/` packages exists yet, so the exact field paths are fixed when the scaffold is
+   built. **No file path or field name in the table above is claimed to exist today.**
+
+**What this closes.** BLK-06's enumeration and cardinality limbs. It does **not** close the
+implementation: `TransitionManifest.protected_hashes` and `diff_protected_hashes` are still
+unwritten, and creating them stays gated by G-09 and stage 3.5.
+
+---
+
+## D-25 — F10.7 conservative availability convention (freeze, explicit assumption)
+
+**Decision date:** 2026-08-22. **Decided by:** the project decision owner under the
+recorded authority equivalence. **Authority:** EC1-R-2/EC1-R-4; TE §6.2; supplements
+**D-21**.
+
+**Why this decision exists.** D-21 fixed the daily F10.7 value as the daily median and
+enforced availability on **observation completion**, which is derivable from the held file.
+It could not fix **publication** availability, because the held archive contains no
+publication timestamp. Rather than block on a provider response, the owner approved a
+conservative convention.
+
+**Decision — the availability convention.**
+
+> A daily F10.7 median for UT day *D* becomes available **no earlier than the start of the
+> following UTC day**, `00:00 UTC on D+1`.
+
+Applied as an availability timestamp on the series:
+
+- `availability_ts( median(D) ) = 00:00 UTC on D+1`.
+- At a forecast origin *t*, the value used is the **most recent daily median whose
+  `availability_ts` is at or before *t***.
+- **`median(D)` is therefore never available at any origin on day *D*.** Same-day
+  look-ahead is prevented by construction, not by review.
+- Under D-10.3's previous-day contract this yields `median(D-1)` for every origin on day
+  *D*, since `availability_ts(median(D-1)) = 00:00 UTC on D`.
+- Where no median is yet available, the most recent previously available approved value
+  carries forward and the carry-forward is recorded.
+- The trailing 81-day mean is computed over daily medians ending at the safe-lagged day,
+  never centered.
+
+**How conservative this is, stated in measured terms.** Observation completion of
+`median(D)` is **22 UT on 120 days and 23 UT on 245 days** of 2022 (derived from the held
+file). The convention delays availability past that by **1 to 2 hours** in every case. It
+is strictly more conservative than the observation-completion rule it supplements, and
+never less.
+
+**This is an explicit project assumption, not a demonstrated fact.** It does **not** prove
+that NRCan published any 2022 value by `00:00 UTC on D+1`, and it does **not** establish
+historical real-time publication availability. **No operational real-time availability
+claim is made or supported by it.** What it does is bound the project's use of the series
+to a rule that cannot leak forward, on an assumption stated in the open.
+
+**Conflicting frozen obligations, identified exactly as required.** Three places require a
+publication timestamp rather than an assumed convention:
+
+| Locus | Text | Bearing on F10.7 |
+|---|---|---|
+| **TE §7.0A stage 4** | *"Build the space-weather availability matrix with observation and publication timestamps."* | Covers the whole matrix, F10.7 included |
+| **EV-12** (TE evidence register) | *"External-feature publication latency … Provider release documentation; 2022 availability matrix; Hp60 availability"*, due at **Feature freeze (G-04)** | Names **provider release documentation** as the evidence |
+| **`components.md`**, `availability.py` | *"observation timestamp, publication timestamp, release status and safe lag per feature"* | Design-level mirror of the same obligation |
+
+**Note what does *not* conflict.** F10.7's own §6.2 dictionary rows — `f107_safe` and
+`f107_81_trailing` — record provenance as *"Approved source"* and do **not** themselves
+demand a publication timestamp, unlike `kp_safe` / `ap_safe`, whose row explicitly reads
+*"observation + publication timestamps"*. The conflict is therefore with the matrix-level
+and evidence-register obligations, not with the feature contract.
+
+**Amendment GRANTED and APPLIED 2026-08-22 — `CR-2026-08-22-EV-12`.** The F10.7 row of the
+availability matrix now records **this declared convention plus the documented absence of a
+provider publication timestamp and an explicit unverified-latency statement**, in place of
+a verified publication timestamp, and **EV-12 is satisfied for F10.7** by that record
+rather than by provider release documentation. Applied to TE **EV-12**, TE **§7.0A stage
+4** and `components.md` → `availability.py` under Vision §15.2, on the project decision
+owner's express approval. The change request that preceded it is retained as
+`governance/CHANGE_REQUEST_2026-08-22_EV-12_f107_publication.md`.
+
+**What the grant does not change.** The convention remains an **explicit project
+assumption**: it still proves nothing about historical publication latency, and **no
+operational real-time availability claim rests on it**. What changed is that recording the
+assumption, the absence and the unverified status is now the sanctioned evidence — so
+**Bolt 5 is not forced to fill a field it cannot obtain**, and EV-12's F10.7 limb is no
+longer unmet at G-04.
+
+---
+
+## D-26 — F10.7 March–April 2022 provenance: recorded unresolved
+
+**Decision date:** 2026-08-22. **Decided by:** the project decision owner under the
+recorded authority equivalence. **Authority:** EC1-R-4; supplements **D-21**.
+
+**Decision.** The provenance of the March–April 2022 F10.7 values spanning the suspected
+outage is recorded as **UNRESOLVED**. The data is **retained**.
+
+**What is asserted, and what is not.**
+
+- **Asserted, measured:** at calendar-day granularity, at least one observation is present
+  on **365 of 365 days** of 2022 in the held archive. This does not assert uninterrupted
+  within-day coverage or uninterrupted provider availability.
+- **NOT asserted, in either direction:** whether values spanning the incident were
+  **measured**, **reconstructed**, **interpolated**, or **provider-corrected**. The held
+  file carries seven columns — `fluxdate`, `fluxtime`, `fluxjulian`, `fluxcarrington`,
+  `fluxobsflux`, `fluxadjflux`, `fluxursi` — and **no qualifier, flag, revision or
+  provenance column**. `EC1-AUDIT.md` records the same limitation independently. The
+  distinction is **not determinable from this file**, and no inference is drawn.
+
+**Retention.** The values stay in the primary dataset. No governing rule requires their
+exclusion: D-5's gap policy governs missing values (none are missing at day granularity),
+and no requirement conditions retention on provenance being established.
+
+**Reporting obligation.** This limitation is carried into the thesis reporting obligations
+alongside the existing F10.7 caveats: any result whose interpretation leans on F10.7
+behaviour across March–April 2022 states that the provenance of those values is unresolved.
+It joins the claims-and-limitations checklist rather than being left in this register only.
+
+**Clarification routes that change no frozen source and re-download nothing.** Two are
+already authorized and are named so the obligation is actionable:
+
+1. **Provider metadata already held.** The file's `fluxadjflux` and `fluxursi` columns are
+   provider-derived from `fluxobsflux`. Their internal consistency across the window is
+   inspectable **from bytes already in the repository** and would show whether the
+   provider's own derivations were computed from the same observed values. This is
+   analysis of held data, not re-acquisition.
+2. **NRCan direct enquiry (EC1-R-4).** Already recorded as optional. **Project progress
+   does not block on a response** (D-25).
+
+**Neither route re-downloads data, changes the frozen source, or touches locked December.**
+
+**A sensitivity analysis that could quantify the dependence — identified, not approved.**
+`ABL-NOSW` already exists as a predeclared ablation in TE §7.2: *"Do forecast-safe
+space-weather features add value beyond lagged VTEC and time?"*, dropping `kp_safe`,
+`ap_safe`, `hp60_safe`, `ap60_safe`, `f107_safe` and `f107_81_trailing`. A narrower
+F10.7-only variant would isolate dependence on the affected series specifically.
+
+**Constraints on any such analysis, stated so it cannot drift:** it runs on the **frozen
+January–November folds only**, uses identical folds, masks and tuning budget, is
+**predeclared as a named run in `experiment.yaml` with a run ID before it executes**, and
+**does not touch locked December** — the locked test is opened once, after G-05, and no
+ablation may precede or substitute for that. **This decision identifies the analysis; it
+does not approve or schedule it.** Approval is a separate owner decision.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -991,3 +1411,10 @@ exposed to challenge and should be read first.
 | D-18 Year re-merge and merge determinism | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. Executed and verified; prior artifact preserved. |
 | D-19 Phase 1 support thresholds | **Yes** | 2026-08-21 | Approved by the project owner under the recorded authority equivalence. TE §18.2 Student + Supervisor item (Q-12), exercised under the recorded delegation. Values measured from January–November only; December excluded by construction. |
 | D-1 Cell convention | **Yes** | 2026-08-21 | Approved by the project owner under the recorded student/supervisor authority equivalence — see the D-1 addendum above. No supervisor signature artifact exists and none is claimed. The IGS site-log validation limitation recorded in D-1 remains separately open. |
+| D-20 Plumbing fixture station | n/a | 2026-08-22 | Q-31 is Student-owned per TE §18.2; no countersignature required. BSHM 32/35 selected on complete 168/168 measured coverage. Closes BLK-02's station limb; supplies no manifest content. |
+| D-21 F10.7 daily value + availability | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. TE §18.2 Q-16/Q-17 item, exercised under the recorded delegation. Daily median frozen; observation-availability rule enforced and derived; **provider publication latency remains open** (EC1-R-4) and is not claimed to be covered. |
+| D-22 F10.7 duplicate-UT handling | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Mean of duplicates with count logging and a QC flag; provider-correction precedence recorded as a standing rule but **currently unexercisable** — the file carries no correction or provenance column. No day discarded. |
+| D-23 F10.7 high-spread handling | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Flag-and-retain on four measured dates; median is the representative value; the QC flag is **not** a model feature without separate approval and a causality check. |
+| D-24 Canonical protected set | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Deduplicated union of TE §2.2 (12) and §7.0B (16) with `history window`, `station encoding` and `baselines` added explicitly; **cardinality 17, calculated from the enumeration**. Closes BLK-06's enumeration limb; triggers a Vision §15.2 amendment to FR-P1-06-1 (14 → 17). Implementation stays gated by G-09. |
+| D-25 F10.7 availability convention | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Conservative convention: a daily median becomes available no earlier than `00:00 UTC` on the following day. **An explicit project assumption, not a demonstrated publication latency**; no operational real-time availability is claimed. **Requests, but does not take,** a §15.2 amendment to TE §7.0A stage 4 and EV-12; until granted, EV-12's F10.7 limb is unmet at G-04. |
+| D-26 F10.7 March–April provenance | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Provenance recorded **UNRESOLVED**; data retained; measured / reconstructed / interpolated / provider-corrected asserted in **no** direction. Carries a thesis reporting obligation. Identifies two clarification routes and an `ABL-NOSW`-style sensitivity — **none approved or scheduled** by this decision. |
