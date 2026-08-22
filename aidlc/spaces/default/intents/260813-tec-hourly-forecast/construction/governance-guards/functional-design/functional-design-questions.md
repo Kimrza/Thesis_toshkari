@@ -4,29 +4,40 @@
 scientific work runs, plus the contract that closes Phase 1.
 **Kind** `library` · **Complexity** M · **Deployment** shared · **Depends on** `foundation`.
 
-This is unit **2 of 12** in the Functional Design pass, and it is the most
-governance-sensitive unit in the plan: it owns the **only** code path into the
-locked December root, the phase-boundary prohibition, and the Phase 1 → Phase 2
-transition manifest.
+Unit **2 of 12**, and the most governance-sensitive in the plan: it owns the only
+code path into the locked December root, both limbs of the phase-boundary
+prohibition, the Phase 1 → Phase 2 transition manifest, and the §10.1 reuse
+register.
 
-**Nothing here decides a scientific value.** Every question is about *mechanism* —
-how a hash is computed, where a list is asserted, what aborts a read. The 17
-protected items are frozen by **D-24**; this stage does not reopen them.
+**Nothing here decides a scientific value.** Every question below is about
+*mechanism* — how a hash is computed, what a walk covers, where an assertion runs,
+what aborts a read. The canonical protected set is frozen by **D-24** and this
+stage does not reopen it.
 
 **G-09 is not signed.** `src/data/phase_contract.py`, `src/data/locked_test.py` and
-`src/data/reuse_registry.py` **do not exist**. BLK-01 closed 2026-08-22 granting
-**authority only** — authority to name a module is not authority to write one.
+`src/data/reuse_registry.py` do not exist; neither does `src/` or `configs/`.
+BLK-01 closed 2026-08-22 granting **authority only** — authority to name a module
+is not authority to write one.
+
+**What does exist, and matters to three of these questions:** `tests/` holds
+three modules today — `test_acquisition_window.py`, `test_phase_boundary.py`,
+`test_release_hashes.py`. Two of them already implement, statically, work this
+unit's contracts specify at run time. Where they diverge, the divergence is named
+below rather than assumed away.
 
 ## Sources
 
-- `../../../inception/units-generation/unit-of-work.md` § 2 `governance-guards` — the `Owns` list, the boundary, the 10 requirements carried, and BLK-06/BLK-07.
-- `../../../inception/units-generation/unit-of-work-story-map.md` — Tables 1 and 2. **Derived, not reasoned:** 10 requirements, **1** with no acceptance row (FR-P1-02-6); tested by TA-07 TA-08 TA-12 TA-18 TA-27 TA-28 WS-10 WS-18; **owns** TA-27 and TA-28; **supports** TA-07, TA-18 and WS-18. Cross-checked against that file's own § Per-unit coverage summary, which agrees.
-- `../../../inception/requirements-analysis/requirements.md` — REQ-ENG-5; FR-P1-02-6; FR-P1-03-2; FR-P1-05-12; FR-P1-06-1 through -4; NFR-PHASE-01; NFR-LIC-01.
-- `../../../inception/application-design/component-methods.md` — the approved contracts for `phase_contract.py` (`assert_phase_boundary`, `assert_no_raw_fields`, `TransitionManifest`, `build_transition_manifest`, `diff_protected_hashes`) and `locked_test.py` (`RESTRICTED_ROOT`, `AccessRecord`, `open_restricted`, `assert_no_december_outside_restricted`).
+- `../../../inception/units-generation/unit-of-work.md` § 2 — the `Owns` list, the boundary that keeps this unit a root, the 10 carried requirements, and BLK-06 / BLK-07.
+- `../../../inception/units-generation/unit-of-work-story-map.md` — Tables 1 and 2 plus § Per-unit coverage summary. **Derived by reading the rows, not carried from prose:** 10 requirements, **1** with no acceptance row (FR-P1-02-6); **owns** TA-27 and TA-28; **supports** WS-18, TA-07 and TA-18. Table 2 also records `RES-01`: permitted-read access logging is **NOT TESTED**.
+- `../../../inception/requirements-analysis/requirements.md` — REQ-ENG-5; FR-P1-02-6; FR-P1-03-2; FR-P1-05-12; FR-P1-06-1 through -4; NFR-PHASE-01; NFR-LIC-01. FR-P1-06-1 was amended 14 → 17 under Vision §15.2 (`CR-2026-08-22-PROTECTED-SET`).
+- `../../../inception/application-design/components.md` — `phase_contract.py`, `locked_test.py` (**NEW**) and `reuse_registry.py` as this unit's three owned modules, each with its requirement set.
+- `../../../inception/application-design/component-methods.md` — the approved contracts: `RAW_MODULES`, `assert_phase_boundary`, `assert_no_raw_fields`, `TransitionManifest`, `build_transition_manifest`, `diff_protected_hashes`, `RESTRICTED_ROOT`, `AccessRecord`, `open_restricted`, `assert_no_december_outside_restricted`.
+- `../../../inception/application-design/services.md` § Stage entry contract — the six ordered steps, with `assert_phase_boundary` as **step 4**, skipped only by `02_build_vtec_target.py`. Its § The nine stage scripts table is the source for the producing-script enumeration in Question 7. § Execution platforms records the fact that a Kaggle session carries **no git working tree**.
 - `../../../inception/application-design/component-dependency.md` § Shared resources — the unqualified carve-out: *"nothing else may construct a path into it."*
-- `evidence/DECISIONS.md` **D-24** — the canonical protected set: **17 items**, each with a governing artifact and a hashable representation. **D-15** — the relocation of 21 December-bearing files into the restricted root.
-- `../../../inception/delivery-planning/bolt-plan.md` § Gate 0 — the permitted/barred boundary before G-09, and the owner's `DP-CHAIR-02` ruling on what functional design may do with an open blocker.
-- `../foundation/functional-design/` — unit 1's `IntegrityError` base (R-01), its two-tier error posture, and its `ConfigSnapshot` contract, all of which this unit builds on.
+- `../../../inception/delivery-planning/bolt-plan.md` § Gate 0 and § Bolt 2 — the `DP-CHAIR-02` ruling, the Definition of Done, and the confidence hypothesis *"that the prohibitions are enforced at run time, not only in tests."*
+- `evidence/DECISIONS.md` **D-24** — the canonical protected set, 17 items, each with a governing artifact and a hashable representation. **D-15** — the relocation of the December-bearing files into the restricted root.
+- `../foundation/functional-design/` — unit 1's `IntegrityError` base (R-01), its two-tier error posture, its `ConfigSnapshot` contract, and **R-15**, which states this unit's chokepoint from `foundation`'s side as the absence of a path.
+- Workspace inspection, 2026-08-22: `tests/test_phase_boundary.py` (266 lines) and `tests/test_acquisition_window.py`, read directly rather than described from a citation.
 - Absent by scope design: `stories` (2.4 `SKIP`), `mockups` (1.6 and 2.5 `SKIP`). `kind: library`, no user-facing surface, so `frontend-components.md` is not produced.
 
 ## What the owner's ruling permits this stage to do with BLK-06
@@ -39,448 +50,424 @@ Quoted from `bolt-plan.md` § Gate 0, the `DP-CHAIR-02` ruling:
 > evidence, risks and a recommendation. **Neither is marked resolved and no
 > approval is assumed until the owner explicitly decides.**
 
-**BLK-06's limb status, as the register records it:** the *enumeration* limb is
-**RESOLVED** by D-24 at 17 items with the cardinality calculated rather than
-assumed. What remains **PENDING** is the **per-item binding to concrete config
-fields and file paths** — and the register notes that none of the four config files
-or six `src/` packages exists yet. Questions 1 through 3 below produce exactly that
+**BLK-06's limb status.** The *enumeration* and *cardinality* limbs are **RESOLVED**
+by D-24 at 17 items, calculated from the enumeration rather than assumed. What
+remains **PENDING** is the **per-item binding to concrete config fields and file
+paths** — and D-24's own consequence 2 records that none of the four config files
+or six `src/` packages exists yet, so *"no file path or field name in the table
+above is claimed to exist today."* Questions 1 through 3 produce exactly that
 binding evidence. **They do not close BLK-06.**
+
+## Three corrections to the previous draft of this file, so they are not re-inherited
+
+Each was found by re-deriving from the source rather than re-reading the draft,
+per `project.md` § Way of Working ("derive a count programmatically from the
+artifact and print it before asserting it").
+
+1. **The config-section count was wrong, and so was its membership.** The draft
+   said *"Eight of D-24's 17 items hash a config-section — items 4, 5, 6, 7, 9, 11,
+   14, 16."* Counted from D-24's Hashable-representation column: **six** items
+   carry a bare `Config-section hash` — **4, 7, 9, 11, 14, 16** — and item **13**
+   carries `Source + config-section hash`, for **seven** items with a
+   config-section component. Items **5 and 6 are `Field hash`**, not
+   config-section, and item **12 is a whole-file `Config hash`**. The draft both
+   over-counted and named two wrong members while omitting item 13. Question 1 is
+   rewritten on the corrected reading, which turns out to change the question:
+   there are **three** granularities in D-24, not one.
+2. **FR-P1-02-6 is not unenforced.** The draft implied its guard was still to be
+   built. `requirements.md` records it as **satisfied 2026-08-21 under D-15** and
+   *"enforced by `tests/test_acquisition_window.py::test_locked_month_values_exist_only_under_the_restricted_path"*,
+   which exists and is green. What FR-P1-02-6 lacks is a **§16/§19 acceptance
+   row**, which is a different thing from lacking a test. Questions 4 and 5 are
+   therefore about the *scope* of an existing green check, not about whether one
+   exists.
+3. **`test_phase_boundary.py` already exists and enforces statically.** The draft
+   treated the import limb as purely prospective. The module is 266 lines and
+   walks `src/` and `scripts/` with `ast`; the approved contract
+   `assert_phase_boundary(phase, *, loaded_modules)` is a **run-time** check on
+   `sys.modules`. Static and run-time enforcement are not the same guarantee, and
+   the bolt-plan's confidence hypothesis is explicitly about the run-time half.
+   Question 7 makes that relationship the decision rather than leaving it implied.
 
 ---
 
 ## Question 1
 
-**Eight of D-24's 17 items hash a "config-section"** — items 4, 5, 6, 7, 9, 11, 14, 16. Nothing defines what a section *is*, or how its hash survives a change that alters no value.
+D-24 binds its 17 items to **three different hash granularities**, and nothing
+defines any of them:
 
-> **⚠ THE PREMISE OF THIS QUESTION WAS WRONG, AND THE QUESTION IS PRESERVED AS
-> ASKED.** Corrected 2026-08-22 after an adversarial review traced the miscount to
-> this line. **Six** items are typed `Config-section hash` — **4, 7, 9, 11, 14, 16**
-> — and items **5** and **6** are typed **`Field hash`**, a different mechanism.
-> Derived:
-> `awk -F'|' '... && $5 ~ /Config-section hash/ {print $2}'` → `4 7 9 11 14 16`;
-> `... /Field hash/` → `5 6`.
->
-> **The answer below is unaffected.** The question asked *how a config-section hash
-> is defined*, and the choice between a byte digest, a canonical serialization and a
-> per-item key list does not depend on how many items use it. Option D remains the
-> answer for the six that do.
->
-> **What the miscount did cost** is now recorded: it caused the artifacts to fold
-> items 5 and 6 into the section contract, and fixing that surfaced the wider gap —
-> D-24 uses **six** hashable-representation kinds and the first issue of the artifacts
-> defined **one**. The full taxonomy is `business-logic-model.md` § W-3a and the
-> field-hash contract is § W-3b.
+| Granularity | Items | Count |
+|---|---|---|
+| Whole-file config hash | 12 (`seeds.yaml`) | 1 |
+| Config-**section** hash | 4, 7, 9, 11, 14, 16 — plus 13 as `Source + config-section hash` | 7 |
+| Config-**field** hash | 5 (`history window`), 6 (`station encoding`) | 2 |
 
-This is the question that decides whether G-P3C is usable: a config-section hash that changes when someone reflows a comment will fail the freeze spuriously, and a team that learns to expect spurious failures stops treating a real one as real.
+Five of those sections live in **one file**: items 5, 9, 11, 14 and 16 all name
+`configs/experiment.yaml`, and items 4 and 6 both name `configs/features.yaml`. So
+"section" has to individuate five regions of one YAML file, and "field" has to
+address two values inside sections that are themselves separately hashed.
 
-How is a config-section hash defined?
+This is the question that decides whether **G-P3C is usable at all**: a hash that
+changes when someone reflows a comment fails the freeze spuriously, and a team
+that learns to expect spurious failures stops treating a real failure as real.
+Note that `foundation`'s **R-16** already forbids machine paths in any governed
+config, so relocating the workspace must not move any of these hashes.
 
-A) Hash the raw bytes of the section as it appears in the file
-   > **Impact**: Trivial to implement and impossible to argue with. But it changes on a comment edit, a key reorder, a quote-style change or a trailing-whitespace fix — none of which alters a governed value. G-P3C would fail on formatting, and the failure would be indistinguishable from a real protected-value change.
+How are the config-section and config-field hashes defined?
 
-B) Hash a canonical serialization of the parsed section — keys sorted, comments dropped, scalars normalised
-   > **Impact**: Stable against every formatting change and sensitive to every value change, which is exactly the required behaviour. Costs a canonicaliser that must itself be frozen, because changing *how* you canonicalise changes every hash — so the canonicaliser's own version belongs in the manifest.
+A) Hash the raw bytes of the region as it appears in the file
+   > **Impact**: Trivial and unarguable. But it changes on a comment edit, a key reorder, a quote-style change or a trailing-whitespace fix, none of which alters a governed value — and it gives no way at all to address items 5 and 6, which are single fields inside a larger hashed section. G-P3C would fail on formatting, indistinguishably from a real change.
 
-C) Hash an explicit field list per item — each protected item names the exact config keys it covers
-   > **Impact**: Most precise and most auditable: a reviewer can see exactly which fields item 9 protects. But it is a hand-maintained list per item, which is the `DP-DATA-01` failure mode — a field added to a grid and not added to the list is silently unprotected.
+B) Hash a canonical serialization of the parsed region — keys sorted, comments dropped, scalars normalised — at whichever granularity the item names
+   > **Impact**: Stable against every formatting change and sensitive to every value change, which is the required behaviour, and it addresses all three granularities uniformly. Costs a canonicaliser that must itself be frozen, because changing *how* you canonicalise changes every hash — so the canonicaliser's own version belongs in the manifest.
 
-D) B for the hash, plus C as an asserted completeness check — canonical serialization hashed, with a per-item key list asserted to cover the section
-   > **Impact**: Stability from B and auditability from C, with the list's completeness machine-checked rather than trusted. Costs both mechanisms and one reconciling test.
+C) Give every item an explicit key list — each of the 17 names the exact config keys it covers, and the hash is taken over exactly those
+   > **Impact**: Most auditable: a reviewer can see precisely which fields item 9 protects, and the field/section distinction disappears because everything is a key list. But it is 17 hand-maintained lists, which is the `DP-DATA-01` failure mode — a key added to a grid and not added to the list is silently unprotected, and item 9's grids are exactly where keys get added.
+
+D) B for the hash, plus C as an asserted completeness check — canonical serialization at the item's granularity, with a per-item key list asserted to cover its region and no other item's
+   > **Impact**: Stability from B, auditability from C, and the list's completeness machine-checked rather than trusted. The "and no other item's" clause matters here specifically: without it, items 5 and 9 both sit in `experiment.yaml` and nothing detects an overlap that would let one item's change hide inside another's hash. Costs both mechanisms plus one reconciling test.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option D, with the canonicaliser version recorded in the manifest. A raw-byte hash (A) would make the phase freeze unusable in practice, and C alone reintroduces exactly the silent-gap failure this project has now corrected four times. D costs one extra test and buys a freeze that fails only when something real changed — which is the whole point of G-P3C's empty-diff pass condition.
+> **💡 Recommendation**: Option D, with the canonicaliser version recorded in the manifest and the section/field boundaries stated per item in `business-rules.md`. Option A cannot express items 5 and 6 at all, which by itself rules it out. Option C alone reintroduces the silent-gap failure this project has now corrected four times. D costs one extra test and buys a freeze that fails only when something real changed — which is precisely what G-P3C's empty-diff pass condition is supposed to mean.
 
-[Answer]: D — canonical serialization hashed (keys sorted, comments dropped, scalars normalised), with a per-item key list asserted to cover the section, and the canonicaliser's own version recorded in the manifest.
+[Answer]:
 
 ---
 
 ## Question 2
 
-`build_transition_manifest` must hash all 17 protected items. **Right now none of the governing artifacts exists** — no config file, no `src/` package, no run record. Later, some items will be legitimately absent at a given moment: Phase 2 grids during Phase 1, selected hyperparameters before tuning has run.
+`build_transition_manifest` must hash all 17 items. **Today none of the governing
+artifacts exists** — no config file, no `src/` package, no run record. And even
+once they do, some items are legitimately absent at a given moment: item 10
+(selected hyperparameters, governed by a *run record*) cannot exist before tuning
+has run, and item 2 (architecture serialization) cannot exist before a model has
+been built.
 
-What does the manifest do about an item whose governing artifact is absent?
+So the manifest is unbuildable now and *partially* unbuildable for most of Phase 1.
+What does it do about an item whose governing artifact is absent?
 
 A) Raise — a manifest that cannot hash all 17 items is not a manifest
-   > **Impact**: Strongest guarantee at the freeze, and the freeze is the only moment that matters for G-P3C. But it makes the manifest unbuildable at every earlier moment, so it cannot be exercised, tested or demonstrated until the very last Bolt — and a mechanism first run at a freeze gate is a mechanism first debugged at a freeze gate.
+   > **Impact**: Strongest guarantee at the freeze, which is the only moment G-P3C cares about. But it makes the manifest unbuildable at every earlier moment, so it cannot be exercised, tested or demonstrated until the last Bolt — and a mechanism first run at a freeze gate is a mechanism first debugged at a freeze gate.
 
 B) Record the item with an explicit `absent` sentinel, and raise only when the manifest is built *for a freeze*
-   > **Impact**: Buildable and testable from Bolt 2 onward, with the full guarantee retained where it counts. Requires a build mode — draft versus freeze — which is a distinction that must be recorded in the manifest itself so a draft can never be mistaken for a freeze.
+   > **Impact**: Buildable and testable from Bolt 2 onward with the full guarantee retained where it counts. Requires a draft-versus-freeze build mode, and that mode must be recorded **inside** the manifest, so a draft can never be mistaken for a freeze by a later reader or by `diff_protected_hashes`.
 
-C) Record `absent` always, and let `diff_protected_hashes` treat `absent → present` as a difference
-   > **Impact**: Uniform and simple, no build modes. But then nothing prevents freezing a manifest with sixteen `absent` entries, and the empty-diff pass condition becomes satisfiable by a manifest that protects nothing.
+C) Record `absent` always, no build modes, and let `diff_protected_hashes` treat `absent → present` as a difference
+   > **Impact**: Uniform and simple. But nothing then prevents freezing a manifest with sixteen `absent` entries, and G-P3C's empty-diff pass condition becomes satisfiable by a manifest that protects almost nothing — the precise failure `component-methods.md` means when it says a short list must not pass silently.
 
-D) B, plus the freeze-mode build additionally asserting the key list equals D-24's 17 items
-   > **Impact**: Closes the last gap — C's failure mode is a *short* list, and only an explicit cardinality-and-membership assertion catches it. This is what `component-methods.md` already demands when it says the key list is asserted equal to the canonical set "so a short list cannot pass silently".
+D) B, plus the freeze-mode build additionally asserting the key set equals D-24's 17 items exactly — no missing key, no extra key, and no `absent` value
+   > **Impact**: Closes C's failure mode, which is a *short or hollow* list, and only an explicit membership-and-cardinality assertion catches it. This is what `component-methods.md` already demands when it says the key list is asserted equal to the canonical set "so a short list cannot pass silently"; B alone leaves the assertion unstated.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option D. The approved design already requires the key-list assertion; B alone leaves it unstated, and C actively defeats it. The draft/freeze distinction is worth its cost because it lets the transition manifest be exercised eleven Bolts before it is relied on — and this project's affirmed posture is that reproducibility and determinism are *executable*, not asserted.
+> **💡 Recommendation**: Option D. The approved design already requires the key-list assertion, so B alone under-delivers against it and C actively defeats it. The draft/freeze distinction earns its cost by letting the transition manifest be exercised ten Bolts before it is relied on — and this project's affirmed posture is that reproducibility and determinism are *executable*, not asserted. Recommend also that the draft/freeze flag be a field of `TransitionManifest` itself rather than a build-time argument, so it survives serialization.
 
-[Answer]: D — record an absent item with an explicit `absent` sentinel so the manifest is buildable and testable from Bolt 2 onward; raise only when the manifest is built **for a freeze**; record the build mode (draft versus freeze) in the manifest itself so a draft can never be mistaken for a freeze; and have the freeze-mode build additionally assert the key list equals D-24's 17 items, so a short list cannot pass silently.
+[Answer]:
 
 ---
 
 ## Question 3
 
-`diff_protected_hashes` returns the differing keys, and an empty mapping is the **G-P3C pass condition**. `component-methods.md` carries a standing caution: until BLK-06 is discharged, *"an empty `diff_protected_hashes` result must not be read as proof that no protected item changed."*
+`diff_protected_hashes` returns the differing keys, and an empty mapping is the
+**G-P3C pass condition**. `component-methods.md` carries a standing caution:
+until BLK-06's implementation limb is discharged, *"an empty
+`diff_protected_hashes` result must not be read as proof that no protected item
+changed."* Question 2's assertion needs an authoritative 17-item list to check
+against. Where does that list live?
 
-Where does the authoritative 17-item list live, so that assertion has something to check against?
+Note the circularity this creates, which is real and not hypothetical: items 5, 9,
+11, 14 and 16 all hash sections of `configs/experiment.yaml`. A list stored in
+that file sits inside a file it protects, so adding an item to the list changes
+the hash of a section the list itself governs.
 
 A) A literal in `phase_contract.py`
-   > **Impact**: Adjacent to the code that uses it and versioned with it. But it is a scientific-governance list in source, and `project.md` § Forbidden prohibits hiding a scientific constant in source code — the 17 items are a governed enumeration, not an implementation detail.
+   > **Impact**: Adjacent to the code that uses it and versioned with it. But `project.md` § Forbidden prohibits hiding a scientific constant in source, and the canonical protected set is a governed enumeration frozen by a D-number, not an implementation detail. It would also put a governance list outside the config-hash net entirely.
 
-B) In `configs/experiment.yaml`, read via `ConfigSnapshot`
-   > **Impact**: Governed, versioned, hashable, and reachable through the existing config path. Consistent with the rule that every scientific constant lives in one of the four config files. But item 12 protects `seeds.yaml` and item 9 protects `experiment.yaml` itself — so the protected-set list would live inside a file it protects, which is circular unless the list is excluded from its own section hash.
+B) In `configs/experiment.yaml`, read through `foundation`'s `ConfigSnapshot`
+   > **Impact**: Governed, versioned, hashable, and reachable through the one sanctioned config path (`foundation` R-15 makes `foundation` the only reader of `configs/`). Consistent with the rule that every governed constant lives in one of the four config files. Leaves the circularity above unaddressed.
 
 C) Derived at run time from D-24 by parsing `evidence/DECISIONS.md`
-   > **Impact**: Single source of truth, and D-24 is the actual authority. But it makes a governance prose document a runtime dependency and a parse target, and a decision record's formatting is not a stable interface.
+   > **Impact**: Single source of truth, and D-24 genuinely is the authority. But it makes a governance prose document a runtime dependency and a parse target, and a decision record's table formatting is not a stable interface — it will break the first time someone reflows a row.
 
-D) B with the circularity resolved explicitly — the list in `configs/experiment.yaml` under a section excluded from item 9's hash, with a test asserting the exclusion
-   > **Impact**: Keeps the list governed and hashable while making the one genuine circularity a named, tested exclusion rather than a latent bug. Costs stating the exclusion in two places — the config and the test — which is exactly where a reviewer would look for it.
+D) B with the circularity resolved explicitly — the list in `configs/experiment.yaml` under a section excluded from every item's section hash, with a test asserting both the exclusion and that no *other* section is excluded
+   > **Impact**: Keeps the list governed and hashable while making the one genuine circularity a named, tested exclusion rather than a latent bug. The second clause matters: an unbounded exclusion mechanism is a hole, so the test must assert the exclusion list has exactly one member. Costs stating the exclusion in two places — the config and the test — which is where a reviewer would look for it.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option D. A is barred by `project.md` § Forbidden. C turns a decision record into a runtime parser target, which will break the first time someone reformats a table. D is B with the circularity handled openly instead of discovered later — and the circularity is real: without the exclusion, adding an item to the list changes the hash of the section that holds the list.
+> **💡 Recommendation**: Option D. A is barred outright by `project.md` § Forbidden. C turns a decision record into a runtime parser target. D is B with the circularity handled openly instead of discovered later, and the circularity is not avoidable by choosing a different file: any of the four configs could hold the list, and items 4, 6, 7 and 12 mean `features.yaml`, `data.yaml` and `seeds.yaml` are all hashed too.
 
-> ⚠ **THE RECOMMENDATION ABOVE IS WRONG AND WAS REJECTED BY THE PROJECT DECISION
-> OWNER.** It is preserved unedited because the reasoning error it contains is the
-> substance of the correction below. **Do not implement option D as recommended.**
-
-[Answer]: **B, modified — MODIFY, not approval.** The project decision owner rejected the recommended option D and directed the following, which governs:
-
-**Ordinary self-protection is not circularity.** `configs/experiment.yaml` stores **only the authoritative 17 protected-item identifiers**, and the resulting config-section digest is stored **externally, in the transition manifest**. Changing the list therefore simply produces a new digest — **that is correct behaviour and must not be described as a circularity.** A change to the protected-set enumeration is a governed change requiring a Vision §15.2 amendment and a D-number, so it *should* be visible as a manifest difference.
-
-**A genuine self-referential digest is a different case, and gets a narrow rule.** If the hashed section ever stores its **own expected digest**, define an explicit canonicalization rule that removes or normalizes **only the self-referential digest value** — nothing else.
-
-**The complete protected-item list is hashed.** It must **not** be excluded from hashing merely to avoid circularity. Excluding it would leave the enumeration that defines what is protected as the one thing unprotected.
-
-**Required tests**, proving the canonical contract handles each case:
-
-| Mutation | Required behaviour |
-|---|---|
-| **Deletion** of a protected key | Digest changes **and** the freeze-mode cardinality/membership assertion fails |
-| **Addition** of a key | Digest changes **and** the membership assertion fails against D-24's 17 |
-| **Duplication** of a key | Rejected — D-24's cardinality of 17 is *calculated from the enumeration*, so a duplicate is a malformed set, not a longer one |
-| **Reordering** where semantically irrelevant | Digest **unchanged** — the 17 items are a set, and Q1's canonical form sorts keys |
-| **Renaming** a protected key | Digest changes **and** the membership assertion fails, because the name is the identifier |
-| Frozen manifest contents | Contains **exactly** the D-24-authorized 17-item set — no more, no fewer, no duplicates |
-
-> **Why the recommendation was wrong, recorded rather than quietly replaced.** It
-> conflated *the list living in a file that contains protected sections* with *the
-> list living inside the section whose digest it determines*. D-24's five
-> `experiment.yaml` items each hash a distinct section — item 5 the history-window
-> field, item 9 Grids, item 11 Optimizer/loss policy, item 14 Statistical
-> configuration, item 16 Reporting hierarchy — and **none** of them covers a
-> `protected_set` section. With the digest stored in the manifest rather than in the
-> section, there is no self-reference to resolve. The recommendation then compounded
-> the error by proposing to **exclude the enumeration from hashing**, which would
-> have left the list that defines the protected set as the only unprotected thing in
-> it. This is a **design** error, not a citation error, and it is the fifth
-> substantive error of this working session.
+[Answer]:
 
 ---
 
 ## Question 4
 
-**FR-P1-02-6 is this unit's one requirement with no §16 or §19 acceptance row** — derived from story-map Table 1, and it is the regression guard `assert_no_december_outside_restricted` implements after D-15 relocated 21 December-bearing files.
+`assert_no_december_outside_restricted(evidence_root)` walks `evidence/`
+recursively and returns any December-bearing artifact found outside the restricted
+root; an empty sequence is the pass condition. FR-P1-02-6's criterion is broader
+than the current implementation: *"No file under `evidence/` at any depth, outside
+`evidence/locked_test_restricted/`, contains a record whose observation date falls
+in December 2022."*
 
-The stakes are specific: `project.md` § Forbidden states **"NEVER derive fold or partition membership from an acquisition directory name or a filename"**, after a year-blind predicate filed locked-month records into `audit_evidence_2022-01/`. So what identifies a "December-bearing artifact"?
+**What the existing green check actually covers, read from the code.**
+`tests/test_acquisition_window.py` sets `RAW_RECORDS = "madrigal_coverage_raw_records.csv"`
+and its `_record_csvs_at_any_depth()` helper returns `EVIDENCE_DIR.rglob(RAW_RECORDS)`
+minus anything under the restricted root. So the walk is **one filename**, not a
+content class. Inventory of `evidence/` by filename shows 16 instances each of
+`madrigal_coverage_raw_records.csv`, `madrigal_coverage_summary.csv`,
+`madrigal_coverage_monthly.csv`, `sha256_manifest.json` and
+`request_manifest.json`. Only the first is scanned.
 
-A) Filename and directory-name pattern matching
-   > **Impact**: Fast and needs no parsing. But it is precisely the mechanism `ML-07` forbids and the one that already failed in this project — a December record inside `audit_evidence_2022-01/` is invisible to it, which is the exact case that produced the rule.
+`madrigal_coverage_summary.csv` carries columns `december_days_present` and
+`december_coverage_pct`. Scanned on 2026-08-22, **every non-zero instance is
+already under the restricted root** — so the check is green *and* the gap is
+latent rather than currently breached. A December-bearing
+`madrigal_coverage_summary.csv` appearing outside the restricted root tomorrow
+would pass.
 
-B) Content scan — parse each artifact and inspect observation dates
-   > **Impact**: Asserts on record dates, which is what the rule requires. Catches the misfiled case that defeated the name-based predicate. Costs parsing every artifact under `evidence/`, and needs a defined behaviour for a file it cannot parse.
+What does this unit's guard walk?
 
-C) B, with an unparseable file treated as a **failure** rather than a pass
-   > **Impact**: Closes the gap B leaves. An artifact the guard cannot read is exactly where a December record would hide, so treating it as clean is the one answer that cannot be defended. Costs occasional friction on a genuinely irrelevant unparseable file, resolved by an explicit recorded exclusion rather than by silence.
+A) Keep the existing scope — the one raw-records filename, at any depth
+   > **Impact**: Zero new work, and it preserves a green check. But it makes the guard's coverage a filename convention, and the `DATA-01` finding is that a narrowed glob "silently stopped checking the artifacts that matter most" — the same shape of defect, one level up. The pass would keep meaning less than FR-P1-02-6's criterion says.
 
-D) C, plus retaining the name-based check as an additional signal that never substitutes for the content scan
-   > **Impact**: A name-based hit is cheap early warning; keeping it as a *supplement* costs nothing and catches an obvious mistake fast. The risk is that a future maintainer reads the presence of the name check as sufficient — so its subordinate status has to be stated where the code lives, not only here.
+B) Every parseable CSV under `evidence/`, discovered by extension
+   > **Impact**: Covers all three coverage CSVs including the summary aggregates, at low cost. But it silently skips the JSON manifests, the HTML driver captures and `experiment_registry.md`, and "parseable" quietly becomes "whatever the CSV reader accepted" — a file that fails to parse disappears from the result rather than being reported.
+
+C) Every file under `evidence/`, dispatched to a declared parser per artifact class, with an **unparseable file treated as a failure** rather than a pass
+   > **Impact**: Matches FR-P1-02-6's stated criterion. A file the guard cannot read is exactly where a December record would hide, so treating it as clean is the one answer that cannot be defended. Costs a parser table and occasional friction on a genuinely irrelevant unparseable file — resolved by an explicit, recorded exclusion rather than by silence.
+
+D) C, plus a declared artifact-class registry asserted to cover every filename present under `evidence/`
+   > **Impact**: Closes the last gap — under C, a new artifact class with no parser is a failure the first time it appears, which is correct but arrives as a surprise mid-run. An asserted registry surfaces the unhandled class at design time instead. Costs a registry that must be updated when a new artifact class is introduced, and that update is the intended friction.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option C. It satisfies the rule exactly and its unparseable-equals-failure clause closes the only hiding place. D's supplementary name check is defensible and I would not argue against it, but this project has now been bitten four times by a mechanism whose weaker half got mistaken for the whole — and adding a weaker half here buys speed the guard does not need.
+> **💡 Recommendation**: Option C. It satisfies the requirement's own wording, and the unparseable-equals-failure clause closes the only hiding place. D is attractive and I would not argue against adding it later, but it front-loads a registry before any of the artifact classes it would enumerate is produced by this pipeline — the current 16-instance inventory is all pre-TC-06 evidence. C's failure-on-unknown gives the same protection without freezing a registry against artifacts that do not exist yet.
 
-[Answer]: C — identify a December-bearing artifact by **content scan on observation dates**, never by filename or directory name, and treat an artifact the guard **cannot parse as a failure** rather than a pass. An unreadable file is exactly where a December record would hide, so a recorded explicit exclusion is the only way past it.
+[Answer]:
 
 ---
 
 ## Question 5
 
-`open_restricted` writes the access record **and flushes it** before returning the path, and **raises when the registry write fails** — *"a failed log write must abort the read, not proceed unlogged."* The ordering is the requirement (`VAL-2`, FR-P1-02-3): an access recorded after the fact **fails** the ordering check rather than satisfying it.
+Question 4 settles *which files* the guard opens. This settles *what counts as a
+hit*, and the two answers together are what "December-bearing" means. Three
+distinct things were found under `evidence/` outside the restricted root:
 
-How is log-before-read *proven* rather than intended?
+1. **A raw December target record** — the case the guard was written for. None
+   currently exists outside the restricted root; D-15 relocated them all.
+2. **A December-derived aggregate** — `madrigal_coverage_summary.csv`'s
+   `december_days_present` / `december_coverage_pct` columns. A count *about*
+   December, carrying no target value.
+3. **A December-dated driver capture** —
+   `evidence/audit_ec1_2026-08-15/kyoto_dst/dst_provisional_202212.html`, present
+   outside the restricted root today. Hourly Dst for December 2022: a record whose
+   observation date falls in December, and not a target value.
 
-A) Code review of the call order
-   > **Impact**: Zero machinery. But the ordering is the single most governance-critical sequence in the project, and "we looked at it" is the evidence class this project's affirmed methodology explicitly rejects in favour of executable guards.
+FR-P1-02-6 says *"Any file containing a December 2022 target value is a locked-test
+artifact"* but its criterion says *"a record whose observation date falls in
+December 2022."* Those two sentences do not pick out the same set, and case 3 is
+the difference. `project.md` § Forbidden also bars December from informing model
+selection, feature selection, thresholds or hyperparameters — with the trigger
+being December being **seen**, not the lock being opened.
 
-B) A test that patches the log writer to fail and asserts the read never happens
-   > **Impact**: Proves the abort limb directly, which is the limb that matters — an unlogged read is the breach. Straightforward to write against a synthetic restricted root.
+What is a hit?
 
-C) B, plus a test asserting the log row is durable on disk before the read is attempted
-   > **Impact**: Proves both limbs — abort-on-failure *and* flush-before-read. The second is what distinguishes this contract from one that logs and reads in the same buffered transaction, where a crash loses the row and keeps the read.
+A) Target values only — case 1
+   > **Impact**: Narrowest, and it matches the requirement's first sentence and the guard's original purpose. Leaves the December Dst capture and the December coverage aggregates outside the guard entirely, which is defensible for Dst (diagnostic-only, never a confirmatory feature) but leaves the aggregates unaddressed.
 
-D) C, plus an ordering assertion in the access log itself — every row carries a timestamp, and the guard records read-completion separately so the interval is visible
-   > **Impact**: Strongest, and it makes a retrospective row detectable in the log rather than only preventable in code. But `experiment_registry.md` already records five retrospective rows from before this guard existed, so the log will contain both kinds and the distinction must be explicit rather than inferred from ordering alone.
+B) Target values and target-derived aggregates — cases 1 and 2
+   > **Impact**: Covers the channel that actually matters for the § Forbidden rule: a December coverage figure sitting in an unrestricted summary is December being *seen* without an access-log row. Costs deciding, per artifact class, which columns are target-derived — a judgement the guard has to encode.
+
+C) Any record whose observation date falls in December 2022 — cases 1, 2 and 3
+   > **Impact**: Matches the criterion's literal wording and needs no target-versus-driver judgement in the guard. But it turns the December Dst capture into a violation, which would force a driver file under the restricted root and route every ordinary Dst read through `open_restricted` — a real cost for a series that is diagnostic-only and must never be a model input.
+
+D) B, with case 3 handled by a separate recorded exclusion naming the driver classes and why they are excluded, tested to be exactly that set
+   > **Impact**: Gets B's protection while making the driver carve-out explicit and bounded rather than an unstated omission — and the exclusion is where a reviewer would look to check that a *target* file has not been mislabelled a driver. Costs one exclusion list and the test that pins its membership.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option C. It proves both limbs of the stated contract with two tests and no new fields. D is attractive but its extra value is detecting a violation the code already makes impossible, and it would add a field to a log that already carries retrospective rows — the interpretation burden outweighs the gain. If you want D, the retrospective rows need an explicit marker first.
+> **💡 Recommendation**: Option D. Option A leaves the aggregate channel open, which is the one that bears on the § Forbidden rule about December being seen. Option C is literal but would sweep a diagnostic-only driver series into locked-test custody and make every Dst read an access-logged event, which buys nothing the lock is for. D states the target/driver line as a tested exclusion rather than leaving it to the reader — and it is the only option under which mislabelling a target file as a driver is detectable.
 
-[Answer]: C, with the ordering stated as a hard precondition — **the access-log append must be durably completed before the December read begins.** A log-write failure **or** a durability failure must **prevent the read**, not merely be reported alongside it. Two tests: patch the log writer to fail and assert the read never happens; and assert the log row is durable on disk before the read is attempted. Log-then-read is the requirement (`VAL-2`, FR-P1-02-3) — an access recorded after the fact fails the ordering check rather than satisfying it.
+[Answer]:
 
 ---
 
 ## Question 6
 
-`assert_phase_boundary` (the **import** limb) and `assert_no_raw_fields` (the **produced-field** limb) are, per the approved design, *"separately checkable per FR-P1-03-2's requirement of two independent results"*, and **"neither substitutes for the other."**
+`open_restricted` writes the access record **and flushes it** before returning the
+path, and **raises when the registry write fails** — *"a failed log write must
+abort the read, not proceed unlogged."* The ordering is the requirement (`VAL-2`,
+FR-P1-02-3): an access recorded after the fact **fails** the ordering check rather
+than satisfying it.
 
-The import limb has a defined call site — step 4 of the stage entry contract. The field limb does not.
+Two facts constrain where the proof can live. `tests/test_locked_test_guard.py` is
+owned by **`features-and-splits`**, not this unit — ADR-03 splits the guard
+deliberately, and assigning that test here would close a cycle. And story-map
+Table 2 records `RES-01`: **permitted-read access logging is NOT TESTED**, with
+its candidate §19 criterion owned by stage 3.2.
 
-Where does the produced-field limb run?
+So this unit must prove its own contract without owning the test that covers both
+limbs. How is log-before-read *proven* rather than intended?
 
-A) At every artifact write, inside the release API
-   > **Impact**: Universal coverage with one call site — nothing reaches disk unchecked. But it puts a Phase 1 prohibition inside `foundation`'s release path, which inverts the dependency: `governance-guards` depends on `foundation`, not the reverse, and the reverse edge would close a cycle.
+A) Code review of the call order
+   > **Impact**: No machinery at all. But this is the single most governance-critical sequence in the project, and "we looked at it" is the evidence class this project's affirmed methodology explicitly rejects — §16 and §19 both state that visual inspection alone is insufficient.
 
-B) At each producing stage script, before it writes
-   > **Impact**: Respects the dependency direction and keeps the check near the producer that knows its own frame. But it is a per-script obligation, so a new script that forgets it is silently unchecked — the list-versus-rule problem again.
+B) A test that patches the registry writer to fail and asserts the read never happens
+   > **Impact**: Proves the abort limb directly, and that is the limb where the breach lives — an unlogged read. Straightforward against a synthetic restricted root, and it belongs to this unit rather than to `features-and-splits`.
 
-C) B, with a completeness test asserting every Phase 1 producing script calls it
-   > **Impact**: Keeps the direction correct and makes the omission a test failure rather than a silent gap. Costs a test that enumerates the producing scripts, which must itself stay current — but it fails loudly when it does not.
+C) B, plus a test asserting the log row is durable on disk before the read is attempted
+   > **Impact**: Proves both limbs — abort-on-failure *and* flush-before-read. The second is what distinguishes this contract from one that logs and reads inside a single buffered transaction, where a crash loses the row and keeps the read. Two tests, no new fields.
 
-D) At the phase-transition manifest build, over every Phase 1 artifact at once
-   > **Impact**: One call site, no per-script obligation, and it runs where the freeze happens. But it catches a violation only at the *end* of Phase 1, after every artifact is written and possibly after downstream work has consumed the contaminated frame.
+D) C, plus a positive-path test for the **permitted** pre-G-05 coverage read, so `RES-01` stops being untested
+   > **Impact**: The only option that closes a recorded residual obligation rather than leaving it to stage 3.2. `inventory-and-registry` performs that audit through this unit's contract, so a test here proving a permitted read is logged before it proceeds covers the shape of it. Risk: the test would exercise this unit's contract against a synthetic root, not the real audit, so it must not be claimed as evidence that the real audit was logged.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option C. A inverts the dependency and would close a cycle the unit design deliberately avoids; D detects the breach too late to be a guard rather than a post-mortem. C is B with the gap closed, and its enumerating test is the same shape as the `RequiredFieldsMap` completeness assertion `foundation` already adopted — one pattern, used twice.
+> **💡 Recommendation**: Option C, with `RES-01` raised at this stage's gate rather than absorbed. C proves both limbs of the stated contract with two tests this unit can own. D is the more ambitious answer and its instinct is right — an untested permitted read is a real gap — but `RES-01` is recorded as owned by stage 3.2 under Vision §15.2, and closing it here with a synthetic-root test would produce evidence that looks like coverage of the real audit and is not. Recommend C plus an explicit gate note that `RES-01` remains open.
 
-[Answer]: C — the produced-field limb runs at each producing stage script before it writes, with a completeness test asserting that every Phase 1 producing script calls it. This keeps the dependency direction correct (`governance-guards` depends on `foundation`, never the reverse, which would close a cycle) and makes an omission a test failure rather than a silent gap.
+[Answer]:
 
 ---
 
 ## Question 7
 
-The §10.1 reuse register carries **all fifteen fields** and must be recorded **before the code is used** and before gate G-P2. `NFR-LIC-01` is accepted by **TA-28**, which this unit owns.
+FR-P1-03-2 requires **two independent pass/fail results**, and
+`component-methods.md` states that *"neither this nor `assert_phase_boundary`
+substitutes for the other."* Two things are unsettled, and they are connected.
 
-"Before the code is used" is an ordering claim. How is it enforced?
+**The import limb already has a static implementation that the contract does not
+describe.** `tests/test_phase_boundary.py` exists — 266 lines — and enforces by
+walking `src/` and `scripts/` with `ast`, skipping explicitly (never passing
+vacuously) where the subject does not exist yet. The approved contract is
+`assert_phase_boundary(phase, *, loaded_modules=sys.modules)`, a **run-time**
+check at step 4 of the stage entry contract. `bolt-plan.md`'s confidence
+hypothesis is *"that the prohibitions are enforced at run time, not only in
+tests"*, because a Kaggle session carries no git working tree and a static scan of
+a local checkout proves nothing about the process that actually ran.
 
-A) Procedural — the register is filled in when a developer copies code
-   > **Impact**: Matches how such registers usually work. But it is unenforced, and the register's whole purpose is licence compliance, where an unrecorded copy is the failure mode with legal consequences rather than merely audit ones.
+**The produced-field limb has no defined call site at all.** `assert_no_raw_fields`
+is specified but `services.md`'s six-step entry contract places only
+`assert_phase_boundary` (step 4). Reading `services.md` § The nine stage scripts,
+**eight** scripts are Phase-1-reachable and write artifacts: `00_acquire_prepared_vtec`,
+`01_inventory_and_registry`, `02_standardize_prepared_target`, `03_verify_processing`,
+`04_build_external_products`, `05_build_features_and_splits`, `06_train_and_predict`,
+`07_evaluate_and_report`. (`02_build_vtec_target` is Phase 2 by definition and is
+the one script that skips step 4; `run_walking_skeleton` is the orchestrator.)
 
-B) A test asserting every third-party-derived module has a register entry
-   > **Impact**: Machine-checkable. But it needs a way to know a module *is* third-party-derived, which is the hard part — an unregistered copy is indistinguishable from original work by inspection.
+How do the two limbs run, and what is the existing static test's standing?
 
-C) B, keyed on a mandatory provenance marker every adapter module must carry
-   > **Impact**: Makes the check tractable: the register is asserted complete against the set of modules carrying the marker, and a module without the marker is asserted to contain no reuse. Costs a convention that must be followed — but the convention's absence is itself detectable at review.
+A) Static only — the existing `ast` scan is the enforcement; add a field scan to it
+   > **Impact**: Already written, and it catches a forbidden import before anything executes, which is earlier than run time. But it defeats the bolt-plan's confidence hypothesis outright: no static scan of a checkout constrains a Kaggle session, and a dynamic import assembled from a string is invisible to `ast`.
 
-D) C, plus the standing default recorded as the primary control: reimplement from the paper with a citation rather than copy
-   > **Impact**: The strongest position, and it matches the affirmed rule already in `project.md` § Forbidden — copying source whose licence is absent, ambiguous or incompatible is prohibited, and reimplementation is the standing default while the AGPLv3 question is open. Under D the register becomes the exception path rather than the expected one.
+B) Run-time only — implement both contracts as specified and retire the static scan
+   > **Impact**: Matches the approved contracts exactly and holds inside the Kaggle session. But it discards a working guard that fires before execution, and it moves first detection of a forbidden import from "any test run" to "the run that would have violated the boundary".
+
+C) Both, with declared roles: the static scan as the early-warning limb, the run-time assertions as the authoritative limb, and `assert_no_raw_fields` called by each of the eight Phase-1 producing scripts before it writes
+   > **Impact**: Keeps the existing green check, satisfies the run-time hypothesis, and gives the field limb a call site that respects the dependency direction — `governance-guards` depends on `foundation`, so putting the field check inside `foundation`'s release path would close a cycle. Per-script obligation means a ninth script that forgets the call is silently unchecked.
+
+D) C, plus a completeness test asserting every Phase-1 producing script calls `assert_no_raw_fields` before its first write
+   > **Impact**: Turns C's omission from a silent gap into a test failure, and it is the same shape as the `RequiredFieldsMap` completeness assertion `foundation` already adopted under R-03 — one pattern used twice. The enumerating test must itself stay current, but it fails loudly rather than quietly when it does not.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option D. The project already has a standing rule that makes reimplementation the default and copying the exception; designing the register as the *exception* path rather than the main road reflects the rule that is actually in force. The AGPLv3 Global-TEC-forecasting repository remains the only approved direct-copy source, and whether its distribution obligations permit that copying is an **unresolved governance dependency this project does not settle** — which is a reason to make copying deliberately harder to reach.
+> **💡 Recommendation**: Option D. A cannot deliver the run-time guarantee the Bolt's confidence hypothesis names, and B throws away enforcement that already works for no gain. The alternative call sites for the field limb are both worse: inside `foundation`'s release API it would invert the dependency and close a cycle; at the transition-manifest build it would catch a contaminated frame only after every Phase 1 artifact was written and possibly consumed — a post-mortem, not a guard. Recommend also that `business-rules.md` state the static scan's *subordinate* status where the code lives, so a future maintainer cannot read its presence as sufficient.
 
-[Answer]: D — a test asserting every third-party-derived module has a register entry, keyed on a mandatory provenance marker every adapter module must carry, with a module lacking the marker asserted to contain no reuse; **and** the standing default recorded as the primary control: reimplement the published method from the paper with a citation rather than copy. The register is the **exception** path, not the expected one. The AGPLv3 Global-TEC-forecasting repository remains the only approved direct-copy source, and whether its distribution obligations permit that copying is an unresolved governance dependency this project does not settle.
+[Answer]:
 
 ---
 
 ## Question 8
 
-**BLK-07** records that `acquisition`'s routing through `open_restricted` was not captured, while `component-dependency.md` § Shared resources states without qualification that *"nothing else may construct a path into it."* Four downstream consumers reach the restricted root through this unit's contract: `inventory-and-registry`, `acquisition`, `features-and-splits`, `evaluation-and-comparison`.
+The §10.1 reuse register carries **all fifteen fields** and must be recorded
+**before the code is used** and before gate G-P2. FR-P1-06-3 additionally requires
+the adapter pattern — reused code lives behind a project-owned adapter and is
+**never pasted into a notebook**. NFR-LIC-01 is accepted by **TA-28**, which this
+unit owns outright with no supporting unit.
 
-How does this unit's design treat the single-chokepoint rule?
+"Before the code is used" is an ordering claim about a human act. How is it
+enforced?
 
-A) State the rule and rely on the four consumers to honour it
-   > **Impact**: Minimal, and consistent with the rule living in the design rather than the code. But D-15 records *why* the boundary matters: it is a **governance boundary, not an access control**, so it holds only while exactly one code path reaches it — and a rule that depends on four units remembering is not "exactly one path".
+A) Procedural — the register is filled in when a developer copies code
+   > **Impact**: How such registers usually work, and it costs nothing. But it is unenforced, and this register's purpose is licence compliance, where an unrecorded copy has legal consequences rather than merely audit ones. TA-28 would reduce to an attestation.
 
-B) A static check asserting no module outside `locked_test.py` contains the restricted-root literal
-   > **Impact**: Makes the single-path claim machine-checkable across the whole tree, and it is cheap — a grep-class assertion. Catches the accidental second path, which is the realistic failure. Does not catch a path assembled at run time from fragments.
+B) A test asserting every third-party-derived module has a complete register row
+   > **Impact**: Machine-checkable, and `tests/test_reuse_registry.py` is already mandated. But it needs a way to know a module *is* third-party-derived, and that is the hard part: an unregistered copy is indistinguishable from original work by inspection.
 
-C) B, plus `open_restricted` raising when its own caller is not one of the four recorded consumers
-   > **Impact**: Closes the run-time-assembly gap too. But it makes the guard depend on knowing its callers, which couples this root unit to four downstream units and is the coupling the DAG design was arranged to avoid.
+C) B, keyed on a mandatory provenance marker every adapter module must carry
+   > **Impact**: Makes the check tractable in both directions — the register is asserted complete against the set of marked modules, and an unmarked module is asserted to contain no reuse. Costs a convention, but a missing marker is itself visible at review, and the marker gives TA-28 something to point at.
 
-D) B, plus BLK-07 raised at this stage's gate as an open item with the four consumers enumerated — not closed here
-   > **Impact**: Gets B's enforcement while keeping BLK-07 where it belongs: an open blocker whose resolution is the owner's, since it concerns which units are authorised to reach the locked month. Nothing about it is silently settled by a design document.
+D) C, plus the standing default recorded as the primary control: reimplement from the paper with a citation rather than copy
+   > **Impact**: Matches the rule actually in force — `project.md` § Forbidden bars copying source whose licence is absent, ambiguous or incompatible, and FR-P1-06-4 makes reimplementation the standing default while the AGPLv3 question is open. Under D the register becomes the **exception** path rather than the expected one, and the design reflects that ordering instead of inverting it.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
 
-> **💡 Recommendation**: Option D. B is the right mechanism and C's extra coverage costs the acyclic dependency structure that keeps this unit a root — a high price for a failure mode (run-time path assembly) that the static check plus code review makes unlikely. BLK-07 is an authorisation question, not a design question, so it goes to the gate rather than getting resolved in an artifact.
+> **💡 Recommendation**: Option D. The project already has a standing rule making reimplementation the default and copying the exception, so designing the register as the main road would misrepresent the policy in force. The AGPLv3 Global-TEC-forecasting repository remains the only approved direct-copy source, and whether its distribution obligations permit that copying is an **unresolved governance dependency this project does not settle** — which is itself a reason to make copying deliberately harder to reach than reimplementation.
 
-[Answer]: D — a static check asserting no module outside `locked_test.py` contains the restricted-root literal, **plus BLK-07 raised at this stage's gate as an open item** with its four consumers enumerated (`inventory-and-registry`, `acquisition`, `features-and-splits`, `evaluation-and-comparison`).
-
-**BLK-07 stays OPEN until the project decision owner receives and approves the specific authorization decision.** Accepting the design mechanism is **not** authorization to open locked December data, and nothing in this unit's artifacts may be read as granting it. The authorization question — which units are authorised to reach the locked month — is the owner's, not a design document's.
+[Answer]:
 
 ---
 
----
+## Question 9
 
-# Step 4 ambiguity analysis
+`component-dependency.md` § Shared resources states without qualification that
+`evidence/locked_test_restricted/` is reached by `data.locked_test` alone and
+*"nothing else may construct a path into it."* `foundation`'s **R-15** already
+states its own side of that as the absence of a path, enforced by a static check.
 
-**No answer is vague, and no answer contradicts another.** Two readings had to be
-settled and one genuine gap remains open rather than invented.
+**BLK-07** records that `acquisition`'s routing through `open_restricted` was
+never captured — and `acquisition` is the unit that reads the D-9 input
+`audit_evidence_2022-FULL/`, which now lives under the restricted root. Four
+downstream consumers reach that root through this unit's contract:
+`inventory-and-registry` (the pre-G-05 coverage audit), `acquisition` (the D-9
+input and any December re-acquisition), `features-and-splits` (the locked
+partition) and `evaluation-and-comparison` (the locked evaluation). BLK-07 is an
+**exit condition on this stage**, and no acquisition run may touch calendar
+2022-12 while it stands.
 
-## Interpretation 1 — Q1's per-item key list and Q3's 17 identifiers are ONE structure
+How does this unit's design treat the single-chokepoint rule?
 
-Q1 = D requires *"a per-item key list asserted to cover the section"*. Q3 requires
-`configs/experiment.yaml` to hold *"only the authoritative 17 protected-item
-identifiers"*. Read carelessly these are two lists, and conflating them is exactly
-the mistake that produced the rejected Q3 recommendation.
+A) State the rule and rely on the four consumers to honour it
+   > **Impact**: Minimal, and it keeps the rule in the design where it was written. But D-15 records *why* the boundary matters — it is a **governance boundary, not an access control**, so it holds only while exactly one code path reaches it. A rule that depends on four units remembering is not "exactly one path".
 
-**Settled as one structure**, because it is the only reading under which both
-answers hold simultaneously: a single governed mapping from **protected-item
-identifier → the config keys or artifact paths that item covers**. The 17 keys of
-that mapping are Q3's identifiers; its values are Q1's per-item coverage lists.
+B) A static check asserting no module outside `locked_test.py` contains the restricted-root literal
+   > **Impact**: Makes the single-path claim machine-checkable across the whole tree, and it is cheap — the same grep-class assertion R-15 already applies to `foundation`, generalised. Catches the accidental second path, which is the realistic failure. Does not catch a path assembled at run time from fragments.
 
-**Consequence, stated so it is not lost:** Q3's rule that the complete
-protected-item list is **hashed and never excluded** applies to the whole mapping,
-values included. A per-item coverage list that drifted while the identifier stayed
-put would otherwise be an unprotected change to what "protected" means.
+C) B, plus `open_restricted` raising when its caller is not one of the four recorded consumers
+   > **Impact**: Closes the run-time-assembly gap too. But it makes this unit's guard depend on knowing its callers, coupling a root unit to four downstream units — the coupling the DAG was arranged to avoid, and the reverse edge would close a cycle.
 
-## Interpretation 2 — the list-plus-completeness-test pattern, now used three times
+D) B, plus BLK-07 raised at this stage's gate as an open item with the four consumers enumerated and `acquisition`'s routing named — not closed here
+   > **Impact**: Gets B's enforcement while keeping BLK-07 where it belongs: the question of which units are *authorised* to reach the locked month is the owner's, not a design document's. It also honours the exit-condition framing — the blocker is discharged by an owner decision recorded at the gate, not by an artifact asserting it away.
 
-Q1's per-item key list, Q6's producing-script list, and `foundation`'s
-`RequiredFieldsMap` all follow one shape: **a declarative list whose completeness
-is asserted by a test, never trusted.** Recorded as a deliberate repetition rather
-than three coincidences, because the shared failure it defends against —
-`DP-DATA-01`'s silently-exempting list — is the same in all three.
+X. Other (please specify)
+   > **Impact**: Depends on your specific choice.
 
-## Open, and deliberately not answered here
+> **💡 Recommendation**: Option D. B is the right mechanism, and C's extra coverage costs the acyclic structure that keeps this unit a root — a high price for a failure mode (run-time path assembly) that the static check plus review makes unlikely. BLK-07 is an authorisation question rather than a design question, so it goes to the gate. Note that B has a live consequence worth stating: `acquisition` cannot hold its own path to `audit_evidence_2022-FULL/` once the check exists, so BLK-07's resolution is a precondition of Bolt 3, not a formality.
 
-**Where does the test that asserts the frozen manifest contains exactly D-24's 17
-items get D-24's list from?** The chain is: manifest keys ← `experiment.yaml`'s
-mapping ← D-24. Q2's freeze assertion and Q3's required test both compare against
-**D-24**, not merely against the config — which is correct, and is what stops the
-config and the manifest agreeing with each other while both drift from the
-authority.
-
-But the test needs D-24's 17 items from somewhere, and both available routes have a
-cost already identified in this file:
-
-- **Hardcode them in the test** — a fourth copy of a governed enumeration, and this
-  session has spent its length correcting exactly that class of duplication.
-- **Parse `evidence/DECISIONS.md`** — makes a governance prose document a test
-  dependency and a parse target, which Q3 option C was rejected for.
-
-**No third option is invented here.** The gap is real, it is narrow, and it is
-raised at the approval gate for the owner to direct rather than resolved by
-preference. Until it is settled, the test asserting D-24 conformance cannot be
-specified completely — and that is stated rather than papered over.
+[Answer]:
 
 ---
-
-# FR-P1-02-6 — explicitly untested, and it stays that way
-
-`FR-P1-02-6` is this unit's **one requirement with no §16 or §19 acceptance row**,
-derived from story-map Table 1 and cross-checked against the § Per-unit coverage
-summary. It is the regression guard `assert_no_december_outside_restricted`
-implements after **D-15** relocated 21 December-bearing files into the restricted
-root.
-
-**On the project decision owner's explicit direction, it is preserved as an
-explicitly untested obligation until an approved acceptance row exists AND its test
-has passed.** Both conditions, not either.
-
-Consequently, and binding on every artifact this unit produces:
-
-- Q4's content-scan design is a **test specification only** — *not an approved
-  acceptance row and not evidence of a passing result.*
-- No artifact, manifest or report may state or imply that FR-P1-02-6 is covered,
-  satisfied, or verified.
-- Designing the guard does not test it. Implementing it does not test it. Only an
-  approved row plus a passed execution does, and neither exists.
-
----
-
-# Pending governed amendments — presented, NOT applied
-
-## Amendment D — the stale BLK-06 text in two approved artifacts
-
-**Recorded on the project decision owner's explicit direction: raise the required
-governed correction with preserved provenance; do not edit the approved artifacts
-silently.**
-
-**What is true now.** **D-24** (2026-08-22, approved by the project decision owner
-under the recorded authority equivalence) resolved BLK-06's **enumeration limb** at
-**17 items**, with the cardinality *calculated from the enumeration* (14 carried
-forward + 3 added) rather than assumed. The blocker register records the
-enumeration limb `RESOLVED 2026-08-22 — 17 items`.
-
-**What two approved artifacts still say.** Both carry text written before D-24 and
-now superseded:
-
-| Artifact | Stale text, quoted | Status |
-|---|---|---|
-| `../../../inception/application-design/component-methods.md` — `TransitionManifest.protected_hashes` comment | *"Final enumeration and cardinality are DEFERRED TO STAGE 3.1; this design states neither. See BLK-06"*, and in the surrounding prose *"The final enumeration and its cardinality are deferred to stage 3.1 (`functional-design`); this design states neither, and no number is carried into this artifact."* | **Superseded by D-24.** Stage 2.6 artifact, approved |
-| `../../../inception/units-generation/unit-of-work.md` § 2 `governance-guards` | *"whose **final enumeration and cardinality are deferred to stage 3.1** (`functional-design`) — this artifact states neither, and **BLK-06** carries the obligation"* | **Superseded by D-24.** Stage 2.7 artifact, approved |
-
-**Provenance preserved.** Both statements were **correct when written** — they
-predate D-24 and were deliberately careful not to invent a cardinality, which is
-why they say "states neither" rather than guessing. The correction is that the
-deferral they describe has since been discharged for the enumeration limb. What
-remains genuinely deferred to this stage is the **per-item binding to concrete
-config fields and file paths**, which the register still records as `PENDING`.
-
-**Not applied.** Both are approved-stage artifacts. `CHANGE_RECORD_PROCEDURE.md`
-§ "Files a sweep may not edit" reserves a completed stage's artifacts absent owner
-approval for annotate-in-place, and the `GOV-2026-08-22-INC-01` Rec 7 precedent is
-the route if the owner grants it. **Neither file is edited by this stage.**
-
-**Class.** Approved AI-DLC artifact annotation — *not* a Vision §15.2 amendment.
-§15.2 governs the authority documents; D-24's consequent FR-P1-06-1 amendment
-(14 → 17) already went through §15.2 and is recorded there.
-
-**Consequence if left unapplied.** A reader of either artifact concludes the
-canonical set has no established cardinality, and `component-methods.md`'s standing
-caution — *"an empty `diff_protected_hashes` result must not be read as proof that
-no protected item changed"* — reads as still fully in force when its enumeration
-half has been discharged. That caution's **remaining** half is real and is carried
-forward: the per-item binding is pending, so an empty diff is still not proof.
-
-## Amendment E — BLK-07 authorization, the owner's alone
-
-**BLK-07 stays OPEN.** Per the owner's explicit direction: **acceptance of the
-design mechanism in Question 8 is not authorization to open locked December data.**
-
-The four consumers reaching the restricted root through `open_restricted` are
-`inventory-and-registry` (pre-G-05 coverage audit), `acquisition` (the D-9 input
-and any December re-acquisition — the unrecorded routing that *is* BLK-07),
-`features-and-splits` (locked partition) and `evaluation-and-comparison` (locked
-evaluation).
-
-**Which units are authorised to reach the locked month is a decision the project
-decision owner receives and approves.** No artifact this unit produces grants it,
-implies it, or treats the static check of Question 8 as a substitute for it.
 
 ## Assumptions & Open Questions
 
-- **[assumption]** `tests/test_locked_test_guard.py` is **not** this unit's. ADR-03 splits the guard deliberately — the access-log limb here, the execution limb in `features-and-splits`'s `splits.py` — and the test covering both limbs is owned by `features-and-splits` to keep this unit a root. Story-map Table 2 confirms `features-and-splits` owns WS-18 and TA-18, with this unit supporting.
-- **[assumption]** `RAW_MODULES` names **four** `gnss` modules — `rinex`, `calibration`, `target`, `verification` — not the two that FR-P1-03-2's earlier wording listed. `target.py` and `verification.py` were added per finding `IMPL-2`. This stage designs to the four.
-- **[assumption]** NFR-PHASE-01's transition-manifest hash-diff test has **no module in the TE §12 tree** and needs frozen artifacts from every later unit. It is carried as an acceptance row on `fixtures-and-reproducibility` (which owns TA-27's evidence chain per Table 2's supporting column) with this unit supporting. Not this unit's to build.
-- **Open — BLK-06's per-item binding.** D-24 resolved the enumeration at **17 items** with each item's governing artifact and hashable representation. The **binding to concrete config fields and file paths is PENDING**, and none of the four config files or six `src/` packages exists yet. Questions 1–3 produce the binding evidence; **BLK-06 is not closed by this stage**, per the owner's `DP-CHAIR-02` ruling.
-- **Open — BLK-07.** `acquisition`'s routing through `open_restricted` is unrecorded. Question 8 addresses the mechanism; the authorisation question goes to the gate.
-- **Open — a stale statement in an approved artifact, reported not edited.** `component-methods.md`'s `TransitionManifest` comment reads *"Final enumeration and cardinality are DEFERRED TO STAGE 3.1; this design states neither"*, and `unit-of-work.md` § 2 says the same. **D-24 has since resolved the enumeration at 17 items.** Both are approved-stage artifacts; per `CHANGE_RECORD_PROCEDURE.md` a sweep reports on those and does not edit them absent owner approval for annotate-in-place. Raised at the gate.
-- **Open — the AGPLv3 distribution question.** Whether the Global-TEC-forecasting repository's obligations permit direct copying is a governance dependency **this project does not resolve**. The standing default is reimplementation from the paper with a citation.
+- **[assumption]** `tests/test_locked_test_guard.py` is **not** this unit's. ADR-03 splits the guard deliberately — the access-log limb here, the execution limb in `features-and-splits`'s `splits.py` — and the test covering both limbs is owned by `features-and-splits` to keep this unit a root. Story-map Table 2 confirms `features-and-splits` owns WS-18 and TA-18 with this unit supporting.
+- **[assumption]** `RAW_MODULES` names **four** `gnss` modules — `rinex`, `calibration`, `target`, `verification` — not the two that FR-P1-03-2's earlier wording listed. `target.py` and `verification.py` were added per finding `IMPL-2`, and the existing `tests/test_phase_boundary.py` already encodes all four. This stage designs to four.
+- **[assumption]** Rule IDs continue `foundation`'s single sequence rather than restarting per unit. `foundation`'s `business-rules.md` runs R-01 through R-17, so this unit opens at **R-18**. If per-unit numbering was intended, say so at the gate and the artifacts will restart.
+- **[assumption]** NFR-PHASE-01's transition-manifest hash-diff test has **no module in the TE §12 tree** and needs frozen artifacts from every later unit. Story-map Table 2 carries it on `fixtures-and-reproducibility` with this unit supporting. Not this unit's to build.
+- **[assumption]** TA-27's second limb (Phase 2 cannot change protected forecasting hashes) is accepted at G-P2 and G-P3C, **outside Phase 1**, per the bolt-plan's Acceptance-rows line. Only the first limb is acceptable inside this initiative.
+- **Open — BLK-06's per-item binding.** D-24 resolved the enumeration and cardinality at **17 items**, calculated rather than assumed. The **binding to concrete config fields and file paths is PENDING**, and D-24's own consequence 2 records that no file path or field name in its table is claimed to exist today. Questions 1–3 produce that binding evidence; **BLK-06 is not closed by this stage**, per the `DP-CHAIR-02` ruling.
+- **Open — BLK-07, an exit condition on this stage.** `acquisition`'s routing through `open_restricted` is unrecorded, and Question 9's static check would make `acquisition`'s current direct path to `audit_evidence_2022-FULL/` a violation. The mechanism is a design question; the authorisation is the owner's, and it goes to the gate.
+- **Open — `RES-01`, permitted-read access logging is NOT TESTED.** Recorded in story-map Table 2 with its candidate §19 criterion owned by stage 3.2 under Vision §15.2. Question 6 option D would close it here; the recommendation declines to, and raises it at the gate instead.
+- **Open — FR-P1-02-6 has no §16/§19 acceptance row.** It *is* enforced, by `tests/test_acquisition_window.py::test_locked_month_values_exist_only_under_the_restricted_path`, and it *is* currently green. Questions 4 and 5 both narrow or widen what that green means. Whichever is chosen, the requirement still lacks an acceptance row and remains this unit's 1-of-10.
+- **Open — a stale statement in two approved artifacts, reported not edited.** `component-methods.md`'s `TransitionManifest` comment reads *"Final enumeration and cardinality are DEFERRED TO STAGE 3.1; this design states neither"*, and `unit-of-work.md` § 2 and `components.md` line 61 say the same. **D-24 has since resolved the enumeration at 17 items**, and `bolt-plan.md` § Bolt 2 already reflects that. Per `CHANGE_RECORD_PROCEDURE.md` a sweep reports on approved-stage artifacts and does not edit them absent owner approval for annotate-in-place. Raised at the gate.
+- **Open — the AGPLv3 distribution question.** Whether the Global-TEC-forecasting repository's obligations permit direct copying is a governance dependency **this project does not resolve**. The standing default is reimplementation from the paper with a citation (FR-P1-06-4).
 - **G-09 is not signed.** No answer here authorises creating `phase_contract.py`, `locked_test.py` or `reuse_registry.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
-
----
-
-## Consolidated Summary Confirmation
-
-Does this all look correct before I generate the artifact?
-
-- Looks correct
-- Request changes
-
-[Answer]: Looks correct
