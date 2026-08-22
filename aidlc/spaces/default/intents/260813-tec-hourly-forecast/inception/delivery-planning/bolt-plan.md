@@ -72,6 +72,49 @@ timeline that is a real loss, and it was accepted knowingly at FU-1.
 **This is not a Bolt. Nothing is built here.** It is a decision gate that runs
 before Bolt 1, required by the Q8 answer.
 
+> ## GATE 0 — DISCHARGED 2026-08-22, WITH NO LIVE DECISION OUTSTANDING
+>
+> Annotated in place after this stage's approval gate, on the project decision
+> owner's explicit approval, under the annotate-in-place precedent set at
+> `GOV-2026-08-22-INC-01` Rec 7.
+>
+> **Every item Gate 0 was built to present had already been decided** by the time
+> it ran. The pack was assembled and found empty — which is a discharge, not a
+> skip, and the difference is recorded so a later reader does not mistake one for
+> the other:
+>
+> | Item | Resolution | Record |
+> |---|---|---|
+> | BLK-02 — `plumbing_7day` fixture station | **BSHM 32/35** — the only candidate cell with 168/168 hourly bins across D-11's window | **D-20** |
+> | F10.7 (a) — which reading is the daily value | **Daily median**, with its availability rule | **D-21** |
+> | F10.7 (b) — duplicate-UT tie-break | **Mean**, with duplicate logging and a QC flag; provider-defined correction semantics take precedence where documented | **D-22** |
+> | F10.7 (c) — high-spread days | **Flag and retain**, using the approved daily median | **D-23** |
+> | BLK-05 — D-17 target-schema module name | **`tests/test_prepared_target_schema.py`** | `CR-2026-08-22-TARGET-SCHEMA-TEST` |
+> | FR-P1-01-7 — amendment wording | **Applied** | `CR-2026-08-22-F107-CORRECTIONS` |
+>
+> **What remains open is not decidable at Gate 0, by design — and this is the
+> `DP-CHAIR-03` distinction, restated at the moment it matters:**
+>
+> - **G-09** (agent preflight) — **surfaced, not signed.** Its §18.3 preconditions
+>   require an automated preflight over `data.yaml`, `features.yaml`,
+>   `experiment.yaml` and `seeds.yaml`, none of which exists until Bolt 1 creates
+>   them. A gate whose evidence is produced by Bolt 1 cannot gate Bolt 1. The
+>   permitted/barred boundary below governs what may proceed meanwhile.
+> - **G-01** (scientific framing) — **surfaced, not signed.** Pending owner
+>   sign-off, due before the implementation freeze. Not this initiative's to grant.
+> - **BLK-06** — per-item config binding and implementation, **decided at the
+>   functional-design gate** under the `DP-CHAIR-02` ruling. Its enumeration limb
+>   is discharged by **D-24**.
+> - **BLK-03, BLK-04, BLK-07** — resolved *during* functional design; they do not
+>   block its start, and no affected Bolt or gate completes until its exit
+>   conditions are satisfied.
+>
+> **The open-blocker count remains six.** Three blockers have a limb discharged;
+> none is closed outright. Discharging Gate 0 authorises **no implementation** —
+> G-09 still stands before any affected component is coded.
+
+
+
 Before any Bolt starts, every unresolved owner decision and entry-blocking
 condition is collected and presented — the issue, the available options, a
 recommendation, the Bolt or gate it affects, and the decision required. The
@@ -493,8 +536,22 @@ and closure of the ICTP rejected-source audit.
 **Confidence hypothesis.** That the six external providers can actually be
 retrieved from under the governed constraints, with provenance complete enough to
 be re-verified. Seven of this unit's fifteen requirements have no acceptance row —
-the largest untested share of any unit — so what this Bolt proves is mostly
-demonstrated rather than asserted by a test.
+tied for the largest untested **count**, though not the largest **proportion** —
+so what this Bolt proves is mostly demonstrated rather than asserted by a test.
+<!-- Corrected 2026-08-22. Superseded literal, preserved: "the largest untested
+     share of any unit". Wrong when written and an internal contradiction: the
+     models-and-baselines Bolt below claims the "joint largest untested share"
+     for 7 of 9, and two sites cannot both hold the largest. Derived from
+     unit-of-work-story-map.md Table 1: three units tie at 7 untested
+     (acquisition 7/15, models-and-baselines 7/9, regimes-diagnostics-reporting
+     7/11), so acquisition ties on count at 7 while its proportion, 47%, ranks
+     fifth of eleven behind models-and-baselines (78%),
+     regimes-diagnostics-reporting (64%), external-products (57%) and
+     evaluation-and-comparison (50%). Count and proportion are now named
+     separately rather than conflated in the word "share". A site the
+     CR-2026-08-22-INC-CORRECTIONS Rec 5 sweep did not reach — it carries no
+     stale numeral, only a stale superlative. -->
+<!-- markdownlint-disable-line -->
 
 **Expected demo.** A retrieval run inside the Kaggle session producing
 `request_manifest.json` and `sha256_manifest.json` with per-provider-file hashes;
@@ -676,9 +733,16 @@ interpolation and network-overlap audit.
 
 **Confidence hypothesis.** That the four outside providers behave as the frozen
 contract assumes — that the drivers exist at a single release grade, that the
-F10.7 gap is what the audit says it is, and that IRI-2016 validates. Five of this
+F10.7 gap is what the audit says it is, and that IRI-2016 validates. Four of this
 unit's seven requirements have no acceptance row, so this Bolt is where provider
 reality is discovered by trying rather than by testing.
+<!-- Superseded literal, preserved: "Five of this unit's seven requirements have
+     no acceptance row". external-products fell 5 → 4 under
+     CR-2026-08-22-LEAKAGE-TA, which gave FR-P1-04-17 acceptance row TA-36.
+     Derived from unit-of-work-story-map.md Table 1 before assertion; the eleven
+     per-unit values sum to 36. A site the CR-2026-08-22-INC-CORRECTIONS Rec 5
+     sweep did not reach. -->
+<!-- markdownlint-disable-line -->
 
 **Expected demo.** Benchmark and comparator manifests, the
 `iri_implementation_validation` report, the `gim_network_overlap_flag` audit
@@ -785,14 +849,29 @@ existing pass/fail criterion — no new scientific rule is created here.
 | **FR-P1-04-16** — support-field rules | Unapproved support-field inclusion | Use a support field as a model input with no recorded G-04 approval ID; construction **must fail**. Second limb: read a support field at or beyond hour *t*; **must fail**. Target-hour quality fields stay permanently forbidden as features. |
 | **FR-P1-04-17** — driver alignment contract | Driver-interval repetition or propagation that could carry future information | Two negative controls in one test: a Kp value repeated **outside** its own 3-hour interval **must fail**, and a Dst value shifted to a neighbouring hour **must fail**. Third limb: a check finds **no interpolation call on any driver series**, at any stage. |
 
-**Status, stated exactly.** These are **test specifications, not test results and
-not acceptance rows.** None of the four has a §16 or §19 row today, and creating
-one is a Vision §15.2 amendment that this stage cannot grant — it is carried to
-the owner as a named decision. Nothing here may be read as evidence that any of
-the four is tested or passing.
+**Status, stated exactly — four distinctions, none of them collapsible.** These
+are **test specifications, not test results.** Each of the four now **has** a §19
+acceptance row — **TA-33, TA-34, TA-35 and TA-36**, created under
+`CR-2026-08-22-LEAKAGE-TA` on the project decision owner's explicit approval. None
+has an **implemented test**: no module exists for any of the four, and module
+placement is an open assignment at functional design. None has been **executed**.
+None has **passed**. All four §19 rows read `Pending`. Nothing here may be read as
+evidence that any of the four is tested or passing — a row that tests a
+requirement on paper is a different fact from a requirement being tested.
+
+<!-- Corrected 2026-08-22. Superseded text, preserved for the audit trail:
+     "These are **test specifications, not test results and not acceptance
+     rows.** None of the four has a §16 or §19 row today, and creating one is a
+     Vision §15.2 amendment that this stage cannot grant — it is carried to the
+     owner as a named decision."
+     True when written; false the same day, once CR-2026-08-22-LEAKAGE-TA created
+     TA-33…TA-36 under the owner's approval. A site the
+     CR-2026-08-22-INC-CORRECTIONS Rec 5 sweep did not reach — that sweep
+     searched count literals, and this defect carries no count. -->
+<!-- markdownlint-disable-line -->
 
 **Remaining recorded gap.** The fifth untested forbidden edge in this unit —
-FR-P1-04-10 — and the balance of the 40 untested requirements stay in the
+FR-P1-04-10 — and the balance of the 36 untested requirements stay in the
 ordinary set handed to NFR requirements.
 
 **Open evidence question (WS-13).** Table 2 of the story map gives WS-13's
@@ -838,8 +917,15 @@ the three-seed run, checkpointing and restore, and the predeclared ablations.
 
 **Confidence hypothesis.** That all six families train and predict on the frozen
 folds, and that the confirmatory prediction is reproducible from the frozen seed
-set. Seven of this unit's nine requirements have no acceptance row — the joint
-largest untested share — so the demo carries most of the weight.
+set. Seven of this unit's nine requirements have no acceptance row — tied for the
+largest untested **count** at seven, and the largest untested **proportion** of
+any unit at 78% — so the demo carries most of the weight.
+<!-- Clarified 2026-08-22. Superseded literal, preserved: "the joint largest
+     untested share". "Joint" was right about the count and silent about the
+     proportion, where this unit is not joint but outright first. Derived from
+     unit-of-work-story-map.md Table 1; see the acquisition Bolt above for the
+     full ranking. -->
+<!-- markdownlint-disable-line -->
 
 **Expected demo.** Per-model prediction artifacts, a checkpoint restored from
 lowest validation RMSE, and the three-seed mean artifact carrying its seed set.
@@ -1081,8 +1167,18 @@ coverage finds a forwarding address rather than a skipped stage.
   BLK-05's module name and BLK-06's enumeration appear here only as *scheduling*
   facts — when the request is raised and what the Bolt does while it waits.
 - **No requirement, acceptance row or dependency edge is added, reworded or
-  reinterpreted.** The 40 requirements with no acceptance row and TA-24's absent
+  reinterpreted.** The 36 requirements with no acceptance row and TA-24's absent
   implementing unit are carried forward, not closed.
+  <!-- Superseded literal, preserved for the audit trail: "The 40 requirements
+       with no acceptance row". Corrected 2026-08-22 — a site the
+       CR-2026-08-22-INC-CORRECTIONS Rec 5 sweep did not reach. The figure moved
+       40 → 36 under CR-2026-08-22-LEAKAGE-TA, whose four new rows (TA-33…TA-36)
+       removed FR-P1-04-12, -13, -16 and -17 from the untested list. Re-derived
+       before assertion, two independent artifacts agreeing on 36 and their ID
+       lists set-differenced to identical; see
+       governance/reviews/GOV-2026-08-22-DP-01.md § DP-ML-01 for the derivation
+       and for the range-lead pitfall that makes a naive count read 40. -->
+<!-- markdownlint-disable-line -->
 - **No amendment to any governed artifact.** Where closing a gap needs a §16 or
   §19 change, it runs through Vision §15.2 change control.
 
@@ -1101,13 +1197,62 @@ coverage finds a forwarding address rather than a skipped stage.
   commit", which supports this reading, but no artifact states it explicitly.
 - **[assumption]** The Q11 answer's narrower reading of TC-06's "test suite" —
   the tree, conftest and the modules whose subject exists, rather than all
-  nineteen up front — is recorded here and flagged for the next
+  twenty-one up front (nineteen when this assumption was written; the TE §12 tree
+  reached twenty-one later the same day) — is recorded here and flagged for the next
   practices-affirmation gate alongside RES-02's two stale figures. This stage
   cannot edit `team-practices.md`; `org.md` reserves that file for that gate.
 - **Open, carried not closed.** BLK-02 through BLK-07 (six open blockers),
-  RES-01, RES-02 and RES-03, the 40 untested requirements, TA-24's missing
+  RES-01, RES-02 and RES-03, the 36 untested requirements, TA-24's missing
   implementing unit, the `02` ordinal collision, WS-13's evidence departure, and
   the AGPLv3 distribution question. Each is enumerated with an owner in
   `external-dependency-map.md` or in the upstream blocker register.
 - **None** of the above adopts a reading on a supervisor-owned value, and none
   decides a scientific constant.
+
+## Corrections applied on resume, 2026-08-22
+
+Four defects were corrected in this file after the first summary confirmation and
+before the approval gate. Each preserves its superseded literal in place, per
+`governance/CHANGE_RECORD_PROCEDURE.md` step 1. **None changes a Bolt, a sequence,
+a Definition of Done, an owner, a gate, an acceptance row or a scientific value.**
+
+| Site | Defect | Reach of the Rec 5 sweep |
+|---|---|---|
+| § What this plan does not decide | "The **40** requirements with no acceptance row" → **36** | Missed — a count literal the sweep did not reach |
+| § Bolt 3 confidence hypothesis | "**Five** of this unit's seven requirements have no acceptance row" → **four** (`external-products` fell 5 → 4 under `CR-2026-08-22-LEAKAGE-TA`, which gave FR-P1-04-17 row TA-36) | Missed — same |
+| § Bolt 3 confidence hypothesis | "the largest untested **share** of any unit" — wrong when written, and a direct contradiction of § Bolt 10's "joint largest" claim in this same file. Count and proportion are now named separately | **Out of reach** — a stale superlative carrying no numeral |
+| § Bolt 7 status paragraph | "none of the four has a §16 or §19 row today, and creating one is a Vision §15.2 amendment that this stage cannot grant" — TA-33…TA-36 were created the same day under the owner's approval | **Out of reach** — a stale claim carrying no numeral |
+
+The last two are the ones worth noting as a class: `CR-2026-08-22-INC-CORRECTIONS`
+Rec 5 swept for **count literals**, so it was structurally unable to see a stale
+superlative or a stale claim with no number in it. The procedure that record
+established inherits the same blind spot at its step 2 ("sweep the workspace for
+that literal"). Raised at the approval gate rather than corrected there, because
+that record is a completed change record and `CHANGE_RECORD_PROCEDURE.md` reserves
+those from sweep edits.
+
+**Derivations, printed before assertion** (`project.md` § Way of Working). The
+untested total is **36**, derived twice from two independent artifacts whose ID
+lists were then set-differenced and found **identical**:
+
+```
+grep -c "NO CURRENT ACCEPTANCE ROW" ../units-generation/unit-of-work-story-map.md   -> 36
+grep "UNTESTED" ../requirements-analysis/requirements.md \
+  | grep -vE "^\| *\*{0,2}(REQ|FR|NFR)-[A-Z0-9-]+…" \
+  | grep -oE "(REQ|FR|NFR)-[A-Z0-9-]+" | sort -u | wc -l                            -> 36
+```
+
+Per-unit untested counts, derived from story-map Table 1 and summing to 36:
+`models-and-baselines` 7/9 · `acquisition` 7/15 · `regimes-diagnostics-reporting`
+7/11 · `external-products` 4/7 · `inventory-and-registry` 2/7 · `foundation` 2/18
+· `fixtures-and-reproducibility` 2/8 · `evaluation-and-comparison` 2/4 ·
+`target-standardization` 1/6 · `governance-guards` 1/11 · `features-and-splits`
+1/12.
+
+> **Caution for anyone re-deriving the 36.** The second command above must exclude
+> rows whose lead is an ID *range*. Four crosswalk rows in `requirements.md`
+> (`FR-P1-03-1…5`, `FR-P1-04-1…18`, `FR-P1-05-1…22`, `REQ-ENG-1…13`) mention
+> `UNTESTED` for one member of the range, so a naive extraction attributes it to
+> the range's first ID and the count reads **40**. That error surfaced here only on
+> set-differencing the two ID lists — comparing the two totals showed a difference
+> and gave no indication which side was wrong.

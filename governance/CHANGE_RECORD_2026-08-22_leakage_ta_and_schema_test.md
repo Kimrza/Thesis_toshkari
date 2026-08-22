@@ -66,7 +66,18 @@ recomputed values.** No difference to explain.
 
 **What changed.** TE §12's `tests/` tree gains
 **`tests/test_prepared_target_schema.py`**, with a row in the §12
-amendment-provenance table. The tree now enumerates **20** test modules.
+amendment-provenance table. The tree now enumerates **21** test modules.
+
+> **Arithmetic correction, 2026-08-22** (`GOV-2026-08-22-INC-01` Rec 4,
+> approved by the project owner; applied under `CR-2026-08-22-INC-CORRECTIONS`).
+> **Superseded text, preserved for the audit trail:** *"The tree now enumerates
+> **20** test modules."* That figure counted only this record's own amendment on a
+> 19-module base and omitted `tests/test_feature_leakage_guards.py`, which the
+> **other half of this same record** (`CR-2026-08-22-LEAKAGE-TA`, see above) adds
+> to the same tree. This file states at its head that both amendments are
+> "recorded in one file because both amend TE §12/§19 in the same act", so the
+> combined result is **21**, not 20. No scientific value, gate, checklist row or
+> approval changes under this correction; only the arithmetic.
 
 **Approved acceptance behaviour**, fixed by the owner:
 
@@ -75,7 +86,7 @@ amendment-provenance table. The tree now enumerates **20** test modules.
 - A row **missing any required** field **fails**.
 
 **Naming basis.** Selected from three candidates presented against the existing
-convention. All 19 prior modules are flat under `tests/`, `test_<subject>.py`,
+convention. All 20 prior modules are flat under `tests/`, `test_<subject>.py`,
 snake_case, subject naming the thing under test. `test_prepared_target_schema.py`
 mirrors its owning module `src/data/prepared.py` the way `test_station_registry.py`
 mirrors `registry.py`. It cannot reuse `test_hourly_target.py`, which is Phase 2
@@ -110,7 +121,11 @@ FR-P1-03-5 stays in the 36-row untested list.
 
 - TE §19 maximum row before the amendment: **TA-32**; new rows take TA-33…TA-36
   with no collision.
-- TE §12 `test_*.py` entries after the amendment: **20**, enumerated.
+- TE §12 `test_*.py` entries after **both** amendments in this record: **21**,
+  enumerated (`sed -n '675,703p' <TE> | grep -oE 'test_[a-z_]+\.py' | sort -u | wc -l`).
+  **Superseded text, preserved for the audit trail:** *"TE §12 `test_*.py` entries
+  after the amendment: **20**, enumerated."* — computed over one of this record's
+  two amendments. Corrected 2026-08-22, `GOV-2026-08-22-INC-01` Rec 4.
 - Requirement/acceptance counts recomputed from the artifacts as tabulated above.
 - 105 requirements defined and 105 assigned; 12 units; 23 edges — all re-derived
   and unchanged.

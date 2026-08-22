@@ -1,23 +1,5 @@
 # Phase Boundary Verification — Inception → Construction
 
-**Reissued 2026-08-22** under `CR-2026-08-22-INC-CORRECTIONS`, on the project
-owner's approval of `GOV-2026-08-22-INC-01` **Recommendation 6, Option 1**. The
-superseded version is preserved verbatim at
-`phase-check-inception.superseded-2026-08-22.md` and is **not** overwritten, so
-the record of what was certified at 13:31 survives.
-
-**Why it was reissued.** The first issue was written at 13:31, before
-`CR-2026-08-22-LEAKAGE-TA` and `CR-2026-08-22-TARGET-SCHEMA-TEST` were applied at
-14:33 and `requirements.md` was updated at 14:35. It therefore certified against
-two counts that the artifacts it certifies had already superseded: it stated
-**40** requirements with no acceptance row (now **36**) and **19** mandated test
-modules (now **21**). Because this certificate's distinguishing claim is that
-every count in it is derived programmatically rather than carried, a stale figure
-here is worse than the same figure elsewhere — a reader has been told these
-numbers were computed. **Every count below has been re-derived at the current
-artifact state for this reissue**, not patched from the previous version, and the
-derivation command is named beside each result as before.
-
 Intent `260813-tec-hourly-forecast`. Run at the close of stage 2.8
 (`delivery-planning`), before the first Construction stage begins.
 
@@ -102,39 +84,21 @@ gaps. This artifact set is Phase 1 only.
 
 | Measure | Result | How derived |
 |---|---|---|
-| Acceptance rows mapped in the story map's Table 2 | **44** — 13 WS rows, 31 TA rows | Extracted `\| WS-nn \|` / `\| TA-nn \|` row leads; sorted unique; counted by prefix |
-| Rows with an evidence-producing unit | **43** | 44 minus the rows whose unit column reads `(none` |
+| Acceptance rows mapped in the story map's Table 2 | **40** — 13 WS rows, 27 TA rows | Extracted `\| WS-nn \|` / `\| TA-nn \|` row leads; sorted unique; counted by prefix |
+| Rows with an evidence-producing unit | **39** | 40 minus the rows whose unit column reads `(none` |
 | Rows with **no** evidence-producing unit | **1 — TA-24** | Same extraction |
-| Requirements carrying **no** acceptance row | **36** | Counted `NO CURRENT ACCEPTANCE ROW` occurrences in Table 1 |
-
-**Both acceptance figures moved since the first issue, in opposite directions,
-and for the same reason.** `CR-2026-08-22-LEAKAGE-TA` created four new §19 rows —
-**TA-33, TA-34, TA-35 and TA-36**, the negative-path leakage controls for
-FR-P1-04-12, -13, -16 and -17 — which raised the mapped acceptance rows from 40
-to 44 and simultaneously removed those four requirements from the untested list,
-lowering it from 40 to 36. The TA range is now TA-01…TA-04, TA-07…TA-28, TA-32,
-TA-33…TA-36. **Superseded figures, preserved for the audit trail: 40 acceptance
-rows (13 WS + 27 TA), 39 with a unit, and 40 requirements with no acceptance
-row.**
-
-**What the four new rows do and do not establish.** Each of FR-P1-04-12, -13, -16
-and -17 now has an **acceptance criterion**. None has an **implemented test** —
-no module exists. None has been **executed**, and none has **passed**. All four
-§19 rows carry status `Pending`, and module placement is an open assignment at
-functional design. The requirements left the untested list because a row now
-tests them on paper, which is a different fact from being tested.
+| Requirements carrying **no** acceptance row | **40** | Counted `NO CURRENT ACCEPTANCE ROW` occurrences in Table 1 |
 
 **PASS on traceability, FAIL on completeness — and the failure is known,
 enumerated and carried, not discovered here.**
 
 Two gaps stand at this boundary:
 
-- **36 of 105 requirements have no §16 or §19 row that tests them.** Each carries
+- **40 of 105 requirements have no §16 or §19 row that tests them.** Each carries
   a real pass/fail criterion; what is missing is the acceptance row. They are
   enumerated per unit in the story map, so Construction receives a concrete work
   list rather than a count. Closing any of them requires a **Vision §15.2**
-  change-control amendment, which is not this initiative's to grant — the four
-  closed on 2026-08-22 were closed by exactly that route.
+  change-control amendment, which is not this initiative's to grant.
 - **TA-24 has no implementing unit.** It requires the Technical Environment
   document to be checked against the current Vision version and marked superseded
   if the Vision changed — author and supervisor document control, not pipeline
@@ -162,7 +126,7 @@ phase. Two were surfaced during this stage and neither was resolved by inference
 
 - **TC-06 versus the test-module distribution.** TC-06 (`binding: hard`) requires
   the repository, pinned environment **and test suite** before any acquisition
-  work, but 18 of the 21 mandated test modules test units built after
+  work, but 16 of the 19 mandated test modules test units built after
   `acquisition`. The reading adopted at Q11 — Bolt 1 delivers the `tests/` tree,
   conftest and the modules whose subject exists; the rest are written in their own
   unit's Bolt — is **narrower than TC-06's words**, and is recorded as such in
@@ -189,42 +153,16 @@ Enumerated rather than counted, so nothing is lost to a wrong total.
 
 **Blockers.** BLK-01 is **closed** (2026-08-22, `CR-2026-08-22-TE-AMEND`;
 authority only — the modules it authorized still do not exist). **BLK-02, BLK-03,
-BLK-04, BLK-05, BLK-06 and BLK-07 are open** — still six — and every one names
-its affected artifact, owning unit, downstream units, required resolution,
-approval authority and status upstream.
-
-**Three of those six have had a limb discharged since the first issue**, annotated
-in the stage 2.7 register on 2026-08-22 under `GOV-2026-08-22-INC-01` Rec 7. No
-blocker closed outright, so the count stays at six, but the open scope is
-narrower than the first issue implied:
-
-- **BLK-02** — station limb **discharged by D-20** (plumbing fixture station,
-  frozen under Q-31); the `fixture_manifest.yaml` limb remains open.
-- **BLK-05** — naming and documentation limbs **discharged**
-  (`tests/test_prepared_target_schema.py` approved and written into TE §12 under
-  `CR-2026-08-22-TARGET-SCHEMA-TEST`); implementation and execution-evidence
-  limbs remain open.
-- **BLK-06** — enumeration limb **discharged by D-24** (seventeen items,
-  cardinality calculated), FR-P1-06-1 amended 14 → 17 under
-  `CR-2026-08-22-PROTECTED-SET`; per-item config binding and the implementation of
-  `protected_hashes` / `diff_protected_hashes` remain open, so BLK-06 still blocks
-  G-P2 and G-P3C.
+BLK-04, BLK-05, BLK-06 and BLK-07 are open**, and every one names its affected
+artifact, owning unit, downstream units, required resolution, approval authority
+and status upstream.
 
 **Residual governance obligations.** RES-01 (permitted-read access logging is
-**NOT TESTED**); RES-02 (`team-practices.md` § Testing Posture stale on two
-figures — the WS-01 exception and a **17**-module count against the current
-**21**, four modules absent from the affirmed list, three of them
-leakage/determinism/schema controls — plus the TC-06 reading added here; deferred
-to the practices-affirmation gate, `org.md` reserving that file); RES-03
-(**derivation and §15.2 amendment complete under D-24**; per-item binding and
-implementation pending at stage 3.1). **Superseded text: RES-03 was described in
-the first issue as "FR-P1-06-1's fourteen-item enumeration pending canonical
-derivation", which the D-24 freeze had already discharged.** RES-04 (no captured
-report for the 2026-08-21 run of the three existing test modules, all of which
-reach the restricted December root by recursive traversal) is carried in the
-stage 2.7 register and is named here so it is not lost at the boundary.
+**NOT TESTED**), RES-02 (`team-practices.md` § Testing Posture stale on two
+figures, plus the TC-06 reading added here), RES-03 (FR-P1-06-1's fourteen-item
+enumeration pending canonical derivation).
 
-**Other carried items.** The 36 untested requirements; TA-24's missing
+**Other carried items.** The 40 untested requirements; TA-24's missing
 implementing unit; the `02` ordinal collision between the Phase 1 and Phase 2
 target scripts; WS-13's evidence departure from §16; the AGPLv3 distribution
 question; the unverifiable-in-principle provenance of the acquisition input.
@@ -252,16 +190,5 @@ condition in front of the project decision owner first. **G-09 is separately
 open** and stands before any code at all. Traceability is a property of the
 documents; readiness is a decision the owner and supervisor make.
 
-**Reissue note.** This reissue changes **no verdict and no conclusion**. Checks 1,
-2, 3 and 5 still pass cleanly on re-derivation (105/105/0/0/0; 12 units; 23 edges;
-four delivery artifacts present). Check 4 still passes on traceability and fails
-on completeness — the gap is smaller than first certified (36 rather than 40) but
-it is the same gap, closed only where a §15.2 amendment closed it. Check 6 still
-passes with both contradictions recorded rather than resolved by inference. Check
-7 hands forward the same six open blockers, three of them with a limb discharged.
-What changed is that the numbers now match the artifacts they describe.
-
 **Approved by:** ☐ pending — this record is produced by the workflow and accepted
-by the project decision owner at the stage 2.8 approval gate. The 2026-08-22
-reissue was authorised by the owner's approval of `GOV-2026-08-22-INC-01`
-Recommendation 6 and does **not** itself constitute that acceptance.
+by the project decision owner at the stage 2.8 approval gate.

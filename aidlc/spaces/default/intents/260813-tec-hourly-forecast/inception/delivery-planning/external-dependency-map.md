@@ -425,7 +425,7 @@ Enumerated rather than counted, so nothing is lost to a wrong total:
 | **BLK-06** — canonical protected set | **17-item deduplicated union**, cardinality calculated; `history window`, `station encoding`, `baselines` added; FR-P1-06-1 amended 14 → 17 | **D-24**, `CR-2026-08-22-PROTECTED-SET` |
 | **"Full-year job"** | **Defined in TE §9.2**: three classes, only class C (full-year scientific processing and evaluation) requires prior fixture evidence. Class A acquisition and integrity verification do not — with every December restriction intact | `CR-2026-08-22-SCOPE-DEFS` |
 | **Stub stage scripts** | **Scaffolding**, provided they carry no scientific implementation, governed execution, full-year processing, acquisition, feature-generation or model-training logic, and no December access. One-unit-per-Bolt preserved | Owner ruling; recorded in `bolt-plan.md` § G-09 |
-| **BLK-05** — new module | **Creation approved in principle**, with the §12 amendment. **The name is not chosen** — three candidates await owner selection | Owner ruling; see § A2 |
+| **BLK-05** — new module | **Name chosen: `tests/test_prepared_target_schema.py`**, with the §12 tree entry and amendment-provenance row added. **Naming is not building** — the module does not exist and has never been run; creation stays gated by G-09 and stage 3.5. Acceptance behaviour fixed by the owner: exactly D-17's 16 fields **passes**, an excluded or additional field **fails**, a missing required field **fails**. (Superseded literal, preserved: "**The name is not chosen** — three candidates await owner selection") | **`CR-2026-08-22-TARGET-SCHEMA-TEST`**; see § A2 |
 
 ### Still open
 
@@ -434,12 +434,44 @@ Enumerated rather than counted, so nothing is lost to a wrong total:
 1. **G-09** — agent preflight. Cannot be signed at Gate 0; signed before any affected component is coded.
 2. **G-01** — scientific framing, pending sign-off.
 
-**Awaiting the owner's explicit selection or final wording:**
+**Awaiting the owner's explicit selection or final wording — NOTHING REMAINS
+UNDER THIS HEADING.** All four items (3, 4, 5, 6) were decided and applied on
+2026-08-22 and are retained below under their original numbers, marked `CLOSED`,
+so the numbering the rest of this document cites stays stable. The heading is kept
+for the same reason.
 
-3. **BLK-05's module name.** Creation is approved; the name is not. Three candidates, the proposed location and the module's exact responsibility are in § A2.
-4. **FR-P1-01-7's amendment wording.** Approved in principle under Vision §15.2; the owner directed that the current text, the exact replacement, the two corrections, the downstream effects and a leakage confirmation be presented before finalization. **Not applied.**
-5. **Whether the four leakage prohibitions get §19 TA rows.** `bolt-plan.md` Bolt 7 carries a negative-path **test specification** for each of FR-P1-04-12, -13, -16 and -17 as prerequisites. Turning any into an acceptance row is a §15.2 amendment. **Recommendation: approve** — a prerequisite with no acceptance row is enforced only by attention.
-6. **Whether `unit-of-work.md`'s blocker register is synced.** D-20 discharges BLK-02's station limb and D-24 discharges BLK-06's enumeration limb, but the stage 2.7 register still shows both open. Leaving it stale is the unpropagated-correction defect `GOV-2026-08-22-UG-02` Rec 3 already flagged once. **Recommendation: sync it**, annotated in place as the 2026-08-22 precedent did.
+**Consequence for Gate 0, recorded at its discharge:** with these four closed and
+BLK-02 plus the three F10.7 freezes resolved by D-20 through D-23, **Gate 0 holds
+no live owner decision.** What is left is not decidable there by design — G-09
+cannot be signed at Gate 0 because its §18.3 preflight reads four config files
+that Bolt 1 creates, G-01 is pending sign-off before the implementation freeze,
+and BLK-06's per-item config binding belongs to the functional-design gate under
+the `DP-CHAIR-02` ruling.
+
+3. **CLOSED 2026-08-22 — BLK-05's module name is chosen: `tests/test_prepared_target_schema.py`.** Approved by the project decision owner under **`CR-2026-08-22-TARGET-SCHEMA-TEST`**, added to the TE §12 `tests/` tree with its responsibility comment and to the §12 amendment-provenance table. **Naming a module is not building it — two of four limbs remain open:** the test **does not exist** (creation gated by G-09 and stage 3.5) and has **never been run** (no result of any kind is claimed). The approved acceptance behaviour is fixed so implementation cannot narrow it: a row with exactly D-17's approved 16 fields **passes**; a row with an excluded or additional field **fails**; a row missing any required field **fails**. The item as originally stated, retained: *"Creation is approved; the name is not. Three candidates, the proposed location and the module's exact responsibility are in § A2."*
+4. **CLOSED 2026-08-22 — FR-P1-01-7's amendment is applied.** Applied under **`CR-2026-08-22-F107-CORRECTIONS`** after the owner-directed presentation of the current text, the exact replacement, both corrections, the downstream effects and the leakage confirmation. The row now reads that the suspected 2022-03-18 outage was audited and **no missing calendar day was observed — at least one observation present on 365 of 365 days** — while explicitly **not** asserting uninterrupted within-day coverage or provider availability; and it names the four high-spread days with their true outlier hours (18, 20, 20, 17 UT), replacing the wrong claim that three of four fell at 20 UT. The item as originally stated, retained: *"Approved in principle under Vision §15.2; the owner directed that the current text, the exact replacement, the two corrections, the downstream effects and a leakage confirmation be presented before finalization. **Not applied.**"*
+
+<!--
+  Items 3 and 4 annotated in place 2026-08-22, AFTER this stage's approval gate,
+  on the project decision owner's explicit approval at the Gate 0 discharge —
+  following the annotate-in-place precedent the owner set at
+  GOV-2026-08-22-INC-01 Rec 7, where the board itself split on whether a
+  completed stage's artifact may be annotated after its gate.
+
+  Both were stale STATUS CLAIMS carrying no numeral: item 3 said the name "is
+  not chosen" when CR-2026-08-22-TARGET-SCHEMA-TEST had chosen it, and item 4
+  said "Not applied" when CR-2026-08-22-F107-CORRECTIONS had applied it. Neither
+  was findable by CR-2026-08-22-INC-CORRECTIONS Rec 5's sweep, which searched
+  superseded count literals. They are the eighth and ninth defects of that class
+  recorded in CR-2026-08-22-SWEEP-COMPLETENESS.
+
+  Superseded text preserved verbatim inside each item. No gate, owner, lead
+  time, provider, December protection, access-log statement, acceptance row or
+  scientific value is changed.
+-->
+<!-- markdownlint-disable-line -->
+5. **CLOSED 2026-08-22 — the four leakage prohibitions have §19 TA rows.** Approved by the project decision owner and applied the same day under **`CR-2026-08-22-LEAKAGE-TA`**: TE §19 gains **TA-33, TA-34, TA-35 and TA-36**, one negative-path row per requirement (FR-P1-04-12, -13, -16, -17), each naming the prohibited behaviour, the deliberately invalid input and the expected protective behaviour. **What that closes and what it does not:** each requirement now has an acceptance **criterion**; none has an implemented test (no module exists), none has been executed, none has passed, and all four rows read `Pending`. Module placement is an open assignment at stage 3.1. The recommendation as originally recorded, retained: *"Recommendation: approve — a prerequisite with no acceptance row is enforced only by attention."*
+6. **CLOSED 2026-08-22 — `unit-of-work.md`'s blocker register is synced.** Annotated in place under **`CR-2026-08-22-INC-CORRECTIONS`** (`GOV-2026-08-22-INC-01` Rec 7), the owner having settled the annotate-in-place question that the board itself split on: **BLK-02**'s station limb discharged by **D-20**, `fixture_manifest.yaml` limb open; **BLK-05**'s naming and documentation limbs discharged, implementation and execution limbs open; **BLK-06**'s enumeration limb discharged by **D-24**, per-item config binding and implementation open. **No blocker is closed outright and the count of open blockers remains six.** The conflict as originally stated, retained: *"D-20 discharges BLK-02's station limb and D-24 discharges BLK-06's enumeration limb, but the stage 2.7 register still shows both open. Leaving it stale is the unpropagated-correction defect `GOV-2026-08-22-UG-02` Rec 3 already flagged once."*
 
 **Open obligations, not decisions:**
 
@@ -481,3 +513,32 @@ Enumerated rather than counted, so nothing is lost to a wrong total:
   was owed or written.
 - **None** of the above adopts a reading on a supervisor-owned value, and none
   decides a scientific constant.
+
+## Corrections applied on resume, 2026-08-22
+
+Two items under § Still open → "Awaiting the owner's explicit selection or final
+wording" were **stale**: both had been decided and applied on 2026-08-22, and this
+document still listed them as pending an owner decision. A dependency map that
+reports a closed decision as open is worse than one that omits it, because the
+reader budgets time for a decision that has already been made.
+
+| Item | Was | Now |
+|---|---|---|
+| **5** — whether the four leakage prohibitions get §19 TA rows | Awaiting owner; carried a "Recommendation: approve" | **CLOSED** — approved and applied under `CR-2026-08-22-LEAKAGE-TA`; TA-33…TA-36 exist. Recorded with the four distinctions intact: criterion **yes**; implemented test **no**; executed **no**; passed **no**; all four rows `Pending`; module placement open at stage 3.1 |
+| **6** — whether `unit-of-work.md`'s blocker register is synced | Awaiting owner; carried a "Recommendation: sync it" | **CLOSED** — annotated in place under `CR-2026-08-22-INC-CORRECTIONS` (`GOV-2026-08-22-INC-01` Rec 7). **No blocker closed outright; the open-blocker count remains six** — BLK-02, BLK-05 and BLK-06 each had one limb discharged |
+
+**Numbering is deliberately unchanged.** Both items keep their original numbers
+and stay in place, marked `CLOSED`, because other sections of this document and of
+`bolt-plan.md` cite them by number. The heading above them now says items 3 and 4
+only. This follows the pattern item 9 already set in this file.
+
+Each closed item retains its original conflict statement and recommendation
+verbatim, so what was proposed stays separately auditable from what was decided.
+
+**Neither correction carries a numeral**, which is why `CR-2026-08-22-INC-CORRECTIONS`
+Rec 5 — a sweep for count literals — could not have found them. Raised at the
+approval gate.
+
+**Not changed in this file:** every gate, owner, lead time, external provider,
+December protection and access-log statement. No scientific constant, no
+supervisor-owned value, no acceptance row.

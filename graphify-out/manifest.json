@@ -1698,9 +1698,9 @@
     "semantic_hash": "8a6643a420fdad6bfb583523bc6cef16"
   },
   "PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md": {
-    "mtime": 1787378232.984176,
-    "seen": 1787381986.063841,
-    "ast_hash": "2ec1c8664032264d0fd4617d76628542",
+    "mtime": 1787401476.4399588,
+    "seen": 1787402203.3386781,
+    "ast_hash": "b38738a6d433dff547ffb74b54df36c1",
     "semantic_hash": ""
   },
   "PreFlight/vision_document(3)(2)(2).md": {
@@ -1722,9 +1722,9 @@
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/git-ae-srv-rdt1-df792a9b0ad4.md": {
-    "mtime": 1787383894.0622332,
-    "seen": 1787384008.6860147,
-    "ast_hash": "f84d94c8c52c03588c65be7cdc3e9a14",
+    "mtime": 1787402150.2446518,
+    "seen": 1787402203.3386781,
+    "ast_hash": "ee3924595aa7cf26d24f0627302c1a8b",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/laptop-tv4ugfbc-97fef92fe092.md": {
@@ -1830,9 +1830,9 @@
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/application-design/components.md": {
-    "mtime": 1787375436.749558,
-    "seen": 1787381986.063841,
-    "ast_hash": "e4599562370fc3ad734dffe47e20ec3a",
+    "mtime": 1787396763.5143025,
+    "seen": 1787402203.3386781,
+    "ast_hash": "90dfcda52fa8fdb56f57a04e0c7041cf",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/application-design/decisions.md": {
@@ -1920,9 +1920,9 @@
     "semantic_hash": "5651a532d1ff06d924d95ac7a6bd69dd"
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/requirements-analysis/requirements.md": {
-    "mtime": 1787383617.9678047,
-    "seen": 1787384008.6865602,
-    "ast_hash": "9ab9da83b5e3287ded7aa56488dae38b",
+    "mtime": 1787401802.114082,
+    "seen": 1787402203.3386781,
+    "ast_hash": "3af381060697a4cfcb010aa145c221a4",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/verification/phase-check-ideation.md": {
@@ -2148,21 +2148,21 @@
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work-dependency.md": {
-    "mtime": 1787383863.3012197,
-    "seen": 1787384008.6865602,
-    "ast_hash": "c34ef5ef068dbf7d320a67db04ac6408",
+    "mtime": 1787394642.5579257,
+    "seen": 1787402203.3386781,
+    "ast_hash": "8d3348e06a6d5fd1864df04a24efdcac",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work-story-map.md": {
-    "mtime": 1787383892.6184275,
-    "seen": 1787384008.6865602,
-    "ast_hash": "4e1e278d2a7abac227fe7f29edc3de91",
+    "mtime": 1787394655.6686103,
+    "seen": 1787402203.3386781,
+    "ast_hash": "6b3f55eb7332d2291f0ad13d68edc7a9",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/unit-of-work.md": {
-    "mtime": 1787383855.7209573,
-    "seen": 1787384008.6865602,
-    "ast_hash": "b5240804c8e379f2f91525e356118314",
+    "mtime": 1787401591.6542628,
+    "seen": 1787402203.3386781,
+    "ast_hash": "5a6373c7ec3d157568a28634e98c381c",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/units-generation/units-generation-questions.md": {
@@ -2193,6 +2193,102 @@
     "mtime": 1787383930.8211164,
     "seen": 1787384008.6865602,
     "ast_hash": "5e26b240d072fc8712be5487617e502a",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/delivery-planning/bolt-plan.md": {
+    "mtime": 1787402148.49833,
+    "seen": 1787402203.3386781,
+    "ast_hash": "57f33d6a76e2e3e081c93c1c096431de",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/delivery-planning/delivery-planning-questions.md": {
+    "mtime": 1787401654.9311438,
+    "seen": 1787402203.3386781,
+    "ast_hash": "59e848691263427b055b0b4bf9ae3968",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/delivery-planning/external-dependency-map.md": {
+    "mtime": 1787396970.2223032,
+    "seen": 1787402203.3386781,
+    "ast_hash": "0e7a0ef8e694d2a00152f5f54c955a78",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/delivery-planning/memory.md": {
+    "mtime": 1787391139.2440822,
+    "seen": 1787402203.3386781,
+    "ast_hash": "9f1669ab23750ff17501a68a90917653",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/delivery-planning/risk-and-sequencing-rationale.md": {
+    "mtime": 1787401652.0509648,
+    "seen": 1787402203.3386781,
+    "ast_hash": "fbd6e9b0941c270135d6efe857a60e10",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/inception/delivery-planning/team-allocation.md": {
+    "mtime": 1787387608.5559802,
+    "seen": 1787402203.3386781,
+    "ast_hash": "516da8c3e8b10d2c3dd0c11d3a31f3d5",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/verification/phase-check-inception.md": {
+    "mtime": 1787402008.5366335,
+    "seen": 1787402203.3386781,
+    "ast_hash": "ad92fe7610ebfb3ec11a47bda09eeb54",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/verification/phase-check-inception.superseded-2026-08-22.md": {
+    "mtime": 1787401911.9427545,
+    "seen": 1787402203.3386781,
+    "ast_hash": "1b4a99c3caa9be0a50e57a918b000e07",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_2026-08-22_EV-12_f107_publication.md": {
+    "mtime": 1787396803.5701747,
+    "seen": 1787402203.3386781,
+    "ast_hash": "3b2a20bda1dd313c116be0643dbbac6a",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_2026-08-22_INC_corrections.md": {
+    "mtime": 1787402090.1026263,
+    "seen": 1787402203.3386781,
+    "ast_hash": "0ef010421c98af1194211fb7fe9c8b65",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_2026-08-22_f107_corrections.md": {
+    "mtime": 1787394835.9331784,
+    "seen": 1787402203.3386781,
+    "ast_hash": "67da8b3ab62dce0d9aa75cf6c4b65e29",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_2026-08-22_leakage_ta_and_schema_test.md": {
+    "mtime": 1787401624.2089014,
+    "seen": 1787402203.3386781,
+    "ast_hash": "2a7258afae64998512aa4990077d25f4",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_2026-08-22_protected_set.md": {
+    "mtime": 1787394835.5836205,
+    "seen": 1787402203.3386781,
+    "ast_hash": "23294dd85eb0537736de0e25c7f96905",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_2026-08-22_scope_definitions.md": {
+    "mtime": 1787394835.4271483,
+    "seen": 1787402203.3386781,
+    "ast_hash": "e91e30f4507f51d95d95463e40da30c9",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_PROCEDURE.md": {
+    "mtime": 1787401683.4676514,
+    "seen": 1787402203.3386781,
+    "ast_hash": "8baa4adcda74a1a7803475b13509860b",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_REQUEST_2026-08-22_EV-12_f107_publication.md": {
+    "mtime": 1787396931.735286,
+    "seen": 1787402203.3386781,
+    "ast_hash": "bf66acb2c5b2bdd86c46a795d18825d9",
     "semantic_hash": ""
   }
 }

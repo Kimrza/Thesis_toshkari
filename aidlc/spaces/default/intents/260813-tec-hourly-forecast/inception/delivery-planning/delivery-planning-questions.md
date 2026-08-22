@@ -264,7 +264,9 @@ X. Other (please specify)
 [Answer]: E
 
 > **Follow-up raised — see FU-2.** This question is multi-select and its option E
-> is one specific item (the 40 untested requirements and the five untested
+> is one specific item (the untested requirements — 40 when this question was
+> written, 36 since `CR-2026-08-22-LEAKAGE-TA`; see `requirements.md`
+> § Requirements with no testing row for the current figure — and the five untested
 > forbidden edges), **not** an "all of the above" like Question 7's option E. A
 > bare `E` therefore reads two ways. FU-2 resolves which; this tag is not
 > re-interpreted here.
@@ -440,3 +442,31 @@ Does this all look correct before I generate the artifact?
 - Request changes
 
 [Answer]: Looks correct
+
+### Re-confirmation, 2026-08-22
+
+The first confirmation was recorded at **2026-08-22T08:28:35Z** against this
+file's contents at that moment. This file has been edited twice since, so that
+receipt no longer matches it and the engine will not accept the stage on a
+receipt whose recorded hash has moved. The summary is therefore re-presented.
+
+**No answer, option or decision in this file changed under either edit.** The
+two edits were:
+
+1. `CR-2026-08-22-INC-CORRECTIONS` Rec 5 — the commentary note under Q9's answer
+   tag, where the untested-requirement figure was rendered as "40 when this
+   question was written, 36 since `CR-2026-08-22-LEAKAGE-TA`". Q9's own option
+   text and the `[Answer]: E` tag were deliberately left as asked.
+2. This subsection.
+
+**Question text is preserved as asked, deliberately.** Q9's option E and the
+§ Sources bullet still read "40 requirements with no acceptance row", because a
+Q&A file records the question the human actually answered. The current figure is
+**36**; it is carried in the commentary beside the answer, in
+`risk-and-sequencing-rationale.md` § R-05, and in `bolt-plan.md`.
+
+**Six defects were corrected in the four plan artifacts before this
+re-confirmation**, all found on resume and all outside the reach of the Rec 5
+sweep. They are enumerated at the approval gate. None of them changes a Bolt, a
+sequence, a Definition of Done, an owner, a gate, a scientific value or an answer
+recorded above.

@@ -7,7 +7,7 @@ Stage 2.8 (`delivery-planning`), intent `260813-tec-hourly-forecast`.
 - `bolt-plan.md` — the twelve-Bolt sequence this document justifies.
 - `../units-generation/unit-of-work-dependency.md` — the 23 edges, the one independent pair, and the topological order this sequence is checked against.
 - `../units-generation/unit-of-work.md` — the blocker register BLK-01…BLK-07 and the residual obligations RES-01…RES-03, which supply most of the risk register below.
-- `../units-generation/unit-of-work-story-map.md` — the 40 requirements with no acceptance row and the per-unit untested breakdown, which is the coverage risk.
+- `../units-generation/unit-of-work-story-map.md` — the 36 requirements with no acceptance row and the per-unit untested breakdown, which is the coverage risk. (Superseded literal, preserved: "the 40 requirements with no acceptance row"; corrected 2026-08-22, a site the `CR-2026-08-22-INC-CORRECTIONS` Rec 5 sweep did not reach.)
 - `../application-design/components.md` — the forbidden edges and the import allowlist, whose enforcement points drive the leakage risks.
 - `../requirements-analysis/requirements.md` — § Known defects, § Open supervisor gates, § Constraints.
 - `../practices-discovery/team-practices.md` — § Walking Skeleton (`skeleton: off` and why), § Testing Posture (§18.3 as the real quality gate), § Deployment.
@@ -59,9 +59,22 @@ The two units carry asymmetric kinds of risk:
   Dst release grades that must not be mixed within one series, provider version
   drift already observed in this dataset (`g.002` versus `g.003`), and a GIM
   network-overlap audit whose result must be disclosed before any independence
-  claim. It is the larger unit (complexity L) and carries **five of its seven
-  requirements with no acceptance row** — the highest untested proportion of any
-  unit in the plan.
+  claim. It is the larger unit (complexity L) and carries **four of its seven
+  requirements with no acceptance row** — the second-highest untested proportion
+  of any unit in the plan, behind `models-and-baselines` at seven of nine.
+  <!-- Corrected 2026-08-22, two separate defects at one site.
+       (1) Superseded literal, preserved: "five of its seven requirements with no
+       acceptance row". external-products fell 5 → 4 under
+       CR-2026-08-22-LEAKAGE-TA, which gave FR-P1-04-17 acceptance row TA-36.
+       Derived from unit-of-work-story-map.md Table 1 before assertion:
+         awk -F'|' '/NO CURRENT ACCEPTANCE ROW/ {gsub(/[` *]/,"",$3); print $3}' \
+           unit-of-work-story-map.md | sort | uniq -c
+       -> external-products 4 of 7; per-unit values sum to 36.
+       (2) "the highest untested proportion of any unit in the plan" was wrong
+       when written, independently of the count: 5/7 = 71% was already below
+       models-and-baselines at 7/9 = 78%. At 4/7 = 57% it is further wrong. A
+       site the CR-2026-08-22-INC-CORRECTIONS Rec 5 sweep did not reach. -->
+<!-- markdownlint-disable-line -->
 - `target-standardization` is complexity M, carries six requirements with one
   untested, and its single open blocker (BLK-05, the D-17 target-schema test's
   missing module name) is a **naming decision inside this project's own control**.
@@ -228,13 +241,33 @@ training and evaluation** rather than a documentation gap:
 Each is designed as a raise at a named call site, and `bolt-plan.md` Bolt 7 now
 carries an explicit **negative-path test specification** for each — a test that
 the prohibited behaviour is *detected and rejected*, not that the happy path
-works. **Those are specifications, not results:** none of the four has a §16 or
-§19 acceptance row today, creating one is a Vision §15.2 amendment this stage
-cannot grant, and nothing here may be read as evidence that any of them is tested
-or passing.
+works.
+
+**Those are specifications, not results — and the four distinctions must not be
+collapsed.** Each of the four now **has** a §19 acceptance row: TA-33, TA-34,
+TA-35 and TA-36, created under `CR-2026-08-22-LEAKAGE-TA` on the owner's approval.
+None has an **implemented test** — no module exists for any of the four, and
+module placement is an open assignment at functional design. None has been
+**executed**. None has **passed**. All four §19 rows read `Pending`. Nothing here
+may be read as evidence that any of them is tested or passing; a row that tests a
+requirement on paper is a different fact from a requirement being tested.
+
+<!-- Corrected 2026-08-22. Superseded text, preserved for the audit trail:
+     "**Those are specifications, not results:** none of the four has a §16 or
+     §19 acceptance row today, creating one is a Vision §15.2 amendment this
+     stage cannot grant, and nothing here may be read as evidence that any of
+     them is tested or passing."
+     That sentence was true when written and became false the same day, when
+     CR-2026-08-22-LEAKAGE-TA created TA-33…TA-36 under the owner's approval. It
+     had survived as a direct contradiction of this document's own R-05 entry,
+     which records the four leaving the untested list precisely because those
+     rows were created. A site the CR-2026-08-22-INC-CORRECTIONS Rec 5 sweep did
+     not reach — the sweep searched count literals, and this defect carries no
+     count. -->
+<!-- markdownlint-disable-line -->
 
 The fifth untested forbidden edge in this unit, FR-P1-04-10, and the balance of
-the 40 remain in R-05.
+the 36 remain in R-05. (Superseded literal, preserved: "the balance of the 40".)
 
 ### R-03 — The confirmatory prediction built on the wrong seeds
 
@@ -262,12 +295,12 @@ the 40 remain in R-05.
 
 | Field | Value |
 |---|---|
-| **Risk** | **40 of the 105 requirements carry no §16 or §19 acceptance row.** **Scope narrowed 2026-08-22:** four of them — FR-P1-04-12, FR-P1-04-13, FR-P1-04-16 and FR-P1-04-17 — were **promoted into R-02** on the owner's ruling against `DP-ML-01`, because they are leakage prohibitions rather than ordinary coverage gaps. This risk now covers the remaining 36 plus FR-P1-04-10, the fifth untested forbidden edge |
+| **Risk** | **36 of the 105 requirements carry no §16 or §19 acceptance row.** **Scope narrowed 2026-08-22:** the figure was **40** when this risk was written. Four of those forty — FR-P1-04-12, FR-P1-04-13, FR-P1-04-16 and FR-P1-04-17 — gained acceptance rows TA-33…TA-36 under `CR-2026-08-22-LEAKAGE-TA` and were **promoted into R-02** on the owner's ruling against `DP-ML-01`, because they are leakage prohibitions rather than ordinary coverage gaps. They left this list because a row now tests them **on paper** — none of the four has an implemented test, an execution or a pass, and all four §19 rows read `Pending`. This risk therefore covers 36 requirements plus FR-P1-04-10, the fifth untested forbidden edge. (Superseded literal, preserved: "**40 of the 105 requirements carry no §16 or §19 acceptance row**"; corrected 2026-08-22, a site the `CR-2026-08-22-INC-CORRECTIONS` Rec 5 sweep did not reach) |
 | **Likelihood** | Realized — the gap exists today |
 | **Impact** | Medium to High, depending on the requirement |
-| **Why it ranks fifth** | Discoverable at a gate rather than silently corrupting a result: each of the 40 carries a real pass/fail criterion, and each of the five forbidden edges is designed as a raise at a named call site, so a test *can* assert it. What is missing is the row, not the mechanism |
+| **Why it ranks fifth** | Discoverable at a gate rather than silently corrupting a result: each of the 36 carries a real pass/fail criterion, and each of the five forbidden edges is designed as a raise at a named call site, so a test *can* assert it. What is missing is the row, not the mechanism. (Superseded literal, preserved: "each of the 40"; corrected 2026-08-22, a site the `CR-2026-08-22-INC-CORRECTIONS` Rec 5 sweep did not reach) |
 | **Mitigation** | Tracked, and enumerated per unit upstream so NFR requirements has a concrete work list. Closing any of them needs a Vision §15.2 change-control amendment, which is **not this initiative's to grant** |
-| **Affected** | Distributed. The largest concentrations: `acquisition` (7 of 15), `models-and-baselines` (7 of 9), `regimes-diagnostics-reporting` (7 of 11), `external-products` (5 of 7) |
+| **Affected** | Distributed. The largest concentrations, derived from `unit-of-work-story-map.md` Table 1 rather than carried: `models-and-baselines` (7 of 9), `acquisition` (7 of 15), `regimes-diagnostics-reporting` (7 of 11), `external-products` (4 of 7). The eleven per-unit values sum to 36. (Superseded literal, preserved: "`external-products` (5 of 7)"; corrected 2026-08-22, a site the `CR-2026-08-22-INC-CORRECTIONS` Rec 5 sweep did not reach) |
 
 ### R-06 — No user stories, so acceptance vocabulary is fixed and external
 
@@ -340,8 +373,40 @@ handles them:
   full in § "The deviation is conditional", with the revision obligation if
   functional design finds the edge moves.
 - **Open, carried not closed.** BLK-02 through BLK-07, RES-01, RES-02, RES-03,
-  the 40 untested requirements, TA-24's missing implementing unit, the `02`
+  the 36 untested requirements, TA-24's missing implementing unit, the `02`
   ordinal collision, WS-13's evidence departure from §16, and the AGPLv3
   question.
 - **None** of the above adopts a reading on a supervisor-owned value, and none
   decides a scientific constant.
+
+## Corrections applied on resume, 2026-08-22
+
+Five defects were corrected in this file after the first summary confirmation and
+before the approval gate. Each preserves its superseded literal in place, per
+`governance/CHANGE_RECORD_PROCEDURE.md` step 1. **No risk is added, removed or
+re-ranked; no ordering argument changes; no scientific value is touched.**
+
+| Site | Defect |
+|---|---|
+| § Sources | "the **40** requirements with no acceptance row" → **36** |
+| § The sequencing argument, `external-products` bullet | "**five** of its seven requirements with no acceptance row" → **four**; and "the highest untested proportion of any unit in the plan" → **second-highest**, behind `models-and-baselines` at 7 of 9. The superlative was wrong when written — 5/7 = 71% was already below 78% |
+| § R-02 status paragraph | "none of the four has a §16 or §19 acceptance row … this stage cannot grant" — **a direct contradiction of R-05 in this same file**, which records the four leaving the untested list precisely because TA-33…TA-36 were created |
+| § R-02 closing line | "the balance of the **40**" → **36** |
+| § R-05 Risk and "Why it ranks fifth" cells | "**40** of the 105 requirements carry no §16 or §19 acceptance row" and "each of the **40**" → **36**, with the 40 → 36 history and the four promoted IDs stated in the cell |
+
+**The R-02 defect is the one that mattered.** It was an unresolved contradiction
+internal to a single artifact, which `aidlc/spaces/default/memory/phases/inception.md`
+§ Requirements Quality forbids carrying forward. Both statements were true when
+written and false the same day, once `CR-2026-08-22-LEAKAGE-TA` created the four
+rows under the owner's approval.
+
+**Two of the five carry no numeral** — the R-02 claim and the "highest untested
+proportion" superlative — so `CR-2026-08-22-INC-CORRECTIONS` Rec 5, which swept
+for count literals, could not have found them. Raised at the approval gate.
+
+**Untested total, derived and printed before assertion:** **36**, from two
+independent artifacts whose ID lists were set-differenced and found identical.
+`external-products` is **4 of 7**. The full per-unit breakdown and the
+range-lead derivation caution are recorded in `bolt-plan.md` § Corrections applied
+on resume rather than duplicated here — duplicating a derived figure across
+artifacts is the drift this correction pass exists to undo.

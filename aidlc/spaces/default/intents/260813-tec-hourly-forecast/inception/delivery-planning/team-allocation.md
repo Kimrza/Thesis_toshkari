@@ -113,3 +113,27 @@ Bolt that does not own it.
   crossings actually gate a Bolt's closure, not a new assignment — no acceptance
   row changes owner here.
 - **None** of the above adopts a reading on a supervisor-owned value.
+
+## Reviewed on resume, 2026-08-22 — no correction needed
+
+The propagation sweep that corrected six defects across the other three plan
+artifacts was run over this file too, and found nothing to change. Recorded
+because `governance/CHANGE_RECORD_PROCEDURE.md` step 3 is explicit that **"a sweep
+that finds nothing records that it ran and found nothing. An unrecorded sweep
+counts as no sweep."**
+
+What was checked here:
+
+- **Every count.** This file carries no untested-requirement count, no per-unit
+  untested figure and no acceptance-row total, so the 40 → 36 correction and the
+  `external-products` 5 → 4 correction have no site in it.
+- **The TA-24 statement** above — that no unit can produce its evidence and it is
+  recorded unassigned. Still accurate: TA-24 remains the one mapped acceptance row
+  with no owning unit, unchanged by `CR-2026-08-22-LEAKAGE-TA`, which raised the
+  owned rows from 39 to 43 out of 44 without touching TA-24.
+- **Every Bolt-to-mob assignment.** All twelve Bolts remain assigned to
+  `aidlc-developer-agent`; stage 1.5 (`team-formation`) is `SKIP` in this scope, so
+  there is no team roster to have drifted against.
+- **The two assumptions** above. Both still hold as written.
+
+No superseded literal is preserved here, because nothing was superseded.
