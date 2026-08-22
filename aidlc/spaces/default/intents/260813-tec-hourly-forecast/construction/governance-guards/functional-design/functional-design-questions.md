@@ -132,7 +132,21 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option D, with the canonicaliser version recorded in the manifest and the section/field boundaries stated per item in `business-rules.md`. Option A cannot express items 5 and 6 at all, which by itself rules it out. Option C alone reintroduces the silent-gap failure this project has now corrected four times. D costs one extra test and buys a freeze that fails only when something real changed — which is precisely what G-P3C's empty-diff pass condition is supposed to mean.
 
-[Answer]:
+[Answer]: D — accepted with the amendments below, recorded verbatim as the human wrote them. Two of them modify the option as offered (the overlap rule and item 13's composition) and one imposes a raise-don't-assume constraint on item 12; all three are binding on the artifacts.
+
+> Define config-section and config-field hashes as SHA-256 hashes over a versioned canonical serialization of the parsed YAML value at the exact granularity authorized by D-24.
+>
+> Each protected item must have an explicit canonical YAML path and an asserted key inventory. A mechanical completeness test must reconcile that inventory with the parsed governed region so that adding, deleting, or renaming a governed key cannot leave it silently unprotected.
+>
+> Record the canonicaliser identifier and version in the transition manifest. The canonicalisation contract must define mapping-key ordering, sequence-order treatment, scalar typing and normalization, Unicode and encoding, duplicate-key rejection, alias or merge-key handling, and rejection of unsupported or ambiguous values. Comments, whitespace, quote style, mapping-key order, and workspace relocation must not change the hash; governed value changes must change it.
+>
+> Modify the proposed non-overlap rule: reject undeclared overlap, but permit explicit parent-section/child-field overlap where D-24 intentionally protects both a section and a field within it. Every permitted overlap must be declared and tested so that a change cannot be hidden or ambiguously attributed.
+>
+> For item 13, compute the source hash and config-section hash independently and combine them using a versioned, domain-separated representation.
+>
+> Preserve item 12's approved whole-file semantics. If applying semantic YAML canonicalisation to the whole-file hash would change D-24's meaning, raise that as a governed amendment rather than assuming it.
+>
+> State the section and field boundaries per item in business-rules.md and verify the complete mapping mechanically against D-24 before G-P3C.
 
 ---
 
@@ -165,7 +179,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option D. The approved design already requires the key-list assertion, so B alone under-delivers against it and C actively defeats it. The draft/freeze distinction earns its cost by letting the transition manifest be exercised ten Bolts before it is relied on — and this project's affirmed posture is that reproducibility and determinism are *executable*, not asserted. Recommend also that the draft/freeze flag be a field of `TransitionManifest` itself rather than a build-time argument, so it survives serialization.
 
-[Answer]:
+[Answer]: D
 
 ---
 
