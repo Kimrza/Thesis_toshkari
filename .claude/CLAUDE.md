@@ -1,4 +1,5 @@
 @.claude/rules/aidlc.md
+@.claude/rules/question-recommendations.md
 
 <!--
   The @-line above pulls the AIDLC method into Claude's ambient context. It is
@@ -91,6 +92,19 @@ or evidence, phase-transition hashes, model advancement, final reproducibility,
 release, and claims. AI-DLC approval and TEC governance are separate: AI-DLC
 may say the stage is complete, but only the human student/supervisor may accept
 the TEC gate after reading the governance report.
+
+When a project Markdown document reaches a finalized state and no review was
+explicitly requested, do not review it automatically. Ask first — "These
+documents appear finalized: <paths>. Should the Enterprise Governance Review
+Board perform a full governance review?" — and stop on `No`.
+
+Every review, governance or otherwise, is delivered in the format fixed by
+`.claude/skills/review-tec-governance/references/review-output-contract.md`:
+one consolidated report, an Executive Summary with severity counts, findings as
+numbered `### Recommendation X` blocks each ending in an explicit Approve /
+Reject / Modify / Postpone decision ask, then STOP and wait. Never rewrite a
+document automatically, invent content, or apply a finding before the human
+decides on it.
 # graphify
 - **graphify** (`.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
 When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.

@@ -30,7 +30,31 @@ or evidence, phase-transition hashes, model advancement, final reproducibility,
 release, and claims. AI-DLC approval and TEC governance are separate: AI-DLC
 may say the stage is complete, but only the human student/supervisor may accept
 the TEC gate after reading the governance report.
+
+When a project Markdown document reaches a finalized state and no review was
+explicitly requested, do not review it automatically. Ask first, and stop on
+`No`. Every review is delivered in the format fixed by
+`.claude/skills/review-tec-governance/references/review-output-contract.md`,
+then STOP and wait.
 ```
+
+## Porting a Kiro steering setup
+
+Kiro's document-finalized hook has no direct Claude Code equivalent, and it does
+not need one. Its two halves land in different places:
+
+| Kiro construct | Claude Code equivalent |
+|---|---|
+| Hook trigger on a finalized Markdown document | The `CLAUDE.md` governance-overlay policy above, which tells the session to run the board before a stage approval |
+| The hook's "would you like a review?" prompt | [review-output-contract.md](review-output-contract.md) § **Consent before review** — asked at the start of the run |
+| Review output format, principles, forbidden behaviour, approval workflow | [review-output-contract.md](review-output-contract.md), read at the start of every run |
+| A steering file with `inclusion: always` | A project rule under `.claude/rules/`, imported by an `@`-line at the top of `.claude/CLAUDE.md` — for example `.claude/rules/question-recommendations.md` |
+
+Do not build a `PostToolUse` hook that offers a review on every Markdown write.
+AI-DLC writes Markdown constantly, so the prompt would fire on drafts, memory
+files, and diaries, and the noise trains the human to dismiss it. The
+policy-plus-consent path keeps the ask at the approval gate where the decision
+actually is.
 
 ## Invocation pattern
 

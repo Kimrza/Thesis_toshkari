@@ -9,6 +9,12 @@ description: Run an independent, read-only TEC_Project governance review board o
 
 Act as the independent governance overlay for TEC_Project. Review artifacts and evidence; do not implement fixes, rewrite approved artifacts, open protected data, approve academic gates, or alter AI-DLC state.
 
+Read [review-output-contract.md](references/review-output-contract.md) at the start of every run. It is binding: it fixes consent, output shape, review principles, forbidden behaviour, cross-artifact checks, and the stop-and-wait rule. Nothing below overrides it.
+
+## Confirm the request
+
+Confirm you are permitted to review before you read for findings, per the contract's **Consent before review**. An invocation naming paths, a stage, or a gate is itself the permission — proceed. An invocation with no target, one reached through the `CLAUDE.md` governance overlay, or one aimed at a visibly incomplete draft requires an explicit `Yes` first. Never review automatically, and never review an unfinished draft without asking.
+
 ## Establish authority
 
 1. Locate the current project root and active AI-DLC intent.
@@ -49,7 +55,8 @@ When independent task execution is available, dispatch one task per active revie
 - severity: `BLOCKER`, `MAJOR`, `MINOR`, or `NOTE`;
 - affected TEC gate and AI-DLC stage;
 - consequence and smallest acceptable remediation;
-- verification needed to close it.
+- verification needed to close it;
+- a category from the contract's list, and one or more genuinely valid remediation options with their advantages and disadvantages, plus the reviewer's preferred option and its justification. The report renders these as **Possible Solutions**, **Comparison**, and **Recommendation**, so a pass offering a single unexplained fix is an incomplete pass. Where two options are equally valid, say so rather than picking one.
 
 Reject unsupported criticism, invented scientific values, generic best-practice findings that do not affect this project, and style-only recommendations unless they impair scientific interpretation or auditability.
 
@@ -66,6 +73,8 @@ Read [review-criteria.md](references/review-criteria.md) for the blocking invari
 - Phase 1/Phase 2 target lineage and the signed phase-transition protected hashes;
 - source, data, environment, experiment, code-reuse, licensing, and artifact provenance;
 - CPU reproducibility on local and Kaggle within the governed resource envelope.
+
+Then run the contract's **Cross-artifact governance checks** and **AI-DLC coverage** sweep on every review, not only on gate reviews: document consistency, shared terminology, aligned IDs, traceability upstream and downstream, duplicated or contradictory requirements, and architecture/API/database/testing/NFR/scope consistency. Flag every inconsistency as a finding. Record `N/A` with a reason for each AI-DLC artifact class the active scope marks `SKIP`, and when a scope skip removes the usual carrier of a requirement, name where that requirement now lives.
 
 Do not confuse project completion with model success. A correctly executed negative or inconclusive experiment may pass a process/reproducibility gate. Issue a separate model-advancement decision whenever model performance is in scope.
 
@@ -91,8 +100,10 @@ When model evidence is in scope, also issue:
 
 ## Report and stop
 
-Use [gate-report-template.md](references/gate-report-template.md). Produce one consolidated Markdown report and, when requested or already standard in the repository, a machine-readable JSON companion. Include authority versions and hashes, active reviewers and conflicts, evidence coverage, verdict rationale, model-advancement status when applicable, findings, disagreements, traceability, required human decisions, and invalidated downstream artifacts.
+Use [gate-report-template.md](references/gate-report-template.md) for structure and [review-output-contract.md](references/review-output-contract.md) § **Standard output** for the delivered shape. Produce exactly one consolidated Markdown report — the Decision, Authority and evidence, Board, and Gate criteria tables, then the Executive Summary, then findings as numbered `### Recommendation X` blocks, then disagreements, traceability and downstream impact, and required human decisions. Add a machine-readable JSON companion when requested or already standard in the repository.
 
-Write a report only when explicitly asked to create an artifact; otherwise return it in chat. Never modify the reviewed artifact during the review. Stop after the recommendation and wait for the student or supervisor to approve, reject, defer, or request remediation.
+Report severities as Critical / High / Medium / Low, mapped from the reviewer grades `BLOCKER` / `MAJOR` / `MINOR` / `NOTE`, and carry the reviewer grade in each block. State the editorial readiness (`Approve` / `Needs Review` / `Major Revision`) alongside the gate verdict rather than in place of it, and derive every severity count from the finding blocks rather than from earlier prose.
+
+Write a report file only when explicitly asked to create an artifact; otherwise return it in chat. Never modify the reviewed artifact during the review. Then **STOP** and wait for the student or supervisor to approve, reject, modify, defer, ask questions, or request remediation — never assume approval, and never apply a finding on the strength of the finding alone.
 
 For Claude Code and AI-DLC v2 setup, read [claude-ai-dlc-integration.md](references/claude-ai-dlc-integration.md). Keep this overlay separate from the AI-DLC conductor, hooks, state machine, and shipped agents.
