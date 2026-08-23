@@ -3,6 +3,9 @@
 **Unit** `acquisition` (Bolt 3) · **Kind** `library` · **Depends on** `foundation`,
 `governance-guards`
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at a sibling unit's stale
+> cross-references. **No rule of this unit changed.**
+
 > **Re-established 2026-08-23 after a redo jump taken to correct this unit.** R-40's TA-08
 > acceptance line was corrected under the cleared receipt at the project decision owner's
 > explicit direction, with both superseded readings recorded in place; the summary was
@@ -16,7 +19,8 @@
 >
 > **Re-established a third time 2026-08-23** after a redo aimed at a misread depth policy in
 > `component-methods.md`. **No rule changed**; that re-reading **confirms** this unit's three
-> owed amendments as genuine cross-package boundary changes.
+> owed amendments as genuine cross-package boundary changes. **A fourth** followed a sweep of
+> two sibling question files; **no rule changed then either.**
 
 The prohibitions this unit enforces, each with what it rejects, what it raises, and the
 negative control that proves the rejection happens.

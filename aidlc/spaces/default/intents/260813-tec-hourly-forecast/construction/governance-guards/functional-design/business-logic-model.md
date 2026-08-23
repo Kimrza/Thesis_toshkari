@@ -2,6 +2,11 @@
 
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Depends on** `foundation`
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
+> cross-references in `target-standardization`'s question file. **No content of this unit
+> changed** — though the correction concerned **this unit's R-20**, which a sibling had been
+> attributing to `inventory-and-registry`.
+
 > **Re-established 2026-08-23 after a stage-wide redo jump**, which reset the receipt floor
 > for every unit of this stage. **No content of this unit changed at re-establishment.**
 > What the jump also does here: it **resets this unit's exhausted adversarial reviewer
@@ -14,7 +19,8 @@
 > **Re-established a second time 2026-08-23** after a further stage-wide redo aimed at
 > `external-products`; **no content of this unit changed on that occasion.** **A third
 > re-establishment** followed a redo aimed at a misread depth policy in
-> `component-methods.md`; **no content changed then either.**
+> `component-methods.md`; **no content changed then either.** **A fourth** followed a sweep
+> of two sibling question files; **no content changed then either.**
 
 The workflows this unit implements: the phase-boundary prohibition checked at every
 stage entry, the Phase 1 → Phase 2 transition manifest, the single guarded path into

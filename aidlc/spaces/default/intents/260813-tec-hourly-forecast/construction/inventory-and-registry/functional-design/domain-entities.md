@@ -3,6 +3,10 @@
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Depends on**
 `acquisition`
 
+> **Re-established a fifth time 2026-08-23.** **No content of this unit changed.** The redo
+> corrected a sibling's citations of "`inventory-and-registry` R-20": **this unit's rules run
+> R-44…R-53 and it has no R-20.**
+
 > **Re-established 2026-08-23 after a stage-wide redo jump** aimed at a correction in
 > `acquisition`. **No content of this unit changed** — its iteration-2 adversarial verdict
 > was READY with no surviving findings. **Re-established again 2026-08-23** after a further
@@ -13,6 +17,10 @@
 > where intra-package shapes are specified; `inventory.py` and `release.py` are the **same
 > package**, so § 1's contract is this stage's ordinary work, **not an amendment owed**.
 > **No answer changed**; this unit owes **one** amendment — § 2's provenance field.
+>
+> **A fourth re-establishment** swept this unit's **question file**, which had not been
+> corrected alongside these artifacts because its receipt was recorded first. **No content of
+> this artifact changed.**
 
 The data shapes this unit owns: the source inventory, the station registry and the
 conflict register that makes its resolution rule checkable, the prepared-product schema

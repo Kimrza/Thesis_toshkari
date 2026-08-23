@@ -25723,3 +25723,5527 @@
 **Iteration**: 1
 
 ---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:12:59Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Context**: construction > external-products > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:12:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: f2638813
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:12:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: f2638813
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 172
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:12:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: 287e1cdb
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:12:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: 287e1cdb
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 180
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-23T06:13:10Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: a4a8287d76adf4909
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: NOT-READY** (1 Critical)\n\nI verified the depth-policy correction itself is sound (checked `component-methods.md` § Depth and its Assumptions
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-23T06:13:28Z
+**Event**: REVIEW_COMPLETED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: external-products
+**Iteration**: 1
+**Verdict**: NOT-READY
+**Artifact Fingerprint**: sha256:7a6ea8c8f5e8f9029aebdb42eb24d1693b4689187a6b7a1127331f73a5548001
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-23T06:18:29Z
+**Event**: HUMAN_TURN
+
+---
+
+## Stage Jump
+**Timestamp**: 2026-08-23T06:18:41Z
+**Event**: STAGE_JUMPED
+**Direction**: REDO
+**Source**: functional-design
+**Target**: functional-design
+**Scope**: research-pipeline-governed
+**Details**: REDO jump from functional-design to functional-design (3.1). Scope: research-pipeline-governed.
+
+---
+
+## Stage Start
+**Timestamp**: 2026-08-23T06:18:41Z
+**Event**: STAGE_STARTED
+**Stage**: functional-design
+**Agent**: aidlc-architect-agent
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T06:20:59Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/functional-design-questions.md
+**Unit**: foundation
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T06:20:59Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/functional-design-questions.md
+**Unit**: governance-guards
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T06:21:00Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/functional-design-questions.md
+**Unit**: acquisition
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T06:21:00Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/functional-design-questions.md
+**Unit**: inventory-and-registry
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T06:21:00Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/functional-design-questions.md
+**Unit**: external-products
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-23T06:21:24Z
+**Event**: HUMAN_TURN
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T06:21:36Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/functional-design-questions.md
+**Questions SHA-256**: 9dd0ff68820421abb13ba0a7b0959ef7a0e2fae02ca8c37f8c8e4910ca447c5e
+**Unit**: foundation
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T06:21:36Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/functional-design-questions.md
+**Questions SHA-256**: 105a855605cafee89f278fbcf0b8510cfbda2912df31703b6a08acc6ceefb3ed
+**Unit**: governance-guards
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T06:21:37Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/functional-design-questions.md
+**Questions SHA-256**: e09b84d7ddf3628c1686e2bb10e29c69bd9876256c488dbe27d65f09cd937362
+**Unit**: acquisition
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T06:21:37Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/functional-design-questions.md
+**Questions SHA-256**: 60de6d6785c359a7de7b51985637f8d67a78ccecb7c79cbd1471bb2dfd12b55e
+**Unit**: inventory-and-registry
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T06:21:37Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/functional-design-questions.md
+**Questions SHA-256**: fbf839eae93d487465e52041143109d8a48d05b8d678d8daacfed90dbe80813d
+**Unit**: external-products
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:21:52Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+**Context**: construction > foundation > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:21:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0a853fec
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:21:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0a853fec
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+**Duration ms**: 202
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:21:53Z
+**Event**: SENSOR_FIRED
+**Fire id**: 65bfe0e9
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:21:53Z
+**Event**: SENSOR_PASSED
+**Fire id**: 65bfe0e9
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+**Duration ms**: 203
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:22:03Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+**Context**: construction > foundation > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: bbd1b30d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:04Z
+**Event**: SENSOR_PASSED
+**Fire id**: bbd1b30d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+**Duration ms**: 179
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7d866b2c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:04Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7d866b2c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+**Duration ms**: 169
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:22:16Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+**Context**: construction > foundation > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:16Z
+**Event**: SENSOR_FIRED
+**Fire id**: 38c60ae4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: 38c60ae4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+**Duration ms**: 198
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:17Z
+**Event**: SENSOR_FIRED
+**Fire id**: f0d4bd64
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:17Z
+**Event**: SENSOR_PASSED
+**Fire id**: f0d4bd64
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+**Duration ms**: 228
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:22:28Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+**Context**: construction > governance-guards > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:29Z
+**Event**: SENSOR_FIRED
+**Fire id**: e80a1232
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:29Z
+**Event**: SENSOR_PASSED
+**Fire id**: e80a1232
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+**Duration ms**: 256
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:29Z
+**Event**: SENSOR_FIRED
+**Fire id**: 525c83c7
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:29Z
+**Event**: SENSOR_PASSED
+**Fire id**: 525c83c7
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+**Duration ms**: 175
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:22:39Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+**Context**: construction > governance-guards > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: c4b149a5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: c4b149a5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+**Duration ms**: 176
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: b38c8c97
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: b38c8c97
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+**Duration ms**: 174
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:22:52Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+**Context**: construction > governance-guards > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 98f217b7
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 98f217b7
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+**Duration ms**: 269
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:22:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8af92baa
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:22:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8af92baa
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+**Duration ms**: 170
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:23:03Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+**Context**: construction > acquisition > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7461d1b3
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:04Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7461d1b3
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:05Z
+**Event**: SENSOR_FIRED
+**Fire id**: efd1c7c6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:05Z
+**Event**: SENSOR_PASSED
+**Fire id**: efd1c7c6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+**Duration ms**: 279
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:23:15Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+**Context**: construction > acquisition > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:16Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0bd6fd7b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0bd6fd7b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:16Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8dd37696
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8dd37696
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+**Duration ms**: 183
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:23:27Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+**Context**: construction > acquisition > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:28Z
+**Event**: SENSOR_FIRED
+**Fire id**: a76cacc9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:28Z
+**Event**: SENSOR_PASSED
+**Fire id**: a76cacc9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+**Duration ms**: 197
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:28Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1e23ddb0
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:28Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1e23ddb0
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+**Duration ms**: 232
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:23:36Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+**Context**: construction > inventory-and-registry > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7cce4d7c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:36Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7cce4d7c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+**Duration ms**: 263
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: 036e6f89
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 036e6f89
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+**Duration ms**: 198
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:23:44Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+**Context**: construction > inventory-and-registry > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:44Z
+**Event**: SENSOR_FIRED
+**Fire id**: a41e11f6
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:44Z
+**Event**: SENSOR_PASSED
+**Fire id**: a41e11f6
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+**Duration ms**: 190
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:44Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8c717ed8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:44Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8c717ed8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+**Duration ms**: 230
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:23:50Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+**Context**: construction > inventory-and-registry > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:50Z
+**Event**: SENSOR_FIRED
+**Fire id**: e999a35c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: e999a35c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+**Duration ms**: 201
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: 025b86f3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 025b86f3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+**Duration ms**: 178
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:23:59Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Context**: construction > external-products > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: 400a1f15
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: 400a1f15
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 172
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:23:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: db594326
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:23:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: db594326
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 185
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:24:05Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+**Context**: construction > external-products > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:24:06Z
+**Event**: SENSOR_FIRED
+**Fire id**: c42602bd
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:24:06Z
+**Event**: SENSOR_PASSED
+**Fire id**: c42602bd
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:24:06Z
+**Event**: SENSOR_FIRED
+**Fire id**: db209876
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:24:06Z
+**Event**: SENSOR_PASSED
+**Fire id**: db209876
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+**Duration ms**: 172
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:24:13Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+**Context**: construction > external-products > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:24:13Z
+**Event**: SENSOR_FIRED
+**Fire id**: 724446ea
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:24:13Z
+**Event**: SENSOR_PASSED
+**Fire id**: 724446ea
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+**Duration ms**: 219
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:24:13Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3fbba9f5
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:24:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3fbba9f5
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+**Duration ms**: 196
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T06:24:32Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Context**: .aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:24:32Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8a70bb63
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Failed
+**Timestamp**: 2026-08-23T06:24:32Z
+**Event**: SENSOR_FAILED
+**Fire id**: 8a70bb63
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Detail path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-sensors/functional-design/required-sections-8a70bb63.md
+**Findings count**: 2
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:24:32Z
+**Event**: SENSOR_FIRED
+**Fire id**: 694cc59e
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:24:33Z
+**Event**: SENSOR_PASSED
+**Fire id**: 694cc59e
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Duration ms**: 198
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-23T06:24:42Z
+**Event**: REVIEW_REQUESTED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: external-products
+**Iteration**: 1
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:27:40Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Context**: construction > external-products > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:27:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8819e4b8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:27:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8819e4b8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 239
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:27:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: a5cdffd6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:27:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: a5cdffd6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 321
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-23T06:27:49Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: a62adc6c7f6741c2a
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: READY**\n\nThe previous pass's single blocking Critical is resolved. I re-verified independently (fresh greps across all four in-scope files f
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-23T06:28:05Z
+**Event**: REVIEW_COMPLETED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: external-products
+**Iteration**: 1
+**Verdict**: READY
+**Artifact Fingerprint**: sha256:7ed9bd6331344c2c238744e639f8a62eb331a265b60e60c9766d797b1a69d82d
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T06:31:53Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+**Context**: construction > target-standardization > functional-design > functional-design-questions.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:31:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2fc08aed
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:31:54Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2fc08aed
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+**Duration ms**: 249
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:31:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: 94aaee92
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:31:54Z
+**Event**: SENSOR_PASSED
+**Fire id**: 94aaee92
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+**Duration ms**: 174
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T06:32:37Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+**Unit**: target-standardization
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-23T06:45:20Z
+**Event**: HUMAN_TURN
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T06:45:42Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+**Questions SHA-256**: 9d9a216f6e13de6c7eae66ecdc1e89a27b85fb710483667749ae4d65cafc9bd2
+**Unit**: target-standardization
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T06:47:20Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Context**: construction > target-standardization > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:47:20Z
+**Event**: SENSOR_FIRED
+**Fire id**: ca064f85
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:47:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: ca064f85
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 224
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:47:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: 91208789
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:47:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: 91208789
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 217
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T06:48:48Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+**Context**: construction > target-standardization > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:48:48Z
+**Event**: SENSOR_FIRED
+**Fire id**: 284c741d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:48:48Z
+**Event**: SENSOR_PASSED
+**Fire id**: 284c741d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+**Duration ms**: 167
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:48:48Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9fb3137c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:48:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9fb3137c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+**Duration ms**: 186
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T06:50:25Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+**Context**: construction > target-standardization > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:50:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: 168319e4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:50:26Z
+**Event**: SENSOR_PASSED
+**Fire id**: 168319e4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+**Duration ms**: 223
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:50:26Z
+**Event**: SENSOR_FIRED
+**Fire id**: f70f10a1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:50:26Z
+**Event**: SENSOR_PASSED
+**Fire id**: f70f10a1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+**Duration ms**: 207
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T06:50:36Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Context**: .aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:50:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0021ac91
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Failed
+**Timestamp**: 2026-08-23T06:50:37Z
+**Event**: SENSOR_FAILED
+**Fire id**: 0021ac91
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Detail path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-sensors/functional-design/required-sections-0021ac91.md
+**Findings count**: 2
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:50:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1b3ce2d1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:50:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1b3ce2d1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Duration ms**: 235
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-23T06:50:47Z
+**Event**: REVIEW_REQUESTED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: target-standardization
+**Iteration**: 1
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-08-23T06:54:13Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Grep
+**Target**: c:\Users\s_inv\Desktop\test\aidlc\spaces\default\intents\260813-tec-hourly-forecast
+**Stage**: functional-design
+**Unit**: target-standardization
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T06:58:36Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Context**: construction > target-standardization > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:58:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5faee68f
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:58:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5faee68f
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 167
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T06:58:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 962882f1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T06:58:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 962882f1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 175
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-23T06:58:48Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: add5b404f57467a98
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: NOT-READY**\n\nI wrote the full review into the `## Review` section of `c:\Users\s_inv\Desktop\test\aidlc\spaces\default\intents\260813-tec-ho
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-23T07:00:58Z
+**Event**: REVIEW_COMPLETED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: target-standardization
+**Iteration**: 1
+**Verdict**: NOT-READY
+**Artifact Fingerprint**: sha256:9257a6bf59de0622c1c8f6304ebbd3d45fa71ead6f44faa98310686056aecf56
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-23T07:00:59Z
+**Event**: REVIEW_REQUESTED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: target-standardization
+**Iteration**: 2
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:04:42Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Context**: construction > target-standardization > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:04:42Z
+**Event**: SENSOR_FIRED
+**Fire id**: b5b97790
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:04:42Z
+**Event**: SENSOR_PASSED
+**Fire id**: b5b97790
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 216
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:04:42Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0fa35295
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:04:43Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0fa35295
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 258
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:05:02Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Context**: construction > target-standardization > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:05:02Z
+**Event**: SENSOR_FIRED
+**Fire id**: a54ca5b7
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:05:03Z
+**Event**: SENSOR_PASSED
+**Fire id**: a54ca5b7
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 179
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:05:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: c0a7f55c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:05:03Z
+**Event**: SENSOR_PASSED
+**Fire id**: c0a7f55c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 187
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-23T07:05:14Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: aff6f492e34a1a80f
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: READY** (iteration 2, final)\n\nBoth iteration-1 findings verified as correctly resolved:\n\n1. **Critical (R-20 cross-reference) — resolved cor
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-23T07:05:31Z
+**Event**: REVIEW_COMPLETED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: target-standardization
+**Iteration**: 2
+**Verdict**: READY
+**Artifact Fingerprint**: sha256:7482064ece821d982b5530487a36a6fc7b37eeb8a4b88ce168ac704d498527a0
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-23T07:31:15Z
+**Event**: HUMAN_TURN
+
+---
+
+## Stage Jump
+**Timestamp**: 2026-08-23T07:31:38Z
+**Event**: STAGE_JUMPED
+**Direction**: REDO
+**Source**: functional-design
+**Target**: functional-design
+**Scope**: research-pipeline-governed
+**Details**: REDO jump from functional-design to functional-design (3.1). Scope: research-pipeline-governed.
+
+---
+
+## Stage Start
+**Timestamp**: 2026-08-23T07:31:38Z
+**Event**: STAGE_STARTED
+**Stage**: functional-design
+**Agent**: aidlc-architect-agent
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T07:32:42Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/functional-design-questions.md
+**Unit**: foundation
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T07:32:42Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/functional-design-questions.md
+**Unit**: governance-guards
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T07:32:42Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/functional-design-questions.md
+**Unit**: acquisition
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T07:32:43Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/functional-design-questions.md
+**Unit**: inventory-and-registry
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T07:32:43Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/functional-design-questions.md
+**Unit**: external-products
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T07:32:43Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+**Unit**: target-standardization
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-23T07:34:30Z
+**Event**: HUMAN_TURN
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T07:34:43Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/functional-design-questions.md
+**Questions SHA-256**: 98e86c67ac47da45fcdf5ef61c8c16e1fd6ad101da8817275075d1f74e5954ce
+**Unit**: foundation
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T07:34:43Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/functional-design-questions.md
+**Questions SHA-256**: d8cee646c9737022e727eb20db529875399792fa3bfb860ec35e4ddd2ae3ea07
+**Unit**: governance-guards
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T07:34:43Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/functional-design-questions.md
+**Questions SHA-256**: 38769a8d0aa8784af96fbe5d228d80de54ee940ab5145be73f0247ce14d02b5a
+**Unit**: acquisition
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T07:34:43Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/functional-design-questions.md
+**Questions SHA-256**: 780bb3c9e31283c4b6b4cefffab3eb428ee715e4410433bab7d35d874fa6a308
+**Unit**: inventory-and-registry
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T07:34:44Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/functional-design-questions.md
+**Questions SHA-256**: 78e0572df8cb3d2b36f60a4348c6c0d0634819cf5b8a91f77461b5d9599a7392
+**Unit**: external-products
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T07:34:44Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/functional-design-questions.md
+**Questions SHA-256**: 7b4440ea2299874077cf9643c9a1c4d998a1196e3e886990218d79360c87b0ae
+**Unit**: target-standardization
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:00Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+**Context**: construction > foundation > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: 6a540bca
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: 6a540bca
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+**Duration ms**: 238
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3f0ab00d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3f0ab00d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-logic-model.md
+**Duration ms**: 188
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:07Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+**Context**: construction > foundation > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:07Z
+**Event**: SENSOR_FIRED
+**Fire id**: 179e2739
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:08Z
+**Event**: SENSOR_PASSED
+**Fire id**: 179e2739
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+**Duration ms**: 217
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:08Z
+**Event**: SENSOR_FIRED
+**Fire id**: 00a79519
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:08Z
+**Event**: SENSOR_PASSED
+**Fire id**: 00a79519
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/domain-entities.md
+**Duration ms**: 193
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:14Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+**Context**: construction > foundation > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:14Z
+**Event**: SENSOR_FIRED
+**Fire id**: 849f8f3d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: 849f8f3d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+**Duration ms**: 181
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:14Z
+**Event**: SENSOR_FIRED
+**Fire id**: b5137b37
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: b5137b37
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/functional-design/business-rules.md
+**Duration ms**: 222
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:21Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+**Context**: construction > governance-guards > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: 989e4ecf
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:22Z
+**Event**: SENSOR_PASSED
+**Fire id**: 989e4ecf
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+**Duration ms**: 221
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:22Z
+**Event**: SENSOR_FIRED
+**Fire id**: 851a7038
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:22Z
+**Event**: SENSOR_PASSED
+**Fire id**: 851a7038
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-logic-model.md
+**Duration ms**: 193
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:29Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+**Context**: construction > governance-guards > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:29Z
+**Event**: SENSOR_FIRED
+**Fire id**: 910ab677
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:29Z
+**Event**: SENSOR_PASSED
+**Fire id**: 910ab677
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+**Duration ms**: 198
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:30Z
+**Event**: SENSOR_FIRED
+**Fire id**: ef69feda
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:30Z
+**Event**: SENSOR_PASSED
+**Fire id**: ef69feda
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/domain-entities.md
+**Duration ms**: 186
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:37Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+**Context**: construction > governance-guards > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:38Z
+**Event**: SENSOR_FIRED
+**Fire id**: ad33ea83
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: ad33ea83
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+**Duration ms**: 176
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:38Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1c66051c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1c66051c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/functional-design/business-rules.md
+**Duration ms**: 169
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:44Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+**Context**: construction > acquisition > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:45Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2e8fda2a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:45Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2e8fda2a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+**Duration ms**: 205
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:45Z
+**Event**: SENSOR_FIRED
+**Fire id**: df87ede8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:45Z
+**Event**: SENSOR_PASSED
+**Fire id**: df87ede8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-logic-model.md
+**Duration ms**: 176
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:52Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+**Context**: construction > acquisition > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 53925b69
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 53925b69
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+**Duration ms**: 171
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:53Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4c8c0287
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:53Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4c8c0287
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/domain-entities.md
+**Duration ms**: 217
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:35:59Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+**Context**: construction > acquisition > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5639b845
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:35:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5639b845
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+**Duration ms**: 171
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:35:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: fd5fe01a
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:00Z
+**Event**: SENSOR_PASSED
+**Fire id**: fd5fe01a
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/functional-design/business-rules.md
+**Duration ms**: 225
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:36:09Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+**Context**: construction > inventory-and-registry > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:09Z
+**Event**: SENSOR_FIRED
+**Fire id**: c7fb6b1b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:09Z
+**Event**: SENSOR_PASSED
+**Fire id**: c7fb6b1b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+**Duration ms**: 175
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:09Z
+**Event**: SENSOR_FIRED
+**Fire id**: 089b78fc
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:09Z
+**Event**: SENSOR_PASSED
+**Fire id**: 089b78fc
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-logic-model.md
+**Duration ms**: 173
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:36:16Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+**Context**: construction > inventory-and-registry > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:16Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8301c786
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:17Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8301c786
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+**Duration ms**: 224
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:17Z
+**Event**: SENSOR_FIRED
+**Fire id**: 6d7bb7e1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:17Z
+**Event**: SENSOR_PASSED
+**Fire id**: 6d7bb7e1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/domain-entities.md
+**Duration ms**: 179
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:36:24Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+**Context**: construction > inventory-and-registry > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: 76fe4e9c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:24Z
+**Event**: SENSOR_PASSED
+**Fire id**: 76fe4e9c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+**Duration ms**: 160
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3871c9df
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3871c9df
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/functional-design/business-rules.md
+**Duration ms**: 183
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:36:31Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Context**: construction > external-products > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:31Z
+**Event**: SENSOR_FIRED
+**Fire id**: ef262d7d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:31Z
+**Event**: SENSOR_PASSED
+**Fire id**: ef262d7d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 170
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:31Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0fe6fb80
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:32Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0fe6fb80
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-logic-model.md
+**Duration ms**: 174
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:36:37Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+**Context**: construction > external-products > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7303b24d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7303b24d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+**Duration ms**: 165
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3640b152
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3640b152
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/domain-entities.md
+**Duration ms**: 168
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:36:44Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+**Context**: construction > external-products > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:44Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8850b04c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:44Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8850b04c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+**Duration ms**: 168
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:44Z
+**Event**: SENSOR_FIRED
+**Fire id**: a7924b37
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:44Z
+**Event**: SENSOR_PASSED
+**Fire id**: a7924b37
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/functional-design/business-rules.md
+**Duration ms**: 162
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:36:53Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Context**: construction > target-standardization > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: 72630a93
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:54Z
+**Event**: SENSOR_PASSED
+**Fire id**: 72630a93
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 171
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:36:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: 648a6703
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:36:54Z
+**Event**: SENSOR_PASSED
+**Fire id**: 648a6703
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-logic-model.md
+**Duration ms**: 180
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:37:01Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+**Context**: construction > target-standardization > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:37:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: b3900ea0
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:37:02Z
+**Event**: SENSOR_PASSED
+**Fire id**: b3900ea0
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+**Duration ms**: 191
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:37:02Z
+**Event**: SENSOR_FIRED
+**Fire id**: cdaf0ae8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:37:02Z
+**Event**: SENSOR_PASSED
+**Fire id**: cdaf0ae8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/domain-entities.md
+**Duration ms**: 179
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:37:10Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+**Context**: construction > target-standardization > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:37:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: dc0802ea
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:37:11Z
+**Event**: SENSOR_PASSED
+**Fire id**: dc0802ea
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+**Duration ms**: 172
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:37:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9ec34fbe
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:37:11Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9ec34fbe
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/functional-design/business-rules.md
+**Duration ms**: 178
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T07:42:12Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Context**: construction > features-and-splits > functional-design > functional-design-questions.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:42:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: f881ece8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:42:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: f881ece8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 171
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:42:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: 49d65baf
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:42:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 49d65baf
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 163
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-08-23T07:43:09Z
+**Event**: DECISION_RECORDED
+**Stage**: functional-design
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Unit**: features-and-splits
+
+---
+
+## Human Turn
+**Timestamp**: 2026-08-23T07:43:37Z
+**Event**: HUMAN_TURN
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-08-23T07:43:49Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: functional-design
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Questions SHA-256**: 9b635cfe7b00452ee668a71fc551d693104ae39dfb1f7c9b64216412bae732ac
+**Unit**: features-and-splits
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T07:46:35Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:46:35Z
+**Event**: SENSOR_FIRED
+**Fire id**: a56ac203
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:46:35Z
+**Event**: SENSOR_PASSED
+**Fire id**: a56ac203
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 218
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:46:35Z
+**Event**: SENSOR_FIRED
+**Fire id**: 34dd4cd8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:46:35Z
+**Event**: SENSOR_PASSED
+**Fire id**: 34dd4cd8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 165
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T07:48:08Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:48:08Z
+**Event**: SENSOR_FIRED
+**Fire id**: 03a9626a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:48:08Z
+**Event**: SENSOR_PASSED
+**Fire id**: 03a9626a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 160
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:48:09Z
+**Event**: SENSOR_FIRED
+**Fire id**: 71873b05
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:48:09Z
+**Event**: SENSOR_PASSED
+**Fire id**: 71873b05
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 167
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T07:49:46Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:49:46Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9eb0a8ff
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:49:46Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9eb0a8ff
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 172
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:49:46Z
+**Event**: SENSOR_FIRED
+**Fire id**: cb500c0c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:49:47Z
+**Event**: SENSOR_PASSED
+**Fire id**: cb500c0c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 173
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-23T07:49:56Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Context**: .aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:49:56Z
+**Event**: SENSOR_FIRED
+**Fire id**: bd0f0e21
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Failed
+**Timestamp**: 2026-08-23T07:49:56Z
+**Event**: SENSOR_FAILED
+**Fire id**: bd0f0e21
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Detail path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-sensors/functional-design/required-sections-bd0f0e21.md
+**Findings count**: 2
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:49:56Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4f74cda8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:49:57Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4f74cda8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Duration ms**: 167
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-23T07:50:07Z
+**Event**: REVIEW_REQUESTED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: features-and-splits
+**Iteration**: 1
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-08-23T07:54:36Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: construction/inventory-and-registry/functional-design/business-rules.md
+**Stage**: functional-design
+**Unit**: features-and-splits
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T07:56:16Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:56:17Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2af7ac46
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:56:17Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2af7ac46
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 296
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T07:56:18Z
+**Event**: SENSOR_FIRED
+**Fire id**: 95b832fc
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T07:56:18Z
+**Event**: SENSOR_PASSED
+**Fire id**: 95b832fc
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 329
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-23T07:56:29Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: a7768772488e9840f
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: NOT-READY** (1 Critical, 1 Minor)\n\nI re-derived every count and cross-reference the dispatch flagged as high-yield, and this unit's own arit
+
+---
+
+## Session Compacted
+**Timestamp**: 2026-08-23T07:58:41Z
+**Event**: SESSION_COMPACTED
+**Current Stage**: functional-design
+**State Validity**: valid
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-23T08:00:33Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a4a1b176b3872f286
+**Message**: <analysis>\nLet me work through this conversation chronologically.\n\n**Session setup**: The conversation began with `/caveman full` — a communication-style skill that compresses output. I acknowledged i
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:01:43Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:01:43Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0b0010b5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:01:43Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0b0010b5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 184
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:01:43Z
+**Event**: SENSOR_FIRED
+**Fire id**: d747cd5d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:01:44Z
+**Event**: SENSOR_PASSED
+**Fire id**: d747cd5d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 186
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:01:48Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:01:49Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5f293157
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:01:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5f293157
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 186
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:01:49Z
+**Event**: SENSOR_FIRED
+**Fire id**: f112dc32
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:01:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: f112dc32
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 189
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:01:54Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:01:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9cc3ecf5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:01:55Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9cc3ecf5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 186
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:01:55Z
+**Event**: SENSOR_FIRED
+**Fire id**: a04f30d2
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:01:55Z
+**Event**: SENSOR_PASSED
+**Fire id**: a04f30d2
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 192
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:02:04Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0e68f807
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:04Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0e68f807
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 200
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9be6d512
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:04Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9be6d512
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 203
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:02:18Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:18Z
+**Event**: SENSOR_FIRED
+**Fire id**: eed53394
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:19Z
+**Event**: SENSOR_PASSED
+**Fire id**: eed53394
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 251
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:19Z
+**Event**: SENSOR_FIRED
+**Fire id**: bdb4cf7a
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:19Z
+**Event**: SENSOR_PASSED
+**Fire id**: bdb4cf7a
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 287
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:02:30Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:30Z
+**Event**: SENSOR_FIRED
+**Fire id**: ecf57cb3
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:31Z
+**Event**: SENSOR_PASSED
+**Fire id**: ecf57cb3
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 184
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:31Z
+**Event**: SENSOR_FIRED
+**Fire id**: 01ca4e19
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:31Z
+**Event**: SENSOR_PASSED
+**Fire id**: 01ca4e19
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 185
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:02:36Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1ecd2e81
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1ecd2e81
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 248
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 80efcca1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: 80efcca1
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 210
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:02:50Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:50Z
+**Event**: SENSOR_FIRED
+**Fire id**: a5e0949f
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: a5e0949f
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 292
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: 36a70858
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 36a70858
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 253
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:02:58Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:58Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5d3da6a9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:58Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5d3da6a9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 178
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:02:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5fc591e4
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:02:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5fc591e4
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 246
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:03:06Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:03:07Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2f10d813
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:03:07Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2f10d813
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 176
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:03:07Z
+**Event**: SENSOR_FIRED
+**Fire id**: 89bd0c93
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:03:07Z
+**Event**: SENSOR_PASSED
+**Fire id**: 89bd0c93
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 228
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:03:35Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:03:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: ae5a860d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:03:36Z
+**Event**: SENSOR_PASSED
+**Fire id**: ae5a860d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 203
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:03:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: 06d23877
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:03:36Z
+**Event**: SENSOR_PASSED
+**Fire id**: 06d23877
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 207
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:04:01Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Context**: construction > features-and-splits > functional-design > functional-design-questions.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:04:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: a7359551
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:04:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: a7359551
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 175
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:04:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: aaec9f3e
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:04:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: aaec9f3e
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 221
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:04:25Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Context**: construction > features-and-splits > functional-design > functional-design-questions.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:04:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: f2c249b9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:04:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: f2c249b9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 171
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:04:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0c4f65ca
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:04:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0c4f65ca
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 180
+
+---
+
+## Review Completed
+**Timestamp**: 2026-08-23T08:04:34Z
+**Event**: REVIEW_COMPLETED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: features-and-splits
+**Iteration**: 1
+**Verdict**: NOT-READY
+**Artifact Fingerprint**: sha256:4f80d309d6378837be2a37ffd15d8dfee74d75c0338c2d1890c5829cc5a6f7bc
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-23T08:04:41Z
+**Event**: REVIEW_REQUESTED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: features-and-splits
+**Iteration**: 2
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-08-23T08:07:33Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: C:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction
+**Stage**: functional-design
+**Unit**: features-and-splits
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:12:17Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:12:17Z
+**Event**: SENSOR_FIRED
+**Fire id**: 235e13a8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:12:17Z
+**Event**: SENSOR_PASSED
+**Fire id**: 235e13a8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:12:17Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8033272b
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:12:17Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8033272b
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 179
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-08-23T08:12:35Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: ad3d6da1a5c710618
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: NOT-READY** (2 Critical, 2 Major, 3 Minor)\n\nIteration-2 review appended below the preserved iteration-1 report in `C:\Users\s_inv\Desktop\te
+
+---
+
+## Error Logged
+**Timestamp**: 2026-08-23T08:13:55Z
+**Event**: ERROR_LOGGED
+**Tool**: aidlc-jump
+**Command**: aidlc-jump execute --direction redo --stage functional-design --unit features-and-splits --reason Reviewer iteration 2 NOT-READY: 2 Critical, 2 Major, 3 Minor against the element-4 remedy. Per-row partition derivation is not single-valued (nesting) and blocks G-06 December apply and the final refit. Clearing receipt floor to correct.
+**Error**: Usage: execute --target <slug> --direction <forward|backward|redo> [--scope <scope>]
+
+---
+
+## Stage Jump
+**Timestamp**: 2026-08-23T08:14:05Z
+**Event**: STAGE_JUMPED
+**Direction**: REDO
+**Source**: functional-design
+**Target**: functional-design
+**Scope**: research-pipeline-governed
+**Details**: REDO jump from functional-design to functional-design (3.1). Scope: research-pipeline-governed.
+
+---
+
+## Stage Start
+**Timestamp**: 2026-08-23T08:14:05Z
+**Event**: STAGE_STARTED
+**Stage**: functional-design
+**Agent**: aidlc-architect-agent
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:15:34Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:15:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: f49a571a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:15:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: f49a571a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 175
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:15:35Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4241208b
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:15:35Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4241208b
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 181
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:15:40Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:15:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: d49a43f2
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:15:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: d49a43f2
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 163
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:15:41Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3555d50d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:15:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3555d50d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 197
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:15:47Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:15:47Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2dfbf1e8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:15:47Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2dfbf1e8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 173
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:15:47Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8f8c70fb
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:15:47Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8f8c70fb
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 176
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:16:00Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: f23174a0
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: f23174a0
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 179
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: d328a84c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: d328a84c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 192
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:16:14Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:14Z
+**Event**: SENSOR_FIRED
+**Fire id**: 73357a8c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: 73357a8c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 169
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:14Z
+**Event**: SENSOR_FIRED
+**Fire id**: d3ac6486
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: d3ac6486
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 185
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:16:20Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:20Z
+**Event**: SENSOR_FIRED
+**Fire id**: eb243f6e
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:20Z
+**Event**: SENSOR_PASSED
+**Fire id**: eb243f6e
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 187
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:20Z
+**Event**: SENSOR_FIRED
+**Fire id**: b8e2c131
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:20Z
+**Event**: SENSOR_PASSED
+**Fire id**: b8e2c131
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 223
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:16:28Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:28Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0dd2fbc5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:29Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0dd2fbc5
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 190
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:29Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3d0fb601
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:29Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3d0fb601
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 189
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:16:37Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: 25df6c3d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 25df6c3d
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 176
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:38Z
+**Event**: SENSOR_FIRED
+**Fire id**: ed07e9d8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: ed07e9d8
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 175
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:16:59Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:16:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4880068a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:16:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4880068a
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 241
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:17:00Z
+**Event**: SENSOR_FIRED
+**Fire id**: a908e4ff
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:17:00Z
+**Event**: SENSOR_PASSED
+**Fire id**: a908e4ff
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 206
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:17:10Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:17:10Z
+**Event**: SENSOR_FIRED
+**Fire id**: 46151377
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:17:10Z
+**Event**: SENSOR_PASSED
+**Fire id**: 46151377
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 212
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:17:10Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9d996daa
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:17:11Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9d996daa
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 211
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:17:21Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:17:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: 595ddca9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:17:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: 595ddca9
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 178
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:17:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0a599651
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:17:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0a599651
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 177
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:18:14Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:14Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2584a5fa
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2584a5fa
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 169
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:14Z
+**Event**: SENSOR_FIRED
+**Fire id**: 10d7d6ad
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: 10d7d6ad
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 200
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:18:24Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: e586263b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: e586263b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 164
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2dd59eca
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2dd59eca
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 169
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:18:33Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: ebb4dc7e
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:33Z
+**Event**: SENSOR_PASSED
+**Fire id**: ebb4dc7e
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 164
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: dc15d53f
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: dc15d53f
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 173
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:18:38Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: 6fa5daf3
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:39Z
+**Event**: SENSOR_PASSED
+**Fire id**: 6fa5daf3
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 159
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: acc80ab3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:39Z
+**Event**: SENSOR_PASSED
+**Fire id**: acc80ab3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 167
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:18:44Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:44Z
+**Event**: SENSOR_FIRED
+**Fire id**: d39ced10
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:44Z
+**Event**: SENSOR_PASSED
+**Fire id**: d39ced10
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 169
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:45Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9f5390b3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:45Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9f5390b3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 175
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:18:50Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:50Z
+**Event**: SENSOR_FIRED
+**Fire id**: 01c3cde6
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:50Z
+**Event**: SENSOR_PASSED
+**Fire id**: 01c3cde6
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 156
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:18:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: 72d0755f
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:18:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 72d0755f
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 181
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:19:03Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2400521c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:03Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2400521c
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 162
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: a8db00c4
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:04Z
+**Event**: SENSOR_PASSED
+**Fire id**: a8db00c4
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 173
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:19:11Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: fa5e3b30
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: fa5e3b30
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 159
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: e27b8661
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: e27b8661
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 168
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:19:30Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:30Z
+**Event**: SENSOR_FIRED
+**Fire id**: afb7b097
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:31Z
+**Event**: SENSOR_PASSED
+**Fire id**: afb7b097
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 164
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:31Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2bfe2bc2
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:31Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2bfe2bc2
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 169
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:19:36Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: d8931e93
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:36Z
+**Event**: SENSOR_PASSED
+**Fire id**: d8931e93
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 159
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:37Z
+**Event**: SENSOR_FIRED
+**Fire id**: dbe16e9a
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: dbe16e9a
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 169
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:19:42Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:42Z
+**Event**: SENSOR_FIRED
+**Fire id**: a7fb62c4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:42Z
+**Event**: SENSOR_PASSED
+**Fire id**: a7fb62c4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 167
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:43Z
+**Event**: SENSOR_FIRED
+**Fire id**: a0968ff2
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:43Z
+**Event**: SENSOR_PASSED
+**Fire id**: a0968ff2
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 170
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:19:50Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:50Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0e1dc989
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0e1dc989
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 166
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:19:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: 602393cb
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:19:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 602393cb
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 168
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:20:04Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: 76687ee4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:05Z
+**Event**: SENSOR_PASSED
+**Fire id**: 76687ee4
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 162
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:05Z
+**Event**: SENSOR_FIRED
+**Fire id**: f7f354f3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:05Z
+**Event**: SENSOR_PASSED
+**Fire id**: f7f354f3
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 171
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:20:11Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1302f2ef
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:11Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1302f2ef
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 179
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: ae2f1651
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:11Z
+**Event**: SENSOR_PASSED
+**Fire id**: ae2f1651
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 178
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:20:35Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Context**: construction > features-and-splits > functional-design > functional-design-questions.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:35Z
+**Event**: SENSOR_FIRED
+**Fire id**: 58cc6b0b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:35Z
+**Event**: SENSOR_PASSED
+**Fire id**: 58cc6b0b
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 168
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:35Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0956943d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:35Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0956943d
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 170
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:20:51Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Context**: construction > features-and-splits > functional-design > functional-design-questions.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9183ade8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9183ade8
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 166
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:20:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: ce67864c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:20:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: ce67864c
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 173
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:21:01Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Context**: construction > features-and-splits > functional-design > functional-design-questions.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: b4b1a956
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: b4b1a956
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 170
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: b3b06db9
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: b3b06db9
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/functional-design-questions.md
+**Duration ms**: 170
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:21:27Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Context**: construction > features-and-splits > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:27Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2f77b993
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:28Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2f77b993
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:28Z
+**Event**: SENSOR_FIRED
+**Fire id**: 01f111a6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:28Z
+**Event**: SENSOR_PASSED
+**Fire id**: 01f111a6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-logic-model.md
+**Duration ms**: 198
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:21:43Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:43Z
+**Event**: SENSOR_FIRED
+**Fire id**: e6676fa7
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:43Z
+**Event**: SENSOR_PASSED
+**Fire id**: e6676fa7
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 168
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:43Z
+**Event**: SENSOR_FIRED
+**Fire id**: d78eb5fd
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:43Z
+**Event**: SENSOR_PASSED
+**Fire id**: d78eb5fd
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 173
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:21:52Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Context**: construction > features-and-splits > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: dfacdede
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: dfacdede
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 162
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:21:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 6cd7ca39
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:21:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 6cd7ca39
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/business-rules.md
+**Duration ms**: 175
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-08-23T08:22:05Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Context**: construction > features-and-splits > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:22:05Z
+**Event**: SENSOR_FIRED
+**Fire id**: efee2af6
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:22:05Z
+**Event**: SENSOR_PASSED
+**Fire id**: efee2af6
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-23T08:22:06Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7802ad30
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-23T08:22:06Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7802ad30
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/functional-design/domain-entities.md
+**Duration ms**: 179
+
+---

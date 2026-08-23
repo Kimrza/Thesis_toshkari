@@ -3,6 +3,10 @@
 **Unit** `acquisition` (Bolt 3) · **Kind** `library` · **Depends on** `foundation`,
 `governance-guards`
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
+> cross-references in `target-standardization`'s question file. **No content of this unit
+> changed.**
+
 > **Re-established 2026-08-23 after a redo jump taken to correct this unit.** The jump
 > cleared the receipt floor; the TA-08 primary/supporting row was corrected under that
 > cleared receipt at the project decision owner's explicit direction, with both superseded
@@ -21,6 +25,9 @@
 > all three of its owed amendments — the named accessors are new symbols in a boundary block
 > that exists and omits them, and both contract modifications touch existing boundary
 > contracts, `scripts/` to `src/data` being genuinely cross-package.
+>
+> **A fourth re-establishment** followed a sweep of two sibling question files; **no content
+> of this unit changed.**
 
 The workflows this unit implements: retrieving the D-144-approved prepared VTEC
 product and the three driver series, recording full provenance for every retrieved

@@ -2,10 +2,15 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
+> cross-references in `target-standardization`'s question file. **No content of this unit
+> changed.**
+
 > **Re-established three times on 2026-08-23, after three stage-wide redo jumps** — aimed
 > respectively at a correction in `acquisition`, corrections in `external-products`, and a
-> misread depth policy in `component-methods.md`. **No content of this unit changed on any of
-> the three occasions.**
+> misread depth policy in `component-methods.md`, and — fourth — a sweep of two question
+> files that had fallen stale against their own corrected artifacts. **No content of this
+> unit changed on any of the four occasions.**
 
 The data shapes this unit owns, their lifecycles, and how they relate. A **Bolt**
 is one build pass over one piece of the work, ending in something that runs;

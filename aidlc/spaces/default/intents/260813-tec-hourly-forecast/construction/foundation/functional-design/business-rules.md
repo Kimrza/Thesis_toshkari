@@ -2,10 +2,15 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
+> cross-references in `target-standardization`'s question file. **No rule of this unit
+> changed.**
+
 > **Re-established three times on 2026-08-23, after three stage-wide redo jumps** — aimed
 > respectively at a correction in `acquisition`, corrections in `external-products`, and a
-> misread depth policy in `component-methods.md`. **No rule of this unit changed on any of
-> the three occasions.**
+> misread depth policy in `component-methods.md`, and — fourth — a sweep of two question
+> files that had fallen stale against their own corrected artifacts. **No rule of this unit
+> changed on any of the four occasions.**
 
 The decision rules, validation logic, constraints and invariants this unit
 enforces. Each rule states what it rejects, what it raises, and what evidence

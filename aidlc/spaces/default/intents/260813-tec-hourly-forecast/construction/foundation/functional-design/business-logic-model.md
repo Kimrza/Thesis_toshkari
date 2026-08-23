@@ -2,12 +2,17 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
-> **Re-established three times on 2026-08-23, after three stage-wide redo jumps** — aimed
-> respectively at a correction in `acquisition`, corrections in `external-products`, and a
-> misread depth policy in `component-methods.md`. Each reset the receipt floor for **every**
-> unit of this stage. **No content of this unit changed on any of the three occasions** — the
-> summary was re-confirmed and the artifact re-saved so the receipts match the current
-> attempt.
+> **Re-established five times on 2026-08-23** — the fifth after a redo aimed at four stale
+> cross-references in `target-standardization`'s question file. **No content of this unit
+> changed on that occasion either.**
+
+> **Re-established four times on 2026-08-23**, after four stage-wide redo jumps aimed
+> respectively at a correction in `acquisition`, corrections in `external-products`, a
+> misread depth policy in `component-methods.md`, and a sweep of two question files that had
+> fallen stale against their own corrected artifacts. Each reset the receipt floor for
+> **every** unit of this stage. **No content of this unit changed on any of the four
+> occasions** — the summary was re-confirmed and the artifact re-saved so the receipts match
+> the current attempt.
 
 The workflows, algorithms and processing sequences this unit implements. A **Bolt**
 is one build pass over one piece of the work, ending in something that runs;

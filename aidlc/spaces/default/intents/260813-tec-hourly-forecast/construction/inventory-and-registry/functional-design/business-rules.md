@@ -3,6 +3,12 @@
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Depends on**
 `acquisition`
 
+> **Re-established a fifth time 2026-08-23.** **No rule of this unit changed.** The redo
+> corrected a sibling's citations of "`inventory-and-registry` R-20": **the rules below run
+> R-44…R-53 and there is no R-20 here.** The rule carrying the open authority question is
+> `governance-guards` R-20; **R-49** below carries the distinct point that D-24's protected
+> set is not reopened.
+
 > **Re-established 2026-08-23 after a stage-wide redo jump** aimed at a correction in
 > `acquisition`. **No rule changed** — this unit's iteration-2 adversarial verdict was
 > READY with no surviving findings. **Re-established again 2026-08-23** after a further
@@ -14,6 +20,10 @@
 > package**, so R-44's contract is this stage's ordinary work, **not an amendment owed**.
 > **No rule's substance changed**; this unit owes **one** amendment — R-46's provenance
 > field — not two.
+>
+> **A fourth re-establishment** swept this unit's **question file**, which had not been
+> corrected alongside these rules because its receipt was recorded first. **No rule
+> changed.**
 
 The prohibitions this unit enforces, each with what it rejects, what it raises, and the
 negative control that proves the rejection happens.

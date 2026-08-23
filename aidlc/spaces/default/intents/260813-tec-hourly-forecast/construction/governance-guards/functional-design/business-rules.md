@@ -2,6 +2,10 @@
 
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Depends on** `foundation`
 
+> **Re-established a fifth time 2026-08-23**, after a redo correcting a sibling unit's
+> cross-references to **R-20 below** — `target-standardization` had been attributing it to
+> `inventory-and-registry`, whose rules run R-44…R-53. **No rule of this unit changed.**
+
 > **Re-established 2026-08-23 after a stage-wide redo jump**, which reset the receipt floor
 > for every unit of this stage and, for this unit, the **exhausted adversarial reviewer
 > budget**. **No rule changed at re-establishment.** The regenerated rules — including
@@ -13,7 +17,8 @@
 > **Re-established again 2026-08-23** after a further stage-wide redo aimed at
 > `external-products`; **no rule changed on that occasion.** **A third re-establishment**
 > followed a redo aimed at a misread depth policy in `component-methods.md`; **no rule
-> changed then either.**
+> changed then either.** **A fourth** followed a sweep of two sibling question files; **no
+> rule changed then either.**
 
 The prohibitions this unit enforces at run time, each with what it rejects, what it
 raises, and the negative control that proves the rejection happens.

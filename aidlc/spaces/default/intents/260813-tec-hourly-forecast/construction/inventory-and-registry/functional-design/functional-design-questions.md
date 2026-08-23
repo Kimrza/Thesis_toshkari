@@ -68,7 +68,7 @@ A) Design it here as a new contract and treat it as settled by this stage
    > **Impact**: Fastest, and this unit owns the module. But `component-methods.md` is an approved stage-2.6 artifact and `write_release` already references `inventory.py` — designing its contract here without a change record repeats exactly the defect just caught, one unit later, with the reviewer's finding still in the previous unit's Review section.
 
 B) Design it here **and** record it as an amendment owed to `component-methods.md`, requiring a change record before stage 3.5 treats it as approved
-   > **Impact**: Same design work, with the governance status stated. It matches how `acquisition` now records its three amendments, so the two units read consistently. Costs one more amendment on the pile — four across two units — which is itself worth surfacing at the gate as a pattern rather than a list.
+   > **Impact**: Same design work, with the governance status stated. It matches how `acquisition` records its three amendments, so the two units read consistently. Costs one more amendment on the pile, which is itself worth surfacing at the gate as a pattern rather than a list. **Note added 2026-08-23:** this option's premise — that an amendment is owed at all — does not hold; see the Assumptions entry. The question is preserved as asked.
 
 C) Do not design it; raise the absence as a blocker and stop
    > **Impact**: Strictly correct about authority, and it refuses to build on an unsettled foundation. But `write_release` already depends on the module, so the gap blocks `foundation` too, and stopping here leaves the dependency unstated rather than resolved. Nothing in the blocker register currently names it.
@@ -404,7 +404,7 @@ X. Other (please specify)
 - **[assumption]** WS-01's Phase 1 retention is settled governance (approved 2026-08-21, `GOV-2026-08-21-RA-01` Rec 12) and this stage records rather than revisits it.
 - **[assumption]** `merge_coverage_year.py` migrates here, taking `--config configs/` and its `NN_verb_noun.py` position, and its `sha256_of_file` copy consolidates into `foundation`'s `src/data/release.py`. This stage designs the target shape, not the migration commit.
 - **[assumption]** The December regime-count audit's **threshold** is D-13's (at least three independent storm events under Vision §9.3), and the count must come from GFZ Kp/Hp60 at a recorded release grade — **D-11 bars any provisional-Dst-derived figure**. This unit measures; it does not set the threshold.
-- **Open — `src/data/inventory.py` has no contract in `component-methods.md`**, while `write_release` already depends on it. Question 1 addresses it; whatever is designed is an amendment owed, not an approved contract.
+- **`src/data/inventory.py` is specified by this stage, and owes no amendment.** `component-methods.md` § Depth specifies **cross-package boundary calls only** and its Assumptions name **`functional-design` (3.1)** as where intra-package shapes are specified; `inventory.py` and `release.py` are the **same package**. Question 1's answer (D) stands; its output is this stage's ordinary work. **Corrected 2026-08-23. Superseded reading, preserved:** *"whatever is designed is an amendment owed, not an approved contract."*
 - **Open — the amendment count is growing across units.** `acquisition` recorded three owed amendments; Question 1 would make a fourth. Raised at the gate as a pattern worth a single consolidated change record rather than four separate ones.
 - **Open — D-1's site-log validation limitation.** Recorded in D-1 and repeated in its addendum as *separate and still open*. Questions 2 and 9 both turn on it; neither closes it.
 - **Open — station coordinates are a §18.2 Student forbidden choice and the cell rule a Student + Supervisor one.** What counts as sufficient validation is the owner's, not this stage's.
@@ -424,7 +424,7 @@ owner's instruction to apply the recommendations. Consolidated:
 
 | Q | Answer | What it settles |
 |---|--------|-----------------|
-| 1 | D | `src/data/inventory.py` gets a **minimal** contract — only what `write_release`'s stated dependency and TE §5.1's nine fields require — recorded as an **amendment owed** to `component-methods.md`, not as settled |
+| 1 | D | `src/data/inventory.py` gets a **minimal** contract — only what `write_release`'s stated dependency and TE §5.1's nine fields require. **Corrected 2026-08-23:** this is **not** an amendment owed — `inventory.py` and `release.py` are the same package, and § Depth names **this stage** as where intra-package shapes are specified. **Superseded:** *"recorded as an amendment owed to `component-methods.md`, not as settled."* The answer letter is unchanged |
 | 2 | C | `Station` gains a per-field **provenance** field; `assert_registry_resolved` raises on insufficient *provenance* rather than only on missing *presence*. What provenance G-P1A requires is put to the owner, not defaulted here |
 | 3 | D | A **conflict register** records every source value; the registry's value must be identical to one of them (an averaged value matches none); each resolved field records its source and a non-empty rationale; and an **injected averaged value** is tested to be rejected |
 | 4 | C | One access row **per artifact opened**, through `acquisition`'s named-accessor routing, plus a **declared audit scope** reconciled against the rows written — so a silently skipped month is detectable rather than producing a wrong figure that looks right |
@@ -434,13 +434,18 @@ owner's instruction to apply the recommendations. Consolidated:
 | 8 | C | WS-01 is cited with its boundary stated explicitly — **WS-01 only; WS-02 through WS-08 remain deferred to G-P3A** — and with the reason, so the exception is neither lost nor widened |
 | 9 | D | Cell rule and coordinates migrate together, each coordinate carrying its provenance (Q2's mechanism), with the migration emitting a **diff against the notebook literal** asserting no value changed in the move |
 
-**Three answers create obligations outside this unit, stated rather than applied.** Q1
-adds an `inventory.py` contract to `component-methods.md`; Q2 adds a provenance field to
-the approved `Station` dataclass; Q6 places three of its four tests on
-`features-and-splits`, `target-standardization` and the units owning those acts. **With
-`acquisition`'s three, that is five amendments owed to approved stage-2.6 contracts
-across two units** — raised at the gate as a pattern worth one consolidated change record
-rather than five separate ones.
+**Two answers create obligations outside this unit, stated rather than applied.** Q2 adds a
+provenance field to the approved `Station` dataclass — a **cross-package** boundary shape,
+so it does owe an amendment; and Q6 places three of its four tests on `features-and-splits`,
+`target-standardization` and the units owning those acts. **With `acquisition`'s three, that
+is four amendments owed across two units** — raised at the gate as worth one consolidated
+change record.
+
+> **Corrected 2026-08-23. Superseded reading, preserved:** *"Three answers create obligations
+> outside this unit… Q1 adds an `inventory.py` contract to `component-methods.md`… that is
+> five amendments owed to approved stage-2.6 contracts across two units."* Q1's contract is
+> **intra-package** and owes nothing — `component-methods.md` § Depth specifies boundary calls
+> only and names **this stage** as where intra-package shapes are specified.
 
 **Two answers decline to reach into frozen decisions.** Q7 does not propose an eighteenth
 item for D-24's protected set; Q2 does not decide what provenance is sufficient, that
@@ -488,5 +493,33 @@ as where the shape is specified**. **Question 1's answer (D) is unchanged**; wha
 that its output is recorded as this stage's ordinary work rather than as an **amendment
 owed**. This unit therefore owes **one** amendment (Q2's `Station.provenance` field, which
 modifies an existing boundary dataclass), not two.
+
+### Re-confirmation, 2026-08-23 (fourth) — this file swept to match its own artifacts
+
+**No question, option or answer changed.** The three design artifacts had already been
+corrected: `src/data/inventory.py` is **intra-package** (same package as `release.py`), and
+`component-methods.md` § Depth specifies **cross-package boundary calls only** while naming
+**`functional-design` (3.1)** as where intra-package shapes are specified — so Q1's output
+is this stage's ordinary work and **owes no amendment**.
+
+**This file had not been swept with them**, because its receipt was recorded before the
+artifact correction was applied. An adversarial pass found it: the Assumptions entry, the
+Q1 summary row and the obligations paragraph all still asserted an amendment owed and a
+total of "five across two units". All three are corrected here, with the superseded text
+preserved. **Corrected total: four owed amendments across two units** — `acquisition` 3,
+this unit 1 (Q2's `Station.provenance` field, which modifies an existing boundary
+dataclass).
+
+### Re-confirmation, 2026-08-23 (fifth) — after a fifth stage-wide redo jump
+
+A redo jump aimed at `target-standardization` reset the receipt floor for every unit.
+**No question, option, answer or amendment on this unit changed.**
+
+**Worth recording here, because the correction was about this unit's rule numbering:**
+`target-standardization` had been citing "`inventory-and-registry` R-20" for an open
+authority question. This unit's rules run **R-44…R-53** and it has **no R-20**; the rule
+carrying that question is **`governance-guards` R-20**. This unit's own **R-49** carries a
+related but distinct point — that D-24's protected set is not reopened. **Nothing in this
+unit changed**; the misreference was a sibling's.
 
 [Answer]: Looks correct

@@ -3,6 +3,9 @@
 **Unit** `external-products` (Bolt 5) · **Kind** `library` · **Depends on**
 `inventory-and-registry`
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at a sibling unit's stale
+> cross-references. **No content of this unit changed.**
+
 The data shapes this unit owns: the three driver series with their grades and alignment
 semantics, the IRI benchmark with its validation report, the GIM comparator with its
 interpolation and overlap-audit records, and the import-allowlist declaration that keeps
@@ -21,6 +24,9 @@ ceiling — and record their grade, provenance and availability.
 > specifies **cross-package boundary calls only** and names **this stage** as where
 > intra-package shapes are specified. **Corrected total: five owed amendments across three
 > units**, boundary contracts only.
+>
+> **A fourth redo** then swept this unit's **question file**, which still asserted "six
+> across three" in five live places. **No content of this artifact changed.**
 
 ## Sources
 

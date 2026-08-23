@@ -3,6 +3,13 @@
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Depends on**
 `acquisition`
 
+> **Re-established a fifth time 2026-08-23**, after a redo correcting a sibling's citations.
+> **No content of this unit changed** — but the correction concerned this unit's numbering:
+> `target-standardization` had cited "`inventory-and-registry` R-20" for an open authority
+> question. **This unit's rules run R-44…R-53 and it has no R-20**; the rule carrying that
+> question is `governance-guards` R-20. This unit's **R-49** carries a related but distinct
+> point — that D-24's protected set is not reopened.
+
 > **Re-established 2026-08-23 after a stage-wide redo jump.** The jump was aimed at a
 > correction in `acquisition` and reset the receipt floor for **every** unit of this stage.
 > **No content of this unit changed** — its iteration-2 adversarial verdict was READY with
@@ -18,6 +25,12 @@
 > and `release.py` are the **same package**, so W-1's contract is this stage's ordinary work
 > and **not an amendment owed**. **Question 1's answer (D) is unchanged**; this unit owes
 > **one** amendment — W-2a's `Station.provenance` field — not two.
+>
+> **A fourth re-establishment** followed a sweep of this unit's **question file**, which had
+> not been corrected alongside these artifacts because its receipt was recorded before the
+> correction was applied. **No content of this artifact changed.** The ordering is changed
+> going forward: corrections land in the artifacts **and** the question file before a
+> confirmation receipt is recorded.
 
 The workflows this unit implements: the source inventory, the station registry and its
 conflict resolution, migration of the frozen notebook literals, schema validation of the

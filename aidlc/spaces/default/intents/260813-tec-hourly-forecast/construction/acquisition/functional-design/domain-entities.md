@@ -3,6 +3,9 @@
 **Unit** `acquisition` (Bolt 3) · **Kind** `library` · **Depends on** `foundation`,
 `governance-guards`
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at a sibling unit's stale
+> cross-references. **No content of this unit changed.**
+
 > **Re-established 2026-08-23 after a redo jump taken to correct this unit.** The TA-08
 > primary/supporting row was corrected under the cleared receipt at the project decision
 > owner's explicit direction, with both superseded readings recorded in place; the summary
@@ -15,7 +18,8 @@
 >
 > **Re-established a third time 2026-08-23** after a redo aimed at a misread depth policy in
 > `component-methods.md`. **No content changed**; that re-reading **confirms** this unit's
-> three owed amendments as genuine cross-package boundary changes.
+> three owed amendments as genuine cross-package boundary changes. **A fourth** followed a
+> sweep of two sibling question files; **no content changed then either.**
 
 The data shapes this unit owns: the two per-month manifests, the per-file provenance
 record, the driver inventory, the gap accounting, the provenance class that

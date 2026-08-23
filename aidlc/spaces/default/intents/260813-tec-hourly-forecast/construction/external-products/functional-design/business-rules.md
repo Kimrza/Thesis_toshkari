@@ -3,6 +3,9 @@
 **Unit** `external-products` (Bolt 5) · **Kind** `library` · **Depends on**
 `inventory-and-registry`
 
+> **Re-established a fifth time 2026-08-23**, after a redo aimed at a sibling unit's stale
+> cross-references. **No rule of this unit changed.**
+
 The prohibitions this unit enforces, each with what it rejects, what it raises, and the
 negative control that proves the rejection happens.
 
@@ -21,6 +24,10 @@ control, it says so.
 > `open_d9_input` misattributed, then from "six across three" once `component-methods.md`
 > § Depth was read — it specifies **cross-package boundary calls only** and names **this
 > stage** as where intra-package shapes are specified.
+>
+> **A fourth redo** then swept this unit's **question file**, which still asserted the
+> superseded total in five live places while these rules already read five. **No rule
+> changed.**
 
 **Rule IDs continue the single sequence.** `foundation` ran R-01…R-17, `governance-guards`
 R-18…R-29, `acquisition` R-30…R-43 and `inventory-and-registry` R-44…R-53, so this unit

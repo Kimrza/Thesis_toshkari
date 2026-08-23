@@ -620,4 +620,16 @@ A redo jump aimed at correcting a **misreading of `component-methods.md` § Dept
 receipt floor for every unit of this stage. **No question, option, answer or amendment on
 this unit changed.**
 
+### Re-confirmation, 2026-08-23 (fourth) — after a fourth stage-wide redo jump
+
+A redo jump aimed at sweeping two **question files** that had fallen stale against their
+own corrected artifacts reset the receipt floor for every unit of this stage. **No
+question, option, answer or amendment on this unit changed.**
+
+### Re-confirmation, 2026-08-23 (fifth) — after a fifth stage-wide redo jump
+
+A redo jump aimed at correcting four stale cross-references in `target-standardization`'s
+question file reset the receipt floor for every unit of this stage. **No question, option,
+answer or amendment on this unit changed.**
+
 [Answer]: Looks correct

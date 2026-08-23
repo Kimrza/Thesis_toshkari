@@ -2,6 +2,9 @@
 
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Depends on** `foundation`
 
+> **Re-established a fifth time 2026-08-23**, after a redo correcting a sibling's
+> cross-references to **this unit's R-20**. **No content of this unit changed.**
+
 > **Re-established 2026-08-23 after a stage-wide redo jump**, which reset the receipt floor
 > for every unit of this stage and, for this unit, the **exhausted adversarial reviewer
 > budget**. **No content changed at re-establishment.** The regenerated artifacts — until
@@ -9,7 +12,8 @@
 > second iteration. **Re-established again 2026-08-23** after a further stage-wide redo aimed
 > at `external-products`; **no content of this unit changed on that occasion.** **A third
 > re-establishment** followed a redo aimed at a misread depth policy in
-> `component-methods.md`; **no content changed then either.**
+> `component-methods.md`; **no content changed then either.** **A fourth** followed a sweep
+> of two sibling question files; **no content changed then either.**
 
 The data shapes this unit owns: the phase-boundary prohibition, the Phase 1 → Phase 2
 transition contract, the single access path into the locked December root, and the

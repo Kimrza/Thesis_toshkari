@@ -85,7 +85,7 @@ C) Design only `spaceweather.py` here; raise `iri.py` and `gim.py` as blocked
    > **Impact**: Draws the line where the containment risk is — the IRI/GIM modules are the ones the import-boundary rule and NFR-IRI-01 exist to constrain. But WS-09, which this unit owns, is precisely the IRI/GIM row, so blocking those two blocks the unit's only currently-passing acceptance path.
 
 D) B, plus this stage recording that **three units in a row have now found a named module with no contract**, and proposing the owed amendments be carried as **one consolidated change record** rather than separately
-   > **Impact**: Treats the recurrence as the finding it is, rather than filing another instance of the same defect. A single change record is also easier for a reviewer to judge as a set — whether `component-methods.md` is systematically under-specified — than several arriving one unit at a time. Costs proposing a governance action this stage does not own. **The count, derived 2026-08-23: six owed amendments across three units** — `acquisition` 3, `inventory-and-registry` 2, this unit 1.
+   > **Impact**: Treats the recurrence as the finding it is, rather than filing another instance of the same defect. A single change record is also easier for a reviewer to judge as a set — whether `component-methods.md` is systematically under-specified — than several arriving one unit at a time. Costs proposing a governance action this stage does not own. **The count, corrected 2026-08-23: FIVE owed amendments across three units**, boundary contracts only — `acquisition` 3, `inventory-and-registry` 1, this unit 1. **Superseded:** *"six owed amendments across three units — `acquisition` 3, `inventory-and-registry` 2, this unit 1."*
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
@@ -415,7 +415,7 @@ X. Other (please specify)
 - **[assumption]** The availability matrix FR-P1-04-15 requires the benchmark's drivers to appear in is **`features-and-splits`' artifact**. This unit states the obligation and does not own the row.
 - **[assumption]** `audit_ec1_drivers.py` migrates here with `--config configs/` and its numbered position. This stage designs the target shape, not the migration commit.
 - **Open — `src/external` has no contract block in `component-methods.md`**, for any of its three modules. Question 1 addresses it; whatever is designed is an amendment owed.
-- **Open — six owed amendments across three units**, derived by counting each unit's own recorded list: **`acquisition` 3** (the named accessors `open_d9_input` and the restricted writer; the `AccessRecord.purpose` extension plus a restricted-write function; `write_release`'s `identity_fields` parameter), **`inventory-and-registry` 2** (`inventory.py`'s contract; `Station`'s provenance field), **this unit 1** (the `src/external` package). Question 1 proposes carrying them as one consolidated change record; that is the owner's call. **Corrected 2026-08-23** — the first issue read "four across three" and attributed the named accessors to `governance-guards`, which recorded no such finding.
+- **Open — FIVE owed amendments across three units**, boundary contracts only: **`acquisition` 3** (the named accessors `open_d9_input` and the restricted writer; the `AccessRecord.purpose` extension plus a restricted-write function; `write_release`'s `identity_fields` parameter), **`inventory-and-registry` 1** (`Station`'s provenance field — its `inventory.py` contract is **intra-package** and owes nothing), **this unit 1** (boundary blocks for `iri.py`, `gim.py` and `spaceweather.py`). Question 1 proposes carrying them as one consolidated change record; that is the owner's call. **Corrected twice on 2026-08-23.** First: the opening reading said "four across three" and attributed the named accessors to `governance-guards`, which recorded no such finding. Then: **"six across three"** was corrected once `component-methods.md` § Depth was read — it specifies **cross-package boundary calls only** and names **this stage** as where intra-package shapes are specified, which removes `inventory-and-registry`'s `inventory.py` from the count and narrows this unit's from "the `src/external` package" to its three boundary-importable modules.
 - **Open — FR-P1-04-18's interpolation rule is a §18.2 Student-owned forbidden choice (Q-15)** and is **not set**. No implementer may fill it by convenience.
 - **Open — four requirements with no acceptance row**: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18. The artifacts state what evidence would close each and draft no §19 criterion.
 - **Open — `unit-of-work.md` § 6 carries stale text**, reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`. Both were correct before 2026-08-22.
@@ -432,7 +432,7 @@ owner's instruction to apply the recommendations. Consolidated:
 
 | Q | Answer | What it settles |
 |---|--------|-----------------|
-| 1 | D | `src/external`'s three modules get contracts here, recorded as **one amendment owed**; and this stage records that **three consecutive units have now found a named module with no contract**, proposing the **six** owed amendments (`acquisition` 3, `inventory-and-registry` 2, this unit 1) be carried as **one consolidated change record** — offered to you, not taken |
+| 1 | D | `src/external`'s three modules get **boundary contracts** here, recorded as **one amendment owed**; and this stage proposes the **five** owed amendments (`acquisition` 3, `inventory-and-registry` 1, this unit 1) be carried as **one consolidated change record** — offered to you, not taken. **Corrected 2026-08-23**; superseded: *"three consecutive units have now found a named module with no contract… the six owed amendments (… `inventory-and-registry` 2 …)"* |
 | 2 | D | The **story map governs** (4 untested; **owns WS-09**); `unit-of-work.md` § 6's stale five-item list and `Acceptance rows (1)` line are **reported at the gate, not edited**; and **TA-36's `Pending` status** is stated wherever it is cited. **On TA-36 the story map contradicts itself**, and § Cross-unit responsibilities is the reconciling statement: **`features-and-splits` holds enforcement and the primary negative-path acceptance test** (`tests/test_feature_leakage_guards.py`); **this unit holds data production and upstream evidence**. This stage does **not** reallocate |
 | 3 | D | The import allowlist is enforced by a **transitive** static reachability scan; a run-time caller check is declined with its reason; and the scan is declared **authoritative for this rule** — a module graph is a property of the source tree, unlike the phase boundary's `sys.modules` check |
 | 4 | C | F10.7 trailing-ness proven as a **property**: perturbing any day after the safe-lagged day must leave the 81-day mean unchanged. Catches boundary and gap-fill cases a spot check misses. Not generalised to the other drivers, which FR-P1-04-17 already governs |
@@ -448,8 +448,9 @@ FR-P1-04-18's interpolation rule as **BLOCKED pending the Student's Q-15 decisio
 generation refuses while it is unset.
 
 **One answer proposes a governance action this stage does not own.** Q1's consolidated
-change record for the **six** owed amendments across **three** units is put to you; the stage
-records its own amendment either way.
+change record for the **five** owed amendments across **three** units is put to you; the stage
+records its own amendment either way. **Corrected 2026-08-23 from "six"** — see the
+Assumptions entry.
 
 **Two answers state obligations on other units.** Q6's availability matrix is
 `features-and-splits`' artifact; Q3's allowlist covers `src/evaluation/` paths owned by
@@ -475,9 +476,11 @@ superseded text preserved:
 
 - the named accessors re-attributed from `governance-guards` to **`acquisition`**; that unit
   recorded no missing-contract finding of its own;
-- the amendment total corrected to **six across three units** (`acquisition` 3,
-  `inventory-and-registry` 2, this unit 1), derived by counting each unit's own recorded
-  list — in **four** places, **two of which the reviewer's line list had not named**;
+- the amendment total corrected — and then corrected again. That cycle set it to "six across
+  three units" in four places, two of which the reviewer's line list had not named. **A
+  later reading of `component-methods.md` § Depth corrected it to FIVE across three**
+  (`acquisition` 3, `inventory-and-registry` 1, this unit 1), boundary contracts only — see
+  the Assumptions entry;
 - the Q2 summary row corrected: this unit **owns WS-09**, and on **TA-36 the story map
   contradicts itself** — § Cross-unit responsibilities reconciles it as
   **`features-and-splits` holding enforcement and the primary negative-path acceptance
@@ -507,5 +510,27 @@ against that policy:
 named module with no contract" framing was **partly a misreading of a stated depth policy**,
 and the consolidated-change-record proposal now rests on the corrected footing. Q1's answer
 (D) stands; the pattern it names is narrower than first argued.
+
+### Re-confirmation, 2026-08-23 (third) — this file swept to match its own artifacts
+
+**No question, option or answer changed.** The three design artifacts had already been
+corrected to **five owed amendments across three units**, boundary contracts only, after
+`component-methods.md` § Depth was read.
+
+**This file had not been swept with them**, because its receipt was recorded before the
+artifact correction was applied. An adversarial pass found **five** live restatements still
+asserting "six across three" — Q1's option-D Impact text, the Assumptions entry, the Q1
+summary row, the paragraph after the summary table, and one line inside the previous
+re-confirmation note. All five are corrected here, with the superseded text preserved.
+
+**The ordering that caused this is changed going forward:** every correction is applied to
+the artifacts **and** this file before a confirmation receipt is recorded, so the receipt
+seals a consistent set. Four cycles of this stage hit the same defect by the old ordering.
+
+### Re-confirmation, 2026-08-23 (fifth) — after a fifth stage-wide redo jump
+
+A redo jump aimed at correcting four stale cross-references in `target-standardization`'s
+question file reset the receipt floor for every unit of this stage. **No question, option,
+answer or amendment on this unit changed.**
 
 [Answer]: Looks correct
