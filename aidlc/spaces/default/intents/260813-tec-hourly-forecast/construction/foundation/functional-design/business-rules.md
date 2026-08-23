@@ -2,6 +2,11 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Re-established three times on 2026-08-23, after three stage-wide redo jumps** — aimed
+> respectively at a correction in `acquisition`, corrections in `external-products`, and a
+> misread depth policy in `component-methods.md`. **No rule of this unit changed on any of
+> the three occasions.**
+
 The decision rules, validation logic, constraints and invariants this unit
 enforces. Each rule states what it rejects, what it raises, and what evidence
 proves the rejection actually happens.

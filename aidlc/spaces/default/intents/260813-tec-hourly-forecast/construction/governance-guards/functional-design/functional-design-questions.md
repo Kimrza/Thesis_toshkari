@@ -214,7 +214,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option D. A is barred outright by `project.md` § Forbidden. C turns a decision record into a runtime parser target. D is B with the circularity handled openly instead of discovered later, and the circularity is not avoidable by choosing a different file: any of the four configs could hold the list, and items 4, 6, 7 and 12 mean `features.yaml`, `data.yaml` and `seeds.yaml` are all hashed too.
 
-[Answer]:
+[Answer]: D — the 17-item list lives in `configs/experiment.yaml` under a section excluded from every item’s section hash, with the exclusion stated in both the config and the test, and the test asserting the exclusion list has exactly one member.
 
 ---
 
@@ -262,7 +262,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option C. It satisfies the requirement's own wording, and the unparseable-equals-failure clause closes the only hiding place. D is attractive and I would not argue against adding it later, but it front-loads a registry before any of the artifact classes it would enumerate is produced by this pipeline — the current 16-instance inventory is all pre-TC-06 evidence. C's failure-on-unknown gives the same protection without freezing a registry against artifacts that do not exist yet.
 
-[Answer]:
+[Answer]: C
 
 ---
 
@@ -308,7 +308,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option D. Option A leaves the aggregate channel open, which is the one that bears on the § Forbidden rule about December being seen. Option C is literal but would sweep a diagnostic-only driver series into locked-test custody and make every Dst read an access-logged event, which buys nothing the lock is for. D states the target/driver line as a tested exclusion rather than leaving it to the reader — and it is the only option under which mislabelling a target file as a driver is detectable.
 
-[Answer]:
+[Answer]: D
 
 ---
 
@@ -346,7 +346,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option C, with `RES-01` raised at this stage's gate rather than absorbed. C proves both limbs of the stated contract with two tests this unit can own. D is the more ambitious answer and its instinct is right — an untested permitted read is a real gap — but `RES-01` is recorded as owned by stage 3.2 under Vision §15.2, and closing it here with a synthetic-root test would produce evidence that looks like coverage of the real audit and is not. Recommend C plus an explicit gate note that `RES-01` remains open.
 
-[Answer]:
+[Answer]: C — and `RES-01` is raised at this stage’s gate as still open, not absorbed here.
 
 ---
 
@@ -394,7 +394,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option D. A cannot deliver the run-time guarantee the Bolt's confidence hypothesis names, and B throws away enforcement that already works for no gain. The alternative call sites for the field limb are both worse: inside `foundation`'s release API it would invert the dependency and close a cycle; at the transition-manifest build it would catch a contaminated frame only after every Phase 1 artifact was written and possibly consumed — a post-mortem, not a guard. Recommend also that `business-rules.md` state the static scan's *subordinate* status where the code lives, so a future maintainer cannot read its presence as sufficient.
 
-[Answer]:
+[Answer]: D — and `business-rules.md` states the static scan’s subordinate status where the code lives, so its presence cannot be read as sufficient.
 
 ---
 
@@ -426,7 +426,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option D. The project already has a standing rule making reimplementation the default and copying the exception, so designing the register as the main road would misrepresent the policy in force. The AGPLv3 Global-TEC-forecasting repository remains the only approved direct-copy source, and whether its distribution obligations permit that copying is an **unresolved governance dependency this project does not settle** — which is itself a reason to make copying deliberately harder to reach than reimplementation.
 
-[Answer]:
+[Answer]: D
 
 ---
 
@@ -466,7 +466,7 @@ X. Other (please specify)
 
 > **💡 Recommendation**: Option D. B is the right mechanism, and C's extra coverage costs the acyclic structure that keeps this unit a root — a high price for a failure mode (run-time path assembly) that the static check plus review makes unlikely. BLK-07 is an authorisation question rather than a design question, so it goes to the gate. Note that B has a live consequence worth stating: `acquisition` cannot hold its own path to `audit_evidence_2022-FULL/` once the check exists, so BLK-07's resolution is a precondition of Bolt 3, not a formality.
 
-[Answer]:
+[Answer]: D — B’s static check is the mechanism; BLK-07 is raised at the gate as an authorisation question with the four consumers enumerated and `acquisition`’s routing named, and its resolution is a precondition of Bolt 3.
 
 ---
 
@@ -485,3 +485,57 @@ X. Other (please specify)
 - **Open — the AGPLv3 distribution question.** Whether the Global-TEC-forecasting repository's obligations permit direct copying is a governance dependency **this project does not resolve**. The standing default is reimplementation from the paper with a citation (FR-P1-06-4).
 - **G-09 is not signed.** No answer here authorises creating `phase_contract.py`, `locked_test.py` or `reuse_registry.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
+
+---
+
+## Consolidated Summary Confirmation
+
+Questions 1 and 2 were already answered (D with amendments; D). Questions 3–9 are
+answered above as the recommended option in each case, on the owner's instruction
+to apply the recommendations. Consolidated:
+
+| Q | Answer | What it settles |
+|---|--------|-----------------|
+| 1 | D (with the owner's three amendments) | BLK-06's 17 items expressed with canonicaliser version recorded in the manifest and section/field boundaries stated per item |
+| 2 | D | Key-list assertion plus the draft/freeze distinction, the flag a field of `TransitionManifest` |
+| 3 | D | The 17-item list lives in `configs/experiment.yaml` under one section excluded from every item's section hash; a test asserts the exclusion and that the exclusion list has exactly one member |
+| 4 | C | The guard walks every file under `evidence/`, dispatched to a declared parser per artifact class; an unparseable file is a **failure**, not a pass. No artifact-class registry is frozen yet |
+| 5 | D | A hit is a target value or a target-derived aggregate; December-dated **driver** captures are a separate recorded exclusion naming the driver classes, tested to be exactly that set |
+| 6 | C | Two tests owned by this unit: registry-write failure aborts the read, and the log row is durable on disk before the read is attempted. `RES-01` stays open and is raised at the gate |
+| 7 | D | Both limbs with declared roles — static scan subordinate/early-warning, run-time assertions authoritative; `assert_no_raw_fields` called by each of the eight Phase-1 producing scripts before it writes, plus a completeness test over those call sites. `business-rules.md` records the static scan's subordinate status |
+| 8 | D | Provenance-marker-keyed register test, with reimplementation-from-the-paper recorded as the **primary** control and the register as the exception path |
+| 9 | D | Static check that no module outside `locked_test.py` contains the restricted-root literal; BLK-07 raised at the gate with the four consumers enumerated and `acquisition`'s routing named — not closed here |
+
+Carried to the gate, unchanged by these answers: `RES-01` still untested; BLK-07
+still open and a precondition of Bolt 3; BLK-06 not closed by this stage; FR-P1-02-6
+still has no §16/§19 acceptance row; the stale `TransitionManifest` deferral
+statement in three approved artifacts reported, not edited; the AGPLv3 distribution
+question unresolved; G-09 unsigned.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+- Request changes
+
+### Re-confirmation, 2026-08-23 — after a stage-wide redo jump
+
+A redo jump on `functional-design` reset the receipt floor for every unit of this stage.
+No answer above changed. **What this redo also does for this unit: it resets the exhausted
+adversarial reviewer budget.** The three artifacts were regenerated against this
+nine-question set after the 2-iteration budget had been spent on the previous issue, so
+those changes have never been reviewed. A fresh pass follows this confirmation.
+
+### Re-confirmation, 2026-08-23 (second) — after a second stage-wide redo jump
+
+A redo jump aimed at correcting `external-products` reset the receipt floor for every unit.
+**No answer above changed.** Since the first re-confirmation this unit reached **READY** on
+its iteration-2 adversarial pass, after a Critical arithmetic slip in the § W-3a taxonomy
+sum was corrected — the printed proof summed to 15 where it asserted 17.
+
+### Re-confirmation, 2026-08-23 (third) — after a third stage-wide redo jump
+
+A redo jump aimed at correcting a **misreading of `component-methods.md` § Depth** reset the
+receipt floor for every unit of this stage. **No question, option, answer or amendment on
+this unit changed.**
+
+[Answer]: Looks correct

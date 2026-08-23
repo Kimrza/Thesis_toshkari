@@ -574,7 +574,6 @@ Does this all look correct before I generate the artifact?
 - Looks correct
 - Request changes
 
-[Answer]: Looks correct
 
 ### Re-confirmation, 2026-08-22 — after a redo jump for a fresh reviewer pass
 
@@ -602,3 +601,23 @@ The eight base answers, the three follow-ups, the TA-03 verification and the thr
 PENDING amendments all stand exactly as recorded above. What changed is confined to
 traceability citations in `business-logic-model.md` and `domain-entities.md`, and
 the per-rule acceptance lines in `business-rules.md`.
+
+### Re-confirmation, 2026-08-23 — after a stage-wide redo jump
+
+A redo jump on `functional-design` (executed 2026-08-22T21:43Z) reset the receipt floor for
+**every** unit of this stage, not only the unit it was aimed at. No question, option,
+answer or amendment on this unit changed; the summary is re-presented because the prior
+confirmation receipt no longer stands.
+
+### Re-confirmation, 2026-08-23 (second) — after a second stage-wide redo jump
+
+A redo jump aimed at correcting `external-products` reset the receipt floor for every unit
+of this stage again. **No question, option, answer or amendment on this unit changed.**
+
+### Re-confirmation, 2026-08-23 (third) — after a third stage-wide redo jump
+
+A redo jump aimed at correcting a **misreading of `component-methods.md` § Depth** reset the
+receipt floor for every unit of this stage. **No question, option, answer or amendment on
+this unit changed.**
+
+[Answer]: Looks correct

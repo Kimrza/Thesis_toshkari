@@ -2,6 +2,13 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Re-established three times on 2026-08-23, after three stage-wide redo jumps** — aimed
+> respectively at a correction in `acquisition`, corrections in `external-products`, and a
+> misread depth policy in `component-methods.md`. Each reset the receipt floor for **every**
+> unit of this stage. **No content of this unit changed on any of the three occasions** — the
+> summary was re-confirmed and the artifact re-saved so the receipts match the current
+> attempt.
+
 The workflows, algorithms and processing sequences this unit implements. A **Bolt**
 is one build pass over one piece of the work, ending in something that runs;
 `foundation` is Bolt 1 and the dependency root, so every workflow below runs before

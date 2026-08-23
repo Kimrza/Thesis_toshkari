@@ -2,6 +2,11 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Re-established three times on 2026-08-23, after three stage-wide redo jumps** — aimed
+> respectively at a correction in `acquisition`, corrections in `external-products`, and a
+> misread depth policy in `component-methods.md`. **No content of this unit changed on any of
+> the three occasions.**
+
 The data shapes this unit owns, their lifecycles, and how they relate. A **Bolt**
 is one build pass over one piece of the work, ending in something that runs;
 `foundation` is Bolt 1, and every entity below is created by it and consumed by
