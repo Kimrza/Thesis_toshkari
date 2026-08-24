@@ -548,6 +548,96 @@ question, option, answer or amendment on this unit changed.**
 
 A redo jump aimed at correcting four stale cross-references in `target-standardization`'s
 question file reset the receipt floor for every unit of this stage. **No question, option,
-answer or amendment on this unit changed.**
+answer or amendment on this unit changed.** *(Answered `Looks correct`, 2026-08-23; that
+receipt belongs to the previous attempt — the live answer tag for this section is the
+blank one at the end of the sixth re-confirmation below.)*
+
+### Re-confirmation, 2026-08-24 (sixth) — new stage attempt after the Inception close
+
+**Why this is being re-asked.** Inception closed and Construction opened on
+**2026-08-24T11:46:26Z**, starting a fresh `functional-design` attempt. A fresh attempt
+resets the receipt floor for every unit: the fifth re-confirmation above no longer
+satisfies it. Unit 1 `foundation` re-confirmed at 12:36:34Z and its artifacts were
+amended; `governance-guards` is unit 2.
+
+**What happened upstream since the fifth re-confirmation, and why it leaves this unit's
+answers untouched.** `foundation` ran an amendment pass, executed and recorded in
+`governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`:
+
+| | Ruling | What it touched | Why this unit is unaffected |
+|---|---|---|---|
+| **A** — §19 rows for REQ-ENG-7 / REQ-ENG-10 | **DECLINED** | nothing | **No count moved.** This unit's derived figures stand: 10 requirements, **1** with no acceptance row (FR-P1-02-6); owns TA-27 and TA-28; supports WS-18, TA-07, TA-18 |
+| **B** — three `DeterminismRecord` fields | **APPROVED** | `component-methods.md` — `DeterminismRecord` **6 → 9** fields | `DeterminismRecord` is a `foundation` contract. This unit cites `component-methods.md` for `RAW_MODULES`, `assert_phase_boundary`, `assert_no_raw_fields`, `TransitionManifest`, `build_transition_manifest`, `diff_protected_hashes`, `RESTRICTED_ROOT`, `AccessRecord`, `open_restricted`, `assert_no_december_outside_restricted` — none amended |
+| **C** — release-history ledger | **APPROVED** | `services.md` § Run record and registry (**two → three** artifacts); `unit-of-work.md` § 1 `Owns` | This unit cites `services.md` § Stage entry contract, § The nine stage scripts and § Execution platforms, and `unit-of-work.md` **§ 2** — none amended |
+
+The change record's own sweep states the same conclusion independently, under
+§ Report-only files: *"other units' `functional-design/` artifacts, verified
+unaffected."*
+
+**What still stands, unchanged.** All nine answers (1=D with the owner's three
+amendments, 2=D, 3=D, 4=C, 5=D, 6=C, 7=D, 8=D, 9=D). Carried to the gate: `RES-01`
+permitted-read access logging still **NOT TESTED**; **BLK-07** still open and a
+precondition of Bolt 3; **BLK-06** not closed by this stage; **FR-P1-02-6** still with no
+§16/§19 acceptance row; the stale `TransitionManifest` deferral statement in three
+approved artifacts reported, not edited; the AGPLv3 distribution question unresolved;
+**G-09 unsigned**, so nothing here authorises creating `phase_contract.py`,
+`locked_test.py` or `reuse_registry.py`.
+
+**One thing this confirmation does change.** The three artifacts on disk, and their
+iteration-2 **READY** verdict of 2026-08-22, belong to the previous attempt. On
+confirmation they are re-saved and re-reviewed under this attempt, so the verdict that
+reaches the gate is one this attempt actually produced.
+
+Does this all look correct before the stage proceeds?
+
+- Looks correct
+   > **Impact**: The confirmation receipt is recorded for `governance-guards` under this attempt. The three artifacts are re-saved and put through a fresh reviewer pass, then the stage moves to unit 3. No answer, contract or scientific value changes.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — an answer, a carried-to-gate item, or the reading of the amendment pass above — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — the amendment pass touched three `foundation` contracts this unit does not cite, Amendment A was declined so no count propagated, and the change record's sweep independently verified this unit's artifacts unaffected. Re-confirming records the receipt this attempt needs without reopening a settled answer.
+
+*(Answered `Request changes`, 2026-08-24 — the owner named two execution defects to
+resolve. The verification pass below is the response; the live answer tag for this section
+is the blank one at its end.)*
+
+### Verification of the two execution defects raised at the sixth confirmation
+
+The owner answered the sixth confirmation by naming the two defects the `foundation`
+amendment pass introduced during execution — **a duplicate bullet**, and **corrupted
+footers caused by letting bash treat backticks as command substitution** — and asked that
+they be resolved. Both were checked against the workspace rather than against the change
+record's account of them. **Both are already resolved on disk; neither needs an edit.**
+
+| Defect | Check run | Result |
+|---|---|---|
+| Duplicate `RequiredFieldsMap` / `CredentialNameMap` bullet | `grep -n "RequiredFieldsMap" foundation/functional-design/business-logic-model.md` | **Two hits, neither a duplicate bullet.** Line 491 is the single § Assumptions bullet; line 598 is a prose mention inside the Review section's iteration summary. The duplicate the change record records as *"Removed"* is gone |
+| Backtick / command-substitution corruption | `grep -rn '``\|$(' ` over `foundation/functional-design/` and the change record; `grep -rn "command not found\|: not found\|bash: \|syntax error near"` over the whole intent record, `governance/` and `evidence/` | **No corruption residue anywhere.** Every `` `…` `` hit is legitimate inline code; the two `` `` `UNTESTED` `` `` hits in the change record are correct nested-backtick markdown. No shell-error text, no truncated footer |
+
+**Nothing was edited to reach this result** — the checks found the workspace already clean,
+so there was no defect left to fix. The change record's own § Sweep result already recorded
+both as corrected during execution; this pass confirms that record against the files.
+
+**One stale representation found while checking, reported and not edited.**
+`foundation/functional-design/business-logic-model.md` **line 598**, inside the
+**iteration-1 Review section**, still reads that *"`DeterminismRecord`'s three pending
+fields and the release ledger await Amendments B and C (correctly marked not-approved,
+with the approved six-field contract stated as the current binding shape)"*. B and C were
+approved and executed on 2026-08-24, so that sentence describes a superseded state. It sits
+inside a **reviewer's verdict text** — a dated record of what that reviewer saw — not in the
+design body a builder reads, and `CHANGE_RECORD_PROCEDURE.md` does not authorise editing a
+recorded review. It is raised here rather than swept. It belongs to `foundation`, not to
+this unit, and does not touch any `governance-guards` contract.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The confirmation receipt is recorded for `governance-guards` under this attempt. The three artifacts are re-saved and put through a fresh reviewer pass, then the stage moves to the next unit. The stale line-598 review sentence stays as raised — reported, not edited.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Use this if the two defects meant something other than what was checked above, or if you want the line-598 review sentence annotated in place rather than left as a raised item — that would need your approval as an annotate-in-place exception.
+
+> **💡 Recommendation**: **Looks correct** — both named defects verify as already resolved with no edit required, and the one stale sentence found sits inside a dated review record that the change procedure protects from sweeping. Nothing outstanding blocks this unit.
 
 [Answer]: Looks correct

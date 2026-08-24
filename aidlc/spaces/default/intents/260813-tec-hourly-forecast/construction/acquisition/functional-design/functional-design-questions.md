@@ -502,6 +502,45 @@ question, option, answer or amendment on this unit changed.**
 
 A redo jump aimed at correcting four stale cross-references in `target-standardization`'s
 question file reset the receipt floor for every unit of this stage. **No question, option,
-answer or amendment on this unit changed.**
+answer or amendment on this unit changed.** *(Answered `Looks correct`, 2026-08-23; that
+receipt belongs to the previous attempt. The live answer tag for this section is the blank
+one at its end.)*
+
+### Re-confirmation, 2026-08-24 (sixth) — new stage attempt after the Inception close
+
+**Why this is being re-asked.** Inception closed and Construction opened at
+**2026-08-24T11:46:26Z**, starting a fresh `functional-design` attempt and resetting the
+receipt floor for every unit. `foundation` and `governance-guards` have already re-confirmed
+under this attempt; `acquisition` is next.
+
+**What happened upstream, and why it leaves this unit's answers untouched.** Two passes ran
+on `foundation`, both recorded in `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`:
+
+| Pass | What it changed | Why this unit is unaffected |
+|---|---|---|
+| The **amendment pass** — A **declined**, B and C **approved and executed** | B: `DeterminismRecord` **6 → 9** fields in `component-methods.md`. C: `services.md` **§ Run record and registry** (two → three artifacts) and `unit-of-work.md` **§ 1** `Owns` | This unit reads `component-methods.md` for `locked_test.py` (`RESTRICTED_ROOT`, `AccessRecord`, `open_restricted`), `release.py` (`sha256_file`, `write_release`, `verify_release`) and the §10 credential rule — **`DeterminismRecord` is not among them, and no `release.py` signature was amended**. It reads `services.md` **§ The nine stage scripts**, **§ Stage entry contract** and **§ Execution platforms**, and `unit-of-work.md` **§ 3** — none of the amended sections. A was declined, so **no count moved**: this unit's 15 requirements and **7** with no acceptance row stand |
+| The **addendum**, sites 9–11 — three statements still asserting a superseded amendment status | Annotations only, all three inside `foundation`'s own files: a box at the head of `business-logic-model.md` § Review, `domain-entities.md` § 5's REQ-ENG-10 box, and a heading in `foundation`'s question file | Annotation of superseded status, not a contract change. This unit consumes `foundation`'s **stage entry contract, `ConfigSnapshot`, the two-tier error posture and credential resolution** — none touched |
+
+**Its other upstream, also unchanged.** `governance-guards` **R-25**, **R-26**, **R-27** and
+**R-28** — this unit is the first consumer of all four — re-confirmed under this attempt
+earlier today with **no rule changed**.
+
+**What still stands.** Every answer, and everything carried to the gate: **BLK-07** open and
+a precondition of Bolt 3, with this unit's routing named but **not closed here**; the F10.7
+measured gap open, to be recorded and governed before any imputation; the Kyoto and CEDAR
+notices to be recorded **verbatim** before G-P1A; **7** of 15 requirements with no acceptance
+row; **G-09 unsigned**, so nothing here authorises creating
+`scripts/00_acquire_prepared_vtec.py` or any module. The § Review verdict of **READY**
+belongs to the previous attempt.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `acquisition` under this attempt and its three artifacts are re-saved. No answer, contract, count or scientific value changes.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — an answer, a carried-to-gate item, or the reading of the two `foundation` passes above — and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — both `foundation` passes touched sections this unit does not read, Amendment A was declined so no count propagated, and its `governance-guards` upstream re-confirmed with no rule changed.
 
 [Answer]: Looks correct

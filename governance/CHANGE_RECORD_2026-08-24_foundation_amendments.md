@@ -308,6 +308,30 @@ against TA-36 — **this record did not worsen it**, because Amendment A was dec
 stays `RES-02`) · `governance/CHANGE_RECORD_2026-08-22_*.md` and `governance/reviews/*`
 · the audit shards · other units' `functional-design/` artifacts, verified unaffected.
 
+## Addendum, 2026-08-24 — three sites this record's own sweep missed
+
+Found while verifying two execution defects raised at `governance-guards`'s sixth summary
+confirmation. All three assert a **superseded amendment status** that this record had
+already corrected elsewhere, so correcting them **executes the rulings already approved
+above and decides nothing new**. The **project decision owner approved the annotate-in-place
+exception on 2026-08-24**, under the same Rec 7 precedent as sites 1–8. Every original
+wording is preserved verbatim in place.
+
+| # | Site | What was stale | Applied |
+|---|---|---|---|
+| 9 | `foundation/business-logic-model.md` § Review (dated 2026-08-22) | Three statements — § Regression checks' *"Amendments A/B/C nowhere treated as approved"*, its *"No determinism claimed as measured … while Amendment B is pending"*, and § Implementability's *"`DeterminismRecord`'s three pending fields and the release ledger await Amendments B and C"* | ✅ One dated annotation box at the head of § Review. **The READY verdict is not disturbed, no finding is withdrawn, and no reviewer sentence is rewritten** — the box names the three statements and their current state, and the reviewer's text stands as the dated record of what that reviewer saw |
+| 10 | `foundation/domain-entities.md` § 5, REQ-ENG-10 acceptance-status box | *"A row is **sought** under Amendment A (Vision §15.2), not approved"* — reads the gap as provisional when A was **declined**, i.e. permanent. §§ 9, Coverage and Assumptions in the same file already read correctly, so this was a missed site, not a disagreement | ✅ Rewritten to *"No row is sought … untested by design, permanently rather than pending"*, superseded wording preserved |
+| 11 | `foundation/functional-design-questions.md` line 736 heading | *"### The three amendments stay PENDING and unapproved"* — the body is inside a section already marked superseded, but the **heading** asserted the false claim unqualified | ✅ Heading qualified in place. This is the same *"box heading still asserting the superseded claim while its body said otherwise"* class this record's § Sweep result already reported once |
+
+**Why the original sweep missed them.** It was keyed to two literals — `DeterminismRecord`
+*"six fields"* and `services.md` *"two artifacts"*. None of these three sites contains
+either literal: sites 9 and 11 assert **amendment status** rather than a count, and site 10
+turns on the single word *"sought"*. This is the failure mode `project.md` § Way of Working
+already names — *"sweep for the superlatives and status claims an amended figure supported,
+not only for the superseded numeral"* — and `CHANGE_RECORD_PROCEDURE.md` step 2's wording
+*"sweep the workspace for that literal"* inherits the same blind spot. **No count moved and
+no scientific value was touched by any of the three.**
+
 ## Standing consequences
 
 - **REQ-ENG-7 and REQ-ENG-10 are untested by design, permanently.** Their negative-path test specifications remain design targets for stage 3.5 and never acceptance evidence.

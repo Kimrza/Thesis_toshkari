@@ -3,6 +3,17 @@
 **Unit** `external-products` (Bolt 5) · **Kind** `library` · **Depends on**
 `inventory-and-registry`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** — Inception closed
+> and Construction opened at 2026-08-24T11:46:26Z, resetting the receipt floor for every
+> unit. **No content of this unit changed.** Both `foundation` passes of that day (the
+> amendment pass and the sites 9–11 addendum, in
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`) touch nothing this unit
+> reads. **Question 1's premise was re-verified against the current file rather than carried
+> forward:** `grep -n "src/external" component-methods.md` returns **no hits**, so the
+> absence of an `src/external` boundary-call block still holds — Amendment B added fields to
+> a `foundation` entity and created no block. Amendment A was declined, so **no count
+> moved**. **The READY verdict in § Review belongs to the previous attempt.**
+
 > **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
 > cross-references in `target-standardization`'s question file. **No content of this unit
 > changed.**

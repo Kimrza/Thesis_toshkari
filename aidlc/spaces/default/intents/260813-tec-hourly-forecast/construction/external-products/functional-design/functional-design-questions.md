@@ -531,6 +531,52 @@ seals a consistent set. Four cycles of this stage hit the same defect by the old
 
 A redo jump aimed at correcting four stale cross-references in `target-standardization`'s
 question file reset the receipt floor for every unit of this stage. **No question, option,
-answer or amendment on this unit changed.**
+answer or amendment on this unit changed.** *(Answered `Looks correct`, 2026-08-23; that
+receipt belongs to the previous attempt. The live answer tag for this section is the blank
+one at its end.)*
+
+### Re-confirmation, 2026-08-24 (sixth) — new stage attempt after the Inception close
+
+**Why this is being re-asked.** Inception closed and Construction opened at
+**2026-08-24T11:46:26Z**, starting a fresh `functional-design` attempt and resetting the
+receipt floor for every unit.
+
+**What changed upstream, and why it leaves this unit's answers untouched.** Two passes ran
+on `foundation`, both in `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`:
+the **amendment pass** (A **declined**; B and C **approved and executed**) and the **sites
+9–11 addendum** (three superseded-status statements annotated in place inside `foundation`'s
+own files).
+
+| What the passes touched | Why this unit is unaffected |
+|---|---|
+| `component-methods.md` — `DeterminismRecord` **6 → 9** fields (B) | **Question 1's premise re-verified directly, not assumed:** `grep -n "src/external" component-methods.md` returns **no hits**. The file still carries `src/features`, `src/models` and `src/evaluation` boundary-call blocks and **no `src/external` block at all** — B added fields to a `foundation` entity and created no block |
+| `services.md` **§ Run record and registry** (C) | This unit reads **§ The nine stage scripts**, for `04_build_external_products.py` |
+| `unit-of-work.md` **§ 1** `Owns` (C) | This unit reads **§ 6** — the `Owns` list, the module-path allowlist, the 7 requirements |
+| The sites 9–11 annotations | Inside `foundation`'s own artifacts; a superseded **status** annotated, no contract changed |
+| Amendment **A** — **declined** | **No count moved.** This unit's 7 requirements and **4** with no acceptance row stand; it still owns WS-09 and TA-36 and supports WS-10, WS-11, TA-08, TA-12 |
+
+**Its other upstream, also unchanged.** `inventory-and-registry` **R-44** (source inventory)
+and **R-45** (registry), both consumed here, re-confirmed under this attempt with no rule
+changed.
+
+**What still stands.** Every answer, and everything carried to the gate: `unit-of-work.md`
+**§ 6's stale text** reported and **not edited** (a five-item bold list including
+FR-P1-04-17, and `Acceptance rows (1). WS-09`); **FR-P1-04-18 obligation 4 named
+uncheckable** rather than given a check that would not test it; **BLK-07's authorization
+limb** carried forward, with nothing here reading the locked month — this unit's IRI and GIM
+products join **at evaluation time** onto the frozen comparison-wide mask; **G-09 unsigned**,
+so nothing here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`,
+`src/external/gim.py` or `scripts/04_build_external_products.py`. The § Review verdict of
+**READY** belongs to the previous attempt.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `external-products` under this attempt and its three artifacts are re-saved. No answer, contract, count or scientific value changes.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — Question 1's premise was re-verified against the current `component-methods.md` rather than carried from the previous attempt, and every amended section is one this unit does not read.
 
 [Answer]: Looks correct

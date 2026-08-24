@@ -2,6 +2,14 @@
 
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Depends on** `foundation`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** — Inception closed
+> and Construction opened at 2026-08-24T11:46:26Z, resetting the receipt floor for every unit.
+> **No content of this unit changed.** `foundation`'s amendment pass of the same day
+> (`governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`) touches no contract this
+> unit cites — **A** declined, **B** amended `DeterminismRecord`, **C** amended `services.md`
+> § Run record and registry and `unit-of-work.md` § 1, none of them read here. **The READY
+> verdict in § Review belongs to the previous attempt**; a fresh pass follows.
+
 > **Re-established a fifth time 2026-08-23**, after a redo correcting a sibling's
 > cross-references to **this unit's R-20**. **No content of this unit changed.**
 

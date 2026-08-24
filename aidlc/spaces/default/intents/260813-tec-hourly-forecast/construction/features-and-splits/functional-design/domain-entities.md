@@ -3,6 +3,19 @@
 **Unit** `features-and-splits` (Bolt 7) · **Kind** `library` · **Depends on**
 `target-standardization`, `external-products`, `governance-guards`
 
+> **Regenerated 2026-08-24, on a new stage attempt — and this unit's shapes did change.**
+> Construction opened at 2026-08-24T11:46:26Z; both `foundation` passes of that day touch nothing
+> this unit reads. The substantive change is this unit's own **NOT-READY** verdict after five
+> adversarial iterations. **§ 5 gains the emitted artifact's recorded provenance fields** —
+> `fold_id`, `purpose`, `transform_id` — refused at `06`/`07` (**FU-4 = D**), plus the
+> **read-versus-emit** distinction that lets an `evaluate` call read the causal history the
+> 24-hour window requires while emitting only the validation month (**FU-5 = D**), which keeps
+> **1 December** in the G-06 locked test. **§ 10's `LeakageError` and `PartitionError` rows are
+> both restated** (iteration-5 finding 5): the pure-containment formulation was an upper bound
+> admitting the leaking direction, and the *"more than one partition"* reading fired on an
+> ordinary 15 February row. Amendments owed re-derives to **8 across 5 units**. **BLK-04 is not
+> closed**, and the verdict below predates all of it.
+
 The data shapes this unit owns: the availability row that carries a feature's lag claim, the
 closed feature dictionary, the **fold-owned transform** that BLK-04's contract turns from a
 convention into a check, one window definition emitting two representations, the partition
@@ -265,6 +278,38 @@ missing from the first statement of this** (corrected 2026-08-23): without it th
 either bypassed § 4's element 4 or had no determinable accepted set. **The seventh owed
 amendment**, one function.
 
+**The emitted artifact's recorded provenance fields** *(added 2026-08-24, FU-4 = D;
+iteration-5 finding 1)*. Every **emitted** `WindowDefinition` output — both the flattened
+matrix and the sequence tensor — carries three recorded fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `fold_id` | `str` | The fold whose transform was applied — `"F1"`…`"F4"`, or the final refit's identifier once R-80's shape question resolves |
+| `purpose` | `ApplyPurpose` | `train` or `evaluate`. Never `None` on an emitted artifact: a `purpose=None` call is the **fitting call**, and its outputs are a fitting input only, never emitted |
+| `transform_id` | `str` | The fitted `Transform`'s identity, so the pairing names *which* transform, not only which fold |
+
+**Why they exist as fields rather than as a call-site invariant.** `services.md` § The nine
+stage scripts puts `apply_transforms` in `05_build_features_and_splits.py` and every scoring
+site in `06_train_and_predict.py` / `07_evaluate_and_report.py`, which read their frames from
+**artifacts**. A predicate about the call that produced a frame is unobservable at a consumer
+that obtained it from a file, so the pairing becomes a property of the artifact. `06` and `07`
+**refuse** a frame whose stamp is not `(fold k, evaluate)` when scoring fold *k*'s validation
+month, and `tests/test_train_only_transforms.py` — declared **manifest-based** — asserts that
+refusal. An **unstamped** frame reaching either consumer **fails**; that unstamped or
+hand-assembled frame is the honest residual.
+
+**These are additional to the project-wide `phase_id`, `source_id` and `target_definition_id`
+stamps**, which the mandated rule requires on every dataset, prediction, mask and comparison,
+and they do not replace them. **The eighth owed amendment**, reaching a fifth unit — the two
+consuming scripts, whose own design has not run.
+
+**Rows emitted versus rows read** *(FU-5 = D)*. A `purpose="evaluate"` call may **read** fold
+*k*'s validation month **plus the causal history the frozen 24-hour window requires** — the
+preceding day's rows, which are lawful inputs at the forecast origin — and may **emit only**
+rows inside the validation month. Element 4 tests the **assembled pre-window frame**. Control:
+emitted rows exceeding the validation month → **fails**. This is what keeps the **G-06**
+locked-test prediction covering the **full** December with no first-day loss.
+
 > **WS-13's evidence departs from TE §16, and no reading is adopted.** TE §16 names
 > `test_common_masks.py`, owned by **`evaluation-and-comparison`**; the story map substitutes
 > *"matched-window parity assertion over one `windows.py` definition"* and records that *"no
@@ -390,10 +435,11 @@ mask**.
 
 | Exception | Raised when |
 |---|---|
-| `LeakageError` | `actual_lag < safe_lag`; a backfilled final value where the contemporaneous grade was required; `f107_81_trailing`'s window not ending at the safe-lagged day, or its recomputed mean disagreeing; a field outside the §6.2 dictionary; a carried-forward `vtec_lag_*`; an incomplete `vtec_seq_24` not excluded; a support field used without a recorded G-04 approval, or read at/beyond hour *t*; a target-hour quality field; a raw-longitude column; a driver carried forward beyond 3 h; **`train`'s index not a subset of the fold's training partition**; **any row's timestamp outside the transform's own carried scope, or an empty frame reaching `apply_transforms`** |
+| `LeakageError` | `actual_lag < safe_lag`; a backfilled final value where the contemporaneous grade was required; `f107_81_trailing`'s window not ending at the safe-lagged day, or its recomputed mean disagreeing; a field outside the §6.2 dictionary; a carried-forward `vtec_lag_*`; an incomplete `vtec_seq_24` not excluded; a support field used without a recorded G-04 approval, or read at/beyond hour *t*; a target-hour quality field; a raw-longitude column; a driver carried forward beyond 3 h; **`train`'s index not a subset of the fold's training partition**; **a frame leaving the set the declared `purpose` permits for that transform's fold**, or an **empty or timestamp-less** frame reaching `apply_transforms`; **emitted rows exceeding the validation month under `purpose="evaluate"`** *(the readable set includes the causal history the 24-hour window needs; the emittable set does not — § 5)* |
 | `AlignmentError` | A driver value **repeated outside its own defined interval** (Kp/ap3 beyond its 3-hour interval); one **shifted to a neighbouring hour** (Dst off its own hourly averaging interval). **Added 2026-08-23** — FR-P1-04-17's raises, which this table omitted while the artifacts wrongly assigned TA-36 to `external-products`. R-58's **third** limb (no interpolation) is a **static source check, not a raise**, and appears in no row here for that reason; see `business-rules.md` R-76a |
 | `LockedTestError` | `g05_signature` is absent or fails verification |
-| `PartitionError` | A target timestamp belongs to zero or to more than one partition; a row's month or year disagrees with its partition; a freeze precondition's timestamp does not precede the final refit |
+| `PartitionError` | A 2022 month carrying **two evaluation roles or none**; a row's month or year disagrees with its partition; a freeze precondition's timestamp does not precede the final refit |
+| | *(Both rows corrected 2026-08-24, iteration-5 finding 5.* `LeakageError` **previously read** *"any row's timestamp outside the transform's own carried scope"* — the **pure-containment** formulation § 4's own boxes show is an upper bound admitting the leaking direction, and which left the purpose-scoped set element 4 defines out of the row entirely. `PartitionError` **previously read** *"belongs to zero or to more than one **partition**"* — the reading § 6's own box says would *"fail on ordinary 2022 data"*, since every Jan–Nov timestamp lies in two or more nested training ranges, so as written it fired on an ordinary 15 February row and contradicted R-80's *"control that must not fire"*. **This section is where an implementer reads raise conditions**, which is why both were the rows most likely to be built from.*) |
 | `ImportBoundaryError` | Raised **through** `external-products` R-56's scan; and here when the permitted-importer set does not have exactly its two members |
 
 Catching `foundation`'s base is what lets the stage entry contract write the `aborted`
@@ -446,7 +492,7 @@ TA-36.
 
 - **[assumption]** Rule IDs continue the single sequence, so `business-rules.md` opens at **R-74**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 7 disagree. See `business-logic-model.md` § The `unit-of-work.md` sweep — **ten of twelve sections agree**, and the two that do not are exactly the two `CR-2026-08-22-LEAKAGE-TA` touched.
-- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify — **still true, and still owes nothing** (`Transform`'s internals and `ApplyPurpose`'s definition included). But **two boundary calls are amended** — `apply_transforms` gains `purpose`, `build_features` gains `transform` — so the running total is **7 across 4 units**, derived in `business-logic-model.md` § Amendments owed. **Corrected 2026-08-23** from *"no amendment owed; the total stays five across three units"*.
+- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify — **still true, and still owes nothing** (`Transform`'s internals and `ApplyPurpose`'s definition included). But **three boundary changes are owed** — `apply_transforms` gains a required `purpose`; `build_features` gains `transform` **and** `purpose`, which travel together; and every emitted feature artifact gains the `fold_id`/`purpose`/`transform_id` stamp refused at `06`/`07` — so the running total is **8 across 5 units**, derived in `business-logic-model.md` § Amendments owed. **Corrected 2026-08-23** from *"no amendment owed; the total stays five across three units"*, and **again 2026-08-24**: the entry named one parameter on `build_features` where the amendment adds **two**, and FU-4 = D then added the stamp.
 - **[assumption]** `tests/test_locked_test_guard.py` is this unit's, per § 7.
 - **Open — BLK-04 is an EXIT condition** on this unit and four downstream units. **Approving this design is not the contract's approval.**
 - **Open — TA-33/34/35/36 all `Pending`.**

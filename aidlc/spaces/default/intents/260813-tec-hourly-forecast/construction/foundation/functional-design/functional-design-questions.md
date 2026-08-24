@@ -733,7 +733,7 @@ read run history (R-08); the **content hash is authoritative** and the release l
 explicitly not (R-11); and on integrity failure, report honestly even when reporting
 itself fails (R-10).
 
-### The three amendments stay PENDING and unapproved
+### The three amendments stay PENDING and unapproved *(as written 2026-08-24, before the rulings — SUPERSEDED: A declined, B and C approved and executed the same day)*
 
 The assessment confirmed each is correctly classified into its own authority class —
 conflating them would overstate two of the three:
@@ -837,5 +837,46 @@ Does this all look correct before the stage proceeds?
    > **Impact**: No receipt is recorded. Tell me what to change — including revisiting any of the three rulings or the change record — and I re-present first.
 
 > **💡 Recommendation**: **Looks correct** — the three amendments are resolved, the two superseded literals are swept and re-derived, and the artifacts now agree with the contracts they cite.
+
+*(Answered `Looks correct`, 2026-08-24T12:36:34Z. That receipt is superseded by the
+addendum re-confirmation below, which was required because this file changed after it.
+The live answer tag for this section is the blank one at its end.)*
+
+### Re-confirmation — the three sites the amendment sweep missed
+
+**Why this is being re-asked.** Three sites asserting a **superseded amendment status**
+were found while verifying two execution defects raised at `governance-guards`'s sixth
+summary confirmation. You approved the annotate-in-place exception on 2026-08-24. One of
+the three corrections lands in **this file**, which changes it after the receipt above and
+so requires a fresh response. They are recorded as sites **9, 10 and 11** in
+`governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md` § Addendum.
+
+| # | Site | What was stale | Applied |
+|---|---|---|---|
+| 9 | `business-logic-model.md` § Review (dated 2026-08-22) | Three statements: § Regression checks' *"Amendments A/B/C nowhere treated as approved"* and *"No determinism claimed as measured … while Amendment B is pending"*, and § Implementability's *"`DeterminismRecord`'s three pending fields and the release ledger await Amendments B and C"* | One dated annotation box at the head of § Review. **The READY verdict is untouched, no finding withdrawn, no reviewer sentence rewritten** — the box names the three statements and their current state; the reviewer's text stands as the dated record of what that reviewer saw |
+| 10 | `domain-entities.md` § 5, REQ-ENG-10 acceptance-status box | *"A row is **sought** under Amendment A (Vision §15.2), not approved"* — reads the gap as provisional when **A was declined**, i.e. permanent. §§ 9, Coverage and Assumptions in the same file already read correctly, so this was a missed site rather than a disagreement | Rewritten to *"No row is sought … untested by design, permanently rather than pending"*, superseded wording preserved |
+| 11 | **this file**, the § heading above at line 736 | *"### The three amendments stay PENDING and unapproved"* — its body sits inside a section already marked superseded, but the **heading** asserted the false claim unqualified | Heading qualified in place. Same *"heading still asserting the superseded claim while its body said otherwise"* class the change record's § Sweep result already reported once |
+
+**Why the original sweep missed all three.** It was keyed to two literals —
+`DeterminismRecord` *"six fields"* and `services.md` *"two artifacts"*. None of the three
+contains either: 9 and 11 assert **amendment status** rather than a count, and 10 turns on
+the single word *"sought"*. This is the failure mode `project.md` § Way of Working already
+names — sweep the **status claims** an amended figure supported, not only the superseded
+numeral.
+
+**What did not change.** **No count moved** — untested stays 36, this unit's stays 2 of 16,
+its acceptance rows stay 7, TE §19 stays at 36 rows. No rule, entity, workflow or contract
+was edited. No scientific value was touched. The three rulings themselves are unchanged: A
+declined permanently, B and C approved and executed. **G-09 remains unsigned.**
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: A fresh confirmation receipt is recorded for `foundation` and the stage continues to the next unit. Sites 9, 10 and 11 stand as applied, with every superseded wording preserved in place.
+
+- Request changes
+   > **Impact**: No receipt is recorded. Tell me what to change — including reverting any of the three annotations — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — all three corrections execute rulings you had already approved, none decides anything new, no count or scientific value moved, and each preserves its superseded wording rather than erasing it.
 
 [Answer]: Looks correct

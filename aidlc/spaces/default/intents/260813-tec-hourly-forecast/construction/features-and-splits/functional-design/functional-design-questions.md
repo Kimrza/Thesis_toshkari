@@ -499,6 +499,112 @@ X. Other (please specify)
 
 ---
 
+## FU-4, FU-5, FU-6 — the three iteration-5 findings that need a decision
+
+Five adversarial iterations have run on this unit. Iteration 5 leaves **2 Criticals and 3
+Majors** standing, and states the consequence plainly: *"BLK-04's contract remains one whose
+closing half a developer would have to invent."* Findings **4, 5, 6 and 7** are mechanical —
+a signature block that did not follow its own amendment, two raise-table rows still stating
+superseded readings, one sentence duplicated as both contract and refutation, and three
+Assumptions entries naming one parameter where the amendment adds two. Those are applied
+during regeneration and are **not** put to you here.
+
+The three below cannot be applied without a decision, because each picks between builds with
+different prerequisites — and **FU-5 has a scientific consequence** on the locked December
+test.
+
+**None of the three decides a scientific constant.** FU-5 decides which rows a call may read,
+which is a mechanism question; its scientific consequence is that one option **silently drops
+1 December from the G-06 locked-test prediction**, and that is why it is being asked rather
+than chosen.
+
+### FU-4 — How is the train-only-transform pairing made observable? *(iteration-5 finding 1, Critical)*
+
+The pairing control is the **sole stated closure of the 10-cell hole**, which is the surviving
+half of **BLK-04**'s leak, inherited by four downstream units. It reads that a scored frame
+*"was **obtained from a call** with `transform = T_k` and `purpose=evaluate`."* Traced against
+`services.md` § The nine stage scripts, that call and that scoring never share a process:
+`05_build_features_and_splits.py` **writes** the feature matrix, sequence tensor, folds and
+masks; `06_train_and_predict.py` and `07_evaluate_and_report.py` **read** them from artifacts.
+So `apply_transforms` is called only in `05`, no scoring site calls it, **nothing stamps the
+emitted artifacts with the fold or the purpose**, and the predicate has nothing to test.
+
+A) **Provenance stamp, consumer-side assertion, manifest-based test**
+   > **Impact**: `domain-entities.md` § 5 gains `fold_id`, `purpose` and the fitted transform's identity as recorded fields on the emitted feature artifacts; `06`/`07` refuse a frame whose stamp is not `(fold k, evaluate)` when scoring fold *k*'s validation month; `tests/test_train_only_transforms.py` is declared **manifest-based** and asserts that refusal with R-74's two controls. The residual restates as *"an unstamped or hand-assembled frame"*. Closes the observability gap at the point the design can actually see it. **Costs an amendment**: the stamp crosses into `06`/`07`, so § Amendments owed re-derives from 7-across-4 to **8 across 5**.
+
+B) **Static analysis of the nine stage scripts**
+   > **Impact**: `test_train_only_transforms.py` parses the nine scripts and asserts no scoring path consumes a frame produced under a non-`evaluate` purpose. No stamp, no amendment, no runtime cost. But it can only see the enumerated scripts — the residual stays *"a caller outside the nine"*, which iteration 5 showed is the **wrong description of the gap**, since the real one is the ordinary `05`→`06` handoff **inside** them. Static analysis of a file-mediated handoff cannot follow the artifact.
+
+C) **Monkeypatch-and-replay runtime check**
+   > **Impact**: the test replaces `apply_transforms`, replays the pipeline and records every `(fold, purpose)` actually used. No production change and no amendment. But it verifies a **replay**, not the artifacts a real run emits, and it needs the whole pipeline runnable inside the test — a heavier prerequisite than the fixture suite currently carries, and one nothing in §12's `tests/` tree anticipates.
+
+D) **Stamp and consumer refusal as in A, and declare it a boundary change**
+   > **Impact**: everything in A, plus the amendment is **declared explicitly** and § Amendments owed is re-derived in all three artifacts rather than left to a later sweep to notice. Slightly more work now; removes the risk that a downstream unit meets a stamped artifact its own contract never mentioned. This is the reviewer's own recommendation, taken with its stated conditional.
+
+X) **Other (please specify)**
+   > **Impact**: Depends on your specific choice. Any option must name a mechanism that can observe the pairing **across a file handoff**, since that is what defeated the current wording.
+
+> **💡 Recommendation**: **Option D** — A and D are the only two that can observe the actual gap, and D differs only in declaring the amendment instead of deferring it. `project.md` § Way of Working requires the inputs a gating condition depends on to be specified in the same stage that records the condition; BLK-04 is an **exit condition on this stage and on four downstream units**, so leaving its closure to a mechanism named later is exactly the failure that rule names. The honest cost: the amendment total moves to 8 across 5, and `06`/`07` belong to units whose design has not run yet, so this stage is writing a requirement into their inbox.
+
+[Answer]: D
+
+### FU-5 — What rows may an `evaluate` call read, given the 24-step causal window? *(iteration-5 finding 2, Critical)*
+
+`component-methods.md:380-393` approves `build_features(target, *, drivers, registry, matrix,
+fold, snapshot)` — **no period, month or row-range parameter**, and `fold` is the same value in
+both calls. Yet the resolution requires a `train` call over the training partition and an
+`evaluate` call over the validation month — **disjoint months** the call cannot express. And
+this unit's own contract makes the collision concrete: `vtec_seq_24` is a 24-step causal
+sequence and `vtec_lag_24h` an exact 24-hour lag, so the first window of any validation month
+needs the **preceding day's rows** — which are lawful inputs at the forecast origin.
+
+A) **`build_features` derives its row set from `fold` + `purpose`; history read but not emitted**
+   > **Impact**: the accepted set for `evaluate` is *"fold k's validation month **plus the causal history the frozen 24-hour window requires**, which may not be emitted as rows."* Element 4 tests the **assembled pre-window frame**, stated explicitly. No `LeakageError` on lawful history, no lost rows, and **December keeps 1 December**. Requires the artifacts to state the derivation rule against the approved signature, plus a control that emitted rows never exceed the validation month.
+
+B) **Caller slices the inputs; first 24 hours of each validation month excluded and counted**
+   > **Impact**: mechanically simpler and needs no derivation rule. But the first ~24 hours of **every** validation month produce incomplete `vtec_seq_24` windows that W-2 requires excluded — **including 1 December**, so the **G-06 locked-test prediction loses its first day**. The loss would be counted and stated at G-06 rather than silent, but it is still a permanent reduction of the locked test, and § 6's table gives December no embargo row to absorb it.
+
+C) **Caller slices, including a leading history buffer, and element 4 tests the emitted rows only**
+   > **Impact**: keeps the approved signature untouched and keeps 1 December. But it moves the row-selection decision **outside** this unit into callers this stage does not own, and element 4 then never sees the pre-window frame — the exact ambiguity iteration 5 named as *"the design never says which frame element 4 tests"*, left open rather than closed.
+
+D) **Option A, plus the December consequence stated where G-06 is described**
+   > **Impact**: A's mechanism, and the artifacts additionally record — at the point G-06 is described — that the locked-test prediction covers the **full** December and why no first-day loss occurs. Costs a few lines; makes the scientific consequence checkable at the gate instead of inferable from a mechanism three sections away.
+
+X) **Other (please specify)**
+   > **Impact**: Depends on your specific choice. Any option must say **which frame element 4 tests**, since the two readings differ precisely on this case.
+
+> **💡 Recommendation**: **Option D** — the history rows are lawful at the forecast origin, so excluding them buys nothing scientific and costs the first day of every validation month, December included. Option B's loss lands on the **locked test**, the one artifact the project treats as irreplaceable, and `project.md` bars changing the frozen claim boundary. D is A with the consequence written where a gate reader will meet it. The honest cost: A and D both require `build_features` to derive rows from `fold` + `purpose`, which is a **behavioural** specification of an approved signature — legitimate under `component-methods.md` § Depth as an intra-package shape, but it should be declared, not slipped in.
+
+[Answer]: D
+
+### FU-6 — How is the third, uncounted call handled? *(iteration-5 finding 3, Major)*
+
+The resolution's own sequence is **three** calls per fold, not two:
+`build_features(transform=None, purpose=None)` produces the features `fit_transforms` is
+fitted on; then a `train` call; then an `evaluate` call. The artifacts describe only *"two
+calls over disjoint months"*. The fitting call covers the **same** months as the `train` call,
+so it is neither of the two — and it emits **both** representations **untransformed**, with
+nothing forbidding their consumption. Compounded by `05` writing to artifacts: three
+`(matrix, tensor)` pairs per partition reach disk and nothing distinguishes them.
+
+A) **State three calls; fitting-call outputs are a fitting input only, never emitted, persisted or consumed, with a negative control**
+   > **Impact**: the call sequence, the artifact inventory and the count agree. The negative control — an untransformed tensor reaching M-06 **fails** — matches this project's mandated negative-control practice. Requires restating the sequence in W-4, R-81 and § 5.
+
+B) **Keep the two-call description; add the prohibition only**
+   > **Impact**: less editing, and the hazard is closed. But the count stays wrong in three artifacts, and the next reviewer re-raises the same discrepancy — this is the fifth consecutive iteration in which a remedy was stated as an outcome rather than a mechanism.
+
+C) **Fold the fitting call into `fit_transforms` so no third `build_features` call exists**
+   > **Impact**: cleanest conceptually — one call produces the fitting frame internally and nothing untransformed ever reaches disk. But `fit_transforms`' approved signature does not take the inputs `build_features` assembles, so this **amends a boundary call** and raises the amendment total again.
+
+X) **Other (please specify)**
+   > **Impact**: Depends on your specific choice. Any option must make the artifact inventory match the call count, since `05` persists what each call emits.
+
+> **💡 Recommendation**: **Option A** — it closes the hazard *and* fixes the count, without touching an approved signature. C is tempting but pays an amendment for a problem A solves in prose plus one control; B leaves a known-wrong count in three artifacts, which this unit's own rule against restated contracts drifting already warns about.
+
+[Answer]: A
+
+---
+
 ## Consolidated Summary Confirmation
 
 Questions 1–9 are answered above as the recommended option in each case — **D throughout** —
@@ -574,5 +680,83 @@ Does this all look correct before I generate the artifact?
 
 - Looks correct
 - Request changes
+
+*(Answered `Looks correct`, 2026-08-23; that receipt belongs to the previous attempt, and it
+predates FU-4, FU-5 and FU-6. The live answer tag for this section is the blank one at its
+end.)*
+
+### Re-confirmation, 2026-08-24 — new stage attempt, and the three iteration-5 decisions
+
+**Why this is being re-asked.** Two reasons, and the second is the substantive one.
+
+1. Inception closed and Construction opened at **2026-08-24T11:46:26Z**, starting a fresh
+   `functional-design` attempt and resetting the receipt floor for every unit. Both
+   `foundation` passes of that day (`governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`)
+   were checked against this unit and touch nothing it reads: it consumes
+   `component-methods.md` § Depth plus the `fit_transforms`/`build_features`/`apply_transforms`
+   blocks, `services.md` § The nine stage scripts, and `unit-of-work.md` § 7 — none of them
+   the amended `DeterminismRecord`, § Run record and registry, or § 1. Amendment A was
+   declined, so **no count moved**.
+2. **This unit's § Review verdict is `NOT-READY`** — five adversarial iterations, the last on
+   2026-08-23, leaving **2 Criticals and 3 Majors**. Unlike every sibling, this unit is not
+   being carried forward as-is. **FU-4, FU-5 and FU-6 above are new questions**, answered
+   **D, D, A**, and they change what the artifacts must say.
+
+### What the three answers settle
+
+| | Decision | What the artifacts must now state |
+|---|---|---|
+| **FU-4 = D** | Provenance stamp **and** the amendment declared | `domain-entities.md` § 5 gains `fold_id`, `purpose` and the fitted transform's identity as recorded fields on the emitted feature artifacts; `06`/`07` **refuse** a frame whose stamp is not `(fold k, evaluate)` when scoring fold *k*'s validation month; `tests/test_train_only_transforms.py` is declared **manifest-based**; the residual restates as *"an unstamped or hand-assembled frame"*, **not** *"a caller outside the nine scripts"*. **§ Amendments owed re-derives from 7 across 4 to 8 across 5** — declared here, not left to a later sweep |
+| **FU-5 = D** | Rows derived from `fold` + `purpose`; causal history read but never emitted; December consequence stated at G-06 | `evaluate`'s accepted set is *"fold k's validation month **plus the causal history the frozen 24-hour window requires**, which may not be emitted as rows"*; **element 4 tests the assembled pre-window frame**, stated explicitly; a control asserts emitted rows never exceed the validation month; and the point where **G-06** is described records that the locked-test prediction covers the **full** December with no first-day loss |
+| **FU-6 = A** | Three calls per fold, fitting output never emitted | W-4, R-81 and § 5 restate the sequence as **three** calls — `transform=None, purpose=None` to produce the fitting frame, then `train`, then `evaluate`; the fitting call's outputs are a **fitting input only**, never emitted, persisted or consumed; negative control: an untransformed tensor reaching **M-06 fails** |
+
+### What is applied without asking
+
+Findings **4, 5, 6 and 7** are mechanical corrections with no decision in them:
+
+- **W-2's signature block** (`business-logic-model.md:97-101`) becomes
+  `INPUT target, drivers, registry, matrix, fold, snapshot, transform, purpose` with the
+  pairing requirement noted, and `RAISES LeakageError, AlignmentError`.
+- **`domain-entities.md` § 10** — `LeakageError` restated as *"a frame leaving the set the
+  declared `purpose` permits for that transform's fold, or an empty or timestamp-less frame"*
+  (the pure-containment formulation is an upper bound that admits the leaking direction);
+  `PartitionError` restated over **evaluation role** — a 2022 month with two roles or none —
+  since the literal *"more than one partition"* reading fires on an ordinary 15 February row.
+- **The duplicated sentence** at `business-logic-model.md:327-330` and
+  `business-rules.md:165-168` gets the rewrite already applied at `domain-entities.md:237-239`.
+- **The three Assumptions entries** read *"`build_features` gains `transform` **and**
+  `purpose`, which travel together"*.
+
+Iteration-5 findings **9, 10 and 11** were not re-raised as blocking and are left as they
+stand, reported here so they are not mistaken for closed.
+
+### What still stands, unchanged by any of this
+
+**BLK-04 remains an exit condition** on this stage and on the four downstream units that
+inherit the fit — FU-4 and FU-6 supply the mechanism its contract was missing, but **BLK-04
+is not closed by this stage** and no implementation may proceed while it stands. NFR-LEAK-01's
+evidence is still owed to the **Supervisor at G-04 and G-05**. TA-33/34/35/36 all `Pending` —
+**a row is not a result**. `unit-of-work.md` § 7 stale, reported not edited. WS-13's departure
+from TE §16 unresolved, with no reading adopted. FR-P1-04-10 with no acceptance row. The final
+refit's representation. An unresolved station registry blocking `station_lat` and excluding
+`lst_sin`/`lst_cos`, consumed not decided here. Rule numbering assumed to continue at **R-74**.
+**G-09 unsigned.** No answer above decides a scientific constant, and none adopts a reading on
+a supervisor-owned value.
+
+**One consequence worth naming plainly.** FU-4 = D writes a requirement into the inbox of
+`06`/`07` — units whose own design has not run yet. That is deliberate and declared, not a
+side effect: BLK-04 is an exit condition on those units too, and `project.md` § Way of Working
+requires the inputs a gating condition depends on to be specified in the stage that records
+the condition.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `features-and-splits` and the three artifacts are **regenerated** — FU-4/5/6 mechanised, findings 4–7 applied, § Amendments owed re-derived to 8 across 5 — then put through a fresh adversarial reviewer pass. BLK-04 stays open.
+
+- Request changes
+   > **Impact**: No receipt, nothing regenerated. Use this to revisit FU-4, FU-5 or FU-6, or to challenge the reading of any finding above — including the four being applied without a decision.
+
+> **💡 Recommendation**: **Looks correct** — the three answers supply mechanisms where five iterations found outcomes stated as mechanisms, FU-5 = D keeps 1 December in the locked test, and the four mechanical findings are corrections to what the artifacts already meant rather than changes to what they decide.
 
 [Answer]: Looks correct

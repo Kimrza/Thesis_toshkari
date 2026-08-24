@@ -493,5 +493,52 @@ nowhere in scope, which defeated the closed-set claim as first stated. The artif
 require the QC operations enumerated as a named list in `configs/data.yaml`, decline to
 invent that list's membership, and state the check as **"specified but not yet
 satisfiable"** until the list is fixed. **Q7's answer letter (D) is unchanged.**
+*(Answered `Looks correct`, 2026-08-23; that receipt belongs to the previous attempt. The
+live answer tag for this section is the blank one at its end.)*
+
+### Re-confirmation, 2026-08-24 (sixth) — new stage attempt after the Inception close
+
+**Why this is being re-asked.** Inception closed and Construction opened at
+**2026-08-24T11:46:26Z**, starting a fresh `functional-design` attempt and resetting the
+receipt floor for every unit.
+
+**What changed upstream, and why it leaves this unit's answers untouched.** Two passes ran
+on `foundation`, both in `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`:
+the **amendment pass** (A **declined**; B and C **approved and executed**) and the **sites
+9–11 addendum** (three superseded-status statements annotated in place inside `foundation`'s
+own files).
+
+| What the passes touched | Why this unit is unaffected |
+|---|---|
+| `component-methods.md` — `DeterminismRecord` **6 → 9** fields (B) | This unit reads `component-methods.md` **§ Depth** only — the cross-package-boundary-calls-only policy that makes intra-package shapes **this stage's** to specify. It consumes no `DeterminismRecord` field |
+| `services.md` **§ Run record and registry** (C) | This unit reads **§ The nine stage scripts** and **§ Stage entry contract** |
+| `unit-of-work.md` **§ 1** `Owns` (C) | This unit reads **§ 5**, including **BLK-05**'s four-limb status table |
+| The sites 9–11 annotations | Inside `foundation`'s own artifacts; they annotate a superseded **status**, changing no contract, rule or entity |
+| Amendment **A** — **declined** | **No count moved.** This unit's 6 requirements and **1** with no acceptance row (FR-P1-03-5) stand; it still owns TA-19 and supports TA-15 |
+
+**Worth stating, because a past redo turned on exactly this file's cross-references.** The
+§ Depth policy is the one upstream clause this unit leans on hardest, and it is **not** what
+Amendment B changed — B added fields to a `foundation` entity, leaving the depth policy
+untouched. The misreading of § Depth that prompted an earlier stage-wide redo is a separate,
+already-closed matter.
+
+**Its other upstreams, also unchanged.** `inventory-and-registry` **R-45** (registry) and
+**R-49** (prepared-product schema), and `governance-guards` **R-23** and **R-24** (the
+phase-boundary limbs this unit must not violate) — all re-confirmed or carried unchanged.
+
+**What still stands.** Every answer, including **Q7=D** with *"documented QC"* enumerated as
+a named list in `configs/data.yaml` and the check stated as **"specified but not yet
+satisfiable"** until that list is fixed. **BLK-05** open; **FR-P1-03-5** with no acceptance
+row; **G-09 unsigned**. The § Review verdict of **READY** belongs to the previous attempt.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `target-standardization` under this attempt and its three artifacts are re-saved. No answer, contract, count or scientific value changes.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the one upstream clause this unit depends on most, `component-methods.md` § Depth, is not what Amendment B changed, and every other amended section is one this unit does not read.
 
 [Answer]: Looks correct

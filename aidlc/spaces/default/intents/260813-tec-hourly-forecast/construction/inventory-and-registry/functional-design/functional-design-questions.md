@@ -520,6 +520,58 @@ A redo jump aimed at `target-standardization` reset the receipt floor for every 
 authority question. This unit's rules run **R-44…R-53** and it has **no R-20**; the rule
 carrying that question is **`governance-guards` R-20**. This unit's own **R-49** carries a
 related but distinct point — that D-24's protected set is not reopened. **Nothing in this
-unit changed**; the misreference was a sibling's.
+unit changed**; the misreference was a sibling's. *(Answered `Looks correct`, 2026-08-23;
+that receipt belongs to the previous attempt. The live answer tag for this section is the
+blank one at its end.)*
+
+### Re-confirmation, 2026-08-24 (sixth) — new stage attempt after the Inception close
+
+**Why this is being re-asked.** Inception closed and Construction opened at
+**2026-08-24T11:46:26Z**, starting a fresh `functional-design` attempt and resetting the
+receipt floor for every unit. `foundation`, `governance-guards` and `acquisition` have
+re-confirmed under this attempt already.
+
+**What changed upstream, and why it leaves this unit's answers untouched.** Two passes ran
+on `foundation`, both in `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`:
+the **amendment pass** (A **declined**; B and C **approved and executed**) and the **sites
+9–11 addendum** (three statements still asserting a superseded amendment status, annotated
+in place inside `foundation`'s own files).
+
+| What the passes touched | Why this unit is unaffected |
+|---|---|
+| `component-methods.md` — `DeterminismRecord` **6 → 9** fields (B) | This unit reads `component-methods.md` for `registry.py`'s `Station`, `load_registry` and `assert_registry_resolved`, and for `release.py`'s `write_release`. **`DeterminismRecord` is not among them** |
+| `services.md` **§ Run record and registry** — two → three release artifacts (C) | This unit reads **§ The nine stage scripts** and **§ Stage entry contract**. Not the amended section |
+| `unit-of-work.md` **§ 1** `Owns` — ledger named (C) | This unit reads **§ 4**. Not the amended section |
+| The sites 9–11 annotations | All three are inside `foundation`'s own artifacts and annotate a superseded **status**; no contract, rule or entity changed |
+| Amendment **A** — **declined** | **No count moved.** This unit's 7 requirements and **2** with no acceptance row stand; it still owns WS-01, TA-04, TA-25 and supports WS-18, TA-18, TA-32 |
+
+**One adjacency named rather than assumed away.** `write_release` sits next to Amendment C
+— C added the release-history ledger and `foundation`'s W-7 label-allocation step. Checked
+directly rather than inferred: `write_release`'s signature in `component-methods.md` is
+**unchanged**, and the clause this unit actually depends on — that `source_files`' six items
+are validated against `inventory.py` — is intact. **R-11 is likewise unchanged**: the
+content hash stays authoritative and the label is a citation device.
+
+**Its other upstreams, also unchanged.** `acquisition` **R-32** and **R-33** (the
+named-accessor routing this unit's December audit must use) and `governance-guards`
+**R-25**, **R-26**, **R-28**, all re-confirmed earlier today with no rule changed.
+
+**What still stands.** Every answer, and everything carried to the gate: **FR-P1-02-8's
+replacement acceptance row** open after TA-29's withdrawal; **D-24's protected set not
+reopened**; **G-09 unsigned**, so nothing here authorises creating `src/data/inventory.py`,
+`src/data/registry.py`, `scripts/01_inventory_and_registry.py` or
+`tests/test_station_registry.py`. The § Review verdict of **READY** — with its one Major
+finding about this file's own § Assumptions and § Consolidated Summary — belongs to the
+previous attempt.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `inventory-and-registry` under this attempt and its three artifacts are re-saved. No answer, contract, count or scientific value changes.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — every amended section is one this unit does not read, the `write_release` adjacency was checked directly and holds, and Amendment A's decline moved no count.
 
 [Answer]: Looks correct

@@ -2,6 +2,14 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Addendum re-confirmed 2026-08-24.** Sites **9–11** of
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md` § Addendum corrected three
+> statements elsewhere in this unit that still asserted a superseded amendment status.
+> **None of them is in this file** — its acceptance-status table and its *"This label is now
+> permanent, 2026-08-24"* box already read correctly, which is what made the three missed
+> sites visible by comparison. **No rule of this unit changed**, no count moved, and no
+> scientific value was touched.
+
 > **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
 > cross-references in `target-standardization`'s question file. **No rule of this unit
 > changed.**

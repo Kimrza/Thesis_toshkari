@@ -2,6 +2,14 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Addendum re-confirmed 2026-08-24.** Site **10** of
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md` § Addendum lands in this
+> file: § 5's REQ-ENG-10 acceptance-status box read *"a row is **sought** under Amendment A
+> … not approved"*, which frames the gap as provisional when **A was declined** — permanent.
+> §§ 9, Coverage and Assumptions already read correctly, so this was a **missed site**, not
+> a disagreement. Superseded wording preserved in place. **No count moved**; no entity,
+> attribute or scientific value changed.
+
 > **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
 > cross-references in `target-standardization`'s question file. **No content of this unit
 > changed.**
@@ -264,8 +272,12 @@ forward.
 > row.** TA-03 was checked against all seven bullets and covers **none fully** —
 > two partially, and both partials are install-time rather than per-run, which is
 > the entire substance of the requirement. `requirements.md` records the same
-> conclusion in REQ-ENG-10's own test column. A row is sought under **Amendment A
-> (Vision §15.2), not approved.** Nothing here claims acceptance coverage.
+> conclusion in REQ-ENG-10's own test column. **No row is sought: Amendment A (Vision
+> §15.2) was raised and DECLINED 2026-08-24**, so REQ-ENG-10 is untested **by design,
+> permanently rather than pending**. Nothing here claims acceptance coverage.
+> *(Superseded status: "A row is sought under **Amendment A (Vision §15.2), not
+> approved.**" — a site the 2026-08-24 sweep missed, corrected 2026-08-24 as execution
+> of the same declined-A disposition already carried at § 9, § Coverage and § Assumptions.)*
 
 ## 6. `RegistryEvent` — append-only rows
 

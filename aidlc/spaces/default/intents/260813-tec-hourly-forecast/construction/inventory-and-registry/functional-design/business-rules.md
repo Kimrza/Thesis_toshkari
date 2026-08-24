@@ -3,6 +3,13 @@
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Depends on**
 `acquisition`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** (Construction opened
+> 2026-08-24T11:46:26Z, resetting every unit's receipt floor). **No rule of this unit
+> changed.** Both `foundation` passes of that day touch nothing this unit reads;
+> `write_release`'s signature and its `source_files`/`inventory.py` validation clause were
+> checked directly and hold; Amendment A was declined, so **no count moved**. **The READY
+> verdict in § Review belongs to the previous attempt.**
+
 > **Re-established a fifth time 2026-08-23.** **No rule of this unit changed.** The redo
 > corrected a sibling's citations of "`inventory-and-registry` R-20": **the rules below run
 > R-44…R-53 and there is no R-20 here.** The rule carrying the open authority question is

@@ -3,6 +3,18 @@
 **Unit** `acquisition` (Bolt 3) · **Kind** `library` · **Depends on** `foundation`,
 `governance-guards`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** — Inception closed
+> and Construction opened at 2026-08-24T11:46:26Z, resetting the receipt floor for every
+> unit. **No content of this unit changed.** Both `foundation` passes of that day (the
+> amendment pass and the sites 9–11 addendum, in
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`) were checked against this
+> unit and touch nothing it reads: `DeterminismRecord` is not among the
+> `component-methods.md` contracts consumed here, no `release.py` signature was amended,
+> the amended `services.md` § Run record and registry and `unit-of-work.md` § 1 are not the
+> sections read here, and Amendment A was declined so **no count moved**. Its
+> `governance-guards` upstream — **R-25** through **R-28** — re-confirmed the same day with
+> no rule changed. **The READY verdict in § Review belongs to the previous attempt.**
+
 > **Re-established a fifth time 2026-08-23**, after a redo aimed at four stale
 > cross-references in `target-standardization`'s question file. **No content of this unit
 > changed.**

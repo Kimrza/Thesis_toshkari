@@ -3,6 +3,19 @@
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Depends on**
 `acquisition`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** — Inception closed
+> and Construction opened at 2026-08-24T11:46:26Z, resetting the receipt floor for every
+> unit. **No content of this unit changed.** Both `foundation` passes of that day (the
+> amendment pass and the sites 9–11 addendum, in
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`) touch nothing this unit
+> reads: `DeterminismRecord` is not among the `component-methods.md` contracts consumed
+> here, and the amended `services.md` § Run record and registry and `unit-of-work.md` § 1
+> are not the sections read here (**§ The nine stage scripts**, **§ Stage entry contract**
+> and **§ 4** are). **`write_release` was checked directly rather than inferred**: its
+> signature is unchanged and the `source_files`-validated-against-`inventory.py` clause this
+> unit depends on is intact. Amendment A was declined, so **no count moved**. **The READY
+> verdict in § Review belongs to the previous attempt.**
+
 > **Re-established a fifth time 2026-08-23**, after a redo correcting a sibling's citations.
 > **No content of this unit changed** — but the correction concerned this unit's numbering:
 > `target-standardization` had cited "`inventory-and-registry` R-20" for an open authority

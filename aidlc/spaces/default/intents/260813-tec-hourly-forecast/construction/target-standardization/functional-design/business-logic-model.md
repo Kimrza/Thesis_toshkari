@@ -3,6 +3,17 @@
 **Unit** `target-standardization` (Bolt 6) · **Kind** `library` · **Depends on**
 `inventory-and-registry`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** — Inception closed
+> and Construction opened at 2026-08-24T11:46:26Z, resetting the receipt floor for every
+> unit. **No content of this unit changed.** Both `foundation` passes of that day (the
+> amendment pass and the sites 9–11 addendum, in
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`) touch nothing this unit
+> reads. **Stated because this unit leans on it hardest:** `component-methods.md` **§ Depth**
+> — the cross-package-boundary-calls-only policy that makes intra-package shapes this
+> stage's to specify — is **not** what Amendment B changed; B added fields to a `foundation`
+> entity. Amendment A was declined, so **no count moved**. **The READY verdict in § Review
+> belongs to the previous attempt.**
+
 > **Corrected and re-established 2026-08-23, after two adversarial passes.** Iteration 1
 > found a **Critical** — nine citations of "`inventory-and-registry` R-20", a unit whose
 > rules run R-44…R-53 and which has no R-20 — and a **Major**: **"documented QC"**, one of

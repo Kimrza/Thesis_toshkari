@@ -3,6 +3,13 @@
 **Unit** `target-standardization` (Bolt 6) · **Kind** `library` · **Depends on**
 `inventory-and-registry`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** (Construction opened
+> 2026-08-24T11:46:26Z, resetting every unit's receipt floor). **No content of this unit
+> changed.** Both `foundation` passes of that day touch nothing this unit reads — in
+> particular `component-methods.md` **§ Depth**, the clause this unit depends on most, is not
+> what Amendment B changed. Amendment A was declined, so **no count moved**. **The READY
+> verdict in § Review belongs to the previous attempt.**
+
 > **Corrected and re-established 2026-08-23**, after two adversarial passes: the R-20
 > citations repointed to **`governance-guards`**, and **"documented QC"** disclosed as
 > undefined upstream, with the closed-set check stated as *"specified but not yet

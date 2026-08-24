@@ -2,6 +2,13 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> **Addendum re-confirmed 2026-08-24.** Site **9** of
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md` § Addendum lands in this
+> file: a dated annotation box at the head of § Review, naming three statements the
+> amendment sweep left asserting a superseded status. **The READY verdict is untouched, no
+> finding is withdrawn, and no reviewer sentence is rewritten.** No rule, entity, workflow
+> or contract changed; **no count moved**; no scientific value was touched.
+
 > **Re-established five times on 2026-08-23** — the fifth after a redo aimed at four stale
 > cross-references in `target-standardization`'s question file. **No content of this unit
 > changed on that occasion either.**
@@ -524,6 +531,31 @@ findings were confined to traceability commentary.
 **Reviewer:** aidlc-architecture-reviewer-agent
 **Date:** 2026-08-22T14:56:57Z
 **Iteration:** 2 of the fresh 2-iteration budget (final)
+
+> ### ⚠ Annotation, 2026-08-24 — three statements below are superseded
+>
+> **Authority:** project decision owner, approving an **annotate-in-place** exception on
+> 2026-08-24 after the stale text was raised at `governance-guards`'s sixth summary
+> confirmation. Recorded under the same Rec 7 precedent that governs the amendment pass in
+> `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`.
+>
+> **What changed after this verdict was written.** Amendments **B** and **C** were
+> **APPROVED and executed on 2026-08-24**; Amendment **A** was **DECLINED**. This verdict
+> is dated 2026-08-22, when all three were still pending, so it describes the state the
+> reviewer actually saw. **The verdict itself — READY — is not disturbed, no finding is
+> withdrawn, and no reviewer sentence is rewritten.** Three statements are annotated as
+> superseded, and the original wording is preserved verbatim in place:
+>
+> | Where | What it says | Current state |
+> |---|---|---|
+> | § Regression checks, *"Amendments A/B/C nowhere treated as approved"* | every occurrence carries PENDING / NOT approved | **Superseded.** B and C are approved and executed; A is **declined permanently**. The regression check was correct on 2026-08-22 and is not a live invariant |
+> | § Regression checks, *"No determinism claimed as measured"* | no output may claim measured determinism **while Amendment B is pending** | **Superseded.** B's approval **lifted** the blanket prohibition and replaced it with a narrower rule: a measured claim requires `probe_scope` recorded and `measurement_status` = `complete`. **R-06 is unchanged** |
+> | § Implementability | *"`DeterminismRecord`'s three pending fields and the release ledger await Amendments B and C (correctly marked not-approved, with the approved six-field contract stated as the current binding shape)"* | **Superseded.** `DeterminismRecord` now defines **nine** fields; the release ledger is named in `services.md` and `unit-of-work.md` § 1 `Owns`. The *"six-field"* phrase is a preserved historical quotation, not a live contract statement |
+>
+> **Unaffected, because Amendment A was declined:** the same § Implementability sentence's
+> clause that *"REQ-ENG-7/REQ-ENG-10's acceptance rows await Amendment A"* now reads as
+> **untested by design, permanently** rather than awaiting anything — the requirements
+> themselves are unchanged, and **no count moved**.
 
 ### Prior findings — disposition, all four occurrences
 

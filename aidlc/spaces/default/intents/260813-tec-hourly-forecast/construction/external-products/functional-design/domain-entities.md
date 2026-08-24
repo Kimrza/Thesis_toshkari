@@ -3,6 +3,13 @@
 **Unit** `external-products` (Bolt 5) · **Kind** `library` · **Depends on**
 `inventory-and-registry`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** (Construction opened
+> 2026-08-24T11:46:26Z, resetting every unit's receipt floor). **No content of this unit
+> changed.** Both `foundation` passes of that day touch nothing this unit reads, and the
+> absence of an `src/external` block in `component-methods.md` was re-verified directly.
+> Amendment A was declined, so **no count moved**. **The READY verdict in § Review belongs
+> to the previous attempt.**
+
 > **Re-established a fifth time 2026-08-23**, after a redo aimed at a sibling unit's stale
 > cross-references. **No content of this unit changed.**
 

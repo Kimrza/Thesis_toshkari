@@ -3,6 +3,13 @@
 **Unit** `acquisition` (Bolt 3) · **Kind** `library` · **Depends on** `foundation`,
 `governance-guards`
 
+> **Re-established a sixth time 2026-08-24**, on a **new stage attempt** — Inception closed
+> and Construction opened at 2026-08-24T11:46:26Z, resetting the receipt floor for every
+> unit. **No content of this unit changed.** Both `foundation` passes of that day touch
+> nothing this unit reads, Amendment A was declined so **no count moved**, and its
+> `governance-guards` upstream **R-25**–**R-28** re-confirmed with no rule changed. **The
+> READY verdict in § Review belongs to the previous attempt.**
+
 > **Re-established a fifth time 2026-08-23**, after a redo aimed at a sibling unit's stale
 > cross-references. **No content of this unit changed.**
 

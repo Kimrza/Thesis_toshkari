@@ -3,6 +3,18 @@
 **Unit** `features-and-splits` (Bolt 7) · **Kind** `library` · **Depends on**
 `target-standardization`, `external-products`, `governance-guards`
 
+> **Regenerated 2026-08-24, on a new stage attempt — and this unit's rules did change.**
+> Construction opened at 2026-08-24T11:46:26Z; both `foundation` passes of that day touch
+> nothing this unit reads. The substantive change is this unit's own **NOT-READY** verdict after
+> five adversarial iterations, and the three decisions taken against it: **FU-4 = D** replaces
+> R-74's unobservable pairing predicate with a **provenance stamp refused at the consumer** and
+> a **manifest-based** test; **FU-5 = D** derives each call's row set from `fold` and `purpose`,
+> letting `evaluate` **read** the causal history the 24-hour window needs while **emitting** only
+> the validation month, which keeps **1 December** in the G-06 locked test; **FU-6 = A** states
+> **three** calls per fold with the fitting call's outputs never emitted. R-81 and the § Amendments
+> owed table are updated accordingly — **8 across 5 units**. Iteration-5 findings 4–7 are applied
+> as mechanical corrections. **BLK-04 is not closed**, and the verdict below predates all of it.
+
 The prohibitions this unit enforces, each with what it rejects, what it raises, and the
 negative control that proves the rejection happens.
 
@@ -134,14 +146,30 @@ register's required list precisely for this.
 > Each is **truthful** and **correct as training**. The leak is in **reusing that output as an
 > evaluation**, at a different call site.
 >
-> **The pairing control.** The nine stage scripts are a **closed set**, so every evaluation
-> call site is checkable. `tests/test_train_only_transforms.py` asserts that a frame scored for
-> fold *k*'s validation month came from a call with **`transform = T_k`** and
-> **`purpose=evaluate`** — never a `purpose=train` output, never another fold's transform.
+> **The pairing control — restated 2026-08-24 on FU-4 = D.** The previous formulation asserted
+> that a scored frame *"came from a call"* with `transform = T_k` and `purpose=evaluate`, and
+> rested on the nine stage scripts being a closed set. The set **is** closed (nine, counted
+> from `services.md`), but the predicate was **unobservable**: `05` writes the features and
+> `06`/`07` read them from **artifacts**, so `apply_transforms` is called only in `05`, no
+> scoring site calls it, and nothing recorded the fold or the purpose on what was emitted.
+> *(Iteration-5 finding 1.)* The control now has three named parts:
 >
-> **Residual:** a false `purpose=train` declaration outside the nine enumerated scripts is
-> unreachable by any check here. Narrower than what BLK-04 faced — an **ordinary** call that
-> leaked — and the boundary of what this contract delivers.
+> 1. **The stamp** — every emitted feature artifact carries `fold_id`, `purpose` and
+>    `transform_id` as recorded fields (`domain-entities.md` § 5; W-4a).
+> 2. **The refusal, at the consumer** — `06` and `07` reject a frame whose stamp is not
+>    `(fold k, evaluate)` when scoring fold *k*'s validation month.
+> 3. **The test, with its kind declared** — `tests/test_train_only_transforms.py` is
+>    **manifest-based**: it reads the emitted stamps and asserts that refusal. **Not** static
+>    analysis of the nine scripts, which cannot follow a file-mediated handoff; **not**
+>    monkeypatch-and-replay, which verifies a replay rather than what a real run emits.
+>
+> **Residual, correctly described:** an **unstamped or hand-assembled frame** — one that never
+> passed through `build_features` and so carries no stamp to refuse. The earlier wording named
+> *"a false `purpose=train` declaration outside the nine enumerated scripts"*, which pointed at
+> an exotic path while the real gap was the **ordinary `05`→`06` handoff inside them**.
+>
+> **Cost:** the stamp crosses into `06`/`07`, so the amendment total re-derives to **8 across
+> 5 units** — declared here, not left to a later sweep.
 >
 > **December is not excluded here, it is routed.** Applying the **final-refit** transform to
 > December **is** the G-06 path. The lock is held by **R-82's execution guard** — December rows
@@ -162,10 +190,13 @@ register's required list precisely for this.
 > `(frame) -> None` validates a row against the partition it is **filed under**. It returns
 > nothing and derives nothing; the second text was wrong to lean on it.
 >
-> **Which representation.** Transforms apply to the **timestamped frame**; `windows.py` builds
-> **both** representations from a frame that has already passed this check. The `NDArray`
-> tensor carries no timestamps and is **never transformed directly**, so element 4 sits
-> **upstream of both** — including the sequence tensor M-06 consumes.
+> **Which representation.** `build_features` applies the `Transform` to the **assembled
+> feature frame before windowing**, so both representations inherit it from **one** definition,
+> and the `NDArray` tensor — carrying no timestamps — is **never transformed directly**. Element
+> 4 therefore sits upstream of both, including the sequence tensor M-06 consumes. *(Reworded
+> 2026-08-24, iteration-5 finding 6: the previous sentence was the one R-81 § Resolution quotes
+> as **unexecutable**, since no transformed frame exists before windowing, so stating it here as
+> the contract contradicted its own refutation two rules later.)*
 
 **Constraint — stated once, consumed by name.** BLK-04 calls it a *"governed cross-unit
 contract"*. The four downstream units **cite** this rule; they do not restate it. A restated
@@ -548,13 +579,31 @@ windowing, so both representations inherit it from **one** definition and parity
 > with no `purpose` meant the tensor path either **bypassed element 4** or had **no
 > determinable accepted set**.
 
-**Two calls per fold is not the rejected "double call".** `evaluate` accepts exactly the
-validation month, so a fold makes one `train` call and one `evaluate` call over **disjoint**
-months, **each emitting both representations already transformed and consistent**. What W-4
-rejects is transforming the matrix of a single call while that call's tensor stays
-untransformed — one feature-set ID, two disagreeing representations. Re-windowing would create
-a second definition; the tensor cannot be transformed directly. **This is the seventh owed
-amendment** — a different function in a different boundary from R-74's sixth.
+**Three calls per fold, not two** *(restated 2026-08-24 on FU-6 = A; iteration-5 finding 3).*
+The sequence is `build_features(transform=None, purpose=None)` over the training partition to
+produce the frame `fit_transforms` is fitted on; then a `train` call over that same partition;
+then an `evaluate` call over the validation month. The earlier text described only *"two calls
+over disjoint months"* — but the **fitting call covers the same months as the `train` call**,
+so it was neither of the two, and it emits **both** representations **untransformed**. Since
+`05` writes what each call emits, three `(matrix, tensor)` pairs per partition could reach disk
+with nothing distinguishing them.
+
+**The fitting call's outputs are a fitting input only** — never emitted, never persisted, never
+consumed. **Negative control:** an **untransformed tensor reaching M-06 → fails**. Only calls 2
+and 3 emit, and both are stamped (W-4a).
+
+**Which rows each call may read** is derived inside `build_features` from `fold` and `purpose`
+— the approved signature carries no row-range parameter — and for `purpose="evaluate"` the
+readable set is fold *k*'s validation month **plus the causal history the frozen 24-hour window
+requires**, of which **only the validation-month rows are emitted** (FU-5 = D; W-4b).
+**Control:** emitted rows exceeding the validation month under `purpose="evaluate"` → **fails**.
+
+**Two calls emitting is not the rejected "double call".** What W-4 rejects is transforming the
+matrix of a single call while that call's tensor stays untransformed — one feature-set ID, two
+disagreeing representations. Here each emitting call emits both representations already
+transformed and consistent. Re-windowing would create a second definition; the tensor cannot be
+transformed directly. **This is the seventh owed amendment** — a different function in a
+different boundary from R-74's sixth — and W-4a's stamp is the **eighth**.
 
 **Negative controls.** Build a tensor from a frame carrying rows outside its transform's
 permitted set → **fails**. Emit a transformed matrix beside an untransformed tensor for one
@@ -647,11 +696,16 @@ they cover this unit's **leakage-sensitive controls**.
 | `external-products` **R-55** | **5**, across **3** units | Derived there, boundary contracts only. **Not restated here**; a restated count drifts. |
 | **R-74** | **1** | `apply_transforms` gains a required `purpose: ApplyPurpose`. Owner-approved 2026-08-23. |
 | **R-81** | **1** | `build_features` gains `transform: Transform \| None = None` **and** `purpose: ApplyPurpose \| None = None`. **One function, one amendment** — the two travel together and supplying one without the other raises. |
-| | **7 across 4 units** | 5 + 1 + 1 |
+| **R-74's pairing control** (W-4a) | **1** | The **provenance stamp** — `fold_id`, `purpose`, `transform_id` as recorded fields on every emitted feature artifact, **refused at the consumer** by `06_train_and_predict.py` and `07_evaluate_and_report.py`. Added 2026-08-24 on **FU-4 = D**. One bundled contract change refused at both consumers, counted as **1** on R-55's own basis — its rows already bundle a dataclass field with a function, and one row covers three modules' blocks. |
+| | **8 across 5 units** | 5 + 1 + 1 + 1 |
 
-Both of this unit's touch **cross-package boundary calls**, outside § Depth's intra-package
-carve-out. That carve-out still covers `Transform`'s internals, `ApplyPurpose`'s definition,
-and every other `src/features/*` / `src/data/splits.py` shape beyond the named boundary calls.
+All three of this unit's touch **cross-package boundary calls or artifacts**, outside § Depth's
+intra-package carve-out. That carve-out still covers `Transform`'s internals, `ApplyPurpose`'s
+definition, and every other `src/features/*` / `src/data/splits.py` shape beyond the named
+boundary calls.
+
+**The fifth unit is the pair of consuming scripts**, whose own units have not designed yet.
+Writing a requirement into their inbox is deliberate: BLK-04 is an exit condition on them too.
 
 > **Superseded, preserved:** *"nothing here owes an amendment; the running total stays five
 > across three units."* True of the first two element-4 remedies — both of which avoided a
@@ -661,7 +715,7 @@ and every other `src/features/*` / `src/data/splits.py` shape beyond the named b
 
 - **[assumption]** Rule IDs continue the single sequence, so this unit opens at **R-74**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 7 disagree. `business-logic-model.md` § The `unit-of-work.md` sweep shows **ten of twelve sections agree**, and the two that do not are exactly the two `CR-2026-08-22-LEAKAGE-TA` touched — so this is **one change record that missed two sections**, not a pattern in the file.
-- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify — **still true, and still owes nothing**. But **two boundary calls themselves are amended** (R-74's `purpose`, R-81's `transform`), so the running total is **7 across 4 units**, derived in § Amendments owed. **Corrected 2026-08-23** from *"no amendment owed; the total stays five across three units"*.
+- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify — **still true, and still owes nothing**. But **three boundary changes** are owed: R-74's required `purpose` on `apply_transforms`; R-81's `transform` **and** `purpose` on `build_features`, which travel together; and W-4a's `fold_id`/`purpose`/`transform_id` stamp on every emitted feature artifact, refused at `06`/`07`. Running total **8 across 5 units**, derived in § Amendments owed. **Corrected 2026-08-23** from *"no amendment owed; the total stays five across three units"*, and **again 2026-08-24** when FU-4 = D added the stamp.
 - **[assumption]** `tests/test_locked_test_guard.py` is this unit's, per § 7.
 - **Open — BLK-04 is an EXIT condition** on this unit and on `models-and-baselines`, `evaluation-and-comparison`, `statistical-inference` and `regimes-diagnostics-reporting`. **R-74 is the contract; approving this design is not its approval.** NFR-LEAK-01's evidence is owed to the **Supervisor at G-04 and G-05**.
 - **Open — TA-33, TA-34, TA-35 and TA-36 are `Pending`.**
