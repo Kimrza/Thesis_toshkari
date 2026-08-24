@@ -44,7 +44,14 @@ intended, say so at the gate and the artifacts restart at R-01.
 | 1 | **Allowed partitions** | The **named fold's training partition only** |
 | 2 | **Fitting failure** | `LeakageError` when `train`'s index is **not a subset** of that partition |
 | 3 | **Ownership of the fitted state** | `Transform` **carries its `FoldSpec`** — the resolved boundaries, not a bare `fold_id` string |
-| 4 | **Applying failure** | `apply_transforms` raises `LeakageError` when **any row's timestamp falls outside the transform's own scope** (that fold's training range, embargo and validation month; for the refit, Jan–Nov **and December**), or when the frame is **empty** |
+| 4 | **Applying failure** | `apply_transforms` takes a **required `purpose`** (`train` \| `evaluate`, no default) and raises `LeakageError` when the frame leaves the set that `purpose` permits **for that transform's own fold** — its training partition for `train`, **exactly its validation month** for `evaluate` — or when the frame is **empty** |
+
+> **⚠ Read this table with its condition — the four downstream units cite it by name.**
+> Elements 1–4 are **complete and executable for F1–F4**. For the **final refit** they are
+> **conditional**: `fit_transforms` takes a `FoldSpec` and R-80 records that the refit **is not
+> one**, so the refit's transform has no fitting path until that shape is settled at the gate.
+> **G-06 depends on that resolution**, and a unit consuming this contract inherits the
+> condition, not just the four rows.
 
 > ## ⚠ THE APPROVED INTERFACE DOES NOT PREVENT WHAT IT CLAIMS TO
 >
@@ -84,16 +91,57 @@ register's required list precisely for this.
 > rows, so *"this row's partition"* is **not single-valued**. **The check never needed a
 > label** — it needed containment in a **named** scope.
 >
-> **The mechanism, and it still needs no signature change.** `component-methods.md` leaves
-> `Transform` *"referenced as a type and left unspecified: … intra-package"* — this stage's to
-> specify, so carrying the `FoldSpec` on it costs **no amendment**, and the count of owed
-> amendments stays **five across three units**. `apply_transforms` tests every row's timestamp
-> against the transform's **own** scope:
+> **Third text, also superseded — and this one needed an amendment.** It read: the transform
+> accepts *"that fold's training range, its 24-h embargo, its validation month"*, the refit
+> *"1 Jan – 30 Nov and December"*. **Those five sets are strictly nested prefixes** — F1 to 30
+> Apr ⊂ F2 to 31 Jul ⊂ F3 to 31 Oct ⊂ F4 to 30 Nov ⊂ refit to 31 Dec — so the rule collapsed
+> to *"not later than this transform's validation month"*: **an upper bound, not a leakage
+> check**. **F4's** transform (fitted Jan–Oct) applied to **April passed, and F4's fit saw
+> April.** The one worked example given was the **non-leaking** direction. Third adversarial
+> pass.
 >
-> | Transform fitted on | Rows accepted |
-> |---|---|
-> | Fold *k*'s training partition | Fold *k*'s training range, its **24-h embargo**, its **validation month** |
-> | The final refit (1 Jan – 30 Nov) | 1 Jan – 30 Nov **and December** |
+> **Why no row-level rule could have worked.** Leakage here is a property of **what the call
+> is for**, not of where the row sits: April is legitimately in F4's training data, so
+> transforming it *as training* is correct and *as F1's evaluation* is the leak. Neither
+> `apply_transforms` nor `FoldSpec` carried the use.
+>
+> ### The amendment — approved by the owner, 2026-08-23
+>
+> ```
+> apply_transforms(frame: DataFrame, *, transform: Transform,
+>                  purpose: ApplyPurpose) -> DataFrame
+> ```
+>
+> `purpose` is **required, with no default** — an implicit default is where the leak would
+> re-enter — and each value carries a **different, tight** accepted set:
+>
+> | `purpose` | Fold *k*'s transform accepts | The refit's transform accepts |
+> |---|---|---|
+> | `train` | Fold *k*'s **training partition**, embargo rows **excluded and counted** | 1 Jan – 30 Nov |
+> | `evaluate` | **Exactly fold *k*'s validation month** | **December only**, through R-82's guard |
+>
+> **`Transform` carrying its `FoldSpec` still costs nothing** — `component-methods.md` leaves
+> it *"referenced as a type and left unspecified: … intra-package"*. **The `purpose` parameter
+> does cost**: it is a **cross-package boundary amendment**, the **sixth** this stage owes.
+> **The total is no longer five across three units** — see § Amendments owed, which derives it.
+>
+> **What `purpose` does NOT bound.** It bounds **which rows a transform may touch under a
+> declared use**; it does **not** bound what the caller does with the returned frame.
+>
+> **The consequence, named.** `purpose=train` accepts a fold's **whole** training partition,
+> and those nest — so **10 of the 39 accepted `train` cells** touch a month that is **another
+> fold's validation month** (F2→Apr; F3→Apr, Jul; F4→Apr, Jul, Oct; refit→Apr, Jul, Oct, Nov).
+> Each is **truthful** and **correct as training**. The leak is in **reusing that output as an
+> evaluation**, at a different call site.
+>
+> **The pairing control.** The nine stage scripts are a **closed set**, so every evaluation
+> call site is checkable. `tests/test_train_only_transforms.py` asserts that a frame scored for
+> fold *k*'s validation month came from a call with **`transform = T_k`** and
+> **`purpose=evaluate`** — never a `purpose=train` output, never another fold's transform.
+>
+> **Residual:** a false `purpose=train` declaration outside the nine enumerated scripts is
+> unreachable by any check here. Narrower than what BLK-04 faced — an **ordinary** call that
+> leaked — and the boundary of what this contract delivers.
 >
 > **December is not excluded here, it is routed.** Applying the **final-refit** transform to
 > December **is** the G-06 path. The lock is held by **R-82's execution guard** — December rows
@@ -102,12 +150,13 @@ register's required list precisely for this.
 > and would have made **G-06 unreachable** and the **FR-P1-04-14 final refit**
 > untransformable.
 >
-> **The fit side of the refit is the same open decision, not a second one.** `fit_transforms`
-> is typed `(train, *, fold: FoldSpec)`, and R-80 records that **the final refit is not a
-> `FoldSpec`** — so *"the refit's transform"* has no fitting path until that representation is
-> settled. **This rule and R-80's open shape question are one decision**, raised at the gate
-> **together**. Element 4 is complete for F1–F4 and **conditional on that resolution** for the
-> refit and therefore for G-06.
+> **The refit has no path on EITHER side, and it is one open decision.** `fit_transforms` is
+> typed `(train, *, fold: FoldSpec)` **and so is `build_features`** — R-80 records that the
+> final refit **is not a `FoldSpec`**, so today the refit can neither have a transform fitted
+> for it nor have its features built, and December inherits both gaps. **Corrected 2026-08-23**
+> from a statement naming only the `fit_transforms` side. All of it turns on R-80's open shape
+> question and goes to the gate **once**, with it. Element 4 is **complete for F1–F4** and
+> **conditional** for the refit and therefore **G-06**.
 >
 > **`assert_membership_from_timestamps` is cited for what it does**, not as the derivation:
 > `(frame) -> None` validates a row against the partition it is **filed under**. It returns
@@ -124,17 +173,41 @@ contract in four places drifts, and this stage has already corrected four counts
 between restatements.
 
 **Negative controls.** Fit on the full dataset with a fold named → **`LeakageError`**. Fit on
-F1's training partition and apply to **F3's validation month (October)** → **`LeakageError`**,
-October being outside F1's scope. Fit on a superset of the training partition by one row →
-`LeakageError`. Apply an **F1** transform to a frame carrying **one December row** →
-`LeakageError`. Reach `apply_transforms` with an **empty or timestamp-less frame** →
-`LeakageError`, so a check that never fired cannot pass for one that did.
+F1's training partition and apply to **F3's validation month (October)** → **`LeakageError`**.
+Fit on a superset of the training partition by one row → `LeakageError`. Apply an **F1**
+transform to a frame carrying **one December row** → `LeakageError`. Reach `apply_transforms`
+with an **empty or timestamp-less frame** → `LeakageError`, so a check that never fired
+cannot pass for one that did. Call `apply_transforms` **without `purpose`** → **`TypeError` at
+the call site**, which is the point of having no default.
+
+**The leaking direction, which the two superseded rules both passed** — the control that
+exists because its absence was the defect. **F4's** transform (fitted Jan–Oct),
+`purpose=evaluate`, applied to **April** → **`LeakageError`**: F4's validation month is
+**November**, and F4's fit saw April. The mirror case, **F2's** transform with
+`purpose=evaluate` on **April** → **`LeakageError`** likewise. Any fold *k*'s transform
+evaluated on any month that is not exactly fold *k*'s validation month → **`LeakageError`**.
+
+**The `train`-purpose cells, which no control previously exercised.** **T_refit**/`train` on
+**November** → **passes**; November is genuinely in the refit's training partition and this is
+the ordinary refit path. **The same frame then reaching an evaluation comparison as F4's
+validation scoring → fails**, caught by the pairing control, not by `apply_transforms`. Same
+pair for **F4**/`train` on **October** against F3's evaluation, and for the other eight of the
+ten nested cells. **This is the control the artifact promised and did not carry** until
+2026-08-23.
 
 **Negative controls that must *not* fire** — as load-bearing as the ones that must, since a
-check blocking a lawful path is the failure mode the second correction fixed. Fit and apply
-**within one fold, spanning its training range, embargo and validation month** → **passes**.
-Apply the **final-refit** transform to **December** → **passes**; that is G-06, gated by
-R-82's execution guard and not by this rule.
+check blocking a lawful path was the failure mode of the second correction. **F4**/`train` on
+**April** → **passes**; April is genuinely in F4's training partition. **F1**/`evaluate` on
+**April** → **passes**. Apply the **final-refit** transform to **December** under
+`purpose=evaluate` → **passes**; that is G-06, gated by R-82's execution guard and not by this
+rule.
+
+> **⚠ One earlier control is withdrawn, not silently dropped.** It read: *"fit and apply within
+> one fold, spanning its training range, embargo and validation month → passes … that is the
+> ordinary path and must not be blocked."* Under `purpose`, `evaluate` accepts **exactly** the
+> validation month, so a **single** spanning call is no longer lawful under either value — the
+> caller makes **two** calls, one per purpose. That is a real change to the calling pattern and
+> is stated here rather than left as a contradiction between two controls.
 
 > ## ⚠ BLK-04 IS AN EXIT CONDITION, AND THIS DESIGN DOES NOT DISCHARGE IT
 >
@@ -186,6 +259,63 @@ values from a different window → **fails on the recomputation**. Backfill a dr
 final archive → fails on `release_status`.
 
 **Acceptance.** WS-11, TA-08 (**both owned by this unit**).
+
+## R-76a — TA-36's enforcement raise and primary test are THIS unit's
+
+> **⚠ Added 2026-08-23, correcting the opposite claim in all three artifacts.** They stated
+> TA-36 was *"`external-products`' row, not this unit's"* — read off the story map's
+> § Per-unit coverage summary and Table 2, and **stopped there**. `external-products` **R-54a**
+> already reconciled this against § Cross-unit responsibilities, **which is the reconciling
+> statement**, and carries the control that any artifact claiming the wrong side *"fails
+> review"*. R-54a exists because this same error was made and corrected once already — **read
+> one table and stopped** — and this unit then reproduced it from the other direction. Found
+> by an adversarial pass; verified against R-54a directly.
+
+**Rule (FR-P1-04-17, TA-36).** The story map's § Cross-unit responsibilities splits **four**
+ownerships, of which **this unit holds two**:
+
+| Ownership | Unit |
+|---|---|
+| Data production — driver series carrying their own interval semantics | `external-products` |
+| **Enforcement — the raise at `features.build_features`** | **this unit** |
+| **Primary acceptance test — TA-36, in `tests/test_feature_leakage_guards.py`** | **this unit** |
+| Upstream evidence — driver manifests recording interval semantics and release grade | `external-products` |
+
+**Constraint — the raise, which no raise list here previously carried.** `build_features`
+**raises `AlignmentError`** on a driver value repeated **outside its own defined interval**
+(Kp/ap3 beyond its 3-hour interval) and on a value **shifted to a neighbouring hour** (Dst off
+its own hourly averaging interval). These are R-58's limbs **1 and 2** arriving as **rejection
+at the consumer**, not as upstream contract evidence — R-54a quotes the deciding clause: an
+upstream contract test is *"documented separately and **not** replacing the primary rejection
+test."*
+
+**Constraint — limb 3 is a grep, not a raise** (corrected 2026-08-23). *"No driver is
+interpolated, at any stage"* is **absolute**, and R-58 says why a runtime check cannot carry
+it: a grep *"is the only check that reaches a call site no fixture exercises."* An interpolated
+value is **indistinguishable at runtime** from a genuine one — there is no signal in the data
+for `build_features` to raise on. So limb 3 is a **static check over the source tree**, run in
+the same test module, asserting **no interpolation call on any driver series**. The first
+statement of R-76a asked `build_features` to raise on it, which is **not implementable**; it
+is corrected rather than quietly dropped, because R-58 warns that *"building limbs 1 and 2
+alone leaves the row partially satisfied while looking complete."*
+
+**Constraint — the test module is named**, because it was named nowhere: TA-36's primary
+negative-path test is **`tests/test_feature_leakage_guards.py`**, built here. It was absent
+from § 12's seventeen-module list, which predates `CR-2026-08-22-LEAKAGE-TA`; that gap goes to
+the gate rather than being resolved here.
+
+**Constraint — no reallocation.** R-54a records that the allocation *"is the default and
+stands unless functional design produces verified evidence for a better one; if it
+reallocates, it updates **both** artifacts."* This unit has produced no such evidence, so the
+default stands and **`external-products` is not edited**.
+
+**Negative controls.** Kp repeated outside its 3-hour interval → **`AlignmentError`**. Dst
+shifted to a neighbouring hour → **`AlignmentError`**. Add an interpolation call on a driver
+series anywhere under `src/` → **the static limb-3 check fails**, with no runtime raise
+involved and none possible.
+
+**Acceptance.** **TA-36** — **`Pending`**: the row exists, is not implemented, not executed,
+not passing. Approved 2026-08-22 under `CR-2026-08-22-LEAKAGE-TA`.
 
 ## R-76 — The ML input space is closed
 
@@ -373,8 +503,10 @@ Reconciled 2026-08-23.
 partition — the defect that filed locked-month records into `audit_evidence_2022-01/`.
 
 > **Open shape decision, stated not assumed: the final refit is not a `FoldSpec`.** That
-> dataclass carries `validation_month`; the final refit has none. Its representation
-> alongside the four folds is raised at the gate.
+> dataclass carries `validation_month`; the final refit has none. Its representation alongside
+> the four folds is raised at the gate — **together with R-74's element 4**, since
+> `fit_transforms` takes a `FoldSpec` and the refit's transform has no fitting path until this
+> is settled. **One decision, not two**, and G-06 depends on it.
 
 **Negative controls.** Let a window cross a fold boundary → fails. Omit the excluded-row count
 → fails. Run the final refit before any of the six freezes → **fails on ordering**. Give one
@@ -394,14 +526,39 @@ January–November row in the dataset.
 **Rule (FR-P1-04-8).** `windows.py` emits **both** the flattened matrix and the sequence
 tensor for a feature-set ID, so parity is *"structural rather than asserted"*.
 
-**Constraint — transforms run before either representation is built** (added 2026-08-23,
-because R-74 element 4 depends on it). `apply_transforms` is typed `DataFrame -> DataFrame`
-and element 4 needs **record timestamps**, which the `NDArray` tensor does not carry. Both
-representations are therefore built from a frame that has **already passed** element 4; the
-tensor is never transformed directly. **Negative control:** build a tensor from a frame that
-has not passed element 4, or one carrying rows outside its transform's scope → **fails**.
-Without this ordering the fit/apply leak survives on **exactly the representation M-06
+**Constraint — transforms reach both representations, and that costs an amendment** (added
+2026-08-23, corrected the same day). `apply_transforms` is typed `DataFrame -> DataFrame` and
+R-74's element 4 tests **record timestamps**, which the `NDArray` tensor does not carry — so
+without a mechanism the fit/apply leak survives on **exactly the representation M-06
 consumes**.
+
+> **⚠ The first statement was unexecutable.** It read *"both representations are built from a
+> frame that has already passed element 4"*. But `build_features(...) -> tuple[DataFrame,
+> NDArray]` emits **both in one call that takes no `Transform`**, and the transform is fitted
+> on the features **that call produces** — no transformed frame exists before windowing.
+
+**Resolution.** `build_features` gains **two parameters that travel together** —
+`transform: Transform | None = None` and `purpose: ApplyPurpose | None = None`. Both `None`
+emits the untransformed features `fit_transforms` is fitted on; both supplied applies the
+transform **under that purpose**, running R-74's element 4 inside `build_features` **before**
+windowing, so both representations inherit it from **one** definition and parity is untouched.
+**Supplying one without the other raises** — a default would reinstate the hole.
+
+> **⚠ `purpose` was missing from the first statement** (corrected 2026-08-23): a `transform`
+> with no `purpose` meant the tensor path either **bypassed element 4** or had **no
+> determinable accepted set**.
+
+**Two calls per fold is not the rejected "double call".** `evaluate` accepts exactly the
+validation month, so a fold makes one `train` call and one `evaluate` call over **disjoint**
+months, **each emitting both representations already transformed and consistent**. What W-4
+rejects is transforming the matrix of a single call while that call's tensor stays
+untransformed — one feature-set ID, two disagreeing representations. Re-windowing would create
+a second definition; the tensor cannot be transformed directly. **This is the seventh owed
+amendment** — a different function in a different boundary from R-74's sixth.
+
+**Negative controls.** Build a tensor from a frame carrying rows outside its transform's
+permitted set → **fails**. Emit a transformed matrix beside an untransformed tensor for one
+feature-set ID → **fails** on parity.
 
 **Constraint — parity is asserted anyway.** Structural does not mean unverified: the two
 representations for a given feature-set ID must contain the same underlying window values.
@@ -455,7 +612,7 @@ door; the read belongs to `open_restricted`.
 | FR-P1-04-12 | R-76 | **TA-33** | **`Pending`** — *"the row exists, no test module is implemented, none has been executed, and none has passed"* |
 | FR-P1-04-13 | R-77 | **TA-34** | **`Pending`** |
 | FR-P1-04-16 | R-78 | **TA-35** | **`Pending`** |
-| FR-P1-04-17 | — (`external-products` R-58) | **TA-36** | **`Pending`** — supported here, owned there |
+| FR-P1-04-17 | **R-76a** (the `build_features` raise) | **TA-36** | **`Pending`** — story-map **supporting** unit, but **this unit owns TA-36's primary test**; see R-76a |
 
 **All four were approved 2026-08-22** under Vision §15.2 (`CR-2026-08-22-LEAKAGE-TA`), and
 they cover this unit's **leakage-sensitive controls**.
@@ -475,14 +632,36 @@ they cover this unit's **leakage-sensitive controls**.
 > **§ 7's "five forbidden edges with no row" is superseded — derived, not recounted.** TA-33
 > covers dictionary closure; **TA-34 covers both** the `vtec_lag_*` carry-forward prohibition
 > **and** the target-lag contract, which are one requirement; TA-35 covers the support-field
-> rules; TA-36 covers driver-interval repetition and is **`external-products`'** row.
+> rules; TA-36 covers driver-interval repetition — story-map **primary `external-products`**,
+> but its **enforcement raise and primary negative-path test are this unit's** (R-76a,
+> reconciled at `external-products` R-54a). **Corrected 2026-08-23** from *"is
+> `external-products`' row"*, which read one table and stopped.
 > **Remainder: FR-P1-04-10 alone.**
+
+## Amendments owed
+
+**Derived, not carried** — every count this stage carried from adjacent prose was wrong.
+
+| Source | Owed | Basis |
+|---|---|---|
+| `external-products` **R-55** | **5**, across **3** units | Derived there, boundary contracts only. **Not restated here**; a restated count drifts. |
+| **R-74** | **1** | `apply_transforms` gains a required `purpose: ApplyPurpose`. Owner-approved 2026-08-23. |
+| **R-81** | **1** | `build_features` gains `transform: Transform \| None = None` **and** `purpose: ApplyPurpose \| None = None`. **One function, one amendment** — the two travel together and supplying one without the other raises. |
+| | **7 across 4 units** | 5 + 1 + 1 |
+
+Both of this unit's touch **cross-package boundary calls**, outside § Depth's intra-package
+carve-out. That carve-out still covers `Transform`'s internals, `ApplyPurpose`'s definition,
+and every other `src/features/*` / `src/data/splits.py` shape beyond the named boundary calls.
+
+> **Superseded, preserved:** *"nothing here owes an amendment; the running total stays five
+> across three units."* True of the first two element-4 remedies — both of which avoided a
+> signature change and **neither of which worked**.
 
 ## Assumptions & Open Questions
 
 - **[assumption]** Rule IDs continue the single sequence, so this unit opens at **R-74**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 7 disagree. `business-logic-model.md` § The `unit-of-work.md` sweep shows **ten of twelve sections agree**, and the two that do not are exactly the two `CR-2026-08-22-LEAKAGE-TA` touched — so this is **one change record that missed two sections**, not a pattern in the file.
-- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify. **No amendment owed**; the total stays **five across three units**.
+- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify — **still true, and still owes nothing**. But **two boundary calls themselves are amended** (R-74's `purpose`, R-81's `transform`), so the running total is **7 across 4 units**, derived in § Amendments owed. **Corrected 2026-08-23** from *"no amendment owed; the total stays five across three units"*.
 - **[assumption]** `tests/test_locked_test_guard.py` is this unit's, per § 7.
 - **Open — BLK-04 is an EXIT condition** on this unit and on `models-and-baselines`, `evaluation-and-comparison`, `statistical-inference` and `regimes-diagnostics-reporting`. **R-74 is the contract; approving this design is not its approval.** NFR-LEAK-01's evidence is owed to the **Supervisor at G-04 and G-05**.
 - **Open — TA-33, TA-34, TA-35 and TA-36 are `Pending`.**

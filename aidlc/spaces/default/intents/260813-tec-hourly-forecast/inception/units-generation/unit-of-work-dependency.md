@@ -87,7 +87,7 @@ artifacts, not because a script of theirs is invoked.
 | `target-standardization` | `inventory-and-registry` | Standardizes only files that passed schema validation, using the registry's cell rule. |
 | `external-products` | `inventory-and-registry` | IRI and GIM products are generated at the registry's pinned coordinates and cells. Drivers are time-indexed and need no cell join, so this edge is carried by the benchmark and comparator, not by `spaceweather.py`. |
 | `features-and-splits` | `target-standardization`, `external-products`, `governance-guards` | Features join the target rows with the driver series; the locked-partition execution guard consumes `locked_test.py`'s contract. |
-| `models-and-baselines` | `features-and-splits` | Trains on the feature matrix and sequence tensor over the F1–F4 folds. |
+| `models-and-baselines` | `features-and-splits` | Trains on the **`FeatureBundle`s** — matrix and sequence tensor travelling as one stamped object — over the six-member `Partition` list. *(Corrected 2026-08-23 from "the feature matrix and sequence tensor over the F1–F4 folds": ADR-11 replaced both nouns, and `FoldSpec`'s four folds became `Partition`'s six members, `REFIT` and `DEC` having been unrepresentable before. Same correction as § Integration points, which this row restates.)* |
 | `evaluation-and-comparison` | `models-and-baselines`, `external-products` | Masks and metrics read predictions on one side and the IRI benchmark / GIM comparator on the other, joined at evaluation time. |
 | `statistical-inference` | `evaluation-and-comparison` | Bootstraps the paired loss differential the metrics module computes, on the frozen mask. |
 | `regimes-diagnostics-reporting` | `statistical-inference` | Reported breakdowns and figures carry the intervals the bootstrap produces. |
@@ -163,11 +163,28 @@ message queue and no shared mutable state between units.
 | Phase 1 target rows under D-17's contract, stamped `phase_id` / `source_id` / `target_definition_id` | `target-standardization` | `features-and-splits` | released artifact |
 | driver series with availability semantics | `external-products` | `features-and-splits` | released artifact; time-indexed only |
 | IRI-2016 benchmark (B-01), CODE final GIM comparator (C-01) | `external-products` | `evaluation-and-comparison` **only** | released artifacts, joined at evaluation time onto the frozen mask |
-| feature matrix + sequence tensor (one window definition), F1–F4 folds, embargo | `features-and-splits` | `models-and-baselines` | released artifacts sharing one feature-set ID |
+| **`FeatureBundle`s** — matrix + tensor + `FrameSpec` + `transform_id`, from one window definition — the six-member `Partition` list (`F1`–`F4`, `REFIT`, `DEC`), and the 24-hour embargo | `features-and-splits` | `models-and-baselines` | released artifacts, one directory per bundle addressed `<partition_id>__<role>__<transform_id>/`, sharing one feature-set ID |
 | per-seed predictions + three-seed element-wise mean, checkpoints | `models-and-baselines` | `evaluation-and-comparison` | released artifacts |
 | comparison-wide intersection mask (stable ID, row counts), paired loss differential | `evaluation-and-comparison` | `statistical-inference`, `regimes-diagnostics-reporting` | one mask per comparison set, never pairwise |
 | bootstrap intervals, 48 h sensitivity, cross-station correlation | `statistical-inference` | `regimes-diagnostics-reporting` | released artifact |
 | fixture manifests, clean-run log, `environment_and_cpu_preflight_report`, traceability matrix | `fixtures-and-reproducibility` | G-07, G-09 | released artifacts |
+| **M10 contract fixture** — synthetic partition dates plus its four assertions on ADR-11's leakage boundary, carried in `test_train_only_transforms.py` and `test_split_embargo.py` | `features-and-splits` (**authors**) | `fixtures-and-reproducibility` (**runs it in the clean-run sequence**) | test modules invoked by the clean run; a **negative control**, never scientific evidence, and **not** a third mandated walking-skeleton fixture |
+
+> **⚠ The `features-and-splits` → `models-and-baselines` row was corrected 2026-08-23.**
+> It read *"feature matrix + sequence tensor (one window definition), F1–F4 folds,
+> embargo … released artifacts sharing one feature-set ID"*. **ADR-11 replaced both
+> nouns**: the two representations now travel in one `FeatureBundle` carrying its own
+> `FrameSpec` and `transform_id`, and `FoldSpec` became `Partition` with six members
+> rather than four — `REFIT` and `DEC` were unrepresentable under the old type, which
+> is what stalled stage 3.1 for five review cycles. The row described a contract that
+> no longer existed. Corrected under the owner's ruling of 2026-08-23 at the approval
+> gate, in the same sweep that reached the per-unit blocker paragraphs.
+
+**Added 2026-08-23 under the owner's ruling Q12 = C.** This handoff **adds no edge**:
+`fixtures-and-reproducibility` already depends on `features-and-splits` in the fenced
+block below, so the fenced `yaml` is unchanged. Recording it as an integration point
+on an existing edge rather than as a new edge is deliberate — topology is what the
+graph states, and this contract rides an edge the graph already carries.
 
 ## Forbidden edges — absent by rule, not by accident
 
@@ -241,18 +258,35 @@ manufacturing more by dropping real edges.
 be described as free to begin while it carries a governance restriction — an
 unsigned amendment, an unresolved locked-test authorization, or a Phase 1
 boundary it would breach. `unit-of-work.md` § Blocker register carries BLK-01
-through **BLK-07**, each naming its affected artifacts, owning unit, downstream
-units, required resolution, approval authority and status. **Ten of the twelve units
-carry a blocker row, owned or inherited** — `inventory-and-registry` and
-`external-products` carry none of their own. That is the sense in which "ten" is meant;
-BLK-01's `config.py` row names *every* unit as a downstream, so counting downstream
-mentions would give twelve (clarified 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 10).
+through **BLK-09**, each naming its affected artifacts, owning unit, downstream
+units, required resolution, approval authority and status. *(Corrected 2026-08-23
+from **BLK-07**: BLK-08 and BLK-09 were registered on 2026-08-23 and this span
+sentence was not extended with them. Count derived from the register's `### BLK-0…`
+headings — nine — rather than carried.)* **Nine of the twelve units
+carry an open blocker row, owned or inherited** — `foundation`,
+`inventory-and-registry` and `external-products` carry none. That is the sense in which
+"nine" is meant; BLK-01's `config.py` row named *every* unit as a downstream, so
+counting downstream mentions of a closed row would give twelve (the downstream-versus-
+carried distinction was clarified 2026-08-22 per `GOV-2026-08-22-UG-02` Rec 10).
 Structural presence in this graph is not readiness.
+
+> **⚠ "Ten" corrected to nine, 2026-08-23.** The figure was true while BLK-01 was open,
+> because `foundation` carried it. **BLK-01 closed on 2026-08-22** and this derived
+> count was not re-derived — a closure invalidating a claim that names no blocker ID,
+> so no sweep keyed to an ID would ever reach it. Found by a mechanical audit of every
+> fact stated in more than one place, after five consecutive review passes each found
+> one more instance of this class by reading. Derived from `unit-of-work.md`'s summary
+> table, Blocker column matched against `BLK-0[2-9]`: nine of twelve.
+
 BLK-06, added 2026-08-22, named no unit that was not already listed; **BLK-07**,
-added 2026-08-22, adds `acquisition`, which is why the figure is now ten rather
-than nine. **BLK-01 is closed** (2026-08-22, `CR-2026-08-22-TE-AMEND`) and its row
+added 2026-08-22, added `acquisition`, which is why the figure rose to ten while
+BLK-01 was open. **BLK-01 is closed** (2026-08-22, `CR-2026-08-22-TE-AMEND`) and its row
 is retained in the register as a closed row rather than deleted; BLK-02 through
-BLK-07 are open.
+**BLK-09** are open — **eight** entries. *(Corrected 2026-08-23 from "BLK-02 through
+BLK-07": BLK-08 and BLK-09 were registered on 2026-08-23, and this sentence sat four
+lines below the "BLK-01 through BLK-09" span corrected in the same paragraph on the
+same day. Count derived from the register's `| Status |` rows — eight, every one
+beginning `Open` — rather than carried.)*
 
 TE §9.2's fixture ordering is worth separating from TC-06 for the same reason:
 TC-06 is an inter-unit edge in the block above, while §9.2 is an intra-unit

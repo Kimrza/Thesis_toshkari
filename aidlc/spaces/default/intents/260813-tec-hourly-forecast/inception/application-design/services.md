@@ -49,10 +49,84 @@ production logic).
 | `02_build_vtec_target.py` | P2 target | **2 only** | RINEX, DCB | Phase 2 target rows, ten-field contract |
 | `03_verify_processing.py` | P1-03 verification | 1 and 2 | target rows | verification report, uncertainty budget |
 | `04_build_external_products.py` | P1-04 | 1 and 2 | IRI, GIM, drivers | benchmark, comparator, driver series |
-| `05_build_features_and_splits.py` | P1-04/P1-05 | 1 and 2 | target, drivers, registry | feature matrix, sequence tensor, folds, masks |
-| `06_train_and_predict.py` | P1-05 | 1 and 2 | features, folds | per-seed predictions, three-seed mean, checkpoints |
-| `07_evaluate_and_report.py` | P1-06 | 1 and 2 | predictions, benchmark, mask | metrics, bootstrap intervals, breakdowns, figures |
+| `05_build_features_and_splits.py` | P1-04/P1-05 | 1 and 2 | target, drivers, registry | **`FeatureBundle`s** (matrix + tensor + `FrameSpec` + `transform_id`), partitions, masks |
+| `06_train_and_predict.py` | P1-05 | 1 and 2 | **`FeatureBundle`s**, partitions | per-seed predictions, three-seed mean, checkpoints |
+| `07_evaluate_and_report.py` | P1-06 | 1 and 2 | predictions (**carrying `partition_id` and `transform_id`**), benchmark, mask | metrics, bootstrap intervals, breakdowns, figures |
 | `run_walking_skeleton.py` | orchestrator | 1 and 2 | `--fixture` | fixture run log |
+
+> ## ⚠ THE `05` → `06` HANDOFF CARRIES PROVENANCE — AMENDED 2026-08-23
+>
+> **Superseded, preserved:** `05` wrote *"feature matrix, sequence tensor, folds,
+> masks"*; `06` read *"features, folds"*.
+>
+> **The defect.** `05` **writes** and `06`/`07` **read** — so the scripts that actually
+> score never call the feature code at all. Nothing travelled with the file to say
+> which partition it was built for, what role it served, or which transform produced
+> it, and **no check at any scoring site could tell**. Stage 3.1 spent a full review
+> cycle designing a call-site pairing control before establishing that it had nothing
+> to observe. A frame built with the wrong partition's transform produces *better*
+> numbers and raises nothing.
+>
+> **The fix (ADR-11, Q12).** `build_features` returns a **`FeatureBundle`** — matrix,
+> tensor, its `FrameSpec` and `transform_id` — persisted and reloaded **as one unit**,
+> so the stamp is the same object as the data and cannot drift from it the way a
+> side-car manifest can. `06` and `07` then **assert** what they previously assumed:
+>
+> - a bundle scored for partition *k* carries `spec.partition_id == k`,
+>   `spec.role == "score"`, and *k*'s own `transform_id`;
+> - **any bundle with `transform_id is None` raises** — the three-call build sequence
+>   leaves an untransformed bundle live in-process, and consuming it is a leak.
+>
+> **Both representations now travel together**, which is also what FR-P1-04-8's parity
+> wanted structurally rather than by assertion.
+>
+> **`07` receives predictions, not bundles**, so the stamp is copied onto `Prediction`
+> (`partition_id`, `transform_id`) at `06`. Provenance that stops at the first consumer
+> is not provenance; `07` is where the metric is computed and therefore where the
+> question "whose transform produced this?" actually has to be answerable.
+>
+> **On-disk form, named because §13.3 requires hashable artifacts.** A `FeatureBundle`
+> persists as **one directory** per bundle: `matrix.parquet`, `tensor.npy`, and
+> `spec.json` carrying `partition_id`, `role`, `scored_start`, `scored_end` and
+> `transform_id`. §13.3's release manifest hashes **all three** and records the bundle
+> directory as the unit; a bundle whose `spec.json` hash does not match its manifest
+> row **fails** the mutation-protection test (`tests/test_release_hashes.py`, TA-15).
+> The three files are one artifact by contract — loading a bundle reads all three or
+> raises, so the stamp cannot be separated from the data in practice even though the
+> filesystem stores them as siblings.
+>
+> ## ⚠ THE BUNDLE ADDRESS IS THE DIRECTORY NAME — AMENDED 2026-08-23 (M9)
+>
+> **The defect.** `FrameSpec` is **not a unique key**, so "one directory per bundle"
+> named no directory. In ADR-11's own three-call sequence, `raw` and `train` carry
+> **identical** `FrameSpec` values — same `partition_id`, same `role`, same scored
+> range — and differ only in the bundle's `transform_id` (`None` versus `T_k`). Two
+> bundles, one address. `06` asking for "partition *k*'s training bundle" had no way
+> to say which, and the untransformed one is exactly the bundle whose consumption is
+> a leak.
+>
+> **The naming rule.** A bundle's directory is
+> `<partition_id>__<role>__<transform_id>/`, with the literal segment `untransformed`
+> in place of `transform_id` when it is `None`:
+>
+> | Bundle in the three-call sequence | Directory |
+> |---|---|
+> | `raw` — fit input, never consumed downstream | `F1__train__untransformed/` |
+> | `train` — the training frame | `F1__train__T-F1/` |
+> | `score` — the validation-month frame | `F1__score__T-F1/` |
+> | The G-06 locked frame | `DEC__score__T-REFIT/` |
+>
+> Three consequences worth stating rather than leaving to inference. The address is
+> **derived from `spec.json`'s own fields**, so a directory whose name disagrees with
+> the `spec.json` inside it is detectable and **raises** on load — the name is a
+> second copy of the stamp, not a substitute for it. The `untransformed` segment
+> makes the leak-bearing bundle **visible in a directory listing**, so a fixture or a
+> reviewer can see one was produced without opening it. And every bundle now has a
+> distinct §13.3 manifest row, which is what FR-P1-04-11's per-file hashing needs:
+> two bundles at one address could not both be hashed and re-verified.
+>
+> Raised by the re-entry advisory review as finding 9; resolved under the owner's
+> 2026-08-23 ruling.
 
 **The `02` ordinal collision is a §12 defect, not a design choice.**
 `02_standardize_prepared_target.py` (Phase 1) and `02_build_vtec_target.py`
@@ -165,6 +239,35 @@ execution path, not an emergency mode** — GPU is an optional accelerator and
 never a dependency of any result. `07_evaluate_and_report.py` carries the heaviest
 CPU cost: 10,000 bootstrap replicates over 24-hour vector blocks.
 
+### `05`'s cost changed with ADR-11, and the envelope must say so
+
+**Added 2026-08-23 (M13).** ADR-11 removed `apply_transforms`, which means a
+transform is applied **only** inside `build_features` — so producing one
+partition's three bundles is **three complete feature constructions**, not one
+construction plus two cheap applies:
+
+| Call | What it builds | Why it cannot be skipped |
+|---|---|---|
+| `raw` | the untransformed training frame | `fit_transforms` needs a bundle to fit on |
+| `train` | the same rows, transformed | the only way to apply `T_k` is to rebuild |
+| `score` | the validation-month rows, transformed | same |
+
+Over the six partitions that is **eighteen** constructions per full run, against
+one per fold before the redesign. At the peak of a single partition's sequence,
+**three `matrix` + `tensor` pairs are live simultaneously** — `raw` is still
+referenced while `train` is built — so peak memory, not cumulative runtime, is
+the binding quantity against TE §9.3's **10.0 GB** hard planning envelope.
+
+This is a **stated cost, not a measured one**: §15.1 requires runtimes and peak
+memory to be measured from the fixtures and frozen, never invented, so no number
+is asserted here. The obligation this records is that the plumbing fixture's
+measured peak memory is checked against the 10.0 GB envelope **before** any
+full-year job, and that a redesign trading applies for rebuilds is visible in the
+envelope rather than discovered when a Kaggle session runs out of memory.
+
+Raised by the re-entry advisory review as finding 13; resolved under the owner's
+2026-08-23 ruling.
+
 ## Run record and registry
 
 Q5 = C. Two artifacts, one authoritative:
@@ -204,3 +307,11 @@ run manifest, not a fatal error.
   The script exists in both phases; its Phase 1 scope is thinner than its
   description implies, and `functional-design` should settle exactly what it runs.
 - **None** of the above adopts a reading on a supervisor-owned value.
+
+---
+
+*Finalized 2026-08-23 under the stage's revision-4 completion pass. The bundle
+address rule (§ ⚠ THE BUNDLE ADDRESS IS THE DIRECTORY NAME) and the three-construction
+envelope statement (§ Resource envelope) were added in this pass. M10 — that neither
+mandated fixture can exercise the redesigned leakage boundary — is tracked open in
+`decisions.md` § Deferred obligations with its owner, due gate and acceptance test.*

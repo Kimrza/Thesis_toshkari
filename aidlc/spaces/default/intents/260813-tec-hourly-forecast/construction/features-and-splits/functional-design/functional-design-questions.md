@@ -7,9 +7,18 @@ forecasting honest.
 
 Unit **7 of 12**, and the one that carries the most acceptance rows in the plan. It owns
 `src/features/availability.py`, `build.py`, `transforms.py`, `windows.py`;
-`src/data/splits.py`; `scripts/05_build_features_and_splits.py`; and **five** test modules —
+`src/data/splits.py`; `scripts/05_build_features_and_splits.py`; and **six** test modules —
 `test_feature_availability.py`, `test_iri_denial.py`, `test_split_embargo.py`,
-`test_train_only_transforms.py`, `test_locked_test_guard.py`.
+`test_train_only_transforms.py`, `test_locked_test_guard.py`, and
+**`test_feature_leakage_guards.py`**.
+
+> **⚠ Corrected 2026-08-23, from "five".** The first five reproduce `unit-of-work.md` § 7's
+> `Owns` list, which predates `CR-2026-08-22-LEAKAGE-TA`. **`test_feature_leakage_guards.py`**
+> is TA-36's primary negative-path test, assigned here by the story map's § Cross-unit
+> responsibilities and confirmed at `external-products` **R-54a**, which also records that
+> `external-products` will **not** build it. Left at five, TA-36's primary test would have been
+> built by nobody. **Derived: 5 + 1 = 6.** § 7's `Owns` list is a **fourth** stale item going
+> to the gate, alongside §§ 5, 6 and 7's counts.
 
 **BLK-04 is an EXIT condition on this stage**, and its contract is authored here. The
 register is explicit: this unit and four downstream units **may enter** functional design;
@@ -39,7 +48,7 @@ it, and whether three instances is a pattern worth naming as one.
 `Pending`: the row exists, no test module is implemented, none has been executed, and none
 has passed."* **A row is not a result.**
 
-**G-09 is not signed.** `src/`, `configs/` and all five test modules are absent; `tests/`
+**G-09 is not signed.** `src/`, `configs/` and all **six** test modules are absent; `tests/`
 holds three modules, none of them this unit's.
 
 ## Sources
@@ -51,7 +60,7 @@ holds three modules, none of them this unit's.
 - `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract.
 - `../target-standardization/functional-design/business-rules.md` — the D-17 target rows this unit consumes.
 - `../external-products/functional-design/business-rules.md` — **R-56**'s transitive import scan and **R-58**'s driver alignment.
-- `../governance-guards/functional-design/business-rules.md` — **R-23**, **R-25**, **R-28**.
+- `../governance-guards/functional-design/business-rules.md` — **R-19** (the exactly-one-member exclusion shape), **R-23** and **R-24** (the two phase-boundary limbs). **Corrected 2026-08-23:** R-19 and R-24 are cited in this artifact’s body and were absent here; **R-25** (access-log ordering) and **R-28** (restricted root) were listed and drawn on nowhere, and are removed.
 - `evidence/DECISIONS.md` — **D-10.3** (lags), **D-11** (fixture window), **D-13** (regime counts).
 - Workspace inspection, 2026-08-23: `tests/` holds three modules, none this unit's; `src/` and `configs/` absent.
 - Absent by scope design: `stories` (2.4 `SKIP`), `mockups` (1.6 and 2.5 `SKIP`). `kind: library`.
@@ -192,7 +201,7 @@ assert it; writing those criteria is a `requirements.md` change and is carried f
 | Dictionary closure | **TA-33** (FR-P1-04-12) — `Pending` |
 | `vtec_lag_*` carry-forward prohibition | **TA-34** (FR-P1-04-13) — `Pending` |
 | Support-field rules | **TA-35** (FR-P1-04-16) — `Pending` |
-| Driver-interval repetition | **TA-36** (FR-P1-04-17) — `Pending`, and **`external-products`' row**, not this unit's |
+| Driver-interval repetition | **TA-36** (FR-P1-04-17) — `Pending`. **⚠ Corrected 2026-08-23:** this read *"`external-products`' row, not this unit's"*, from the story map's § Per-unit coverage summary alone. § Cross-unit responsibilities is the reconciling statement and gives **this unit** TA-36's **enforcement raise** at `features.build_features` **and its primary negative-path test** (`tests/test_feature_leakage_guards.py`) — already settled at `external-products` **R-54a**, whose own control says an artifact claiming the wrong side fails review. See `business-rules.md` **R-76a** |
 | The target-lag contract | Part of FR-P1-04-13 → **TA-34** |
 
 How does this unit state the remaining gap?
@@ -476,7 +485,7 @@ X. Other (please specify)
 
 - **[assumption]** Rule IDs continue the single sequence — `foundation` R-01…R-17, `governance-guards` R-18…R-29, `acquisition` R-30…R-43, `inventory-and-registry` R-44…R-53, `external-products` R-54…R-63, `target-standardization` R-64…R-73 — so this unit opens at **R-74**. If per-unit numbering was intended, say so at the gate and the artifacts restart.
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 7 disagree, because the 2026-08-22 §15.2 approval of TA-33/34/35 is what moved it. Neither artifact is edited by this stage.
-- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify (`component-methods.md` § Depth). **No amendment is owed for them**; the running total stays **five across three units**.
+- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify (`component-methods.md` § Depth) — **still true, and still owes nothing for them**. But Q1's answer, as finally mechanised, **amends two boundary calls**: `apply_transforms` gains a required `purpose`, and `build_features` gains `transform`. Running total **7 across 4 units**. **Corrected 2026-08-23** from *"no amendment is owed; the total stays five across three units"*.
 - **[assumption]** `tests/test_locked_test_guard.py` is **this unit's**, per § 7 — it exercises both limbs and this unit already depends on `governance-guards`, so assigning it there would close a cycle. `governance-guards` supports WS-18 and TA-18.
 - **Open — BLK-04 is an EXIT condition on this stage**, and on the four downstream units that inherit the fit. **No affected unit may complete or exit 3.1 without its approved contract**, and **no implementation may proceed** while it stands. NFR-LEAK-01's evidence is still owed to the **Supervisor at G-04 and G-05**.
 - **Open — TA-33, TA-34, TA-35 and TA-36 are all `Pending`** — approved, not implemented, not executed, not passing. **A row is not a result.**
@@ -536,10 +545,24 @@ value-flow property.
 > while keeping WS-10/TA-07 here, so applied consistently it would forbid the very split Q6
 > adopts. The by-property reason above holds for both, and **neither answer changes**.
 
-**Nothing here owes an amendment.** The `src/features/*` and `src/data/splits.py` shapes
-beyond the named boundary calls are **intra-package**, and `component-methods.md` § Depth
-names this stage as where they are specified. The running total stays **five owed amendments
-across three units**.
+**Two amendments are owed, and they are Q1's real price.** The `src/features/*` and
+`src/data/splits.py` shapes beyond the named boundary calls are **intra-package**, and
+`component-methods.md` § Depth names this stage as where they are specified — **those owe
+nothing**, `Transform`'s internals included. But mechanising Q1's answer so that it actually
+works required amending **two cross-package boundary calls**: `apply_transforms` gains a
+required `purpose` (`train` | `evaluate`), and `build_features` gains **both**
+`transform: Transform | None = None` **and** `purpose: ApplyPurpose | None = None` — they
+travel together, and supplying one without the other raises. Running total **7 across 4
+units** (two functions, not two per function), derived in `business-logic-model.md`
+§ Amendments owed.
+
+> **⚠ Corrected 2026-08-23.** This paragraph read *"nothing here owes an amendment … the
+> running total stays five owed amendments across three units."* That held for the first two
+> attempts at element 4, **both of which avoided a signature change and neither of which
+> worked** — the first stated a comparison the signature could not perform, the second derived
+> a partition label that does not exist and blocked G-06. The amendment is what a working
+> mechanism cost. **The owner approved it on 2026-08-23** after being shown that no row-level
+> check can separate a legitimate training use from a leaking evaluation use of the same row.
 
 Carried to the gate, unchanged by these answers: **BLK-04 open and an exit condition**;
 TA-33/34/35/36 all `Pending`; `unit-of-work.md` § 7 stale, plus whatever the § sweep finds;

@@ -8,8 +8,13 @@ Depth: Comprehensive. Scope: `research-pipeline-governed`.
 - [desc] Initial description, carried verbatim in
   `aidlc/spaces/default/intents/260813-tec-hourly-forecast/ideation/intent-capture/intent-statement.md`.
 - Requirements: `../requirements-analysis/requirements.md` — 94 requirement rows,
-  40 with no §16/§19 test row. Every component below names the requirement IDs it
-  carries.
+  **36** with no §16/§19 test row. Every component below names the requirement IDs
+  it carries. *(Corrected 2026-08-23: this line read **40**, the figure superseded
+  on 2026-08-22 when `FR-P1-04-12`, `FR-P1-04-13`, `FR-P1-04-16` and `FR-P1-04-17`
+  left the untested list on gaining acceptance rows TA-33 through TA-36 under
+  `CR-2026-08-22-LEAKAGE-TA`. `requirements.md` § Requirements with no testing row
+  carries 36 and records the 40 → 36 change with the four IDs named; the 40 here
+  was carried from the upstream document as it stood before that change.)*
 - Affirmed practices: `../practices-discovery/team-practices.md` — `ruff`, the
   `NN_verb_noun.py` convention, the `--config configs/` CLI, two platforms, and
   the rule that a notebook never holds the only copy of production logic.
@@ -61,7 +66,7 @@ package that reads `configs/`, and the only one that writes release manifests.
 | `phase_contract.py` | The phase boundary: the runtime import guard (Q3), the transition manifest, and the canonical protected set derived from TE §2.2 ∪ §7.0B — **final enumeration and cardinality deferred to stage 3.1**, stated neither here nor in this stage; see BLK-06. | 1 and 2 | FR-P1-03-2, FR-P1-06-1, FR-P1-06-2 |
 | `locked_test.py` **NEW** | The December path guard (Q4): one chokepoint for every read under the restricted root, writing the access-log row **before** the read. | 1 and 2 | FR-P1-02-3, FR-P1-02-6, FR-P1-05-12 |
 | `registry.py` | Station registry: coordinates, the coordinate-to-cell rule, and Vision §6.2's full content including one pinned IGRF version. | 1 and 2 | FR-P1-02-1, FR-P1-02-7 |
-| `splits.py` | F1–F4 folds, the 24-hour embargo, and the December locked partition — the execution half of the locked-test guard (Q4). | 1 and 2 | FR-P1-04-5, FR-P1-05-12 |
+| `splits.py` | **One `Partition` list** — F1–F4, the **final refit** and the December locked month — with the 24-hour embargo and the execution half of the locked-test guard (Q4). **Amended 2026-08-23 (ADR-11):** `FoldSpec` carried a required `validation_month`, so the refit was representable nowhere and G-06 had no path. | 1 and 2 | FR-P1-04-5, FR-P1-04-14, FR-P1-05-12 |
 | `release.py` | Immutable dataset releases: TE §13.3's ten manifest rows over fourteen fields, SHA-256 hashing, write-protection. The single home of the SHA-256 helper the team practice consolidates. | 1 and 2 | FR-P1-04-11, FR-P1-01-11, FR-P1-05-13 |
 | `reuse_registry.py` | The §10.1 external-code register: all fifteen fields, recorded before the code is used. | 1 and 2 | FR-P1-06-3, FR-P1-06-4 |
 
@@ -122,13 +127,29 @@ are externally sourced, not because it shares the benchmark's isolation.
 |---|---|---|
 | `availability.py` | The availability matrix: observation timestamp, publication timestamp **or, where the provider supplies no publication timestamp, the approved conservative availability convention plus the documented absence and an unverified-latency statement** (amended 2026-08-22, `CR-2026-08-22-EV-12`; for F10.7 this is **D-25**), release status and safe lag per feature. Asserts actual lag ≥ declared safe lag. | FR-P1-04-2, FR-P1-04-15, FR-P1-04-16 |
 | `build.py` | Feature construction. **Asserts the IRI-free contract** and the closed §6.2 dictionary. | FR-P1-04-1, FR-P1-04-12, FR-P1-04-13, FR-P1-04-17 |
-| `transforms.py` | Train-only fitting, per fold. Never fitted on the full dataset. | FR-P1-04-6 |
-| `windows.py` | One shared window definition producing both the flattened matrix and the sequence tensor, so every model family sees the same eligible information. | FR-P1-04-8 |
+| `transforms.py` | Train-only fitting, per **partition**. `fit_transforms` takes a `FeatureBundle` **and the `Partition` itself**, so a full-dataset fit **raises**: the scored-range-equals-training-range comparison is computable from the arguments rather than asserted in prose. It is *not* unrepresentable in the type — `FrameSpec.partition_id` is a caller-supplied string — and that earlier claim is **withdrawn** (ADR-11 § ⚠ THE "UNREPRESENTABLE" CLAIM IS WITHDRAWN). **`apply_transforms` is removed** (ADR-11): an apply accepting any frame was the leak itself; transforms are applied only inside `build_features`, under an identity check. | FR-P1-04-6 |
+| `windows.py` | One shared window definition producing both the flattened matrix and the sequence tensor, so every model family sees the same eligible information. Both now travel in one **`FeatureBundle`**, making FR-P1-04-8 parity structural rather than asserted. | FR-P1-04-8 |
 
 **Boundary.** `src/features` imports `src/data` and `src/external.spaceweather`.
 It must not import `src/external.iri`, `src/external.gim` or any `src/gnss`
 module. `windows.py` owning both representations is what makes FR-P1-04-8's
 matched-window parity checkable rather than aspirational.
+
+> **⚠ This package's leakage boundary was redesigned 2026-08-23 (ADR-11).** ADR-01
+> claimed the `fit_transforms` / `apply_transforms` split made a full-dataset fit
+> *"unrepresentable"*; it did not, and stage 3.1 returned `NOT-READY` **five**
+> consecutive times trying to close the gap from below before the owner directed a
+> backward jump to this stage. What changed here: `build_features` takes a
+> **`FrameSpec`** (partition, role, scored range) and returns a
+> **`FeatureBundle`** carrying that spec and the transform identity; the leak check
+> is an **identity comparison** of partition ids rather than any containment rule over
+> rows — the training ranges nest, which defeated every containment attempt; and
+> `apply_transforms` is gone. `FrameSpec` carried a fourth field, `lead_in_hours`,
+> which was **withdrawn** on 2026-08-23 because it reversed FR-P1-04-5's approved
+> *"no window crosses a boundary"* criterion and enlarged the locked-test scored set;
+> the consequence — **the locked test covers 30 days, not 31** — is disclosed wherever
+> December coverage is reported. Full history in `decisions.md` ADR-11 and
+> `application-design-questions.md` § RE-ENTRY.
 
 ### `src/models` — the six model families
 
@@ -192,3 +213,11 @@ requirement, and the four places REQ-ENG-4's count must move together.
 - **Open, carried from 2.3.** `scripts/02_standardize_prepared_target.py` (Phase 1) and `scripts/02_build_vtec_target.py` (Phase 2) share the ordinal `02` in §12's tree. `services.md` records the reading adopted; the collision itself is a §12 defect this stage does not resolve.
 - **Open, carried from 2.3.** § Known defects row 12 — the `plumbing_7day` station count — blocks the fixture manifest `run_walking_skeleton.py` reads. `services.md` names it as a precondition rather than designing past it.
 - **None** of the above adopts a reading on a supervisor-owned value.
+
+---
+
+*Finalized 2026-08-23 under the stage's revision-4 completion pass. Carried to the
+approval gate unresolved: `Transform.inverse`'s lookup mechanism (Critical),
+`Partition.train_start`'s absence (Major), `test_prepared_target_schema.py`'s
+missing owner, and the three tracked deferrals M10, M14 and BLK-04/BLK-06 recorded
+in `decisions.md` § Deferred obligations.*

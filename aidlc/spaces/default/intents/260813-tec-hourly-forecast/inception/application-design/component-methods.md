@@ -258,16 +258,43 @@ checking the artifacts that matter most.
 
 ## `src/data/splits.py` — partitions and the execution guard
 
+> ## ⚠ AMENDED 2026-08-23 — `FoldSpec` COULD NOT REPRESENT THE FINAL REFIT
+>
+> **Superseded, preserved:**
+> ```python
+> @dataclass(frozen=True)
+> class FoldSpec:
+>     fold_id: str                 # "F1".."F4"
+>     train_end: date
+>     validation_month: int
+>     embargo_hours: int = 24
+>
+> def build_folds(snapshot: ConfigSnapshot) -> Sequence[FoldSpec]: ...
+> ```
+>
+> `validation_month: int` is **required**, and the final refit (1 Jan – 30 Nov,
+> FR-P1-04-14) has none — so the refit was representable nowhere, and both functions
+> taking a `FoldSpec` were closed to it. **December inherited the same gap, and G-06
+> depends on the refit.** Found on a backward jump from stage 3.1 after five review
+> cycles; see § The `src/features` leakage boundary and **ADR-11**.
+
 ```python
+class PartitionKind(StrEnum):
+    fold = "fold"
+    refit = "refit"
+    locked = "locked"
+
+
 @dataclass(frozen=True)
-class FoldSpec:
-    fold_id: str                 # "F1".."F4"
+class Partition:
+    partition_id: str                 # "F1".."F4", "REFIT", "DEC"
+    kind: PartitionKind
     train_end: date
-    validation_month: int
+    validation_month: date | None     # None for REFIT alone; DEC carries 2022-12-01
     embargo_hours: int = 24
 
 
-def build_folds(snapshot: ConfigSnapshot) -> Sequence[FoldSpec]: ...
+def build_partitions(snapshot: ConfigSnapshot) -> Sequence[Partition]: ...
 
 
 def materialise_locked_partition(
@@ -283,13 +310,68 @@ evidences. A *read* for the required coverage audit does not come through here;
 it comes through `locked_test.open_restricted`, which is why the two are
 separate functions in separate modules.
 
+> ## ⚠ SIX PARTITIONS, FIVE MANIFEST ROWS — AMENDED 2026-08-23 (M5)
+>
+> **Superseded, preserved:** `validation_month: date | None  # None for refit and locked`.
+>
+> **Two distinct defects, one line apart.**
+>
+> **1. The locked partition could not say which month it evaluates.** `DEC` carried
+> `validation_month = None`, so the one partition whose whole purpose is a named
+> evaluation month was the one that could not name it. `None` now means **the final
+> refit alone** — which genuinely has no validation month (FR-P1-04-14: selected
+> configuration refit on January–November, scored nowhere) — and `DEC` carries
+> **2022-12-01**. This is also what makes the *"exactly one evaluation role per
+> month"* assertion walk **one** list and terminate: Apr → F1, Jul → F2, Oct → F3,
+> Nov → F4, Dec → DEC, `None` → REFIT.
+>
+> **2. Six `Partition` objects against a criterion that says five.** FR-P1-04-5's
+> acceptance criterion reads, verbatim: *"No window crosses a boundary; the split
+> manifest records the excluded count and **enumerates all five partitions**; a refit
+> executed before the freeze fails rather than proceeding."* The five are the four
+> folds **and the final refit** — the requirement text names them as *"F1: Jan–Mar/Apr;
+> F2: Jan–Jun/Jul; F3: Jan–Sep/Oct; F4: Jan–Oct/Nov; December locked"* plus *"The
+> partition list also carries `Final refit: 1 Jan – 30 Nov`"*. December is **locked**,
+> not a manifest row.
+>
+> **The rule, stated so the two counts cannot be confused again:**
+>
+> | Artifact | Contents | Count |
+> |---|---|---|
+> | `build_partitions(snapshot)` return value | `F1`–`F4`, `REFIT`, `DEC` | **6** — every partition any code path needs to name |
+> | The **split manifest** FR-P1-04-5 gates on | `F1`–`F4`, `REFIT`, each with its training range, validation month and excluded count | **5** |
+> | The locked partition record | `DEC`, its evaluated month (2022-12-01), and its access-gate state | recorded **separately**, because it is access-gated and the manifest is not |
+>
+> A split manifest carrying six rows **fails** FR-P1-04-5, and so does one carrying
+> four. `DEC` appearing in `build_partitions`'s list is not a manifest row and must
+> never be written as one: the manifest is reviewed at a gate where December's
+> evaluation is not yet permitted to exist.
+>
+> Raised by the re-entry advisory review as finding 5; resolved under the owner's
+> 2026-08-23 ruling.
+
 ```python
 def assert_membership_from_timestamps(frame: DataFrame) -> None: ...
 ```
-Fold and partition membership derives from record timestamps, never from a
+Partition membership derives from record timestamps, never from a
 directory name or filename. **Raises** on any row whose month or year disagrees
 with its partition — the defect that filed locked-month records into
 `audit_evidence_2022-01/`.
+
+> **What this does NOT do, stated 2026-08-23 because stage 3.1 twice read it as more
+> than it is.** It returns `None`. It **validates** a row against the partition the row
+> is already filed under; it **derives nothing** and yields no per-row label. No
+> derivation is possible: the training ranges **nest**, so a 15 February row belongs to
+> five of the six partitions at once. Any leakage check that needs to know "which
+> partition" must compare **declared identities** (`FrameSpec.partition_id` against
+> `Transform.partition_id`), which is what the redesigned `src/features` boundary does.
+>
+> **Vision §8.1's *"each target timestamp belongs to exactly one partition"* therefore
+> cannot run over the training ranges either.** It holds over each month's **evaluation
+> role** — Apr (F1), Jul (F2), Oct (F3), Nov (F4), December (locked), training-only for
+> the rest — which is disjoint by construction. **This is a reading of a frozen Vision
+> rule and is carried to the gate**, not settled here; if §8.1 is meant literally over
+> the training ranges it is unsatisfiable as written.
 
 ---
 
@@ -381,33 +463,232 @@ safe_lag_hours`, when a driver's `release_status` indicates a backfilled final
 value where the contemporaneous grade was required, or when `f107_81_trailing`'s
 window does not **end at the safe-lagged day** — the anchor `TEC-13` restored.
 
+## The `src/features` leakage boundary — redesigned 2026-08-23
+
+> **⚠ THE SUPERSEDED INTERFACE, PRESERVED, AND WHY IT COULD NOT WORK**
+>
+> ```python
+> def build_features(target, *, drivers, registry, matrix,
+>                    fold: FoldSpec, snapshot) -> tuple[DataFrame, NDArray]: ...
+> def fit_transforms(train: DataFrame, *, fold: FoldSpec) -> Transform: ...
+> def apply_transforms(frame: DataFrame, *, transform: Transform) -> DataFrame: ...
+> ```
+>
+> It claimed: *"A single `fit_transform(all_data)` is unrepresentable in this
+> interface, which is how NFR-LEAK-01 is enforced by shape rather than by review."*
+> **It is not.** `train` is an unconstrained `DataFrame`, so `fit_transforms(all_data,
+> fold=F1)` type-checks — and stage 3.1 then spent **five adversarial review cycles**
+> failing to close the gap from below. Three defects, each verified directly:
+>
+> 1. **`build_features` had no row selector** — no way to ask for a partition's
+>    training rows as distinct from its validation month.
+> 2. **`apply_transforms` had no way to reject a wrong-partition frame.** Every
+>    row-level rule tried was defeated by the fact that the training ranges **nest**:
+>    Jan–Mar ⊂ Jan–Jun ⊂ Jan–Sep ⊂ Jan–Oct ⊂ Jan–Nov. F4's transform applied to April
+>    passed every containment test, and F4's fit saw April.
+> 3. **Nothing stamped the emitted artifacts**, so provenance could not be checked
+>    across the `05` → `06` disk handoff where the actual scoring happens.
+>
+> The full history is in `application-design-questions.md` § RE-ENTRY and in the five
+> preserved reports at `construction/features-and-splits/functional-design/business-logic-model.md`
+> § Review.
+
 ```python
+@dataclass(frozen=True)
+class FrameSpec:
+    partition_id: str                     # matches Partition.partition_id
+    role: Literal["train", "score"]
+    scored_start: datetime
+    scored_end: datetime
+
+
+@dataclass(frozen=True)
+class Transform:
+    transform_id: str
+    partition_id: str
+    # fitted state is intra-package
+
+
+@dataclass(frozen=True)
+class FeatureBundle:
+    matrix: DataFrame
+    tensor: NDArray
+    spec: FrameSpec
+    transform_id: str | None              # None ⇒ untransformed
+
+
 def build_features(
     target: DataFrame,
     *,
     drivers: Mapping[str, DataFrame],
     registry: Mapping[str, Station],
     matrix: Sequence[AvailabilityRow],
-    fold: FoldSpec,
+    spec: FrameSpec,
+    partitions: Sequence[Partition],
     snapshot: ConfigSnapshot,
-) -> tuple[DataFrame, NDArray]: ...
+    transform: Transform | None = None,
+) -> FeatureBundle: ...
+
+
+def fit_transforms(
+    bundle: FeatureBundle,
+    *,
+    partition: Partition,
+) -> Transform: ...
 ```
-Returns the flattened matrix and the sequence tensor from **one** window
-definition (`windows.py`), so FR-P1-04-8's parity is structural rather than
-asserted. **Raises** `LeakageError` on: any field outside the §6.2 dictionary; a
-carried-forward `vtec_lag_*` value (prohibited — the ≤3 h allowance is external
-drivers only); an incomplete `vtec_seq_24` window that was not excluded; a
-support field used as an input without a recorded G-04 approval; a target-hour
-quality field; a raw-longitude column; a driver carried forward beyond 3 h.
+
+> **⚠ `partition` added 2026-08-23 after the re-entry review — the first draft
+> reproduced ADR-01's exact error.** It read `fit_transforms(bundle: FeatureBundle)`
+> and claimed to raise *"when the bundle's scored range is not its partition's training
+> range"*. **That check could not execute**: the argument closure is `matrix, tensor,
+> spec, transform_id` / `partition_id, role, scored_start, scored_end, lead_in_hours` —
+> **no `Partition`, no `ConfigSnapshot`**, so nothing in scope knows what `F1`'s
+> training range *is*. `partition_id` is a **caller-asserted string**, and
+> `build_features(spec=FrameSpec("F1", "train", 2022-01-01, 2022-11-30))` would have
+> produced a bundle that passes the identity check while carrying all of Jan–Nov.
+> The unconstrained argument had **moved**, from `train: DataFrame` to a string, not
+> closed. Caught by the advisory reviewer; the same defect class this redesign exists
+> to fix, made once more inside the fix.
+
+**`apply_transforms` is removed.** A function that applies a fitted transform to an
+arbitrary frame **is** the hole — five cycles of trying to constrain its argument
+established that the constraint cannot be expressed over rows. Transforms are now
+applied **only** inside `build_features`, which is also the only place both
+representations are produced, so a transformed matrix beside an untransformed tensor
+is no longer constructible.
+
+**The leak check is an identity, not a containment.** `build_features` **raises
+`LeakageError`** when `transform.partition_id != spec.partition_id`. The nesting that
+defeated every date-range rule is irrelevant to an id comparison: F4's transform on a
+frame whose spec says `F1` fails regardless of which months overlap.
+
+> ## ⚠ ONE ENUMERATED EXCEPTION — `REFIT` → `DEC`, OWNER DECISION 2026-08-23
+>
+> **The problem.** A pure identity rule raises on `transform.partition_id == "REFIT"`
+> against `spec.partition_id == "DEC"` — **which is exactly the G-06 apply.** The
+> locked test is scored with the transform fitted on January–November; the only
+> alternative a pure identity permits is a `DEC`-stamped transform, i.e. **fitting on
+> December**, which is the thing the lock exists to prevent. The first draft of ADR-11
+> never said which transform scores December, and Q9–Q12 never asked. Caught by the
+> re-entry advisory review.
+>
+> **The rule, stated as a closed set rather than a softening.** `build_features`
+> accepts a transform whose `partition_id` differs from the spec's **only** for the
+> pairs in this table, which has exactly one row:
+>
+> | Transform `partition_id` | Spec `partition_id` | Spec `role` | Why |
+> |---|---|---|---|
+> | `REFIT` | `DEC` | `score` | The G-06 one-shot evaluation. Fitted Jan–Nov; December is never fitted on. |
+>
+> **Every other mismatched pair raises.** The permitted pair additionally requires
+> `spec.role == "score"` — a `REFIT` transform against a `DEC` **train** frame raises,
+> because training on December is the locked-test violation itself.
+>
+> **What this costs, stated plainly.** The invariant is no longer *"ids must match"*
+> but *"ids must match, or be the one enumerated pair"* — strictly weaker, and a
+> weaker invariant needs its own evidence. **Negative control:** for every ordered pair
+> of partition ids that is **not** this row, a mismatched apply → `LeakageError`,
+> asserted by enumeration over the six ids rather than by sampling, so a second
+> exception cannot be added without a test failing. **And:** `REFIT` → `DEC` with
+> `role="train"` → `LeakageError`.
+>
+> **December still reaches `apply` only through the guard.** The carve-out permits the
+> *pairing*; it grants no access. `splits.materialise_locked_partition` still refuses
+> without a verifying `g05_signature` (ADR-03), and `locked_test.open_restricted` still
+> logs before every read.
+
+**`fit_transforms` takes a bundle and the `Partition` itself.** It **raises
+`LeakageError`** when `bundle.spec.role != "train"`; when `bundle.transform_id is not
+None` (already transformed); when `bundle.spec.partition_id != partition.partition_id`;
+and — **the check that needs `partition` in scope** — when
+`[bundle.spec.scored_start, bundle.spec.scored_end]` is not exactly
+`partition`'s training range. The returned `Transform` carries
+`partition.partition_id`.
+
+**`build_features` validates the same way, for the same reason.** It takes
+`partitions: Sequence[Partition]` and **raises** when `spec.partition_id` names none of
+them, or when the spec's scored range is not **contained in** the range its `role`
+permits for that partition — the training range for `train`, the
+**`validation_month`** for `score`. Without this, `FrameSpec`'s fields are caller
+assertions and nothing verifies them, which is precisely how the superseded interface
+failed.
+
+> **⚠ Containment, not equality — corrected 2026-08-23.** The first draft required the
+> scored range to **equal** `validation_month`. That makes the **walking-skeleton
+> fixtures unrepresentable**: D-11 freezes the plumbing window at **2022-11-01 to
+> 2022-11-07**, seven days inside F4's validation month, so no legal `score` spec
+> existed for **WS-12, WS-13 or WS-20** — the three rows the fixtures evidence. Caught
+> by the re-entry advisory review.
+>
+> **Containment is exact enough**, and this is why: the **validation months are
+> disjoint** (Apr, Jul, Oct, Nov, December) even though the training ranges nest. A
+> range contained in F4's validation month is in November and nowhere else, so no
+> cross-partition scoring becomes representable. The training side is likewise safe —
+> `FrameSpec("F1", "train", 2022-01-01, 2022-11-30)`, the Critical-1 case, still
+> **raises**, because Nov 30 lies outside F1's training range regardless of
+> containment-versus-equality. The identity check does the leakage work; this check
+> catches an inconsistent spec.
+
+> ## ⚠ `lead_in_hours` WAS REMOVED — OWNER DECISION, 2026-08-23
+>
+> **The superseded field and its rationale, preserved.** `FrameSpec` carried
+> `lead_in_hours: int = 24`, on the argument that `vtec_seq_24` and `vtec_lag_24h` need
+> 24 h **preceding** any scored row, so a `score` frame for December would hold late-
+> November rows that are *present but never scored* — making **1 December** scorable.
+>
+> **Why it is gone.** FR-P1-04-5's acceptance criterion reads, verbatim: *"No window
+> crosses a boundary … the first 24 h are excluded and counted."* `lead_in_hours`
+> existed **precisely to make a window cross the November/December boundary**, which
+> reverses an approved requirement and **enlarges the locked-test scored set**. That is
+> supervisor-owned under Vision §8.2 and §8.7 and gate **G-05** — and ADR-11 itself
+> states that no ADR here adopts a reading on a supervisor-owned value. Caught by the
+> re-entry advisory review; the owner chose to honour FR-P1-04-5 rather than route it
+> to the supervisor.
+>
+> **The consequence, which must be disclosed wherever December coverage is reported:**
+> **1 December is not scored.** The locked test covers **30 days, not 31**, and the
+> first 24 h of **every** validation month (Apr, Jul, Oct, Nov) are likewise excluded
+> and counted. This is the requirement working as approved, not a defect — but a
+> December coverage figure that silently reads as 31 days would be wrong.
+
+**`scored_start` / `scored_end` bound exactly what is scored, and nothing precedes
+them.** A window that would reach before `scored_start` is **excluded and counted**,
+per FR-P1-04-5 and FR-P1-04-13's incomplete-`vtec_seq_24` rule. The excluded-row count
+is emitted, never merely dropped — this project's standing rule that a check which
+never fired must not look like one that passed.
+
+**The sequence, for any partition *k*** — three calls, each with a stated purpose:
 
 ```python
-def fit_transforms(train: DataFrame, *, fold: FoldSpec) -> Transform: ...
-def apply_transforms(frame: DataFrame, *, transform: Transform) -> DataFrame: ...
+raw   = build_features(..., spec=FrameSpec(k, "train", ...), partitions=P)   # transform_id None
+T_k   = fit_transforms(raw, partition=P[k])
+train = build_features(..., spec=FrameSpec(k, "train", ...), partitions=P, transform=T_k)
+score = build_features(..., spec=FrameSpec(k, "score",  ...), partitions=P, transform=T_k)
 ```
-Two functions, deliberately. Fitting takes only the training partition and the
-fold; applying takes a fitted transform. A single `fit_transform(all_data)` is
-unrepresentable in this interface, which is how NFR-LEAK-01 is enforced by shape
-rather than by review.
+
+The **untransformed** `raw` bundle is live in the process, and consuming it for
+training or scoring would leak. That is closed by a check, not a convention:
+`06_train_and_predict.py` and `07_evaluate_and_report.py` **raise** on any bundle
+whose `transform_id is None`.
+
+**Returning `FeatureBundle` is what makes provenance survive `05` → `06`.** The spec
+and the transform identity are **the same object** as the data, so they cannot drift
+from it the way a side-car manifest can. `06`/`07` assert that a bundle scored for
+partition *k* carries `spec.partition_id == k`, `spec.role == "score"`, and the
+`transform_id` of *k*'s own transform.
+
+**`build_features` still raises** `LeakageError` on: any field outside the §6.2
+dictionary; a carried-forward `vtec_lag_*` value (prohibited — the ≤3 h allowance is
+external drivers only); an incomplete `vtec_seq_24` window that was not excluded; a
+support field used as an input without a recorded G-04 approval; a target-hour quality
+field; a raw-longitude column; a driver carried forward beyond 3 h. **And
+`AlignmentError`** on a driver value repeated outside its own defined interval, or
+shifted to a neighbouring hour (FR-P1-04-17 / TA-36's enforcement limb; the
+no-interpolation limb is a static source check, not a runtime raise).
+
+**Parity is still structural.** Both representations come from **one** window
+definition in `windows.py` and now travel in one object, so FR-P1-04-8 holds by
+construction rather than by assertion.
 
 ---
 
@@ -422,28 +703,81 @@ class Prediction:
     target_definition_id: str
     phase_id: str
     source_id: str
+    partition_id: str            # added 2026-08-23 (ADR-11)
+    transform_id: str            # added 2026-08-23 (ADR-11)
 
 
 def fit_predict(
     model_id: str,
     *,
-    features: DataFrame,
-    tensor: NDArray,
-    fold: FoldSpec,
+    bundle: FeatureBundle,
+    partition: Partition,
     snapshot: ConfigSnapshot,
 ) -> Prediction: ...
 
 
-def three_seed_mean(predictions: Sequence[Prediction]) -> Prediction: ...
+def three_seed_mean(
+    predictions: Sequence[Prediction],
+    *,
+    expected_seeds: frozenset[int],
+) -> Prediction: ...
 ```
+**`Prediction` carries `partition_id` and `transform_id`** (added 2026-08-23), copied
+from the bundle it was produced from. Without them the provenance `FeatureBundle`
+established dies at `06`: `07` receives predictions, not bundles, and could not tell
+which partition's transform produced the numbers it is about to score. The stamp has
+to travel the **whole** way, not just to the first consumer.
+
+**`inverse_transform` is required, and `apply_transforms`'s removal did not delete
+it.** TE §7.2's `ABL-DIFF` *"inverse-transforms to absolute TECU before any metric"*,
+and `src/evaluation` must be able to do that without importing `src/features` — an
+edge the dependency matrix does not carry and should not gain. The inverse is
+therefore a **method on `Transform`** (`Transform.inverse(frame) -> DataFrame`), which
+travels with the `Prediction`'s `transform_id` and needs no new package edge. This is
+distinct from the removed `apply_transforms`: an inverse maps model output back to
+TECU and can leak nothing, because it consumes predictions rather than producing
+training input.
+
+**Amended 2026-08-23 with the leakage boundary.** `fit_predict` previously took
+`features: DataFrame, tensor: NDArray, fold: FoldSpec` — three parameters a caller
+could assemble inconsistently, and none of which carried provenance. It now takes the
+**`FeatureBundle`**, so the two representations arrive together as `build_features`
+emitted them, and it **raises `LeakageError`** when `bundle.transform_id is None` —
+an untransformed bundle reaching training is the leak the three-call sequence would
+otherwise leave live. `partition: Partition` replaces `fold: FoldSpec` so the refit
+and the locked month are expressible.
+
 Q6's confirmatory-prediction rule. `three_seed_mean` **verifies sample alignment
 explicitly** before averaging and **raises** `AlignmentError` when the three
 frames do not share an identical index — averaging misaligned predictions
 silently is the failure this check exists for. It **raises** `SeedError` when
-given fewer than three predictions or when their seeds are not exactly the
-frozen set: selecting a best seed, or substituting a single-seed prediction, is
-unrepresentable here. The individual predictions are preserved by the caller;
-this function does not discard them.
+given fewer than three predictions or when their seeds are not exactly
+`expected_seeds`: selecting a best seed, or substituting a single-seed
+prediction, is rejected here rather than left to review. The individual
+predictions are preserved by the caller; this function does not discard them.
+
+> **⚠ `expected_seeds` ADDED 2026-08-23 — THE CHECK COULD NOT EXECUTE (BLK-03).**
+>
+> **Superseded, preserved:** `def three_seed_mean(predictions: Sequence[Prediction]) -> Prediction: ...`
+>
+> The prose already claimed a raise *"when their seeds are not exactly the frozen
+> set"*, but the frozen set — `{1337, 2024, 7}` (D-122, restated at
+> `requirements.md` FR-P1-05-2) — appeared in **no argument**. Only two
+> implementations existed, and both were wrong:
+>
+> 1. **Inline `{1337, 2024, 7}` inside `src/models`** — precisely the pattern TC-03e
+>    and `project.md` § Forbidden prohibit ("NEVER hide a scientific constant in
+>    source code or a notebook"); every scientific constant lives in `seeds.yaml`.
+> 2. **Weaken to "exactly three, pairwise distinct"** — which passes a
+>    wrong-but-distinct triple undetected, and is not the stated rule.
+>
+> `expected_seeds` is read from `ConfigSnapshot.seeds` at the call site, so the
+> comparison is against the configured value and the constant is never inlined.
+> This is the shape `vector_block_bootstrap(seed: int)` a few sections below
+> already uses, for the identical reason — the omission here was an inconsistency
+> rather than a considered difference. Raised by the advisory reviewer as prior
+> finding 1, carried unresolved through the ADR-11 re-entry as **BLK-03**, and
+> resolved here under the owner's 2026-08-23 ruling.
 
 ```python
 def climatology_fit_partition(prediction: Prediction) -> Sequence[str]: ...
@@ -519,3 +853,12 @@ change and is not in this stage's produces list.
 - **[Q1]** Intra-package helper names are indicative. `functional-design` (3.1) specifies them per unit and may rename freely — only the signatures above are contracts.
 - **Open.** `Transform` and `BootstrapResult` are referenced as types and left unspecified: both are intra-package shapes under Q1 = B.
 - **None** of the signatures above encodes a scientific constant. Every threshold, seed, grid and window length arrives through `ConfigSnapshot`.
+
+---
+
+*Finalized 2026-08-23 under the stage's revision-4 completion pass. Two signature
+gaps go to the approval gate unresolved: `Transform.inverse` is specified as
+reachable from `Prediction.transform_id`, a `str`, with no lookup named (Critical);
+and `Partition` carries no `train_start`, so the training-range comparisons in
+`fit_transforms` and `build_features` rest on an unwritten January-1 convention
+(Major).*

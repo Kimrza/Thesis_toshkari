@@ -349,7 +349,7 @@ Keep the DAG sparse and evidence-backed: include genuine dependency edges, ident
 
 ---
 
-## Consolidated Summary Confirmation
+## Consolidated Summary Confirmation (2026-08-21 pass, answered and superseded)
 
 **Mode:** self-guided (answers supplied by the human in chat, written back to this file verbatim).
 
@@ -387,5 +387,210 @@ Does this all look correct before I generate the artifact?
 
 - Looks correct
 - Request changes
+
+[Answer]: Looks correct
+
+---
+
+# RE-ENTRY 2026-08-23 — reconciling the register against ADR-11
+
+This stage was re-entered after `application-design` (2.6) was itself re-entered and
+produced **ADR-11**, which redesigned the `src/features` leakage boundary. Q1–Q7
+above are **not reopened**: the twelve units, their `kind: library` tagging, the DAG
+and the parallel-development sets all stand exactly as approved.
+
+What ADR-11 changed is the *content* of four blocker-register entries and the story
+map's defect rows, plus four items 2.6 handed forward. The questions below decide
+how this artifact records them. Nothing here changes the decomposition.
+
+## Q8 — BLK-04's required resolution prescribes a mechanism the design now rejects
+
+BLK-04's **Required resolution** field reads, in part: *"a `LeakageError` when
+`train`'s index is not a subset of that partition"* — a **containment** rule.
+ADR-11 rejected containment outright after stage 3.1 spent five review cycles on it:
+the training ranges nest (Jan–Mar ⊂ Jan–Jun ⊂ Jan–Sep ⊂ Jan–Oct ⊂ Jan–Nov), so F4's
+transform applied to April passes every containment test while F4's fit saw April.
+The register therefore now contradicts the ADR that supersedes it.
+
+A) Rewrite BLK-04's mechanism to ADR-11's, and keep the blocker **open** as a stage-3.1 exit condition
+   > **Impact**: The register stops contradicting the design. The blocker's own stated resolution — *"a governed cross-unit contract"* — is still genuinely owed at 3.1, so keeping it open is accurate rather than conservative. `features-and-splits` and its four downstream units keep entering 3.1 under the 2026-08-22 ruling.
+
+B) Close BLK-04 as resolved by ADR-11
+   > **Impact**: Shortest register, and defensible on the mechanism alone — the design does now reject the full-dataset fit at run time. But it overstates what exists: no cross-unit contract has been authored, and 2.6's own review recorded that the guarantee is an executable raise rather than a type-level impossibility. Closing it would drop the one entry that keeps `test_train_only_transforms.py`'s enumerated negative control visible to 3.1.
+
+C) Split it — record the mechanism as resolved, open a successor entry for the contract
+   > **Impact**: Most precise, and mirrors how BLK-06 was handled with its limb table. Costs a new blocker ID and a second entry that says much of what BLK-04 already says; the roll-up by unit gains a row without gaining information.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option A** — BLK-06 already established this project's pattern for a partially-resolved blocker (a limb table inside one entry, not a successor ID), and BLK-04's unresolved limb is exactly the one its Required-resolution field names. Rewriting the mechanism removes the contradiction without claiming a contract exists.
+
+[Answer]: A
+
+## Q9 — BLK-03 is resolved on the same day its affected artifact changed
+
+BLK-03's affected-artifact field names *"the `three_seed_mean(predictions)` signature
+in `component-methods.md`"*. That signature no longer exists: ADR-11's fix pass added
+`expected_seeds: frozenset[int]`, sourced from `ConfigSnapshot.seeds`. BLK-03's own
+Required-resolution field had **anticipated** exactly this (*"reaches the function as
+a parameter sourced from `ConfigSnapshot.seeds` — never inlined"*), so the design
+limb is satisfied as specified.
+
+A) Same treatment as Q8's answer — mechanism resolved, contract still owed at 3.1, blocker stays open
+   > **Impact**: Keeps BLK-03 and BLK-04 symmetric, which matters because they are the same defect class and were registered together. `models-and-baselines` and its three downstream units keep their 3.1 exit condition.
+
+B) Close BLK-03 entirely
+   > **Impact**: The narrower reading — its Required resolution named a parameter, and the parameter now exists. But the field asks for "a governed cross-unit contract fixing input and output types, alignment requirements, ownership of the frozen seed set, allowed partitions, and failure conditions", and only the seed-ownership limb is settled. Closing it would lose the alignment and failure-condition limbs.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option A** — the parameter closes the limb the reviewer raised, not the contract the blocker registers. Symmetry with BLK-04 also keeps the roll-up honest: both units carry one open 3.1 exit condition rather than one carrying none for a reason the register does not explain.
+
+[Answer]: A
+
+## Q10 — Two new defects arrive from 2.6, both accepted as carried risk
+
+`application-design`'s gate carried two findings forward unresolved, at your ruling:
+
+- **`Transform.inverse`** is specified as reachable from `Prediction.transform_id`, a `str`, with no lookup or registry named and no `src/evaluation` → `src/features` import edge. `ABL-DIFF`'s obligation to inverse-transform to absolute TECU before any metric has no executable path. Owning unit: `evaluation-and-comparison`, with `features-and-splits` owning the inverse itself.
+- **`Partition` has no `train_start`**, so *"the partition's training range"* — the value `fit_transforms` and `build_features` compare against — rests on an unwritten January-1 convention. Owning unit: `features-and-splits`.
+
+A) Register both as new blocker entries, BLK-08 and BLK-09
+   > **Impact**: They are the same class as BLK-03 and BLK-04 — a design surface that cannot execute as written — and the register is where this project has put that class every time. Both become 3.1 exit conditions with named owning and downstream units, and both appear in the roll-up. Cost: the register grows to nine entries.
+
+B) Record them as residual governance obligations (the `RES-` series) instead
+   > **Impact**: Lighter, and the `RES-` series already carries cross-stage obligations. But `RES-` entries have no owning-unit or downstream-unit fields and do not appear in the roll-up, so a unit entering 3.1 would not see them in its own row — which is the failure mode the register exists to prevent.
+
+C) Leave them in `decisions.md` only, and cite them from the story map's defect table
+   > **Impact**: No duplication, and 2.6's record is authoritative. But this stage's artifacts are what 3.1 reads per unit; a defect visible only in the upstream ADR is one a unit-scoped reader will not encounter.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option A** — `Transform.inverse` in particular blocks a *reported quantity*: every number in the results table is in TECU, and nothing can currently invert to it. That is a blocker in this register's own terms, not a residual note.
+
+[Answer]: A
+
+## Q11 — BLK-05's premise changed: the module now exists, the owner does not
+
+BLK-05 registered that *"the D-17 target-schema test has no module and no §12 entry"*.
+Both halves are now false: `test_prepared_target_schema.py` was added to the §12 tree
+on **2026-08-22** under `CR-2026-08-22-TARGET-SCHEMA-TEST`, taking REQ-ENG-4's
+mandated count to 20 (and then 21). But 2.6's review found the module named in **no**
+module, package or dependency inventory across the five design artifacts — so it is
+mandated and unowned.
+
+A) Rewrite BLK-05 to its actual current state — module exists, no owning design surface — and keep it open on `target-standardization`
+   > **Impact**: The blocker keeps its ID and its unit, and its statement becomes true. 3.1 for `target-standardization` inherits a precise obligation: name the module's owner. Nothing is lost from the audit trail, since the superseded text is preserved inline as this project does elsewhere.
+
+B) Close BLK-05 (its stated condition — no module, no §12 entry — is satisfied) and open a new entry for the missing owner
+   > **Impact**: Literal-minded and defensible: the registered condition is genuinely gone. But it splits one continuous problem across two IDs and reads, in the roll-up, as progress where the practical gap is unchanged — the test still cannot be written against a named module.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option A** — closing a blocker because its *wording* was overtaken, while the gap it names persists, is the pattern this project has corrected four times in two stages. The obligation is the same one; only its description moved.
+
+[Answer]: A
+
+## Q12 — Which unit owns M10's contract fixture?
+
+2.6 deferred **M10** — that neither mandated walking-skeleton fixture can exercise
+ADR-11's redesigned boundary, because partitions come from the frozen 2022 calendar
+boundaries while D-11 froze the plumbing window at 2022-11-01 to 2022-11-07. Its
+tracked resolution is a **synthetic contract fixture** over synthetic partition
+dates, placed in the existing mandated modules `tests/test_train_only_transforms.py`
+and `tests/test_split_embargo.py`, authored at code-generation (3.5) and evidenced at
+build-and-test (3.6). This stage must say which **unit** carries it.
+
+A) `features-and-splits` — the unit that owns the boundary being tested
+   > **Impact**: The fixture tests `fit_transforms`, `build_features` and the identity check, all owned here, and both named test modules attach to this unit's surface. Keeps the negative control beside the mechanism it controls. Cost: `fixtures-and-reproducibility` then owns the two mandated fixtures but not this one, which needs saying explicitly or it reads as an oversight.
+
+B) `fixtures-and-reproducibility` — the unit that owns fixtures
+   > **Impact**: One unit owns everything named "fixture", which is easier to find. But that unit's charter is the two **walking-skeleton** fixtures and the clean run — TC-03f evidence — and M10's fixture is explicitly **not** scientific evidence. Filing it here risks it being read as a third mandated fixture.
+
+C) Both — `features-and-splits` authors it, `fixtures-and-reproducibility` runs it in the clean-run sequence
+   > **Impact**: Matches how the two units already split work elsewhere and puts the fixture in the clean run, where TA-17 and WS-20 would exercise it. Cost: a cross-unit contract for a test fixture, which is more ceremony than a synthetic seven-row assertion needs.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option A** — with an explicit sentence in `fixtures-and-reproducibility`'s definition saying this fixture is deliberately not its own, so the split is recorded rather than inferred. The fixture is a negative control on a mechanism, not evidence about the pipeline, and TC-03f's distinction is exactly the one option B blurs.
+
+[Answer]: C
+
+> **Owner's ruling, against my recommendation of A.** `features-and-splits` authors
+> the fixture; `fixtures-and-reproducibility` runs it in the clean-run sequence. The
+> cross-unit contract this creates is accepted as the price of having the fixture
+> exercised by TA-17 and WS-20 rather than sitting outside the clean run — the
+> coverage argument my recommendation traded away for lower ceremony. TC-03f's
+> distinction is preserved by stating in `fixtures-and-reproducibility`'s definition
+> that this fixture is a **negative control, not scientific evidence**, and is not a
+> third mandated fixture.
+
+---
+
+## Consolidated Summary Confirmation
+
+*(2026-08-23 re-entry)*
+
+**The decomposition is not reopened.** Twelve units, every one `kind: library`, the
+dependency DAG and the parallel-development sets all stand exactly as approved on
+2026-08-21 under Q1–Q7. **The DAG is unchanged, including by Q12=C** —
+`fixtures-and-reproducibility` already depends on `features-and-splits`, so the
+fixture handoff needs no new edge, only a named integration point. Recording it as
+an edge that already exists rather than adding one honours `project.md`'s rule that
+topology is a fact the graph expresses.
+
+### Answers as recorded
+
+- **Q8 = A** — BLK-04's mechanism is rewritten to ADR-11's identity check with its one enumerated `REFIT` → `DEC` exception; the containment wording is removed. The blocker stays **open** as a stage-3.1 exit condition, because the cross-unit contract its own Required-resolution field names has not been authored.
+- **Q9 = A** — BLK-03 is treated the same way. `three_seed_mean` now takes `expected_seeds`, which is what its Required-resolution field anticipated, so that limb closes; the contract's alignment and failure-condition limbs stay open at 3.1.
+- **Q10 = A** — the two defects 2.6 carried forward become **BLK-08** (`Transform.inverse` unreachable) and **BLK-09** (`Partition` has no `train_start`), with owning and downstream units and roll-up rows, because both are the same class the register already holds: a design surface that cannot execute as written.
+- **Q11 = A** — BLK-05 is rewritten to its actual state. Both halves of its registered condition are now false: `test_prepared_target_schema.py` entered the §12 tree on 2026-08-22 under `CR-2026-08-22-TARGET-SCHEMA-TEST`. What persists is that no module, package or dependency inventory in the five 2.6 artifacts names it. Same ID, same unit, true statement.
+- **Q12 = C**, *against my recommendation of A* — `features-and-splits` authors the M10 contract fixture; `fixtures-and-reproducibility` runs it in the clean-run sequence. The cross-unit contract is accepted as the price of the fixture being exercised by TA-17 and WS-20 rather than sitting outside the clean run.
+
+### What I will write
+
+**`unit-of-work.md`**
+
+| # | Change |
+|---|---|
+| 1 | **BLK-03** — affected-artifact line updated to the current signature; a limb note recording the seed-ownership limb **resolved 2026-08-23** and the contract limbs open at 3.1 |
+| 2 | **BLK-04** — Required resolution rewritten to the identity mechanism; the containment sentence removed with its superseded text preserved inline, since it is the specific wording 2.6 deferred here |
+| 3 | **BLK-05** — premise rewritten: module exists since 2026-08-22, no owning design surface; stays open on `target-standardization` |
+| 4 | **BLK-08** *(new)* — `Transform.inverse` is specified as reachable from `Prediction.transform_id`, a `str`, with no lookup and no `src/evaluation` → `src/features` edge. Owning unit `evaluation-and-comparison`; the inverse itself sits in `features-and-splits`. Downstream: `statistical-inference`, `regimes-diagnostics-reporting`. **This blocks a reported quantity** — every results-table number is in TECU and `ABL-DIFF` must inverse-transform before any metric |
+| 5 | **BLK-09** *(new)* — `Partition` carries no `train_start`, so the training-range comparison in `fit_transforms` and `build_features` rests on an unwritten January-1 convention. Owning unit `features-and-splits`; downstream the four units that inherit the fit |
+| 6 | **Roll-up by unit** — recomputed from the register rather than incremented by hand, and the derivation printed |
+| 7 | **`features-and-splits`** definition — gains authorship of the M10 contract fixture, with its four assertions and the note that it goes in the two existing mandated modules rather than a new `tests/fixtures/` directory |
+| 8 | **`fixtures-and-reproducibility`** definition — gains the run obligation, with an explicit sentence that this fixture is a **negative control, not scientific evidence**, and is **not** a third mandated fixture. TC-03f's distinction is stated rather than left to inference |
+| 9 | **`RES-05`** *(new residual obligation)* — M14, the stale line-number anchor at `construction/inventory-and-registry/functional-design/business-logic-model.md` line 529. Recorded as residual rather than as a blocker: it is a citation to repair, not a design surface that cannot execute |
+
+**`unit-of-work-dependency.md`** — the `features-and-splits` → `fixtures-and-reproducibility`
+integration point gains the contract fixture as a named handoff. **No edge is added
+and the fenced `yaml` block is unchanged.**
+
+**`unit-of-work-story-map.md`** — the defect table's BLK-03 and BLK-04 rows are
+restated against ADR-11, BLK-05's row is corrected, and BLK-08 and BLK-09 gain rows.
+
+### What I will not do
+
+No change to the twelve units, their kinds, the DAG, or the parallel sets. No
+blocker closed. No `requirements.md`, `decisions.md` or authority-document edit —
+BLK-08's and BLK-09's resolutions belong to stage 3.1 and their acceptance rows, if
+any are needed, are Vision §15.2 changes. M10, M14 and the BLK-04/BLK-06 register
+obligations stay **open** with their owners and due gates.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: I make the nine `unit-of-work.md` changes, the one dependency-artifact change and the story-map row updates, then run one advisory review over the three artifacts and bring its verdict to the approval gate.
+
+- Request changes
+   > **Impact**: Nothing is edited. Tell me what to change — including reversing any of the five answers above — and I re-present before touching an artifact.
+
+> **💡 Recommendation**: **Looks correct** — every change here is a register statement being made true against a design that moved under it, which is the one thing this stage owes before `delivery-planning` sequences work against it.
 
 [Answer]: Looks correct

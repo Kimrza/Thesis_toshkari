@@ -22,7 +22,7 @@ input space and what may not.
 - `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract.
 - `../target-standardization/functional-design/domain-entities.md` — the D-17 `TargetRow` consumed here.
 - `../external-products/functional-design/business-rules.md` — **R-56**, **R-57**, **R-58**.
-- `../governance-guards/functional-design/business-rules.md` — **R-23**, **R-25**, **R-28**.
+- `../governance-guards/functional-design/business-rules.md` — **R-19** (the exactly-one-member exclusion shape), **R-23** and **R-24** (the two phase-boundary limbs). **Corrected 2026-08-23:** R-19 and R-24 are cited in this artifact’s body and were absent here; **R-25** (access-log ordering) and **R-28** (restricted root) were listed and drawn on nowhere, and are removed.
 - `evidence/DECISIONS.md` — **D-10.3**, **D-11**, **D-13**.
 - Workspace inspection, 2026-08-23: `tests/` holds three modules, none this unit's; `src/` and `configs/` absent.
 - `functional-design-questions.md` (**Q1 through Q9**), `business-logic-model.md`, `business-rules.md`.
@@ -38,7 +38,7 @@ graph TD
   FC["FieldClass<br/>(driver | target-derived)"]
   FS["FoldSpec<br/>(F1..F4, embargo 24h)"]
   PL["PartitionList<br/>(F1-F4 + final refit + December)"]
-  TF["Transform<br/>(carries fold_id)"]
+  TF["Transform<br/>(carries its FoldSpec)"]
   WD["WindowDefinition<br/>(one; two outputs)"]
   SF["SupportFieldPolicy<br/>(diagnostic by DEFAULT)"]
   LG["LockedPartitionGuard<br/>(g05_signature)"]
@@ -47,19 +47,19 @@ graph TD
   FD --> WD
   FC -->|"partitions the dictionary"| FD
   FS --> TF
-  TF -->|"fold_id must match"| WD
+  TF -->|"purpose-scoped apply"| WD
   FS --> PL
-  PL -->|"exactly one partition per timestamp"| WD
+  PL -->|"exactly one evaluation role per month"| WD
   SF -->|"excluded unless approved"| FD
   LG -.->|"raises without a verified signature"| PL
 ```
 
 Text fallback: availability rows gate the feature dictionary through the lag assertion; the
-dictionary is closed and partitioned by field class; folds produce fold-owned transforms
-whose identifier must match the frame they are applied to; the partition list carries F1–F4,
-the final refit and December, and every target timestamp belongs to exactly one of them;
-support fields are excluded from the dictionary unless approved; and the locked partition
-raises without a verified G-05 signature.
+dictionary is closed and partitioned by field class; folds produce fold-owned transforms that
+are applied only under a declared purpose, which fixes the set of rows that transform may
+touch; the partition list carries F1–F4, the final refit and December, and every 2022 month
+carries exactly one evaluation role; support fields are excluded from the dictionary unless
+approved; and the locked partition raises without a verified G-05 signature.
 
 ---
 
@@ -183,7 +183,12 @@ apply_transforms(frame: DataFrame, *, transform: Transform) -> DataFrame
 | **Allowed partitions** | The named fold's **training partition only** |
 | **Fitting failure** | `LeakageError` when `train`'s index is **not a subset** of that partition |
 | **Ownership of fitted state** | `Transform` **carries its `FoldSpec`** — resolved boundaries, not a bare `fold_id` string |
-| **Applying failure** | `apply_transforms` raises `LeakageError` when **any row's timestamp falls outside the transform's own scope** (that fold's training range, embargo and validation month; for the refit, Jan–Nov **and December**), or when the frame is **empty** |
+| **Applying failure** | `apply_transforms` takes a **required `purpose`** (`train` \| `evaluate`, no default) and raises `LeakageError` when the frame leaves the set that `purpose` permits **for that transform's own fold** — its training partition for `train`, **exactly its validation month** for `evaluate` — or when the frame is **empty** |
+
+> **⚠ Read this table with its condition.** These four elements are **complete and executable
+> for F1–F4**; for the **final refit** they are **conditional** on § 6's open shape question
+> (`fit_transforms` takes a `FoldSpec`; the refit is not one). **G-06 depends on it.** The four
+> downstream units that cite this contract by name inherit the condition too.
 
 **Why the fourth element is not optional.** The second stops a transform being **fitted** on
 the wrong rows. Nothing in it stops one correctly fitted on F1 being **applied** to F3's
@@ -207,12 +212,19 @@ operationally.
 > entries, so *"this row's partition"* is **not single-valued**. The check never needed a
 > label — it needed containment in a **named** scope.
 >
-> **The mechanism, at no amendment cost.** `component-methods.md` leaves `Transform`
-> *"referenced as a type and left unspecified: … intra-package"*, so carrying the `FoldSpec`
-> on it is this stage's to specify. `apply_transforms` tests every row's timestamp against the
-> transform's **own** scope: fold *k* → that fold's training range, 24-h embargo and validation
-> month; the final refit → 1 Jan – 30 Nov **and December**. Any row outside raises
-> `LeakageError`; so does an **empty** frame.
+> **Third text, also superseded — and this one cost an amendment.** It accepted, per fold,
+> *"that fold's training range, 24-h embargo and validation month"*. Those sets are **strictly
+> nested prefixes** (F1 to 30 Apr ⊂ F2 to 31 Jul ⊂ F3 to 31 Oct ⊂ F4 to 30 Nov ⊂ refit to 31
+> Dec), so the rule was an **upper bound, not a leakage check**: **F4's** transform applied to
+> **April** passed, and F4's fit saw April. Leakage here is a property of **what the call is
+> for**, which no row-level rule can see.
+>
+> **The amendment, approved by the owner 2026-08-23.**
+> `apply_transforms(frame, *, transform, purpose: ApplyPurpose)` — `purpose` **required, no
+> default**. `train` accepts that fold's **training partition** (embargo excluded and
+> counted); `evaluate` accepts **exactly its validation month** — December for the refit,
+> through § 7's guard. `Transform` carrying its `FoldSpec` is free (unspecified, intra-package);
+> **`purpose` is a cross-package boundary amendment, the sixth this stage owes.**
 >
 > **December is routed, not excluded** — applying the refit transform to December **is** the
 > G-06 path, held by § 7's `LockedPartitionGuard` against a verified `g05_signature`. **The refit's
@@ -240,10 +252,18 @@ drifts — this stage has corrected four counts that drifted between restatement
 `windows.py` emits **both** the flattened matrix and the sequence tensor for a feature-set
 ID, which is what makes FR-P1-04-8's parity *"structural rather than asserted"*.
 
-**Ordering against § 4** (added 2026-08-23): transforms apply to the **timestamped frame**,
-and both representations are built from a frame that has **already passed** § 4's element 4.
-The `NDArray` carries no record timestamps and is never transformed directly — otherwise the
-fit/apply leak survives on the representation M-06 consumes.
+**Ordering against § 4, and the amendment it costs** (added 2026-08-23, corrected the same
+day). The `NDArray` carries no record timestamps, so § 4's element 4 cannot reach it, and the
+fit/apply leak would survive on the representation M-06 consumes. The first remedy —
+*"both representations are built from a frame that has already passed"* — was **unexecutable**:
+`build_features` emits both in **one call taking no `Transform`**, and the transform is fitted
+on the features that call produces. **Resolution:** `build_features` gains
+`transform: Transform | None = None` **and** `purpose: ApplyPurpose | None = None` — they
+travel together, supplying one without the other raises — applied to the feature frame
+**before** windowing so both representations inherit it from one definition. **`purpose` was
+missing from the first statement of this** (corrected 2026-08-23): without it the tensor path
+either bypassed § 4's element 4 or had no determinable accepted set. **The seventh owed
+amendment**, one function.
 
 > **WS-13's evidence departs from TE §16, and no reading is adopted.** TE §16 names
 > `test_common_masks.py`, owned by **`evaluation-and-comparison`**; the story map substitutes
@@ -275,17 +295,33 @@ substance is that precondition rather than the date range. **Each is asserted wi
 timestamp preceding the refit**, the same evidence class used at `inventory-and-registry`
 R-52 and `external-products` R-59/R-60.
 
-**Why the fifth entry matters**, in FR-P1-04-5's own words: its omission *"left Vision §8.1's
-rule that **each target timestamp belongs to exactly one partition** with no list to check
-November against."*
+**Why the fifth partition matters**, in FR-P1-04-5's own words: its omission *"left Vision
+§8.1's rule that **each target timestamp belongs to exactly one partition** with no list to
+check November against."*
 
-**So the rule is asserted over the complete list** — F1–F4, the final refit, December. It
-catches both an **overlap** and a **gap**, and it is the check the corrected list was added
-to make possible.
+**The rule is asserted over the list's disjoint reading** — each month's **evaluation role**:
+Apr (F1), Jul (F2), Oct (F3), Nov (F4), December (**locked**), training-only for the rest. It
+catches both an **overlap** and a **gap**, and it is the check the corrected list was added to
+make possible.
+
+> **⚠ It cannot run over the training ranges, corrected 2026-08-23.** This read *"asserted over
+> the complete list — F1–F4, the final refit, December"*. Those ranges are an **expanding
+> window** and **nest** (Jan–Mar ⊂ Jan–Jun ⊂ Jan–Sep ⊂ Jan–Oct ⊂ Jan–Nov), so a **15 February**
+> row belongs to **five** of the six entries and the assertion would **fail on ordinary 2022
+> data**. **Reading a frozen Vision §8.1 rule is not this stage's call** — the evaluation-role
+> reading is adopted so the check can run, and **raised at the gate**. If §8.1 is meant
+> literally over the training ranges it is unsatisfiable as written, which is a defect in the
+> governing document rather than in this design.
+
+**Count, derived by reading the table above: six rows** — **five partitions** (F1–F4, the
+final refit) plus the **locked month**, which is a partition of the calendar but never a
+fitting scope. FR-P1-04-5's *"all five partitions"* and the six-row table are both right.
 
 > **Open shape decision, stated not assumed: the final refit is not a `FoldSpec`.**
 > `FoldSpec` carries `validation_month`; the final refit has none. How it is represented
-> alongside the four folds is raised at the gate.
+> alongside the four folds is raised at the gate — **together with § 4's element 4**, since
+> `fit_transforms` takes a `FoldSpec` and the refit's transform has no fitting path until this
+> is settled. **One decision, not two.**
 
 **Membership derives from record timestamps.** `assert_membership_from_timestamps` raises on
 any row whose month or year disagrees with its partition — the defect that filed locked-month
@@ -355,6 +391,7 @@ mask**.
 | Exception | Raised when |
 |---|---|
 | `LeakageError` | `actual_lag < safe_lag`; a backfilled final value where the contemporaneous grade was required; `f107_81_trailing`'s window not ending at the safe-lagged day, or its recomputed mean disagreeing; a field outside the §6.2 dictionary; a carried-forward `vtec_lag_*`; an incomplete `vtec_seq_24` not excluded; a support field used without a recorded G-04 approval, or read at/beyond hour *t*; a target-hour quality field; a raw-longitude column; a driver carried forward beyond 3 h; **`train`'s index not a subset of the fold's training partition**; **any row's timestamp outside the transform's own carried scope, or an empty frame reaching `apply_transforms`** |
+| `AlignmentError` | A driver value **repeated outside its own defined interval** (Kp/ap3 beyond its 3-hour interval); one **shifted to a neighbouring hour** (Dst off its own hourly averaging interval). **Added 2026-08-23** — FR-P1-04-17's raises, which this table omitted while the artifacts wrongly assigned TA-36 to `external-products`. R-58's **third** limb (no interpolation) is a **static source check, not a raise**, and appears in no row here for that reason; see `business-rules.md` R-76a |
 | `LockedTestError` | `g05_signature` is absent or fails verification |
 | `PartitionError` | A target timestamp belongs to zero or to more than one partition; a row's month or year disagrees with its partition; a freeze precondition's timestamp does not precede the final refit |
 | `ImportBoundaryError` | Raised **through** `external-products` R-56's scan; and here when the permitted-importer set does not have exactly its two members |
@@ -387,8 +424,11 @@ TA-36.
 
 > ## FOUR ROWS EXIST AND NONE HAS RUN
 >
-> **TA-33, TA-34, TA-35** (owned) and **TA-36** (supported) are all **`Pending`** — *"the row
-> exists, no test module is implemented, none has been executed, and none has passed."*
+> **TA-33, TA-34, TA-35** (owned) and **TA-36** (story-map primary `external-products`, but its
+> **enforcement raise and primary test are this unit's** — § 10's `AlignmentError` row and
+> `business-rules.md` R-76a) are all **`Pending`** — *"the row exists, no test module is
+> implemented, none has been executed, and none has passed."* **Corrected 2026-08-23** from
+> "(supported)", which understated what this unit builds.
 >
 > They cover this unit's **leakage-sensitive controls**. **No artifact, manifest or report may
 > state or imply that FR-P1-04-12, -13 or -16 is covered, satisfied or verified.**
@@ -396,14 +436,17 @@ TA-36.
 > **§ 7's "five forbidden edges with no row" is superseded.** Derived: TA-33 covers dictionary
 > closure; TA-34 covers **both** the `vtec_lag_*` carry-forward prohibition **and** the
 > target-lag contract, which are one requirement; TA-35 covers the support-field rules; TA-36
-> covers driver-interval repetition and is **`external-products`'** row. **Remainder:
+> covers driver-interval repetition — story-map **primary `external-products`**, but its
+> **enforcement raise and primary negative-path test are this unit's** (`business-rules.md`
+> R-76a). **Corrected 2026-08-23** from *"is `external-products`' row"*, missed by the first
+> TA-36 sweep because it states the superseded claim in different words. **Remainder:
 > FR-P1-04-10 alone.**
 
 ## Assumptions & Open Questions
 
 - **[assumption]** Rule IDs continue the single sequence, so `business-rules.md` opens at **R-74**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 7 disagree. See `business-logic-model.md` § The `unit-of-work.md` sweep — **ten of twelve sections agree**, and the two that do not are exactly the two `CR-2026-08-22-LEAKAGE-TA` touched.
-- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify. **No amendment owed**; the total stays **five across three units**.
+- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify — **still true, and still owes nothing** (`Transform`'s internals and `ApplyPurpose`'s definition included). But **two boundary calls are amended** — `apply_transforms` gains `purpose`, `build_features` gains `transform` — so the running total is **7 across 4 units**, derived in `business-logic-model.md` § Amendments owed. **Corrected 2026-08-23** from *"no amendment owed; the total stays five across three units"*.
 - **[assumption]** `tests/test_locked_test_guard.py` is this unit's, per § 7.
 - **Open — BLK-04 is an EXIT condition** on this unit and four downstream units. **Approving this design is not the contract's approval.**
 - **Open — TA-33/34/35/36 all `Pending`.**
