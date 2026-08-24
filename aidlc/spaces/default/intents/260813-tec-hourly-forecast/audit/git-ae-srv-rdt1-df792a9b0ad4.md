@@ -51527,3 +51527,176 @@
 **Unit**: models-and-baselines
 
 ---
+
+## Artifact Created
+**Timestamp**: 2026-08-24T13:46:40Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/domain-entities.md
+**Context**: construction > models-and-baselines > functional-design > domain-entities.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-24T13:46:41Z
+**Event**: SENSOR_FIRED
+**Fire id**: a46c5e06
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-24T13:46:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: a46c5e06
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/domain-entities.md
+**Duration ms**: 200
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-24T13:46:41Z
+**Event**: SENSOR_FIRED
+**Fire id**: 13bc0bc6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/domain-entities.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-24T13:46:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: 13bc0bc6
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/domain-entities.md
+**Duration ms**: 209
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-24T13:48:14Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-rules.md
+**Context**: construction > models-and-baselines > functional-design > business-rules.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-24T13:48:14Z
+**Event**: SENSOR_FIRED
+**Fire id**: cf5a3229
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-24T13:48:14Z
+**Event**: SENSOR_PASSED
+**Fire id**: cf5a3229
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-rules.md
+**Duration ms**: 323
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-24T13:48:15Z
+**Event**: SENSOR_FIRED
+**Fire id**: 69203bd4
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-rules.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-24T13:48:15Z
+**Event**: SENSOR_PASSED
+**Fire id**: 69203bd4
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-rules.md
+**Duration ms**: 376
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-08-24T13:49:48Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: c:/Users/s_inv/Desktop/test/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-logic-model.md
+**Context**: construction > models-and-baselines > functional-design > business-logic-model.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-24T13:49:48Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3cbc1113
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-24T13:49:48Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3cbc1113
+**Sensor ID**: required-sections
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-logic-model.md
+**Duration ms**: 456
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-08-24T13:49:49Z
+**Event**: SENSOR_FIRED
+**Fire id**: e754802f
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-logic-model.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-08-24T13:49:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: e754802f
+**Sensor ID**: upstream-coverage
+**Stage slug**: functional-design
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/functional-design/business-logic-model.md
+**Duration ms**: 255
+
+---
+
+## Review Requested
+**Timestamp**: 2026-08-24T13:50:09Z
+**Event**: REVIEW_REQUESTED
+**Stage**: functional-design
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: models-and-baselines
+**Iteration**: 1
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-08-24T13:53:21Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Grep
+**Target**: c:\Users\s_inv\Desktop\test\aidlc\spaces\default\intents\260813-tec-hourly-forecast\construction
+**Stage**: functional-design
+**Unit**: models-and-baselines
+
+---
