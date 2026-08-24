@@ -98,6 +98,9 @@ class DeterminismRecord:
     framework_versions: Mapping[str, str]   # python, numpy, tensorflow, ...
     tf_op_determinism: bool                 # enable_op_determinism() succeeded
     nondeterministic_ops: Sequence[str]     # operations determinism is NOT guaranteed for
+    probe_scope: Sequence[str]              # which operation classes the probe examined
+    measurement_status: str                 # "complete" | "partial" | "not-yet-measured"
+    declared_vs_observed_mismatches: Sequence[str]   # config-declared expectations the probe contradicted
 
 
 def seed_everything(snapshot: ConfigSnapshot, *, stage: str) -> DeterminismRecord: ...
@@ -118,6 +121,45 @@ When already set, returns immediately. **The re-exec is recorded** in
 `DeterminismRecord.reexec_performed` and in the run log, so it is never mistaken
 for a double run. Called as the **first statement** of every stage script's
 `main()`, before any framework import.
+
+> ## ⚠ THREE FIELDS ADDED 2026-08-24 — `DeterminismRecord` GOES SIX TO NINE
+>
+> **Superseded definition, preserved.** As approved at this stage, the dataclass
+> carried **six** fields: `seeds_applied`, `pythonhashseed`, `reexec_performed`,
+> `framework_versions`, `tf_op_determinism`, `nondeterministic_ops`.
+>
+> **Why it changed.** `functional-design` for `foundation` answered its **Q3=C**:
+> *"Record the framework version, determinism settings, **probe scope**, and any
+> detected **mismatches**… explicitly mark the result as **'partial'**; if the
+> relevant operations have not yet been executed, mark it not-yet-measured."* The
+> first two have fields here; the other three had none, so the approved contract
+> could not record what the approved answer requires. W-4 steps 5–7 of that unit's
+> `business-logic-model.md` are the workflow that produces them.
+>
+> **Why here and not on `RunRecord`.** `RunRecord`'s field set is fixed by **TE
+> §13.1's eight items**, an authority document — housing them there would require a
+> Vision §15.2 amendment. `DeterminismRecord` is a stage artifact, and it is also the
+> structurally correct home: the probe runs inside `seed_everything`, whose only
+> output this is.
+>
+> **Each field was tested for removal.** `probe_scope` is indispensable — without it
+> an empty `nondeterministic_ops` cannot be distinguished from a probe that examined
+> nothing, which is exactly what R-06 exists to prevent. `measurement_status` is not
+> derivable from scope: *"partial"* is a fact about the framework's capability, not
+> about coverage. `declared_vs_observed_mismatches` was challenged hardest — could a
+> mismatch be raised rather than stored? No: W-4 step 6 says *"**record** mismatches
+> rather than reconciling them"*, and a raise terminates the run, leaving no record
+> to carry it.
+>
+> **Bounded.** Purely additive — no consumer breaks, no requirement, DoD or workflow
+> changes, and **R-06 is unchanged**: an empty `nondeterministic_ops` is still never
+> proof of determinism.
+>
+> Annotated in place under the `GOV-2026-08-22-INC-01` Rec 7 precedent, on the project
+> decision owner's approval. **Not** a Vision §15.2 change — no requirement fixes this
+> field set (`DeterminismRecord` appears **0 times** in `requirements.md`; NFR-DET-01
+> requires only *"nondeterministic ops recorded"*).
+> Change record: `CR-2026-08-24-FOUNDATION-AMENDMENTS`, Amendment B.
 
 | Intra-package helper | Purpose |
 |---|---|

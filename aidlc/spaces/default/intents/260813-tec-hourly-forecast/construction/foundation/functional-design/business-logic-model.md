@@ -173,19 +173,29 @@ RAISES  DeterminismError — TensorFlow already initialised
 that carve-out is `src/evaluation/bootstrap.py` by ADR-05, a design decision rather
 than an oversight.
 
-> ## ⚠ STEPS 5–7 CANNOT BE FULLY RECORDED UNDER THE APPROVED CONTRACT
+> ## ✅ STEPS 5–7 ARE NOW FULLY RECORDABLE — AMENDMENT B APPROVED 2026-08-24
 >
-> `probe_scope`, `measurement_status` and `declared_vs_observed_mismatches` do
-> **not** exist in `DeterminismRecord` as approved at stage 2.6 — six fields,
-> derived:
-> `awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+: "` → `6`.
+> **Superseded status, preserved:** this box read *"STEPS 5–7 CANNOT BE FULLY
+> RECORDED UNDER THE APPROVED CONTRACT"* — `probe_scope`, `measurement_status` and
+> `declared_vs_observed_mismatches` did not exist in `DeterminismRecord`, which
+> carried **six** fields, and until the amendment was approved **no output of this
+> unit could state or imply that determinism had been measured**. Silence was then
+> the correct output.
 >
-> **Amendment B is PENDING and NOT approved.** The steps are specified so stage 3.5
-> has a complete target. Until the amendment is approved, **no output of this unit
-> may state or imply that determinism has been measured for any operation class** —
-> because the fields recording the scope and status of that measurement do not
-> exist, and an empty `nondeterministic_ops` presented as a clean result is exactly
-> the claim Q3 = C was chosen to prevent. Silence is the correct output.
+> **Amendment B is APPROVED** (project decision owner, 2026-08-24;
+> `CR-2026-08-24-FOUNDATION-AMENDMENTS`). `component-methods.md` now defines **nine**
+> fields — derived, not carried:
+> `awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+: "` → `9`.
+>
+> **The prohibition is lifted.** Steps 5–7 write to `probe_scope`,
+> `declared_vs_observed_mismatches` and `measurement_status` respectively, so the
+> scope and status of the measurement are now recorded rather than implied.
+>
+> **What is unchanged: R-06.** An empty `nondeterministic_ops` is still **never proof
+> of determinism**. What the amendment buys is that an empty result is no longer
+> *ambiguous* — `probe_scope` says what was examined and `measurement_status`
+> distinguishes `complete` from `partial` and `not-yet-measured`. That distinction,
+> not the empty list, is what Q3 = C was chosen to secure.
 
 ## W-5 — Opening the run record
 
@@ -223,7 +233,22 @@ run forward because the thirteen prior runs are recorded as violating it and the
 > and covers **none fully** — two partially, and both partials are install-time
 > rather than per-run, which is the entire substance of the requirement.
 > `requirements.md` records the same conclusion in REQ-ENG-10's own test column.
-> **Amendment A pending.** No acceptance coverage is claimed.
+>
+> **Amendment A was raised and DECLINED, 2026-08-24** *(superseded status: "Amendment A
+> pending")*. The project decision owner rejected adding §19 rows for REQ-ENG-7 and
+> REQ-ENG-10, on the evidence that **no project rule requires universal §19 coverage**,
+> that the approved position dispositions uncovered requirements as *"Open by design"*,
+> and that this unit already designs both as enforceable obligations without them.
+> `CR-2026-08-24-FOUNDATION-AMENDMENTS`, Amendment A.
+>
+> **This resolves Q7=X rather than contradicting it.** Q7=X directed that a §15.2
+> change request be *raised*; it was, and the owner declined it. Raising a request
+> never obliged its approval.
+>
+> **REQ-ENG-10 therefore remains untested by design, permanently rather than
+> provisionally**, and travels in the ordinary set handed to NFR requirements. **No
+> acceptance coverage is claimed** — that statement is now settled, not awaiting an
+> amendment.
 
 ## W-6 — Registry append
 
@@ -296,10 +321,23 @@ reuses it.
 **`source_files`' six items** are validated against `inventory.py` rather than
 restated as a bare hash.
 
-> **Amendment C pending.** The ledger is in no approved `Owns` list. Both approved
-> artifacts (`services.md`, `unit-of-work.md`) are unedited. **No TE §12 amendment
-> is needed** — `artifacts/registry/` is already enumerated and the §12 tree carries
-> zero file-level entries inside `artifacts/`.
+> **✅ Amendment C APPROVED 2026-08-24.** *Superseded status, preserved: "Amendment C
+> pending. The ledger is in no approved `Owns` list. Both approved artifacts
+> (`services.md`, `unit-of-work.md`) are unedited."* Both have since been annotated in
+> place on the owner's approval (`CR-2026-08-24-FOUNDATION-AMENDMENTS`): the ledger is
+> now in `unit-of-work.md` § 1 `foundation` → `Owns` and in `services.md` § Run record
+> and registry, which reads **three artifacts, one authoritative**.
+>
+> **Its authority is Q6=D and FU-2=D**, not an engineering preference. Q6=D requires a
+> *monotonic, human-readable* label alongside the authoritative hash — choosing that
+> over option C's *"version derived from the manifest hash"* — and FU-2=D names the
+> durable append-only ledger, its ownership and its append behaviour. Monotonicity
+> requires durable state, which is precisely why a directory scan cannot serve.
+>
+> **No TE §12 amendment was needed** — `artifacts/registry/` is already enumerated and
+> the §12 tree carries zero file-level entries inside `artifacts/`. **R-11 is
+> unchanged**: the content hash remains authoritative and the label remains a citation
+> device.
 
 ## W-8 — `resolve_platform_roots` and the credential precondition
 
@@ -402,9 +440,9 @@ the owner column and the separate seven-row ownership set.
 | REQ-ENG-3 | W-2 | **TA-03, TA-26** |
 | REQ-ENG-4 | W-9 | **TA-09** — *bounded, see story-map § Known defects row 8* |
 | REQ-ENG-6 | W-8 | **TA-22** |
-| **REQ-ENG-7** | W-6, W-7 | ⚠ **NO CURRENT ACCEPTANCE ROW** — Amendment A pending |
+| **REQ-ENG-7** | W-6, W-7 | ⚠ **NO ACCEPTANCE ROW, AND NONE WILL BE ADDED** — Amendment A **declined 2026-08-24**; untested by design |
 | REQ-ENG-8 | W-2, W-3 | **TA-16** |
-| **REQ-ENG-10** | W-5 | ⚠ **NO CURRENT ACCEPTANCE ROW** — TA-03 verified not to cover it; Amendment A pending |
+| **REQ-ENG-10** | W-5 | ⚠ **NO ACCEPTANCE ROW, AND NONE WILL BE ADDED** — TA-03 verified not to cover it; Amendment A **declined 2026-08-24**; untested by design |
 | REQ-ENG-11 | W-5 | **TA-17, TA-26** |
 | FR-P1-01-10 | W-8 | TA-22 |
 | FR-P1-04-11 | W-2, W-3 | **TA-15** |
@@ -447,9 +485,9 @@ matching the story map's designation.
 - **[assumption]** Bolt 1 reads REQ-ENG-1 as requiring the §12 tree to **exist** item for item, with module *content* belonging to the Bolt that owns each module. TA-01's evidence column is "Repository tree and code commit", which supports it; no artifact states the split explicitly, and a reader could take REQ-ENG-1 as requiring nine working stage scripts in Bolt 1.
 - **[assumption]** `src/data/registry.py` / `Station` and `src/data/locked_test.py` are **not** this unit's, notwithstanding their proximity in `component-methods.md`. See `domain-entities.md` § Assumptions.
 - **[assumption]** `frontend-components.md` is not produced — `kind: library`, and the stage maps that artifact to `[ui]` only.
-- **Open — Amendment A** (Vision §15.2): §19 rows for REQ-ENG-7 and REQ-ENG-10. **Not approved.**
-- **Open — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **Not approved.** W-4 steps 5–7 cannot be fully recorded until it is.
-- **Open — Amendment C** (approved 2.6 and 2.7 artifacts): the release ledger. **Not approved.**
+- **Closed — Amendment A** (Vision §15.2): §19 rows for REQ-ENG-7 and REQ-ENG-10. **Raised and DECLINED 2026-08-24** by the project decision owner. No rule requires universal §19 coverage; the approved position dispositions uncovered requirements as *"Open by design"*. Both requirements stay untested **by design**, and the negative-path test specifications in `business-rules.md` keep their *"Test specification only — not an approved acceptance row"* label **permanently**. *(Superseded status: "**Not approved.**", pending.)*
+- **Closed — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **APPROVED 2026-08-24.** `component-methods.md` now defines nine fields; W-4 steps 5–7 are fully recordable and the prohibition on stating that determinism was measured is lifted. R-06 unchanged. *(Superseded status: "**Not approved.** W-4 steps 5–7 cannot be fully recorded until it is.")*
+- **Closed — Amendment C** (approved 2.6 and 2.7 artifacts): the release ledger. **APPROVED 2026-08-24**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. `services.md` and `unit-of-work.md` are annotated in place. R-11 unchanged — the content hash stays authoritative. *(Superseded status: "**Not approved.**")*
 - **Open** — the concrete `RequiredFieldsMap` and `CredentialNameMap` contents await the four configs existing. This stage fixes the mechanism.
 - **G-09 is not signed.** No workflow here authorises creating a module.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -562,3 +600,19 @@ Stage 3.5 could build `foundation` from these three documents without inventing 
 ### Summary
 
 All four recorded occurrences of the primary-vs-supporting/tested-by confusion are genuinely resolved, re-verified independently against `unit-of-work-story-map.md` Table 1, Table 2, and (newly, this pass) the structurally independent § Per-unit coverage summary row — a fourth cross-check that agrees exactly. Every command printed across all three artifacts reproduces its claimed output. A full sweep for a fifth occurrence, covering every count and set-membership sentence in all three files including review-history tables and superseded quotes, found none. Q7/Q8's regression items, the amendment-pending discipline, the no-determinism-measured claim, the locked-test carve-out, and the full W-1–W-10/R-01–R-17 sequences all hold. The three documents are implementable as specified, with every genuine gap correctly deferred to a named pending amendment or a Bolt 1 work product rather than silently filled. READY.
+
+---
+
+## Finalized 2026-08-24 — the three amendments are settled
+
+Recorded under `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`, after
+an independent challenge of each amendment against the approved artifacts. **The
+"amendment-pending discipline" the review above verified is now discharged**: no
+amendment is pending, so nothing in these documents defers to one.
+
+- **Amendment A — DECLINED.** No project rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. W-5 records **REQ-ENG-10 as permanently uncovered**, and W-6/W-7 likewise for REQ-ENG-7. No count moved: untested stays 36, this unit's stays 2 of 16, its acceptance rows stay 7, TE §19 stays at 36 rows.
+- **Amendment B — APPROVED.** `DeterminismRecord` carries **nine** fields, so **W-4 steps 5–7 are fully recordable** and the prohibition on stating that determinism was measured is lifted — replaced by the narrower rule that a measured claim requires `probe_scope` recorded and `measurement_status` = `complete`. **R-06 is unchanged.**
+- **Amendment C — APPROVED**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. **W-7's label-allocation step stands**, and the ledger is now named in `unit-of-work.md` § 1 `Owns` and `services.md`. A draft of the change record proposed rejecting it and deriving the label from the content hash; that is Q6 option C, which the owner had read and declined, and it cannot yield the *monotonic* label Q6=D requires. **R-11 is unchanged** — the content hash remains authoritative.
+
+**G-09 remains unsigned.** Nothing in this document authorises creating a module, and
+no scientific value is decided here.

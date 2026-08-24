@@ -434,7 +434,7 @@ X. Other (please specify)
 
 ---
 
-## Consolidated Summary Confirmation
+## Consolidated Summary Confirmation (2026-08-22 pass, answered and superseded)
 
 Does this all look correct before I generate the artifact?
 
@@ -470,3 +470,171 @@ re-confirmation**, all found on resume and all outside the reach of the Rec 5
 sweep. They are enumerated at the approval gate. None of them changes a Bolt, a
 sequence, a Definition of Done, an owner, a gate, a scientific value or an answer
 recorded above.
+
+---
+
+# RE-ENTRY 2026-08-24 — reconciling the plan against BLK-08, BLK-09 and the M10 split
+
+This stage was re-entered after `application-design` (2.6) produced **ADR-11** and
+`units-generation` (2.7) was re-run against it. **Q1–Q12 and the follow-ups are not
+reopened**: the twelve-Bolt sequence, one Bolt per unit, `stage-major` construction
+iteration, Gate 0 as a pre-Construction decision pack, and every Definition of Done
+stand exactly as approved on 2026-08-22.
+
+What changed upstream is the blocker inventory this plan consumes as fixed input.
+All four plan artifacts reference **BLK-01…BLK-07** and say **six open blockers**;
+the register now holds **nine entries with eight open**, the two new ones landing on
+Bolts 7 and 9. The M10 contract fixture also became a cross-Bolt handoff that did not
+exist when the plan was written. The questions below decide how the plan records
+that. None of them proposes changing a Bolt's contents.
+
+## Q13 — BLK-08 blocks a reported quantity, and it lands on Bolt 9
+
+**BLK-08**: `Transform.inverse` is specified as reachable from
+`Prediction.transform_id`, a `str`, with no lookup, registry or import edge named.
+`project.md` § Mandated requires `ABL-DIFF` to *"inverse-transform to absolute TECU
+before any metric"*, and every number the thesis reports — the paired loss
+differential, the bootstrap interval, the practical-relevance threshold — is in TECU.
+Owned by `evaluation-and-comparison` (Bolt 9), co-owned by `features-and-splits`
+(Bolt 7), inherited by Bolts 10 and 12.
+
+Gate 0's own rule is that **BLK-03, BLK-04 and BLK-07 are resolved *during* functional
+design and do not block its start**. The question is whether BLK-08 belongs in that
+class or is different in kind.
+
+A) Same class as BLK-03/BLK-04/BLK-07 — resolved during functional design, recorded in Bolt 7's and Bolt 9's entries and in the Gate 0 pack as surfaced-not-signed
+   > **Impact**: Consistent with how this plan already treats cross-unit contract blockers, and with the owner's 2026-08-22 ruling that made them exit rather than entry conditions. Bolt 9 cannot complete until the contract exists, which is the protection that matters. Costs nothing in sequence. The risk it carries: the design decision — whether the transform touches the target at all — is deferred to the stage that also has to build against it.
+
+B) Escalate it to a Gate 0 decision the owner takes before Bolt 1
+   > **Impact**: The "does the transform touch the target?" question is answerable now from the frozen feature contract, and answering it before Bolt 1 means Bolts 7 and 9 are designed against a settled answer rather than discovering it. But Gate 0 was discharged on 2026-08-22 as empty, and re-opening it for an item that `functional-design` is competent to resolve sets a precedent that every new blocker re-opens a discharged gate.
+
+C) Split it: the *"does the transform touch the target"* question to Gate 0, the resolution mechanism to functional design
+   > **Impact**: Puts the scientific question where the owner can answer it and leaves the interface design where it belongs. Most precise, and it mirrors how BLK-06's enumeration limb was separated from its implementation limb. Costs a reopened Gate 0 for a single yes/no.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option C** — BLK-06 already set this project's precedent for splitting a blocker whose scientific limb and engineering limb have different owners, and the scientific limb here is a single question answerable from the frozen §6.2 feature contract. Deferring it wholesale (A) means Bolt 9's designer decides, mid-design, whether a reported quantity needs inverting — which is a scientific reading, not an interface choice.
+
+[Answer]: C
+
+## Q14 — the M10 contract fixture is now a cross-Bolt handoff
+
+Under the owner's Q12 = C ruling at units-generation, `features-and-splits` (Bolt 7)
+**authors** the M10 synthetic contract fixture and `fixtures-and-reproducibility`
+(Bolt 12) **runs** it in the clean-run sequence. The unit DAG already carries that
+edge, so no new dependency exists — but the plan currently describes no handoff
+between those two Bolts beyond the released artifacts.
+
+A) Record it in `bolt-plan.md` only, as a line in Bolt 7's and Bolt 12's entries
+   > **Impact**: The Bolt entries are where a builder looks, and both ends of the handoff are stated where each one's owner will read it. Lightest change consistent with the ruling. It leaves `external-dependency-map.md` describing only externally-gated items, which is what that artifact is for.
+
+B) Record it in `bolt-plan.md` **and** `external-dependency-map.md`
+   > **Impact**: The dependency map becomes the single place to see everything one Bolt owes another. But that artifact's stated purpose is *external* gating — APIs, data windows, approval lead times, other teams — and an internal Bolt-to-Bolt handoff filed there dilutes the distinction the artifact exists to draw.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option A** — this is an internal handoff on an edge the DAG already carries, between two Bolts the same plan sequences. `external-dependency-map.md` is for things outside the team's control, and it is currently accurate on that basis.
+
+[Answer]: A
+
+## Q15 — `features-and-splits` is now the most constrained unit in the plan
+
+Bolt 7 carries **three** of the eight open blockers — BLK-04 (owned), BLK-08
+(co-owned), BLK-09 (owned) — more than any other Bolt, and it has 2 direct and 5
+transitive dependents. When `risk-and-sequencing-rationale.md` was written it carried
+one.
+
+The sequence itself is not in question: Bolt 7 already sits after its dependencies and
+before its dependents, and no reordering is available that reduces its blocker load.
+The question is what the rationale artifact should say about it.
+
+A) Record the concentration in `risk-and-sequencing-rationale.md` as a stated risk, with no sequence change
+   > **Impact**: Honest and cheap. The rationale artifact's job is to explain the ordering and the risks it accepts, and a unit carrying three of eight open blockers while five units depend on it is exactly that. Nothing about the order changes, because nothing about the order can change.
+
+B) Also add a Bolt 7 entry condition — its three blockers reviewed together before Bolt 7's functional design starts
+   > **Impact**: Gives the concentration a mechanism rather than only a note. But it contradicts the owner's 2026-08-22 ruling that these are **exit** conditions, not entry conditions, and that ruling exists because the contracts are authored *at* 3.1 — an entry condition would be unsatisfiable in the same way the superseded wording was.
+
+X. Other (please specify)
+   > **Impact**: Depends on your choice.
+
+> **💡 Recommendation**: **Option A** — B re-creates precisely the unsatisfiable-entry-condition defect that `GOV-2026-08-22-REM-01` Rec 2 corrected. The concentration is real and worth stating; the mechanism that handles it already exists in the exit conditions.
+
+[Answer]: A
+
+---
+
+## Consolidated Summary Confirmation
+
+*(2026-08-24 re-entry)*
+
+**The plan is not reopened.** Twelve Bolts, one per unit, in the approved order;
+`stage-major` construction iteration; every Definition of Done, confidence
+hypothesis, mob assignment and expected demo exactly as approved on 2026-08-22.
+**No Bolt changes contents, position or owner.**
+
+### Answers as recorded
+
+- **Q13 = C** — BLK-08 splits. Its **scientific limb** — *does the train-only transform touch the target?* — becomes a live Gate 0 item for the owner, answerable now from the frozen §6.2 feature contract. Its **mechanism limb** — registry, `inverse_transform_id`, or a permitted import edge — is resolved during functional design alongside BLK-03, BLK-04 and BLK-07. Mirrors BLK-06's enumeration/implementation split.
+- **Q14 = A** — the M10 fixture handoff is recorded in `bolt-plan.md` only, in Bolt 7's and Bolt 12's entries. `external-dependency-map.md` keeps its external-only meaning.
+- **Q15 = A** — Bolt 7's blocker concentration is stated as accepted risk in `risk-and-sequencing-rationale.md`. **No sequence change**, and **no entry condition** — B would re-create the unsatisfiable-entry-condition defect `GOV-2026-08-22-REM-01` Rec 2 corrected.
+
+### What I will write
+
+**`bolt-plan.md`**
+
+| # | Change |
+|---|---|
+| 1 | § Sources — the register span `BLK-01…BLK-07` → **BLK-09** |
+| 2 | § Gate 0 — **one live item restored**, recorded as a re-opening rather than a rewrite of the 2026-08-22 discharge: BLK-08's scientific limb. The discharge table stands untouched; the new item sits beside it with its own date and reason |
+| 3 | § Gate 0's *"resolved during functional design"* list — gains **BLK-08's mechanism limb** and **BLK-09** |
+| 4 | The *"require cross-unit contracts authored at functional design"* sentence — gains **BLK-08** |
+| 5 | § The Bolt sequence table — `Open blockers` column: Bolt 7 gains BLK-08 (co-owned) and BLK-09; Bolt 9 gains BLK-08 (owned); Bolts 8, 10, 11, 12 gain the inherited marks the register now carries |
+| 6 | **Same table, `Acceptance rows` column** — Bolt 5 `external-products` **1 → 2**, Bolt 7 `features-and-splits` **9 → 12**, and the stated total **39 → 43**. These are the TA-33…TA-36 rows approved 2026-08-22; units-generation corrected them and this downstream copy was never swept. *Derived, not carried:* the twelve per-unit figures read `7, 2, 1, 3, 2, 1, 12, 5, 1, 2, 3, 4` in this table's order (which places `external-products` before `target-standardization`, the reverse of units-generation's), summing to **43** — the same 43 units-generation's own column sums to |
+| 7 | **Bolt 7** entry — open blockers updated; a line recording that this Bolt **authors** the M10 synthetic contract fixture, with its four assertions, in the two existing mandated test modules |
+| 8 | **Bolt 9** entry — records that it **owns** BLK-08, and what that blocks: `ABL-DIFF` and every TECU-denominated reported quantity |
+| 9 | **Bolt 12** entry — a line recording that it **runs** the M10 fixture in the clean-run sequence, that the fixture is a negative control rather than scientific evidence, and that it is **not** a third mandated walking-skeleton fixture |
+| 10 | **Bolt 4** entry — `RES-05` noted: the stale line-number citation in that unit's own 3.1 artifact, due at its functional-design gate |
+| 11 | § Assumptions & Open Questions — *"BLK-02 through BLK-07 (six open blockers)"* → **BLK-02 through BLK-09**, **eight**, derived from the register's `\| Status \|` rows |
+
+**`risk-and-sequencing-rationale.md`** — the register span corrected, and Bolt 7's
+concentration stated: three of eight open blockers on one unit with 2 direct and 5
+transitive dependents, accepted without resequencing because no available order
+reduces it.
+
+**`external-dependency-map.md`** and **`team-allocation.md`** — the register span
+corrected where each references it. Nothing else; per Q14 = A the M10 handoff does
+not appear in the dependency map.
+
+### After the edits
+
+A mechanical mirror sweep across all four artifacts before the gate — the register
+span in both forms, the open count in words and figures, the per-Bolt blocker sets
+against the register, and both numeric columns against their upstream sources. That
+sweep is what ended the same defect class at units-generation after seven review
+passes; this stage inherits the class along with the artifacts, and item 6 above is
+already one instance of it crossing a stage boundary.
+
+**This stage declares no reviewer**, so there is no advisory pass between these edits
+and the gate. The sweep is the only check, and its results come to you at the gate.
+
+### What I will not do
+
+No Bolt added, removed, resequenced, rescoped or reassigned. No Definition of Done,
+confidence hypothesis or demo changed. No scientific value decided — BLK-08's
+scientific limb is *put to you*, not answered. No edit to `requirements.md`,
+`unit-of-work.md` or any authority document. Gate 0's 2026-08-22 discharge record is
+preserved intact.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: I make the eleven `bolt-plan.md` changes and the span corrections in the other three artifacts, run the mirror sweep, and bring you its results plus the reopened Gate 0 item at the approval gate.
+
+- Request changes
+   > **Impact**: Nothing is edited. Tell me what to change — including reversing any of Q13, Q14 or Q15 — and I re-present before touching an artifact.
+
+> **💡 Recommendation**: **Looks correct** — every change is a plan statement being made true against a register that moved under it, plus one live decision returned to you rather than absorbed. Item 6 is the one worth your eye: it is a count defect that crossed from units-generation into this plan and would otherwise reach Construction.
+
+[Answer]: Looks correct

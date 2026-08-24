@@ -476,6 +476,27 @@ conflating them would overstate two of them.
 
 ## Amendment A — §19 acceptance rows for REQ-ENG-7 and REQ-ENG-10 (Vision §15.2)
 
+> **❌ RAISED AND DECLINED 2026-08-24** by the project decision owner
+> (`CR-2026-08-24-FOUNDATION-AMENDMENTS`). The request as raised is preserved below.
+>
+> **Why it was declined.** No project rule requires universal §19 coverage — the
+> requirements, all memory layers and both authority documents were searched and no
+> such rule exists. The approved position is the opposite: `unit-of-work-story-map.md`
+> dispositions uncovered requirements as *"Open by design"*. This unit already designs
+> both requirements as enforceable obligations without the rows, and **TA-37 would have
+> passed vacuously** — its subject is tags on G-05, G-06 and the phase transitions,
+> none of which has occurred.
+>
+> **This resolves Q7=X rather than contradicting it.** Q7=X directed that the request
+> be *raised*; it was, and the owner declined it. Raising a request never obliged its
+> approval.
+>
+> **Consequence:** REQ-ENG-7 and REQ-ENG-10 remain untested **by design, permanently
+> rather than pending**. The negative-path test specifications in `business-rules.md`
+> keep their *"Test specification only — not an approved acceptance row"* label as a
+> settled state. No count propagated: untested stays **36**, this unit's stays **2 of
+> 16**, its acceptance rows stay **7**, and §19 stays at **36** rows.
+
 Directed by **Q7=X**. The TA-03 verification above establishes there is **no
 partial coverage to subtract**: both requirements need a row in full.
 
@@ -535,7 +556,28 @@ the three proposed fields as **not present in the approved component design**, s
 a reader cannot mistake the specification for the contract. **No determinism is
 claimed as measured anywhere on the strength of a field that does not exist.**
 
+> **✅ APPLIED 2026-08-24.** The paragraph above records the state when this request
+> was raised and is preserved as that record. Amendment B was **approved** by the
+> project decision owner and executed under
+> `CR-2026-08-24-FOUNDATION-AMENDMENTS`: `component-methods.md` now defines **nine**
+> fields (derived: `awk … | grep -cE "^ +[a-z_]+: "` → `9`), and the three artifacts
+> have been updated so the specification and the contract now agree. **R-06 is
+> unchanged** — an empty `nondeterministic_ops` is still never proof of determinism.
+
 ## Amendment C — the release-history ledger (approved 2.6 and 2.7 artifacts)
+
+> **✅ APPROVED AND APPLIED 2026-08-24** under
+> `CR-2026-08-24-FOUNDATION-AMENDMENTS`. `unit-of-work.md` § 1 `foundation` → `Owns`
+> now names the ledger, and `services.md` § Run record and registry reads **three
+> artifacts, one authoritative**. The request as raised is preserved below.
+>
+> **Its authority was re-examined before approval and corrected.** A draft of the
+> change record proposed *rejecting* C on the grounds that no requirement mandates a
+> ledger — true of `requirements.md` and the eight upstream artifacts, but the search
+> had not covered this stage's own answers, where **Q6=D** and **FU-2=D** mandate it.
+> The proposed replacement, deriving the label from the content hash, is **Q6 option
+> C** — read and declined by the owner — and cannot produce the *monotonic* label
+> Q6=D requires, since monotonicity needs durable state. The rejection was withdrawn.
 
 Directed by **FU-2=D**, which instructs raising the request rather than editing
 silently. Scope determined above, not assumed:
@@ -567,7 +609,7 @@ silently. Scope determined above, not assumed:
 
 ---
 
-## Consolidated Summary Confirmation
+## Consolidated Summary Confirmation (2026-08-23 pass, answered and superseded by the re-entry below)
 
 Does this all look correct before I generate the artifact?
 
@@ -631,5 +673,169 @@ question, option, answer or amendment on this unit changed.**
 A redo jump aimed at correcting four stale cross-references in `target-standardization`'s
 question file reset the receipt floor for every unit of this stage. **No question, option,
 answer or amendment on this unit changed.**
+
+[Answer]: Looks correct
+
+---
+
+## Consolidated Summary Confirmation (2026-08-24 re-entry — superseded by the amendment pass below)
+
+*(after the Inception re-run and a change assessment. **Superseded**: this section
+states that Amendments A, B and C all stay pending. That was true when written and is
+false now — A was declined and B and C were approved and executed on 2026-08-24 under
+`CR-2026-08-24-FOUNDATION-AMENDMENTS`. Preserved as the record of what was presented.)*
+
+**Why this confirmation is being retaken.** The backward jump from this stage on
+2026-08-23 cleared every receipt while leaving the artifacts on disk. Three Inception
+stages were then re-run — `application-design` produced **ADR-11**, `units-generation`
+registered **BLK-08** and **BLK-09**, `delivery-planning` reconciled the Bolt plan and
+recorded **D-27**. This unit's design was written before all of that, so it was
+assessed against it before any receipt was sought.
+
+**The assessment found nothing to change.** Six checks against everything that moved:
+
+| Check | Result |
+|---|---|
+| Retired ADR-11 identifiers (`FoldSpec`, `apply_transforms`, `build_folds`) | **0** across all four files |
+| References to `features-and-splits` or `evaluation-and-comparison` | **0** |
+| Stale blocker spans, "six open", or a stale `40` | **none** |
+| Blocker references | only **BLK-01** (correctly noted closed) and **BLK-07** as acquisition context |
+| Its own figures — 16 requirements, 2 untested, 7 acceptance rows | match the current unit table; TA-33…TA-36 touched `external-products` and `features-and-splits` only |
+| Stale ADR-10 authority claims (*"unsigned"*, *"no authority backing"*) | **none** |
+
+The reason is structural rather than luck: `foundation` sits upstream of everything
+ADR-11 changed. It owns config loading, determinism, run records, the registry and
+releases — none of which touches the leakage boundary. BLK-08 and BLK-09 land on
+Bolts 7 and 9; RES-05 is `inventory-and-registry`'s; the M10 fixture is Bolts 7 and
+12; D-27 concerns the target transform. **None reaches this unit.**
+
+### What this unit's functional design commits to
+
+**Nine entities.** `ConfigSnapshot` (frozen per run — config hashes to the run record,
+seeds to determinism); `DeterminismRecord`; `RunRecord`; `RegistryEvent`
+(append-only); `ReleaseManifest` (immutable, content-addressed); `ReleaseLedgerEntry`;
+two static maps — `RequiredFieldsMap` keyed by `(stage, phase)` and
+`CredentialNameMap`, which `ConfigSnapshot` **declares and never consumes**; and
+`IntegrityError` as an entity in its own right, the single catchable base.
+
+**Ten workflows** (W-1…W-10): the stage entry contract; `load_configs`
+read/snapshot/hash/resolve; preflight `assert_no_tbd` and
+`assert_declared_sources_exist`; `seed_everything` plus the determinism probe;
+opening the run record; registry append; `write_release` and label allocation;
+`resolve_platform_roots` with its credential precondition; what Bolt 1 builds and must
+not; and fixture-scale-only with the in-Kaggle obligation.
+
+**Business rules worth naming.** Preflight rejects a *missing* field and a `TBD` field
+alike (R-02); an authorized `TBD` in Bolt 1 is expected evidence, not a failure
+(R-04); determinism applies before graph construction, re-exec first (R-05); an empty
+`nondeterministic_ops` is **never proof** of determinism (R-06); registry writes never
+read run history (R-08); the **content hash is authoritative** and the release label is
+explicitly not (R-11); and on integrity failure, report honestly even when reporting
+itself fails (R-10).
+
+### The three amendments stay PENDING and unapproved
+
+The assessment confirmed each is correctly classified into its own authority class —
+conflating them would overstate two of the three:
+
+| Amendment | Authority class | Why it stays open |
+|---|---|---|
+| **A** — §19 rows for REQ-ENG-7 and REQ-ENG-10 | **Vision §15.2** — an authority-document change | `requirements.md` marks both `UNTESTED`; TA-03 covers neither fully (two partials, both install-time rather than per-run). Yours to approve or decline |
+| **B** — three `DeterminismRecord` fields | **Approved-artifact annotation** (`GOV-2026-08-22-INC-01` Rec 7 precedent) | Your own **Q3=C** answer mandates recording probe scope, detected mismatches and a `partial` / `not-yet-measured` classification. `component-methods.md` defines six fields. **No requirement fixes the field set** — so this is not a §15.2 change |
+| **C** — the release ledger | **Approved-artifact annotation**; **no §12 amendment needed**, derived | *"ledger"* appears **0 times** in `requirements.md` and all eight approved upstream artifacts. TE §13.3 requires `dataset_version` as a *"Stable release ID"* but mandates no ledger, and R-11 makes the label non-authoritative. The weakest of the three |
+
+**Nothing here claims what is not approved.** No acceptance coverage is claimed for
+REQ-ENG-7 or REQ-ENG-10; no output states or implies determinism has been measured
+(W-4: *"Silence is the correct output"*); the ledger appears in no approved `Owns`
+list, and `component-methods.md`, `services.md` and `unit-of-work.md` are unedited.
+That is what your **Q7=X** answer directed.
+
+**G-09 is not signed.** Nothing in this design authorises creating a module.
+
+### Limits on what this confirms
+
+I verified these artifacts against everything that changed upstream and against the
+six questions in the assessment. I did **not** independently re-derive all ten
+workflows and thirteen business rules against their cited sources — that was the
+original review's work, and it returned **READY**.
+
+Does this all look correct before the stage proceeds?
+
+- Looks correct
+   > **Impact**: The confirmation receipt is recorded for `foundation`, and the workflow moves to the next unit in functional design. Amendments A, B and C stay pending and unapproved; nothing is marked resolved and no module is authorised.
+
+- Request changes
+   > **Impact**: No receipt is recorded. Tell me what to change — including deciding any of A, B or C, or reopening the stage body for this unit — and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the assessment's minimal edit set was empty, and the design already handles all three open items the way this project's rules require: specify the target, claim nothing unapproved.
+
+[Answer]: Superseded — not answered. The owner ruled on Amendments A, B and C
+instead, which changed the facts this summary asserted. See the amendment pass below.
+
+---
+
+## Consolidated Summary Confirmation
+
+*(2026-08-24 — the amendment pass)*
+
+**What changed since the last summary.** That summary said Amendments A, B and C all
+stay pending. The owner then ruled on all three, an independent challenge of each
+against the approved artifacts followed, and one of the three rulings was reversed on
+evidence. All of it is executed and recorded in
+`governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`.
+
+### The three rulings
+
+| | Decision | Authority | What it means for this unit |
+|---|---|---|---|
+| **A** — §19 rows for REQ-ENG-7 and REQ-ENG-10 | **DECLINED** | Owner, on the evidence that **no rule requires universal §19 coverage** and that the approved position dispositions uncovered requirements as *"Open by design"* | Both stay untested **by design, permanently**. Their negative-path test specifications keep the *"Test specification only"* label as a settled state, not a provisional one. **No count moved** — untested stays 36, this unit's 2 of 16, its acceptance rows 7, §19 at 36 rows |
+| **B** — three `DeterminismRecord` fields | **APPROVED** | Owner, under the Rec 7 annotate-in-place precedent. Required by your own **Q3=C** answer, which the six-field contract could not record | `component-methods.md` now defines **nine** fields. W-4 steps 5–7 are fully recordable and **the prohibition on stating that determinism was measured is lifted** — replaced by a narrower rule: a measured claim requires `probe_scope` recorded and `measurement_status` = `complete`. **R-06 unchanged** |
+| **C** — the release-history ledger | **APPROVED** | Owner, on the authority of **Q6=D** and **FU-2=D** | `services.md` reads **three artifacts, one authoritative**; `unit-of-work.md` § 1 `Owns` names the ledger. **R-11 unchanged** — the content hash stays authoritative and the label is a citation device |
+
+### One reversal, recorded rather than buried
+
+A draft of the change record proposed **rejecting C**, on the finding that *"ledger"*
+appears **0 times** in `requirements.md` and the eight approved upstream artifacts —
+true, but the search had never covered **this stage's own answered questions**. **Q6=D**
+requires a *monotonic, human-readable* label alongside the hash, and **FU-2=D** names
+the durable append-only ledger, its ownership and its append behaviour.
+
+The replacement that draft proposed — deriving `dataset_version` from `content_hash` —
+is **Q6 option C**, which you read and declined in favour of D. It also cannot produce
+a *monotonic* label, because monotonicity requires durable state. The rejection was
+withdrawn and C reinstated on the same logic that makes B required: an approved stage
+answer mandates something the upstream artifacts do not express.
+
+### What was executed
+
+Six planned sites, plus two the sweep found in this file's own Amendment sections.
+Two superseded literals swept and both re-derived rather than decremented:
+`DeterminismRecord` **6 → 9** fields, and `services.md` **two → three** artifacts. The
+sweep also caught a box **heading** in `domain-entities.md` still asserting the
+superseded claim while its body said otherwise, and a duplicate bullet introduced
+during execution — both corrected.
+
+**Confirmed untouched**, because A was declined: the Technical Environment §19 table,
+`requirements.md`, and every untested and acceptance figure across
+`components.md`, `unit-of-work.md`, `unit-of-work-story-map.md`, `bolt-plan.md`,
+`risk-and-sequencing-rationale.md` and `phase-check-inception.md`.
+
+### What still stands unchanged
+
+The design itself — nine entities, ten workflows W-1…W-10, thirteen business rules.
+**G-09 is not signed**, so nothing here authorises creating a module. No scientific
+value was decided. ADR-11, D-27 and BLK-02…BLK-09 are untouched. The concrete
+`RequiredFieldsMap` and `CredentialNameMap` contents still await the four configs
+existing — this stage fixes the mechanism only.
+
+Does this all look correct before the stage proceeds?
+
+- Looks correct
+   > **Impact**: The confirmation receipt is recorded for `foundation` and the workflow moves to the next unit in functional design. The three amendments are settled — A declined permanently, B and C approved and executed.
+
+- Request changes
+   > **Impact**: No receipt is recorded. Tell me what to change — including revisiting any of the three rulings or the change record — and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the three amendments are resolved, the two superseded literals are swept and re-derived, and the artifacts now agree with the contracts they cite.
 
 [Answer]: Looks correct

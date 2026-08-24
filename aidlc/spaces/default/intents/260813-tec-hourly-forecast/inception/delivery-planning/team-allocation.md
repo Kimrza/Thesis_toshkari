@@ -60,12 +60,26 @@ acceptance evidence needs something another unit owns.
 | 4 | `inventory-and-registry` | `aidlc-developer-agent` | — (no open blocker) |
 | 5 | `external-products` | `aidlc-developer-agent` | — (no open blocker) |
 | 6 | `target-standardization` | `aidlc-developer-agent` | Supervisor — BLK-05's §12 tree amendment |
-| 7 | `features-and-splits` | `aidlc-developer-agent` | Functional design authors BLK-04's transform contract; supervisor accepts the leakage evidence at G-04 and G-05 |
-| 8 | `models-and-baselines` | `aidlc-developer-agent` | Functional design authors BLK-03's confirmatory-prediction contract |
-| 9 | `evaluation-and-comparison` | `aidlc-developer-agent` | Inherited only — BLK-03 ↓, BLK-04 ↓ |
-| 10 | `statistical-inference` | `aidlc-developer-agent` | Inherited only — BLK-03 ↓, BLK-04 ↓ |
-| 11 | `regimes-diagnostics-reporting` | `aidlc-developer-agent` | Inherited only — BLK-03 ↓, BLK-04 ↓ |
-| 12 | `fixtures-and-reproducibility` | `aidlc-developer-agent` | Project owner under Q-31 — BLK-02's fixture station |
+| 7 | `features-and-splits` | `aidlc-developer-agent` | Functional design authors BLK-04's transform contract, **BLK-08's mechanism limb jointly with Bolt 9**, and **BLK-09's `train_start` contract term**; supervisor accepts the leakage evidence at G-04 and G-05. **BLK-08's scientific limb was answered by the project owner on 2026-08-24 — no; the primary target stays raw TECU** |
+| 8 | `models-and-baselines` | `aidlc-developer-agent` | Functional design authors BLK-03's confirmatory-prediction contract; **BLK-09 ↓** inherited |
+| 9 | `evaluation-and-comparison` | `aidlc-developer-agent` | **Owns BLK-08** — functional design authors its mechanism limb jointly with Bolt 7, and **its scientific limb was answered by the project owner on 2026-08-24 — no, the primary target stays raw TECU, so no primary-path inverse is owed and the mechanism limb narrows to `ABL-DIFF`**. Inherited: BLK-03 ↓, BLK-04 ↓, **BLK-09 ↓** |
+| 10 | `statistical-inference` | `aidlc-developer-agent` | Inherited only — BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓** |
+| 11 | `regimes-diagnostics-reporting` | `aidlc-developer-agent` | Inherited only — BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓** |
+| 12 | `fixtures-and-reproducibility` | `aidlc-developer-agent` | Project owner under Q-31 — BLK-02's fixture station. Inherited: BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓**. **Runs the M10 contract fixture** authored by Bolt 7 |
+
+> **⚠ Rows 7–12 corrected 2026-08-24.** Row 9 read *"Inherited only — BLK-03 ↓,
+> BLK-04 ↓"*, which became false on 2026-08-23 when **BLK-08** was registered against
+> `evaluation-and-comparison`: that unit now **owns** a blocker, and this table is
+> where a reader looks to find out who decides what. Rows 7, 8, 10, 11 and 12 were
+> stale in the milder way — missing inherited marks rather than misstating ownership.
+>
+> The correction also added the one **Gate 0** item this table needed to show: BLK-08's
+> scientific limb, the owner's to take. **It was taken on 2026-08-24** at this stage's
+> approval gate — *no*, the primary configuration's transform does not touch the
+> target — so every decision on this table is now either already taken or delegated to
+> functional design, and Gate 0 carries no live item. That ruling is numbered **D-27**
+> in `evidence/DECISIONS.md` (2026-08-24), written on the owner's explicit instruction
+> at this gate since that file is outside this stage's produces list.
 
 **↓** marks a blocker inherited through a consumed contract rather than owned.
 

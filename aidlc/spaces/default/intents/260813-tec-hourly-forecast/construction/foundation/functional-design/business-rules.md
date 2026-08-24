@@ -30,7 +30,7 @@ where no acceptance row exists to accept that control, it says so.
 - `../../../inception/application-design/components.md` and `component-dependency.md` — the import boundaries and § Shared resources' carve-out.
 - `../../../inception/application-design/services.md` — § Stage entry contract, § Run record and registry.
 - `../../../inception/practices-discovery/team-practices.md` — § Code Style (two-tier error posture, docstring rule), § Testing Posture (§18.3 as the real gate).
-- `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, the three pending amendments.
+- `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, the three amendments — A **declined**, B and C **approved**, all resolved 2026-08-24.
 - `domain-entities.md` and `business-logic-model.md` — the shapes and workflows these rules constrain.
 
 ---
@@ -183,20 +183,31 @@ as proof of determinism.**
 
 > ## ⚠ THIS RULE IS NOT FULLY ENFORCEABLE UNDER THE APPROVED CONTRACT
 >
-> `probe_scope`, `measurement_status` and `declared_vs_observed_mismatches` **do
-> not exist** in `DeterminismRecord` as approved at stage 2.6 — the contract carries
-> **six** fields, derived:
-> `awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+: "` → `6`.
+> **✅ Amendment B APPROVED 2026-08-24** (`CR-2026-08-24-FOUNDATION-AMENDMENTS`).
+> `probe_scope`, `measurement_status` and `declared_vs_observed_mismatches` now exist
+> in `DeterminismRecord` — the contract carries **nine** fields, derived:
+> `awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+: "` → `9`.
 >
-> **Amendment B is PENDING and NOT approved.** Until it is approved, the record can
-> carry the probe *result* with no recorded *scope* and no measurement *status* —
-> exactly the ambiguity Q3 = C was chosen to eliminate.
+> *Superseded status, preserved:* the three fields *"**do not exist** in
+> `DeterminismRecord` as approved at stage 2.6 — the contract carries **six** fields"*,
+> and **Amendment B was PENDING and NOT approved**, so the record could carry a probe
+> *result* with no recorded *scope* and no measurement *status* — exactly the ambiguity
+> Q3 = C was chosen to eliminate. That ambiguity is now closed.
 >
-> **Therefore, binding now and not deferred:** no artifact, manifest, registry row
-> or report produced by this unit may state or imply that determinism has been
-> measured for any operation class, while the fields that would record the scope and
-> status of that measurement do not exist. Silence is the correct output, not an
-> empty list presented as a clean result.
+> **The prohibition this box carried is now DISCHARGED, because its condition has
+> ended.** It read: *"binding now and not deferred: no artifact, manifest, registry
+> row or report produced by this unit may state or imply that determinism has been
+> measured for any operation class, **while the fields that would record the scope and
+> status of that measurement do not exist**. Silence is the correct output, not an
+> empty list presented as a clean result."* The fields now exist, so the condition no
+> longer holds.
+>
+> **What replaces it is narrower, not nothing.** A statement that determinism was
+> measured is permitted **only** where `probe_scope` records what was examined and
+> `measurement_status` is `complete`. Where the status is `partial` or
+> `not-yet-measured`, the output says so — it does not fall silent, and it does not
+> present an empty list as a clean result. **R-06 is untouched**: an empty
+> `nondeterministic_ops` remains no proof of determinism.
 
 **Negative control.** Declare an operation as expected-nondeterministic in
 configuration that the probe does not observe, and the inverse; both must surface
@@ -338,14 +349,27 @@ rule that quietly stops applying to the rows it was written for.
 **Negative control.** Delete a release directory and attempt a fresh allocation;
 the previously used label must still be refused.
 
-> **Amendment C is PENDING and NOT approved.** The ledger is absent from
-> `unit-of-work.md` § 1 `Owns` and from `services.md` § Run record and registry
-> ("Two artifacts, one authoritative"). Both approved artifacts are unedited. **No
-> TE §12 amendment is needed** — `artifacts/registry/` is already enumerated and the
-> tree carries zero file-level entries inside `artifacts/`.
+> **✅ Amendment C APPROVED 2026-08-24** (`CR-2026-08-24-FOUNDATION-AMENDMENTS`).
+> *Superseded status, preserved:* *"Amendment C is PENDING and NOT approved. The ledger
+> is absent from `unit-of-work.md` § 1 `Owns` and from `services.md` § Run record and
+> registry ("Two artifacts, one authoritative"). Both approved artifacts are
+> unedited."* Both have been annotated in place on the owner's approval;
+> `services.md` now reads **three artifacts, one authoritative**.
+>
+> **Authority: Q6=D and FU-2=D.** Q6=D requires a *monotonic, human-readable* label
+> alongside the authoritative hash — chosen over option C's *"version derived from the
+> manifest hash"* — and FU-2=D names the durable append-only ledger with its ownership
+> and append behaviour. A monotonic label needs durable state, which is why the
+> directory scan R-12 rejects cannot serve.
+>
+> **No TE §12 amendment was needed** — `artifacts/registry/` is already enumerated and
+> the tree carries zero file-level entries inside `artifacts/`.
 
-**Acceptance.** TA-15 for the release; **no row accepts the ledger itself** until
-Amendment C is approved.
+**Acceptance.** TA-15 for the release. **No §16/§19 row accepts the ledger itself** —
+and none is sought: Amendment A, which would have added acceptance rows for this
+unit's uncovered obligations, was **declined** on 2026-08-24. The ledger's own
+integrity is asserted by the independent test FU-2=D requires, not by an acceptance
+row.
 
 ## R-13 — A release directory is never overwritten
 
@@ -446,16 +470,23 @@ docstring containing all three elements.
 
 | Rule | Requirement | Status |
 |---|---|---|
-| Freeze-gate tagging; D-number on every governed change | **REQ-ENG-7** | ⚠ **No §16/§19 row.** Amendment A pending |
-| Per-run environment lock, eight fields populated | **REQ-ENG-10** | ⚠ **No §16/§19 row.** TA-03 verified against all seven §13.1 bullets and covers **none fully**; two partially, both install-time rather than per-run. `requirements.md` records the same conclusion. Amendment A pending |
-| Probe scope, measurement status, declared-vs-observed mismatches | Q3 = C / NFR-DET-01 | ⚠ **Fields not in the approved contract.** Amendment B pending |
-| Release-label ledger integrity | Q6 / FU-2 | ⚠ **Artifact not in any approved `Owns` list.** Amendment C pending |
+| Freeze-gate tagging; D-number on every governed change | **REQ-ENG-7** | ⚠ **No §16/§19 row — and none will be added.** Amendment A **DECLINED 2026-08-24**; untested **by design**, permanently *(superseded status: "Amendment A pending")* |
+| Per-run environment lock, eight fields populated | **REQ-ENG-10** | ⚠ **No §16/§19 row.** TA-03 verified against all seven §13.1 bullets and covers **none fully**; two partially, both install-time rather than per-run. `requirements.md` records the same conclusion. Amendment A **DECLINED 2026-08-24**; untested **by design**, permanently *(superseded status: "Amendment A pending")* |
+| Probe scope, measurement status, declared-vs-observed mismatches | Q3 = C / NFR-DET-01 | ✅ **Fields now in the approved contract** — `DeterminismRecord` carries nine. Amendment B **APPROVED 2026-08-24** *(superseded status: "Fields not in the approved contract. Amendment B pending")* |
+| Release-label ledger integrity | Q6 / FU-2 | ✅ **Artifact now in `unit-of-work.md` § 1 `Owns` and `services.md`.** Amendment C **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D *(superseded status: "Artifact not in any approved `Owns` list. Amendment C pending")* |
 
 **Test specifications for REQ-ENG-7 and REQ-ENG-10**, labelled exactly as Q7 = X
 directs:
 
 > **Test specification only — not an approved acceptance row and not evidence of a
 > passing result.**
+>
+> **This label is now permanent, 2026-08-24.** It was provisional while Amendment A —
+> the Vision §15.2 request Q7=X directed be raised — was pending. The owner **declined**
+> that request, so no §19 row will cover REQ-ENG-7 or REQ-ENG-10. These specifications
+> remain what they say they are: design targets for stage 3.5, never acceptance
+> evidence, and their absence from §19 is the approved *"Open by design"* state rather
+> than an outstanding gap.
 
 - **REQ-ENG-7.** Reject a change to a governed scientific constant or governed
   configuration file when the required decision identifier is **missing or
@@ -491,3 +522,21 @@ amendment is approved and the tests have executed successfully.
 **What iteration 2 explicitly cleared here.** The per-rule acceptance citations, the
 two-tier posture, R-14's credential-boundary statement, and the pending-amendment
 discipline in R-06 and R-12 — all checked against source and found correct.
+
+---
+
+## Finalized 2026-08-24 — the three amendments are settled
+
+Recorded under `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`, after
+an independent challenge of each amendment against the approved artifacts.
+
+- **Amendment A — DECLINED.** No project rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. **REQ-ENG-7 and REQ-ENG-10 are untested by design, permanently rather than pending.** No count moved: untested stays 36, this unit's stays 2 of 16, its acceptance rows stay 7, TE §19 stays at 36 rows.
+- **Amendment B — APPROVED.** `DeterminismRecord` carries **nine** fields. R-05's prohibition on stating that determinism was measured is **discharged** and replaced by a narrower rule: a measured claim requires `probe_scope` recorded and `measurement_status` = `complete`. **R-06 is unchanged** — an empty `nondeterministic_ops` is never proof of determinism.
+- **Amendment C — APPROVED**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. A draft of the change record proposed rejecting it and deriving the label from the content hash; that is Q6 option C, which the owner had read and declined, and it cannot yield the *monotonic* label Q6=D requires. The rejection was withdrawn. **R-11 is unchanged** — the content hash remains authoritative and the label is a citation device.
+
+The negative-path test specifications for REQ-ENG-7 and REQ-ENG-10 keep their
+*"Test specification only — not an approved acceptance row"* label as a **settled**
+state rather than a provisional one.
+
+**G-09 remains unsigned.** Nothing in this document authorises creating a module, and
+no scientific value is decided here.

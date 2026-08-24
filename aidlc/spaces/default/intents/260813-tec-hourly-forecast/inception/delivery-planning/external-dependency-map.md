@@ -15,7 +15,7 @@ answer requires.
 ## Sources
 
 - `bolt-plan.md` and `risk-and-sequencing-rationale.md` — the Bolt numbering and risk ranking referenced throughout.
-- `../units-generation/unit-of-work.md` — the blocker register BLK-01…BLK-07, the residual obligations RES-01…RES-03, and each blocker's stated approval authority.
+- `../units-generation/unit-of-work.md` — the blocker register BLK-01…**BLK-09**, the residual obligations RES-01…**RES-05**, and each blocker's stated approval authority.
 - `../units-generation/unit-of-work-dependency.md` — the integration-point table, which is where the released-artifact contracts between units come from.
 - `../units-generation/unit-of-work-story-map.md` — the acceptance rows each gated item reaches.
 - `../application-design/components.md` — the module boundaries the licence and reuse rules attach to.
@@ -41,6 +41,18 @@ decision can actually be taken.
 |---|---|---|---|---|---|
 | **BLK-02** — the `plumbing_7day` fixture station | **RESOLVED 2026-08-22 — BSHM 32/35 (D-20)**, on the only complete observed coverage of D-11's window. Measured evidence in § A1b | Project owner, under Q-31 | Decided | **Bolt 12** owns the manifest; **Bolt 3 onward** needed the identity for the per-Bolt measurement rule | **No longer a Gate 0 blocker.** Still pending: the manifest does not exist, the fixture has never been run, and no measured value exists or is claimed |
 | **F10.7 selection decisions** (three, recorded as D-21/D-22/D-23; transcribed into `features.yaml` at Bolt 1) | **RESOLVED 2026-08-22** — (a) daily value = **daily median** (D-21, with its availability rule); (b) duplicate UT = **mean** + count log + QC flag, provider-correction semantics taking precedence when documented (D-22); (c) high-spread = **flag and retain** (D-23). Measured evidence in § A1a | Project owner, before G-05 | Decided | **Bolt 5** — `external-products` builds the F10.7 series | **No longer a Gate 0 blocker.** A run whose `features.yaml` leaves any of the three unset still **fails the zero-`TBD` preflight**; the values are now available to transcribe rather than absent |
+
+**Added 2026-08-24 — the one item on this table that is still live:**
+
+| Item | What is needed | Owner | Lead time | Blocks | If it slips |
+|---|---|---|---|---|---|
+| **BLK-08, scientific limb** — *does the train-only transform touch the target?* — **RESOLVED 2026-08-24: NO.** The primary configuration's transform touches target-derived **inputs** (`vtec_lag_*`, `vtec_seq_24`) and not the target, which stays **raw TECU** (TE §7.2 `ABL-DIFF` row, *Primary remains: Raw TECU*). No primary-path inverse is owed; `ABL-DIFF` alone transforms the target and keeps its inverse-before-metrics obligation with error propagation recorded. Taken by the project decision owner at the delivery-planning approval gate under the recorded student/supervisor authority equivalence. **Numbered D-27 in `evidence/DECISIONS.md` on 2026-08-24**, written on the owner's explicit instruction at that gate since the file is outside this stage's produces list. *(Original statement of what was needed, preserved:)* A recorded reading of the frozen TE §6.2 feature contract, stated either way. **If it does**: model output is in transformed space, and `project.md` § Mandated requires `ABL-DIFF` to *"inverse-transform to absolute TECU before any metric"* — so a path back must exist, and the design currently expresses none. **If it does not**: that must be said explicitly in `component-methods.md` and in ADR-11's consequences, so the obligation is visibly satisfied rather than silently assumed. **No value is invented either way** — this is a reading, and it is the owner's | Project decision owner, under the recorded student/supervisor authority equivalence | **Decidable now** — the input is the already-frozen §6.2 dictionary, and no design work sits behind it | **Bolts 7 and 9** may **begin** functional design and may not **complete** it; through them the TECU-denominated outputs of **Bolts 10 and 11** | Bolt 9's designer would settle a scientific reading mid-design, which is the class of decision `project.md` § Forbidden bars an agent from taking. The mechanism limb cannot be designed against an unanswered scientific limb, so Bolt 7 and Bolt 9 stall at their functional-design gates rather than proceeding on an assumption |
+
+*Why this is on the A1 table and not A2: A1 is for items decidable at Gate 0 with
+no design work behind them, and this one qualifies — the answer is read off a frozen
+contract. BLK-08's **mechanism** limb is genuine design work and sits on the A2 table
+with the other contract blockers. The split is the owner's Q13 = C ruling of
+2026-08-24.*
 
 ### A1b — the `plumbing_7day` station, with the measured evidence behind it
 
@@ -193,6 +205,14 @@ So functional design produces the analysis; the owner takes the decision; the
 implementation stays barred until the decision is recorded. Both blockers are
 presented below with options, evidence, risks and a recommendation — and neither
 is closed by this artifact.
+
+> **⚠ Two blockers joined this table on 2026-08-24**, registered 2026-08-23 after
+> `application-design` produced ADR-11. Neither is presented with options below,
+> because neither needs an owner decision on this table — both are contract work the
+> functional-design gate resolves, on the 2026-08-22 exit-condition terms.
+>
+> - **BLK-08, mechanism limb** — how `ABL-DIFF`'s inverse is reached and where its error propagation is recorded. Owned by `evaluation-and-comparison` (Bolt 9) with `features-and-splits` (Bolt 7) co-owning, because `Transform` and its fitted state live there. **Narrowed 2026-08-24** by the A1-table ruling: the primary path needs no inverse at all, since the primary target stays raw TECU, so this limb no longer requires a general `src/evaluation` → `src/features` route — only a named path for the one ablation that transforms the target. **Its scientific limb is resolved** on the A1 table.
+> - **BLK-09** — whether `Partition` gains a `train_start` field or the January-1 rule is stated explicitly as a contract term with a test that fails if a partition's training range starts elsewhere. Owned by `features-and-splits` (Bolt 7). Deriving the range from `train_end` and a hard-coded year is **not** available: TC-03e forbids a scientific constant in source. No scientific limb — FR-P1-04-5's fold definitions already fix the reading.
 
 **BLK-06 — the canonical protected set. Options, with the derivation already
 performed.** Both source lists were enumerated from the Technical Environment on
@@ -471,7 +491,7 @@ the `DP-CHAIR-02` ruling.
 -->
 <!-- markdownlint-disable-line -->
 5. **CLOSED 2026-08-22 — the four leakage prohibitions have §19 TA rows.** Approved by the project decision owner and applied the same day under **`CR-2026-08-22-LEAKAGE-TA`**: TE §19 gains **TA-33, TA-34, TA-35 and TA-36**, one negative-path row per requirement (FR-P1-04-12, -13, -16, -17), each naming the prohibited behaviour, the deliberately invalid input and the expected protective behaviour. **What that closes and what it does not:** each requirement now has an acceptance **criterion**; none has an implemented test (no module exists), none has been executed, none has passed, and all four rows read `Pending`. Module placement is an open assignment at stage 3.1. The recommendation as originally recorded, retained: *"Recommendation: approve — a prerequisite with no acceptance row is enforced only by attention."*
-6. **CLOSED 2026-08-22 — `unit-of-work.md`'s blocker register is synced.** Annotated in place under **`CR-2026-08-22-INC-CORRECTIONS`** (`GOV-2026-08-22-INC-01` Rec 7), the owner having settled the annotate-in-place question that the board itself split on: **BLK-02**'s station limb discharged by **D-20**, `fixture_manifest.yaml` limb open; **BLK-05**'s naming and documentation limbs discharged, implementation and execution limbs open; **BLK-06**'s enumeration limb discharged by **D-24**, per-item config binding and implementation open. **No blocker is closed outright and the count of open blockers remains six.** The conflict as originally stated, retained: *"D-20 discharges BLK-02's station limb and D-24 discharges BLK-06's enumeration limb, but the stage 2.7 register still shows both open. Leaving it stale is the unpropagated-correction defect `GOV-2026-08-22-UG-02` Rec 3 already flagged once."*
+6. **CLOSED 2026-08-22 — `unit-of-work.md`'s blocker register is synced.** Annotated in place under **`CR-2026-08-22-INC-CORRECTIONS`** (`GOV-2026-08-22-INC-01` Rec 7), the owner having settled the annotate-in-place question that the board itself split on: **BLK-02**'s station limb discharged by **D-20**, `fixture_manifest.yaml` limb open; **BLK-05**'s naming and documentation limbs discharged, implementation and execution limbs open; **BLK-06**'s enumeration limb discharged by **D-24**, per-item config binding and implementation open. **No blocker is closed outright and the count of open blockers remains six.** *(That count was correct at this closure on 2026-08-22 and is left as the record of it. It is **no longer the current count**: BLK-08 and BLK-09 were registered 2026-08-23, and **eight** blockers are open today — derived from the register's `| Status |` rows. This item's own resolution is unaffected; only the figure it quoted has moved.)*** The conflict as originally stated, retained: *"D-20 discharges BLK-02's station limb and D-24 discharges BLK-06's enumeration limb, but the stage 2.7 register still shows both open. Leaving it stale is the unpropagated-correction defect `GOV-2026-08-22-UG-02` Rec 3 already flagged once."*
 
 **Open obligations, not decisions:**
 
@@ -525,7 +545,7 @@ reader budgets time for a decision that has already been made.
 | Item | Was | Now |
 |---|---|---|
 | **5** — whether the four leakage prohibitions get §19 TA rows | Awaiting owner; carried a "Recommendation: approve" | **CLOSED** — approved and applied under `CR-2026-08-22-LEAKAGE-TA`; TA-33…TA-36 exist. Recorded with the four distinctions intact: criterion **yes**; implemented test **no**; executed **no**; passed **no**; all four rows `Pending`; module placement open at stage 3.1 |
-| **6** — whether `unit-of-work.md`'s blocker register is synced | Awaiting owner; carried a "Recommendation: sync it" | **CLOSED** — annotated in place under `CR-2026-08-22-INC-CORRECTIONS` (`GOV-2026-08-22-INC-01` Rec 7). **No blocker closed outright; the open-blocker count remains six** — BLK-02, BLK-05 and BLK-06 each had one limb discharged |
+| **6** — whether `unit-of-work.md`'s blocker register is synced | Awaiting owner; carried a "Recommendation: sync it" | **CLOSED** — annotated in place under `CR-2026-08-22-INC-CORRECTIONS` (`GOV-2026-08-22-INC-01` Rec 7). **No blocker closed outright; the open-blocker count remains six** *(as at this 2026-08-22 closure, preserved as its record; the current count is **eight** — BLK-08 and BLK-09 registered 2026-08-23)* — BLK-02, BLK-05 and BLK-06 each had one limb discharged |
 
 **Numbering is deliberately unchanged.** Both items keep their original numbers
 and stay in place, marked `CLOSED`, because other sections of this document and of

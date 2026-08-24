@@ -6,7 +6,7 @@ Stage 2.8 (`delivery-planning`), intent `260813-tec-hourly-forecast`.
 
 - `bolt-plan.md` — the twelve-Bolt sequence this document justifies.
 - `../units-generation/unit-of-work-dependency.md` — the 23 edges, the one independent pair, and the topological order this sequence is checked against.
-- `../units-generation/unit-of-work.md` — the blocker register BLK-01…BLK-07 and the residual obligations RES-01…RES-03, which supply most of the risk register below.
+- `../units-generation/unit-of-work.md` — the blocker register BLK-01…**BLK-09** and the residual obligations RES-01…**RES-05**, which supply most of the risk register below.
 - `../units-generation/unit-of-work-story-map.md` — the 36 requirements with no acceptance row and the per-unit untested breakdown, which is the coverage risk. (Superseded literal, preserved: "the 40 requirements with no acceptance row"; corrected 2026-08-22, a site the `CR-2026-08-22-INC-CORRECTIONS` Rec 5 sweep did not reach.)
 - `../application-design/components.md` — the forbidden edges and the import allowlist, whose enforcement points drive the leakage risks.
 - `../requirements-analysis/requirements.md` — § Known defects, § Open supervisor gates, § Constraints.
@@ -175,10 +175,16 @@ unit and its gate, then NFR requirements and its gate, then NFR design, then cod
 generation last — rather than designing and building one unit completely before
 the next.
 
-The reason is specific rather than stylistic. **Four of the six open blockers
-(BLK-03, BLK-04, BLK-06, BLK-07) require cross-unit contracts authored at
-functional design**, and three are recorded as **exit conditions on that stage**
-for several units at once. Stage-major's functional-design gate fires **before any
+The reason is specific rather than stylistic. **Six of the eight open blockers
+(BLK-03, BLK-04, BLK-06, BLK-07, BLK-08, BLK-09) require cross-unit contracts
+authored at functional design**, and five are recorded as **exit conditions on that
+stage** for several units at once. *(Counts corrected 2026-08-24 from "four of the
+six": BLK-08 and BLK-09 were registered 2026-08-23, and both are cross-unit contract
+blockers of exactly the kind this argument turns on — BLK-08 spans
+`evaluation-and-comparison` and `features-and-splits`, BLK-09 binds
+`features-and-splits` and the four units that inherit its fit. The stage-major
+argument is **strengthened** by them: it rests on how many units one contract
+blocker spans, and that number grew.)* Stage-major's functional-design gate fires **before any
 code exists**, which is the strongest available reading of G-09's *"before any
 affected component is coded"*.
 
@@ -333,6 +339,20 @@ the 36 remain in R-05. (Superseded literal, preserved: "the balance of the 40".)
 | **Mitigation** | The platform limb is tracked with no substitution available; the envelope is measured at Bolt 1 and re-measured at Bolt 12. The licence limb has a standing default already recorded — **reimplement from the paper with a citation** — so it degrades rather than blocks |
 | **Affected** | Bolts 1, 3, 4, 10, 12; gate G-P2 |
 
+### R-09 — Blocker concentration on Bolt 7, accepted without resequencing
+
+*Added 2026-08-24 under the owner's Q15 = A ruling, after BLK-08 and BLK-09 were
+registered on 2026-08-23.*
+
+| Field | Value |
+|---|---|
+| **Risk** | `features-and-splits` (Bolt 7) carries **three of the eight open blockers** — BLK-04 (owned), BLK-08 (co-owned with Bolt 9), BLK-09 (owned) — more than any other unit, while **2 units depend on it directly and 5 transitively** (`models-and-baselines`, `fixtures-and-reproducibility`, and through the first of those `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`). All three are cross-unit contract blockers resolved at functional design. If any one of them resolves late or resolves differently than its dependents assumed, the rework radius is five units rather than one. When this document was first written Bolt 7 carried **one** blocker |
+| **Likelihood** | Medium. The three are independent in origin but not in subject: BLK-09's missing `train_start` is the value BLK-04's own raises compare against, so a resolution of one constrains the other |
+| **Impact** | High in radius, Medium in severity. No scientific value is at stake in BLK-04 or BLK-09 — both are interface questions — and BLK-08's scientific limb is removed from this risk entirely — routed to Gate 0 and **answered there on 2026-08-24**: no, the primary target stays raw TECU, which also narrows BLK-08's remaining mechanism limb to the `ABL-DIFF` path alone |
+| **Mitigation** | **None available through sequencing, and that is the finding.** Bolt 7 already sits after all three of its dependencies and before all five of its dependents; no legal reordering of this DAG reduces its blocker load or shrinks its dependent set. What does mitigate it is already in the plan: `stage-major` iteration puts Bolt 7's functional design in the same stage as its dependents', so a contract settled there is settled for all of them at once — the argument § "Why the design steps run across all units before code" makes, now carrying more weight than when it was written. The three blockers stay **exit** conditions on functional design |
+| **Explicitly rejected mitigation** | Adding a Bolt 7 **entry** condition — its three blockers reviewed together before its functional design starts. Rejected because it re-creates the unsatisfiable-entry-condition defect `GOV-2026-08-22-REM-01` Rec 2 corrected: the contracts are authored *at* 3.1, so a condition requiring them before 3.1 begins can never be met |
+| **Affected** | Bolts 7, 8, 9, 10, 11, 12 |
+
 ## What sequencing cannot mitigate
 
 Two things are worth naming, because a reader could otherwise assume the plan
@@ -372,10 +392,24 @@ handles them:
   `external-products` / `target-standardization` independence holding. Recorded in
   full in § "The deviation is conditional", with the revision obligation if
   functional design finds the edge moves.
-- **Open, carried not closed.** BLK-02 through BLK-07, RES-01, RES-02, RES-03,
-  the 36 untested requirements, TA-24's missing implementing unit, the `02`
-  ordinal collision, WS-13's evidence departure from §16, and the AGPLv3
-  question.
+- **Open, carried not closed.** BLK-02 through **BLK-09** (**eight**), RES-01
+  through **RES-05**, the 36 untested requirements, TA-24's missing implementing
+  unit, the `02` ordinal collision, WS-13's evidence departure from §16, and the
+  AGPLv3 question. *(Spans corrected 2026-08-24; derived from the register's
+  `| Status |` rows and its `### RES-0…` headings.)*
+- **Closed 2026-08-24.** **BLK-08's scientific limb** — does the train-only transform
+  touch the target? — was restored as a live Gate 0 item under the Q13 = C ruling and
+  **answered at this stage's approval gate the same day: no.** The primary
+  configuration's transform touches target-derived inputs, not the target, which stays
+  **raw TECU** (TE §7.2, `ABL-DIFF` row: *Primary remains, Raw TECU*). `ABL-DIFF`
+  alone transforms the target and keeps its inverse-before-metrics obligation with
+  error propagation recorded. Numbered **D-27** in `evidence/DECISIONS.md` on
+  2026-08-24, written on the owner's explicit instruction at that gate since the file
+  is outside this stage's produces list.
+- **Open, narrowed.** **BLK-08's mechanism limb** — how `ABL-DIFF`'s inverse is
+  reached and where its error propagation is recorded — remains functional design's,
+  jointly for Bolts 7 and 9. The ruling removes the general primary-path inverse that
+  made the original finding Critical.
 - **None** of the above adopts a reading on a supervisor-owned value, and none
   decides a scientific constant.
 

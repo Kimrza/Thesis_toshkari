@@ -5,7 +5,7 @@ Depth: Comprehensive. Scope: `research-pipeline-governed`.
 
 ## Sources
 
-- Topology, consumed as fixed input: `../units-generation/unit-of-work.md` (the twelve units, their owned artifacts, the blocker register BLK-01…BLK-07 and the residual obligations RES-01…RES-03), `../units-generation/unit-of-work-dependency.md` (23 edges, the one independent pair, the forbidden edges), `../units-generation/unit-of-work-story-map.md` (requirement-to-unit and acceptance-row-to-unit mapping).
+- Topology, consumed as fixed input: `../units-generation/unit-of-work.md` (the twelve units, their owned artifacts, the blocker register BLK-01…**BLK-09** and the residual obligations RES-01…**RES-05**), `../units-generation/unit-of-work-dependency.md` (23 edges, the one independent pair, the forbidden edges), `../units-generation/unit-of-work-story-map.md` (requirement-to-unit and acceptance-row-to-unit mapping).
 - Design: `../application-design/components.md` — the six `src/` packages, the three **NEW** modules, and the one-way layering rule this plan's build order follows.
 - Requirements: `../requirements-analysis/requirements.md` — the seventeen governing gates, § Success and acceptance, § Known defects, § Constraints.
 - Affirmed practices: `../practices-discovery/team-practices.md` — § Way of Working (git on `main`, freeze-gate tags, D-number commit linkage), § Walking Skeleton, § Testing Posture, § Deployment.
@@ -55,10 +55,16 @@ its gate; then NFR design; then code generation last. This is the framework
 default and needs no state write.
 
 It was chosen over the alternative (design and build one unit completely before
-the next) for one specific reason. Four of the six open blockers — BLK-03,
-BLK-04, BLK-06 and BLK-07 — require **cross-unit contracts authored at functional
-design**, and three of them are recorded as **exit conditions on that stage** for
-several units at once. Stage-major puts every affected unit inside functional
+the next) for one specific reason. **Six of the eight** open blockers — BLK-03,
+BLK-04, BLK-06, BLK-07, **BLK-08** and **BLK-09** — require **cross-unit contracts
+authored at functional design**, and five of them are recorded as **exit conditions
+on that stage** for several units at once. *(Counts corrected 2026-08-24 from "four
+of the six": BLK-08 and BLK-09 were registered 2026-08-23 and both are cross-unit
+contract blockers of exactly this kind — BLK-08 spans `evaluation-and-comparison`
+and `features-and-splits`, BLK-09 binds `features-and-splits` and the four units
+inheriting its fit. The argument this sentence makes is **strengthened** by them,
+not weakened: the case for stage-major rests on how many units a contract blocker
+spans, and the answer grew.)* Stage-major puts every affected unit inside functional
 design together, and — decisively — its gate fires **before any code exists**,
 which is the strongest available reading of G-09's "before any affected component
 is coded".
@@ -108,10 +114,78 @@ before Bolt 1, required by the Q8 answer.
 > - **BLK-03, BLK-04, BLK-07** — resolved *during* functional design; they do not
 >   block its start, and no affected Bolt or gate completes until its exit
 >   conditions are satisfied.
+> - **BLK-08's mechanism limb, and BLK-09** — same treatment, added 2026-08-24.
+>   The resolution mechanism for `Transform.inverse`, and whether `Partition` gains
+>   a `train_start` field or an explicitly stated January-1 contract term, are both
+>   authored at functional design and are **exit** conditions on the Bolts that own
+>   them, never entry conditions.
 >
-> **The open-blocker count remains six.** Three blockers have a limb discharged;
-> none is closed outright. Discharging Gate 0 authorises **no implementation** —
-> G-09 still stands before any affected component is coded.
+> **The open-blocker count is eight** *(corrected 2026-08-24 from **six**; BLK-08
+> and BLK-09 were registered 2026-08-23 and this passage predates them. Derived from
+> the register's `| Status |` rows — eight, one each for BLK-02 through BLK-09, every
+> one beginning `Open`.)* Several blockers have a limb discharged; none is closed
+> outright. Discharging Gate 0 authorises **no implementation** — G-09 still stands
+> before any affected component is coded.
+
+> ## ⚠ GATE 0 RE-OPENED 2026-08-24 — ONE LIVE ITEM
+>
+> **The discharge above stands exactly as recorded.** Every item it lists was
+> genuinely decided, and nothing here reverses or amends it. What follows is a **new**
+> item that did not exist on 2026-08-22: `application-design` was re-entered on
+> 2026-08-23, produced **ADR-11**, and its review registered two blockers — **BLK-08**
+> and **BLK-09** — which `units-generation` then carried into the register this plan
+> consumes as fixed input.
+>
+> Under the owner's ruling of 2026-08-24 (question Q13 = C), **BLK-08 splits**, on the
+> precedent BLK-06 set when its enumeration limb was separated from its implementation
+> limb.
+>
+> | Item | Why it is a Gate 0 decision rather than a design one | Owner | Due |
+> |---|---|---|---|
+> | **BLK-08, scientific limb** — *does the train-only transform touch the target?* | It is answerable **now** from the frozen TE §6.2 feature contract, and it is a scientific reading rather than an interface choice. If the transform touches the target, model output is in transformed space, and `ABL-DIFF`'s obligation to *"inverse-transform to absolute TECU before any metric"* (`project.md` § Mandated) needs a path back that the design does not currently express. If it does not, that must be **stated**, so the obligation is visibly satisfied rather than silently assumed. Deferring it would have Bolt 9's designer settle a scientific question mid-design | Project decision owner, under the recorded student/supervisor authority equivalence | **ANSWERED 2026-08-24** — see below |
+
+> ## ✅ BLK-08 SCIENTIFIC LIMB — ANSWERED 2026-08-24
+>
+> **The ruling: NO.** The primary configuration's train-only transform does **not**
+> touch the target. Taken by the project decision owner at this stage's approval gate,
+> under the recorded student/supervisor authority equivalence.
+>
+> **The evidence it was read from**, all frozen before this stage ran:
+>
+> | # | Source | What it says |
+> |---|---|---|
+> | 1 | **TE §7.2 ablation table, `ABL-DIFF` row** | Its **Primary remains** column reads **"Raw TECU"**. The first-difference target is an ablation-only change: *"Target becomes y(t+1) − y(t); predictions inverse-transformed to absolute TECU before any metric is computed"* |
+> | 2 | **TE §6.2 dictionary** | It is the **feature** table. The only train-only standardization on anything target-derived applies to **inputs** — `vtec_lag_1h/2h/3h/24h` and `vtec_seq_24`, *"Train-only standardization for ridge/LSTM; none for RF"*. Those are lagged values used as predictors, not the y being predicted |
+> | 3 | **Both governing documents** | Neither states anywhere that the target itself is scaled. The only normalization applied to it at P1-03 is **UTC** normalization — timestamps, not magnitudes |
+> | 4 | **NFR-LEAK-01** | Its *"no all-data scaling"* prohibition is a constraint on features |
+>
+> **What follows, and what does not.**
+>
+> - **The primary path needs no inverse.** Model output is already in raw TECU, so the paired loss differential, the bootstrap interval and the practical-relevance threshold are computed on the quantity the model emits. This must be **stated explicitly** in `component-methods.md` and in ADR-11's consequences — the obligation is satisfied by a recorded fact, not by silence.
+> - **`ABL-DIFF` keeps its inverse obligation in full.** It is the one configuration that transforms the target, and TE §7.2 requires the inverse **before** metrics *"so every ablation is scored on the same quantity in the same units as the primary"*, with **error propagation through the inverse transform recorded**. The inverse belongs to the ablation's target differencing, which the ablation configuration owns, rather than to `src/features`' train-only scaler.
+> - **BLK-08's mechanism limb narrows but does not close.** Functional design still names how `ABL-DIFF`'s inverse is reached and where its error propagation is recorded. It no longer needs a general `src/evaluation` → `src/features` route for the primary path, which is the design pressure that made the original finding Critical.
+>
+> **Numbered as D-27, 2026-08-24.** `team.md` § Way of Working holds that a scientific
+> or governance decision *"is not real until it has a D-number"*, and
+> `evidence/DECISIONS.md` is authoritative for those. That file is **outside this
+> stage's produces list**, so it was written on the owner's explicit instruction at
+> this approval gate rather than as stage output. **D-27** carries the ruling, the four
+> pieces of evidence it was read from, its consequences, an explicit statement of what
+> is *not* asserted, and the limitation that a contradicting model path found later is
+> a contradiction to surface rather than a licence to adjust the target contract
+> (TE §18.2). The decision is **real and numbered**, not recorded-but-unnumbered.
+>
+> **What this does not re-open.** BLK-08's **mechanism** limb — a registry keyed by
+> `transform_id`, an `inverse_transform_id` on `Prediction` with a named owner, or a
+> permitted import edge — is functional design's work and is listed above. **BLK-09**
+> does not reach Gate 0 at all: it is an interface question with no scientific limb,
+> and the January-1 reading it depends on is already fixed by FR-P1-04-5's fold
+> definitions.
+>
+> **What it blocked meanwhile — now moot.** Nothing permitted on 2026-08-22 became
+> barred, and Bolts 1–6 were never touched by BLK-08. The scientific limb was
+> **answered at this stage's approval gate on 2026-08-24** (see below), so Bolt 7's and
+> Bolt 9's functional design now enter with the reading settled rather than carrying it.
 
 
 
@@ -156,8 +230,9 @@ This is recorded against the Q8 instruction in `delivery-planning-questions.md`
 and carried identically in `external-dependency-map.md` § A2. It narrows what
 functional design may do with these two blockers rather than relocating them:
 the analysis is permitted, the decision remains the owner's, and the
-implementation stays barred. BLK-03, BLK-04 and BLK-07 are unaffected — they keep
-the 2026-08-22 exit-condition ruling recorded in the blocker register.
+implementation stays barred. BLK-03, BLK-04, BLK-07, **BLK-08's mechanism limb and
+BLK-09** are unaffected — they keep the 2026-08-22 exit-condition ruling recorded in
+the blocker register, extended to the two newer blockers on 2026-08-24.
 
 ### G-09 and G-01 — surfaced at Gate 0, signed later
 
@@ -234,10 +309,13 @@ stage is not.
 **G-01** is likewise surfaced, not signed: it is pending sign-off and due before
 the implementation freeze. Neither gate is this initiative's to grant.
 
-**Contract-type blockers are explicitly out of Gate 0's scope.** BLK-03, BLK-04
-and BLK-07 are resolved *during* functional design and do not block its start —
-that is the 2026-08-22 ruling recorded in the blocker register, which corrected
-an earlier wording that made them unsatisfiable. What they do bind: **no affected
+**Contract-type blockers are explicitly out of Gate 0's scope.** BLK-03, BLK-04,
+BLK-07, **BLK-08's mechanism limb and BLK-09** are resolved *during* functional
+design and do not block its start — that is the 2026-08-22 ruling recorded in the
+blocker register, extended to the two newer blockers on 2026-08-24, which corrected
+an earlier wording that made them unsatisfiable. **BLK-08's scientific limb is the
+one exception**, and it is in Gate 0's scope by the owner's Q13 = C ruling: see
+§ Gate 0 § ⚠ GATE 0 RE-OPENED. What they do bind: **no affected
 Bolt or gate is marked complete until its applicable exit conditions are
 satisfied**, and no implementation proceeds while they stand.
 
@@ -247,9 +325,28 @@ satisfied**, and no implementation proceeds while they stand.
 
 Twelve Bolts, one per unit, strictly serial. Complexity is relative only — no
 calendar estimate is implied. Derived from the unit table: **105 requirements and
-39 primary acceptance rows** distributed across the twelve Bolts (both figures
+43 primary acceptance rows** distributed across the twelve Bolts (both figures
 recomputed by summing the per-unit rows below, not carried from the upstream
 prose).
+
+> **⚠ Acceptance rows corrected 2026-08-24 — the total read 39, and two cells fed it.**
+> Bolt 5 `external-products` read **1** and Bolt 7 `features-and-splits` read **9**.
+> Those are the figures superseded on **2026-08-22** by `CR-2026-08-22-LEAKAGE-TA`,
+> which gave `FR-P1-04-17` **TA-36** and `FR-P1-04-12`, `FR-P1-04-13`, `FR-P1-04-16`
+> **TA-33**, **TA-34** and **TA-35**. `units-generation` corrected its own copies; this
+> downstream plan was written from the pre-correction figures and no sweep crossed the
+> stage boundary to reach it.
+>
+> *Derived, not carried:* this table's twelve Acceptance-rows cells now read
+> `7, 2, 1, 3, 2, 1, 12, 5, 1, 2, 3, 4`, summing to **43**. That is the same 43 the
+> upstream `unit-of-work.md` column sums to, though the two orders differ — this table
+> places `external-products` at position 5 and `target-standardization` at 6, the
+> reverse of the unit table, so the series are checked element-by-unit rather than
+> position-by-position. The **105** requirements figure was re-derived the same way
+> and is unchanged.
+>
+> The four new rows are `Pending`: acceptance rows that exist, not tests that have
+> been implemented, executed or passed.
 
 | # | Bolt | Unit | Complexity | Requirements | Acceptance rows | Open blockers |
 |---|---|---|---|---|---|---|
@@ -257,14 +354,14 @@ prose).
 | 2 | Governance guards | `governance-guards` | M | 10 | 2 | BLK-06 |
 | 3 | Acquisition | `acquisition` | L | 15 | 1 | BLK-07 |
 | 4 | Inventory and registry | `inventory-and-registry` | M | 7 | 3 | — |
-| 5 | External products | `external-products` | L | 7 | 1 | — |
+| 5 | External products | `external-products` | L | 7 | **2** | — |
 | 6 | Target standardization | `target-standardization` | M | 6 | 1 | BLK-05 |
-| 7 | Features and splits | `features-and-splits` | L | 11 | 9 | BLK-04 |
-| 8 | Models and baselines | `models-and-baselines` | L | 9 | 5 | BLK-03, BLK-04 ↓ |
-| 9 | Evaluation and comparison | `evaluation-and-comparison` | M | 4 | 1 | BLK-03 ↓, BLK-04 ↓ |
-| 10 | Statistical inference | `statistical-inference` | M | 1 | 2 | BLK-03 ↓, BLK-04 ↓ |
-| 11 | Regimes, diagnostics, reporting | `regimes-diagnostics-reporting` | L | 11 | 3 | BLK-03 ↓, BLK-04 ↓ |
-| 12 | Fixtures and reproducibility | `fixtures-and-reproducibility` | M | 8 | 4 | BLK-02, BLK-03 ↓, BLK-04 ↓ |
+| 7 | Features and splits | `features-and-splits` | L | 11 | **12** | BLK-04, **BLK-08** (co-owned), **BLK-09** |
+| 8 | Models and baselines | `models-and-baselines` | L | 9 | 5 | BLK-03, BLK-04 ↓, **BLK-09 ↓** |
+| 9 | Evaluation and comparison | `evaluation-and-comparison` | M | 4 | 1 | **BLK-08**, BLK-03 ↓, BLK-04 ↓, **BLK-09 ↓** |
+| 10 | Statistical inference | `statistical-inference` | M | 1 | 2 | BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓** |
+| 11 | Regimes, diagnostics, reporting | `regimes-diagnostics-reporting` | L | 11 | 3 | BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓** |
+| 12 | Fixtures and reproducibility | `fixtures-and-reproducibility` | M | 8 | 4 | BLK-02, BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓** |
 
 **↓** marks a blocker inherited through a consumed contract rather than owned.
 An unmarked ID is owned by that Bolt's unit. **BLK-01 is closed** (2026-08-22,
@@ -570,6 +667,18 @@ gate while its provenance chain stands unrepaired.
 
 **Unit** `inventory-and-registry` · **Deployment** standalone · **Depends on** `acquisition` · **Open blockers** none · **In-Kaggle critical test run required**
 
+> **`RES-05` — a residual obligation, not a blocker** (registered 2026-08-23, carried
+> from `application-design` finding M14). This unit's own 3.1 artifact,
+> `construction/inventory-and-registry/functional-design/business-logic-model.md`
+> line 529, cites `build_features`'s signature by **line number** —
+> *"`component-methods.md` line 389"* — an anchor the 2026-08-23 amendments moved, and
+> a signature that itself changed (`build_features` now takes `spec: FrameSpec` and
+> `partitions: Sequence[Partition]` and returns a `FeatureBundle`). Due at this Bolt's
+> functional-design gate; the re-verification cites the **section heading** rather than
+> a line number, so the anchor cannot go stale again. It is a citation to repair, not a
+> design surface that cannot execute — which is why it is a `RES-` item and does not
+> appear in this Bolt's Open-blockers field.
+
 **What it bundles.** The source inventory (nine fields per entry, including which
 configuration consumes each source), the station registry, schema validation of
 the prepared product, and the performance-blind coverage and regime audit that
@@ -788,7 +897,42 @@ must **not** invent a `02a`/`02b` convention.
 
 ### Bolt 7 — Features and splits
 
-**Unit** `features-and-splits` · **Deployment** standalone · **Depends on** `target-standardization`, `external-products`, `governance-guards` · **Open blockers** BLK-04
+**Unit** `features-and-splits` · **Deployment** standalone · **Depends on** `target-standardization`, `external-products`, `governance-guards` · **Open blockers** BLK-04, **BLK-08** (co-owned with Bolt 9), **BLK-09**
+
+> **⚠ Two blockers added 2026-08-24, and this Bolt now carries the most of any.**
+> **BLK-08** (co-owned): `Transform` and its fitted state live in this unit, so
+> whatever mechanism reaches the inverse changes this Bolt's contract as well as
+> Bolt 9's. Its **scientific limb was answered 2026-08-24 — no**, the primary
+> transform does not touch the target (TE §7.2: *Primary remains, Raw TECU*), so this
+> unit's train-only scaler acts on **target-derived inputs** and no primary-path
+> inverse is owed. Its **mechanism limb stays open and narrows to `ABL-DIFF`**, the one
+> configuration that does transform the target, authored here at functional design
+> jointly with Bolt 9. **BLK-09**: `Partition` carries no `train_start`, so the training range that
+> two of ADR-11's raises compare against rests on an unwritten January-1 convention.
+> Deriving it from `train_end` and a hard-coded year is not available — TC-03e forbids
+> a scientific constant in source.
+>
+> **Three of the eight open blockers land here**, against 2 direct and 5 transitive
+> dependent units. That concentration does not change this Bolt's position — it
+> already sits after its dependencies and before its dependents, and no available
+> order reduces it — and it is recorded as accepted risk in
+> `risk-and-sequencing-rationale.md` under the owner's Q15 = A ruling. All three
+> remain **exit** conditions on functional design, never entry conditions.
+
+**This Bolt authors the M10 contract fixture** (owner ruling Q12 = C at
+units-generation, 2026-08-23). Neither mandated walking-skeleton fixture can exercise
+ADR-11's redesigned leakage boundary — partitions come from the frozen 2022 calendar
+boundaries, while D-11 froze the plumbing window at 2022-11-01 to 2022-11-07 — so this
+Bolt writes a **synthetic** fixture over synthetic partition dates asserting four
+things: (a) the identity check raises for every ordered pair of partition ids except
+the enumerated `REFIT` → `DEC`, by enumeration rather than sampling; (b) that pair
+passes with `role="score"` and raises with `role="train"`; (c) `fit_transforms` raises
+when the bundle's scored range is not exactly the partition's training range; (d)
+`06`/`07` and `fit_predict` raise on any bundle with `transform_id is None`. It goes in
+the **existing** mandated modules `test_train_only_transforms.py` and
+`test_split_embargo.py` — deliberately not a new `tests/fixtures/` directory, which
+would be a §12 tree amendment needing its own change record. **Bolt 12 runs it** in the
+clean-run sequence; this Bolt does not.
 
 The densest Bolt in the plan — nine acceptance rows, more than any other unit.
 
@@ -934,7 +1078,41 @@ lowest validation RMSE, and the three-seed mean artifact carrying its seed set.
 
 ### Bolt 9 — Evaluation and comparison
 
-**Unit** `evaluation-and-comparison` · **Deployment** standalone · **Depends on** `models-and-baselines`, `external-products` · **Open blockers** BLK-03 ↓, BLK-04 ↓
+**Unit** `evaluation-and-comparison` · **Deployment** standalone · **Depends on** `models-and-baselines`, `external-products` · **Open blockers** **BLK-08** (owned), BLK-03 ↓, BLK-04 ↓, **BLK-09 ↓**
+
+> **⚠ This Bolt now OWNS a blocker, added 2026-08-24 — and it blocks a reported
+> quantity rather than an internal detail.** **BLK-08**: `Transform.inverse` is
+> specified as reachable from `Prediction.transform_id`, which is typed `str`. A string
+> has no method, no lookup or registry is named anywhere in the 2.6 design, and
+> `component-dependency.md` carries no `src/evaluation` → `src/features` edge. So this
+> unit — the one that needs the inverse — has **no route to it**.
+>
+> What that blocks, concretely: `project.md` § Mandated requires `ABL-DIFF` to
+> *"inverse-transform to absolute TECU before any metric"*, and every number this Bolt
+> produces or feeds downstream is TECU-denominated — the paired loss differential, and
+> through Bolts 10 and 11 the bootstrap interval and the practical-relevance threshold
+> comparison. If the train-only transform touches the target, model output is in
+> transformed space and nothing in the current design returns it to TECU.
+>
+> **Split by the owner's Q13 = C ruling — and the scientific limb is now answered.**
+>
+> **Scientific limb: ANSWERED 2026-08-24 — no.** The primary configuration's train-only
+> transform does not touch the target. TE §7.2's `ABL-DIFF` row states **Primary
+> remains: Raw TECU**; TE §6.2 standardizes target-derived *inputs* (`vtec_lag_*`,
+> `vtec_seq_24`) rather than the y being predicted; nothing in either governing
+> document scales the target. **So this Bolt's primary outputs are already in raw
+> TECU** and the paired loss differential needs no inverse. That fact must be stated
+> explicitly in the design rather than left implicit.
+>
+> **Mechanism limb: open, and narrower than when registered.** `ABL-DIFF` remains the
+> one configuration that transforms the target, and TE §7.2 requires its inverse
+> **before** metrics with **error propagation recorded**. Functional design names how
+> that inverse is reached and where the propagation is recorded — jointly with Bolt 7,
+> which co-owns it because `Transform` and its fitted state live there. What the ruling
+> removes is the need for a general `src/evaluation` → `src/features` route on the
+> primary path, which was the design pressure behind the original Critical finding.
+> This Bolt **may enter** functional design and **may not complete** it without the
+> mechanism limb resolved.
 
 **What it bundles.** One comparison-wide intersection mask computed once per
 comparison set with a stable ID and reported row counts, the IRI-free denial check
@@ -1075,7 +1253,26 @@ explicit required argument so a test *can* assert it; writing the criterion is a
 
 ### Bolt 12 — Fixtures and reproducibility
 
-**Unit** `fixtures-and-reproducibility` · **Deployment** standalone · **Depends on** nine units · **Open blockers** BLK-02, BLK-03 ↓, BLK-04 ↓ · **In-Kaggle critical test run required**
+**Unit** `fixtures-and-reproducibility` · **Deployment** standalone · **Depends on** nine units · **Open blockers** BLK-02, BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓** · **In-Kaggle critical test run required**
+
+> **⚠ BLK-08 ↓ and BLK-09 ↓ added 2026-08-24**, by the same inheritance rule that
+> already brought BLK-03 and BLK-04 here: this Bolt's `depends_on` reaches every unit
+> carrying them, and the clean-run tolerance comparison and TA-21's traceability matrix
+> consume their released artifacts. **BLK-08 ↓ bounds the units of every tolerance this
+> Bolt compares** — a clean-run tolerance stated in TECU cannot be checked against
+> output that no design path returns to TECU.
+
+**This Bolt runs the M10 contract fixture** (owner ruling Q12 = C at units-generation,
+2026-08-23), authored by Bolt 7. Running it here is what puts it inside TA-17's and
+WS-20's reach, which authorship alone would not.
+
+> **⚠ The M10 contract fixture is NOT a third mandated fixture.** It is a **negative
+> control on a mechanism**, not evidence about the pipeline, and TC-03f's distinction is
+> stated here rather than left to inference. The two mandated walking-skeleton fixtures
+> remain exactly two: the seven-day single-station plumbing fixture (smoke only, never
+> scientific evidence) and the one-month all-station scientific fixture. Technical
+> Environment §9.2's *"run both walking-skeleton fixtures before any full-year job"* is
+> unchanged and unextended, and **no full-year job gates on the contract fixture**.
 
 The closing Bolt. Depends directly on nine units for two distinct reasons: seven
 own a stage script the clean-run sequence invokes, and two (`statistical-inference`,
@@ -1201,11 +1398,27 @@ coverage finds a forwarding address rather than a skipped stage.
   reached twenty-one later the same day) — is recorded here and flagged for the next
   practices-affirmation gate alongside RES-02's two stale figures. This stage
   cannot edit `team-practices.md`; `org.md` reserves that file for that gate.
-- **Open, carried not closed.** BLK-02 through BLK-07 (six open blockers),
-  RES-01, RES-02 and RES-03, the 36 untested requirements, TA-24's missing
+- **Open, carried not closed.** BLK-02 through **BLK-09** (**eight** open blockers),
+  RES-01 through **RES-05**, the 36 untested requirements, TA-24's missing
   implementing unit, the `02` ordinal collision, WS-13's evidence departure, and
   the AGPLv3 distribution question. Each is enumerated with an owner in
-  `external-dependency-map.md` or in the upstream blocker register.
+  `external-dependency-map.md` or in the upstream blocker register. *(Counts
+  corrected 2026-08-24 from "BLK-02 through BLK-07 (six open blockers)" and
+  "RES-01, RES-02 and RES-03": BLK-08 and BLK-09 were registered 2026-08-23, RES-04
+  and RES-05 likewise. Derived from the register's `| Status |` rows — eight, every
+  one beginning `Open` — and its `### RES-0…` headings.)*
+- **Closed 2026-08-24 — BLK-08's scientific limb.** Returned to the owner under the
+  Q13 = C ruling rather than absorbed, and **answered at this stage's approval gate**:
+  **no**, the primary configuration's train-only transform does not touch the target,
+  which stays raw TECU; `ABL-DIFF` alone transforms it and keeps its inverse
+  obligation. Gate 0 carries **no live item** again. Numbered **D-27** in
+  `evidence/DECISIONS.md` on 2026-08-24, on the owner's explicit instruction at this
+  gate — see § Gate 0 § ✅ BLK-08 SCIENTIFIC LIMB.
+- **Open, narrowed not closed.** **BLK-08's mechanism limb** — how `ABL-DIFF`'s
+  inverse is reached and where its error propagation is recorded — resolved at
+  functional design, jointly by Bolts 7 and 9. The 2026-08-24 ruling removes the need
+  for a general primary-path inverse, which was the pressure that made the original
+  finding Critical.
 - **None** of the above adopts a reading on a supervisor-owned value, and none
   decides a scientific constant.
 

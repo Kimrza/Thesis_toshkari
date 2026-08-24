@@ -1341,6 +1341,51 @@ does not approve or schedule it.** Approval is a separate owner decision.
 
 ---
 
+## D-27 — The primary target is not transformed; the inverse obligation is ABL-DIFF's alone (reading)
+
+**Decision date:** 2026-08-24. **Decided by:** the project decision owner under the
+recorded authority equivalence, at the delivery-planning approval gate.
+**Authority:** TE §7.2 (ablation register); TE §6.2 (feature dictionary);
+NFR-LEAK-01. **Raised by:** blocker **BLK-08**, registered 2026-08-23 against
+`evaluation-and-comparison` and `features-and-splits`.
+
+**Decision.** The **primary configuration's train-only transform does not touch the
+target.** It acts on target-**derived input features**; the target itself remains
+**raw TECU**. `ABL-DIFF` is the sole configuration that transforms the target, and its
+inverse obligation is unchanged.
+
+**This is a reading of already-frozen text, not a new scientific value.** No constant,
+threshold, window, seed or grid is set, changed or reinterpreted by this decision.
+
+**The evidence it was read from.**
+
+| # | Source | What it states |
+|---|---|---|
+| 1 | **TE §7.2 ablation table, `ABL-DIFF` row** | Its **Primary remains** column reads **"Raw TECU"**. The first-difference target is an ablation-only change: *"Target becomes \(y_{t+1}-y_t\); predictions inverse-transformed to absolute TECU before any metric is computed"* |
+| 2 | **TE §6.2 dictionary** | This is the **feature** table. Its only train-only standardization on anything target-derived applies to **inputs** — `vtec_lag_1h/2h/3h/24h` and `vtec_seq_24`, *"Train-only standardization for ridge/LSTM; none for RF"*. Those are lagged values used as predictors, not the \(y\) being predicted |
+| 3 | **Both governing documents** | Neither states anywhere that the target itself is scaled. The only normalization applied to it at P1-03 is **UTC** normalization — timestamps, not magnitudes |
+| 4 | **NFR-LEAK-01** | Its *"no all-data scaling"* prohibition is a constraint on features |
+
+**Consequences.**
+
+- **The primary path needs no inverse transform.** Model output is already in raw TECU, so the paired loss differential, the vector time-block bootstrap interval and the practical-relevance threshold are computed on the quantity the model emits. **This must be stated explicitly** in the design (`component-methods.md`, ADR-11 § Consequences) so the `ABL-DIFF` obligation is visibly satisfied rather than silently assumed.
+- **`ABL-DIFF` retains its obligation in full**, per TE §7.2: it inverse-transforms to absolute TECU **before** metrics *"so every ablation is scored on the same quantity in the same units as the primary"*, and **error propagation through the inverse transform is recorded**.
+- **BLK-08's mechanism limb narrows and stays open.** `functional-design` (3.1) names how `ABL-DIFF`'s inverse is reached and where its error propagation is recorded, jointly for `features-and-splits` and `evaluation-and-comparison`. It no longer requires a general `src/evaluation` → `src/features` route for the primary path.
+- **No import-boundary change is authorised by this decision.** The §12 rule and its allowlist are untouched.
+
+**What is NOT asserted.** That the LSTM or ridge implementation may not internally
+scale its own inputs — that is the §6.2 dictionary's train-only standardization, which
+this decision leaves exactly as written. And that `ABL-DIFF` is approved or scheduled;
+it remains a predeclared ablation requiring its own registration in `experiment.yaml`.
+
+**Limitation.** This decision is a reading of frozen text taken before any code exists.
+If `code-generation` or `build-and-test` finds a model path that scales the target
+contrary to this reading, that is a **contradiction to surface**, not a licence to
+adjust the target contract — TE §18.2's absolute rule bars changing a scientific value
+in response to what a run produced.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -1418,3 +1463,4 @@ exposed to challenge and should be read first.
 | D-24 Canonical protected set | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Deduplicated union of TE §2.2 (12) and §7.0B (16) with `history window`, `station encoding` and `baselines` added explicitly; **cardinality 17, calculated from the enumeration**. Closes BLK-06's enumeration limb; triggers a Vision §15.2 amendment to FR-P1-06-1 (14 → 17). Implementation stays gated by G-09. |
 | D-25 F10.7 availability convention | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Conservative convention: a daily median becomes available no earlier than `00:00 UTC` on the following day. **An explicit project assumption, not a demonstrated publication latency**; no operational real-time availability is claimed. **Requests, but does not take,** a §15.2 amendment to TE §7.0A stage 4 and EV-12; until granted, EV-12's F10.7 limb is unmet at G-04. |
 | D-26 F10.7 March–April provenance | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Provenance recorded **UNRESOLVED**; data retained; measured / reconstructed / interpolated / provider-corrected asserted in **no** direction. Carries a thesis reporting obligation. Identifies two clarification routes and an `ABL-NOSW`-style sensitivity — **none approved or scheduled** by this decision. |
+| D-27 Primary target untransformed; inverse is ABL-DIFF's | **Yes** | 2026-08-24 | Approved by the project owner under the recorded authority equivalence, at the delivery-planning approval gate. **A reading of frozen text, not a new scientific value.** The primary train-only transform touches target-derived inputs, not the target, which stays **raw TECU** (TE §7.2 `ABL-DIFF`: *Primary remains, Raw TECU*). Primary path needs no inverse; `ABL-DIFF` alone transforms the target and keeps its inverse-before-metrics obligation with error propagation recorded. Raised by blocker BLK-08; narrows but does not close its mechanism limb, which stays with `functional-design`. |

@@ -29,7 +29,7 @@ four governed configs and is frozen by D-number.
 - `../../../inception/application-design/component-methods.md` — the approved `ConfigSnapshot` and `DeterminismRecord` contracts.
 - `../../../inception/application-design/components.md` and `component-dependency.md` — the layering rule and § Shared resources' carve-out on `evidence/locked_test_restricted/`.
 - `../../../inception/application-design/services.md` — § Stage entry contract, § Run record and registry.
-- `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, and the three pending amendments.
+- `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, and the three amendments — A **declined**, B and C **approved**, all resolved 2026-08-24.
 
 ---
 
@@ -152,14 +152,18 @@ own file, but TE §12 fixes exactly six `src/` packages and there is no legal ho
 for a stray seventh. The separation is achieved by structure inside `config.py`,
 not by file.
 
-## 4. `DeterminismRecord` — approved contract, plus three fields **pending approval**
+## 4. `DeterminismRecord` — approved contract, nine fields
 
-**Approved contract — six fields**, derived from `component-methods.md` rather than
+**Approved contract — nine fields**, derived from `component-methods.md` rather than
 recalled:
 
 ```
-awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+: "   ->  6
+awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+: "   ->  9
 ```
+
+*Superseded 2026-08-24: this section read "approved contract, plus three fields
+**pending approval**" over a **six**-field contract. Amendment B was approved
+(`CR-2026-08-24-FOUNDATION-AMENDMENTS`) and the three fields are now part of it.*
 
 | Attribute | Type | Status |
 |---|---|---|
@@ -169,25 +173,34 @@ awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+
 | `framework_versions` | `Mapping[str, str]` | **approved** |
 | `tf_op_determinism` | `bool` | **approved** |
 | `nondeterministic_ops` | `Sequence[str]` | **approved** |
-| `probe_scope` | `Sequence[str]` | ⚠ **PENDING — Amendment B, NOT approved** |
-| `measurement_status` | `str` — `complete` \| `partial` \| `not-yet-measured` | ⚠ **PENDING — Amendment B, NOT approved** |
-| `declared_vs_observed_mismatches` | `Sequence[str]` | ⚠ **PENDING — Amendment B, NOT approved** |
+| `probe_scope` | `Sequence[str]` | **approved 2026-08-24** |
+| `measurement_status` | `str` — `complete` \| `partial` \| `not-yet-measured` | **approved 2026-08-24** |
+| `declared_vs_observed_mismatches` | `Sequence[str]` | **approved 2026-08-24** |
 
-> ## ⚠ THE LAST THREE FIELDS DO NOT EXIST IN THE APPROVED CONTRACT
+> ## ✅ ALL NINE FIELDS ARE IN THE APPROVED CONTRACT — AMENDMENT B APPROVED 2026-08-24
 >
-> `component-methods.md` defines **six** fields. The three marked PENDING are
-> **proposed** under Amendment B and have **not been approved by the project
-> decision owner**. They are specified here so stage 3.5 has a complete semantic
-> target, and marked so no reader mistakes the specification for the contract.
+> **Superseded 2026-08-24, preserved:** this box was headed *"⚠ THE LAST THREE FIELDS
+> DO NOT EXIST IN THE APPROVED CONTRACT"* and read *"THE LAST THREE FIELDS DO NOT
+> EXIST IN THE APPROVED CONTRACT — `component-methods.md` defines **six** fields. The
+> three marked PENDING are **proposed** under Amendment B and have **not been approved
+> by the project decision owner**… Until Amendment B is approved,
+> `nondeterministic_ops` carries the probe result with **no** recorded scope and
+> **no** measurement status — which is precisely the ambiguity Q3 = C chose C to
+> eliminate."*
 >
-> **No determinism is claimed as measured anywhere on the strength of a field that
-> does not exist.** Until Amendment B is approved, `nondeterministic_ops` carries
-> the probe result with **no** recorded scope and **no** measurement status — which
-> is precisely the ambiguity Q3 = C chose C to eliminate, and is the reason the
-> amendment is being asked for rather than assumed.
+> **Amendment B was approved on 2026-08-24** and `component-methods.md` now defines
+> **nine** fields. The ambiguity is closed: scope and status are recorded, and the
+> three fields are contract rather than specification.
+>
+> **What has not changed.** No determinism is claimed as measured on the strength of
+> an empty list. A measured claim requires `probe_scope` to record what was examined
+> **and** `measurement_status` to read `complete`; `partial` and `not-yet-measured`
+> are stated rather than smoothed over. **R-06 stands** — an empty
+> `nondeterministic_ops` is never proof of determinism.
 
-**Why each pending field cannot be dropped** (Q3 = C requires recording probe
-scope, measurement status and detected mismatches):
+**Why each field cannot be dropped** (Q3 = C requires recording probe scope,
+measurement status and detected mismatches — each was tested for removal before
+Amendment B was sought):
 
 - `probe_scope` — without it, `nondeterministic_ops: []` is ambiguous between
   *probed and found none* and *probed nothing*. Q3 chose a runtime probe over a
@@ -341,12 +354,28 @@ that quietly stops applying to the rows it was written for.
 reused label, a label bound to two different content hashes, a content hash bound
 to two labels, and a malformed row.
 
-> **Amendment status — PENDING, NOT approved.** This entity is **not** in
-> `unit-of-work.md` § 1 `foundation` → `Owns`, which names "the run record and
-> `experiment_registry.jsonl` append-only writer" and no release ledger. It is
-> **not** in `services.md` § Run record and registry, which opens *"Two artifacts,
-> one authoritative"*. Both are approved-stage artifacts and **neither is edited**.
-> **Amendment C** is presented for the owner's decision.
+> **✅ Amendment status — APPROVED 2026-08-24**
+> (`CR-2026-08-24-FOUNDATION-AMENDMENTS`). *Superseded, preserved:* *"PENDING, NOT
+> approved. This entity is **not** in `unit-of-work.md` § 1 `foundation` → `Owns`…
+> It is **not** in `services.md` § Run record and registry, which opens "Two
+> artifacts, one authoritative". Both are approved-stage artifacts and **neither is
+> edited**."*
+>
+> Both have since been annotated in place on the owner's approval: the ledger is named
+> in `unit-of-work.md` § 1 `foundation` → `Owns`, and `services.md` § Run record and
+> registry now reads **three artifacts, one authoritative**.
+>
+> **Its authority is Q6=D and FU-2=D**, two approved answers of this stage — not an
+> engineering preference. Q6=D requires a *monotonic, human-readable* label alongside
+> the authoritative hash, chosen **over** option C's *"version derived from the
+> manifest hash"*; FU-2=D names this ledger, its ownership, its append-only behaviour
+> and its independent integrity test. Monotonicity requires durable state, which is
+> exactly why the directory scan below cannot serve.
+>
+> *(An earlier draft of the change record proposed rejecting this entity and deriving
+> the label from the content hash instead. That proposal was withdrawn: it is Q6
+> option C, which the owner had read and declined, and it cannot produce a monotonic
+> label. Recorded so the reasoning is not lost.)*
 >
 > **No TE §12 amendment is required** — determined, not assumed:
 > `artifacts/registry/` is already an enumerated directory in the §12 tree, and the
@@ -417,9 +446,9 @@ awk -F'|' 'NR>=145 && NR<=223 {r=$2; gsub(/[` *]/,"",r); print r": primary="$4" 
 | REQ-ENG-3 | `ConfigSnapshot` (no machine path in configs) | **TA-03, TA-26** | TA-03 → `foundation`; TA-26 → **`models-and-baselines`** |
 | REQ-ENG-4 | the `tests/` tree | **TA-09** — *bounded, see story-map § Known defects row 8* | `fixtures-and-reproducibility` |
 | REQ-ENG-6 | `ConfigSnapshot.platform`, `resolved_roots` | **TA-22** | `foundation` |
-| **REQ-ENG-7** | `RegistryEvent`, `ReleaseLedgerEntry` | ⚠ **NO CURRENT ACCEPTANCE ROW** — Amendment A pending | — |
+| **REQ-ENG-7** | `RegistryEvent`, `ReleaseLedgerEntry` | ⚠ **NO ACCEPTANCE ROW, AND NONE WILL BE ADDED** — Amendment A **declined 2026-08-24**; untested by design | — |
 | REQ-ENG-8 | `ConfigSnapshot` | **TA-16** | `regimes-diagnostics-reporting` |
-| **REQ-ENG-10** | `RunRecord` | ⚠ **NO CURRENT ACCEPTANCE ROW** — TA-03 verified not to cover it; Amendment A pending | — |
+| **REQ-ENG-10** | `RunRecord` | ⚠ **NO ACCEPTANCE ROW, AND NONE WILL BE ADDED** — TA-03 verified not to cover it; Amendment A **declined 2026-08-24**; untested by design | — |
 | REQ-ENG-11 | `RunRecord.runtime_versions` | **TA-17, TA-26** | TA-17 → `fixtures-and-reproducibility`; TA-26 → **`models-and-baselines`** |
 | FR-P1-01-10 | `CredentialNameMap` | TA-22 | `foundation` |
 | FR-P1-04-11 | `ConfigSnapshot` | **TA-15** | `foundation` |
@@ -542,9 +571,9 @@ matching the story map's designation.
 - **[assumption]** `src/data/registry.py` and its `Station` entity are **not** part of this unit. `component-methods.md` places them between two `foundation` modules, but `unit-of-work.md` § 1 does not list them under `Owns`; the station registry belongs to `inventory-and-registry`.
 - **[assumption]** `src/data/locked_test.py` is not this unit's, notwithstanding that `foundation` owns the boundary rule naming it. It belongs to `governance-guards` (BLK-07); § Shared resources fixes without qualification that nothing else may construct a path into `evidence/locked_test_restricted/`.
 - **[assumption]** `frontend-components.md` is not produced. `foundation` is `kind: library`; the stage's `produces_kinds` maps that artifact to `[ui]` only, and the engine's resolved list for this unit carries three artifacts.
-- **Open — Amendment A** (Vision §15.2): §19 acceptance rows for REQ-ENG-7 and REQ-ENG-10. **Not approved.** No acceptance coverage is claimed for either.
-- **Open — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **Not approved.** The approved contract stands at six fields.
-- **Open — Amendment C** (approved 2.6 and 2.7 artifacts): the release ledger in `services.md` and `unit-of-work.md` § 1 `Owns`. **Not approved.**
+- **Closed — Amendment A** (Vision §15.2): §19 acceptance rows for REQ-ENG-7 and REQ-ENG-10. **Raised and DECLINED 2026-08-24.** No rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. **No acceptance coverage is claimed for either, permanently rather than pending.** *(Superseded status: "**Open** … **Not approved.**")*
+- **Closed — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **APPROVED 2026-08-24.** The approved contract now stands at **nine** fields. *(Superseded status: "**Not approved.** The approved contract stands at six fields.")*
+- **Closed — Amendment C** (approved 2.6 and 2.7 artifacts): the release ledger in `services.md` and `unit-of-work.md` § 1 `Owns`. **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D. *(Superseded status: "**Not approved.**")*
 - **Open** — the concrete `RequiredFieldsMap` contents cannot be enumerated until the four configs exist with their field names. This stage fixes the **mechanism**; the populated map is a Bolt 1 work product.
 - **G-09 is not signed.** Nothing here authorises creating `src/data/config.py`, `src/data/release.py` or `tests/test_determinism.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -579,3 +608,20 @@ produced it.
 verification, Q7's dual limbs, Q8's credential placement, the pending-amendment
 discipline, and boundary compliance on `registry.py` / `locked_test.py` / `TBD`
 fields / scientific constants.
+
+---
+
+## Finalized 2026-08-24 — the three amendments are settled
+
+Recorded under `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md`, after
+an independent challenge of each amendment against the approved artifacts.
+
+- **Amendment A — DECLINED.** No project rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. **REQ-ENG-7 and REQ-ENG-10 are untested by design, permanently rather than pending.** No count moved: untested stays 36, this unit's stays 2 of 16, its acceptance rows stay 7, TE §19 stays at 36 rows.
+- **Amendment B — APPROVED.** `DeterminismRecord` is a **nine-field approved contract**, not a six-field contract plus three proposals.
+- **Amendment C — APPROVED**, on the authority of **Q6=D** and **FU-2=D**. `ReleaseLedgerEntry` is an approved entity, now named in `unit-of-work.md` § 1 `foundation` → `Owns` and in `services.md` § Run record and registry. **R-11 is unchanged** — the content hash remains authoritative and the label is a citation device.
+
+**The nine-entity count is unchanged.** `ReleaseLedgerEntry` already existed in this
+document; what changed on 2026-08-24 is that the upstream artifacts now carry it too.
+
+**G-09 remains unsigned.** Nothing in this document authorises creating a module, and
+no scientific value is decided here.
