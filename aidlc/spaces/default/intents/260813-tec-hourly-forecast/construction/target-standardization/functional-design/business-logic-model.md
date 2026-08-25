@@ -451,3 +451,16 @@ None survived verification. One item is deliberately not yet fixed and is report
 ### Summary
 
 Both iteration-1 findings resolve correctly on independent verification, not merely on trust in the correction pass. The Critical cross-reference now points at `governance-guards` R-20, and reading both candidate rules directly confirms that is the right unit and the right rule — R-20's own boxed open question is worded almost identically to the question this unit inherits for D-17, while `inventory-and-registry` R-49 (my own iteration-1 recommendation) turns out to carry a different, unrelated point; had the correction gone the way I recommended, it would have traded one broken reference for a plausible-looking wrong one. The Major "Documented QC" gap is now an honest, bounded disclosure: three of four permitted transformations remain fully specified, the fourth is named as unspecified with a concrete fix (a governed named list in `configs/data.yaml`), the fix is attributed to the correct authority (`component-methods.md` § Depth), the list's membership is explicitly not invented and is raised at the gate, and two new negative-control cases make the interim state testable rather than merely asserted. This is consistent with the project's own accepted pattern for authority-owned open items elsewhere in the same design (the R-20 authority question itself, the `02` ordinal collision) and with `project.md` § Forbidden's bar on filling a TBD value by convenience. The single residual issue — four stale "`inventory-and-registry` R-20" citations remaining in `functional-design-questions.md` because that file's receipt is locked pending a redo jump — is a known, deliberate deferral rather than an undiscovered defect, and does not appear in any of the three artifacts that carry this stage's actual design authority. No fresh defect from the correction pass itself was found: the added boxes and correction notes are word-for-word consistent across all three files where each appears, with no duplication, no orphaned heading, and no box contradicting its surrounding body. The design is implementable as stated, with its remaining open points (the D-17 authority-source question, the QC-list membership, the `02` ordinal collision) correctly carried to the gate rather than resolved by invention.
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.

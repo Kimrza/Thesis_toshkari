@@ -410,3 +410,16 @@ cross-checked and in agreement.
 - **Open — D-24's protected set is not reopened.** The schema-block-as-eighteenth-item question is available to raise separately; it is not proposed here.
 - **G-09 is not signed.** No entity here authorises creating `src/data/inventory.py`, `src/data/registry.py`, `scripts/01_inventory_and_registry.py` or `tests/test_station_registry.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.

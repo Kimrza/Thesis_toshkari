@@ -453,3 +453,16 @@ TA-36's primary test while it was sited in `features-and-splits`' module.
 - **Open — an obligation stated on a sibling:** R-71's cell-and-month keying must agree with `inventory-and-registry`'s G-P1A record.
 - **G-09 is not signed.** No rule here authorises creating `src/data/prepared.py`, `scripts/02_standardize_prepared_target.py`, `scripts/03_verify_processing.py` or `tests/test_prepared_target_schema.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.

@@ -1336,3 +1336,18 @@ one table an implementer reads for raise conditions. Two Criticals and three Maj
 BLK-04's contract remains one whose closing half a developer would have to invent.
 
 **Verdict: NOT-READY**
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+> **This unit is named in one of them**: R-96's ownership analysis rests on `features-and-splits`
+> R-80 owning the closed six-row partition list, which the reviewer verified directly and upheld.

@@ -341,4 +341,66 @@ Does this all look correct before I generate the artifact?
 
 > **💡 Recommendation**: **Looks correct** — the eight answers are mechanism only, the amendment total was re-derived rather than carried and stays at 8 across 5, Q6 = C declines the one option that would have added a ninth for no gain, and every frozen scientific value is restated from its upstream decision rather than chosen here.
 
+*(Answered `Looks correct` earlier on 2026-08-24, before the artifacts were reviewed. That receipt
+was reset by the redo jump taken for this unit's own benefit. The live answer tag for this section
+is the blank one at its end.)*
+
+### Re-confirmation, 2026-08-24 (post-redo) — the unit the redo was taken for
+
+**Why this is being re-asked, and unlike the seven siblings it is not merely mechanical.** The
+first artifact set was reviewed adversarially, reached **NOT-READY** with the 2-iteration budget
+spent, and the write-freeze on a terminal receipt made a redo the only route to a fix. The project
+decision owner authorised a redo jump on `functional-design` at **2026-08-24T14:57:07Z**. **This
+unit's content then changed** — twice.
+
+### The four reviewer passes, and what each changed
+
+| Pass | Verdict | What it found, and what was done |
+|---|---|---|
+| **Iteration 1** | NOT-READY | 2 Critical, 3 Major, 1 Minor. The Critical *"D-121/D-122 do not exist"* was **disputed and partly rejected on evidence**: both exist in the **Vision** decision register (lines 1206–1207), Approved; `evidence/DECISIONS.md` is a separate register running D-1…D-27. The real defect was **citing the wrong file**, corrected in all three artifacts. The sibling-test mischaracterisation, the `06`/`07` conflation, the "Two mechanisms" count and the unswept `requirements.md` clause were all accepted and fixed |
+| **Iteration 2** | NOT-READY | Budget exhausted. Three new findings, two of them **fixes that stopped one representation short** — a § Amendments owed paragraph still asserting the superseded claim 20 lines below its own correction, and a second stale clause on the same `requirements.md` line as the one already flagged. This is the failure mode `project.md` records twice |
+| **Post-redo, iteration 1** | NOT-READY | All three redo fixes verified to hold with **no regression**. Three **fresh** Major findings in places the earlier passes had not reached: § 11's negative-control list missing one control and the whole must-not-fire control; `criterion_used_hash` pointing at a **timestamp** field rather than `criterion_hash`; and R-96 mechanising one of its two prohibitions with neither a check nor a disclaimer for the other |
+| **Post-redo, iteration 2** | **READY** | All three fixes verified from source. R-96's new ownership claim was **checked against primary sources rather than trusted** — D-8 read directly, and `features-and-splits` R-80 confirmed as owner of the closed six-row partition list. Every count re-derived independently with no drift |
+
+### One error the reviewer never raised, found while checking its Critical
+
+Verifying finding 1 against the Vision register turned up a **second author error**: all three
+artifacts had said D-122's supervisor signature was *"still owed at G-05"*. Line 1207 reads
+**"Approved; supervisor sign-off closed 2026-08-22"** — by the project owner under the recorded
+student/supervisor authority equivalence, with the explicit note that **no supervisor signature
+artifact exists and none is claimed**. *"Approved — supervisor sign-off pending"* is **D-126's and
+D-128's** status. Corrected in all three artifacts and recorded as found-outside-the-review.
+
+### Two residuals ride the READY verdict, and are NOT applied
+
+Per the rule that a suggestion riding a READY verdict is **gate input, never an edit**:
+
+| Severity | Residual |
+|---|---|
+| **Major** | R-96's closing sentence says `domain-entities.md` § 3 limb 3/4 raises `PartitionError` for *"a partition outside that enumeration"*, but limb 4's two stated conditions — cross-input disagreement, or a training partition — do not literally cover an **unrecognised** partition value. The real safeguard is upstream **type-closure** (`features-and-splits` R-80 fixing `partition_id` to six values), which R-96 never names as the mechanism |
+| **Minor** | R-95's mechanism 2 still labels the pair `criterion_declared_at`/`criterion_used_hash` rather than `criterion_hash`/`criterion_used_hash`. Non-blocking: the authoritative entity table is correct |
+
+**Neither was fixed**, deliberately. Both go to the stage gate for your ruling.
+
+### What still stands, unchanged by any of it
+
+**BLK-03's contract limbs are an EXIT condition** on this unit and on `evaluation-and-comparison`,
+`statistical-inference` and `regimes-diagnostics-reporting`. `domain-entities.md` § 3 **authors**
+the contract; **approving it is yours, at the gate**. **BLK-04 ↓ and BLK-09 ↓** inherited and not
+closed. **`07`'s half of the eighth amendment is unowned** — it belongs to
+`evaluation-and-comparison`, whose design has not run. **7 of 9 requirements have no acceptance
+row.** **TA-11's reach into a model fit stays unverified**, no reading adopted. **G-09 unsigned**,
+and **BLK-03 independently bars implementation**. **Amendments owed: 8 across 5 units**, nothing
+added here.
+
+Does this all look correct before the stage proceeds?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `models-and-baselines` under the post-redo floor and its three artifacts are re-saved. The READY verdict stands and the two residuals travel to the stage gate as input for your ruling.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Use this to challenge any of the four passes' dispositions, to direct that either residual be applied now rather than at the gate, or to reopen one of the eight answers.
+
+> **💡 Recommendation**: **Looks correct** — the redo achieved what it was authorised for, the disputed Critical was resolved on evidence rather than accepted, one author error the review missed was found and corrected, and the two residuals are left for your ruling rather than quietly applied.
+
 [Answer]: Looks correct

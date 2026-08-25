@@ -548,3 +548,16 @@ an approved one.
 ### Summary
 
 The correction itself is sound: `component-methods.md` § Depth and its Assumptions genuinely restrict full-signature contracts to cross-package boundary calls and genuinely delegate intra-package shape-naming to this stage, `inventory.py` and `release.py` genuinely share the `src/data` package, and the revised "one amendment, four across two units" count is independently correct arithmetic once `inventory.py` is reclassified. `business-logic-model.md`, `domain-entities.md` and `business-rules.md` apply the correction consistently and mark every superseded claim as superseded. The one defect found is that the sweep stopped one file short: `functional-design-questions.md`'s § Assumptions & Open Questions (line 407) and § Consolidated Summary Confirmation (lines 427, 438–442) still state the pre-correction classification and the pre-correction "five across two units" total as live fact, unmarked, directly beneath the section that says the opposite — the same "amended figure, stale restatement survives" failure mode this project has hit before. This is a documentation-consistency defect in the audit-trail file rather than in the governing design artifacts a builder would actually implement from (those three are correct and consistent), so it does not block readiness on its own, but it should be fixed before the amendment count reaches the gate as a number the human is asked to act on. Every other checked claim — the requirement counts and two unrowed IDs, the WS-01/TA-04/TA-25 and supporting-row ownership, the named-source conflict mechanism and its disclosed residual, the three-check declared/required/executed audit-scope design, the D-1/D-2/D-12/D-13/D-143/D-144 quotations and figures, the G-P1A prohibition table, and the workspace-state claims — was independently re-derived from source and held up without exception. Verdict: READY, with one Major finding to clear before or alongside the gate.
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.

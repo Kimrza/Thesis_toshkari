@@ -543,4 +543,37 @@ Does this all look correct before I generate the artifact?
 
 > **💡 Recommendation**: **Looks correct** — both `foundation` passes touched sections this unit does not read, Amendment A was declined so no count propagated, and its `governance-guards` upstream re-confirmed with no rule changed.
 
+*(Answered `Looks correct` earlier on 2026-08-24; that receipt was reset by the authorised redo jump below. The live answer tag for this section is the blank one at its end.)*
+
+
+### Re-confirmation, 2026-08-24 (post-redo) — receipt floor reset by an authorised redo jump
+
+**Why this is being re-asked, and it is not about this unit.** The project decision owner
+authorised a **redo jump on `functional-design`** at **2026-08-24T14:57:07Z**, so that three
+standing reviewer findings on **`models-and-baselines`** (unit 8) could be fixed and
+re-reviewed — its adversarial budget had been exhausted at NOT-READY, and the write-freeze on a
+terminal review receipt made a redo the only route to a fix. **A redo resets the receipt floor for
+every unit of the stage**, which is the stated cost that was accepted when the redo was chosen.
+
+**Nothing in `acquisition` changed.** No question, option, answer, amendment, rule, entity or
+workflow of this unit was touched after its earlier confirmation today. The only artifacts edited
+after the redo are `models-and-baselines`'s; its three fixes are confined to its own
+files and reach no contract this unit consumes.
+
+**The redo bought what it was for.** `models-and-baselines` returned **READY** on the
+second pass of the restored budget, after three further Major findings were fixed. Two residuals
+ride that READY verdict and are carried to the stage gate rather than applied.
+
+**Everything this unit carried to the gate still stands, unchanged**, as recorded above.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `acquisition` under the post-redo floor and its three artifacts are re-saved. No answer, rule, entity, count or scientific value changes.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — this unit is untouched; the reset is a mechanical consequence of a redo taken for a different unit, and that redo achieved what it was authorised for.
+
 [Answer]: Looks correct

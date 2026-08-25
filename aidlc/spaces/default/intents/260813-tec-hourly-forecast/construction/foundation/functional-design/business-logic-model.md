@@ -85,6 +85,26 @@ Any of steps 1–5 raising an `IntegrityError` subclass exits non-zero and write
 **Step 4 is skipped only by `02_build_vtec_target.py`**, which is Phase 2 by
 definition and asserts `phase == 2` instead.
 
+> **Step 4 is a sequencing reference, not an import by this unit** *(added 2026-08-25 on
+> adversarial reviewer finding m-4, at the owner's direction)*. `assert_phase_boundary` lives in
+> `src/data/phase_contract.py`, which **`governance-guards` owns** (`unit-of-work.md` § 2;
+> `unit-of-work.md` also records `Q5=A`, *"no separate phase-transition unit —
+> `phase_contract.py` lives in `governance-guards`"*). This unit is declared to *"import
+> nothing from any other unit — this is the DAG's first root"*, and the two statements are
+> consistent because **W-1 is the stage script's entry contract, not a `foundation` module**:
+> `component-methods.md` states `assert_phase_boundary` is *"Called at entry by every
+> phase-aware stage script"*, and W-1 is described here as *"identical in all nine scripts"*.
+> The **caller is the script**, which may import from both units; `src/data/config.py` does not
+> import `phase_contract.py`.
+>
+> **Independent confirmation from the DAG.** `unit-of-work-dependency.md` declares
+> `foundation depends_on: []` and `governance-guards depends_on: [foundation]`. A real import
+> here would make the unit graph **cyclic**, and `units-generation` validated it as acyclic —
+> so a genuine import would have failed upstream validation rather than merely reading oddly.
+>
+> Only the distinction was undocumented; **no design changes and no upstream decision is
+> required.**
+
 **Failure behaviour (R-10).** On a steps 1–5 raise the script exits non-zero with a
 message naming the file and the violated expectation, and writes an `aborted`
 registry row. **If that registry write itself fails**, the original exception is
@@ -165,8 +185,36 @@ RAISES  DeterminismError — TensorFlow already initialised
    `seeds_applied`.
 3. **Enable TensorFlow op determinism** *before any graph construction* →
    `tf_op_determinism`.
-4. **Capture** `pythonhashseed` from the environment, `reexec_performed` from
-   step 1 of W-1, and `framework_versions`.
+4. **Capture** `pythonhashseed` from the environment, `reexec_performed` **from the re-exec
+   marker described below**, and `framework_versions`.
+
+> **The `reexec_performed` carrier** *(added 2026-08-25 on adversarial reviewer finding m-3,
+> decided by the project decision owner).* `ensure_process_determinism(argv)` returns `None`
+> (`component-methods.md`), so nothing crosses the `exec` boundary in its return value, and a
+> child process cannot otherwise tell a re-exec from an externally exported `PYTHONHASHSEED` —
+> the environment looks identical in both cases. Without a carrier, W-4 step 4 has nothing to
+> read and **R-05's negative control cannot discriminate**, so stage 3.5 would have had to
+> invent a mechanism.
+>
+> **The carrier is a sentinel environment variable**, set by the parent immediately before
+> `os.execv` and read once by the child. **Exactly one bit of information crosses**: *this
+> process is a re-exec child*. `reexec_performed` is `True` when the sentinel is present and
+> `False` when it is absent. **The variable's name is not fixed here** — it is an
+> implementation identifier carrying no scientific content, no governed value and no config
+> field, so it is not a §12/TC-03e constant and belongs in `src/data/config.py` beside the
+> function that sets it.
+>
+> **Why this option.** The alternative that reads more cleanly — changing
+> `ensure_process_determinism` to return `bool` — would amend an **approved stage-2.6
+> contract** in `component-methods.md`, which needs an amendment rather than a design note. A
+> marker file would add filesystem state to a function whose whole purpose is to run before
+> anything else. The sentinel is the smallest change that preserves every approved semantic:
+> the signature, the first-statement-of-`main()` rule, and the return-immediately path.
+>
+> **What this is and is not.** It is an engineering decision inside this stage's remit, made
+> explicitly rather than assumed, and put to the owner before it was applied. It decides **no**
+> scientific value and **no** governed constant, and **G-09 remains unsigned** — nothing here
+> authorises writing the module.
 5. **Probe** for nondeterministic operations (Q3 = C) → `nondeterministic_ops`,
    recording **which operation classes were examined**.
 6. **Cross-check** the observed set against any expected set declared in
@@ -284,7 +332,10 @@ contents are relied on as audit evidence.
 hashed, and marked derived. A stale CSV is a **completeness shortfall recorded in
 the run manifest**, not a fatal error — the non-fatal tier.
 
-## W-7 — `write_release` and label allocation
+## W-7 — `write_release` and label derivation
+
+*(Heading amended 2026-08-25: "label allocation" → "label derivation". Amendment C declined as
+drafted; there is no ledger to allocate from. W-7 remains one of the ten workflows W-1…W-10.)*
 
 ```
 INPUT   manifest, files, out_dir
@@ -298,18 +349,41 @@ graph TD
   B["2. Canonicalize:<br/>exclude label, volatile metadata,<br/>self-referential hash field"]
   C["3. content_hash = SHA-256(canonical)"]
   D["4. Reject if out_dir already holds a release"]
-  E["5. Allocate label from the append-only ledger"]
+  E["5. Derive dataset_version from content_hash<br/>(encoding not specified here)"]
   F["6. Write release + manifest"]
-  G["7. Append ReleaseLedgerEntry<br/>label + content_hash + path + run_id"]
-  A --> B --> C --> D --> E --> F --> G
+  A --> B --> C --> D --> E --> F
   D -.->|ReleaseError| X["exit non-zero"]
-  E -.->|"label reused or<br/>label/hash mismatch"| X
+  E -.->|"label/hash mismatch"| X
 ```
 
 Text fallback: validate the fourteen fields, canonicalize excluding the label and
 volatile metadata, hash to get the authoritative identity, reject a directory that
-already holds a release, allocate a label from the ledger, write, then append the
-ledger entry. A reused label or a label/hash mismatch raises.
+already holds a release, derive `dataset_version` from that content hash, then write the
+release and its manifest. A label that does not match its content hash raises.
+
+> *(W-7 amended 2026-08-25: **step 7 is removed** and step 5 is changed from ledger allocation
+> to derivation from `content_hash`. **Amendment C was DECLINED AS DRAFTED** by the project
+> decision owner on 2026-08-25, reversing its 2026-08-24 approval — no release ledger, no
+> `ReleaseLedgerEntry`, no `artifacts/registry/release_history.jsonl`, and **no exact
+> hash-to-label encoding is invented here**, because no approved artifact specifies one.
+> **Superseded steps, preserved:** *"5. Allocate label from the append-only ledger"*, *"7.
+> Append ReleaseLedgerEntry — label + content_hash + path + run_id"*, and the fallback clause
+> *"allocate a label from the ledger, write, then append the ledger entry. A reused label or a
+> label/hash mismatch raises."*
+>
+> **W-7 remains one of the ten workflows W-1…W-10** — it lost a step, not its existence, so the
+> workflow count is unchanged. **What this reversal actually costs is label ordering, and only
+> that.** The never-reuse guarantee survives by a different route: the derivation is a pure
+> function of `content_hash`, so identical content yields an identical label by construction and
+> the delete-and-rebuild failure that motivated the ledger cannot arise — there is nothing that
+> allocates and nothing that could forget. Ordering, by contrast, is information about sequence,
+> which a function of content alone does not carry, and no implementation choice reaches it.
+> **So the requirement was changed rather than left unmet: Q6 was re-presented and re-answered
+> as D′ on 2026-08-25, dropping "monotonic"** — the owner's explicit decision, with the original
+> Q6=D answer preserved verbatim beside it. **W-7 is fully compliant with Q6=D′**, and the
+> consequence to disclose is a capability rather than a gap: a reviewer comparing two release
+> labels at a gate must read sequence from the run record or the experiment registry, both of
+> which carry timestamps and `run_id`. **FU-2 is moot** — it existed only to locate the ledger.)*
 
 **Which identifier is authoritative (R-11).** The **content hash**. The label is
 derived, for citation at a human-reviewed gate, and **explicitly not
@@ -319,16 +393,44 @@ label in charge would elevate the weaker identifier.
 **Never overwritten (R-13).** A directory already holding a release is rejected, and
 repeated writes are **not** silently treated as successful.
 
-**Label allocation (R-12).** From a durable append-only ledger at
-`artifacts/registry/release_history.jsonl`, **separate** from the experiment
-registry. Never from a directory scan and never from a derived index — delete a
-release directory and a rebuilt index forgets the label, so the next allocation
-reuses it.
+**Label derivation (R-12, amended 2026-08-25).** `dataset_version` is **derived from the
+release's `content_hash`**. **No exact hash-to-label encoding is specified here**, because no
+approved artifact specifies one and this stage must not invent it — stage 3.5 must not choose
+one either, and must stop and report instead. There is **no ledger and no allocation step**.
+
+> *(**Superseded mechanism, preserved:** *"**Label allocation (R-12).** From a durable
+> append-only ledger at `artifacts/registry/release_history.jsonl`, **separate** from the
+> experiment registry. Never from a directory scan and never from a derived index — delete a
+> release directory and a rebuilt index forgets the label, so the next allocation reuses it."*
+> **Amendment C declined as drafted, 2026-08-25.** The superseded text rejects a *derived
+> index*, and its stated failure — a rebuilt index forgetting a label so the next allocation
+> reuses it — is a property of **allocation from state**. It does not transfer to a pure
+> derivation, which allocates nothing and consults nothing: there is no index to forget, and
+> reproducing the same label from the same content is the correct outcome rather than a
+> collision. So of the two Q6=D obligations, **never-reused is satisfied by determinism** (a
+> label bound to two genuinely different contents reduces to a SHA-256 collision), while
+> **monotonicity cannot be satisfied by any mechanism available here** — ordering is information
+> about sequence, which a function of content alone does not carry. **That requirement was
+> therefore changed rather than left unmet: Q6 was re-presented and re-answered as D′ on
+> 2026-08-25, dropping "monotonic"**, the owner's explicit decision with the original Q6=D
+> answer preserved verbatim beside it. **FU-2 is moot** — it existed only to locate the ledger
+> Q6=D required. This rule is fully compliant with Q6=D′; what is disclosed is a capability, not
+> a gap: release labels can no longer be ordered, so sequence is read from the run record or the
+> experiment registry. R-12 states the three replacement negative controls — correspondence,
+> derivation determinism, and injectivity against a degenerate encoding.)*
 
 **`source_files`' six items** are validated against `inventory.py` rather than
 restated as a bare hash.
 
-> **✅ Amendment C APPROVED 2026-08-24.** *Superseded status, preserved: "Amendment C
+> **⛔ Amendment C DECLINED AS DRAFTED 2026-08-25**, reversing the approval recorded in the
+> box below. No release ledger; `dataset_version` derives from `content_hash`. The box below is
+> preserved as the dated record of the 2026-08-24 approval and is **not** the current state —
+> including its *"three artifacts, one authoritative"* reading of `services.md`, which is now
+> wrong at two. **That upstream correction has since been made** (2026-08-25, on the owner's explicit authorisation after this stage had first reported it rather than made it): `services.md` now reads "Two artifacts, one authoritative" with the ledger row removed, and `unit-of-work.md` § 1 `Owns` no longer names the ledger, both superseded wordings preserved. **The Q6=D
+> monotonicity and label-reuse guarantees it cites are the two things the reversal gives up**,
+> and both are carried to the stage gate.
+>
+> **✅ Amendment C APPROVED 2026-08-24** *(superseded 2026-08-25)*. *Superseded status, preserved: "Amendment C
 > pending. The ledger is in no approved `Owns` list. Both approved artifacts
 > (`services.md`, `unit-of-work.md`) are unedited."* Both have since been annotated in
 > place on the owner's approval (`CR-2026-08-24-FOUNDATION-AMENDMENTS`): the ledger is
@@ -494,12 +596,28 @@ matching the story map's designation.
 - **[assumption]** `frontend-components.md` is not produced — `kind: library`, and the stage maps that artifact to `[ui]` only.
 - **Closed — Amendment A** (Vision §15.2): §19 rows for REQ-ENG-7 and REQ-ENG-10. **Raised and DECLINED 2026-08-24** by the project decision owner. No rule requires universal §19 coverage; the approved position dispositions uncovered requirements as *"Open by design"*. Both requirements stay untested **by design**, and the negative-path test specifications in `business-rules.md` keep their *"Test specification only — not an approved acceptance row"* label **permanently**. *(Superseded status: "**Not approved.**", pending.)*
 - **Closed — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **APPROVED 2026-08-24.** `component-methods.md` now defines nine fields; W-4 steps 5–7 are fully recordable and the prohibition on stating that determinism was measured is lifted. R-06 unchanged. *(Superseded status: "**Not approved.** W-4 steps 5–7 cannot be fully recorded until it is.")*
-- **Closed — Amendment C** (approved 2.6 and 2.7 artifacts): the release ledger. **APPROVED 2026-08-24**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. `services.md` and `unit-of-work.md` are annotated in place. R-11 unchanged — the content hash stays authoritative. *(Superseded status: "**Not approved.**")*
+- **Open — Amendment C, DECLINED AS DRAFTED 2026-08-25**, reversing its 2026-08-24 approval. No release ledger; `ReleaseLedgerEntry` withdrawn; `dataset_version` derived from `content_hash` with no encoding specified here. **R-11 unchanged** — the content hash stays authoritative. **R-12 amended, not deleted.** *(Superseded statuses, both preserved: "**Closed — Amendment C** … **APPROVED 2026-08-24**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. `services.md` and `unit-of-work.md` are annotated in place." and, before that, "**Not approved.**")* **All three consequences of the reversal are now closed, and none by this stage's own choice.** (a) **CLOSED — monotonicity, by re-answering the question.** Ordering is information about *sequence*, which a function of content alone cannot carry, so no test or implementation choice reaches it. **Q6 was re-presented and re-answered as D′ on 2026-08-25**, dropping "monotonic" — the owner's explicit decision, the original Q6=D answer preserved verbatim beside it, and **FU-2 is moot** since it existed only to locate the ledger. The design is fully compliant with Q6=D′; what is disclosed is a capability rather than a gap — release labels cannot be ordered, so sequence is read from the run record or the experiment registry. (b) **RESOLVED — the never-reused guarantee survives.** The superseded R-12 text objects to *allocation from an index*, and that objection does not transfer to a pure derivation, which allocates nothing and consults nothing; identical content yields an identical label by construction, and a label bound to two genuinely different contents reduces to a SHA-256 collision. FU-2=D's integrity obligation is likewise discharged by R-12's three replacement negative controls. (c) **RESOLVED — the upstream contradiction is corrected.** `unit-of-work.md` § 1 `Owns` and `services.md` were first **reported** rather than edited, because this stage's scope control forbade editing an approved Inception artifact; the owner authorised the edits explicitly on 2026-08-25 and both were corrected the same day, superseded wordings preserved, with a search across `construction/` confirming no other unit referenced the ledger.
 - **Open** — the concrete `RequiredFieldsMap` and `CredentialNameMap` contents await the four configs existing. This stage fixes the mechanism.
 - **G-09 is not signed.** No workflow here authorises creating a module.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
 ## Review history
+
+> **Annotation added 2026-08-25 — two stale statements in this section and the next, corrected
+> in place.** Raised as residual findings by the adversarial reviewer's 2026-08-25 iteration-1
+> pass and resolved on the project decision owner's instruction to resolve all defects. The
+> annotate-in-place form follows the `GOV-2026-08-22-INC-01` Rec 7 precedent used for sites 9–11
+> on 2026-08-24: **no reviewer sentence is rewritten and no verdict or finding is withdrawn** —
+> the reviewer's text stands as the dated record of what that reviewer saw, and the current
+> state is stated alongside it.
+>
+> | # | Stale statement | Current state |
+> |---|---|---|
+> | R-1 | The table row **"Iteration 1 of the fresh budget — *pending* — The `## Review` section below is from iteration 2 and will be replaced by the fresh pass"** | **Both halves are now wrong.** That pass **completed** on 2026-08-24 (READY, iteration 2 of the restored budget), so it is not pending; and the § Review section below was **not** replaced — the 2026-08-24 and 2026-08-25 passes were **appended** as their own dated sections instead, which is the convention this unit has followed throughout. Two further passes have since run: 2026-08-24 (READY) and 2026-08-25 iteration 1 (**NOT-READY**, seven findings, all remediated) |
+> | R-2 | The § Refutations line **"all five re-derived counts matched (`DeterminismRecord` fields = 6, …)"** | **`DeterminismRecord` carries nine fields**, not six, since **Amendment B** was approved on 2026-08-24. The figure was correct when that reviewer derived it. The refutation itself still stands — the count *did* match the contract as it then was |
+>
+> Neither correction moves a project count: 16 requirements, 2 untested, 7 acceptance rows, §19
+> at 36 rows, 17 rules.
 
 This is the **primary** artifact, so the `## Review` section below carries the
 reviewer's verdict for the whole unit.
@@ -644,7 +762,389 @@ amendment is pending, so nothing in these documents defers to one.
 
 - **Amendment A — DECLINED.** No project rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. W-5 records **REQ-ENG-10 as permanently uncovered**, and W-6/W-7 likewise for REQ-ENG-7. No count moved: untested stays 36, this unit's stays 2 of 16, its acceptance rows stay 7, TE §19 stays at 36 rows.
 - **Amendment B — APPROVED.** `DeterminismRecord` carries **nine** fields, so **W-4 steps 5–7 are fully recordable** and the prohibition on stating that determinism was measured is lifted — replaced by the narrower rule that a measured claim requires `probe_scope` recorded and `measurement_status` = `complete`. **R-06 is unchanged.**
-- **Amendment C — APPROVED**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. **W-7's label-allocation step stands**, and the ledger is now named in `unit-of-work.md` § 1 `Owns` and `services.md`. A draft of the change record proposed rejecting it and deriving the label from the content hash; that is Q6 option C, which the owner had read and declined, and it cannot yield the *monotonic* label Q6=D requires. **R-11 is unchanged** — the content hash remains authoritative.
+- **Amendment C — DECLINED AS DRAFTED 2026-08-25**, reversing the 2026-08-24 approval this section was written to record. **W-7's label-allocation step is removed** and its step 7 with it; `dataset_version` derives from `content_hash`, with no encoding specified here. `ReleaseLedgerEntry` is withdrawn, taking the entity count nine → eight. **R-11 is unchanged** — the content hash remains authoritative. **R-12 is amended rather than deleted**, and states the resulting gap. *(Superseded status, preserved: "**Amendment C — APPROVED**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. **W-7's label-allocation step stands**, and the ledger is now named in `unit-of-work.md` § 1 `Owns` and `services.md`. A draft of the change record proposed rejecting it and deriving the label from the content hash; that is Q6 option C, which the owner had read and declined, and it cannot yield the *monotonic* label Q6=D requires.")*
+
+  **This section's title no longer holds for C, and that is stated rather than hidden.** The mechanism the 2026-08-24 text identifies as unable to satisfy Q6=D — deriving the label from the content hash, Q6 option C — is the mechanism the 2026-08-25 ruling mandates. The owner gave that ruling after the conflict, including their own Q6=D and FU-2=D answers and this very paragraph's reasoning, was put to them in full; it is a deliberate override, not an oversight. **What it gives up:** the label is no longer monotonic and reuse is no longer detectable across a deleted and rebuilt release directory. **What is unresolved and carried to the stage gate:** whether Q6=D should be re-answered, and the upstream correction now owed by `unit-of-work.md` § 1 `Owns` and `services.md`, neither of which is edited here.
 
 **G-09 remains unsigned.** Nothing in this document authorises creating a module, and
 no scientific value is decided here.
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 under the sixth post-redo receipt floor.** The stage wedged on
+> `models-and-baselines`: its artifacts were written and the adversarial reviewer returned
+> READY on iteration 2 of 2 (2026-08-24T15:16:47Z) *before* its summary confirmation was
+> recorded (15:32:45Z). The engine requires a produces-artifact write after the confirmation
+> receipt, the write-freeze hook refused the re-save because a fresh READY receipt covered the
+> unit, and the 2-iteration adversarial budget was spent — a deadlock whose only sanctioned
+> exit is a redo jump. The project decision owner authorised one at **2026-08-25T06:30:05Z**,
+> which reset the receipt floor for every unit of the stage.
+>
+> **No content of this unit changed.** The owner directed **evidence-driven revision** for this
+> recovery — keep the adversarially-verified text as the baseline and edit only where a real
+> defect is found — rather than a blanket re-derive, on the finding that all eight built units
+> already carry a READY `## Review` section and that a blanket rewrite would discard verified
+> corrections. Two checks were run before the receipt was sought.
+>
+> **First, upstream provenance, enumerated per file** *(corrected 2026-08-25 on reviewer
+> finding m-5; **superseded wording, preserved:** "every consumed upstream file
+> (`component-methods.md`, `services.md`, `unit-of-work.md`) was last modified at 12:26 UTC,
+> three hours before this unit's 15:27 UTC artifacts and committed unchanged at `9c7afd9`" —
+> which named three of the six consumed artifacts and generalised one commit across all of
+> them)*:
+>
+> | Consumed artifact | Last modified | Commit |
+> |---|---|---|
+> | `unit-of-work.md` | 2026-08-24 12:26 UTC | `9c7afd9` |
+> | `component-methods.md` | 2026-08-24 12:26 UTC | `9c7afd9` |
+> | `services.md` | 2026-08-24 12:26 UTC | `9c7afd9` |
+> | `unit-of-work-story-map.md` | 2026-08-23 20:40 UTC | `45796f5` |
+> | `components.md` | 2026-08-23 19:05 UTC | `45796f5` |
+> | `requirements.md` | 2026-08-22 12:37 UTC | `89674b6` |
+>
+> **The no-drift conclusion is unchanged**: all six predate this unit's 15:27 UTC artifacts.
+>
+> **Second**, this unit's three figures were re-derived programmatically from the current
+> `unit-of-work.md` § 1 — **16** requirements from the ID list, **2** untested (REQ-ENG-7,
+> REQ-ENG-10, the bolded pair), **7** acceptance rows (TA-01, TA-02, TA-03, TA-10, TA-15,
+> TA-22, TA-23) — each agreeing with what this document asserts. Derivation was used rather
+> than reading the adjacent prose because a count carried from prose is this project's recorded
+> repeat defect (`project.md` § Way of Working).
+>
+> **That guard nonetheless failed once, in the sibling artifact.** The 2026-08-25 re-save
+> annotation in `business-rules.md` closed by carrying a fourth figure — *"the thirteen
+> rules"* — from an earlier section's prose. The derived count is **17** (R-01–R-17), which
+> § Implementability of this document already stated correctly. Recorded as reviewer finding
+> M-1 (Major) and corrected in place; the rule set did not change and no requirement,
+> acceptance or §19 total moved.
+>
+> The two residuals named in the box above remain gate input, not edits.
+
+---
+
+## Review — 2026-08-25 post-redo pass, iteration 1
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-25
+**Class:** adversarial · **Iteration:** 1 of the fresh 2-iteration budget (redo of 2026-08-25T06:30:05Z)
+**Scope:** `business-logic-model.md`, `business-rules.md`, `domain-entities.md`, the answered
+`functional-design-questions.md`, and the six passed `consumes` contracts. No other unit's
+`construction/` content was read; the Technical Environment document is outside this pass's
+read scope, which bounds two checks named below.
+
+**Verdict: NOT-READY**
+
+Six of the ten claims this pass was asked to attack reproduce exactly. Four do not, and one
+of the four sits in the only text added since the last READY verdict. The design itself —
+W-1…W-10, R-01…R-17, the nine entities, the whole traceability layer — survived every
+refutation attempt; the defects are all in status and count assertions, which is this
+project's recorded repeat failure mode.
+
+### Major
+
+**M-1 · `business-rules.md` line 586 — "thirteen business rules" is wrong; the file carries seventeen.**
+The 2026-08-25 re-save annotation closes: *"The thirteen rules, their IDs and their acceptance
+citations are unchanged."* Derived from the artifact rather than from the adjacent prose:
+
+```
+grep -cE "^## R-[0-9]+" business-rules.md            ->  17
+grep -oE "^## R-[0-9]+" business-rules.md            ->  R-01 R-02 R-03 R-04 R-05 R-06 R-07 R-08
+                                                         R-09 R-10 R-11 R-12 R-13 R-14 R-15 R-16 R-17
+```
+
+It should read **seventeen**. Three aggravating facts: (a) `business-logic-model.md` line 630
+independently states *"the seventeen rules (R-01–R-17)"*, so the two artifacts under review
+contradict each other on the size of one of them; (b) the same wrong figure is in the answered
+Q&A at lines 759, 825 and **955** — line 955 is inside the 2026-08-25 summary the human
+confirmed `Looks correct`, so the confirmation gate was served a misstatement of the artifact
+it was confirming; (c) the number **13** has a legitimate home in this unit — `requirements.md`
+line 271's *"the thirteen existing runs are recorded as violating it"*, faithfully carried at
+`business-logic-model.md` line 236 and `domain-entities.md` line 266 — so this reads as that
+figure migrating into a rule count. Line 955 states the figure immediately beneath a table
+that correctly derives 16 / 2 / 7, which is verbatim the pattern
+`domain-entities.md` line 611 already recorded against this unit: *"the table cells were
+derived, and then a sentence summarising them was written from memory."*
+
+**M-2 · `business-rules.md` line 515 — Amendment status asserted as PENDING for all three.**
+§ Assumptions & Open Questions reads *"**Open — Amendments A, B and C.** All three **PENDING
+and NOT approved.** Enumerated at this stage's approval gate."* All three were resolved on
+2026-08-24, and I confirmed the execution in the contracts rather than in the artifacts'
+narration of them:
+
+```
+unit-of-work.md § 1 `foundation` -> `Owns` contains `artifacts/registry/release_history.jsonl`   (Amendment C)
+services.md line 273            -> "Three artifacts, one authoritative"                          (Amendment C)
+awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+: "  ->  9        (Amendment B)
+```
+
+Both sibling artifacts swept this exact bullet — `business-logic-model.md` lines 495–497 and
+`domain-entities.md` lines 586–588 all read *"Closed — Amendment …"* with the superseded status
+preserved parenthetically. `business-rules.md`'s § Assumptions was not swept. It should read
+`Closed` for all three, in the siblings' form: A **declined permanently**, B and C **approved
+and executed**.
+
+**M-3 · `business-rules.md` lines 5–11 — the addendum box asserts this file is clean, and it is not.**
+*"**None of them is in this file** — its acceptance-status table and its "This label is now
+permanent, 2026-08-24" box already read correctly, which is what made the three missed sites
+visible by comparison."* M-2, M-4, m-1 and m-2 are four sites in this file still asserting a
+superseded amendment status. The claim is not merely wrong; it is the reason the file was
+never swept — a self-certification of cleanliness standing where the sweep should have been.
+It should state which sites in this file were checked and what was found, or be withdrawn.
+
+**M-4 · `business-rules.md` lines 224–225 — R-06's acceptance line gives a superseded reason.**
+*"No row accepts the scope or status fields, because they are **not yet in the contract**."*
+The three fields are in the contract — nine fields, derived above — as the box thirty lines
+earlier in the same rule states outright. The **conclusion** survives (no §16/§19 row accepts
+`probe_scope` or `measurement_status`, and after Amendment A's decline none will), but the
+**reason** is refuted by the amendment the same rule announces. This finding carries no
+numeral, which is precisely the blind spot `project.md` § Way of Working records: a sweep
+keyed to a superseded figure cannot see a stale status clause that never held one.
+
+### Minor
+
+**m-1 · `business-rules.md` lines 507–509 — a condition that can never be met.**
+*"Per Q7, design and implementation planning proceed while Amendment A is pending. **Formal
+acceptance coverage and gate satisfaction are not claimed** until the amendment is approved
+and the tests have executed successfully."* Amendment A was **declined permanently**, so
+"until the amendment is approved" is unsatisfiable. It contradicts the box immediately above
+it (lines 489–497, *"This label is now permanent, 2026-08-24"*), the table at lines 481–482,
+and line 541. The substance to keep is the second clause; the trigger must change from
+*pending approval* to *declined, so coverage is never claimed*.
+
+**m-2 · `business-rules.md` line 192 — box heading contradicts its own first line.**
+Heading: *"## ⚠ THIS RULE IS NOT FULLY ENFORCEABLE UNDER THE APPROVED CONTRACT"*. First line
+of the body: *"✅ Amendment B APPROVED 2026-08-24"*. Both siblings rewrote the equivalent
+heading and demoted the old one to a preserved quotation (`business-logic-model.md` line 183,
+`domain-entities.md` line 190); this is the third representation of the same fact and it was
+not swept. A reader scanning headings — which is how a box heading is read — takes away the
+superseded status.
+
+**m-3 · `reexec_performed` has no channel across the exec boundary.**
+`component-methods.md` line 116 declares `ensure_process_determinism(argv: Sequence[str]) -> None`
+and it **re-execs the interpreter**. In the child process, `PYTHONHASHSEED` being set is
+indistinguishable between *"my parent re-exec'd me"* (→ `True`) and *"the operator exported
+it"* (→ `False`). W-4 step 4 says to *"Capture … `reexec_performed` from step 1 of W-1"*, and
+R-05's negative control requires *"Invoke a stage script with `PYTHONHASHSEED` unset and
+assert `reexec_performed` is `True`"* — a test that only discriminates if the two cases are
+distinguishable. No artifact names the carrier (a marker environment variable, an argv
+sentinel), and W-1's diagram shows no value flowing S1 → S5. Stage 3.5 must invent it, which
+this stage's own standard forbids: *"This stage fixes the mechanism."* One sentence in W-4 or
+R-05 closes it; the gap is small but it is a real decision left to the implementer, and the
+prior pass's § Implementability claim of *"without inventing a decision"* does not hold on
+this point.
+
+**m-4 · W-1 step 4 reaches into another unit's module, undisclosed.**
+`assert_phase_boundary` is defined in `src/data/phase_contract.py` (`component-methods.md`
+line 181), which `unit-of-work.md` line 153 places in **`governance-guards`** — it is absent
+from `foundation`'s `Owns`. The artifacts disclaim `registry.py` / `Station` and
+`locked_test.py` explicitly in `domain-entities.md` § Assumptions, but give `phase_contract.py`
+no such note, while `unit-of-work.md` § 1 declares that `foundation` *"Imports nothing from
+any other unit — this is the DAG's first root."* W-1 is correct as a **contract** (it matches
+`services.md` § Stage entry contract step for step, including the `02_build_vtec_target.py`
+exemption), but it is presented under a heading that says these are the workflows *"this unit
+implements"*. State that each stage script's `main()` orchestrates the six steps — not
+`config.py` — or 3.5 may implement step 4 inside `foundation` and invert the dependency root.
+
+**m-5 · "Every consumed upstream file" is false as a universal (three of six).**
+`business-rules.md` lines 580–582 and `domain-entities.md`'s tail assert *"Every consumed
+upstream file was last modified at 12:26 UTC … and committed unchanged at `9c7afd9`."* Derived
+across all six passed contracts:
+
+| Consumed contract | mtime (UTC) | last commit |
+|---|---|---|
+| `component-methods.md` | 2026-08-24 12:26 | `9c7afd9` |
+| `services.md` | 2026-08-24 12:26 | `9c7afd9` |
+| `unit-of-work.md` | 2026-08-24 12:26 | `9c7afd9` |
+| `unit-of-work-story-map.md` | 2026-08-23 20:40 | `45796f5` |
+| `components.md` | 2026-08-23 19:05 | `45796f5` |
+| `requirements.md` | 2026-08-22 12:37 | `89674b6` |
+
+The **substantive conclusion is unharmed and in fact stronger** — every one of the six is
+older than this unit's content, so nothing upstream moved after the artifacts were written.
+The defect is that a check reported as a derivation did not enumerate its own scope.
+`business-logic-model.md` line 683 states the same figure but parenthetically names the three
+files it actually measured, so it overclaims only in the words *"every consumed upstream
+file"*; the other two artifacts name none and are simply wrong as written.
+
+### Residual
+
+- **`business-logic-model.md` line 514** — § Review history's last row reads
+  *"| Iteration 1 of the fresh budget | pending | The `## Review` section below is from
+  **iteration 2** and will be replaced by the fresh pass |"*. The `## Review` section below it
+  is stamped *"Iteration: 2 of the fresh 2-iteration budget (final)"* and READY, and
+  `domain-entities.md` lines 600–609 record fresh-budget iteration 1 as **NOT-READY** followed
+  by corrections 3 and 4. The row marks a completed pass as pending and predicts a replacement
+  that did not occur — six redo jumps later, this pass appends rather than replaces. Same class
+  at `business-rules.md` line 528.
+- **`business-logic-model.md` line 520** — *"all five re-derived counts matched
+  (`DeterminismRecord` fields = 6 …)"* carries no superseded marker, while the contract is now
+  nine. Historical in intent, and the 2026-08-24 annotation table covers the same numeral
+  where it appears inside `## Review`; this occurrence is in author-owned § Review history text
+  and was not annotated.
+- **Neither `business-logic-model.md` nor `business-rules.md` lists the Technical Environment
+  document in § Sources**, while citing TE sections 13 and 10 times respectively. The printed
+  derivation `awk 'NR>=749 && NR<=760 && /^- /' <TE> | wc -l` → `7` uses an unresolved `<TE>`
+  placeholder over hard-coded line numbers, so a later reader cannot re-run it. **I could not
+  verify the seven-bullet figure** — the TE document is outside this pass's read scope. What I
+  can confirm is that the eight-**field** reading is upstream-supported: `requirements.md`
+  line 271 and `services.md` step 6 both say *"§13.1's eight items"*, and REQ-ENG-10's criterion
+  is quoted verbatim and correctly as *"A registry row exists carrying all eight fields"*.
+- **Upstream, outside this unit's edit scope:** `requirements.md` line 271's test column still
+  reads *"`UNTESTED` — no WS/TA row covers the §13.1 capture list; candidate new TA row via
+  Vision §15.2"*. Amendment A's decline retired that candidate. The artifacts' claim that
+  *"`requirements.md` records the same conclusion"* is true of the `UNTESTED` finding, so this
+  is not a defect in the artifacts under review — noted so the decline's sweep is not assumed
+  complete.
+
+### What reproduced exactly — the refutations that failed
+
+Every figure below was derived here from the cited source before being compared, never read
+from adjacent prose.
+
+| Claim under attack | Derivation | Result |
+|---|---|---|
+| 16 requirements carried | `unit-of-work.md` § 1 ID list enumerated: 9 `REQ-ENG-*` + 4 `FR-*` + 3 `NFR-*` | **16** — agrees |
+| 2 untested, REQ-ENG-7 / REQ-ENG-10 | the bolded pair in the same list; story-map § Requirements with no acceptance row → `` `foundation` (2): REQ-ENG-7, REQ-ENG-10 `` | **2** — agrees, two independent paths |
+| 7 acceptance rows | Table 2 `primary == foundation` over NR 145–223 → TA-01 TA-02 TA-03 TA-10 TA-15 TA-22 TA-23 | **7** — agrees |
+| `DeterminismRecord` nine fields | `awk '/class DeterminismRecord/,/^$/' component-methods.md \| grep -cE "^ +[a-z_]+: "` | **9** — agrees |
+| `services.md` three artifacts, one authoritative | `services.md` line 273 | **agrees** verbatim |
+| nine entities | `grep -cE "^## [0-9]+\. " domain-entities.md` → 9 (`ConfigSnapshot` … `IntegrityError`) | **9** — agrees |
+| ten workflows W-1…W-10 | `grep -oE "^## W-[0-9]+" business-logic-model.md` | **10**, no gaps — agrees |
+| thirteen business rules | `grep -cE "^## R-[0-9]+" business-rules.md` | **17** — **refuted (M-1)** |
+| A declined, B and C approved and executed | ledger present in `unit-of-work.md` `Owns`; `services.md` "Three artifacts"; 9-field dataclass | **executed** — but four sites still say otherwise (M-2, M-4, m-1, m-2) |
+| supporting on exactly two rows | Table 2 `supporting ~ foundation` → TA-13 TA-26 | **2** — agrees |
+| 14 distinct rows test the 16 requirements | union over Table 1 col 4 → TA-01 02 03 09 10 13 15 16 17 21 22 23 26, WS-17 | **14** — agrees |
+
+**The whole traceability layer re-derived from source, cell by cell.** Table 1 `tested by` for
+all sixteen requirement IDs reproduces the tables in `business-logic-model.md`
+§ Requirement-to-workflow map and `domain-entities.md` § Requirement coverage **identically**,
+including the two `NO CURRENT ACCEPTANCE ROW` cells and REQ-ENG-4's *bounded* qualifier. Table 2
+`primary` for all fourteen referenced rows reproduces `domain-entities.md`'s `Row owner` column
+**identically**, including the four multi-row entries that were wrong twice before
+(REQ-ENG-3 → TA-03 `foundation` / TA-26 `models-and-baselines`; REQ-ENG-11 → TA-17
+`fixtures-and-reproducibility` / TA-26 `models-and-baselines`; NFR-AUD-01 → TA-10 `foundation`
+/ TA-21 `fixtures-and-reproducibility`; NFR-DET-01 → WS-17 `statistical-inference` / TA-13
+`models-and-baselines`). REQ-ENG-8 → TA-16 → `regimes-diagnostics-reporting` and REQ-ENG-4 →
+TA-09 → `fixtures-and-reproducibility` also check out. **No fifth occurrence of the
+primary-versus-supporting confusion class exists.**
+
+**Q&A fidelity — every answer checked against the filled `[Answer]:` line.** Q1=B, Q2=B, Q3=C,
+Q4=D, Q5=B, Q6=D, Q7=X (B+C), Q8=D, FU-1=C, FU-2=D, FU-3=A. Every rule and workflow attribution
+matches. Q7=X's dual limbs both stand: the B-form specifications are present and labelled, and
+the C-form request was raised and declined — which resolves the limb rather than contradicting
+it. Q8=D's credential precondition is correctly kept **out** of `resolve_platform_roots` in
+W-8, R-14 and `domain-entities.md` § 3, matching `component-methods.md`'s *"No credential is
+returned or logged."* The stage-2.6 question numbers the artifacts cite (`FU-1 = D at stage
+2.6`, `Q6 = X`, `Q7 = C`) are qualified where they could collide with this stage's own.
+
+**Contracts and signatures.** W-2/W-3/W-4/W-7/W-8's `INPUT`/`OUTPUT`/`RAISES` blocks match
+`component-methods.md` exactly, function by function — `load_configs(config_dir, *, phase)`,
+`assert_no_tbd(snapshot, *, required)`, `assert_declared_sources_exist(snapshot)`,
+`resolve_platform_roots(env) -> tuple[str, Mapping[str, Path]]`,
+`seed_everything(snapshot, *, stage)`, `write_release(manifest, *, files, out_dir)` — with
+`ConfigError` / `PreflightError` / `PlatformError` / `DeterminismError` / `ReleaseError` on the
+same conditions. W-7's *"all 14 §13.3 fields"* and *"`source_files`' six items … validated
+against `inventory.py`"* are verbatim upstream. W-1 matches `services.md` § Stage entry
+contract step for step, including the failure behaviour of steps 1–5 and the
+`02_build_vtec_target.py` exemption.
+
+**Hard project rules.** **G-09** is honoured: W-9's box states the three modules do not exist
+and that BLK-01's closure granted *"authority only"*, and no workflow or rule authorises
+creation — every artifact repeats it in its closing line. The **Phase 1 prohibition** is
+honoured: step 4 asserts the boundary, R-03's `(stage, phase)` key exists precisely so Phase 1
+never has to fill a Phase-2 sentinel — which `project.md` § Forbidden prohibits — and no
+`foundation` path touches `src/gnss`. The **IRI import boundary** is not implicated and not
+breached: `foundation` owns `config.py`, `release.py`, the registry writer, the ledger and
+`tests/`; nothing imports `src/external/iri.py` or `gim.py`, and `components.md`'s allowlist
+(`scripts/04_build_external_products.py`, `src/evaluation/`) is untouched. **R-15's
+locked-test carve-out** holds: no `foundation` path constructs a path into
+`evidence/locked_test_restricted/`, with a static negative control specified. No scientific
+constant is decided anywhere in the three artifacts, and no `TBD — freeze gate` field is
+filled.
+
+### Implementability
+
+Setting the status defects aside, stage 3.5 could build `foundation` from these three
+documents with **one** invented decision — the `reexec_performed` carrier (m-3) — and one
+attribution to confirm (m-4). The seventeen rules, ten workflows and nine entities are
+mutually consistent; the two-tier posture is structural rather than remembered (a shortfall is
+not in the exception hierarchy at all); R-10's report-honestly-when-reporting-fails clause and
+R-08's read-free append are both genuine design decisions with stated reasoning rather than
+restatements of a requirement; and the two real gaps that remain open — the concrete
+`RequiredFieldsMap` and `CredentialNameMap` contents — are correctly deferred to Bolt 1 rather
+than invented.
+
+### Why NOT-READY rather than READY with residuals
+
+M-1 is a count claim in a `produces[]` artifact that is wrong by four, and it is inside the
+**only text added since the last READY verdict** — the change this pass exists to review. M-2
+and M-4 are live status assertions contradicted by the contracts and by their own file. M-3
+is a false clean-bill that explains why M-2, M-4, m-1 and m-2 all survived a sweep that was
+reported as complete. Each is machine-checkable, each is in the class
+`project.md` § Way of Working names as this project's repeat defect, and none is a style
+preference. The design is sound; its status and count layer is not, and that layer is what a
+human reads at the gate.
+
+---
+
+## Remediation of the 2026-08-25 iteration-1 findings
+
+*(Written after the human's consolidated-summary confirmation for this unit under the sixth
+post-redo receipt floor. Appended rather than folded into the § Review above, which stands as
+the dated record of what that reviewer saw.)*
+
+**All seven findings are remediated**, each verified at its named location before being touched,
+and every superseded wording preserved in place:
+
+| Finding | Sev | Where | Resolution |
+|---|---|---|---|
+| **M-1** | Major | `business-rules.md`, and three sites in the Q&A file | *"thirteen rules"* → **seventeen, R-01–R-17**, derived (`grep -cE "^## R-[0-9]+" business-rules.md` → 17), agreeing with § Implementability. **The rules live in `business-rules.md`; this file carries zero `## R-` headings** |
+| **m-5** | Minor | all three artifacts + the Q&A file | The generalised *"committed unchanged at `9c7afd9`"* replaced by a per-file provenance table covering all six consumed artifacts. No-drift conclusion unchanged |
+| **M-2** | Major | `business-rules.md` § Assumptions | All-three-pending bullet replaced with the settled statuses |
+| **M-3** | Major | `business-rules.md` header box | The false *"none of them is in this file"* clean-bill corrected, and the four sites it caused to be missed named |
+| **M-4** | Major | `business-rules.md` R-06 § Acceptance | Refuted reason replaced; **conclusion preserved and re-evidenced** — the two field names appear in no acceptance table anywhere in this workspace |
+| **m-1** | Minor | `business-rules.md` | Unsatisfiable *"until the amendment is approved"* → permanent-by-design; Amendment A not reopened |
+| **m-2** | Minor | `business-rules.md` R-06 heading | Heading brought into agreement with its own body, on the body's evidence rather than fitted to it |
+
+**Both design findings were investigated and then ruled by the project decision owner, not
+assumed.** **m-3:** a carrier is genuinely required — `ensure_process_determinism(argv)` returns
+`None`, so nothing crosses the `exec` boundary and the child cannot distinguish a re-exec from
+an externally exported `PYTHONHASHSEED`; R-05's negative control could not discriminate without
+one. A **sentinel environment variable** carries the single bit, named in W-4 above and as a new
+R-05 constraint; the variable's name is deliberately unfixed as a non-TC-03e implementation
+identifier, and the approved stage-2.6 `-> None` signature is untouched. **m-4:** a **sequencing
+reference, not an import** — evidenced in W-1 above, and confirmed independently by the unit DAG,
+where a real import would make a graph `units-generation` validated as acyclic cyclic.
+
+**Amendment C was declined as drafted, and Q6 re-answered as D′.** The reversal removed the
+release ledger, `ReleaseLedgerEntry` (entity count nine → eight) and W-7's allocation step.
+Monotonicity could not be met by any mechanism available here, so the **requirement** was changed
+rather than left unmet: Q6 was re-presented and re-answered as **D′**, dropping *"monotonic"*,
+with the original Q6 = D answer preserved verbatim; FU-2 is moot, having existed only to locate
+the ledger. **Never-reuse survives by determinism** and **FU-2's integrity obligation is
+discharged** by R-12's three negative controls, so no obligation of either question is left
+uncovered. The one disclosed cost is a capability: release labels cannot be ordered, so sequence
+is read from the run record or the experiment registry.
+
+**The two upstream artifacts were corrected on the owner's explicit authorisation**, after this
+stage first reported rather than edited them: `unit-of-work.md` § 1 `foundation` → `Owns` no
+longer names the ledger, and `services.md` reads *"Two artifacts, one authoritative"*. A search
+across `construction/` confirmed no other unit referenced it.
+
+**Counts, derived after every edit rather than carried across them:** 16 requirements · 2
+untested · 7 acceptance rows · §19 at 36 rows, no TA-37/TA-38 added · 17 rules · 10 workflows
+(W-7 lost a step, not its existence) · **8 live entities**, the only figure that moved.
+**G-09 remains unsigned**, and no scientific value was decided.

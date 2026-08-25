@@ -24,7 +24,8 @@ authority to write a module.
 - `../../../inception/requirements-analysis/requirements.md` — FR-P1-04-14, FR-P1-05-1…-6, -21, -22.
 - `../features-and-splits/functional-design/` — **W-4a** (the provenance stamp), **W-4b** (read-versus-emit), **R-74**'s pairing control. FU-4 = D is what lands E-8 below.
 - `../foundation/functional-design/` — `ConfigSnapshot`, the `IntegrityError` base, the two-tier error posture.
-- `evidence/DECISIONS.md` — **D-121**, **D-122**.
+- `PreFlight/vision_document(3)(2)(2).md` § Decision register, lines **1206–1207** — **D-121** (exact frozen grids: ridge 6, RF 18, LSTM 16, with fixed training settings; **Approved**) and **D-122** (development seed **42**; final seeds **{1337, 2024, 7}**; the confirmatory prediction is the element-wise three-seed mean; failed runs recorded, never silently rerun. **Approved; supervisor sign-off closed 2026-08-22** by the project owner under the recorded student/supervisor authority equivalence — `CR-2026-08-22-TE-AMEND`, `GOV-2026-08-22-REM-01` Rec 4 — with the note that **no supervisor signature artifact exists and none is claimed**, and the seed values verified unchanged before closure).
+  > ⚠ **Two D-number namespaces, and the first draft cited the wrong one.** D-121 and D-122 are **Vision-document** decision IDs. `evidence/DECISIONS.md` is a **separate register running D-1…D-27** and contains neither — verified by enumerating its `D-<n>` headings. The first draft of these artifacts cited `evidence/DECISIONS.md — D-121, D-122`, which resolves to nothing. **Corrected 2026-08-24** (iteration-1 finding 1 — whose framing that the two decisions *"do not exist"* is itself wrong: they exist, in the other register, and both are Approved).
 
 ---
 
@@ -99,6 +100,14 @@ call site — never inlined in `src/models` or any implementation file (TC-03e; 
 § Forbidden). The frozen final set is **{1337, 2024, 7}** (D-122); development seed **42** is not
 a confirmatory seed. The bootstrap seed **20221201** belongs to TE §13.6 / TC-19 and is **not**
 part of D-122's item set.
+
+> ⚠ **One cited Source still carries the superseded attribution, reported not edited**
+> *(iteration-1 finding 5)*. `requirements.md` FR-P1-05-2 still lists bootstrap seed **20221201**
+> among D-122's values, a reading `unit-of-work.md` § 8 records as **corrected 2026-08-22** per
+> `GOV-2026-08-22-UG-02` Rec 11 — the bootstrap seed is frozen separately by **TE §13.6 / TC-19**
+> (Q-27). This unit follows the **corrected** reading. `requirements.md` is an approved upstream
+> artifact, and `CHANGE_RECORD_PROCEDURE.md` bars editing one absent owner approval for
+> annotate-in-place, so the disagreement is **raised at the gate**.
 
 ### Limb 2 — output type
 
@@ -188,12 +197,15 @@ performance-blind coverage audit passes by construction.
 | `partitions_read` | every partition the run read. **Asserted to exclude December** |
 | `criterion_declared_at` | when the selection criterion was declared — **before tuning began** |
 | `criterion_hash` | the declared criterion, hashed |
-| `criterion_used_hash` | the criterion actually used. **Must equal `criterion_declared_at`'s hash** |
-| `audit_access_since_declaration` | whether a December coverage-audit access is recorded between declaration and this run, read from `governance-guards` **R-25**'s durable access log |
+| `criterion_used_hash` | the criterion actually used, hashed. **Must equal `criterion_hash`** — the row above, which holds the *declared* criterion's hash. *(Corrected 2026-08-24, post-redo finding 2: this read "must equal `criterion_declared_at`'s hash", and `criterion_declared_at` is a **timestamp** with no hash. An implementer following it literally would have had to invent one.)* |
+| `run_at` | the timestamp of this tuning run itself. **Added 2026-08-24 (iteration-2 finding 3):** R-95's join correlates against it, and the first draft referenced *"`TuningRecord`'s own run timestamp"* while this table declared no such field, leaving an implementer to invent one |
+| `audit_access_since_declaration` | whether a December coverage-audit access is recorded between `criterion_declared_at` and `run_at`, read from `governance-guards` **R-25**'s durable access log |
 
-**Two mechanisms, because one channel each.** `partitions_read` catches a December partition
-being read. The criterion-hash comparison catches a criterion changed after December was seen —
-which the partition record cannot see.
+**Three mechanisms**, and the count is stated to match the three rows above and R-95's three
+negative controls *(corrected 2026-08-24, iteration-1 finding 4: this paragraph read "Two" while
+enumerating three)*. `partitions_read` catches a December partition being read. The criterion-hash
+comparison catches a criterion changed after December was seen — which the partition record cannot
+see. `audit_access_since_declaration` narrows what neither reaches.
 
 > **The residual, named rather than left implicit.** Neither mechanism reaches a choice informed
 > by a December **figure a human carries in their head** — a narrowed grid decided after glancing
@@ -342,13 +354,34 @@ orchestrators.
 | `bundle.purpose` | equals `evaluate` |
 | `bundle.transform_id` | present — `None` is already `fit_predict`'s `LeakageError` |
 
-**Negative controls:** a frame stamped **`(fold 4, train)`** reaching **fold 4's validation
-scoring** **fails**; an **unstamped** frame reaching **any** scoring path **fails**.
+**Negative controls**, stated in full to match `business-rules.md` R-90 and
+`business-logic-model.md` W-1: a frame stamped **`(fold 4, train)`** reaching **fold 4's
+validation scoring** **fails**; a frame stamped **`(fold 2, evaluate)`** reaching **fold 3's**
+scoring **fails**; an **unstamped** frame reaching **any** scoring path **fails**.
 
-> **A cross-unit contract surface, named rather than left implicit.** `features-and-splits`'
-> manifest-based `tests/test_train_only_transforms.py` asserts against **this function**, calling
-> it directly rather than replaying a script. Two units depend on it and **neither owns it
-> alone**.
+**Control that must *not* fire:** a frame stamped **`(fold 4, evaluate)`** reaching **fold 4's**
+validation scoring → **passes**. That is the ordinary path, and a check blocking it would be the
+failure mode `features-and-splits` already hit once — a control that must not fire is as
+load-bearing as one that must.
+
+> ⚠ **Corrected 2026-08-24 (post-redo finding 1).** This list previously carried **two** of the
+> three negative controls and **omitted the paired must-not-fire control entirely**, while R-90 and
+> W-1 both carried all four. § 10 is where an implementer reads raise conditions, so the shortest
+> list was in the most-read place. Same cross-representation sweep gap as the two findings before
+> it, in a location neither earlier pass checked.
+
+> **A cross-unit contract surface — semantic, not a call edge.** *(Corrected 2026-08-24,
+> iteration-1 finding 2.)* The first draft said `features-and-splits`' `test_train_only_transforms.py`
+> asserts against this function *"calling it directly rather than replaying a script"*. Its own R-74
+> declares that test **manifest-based** — it *"reads the emitted stamps and asserts that refusal"* —
+> and explicitly **not** monkeypatch-and-replay. What the sibling asserts is the **refusal's effect
+> on emitted artifacts**. Both units still depend on the same match semantics, and neither owns
+> them alone; the dependency is semantic rather than a call.
+>
+> **This covers `06` only.** FU-4 = D names **`06` and `07`**, and `unit-of-work.md` assigns `07`
+> to **`evaluation-and-comparison`** — a different unit whose design has not run. `07`'s half of
+> the refusal is **unowned and open**, carried to the gate rather than presumed discharged
+> *(iteration-1 finding 3)*.
 
 ## 12. `IntegrityError` subclasses raised here
 
@@ -392,6 +425,8 @@ TA-20.
 - **Open — a new cross-unit contract surface**: § 11's match function, asserted against by `features-and-splits`' `test_train_only_transforms.py`. Two units depend on it; neither owns it alone.
 - **Open — 7 of 9 requirements have no acceptance row**, four naming their own candidate TA row via Vision §15.2. **None is added here.**
 - **Open — whether TA-11 reaches a model fit is unverified upstream** (§ 6). No reading adopted.
-- **Open — D-122's supervisor signature** is still owed at **G-05**; Vision §14.2 marks it *"Approved — supervisor sign-off pending"*.
+- **Closed, corrected 2026-08-24 — D-122's supervisor sign-off is NOT outstanding.** The first draft carried *"Approved — supervisor sign-off pending"*, which is the status of **D-126** and **D-128**, not D-122. The Vision decision register (line 1207) reads **"Approved; supervisor sign-off closed 2026-08-22"** by the project owner under the recorded student/supervisor authority equivalence (`CR-2026-08-22-TE-AMEND`; `GOV-2026-08-22-REM-01` Rec 4), noting that **no supervisor signature artifact exists and none is claimed** and that the seed values were verified unchanged before closure. `unit-of-work.md` § 8 already recorded the closure. **Found while verifying iteration-1 finding 1 against the source register; the reviewer did not raise it.**
 - **G-09 is not signed**, and **BLK-03 independently bars implementation.** No entity here authorises creating any module.
+- **Open — `07`'s half of the eighth amendment is UNOWNED.** FU-4 = D names **`06` and `07`**; `unit-of-work.md` assigns `07_evaluate_and_report.py` to **`evaluation-and-comparison`**, whose functional design has not run. This unit discharges `06` only. Raised at the gate so it is not discovered later *(iteration-1 finding 3)*.
+- **Open — `requirements.md` FR-P1-05-2 carries TWO superseded clauses on one line, both reported and neither edited.** (a) It attributes bootstrap seed **20221201** to D-122, a reading `unit-of-work.md` § 8 records as corrected 2026-08-22 (`GOV-2026-08-22-UG-02` Rec 11) — the seed is frozen separately by **TE §13.6 / TC-19** (Q-27). (b) It states *"Vision §14.2 marks it 'Approved — supervisor sign-off pending'… still owes a signature at G-05"*, superseded by the same Vision-register closure at line 1207 that these artifacts cite correctly elsewhere — **"Approved; supervisor sign-off closed 2026-08-22"**. This unit follows the **corrected** reading of both. `requirements.md` is an approved upstream artifact and `CHANGE_RECORD_PROCEDURE.md` bars editing one absent owner approval for annotate-in-place, so both are **raised at the gate**. *(Clause (a) was iteration-1 finding 5; clause (b) is iteration-2 finding 2 — flagging one clause of a line and missing its neighbour is the same one-representation-short failure as iteration-2 finding 1, and clause (b) is where this author's own D-122 error originated.)*
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.

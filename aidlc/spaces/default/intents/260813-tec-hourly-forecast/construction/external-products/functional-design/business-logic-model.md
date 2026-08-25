@@ -597,3 +597,16 @@ None survived verification. No Critical, Major, or Minor findings.
 ### Summary
 
 The sole blocking Critical from iteration 1 — an incomplete sweep leaving "six owed amendments" live in four locations of `functional-design-questions.md` against the corrected "five" in the three design artifacts — is now fully resolved. A fresh, list-independent grep across all four in-scope files confirms every live, unlabelled assertion of the amendment count reads "five across three units" with `inventory-and-registry` at 1, and every surviving instance of "six" or "four across four/three" is explicitly labelled superseded, quoted as history inside a Re-confirmation narrative, or preserved as evidence in the review section this entry replaces. The corrected total of five is independently re-derivable from the two permitted carve-out files (`acquisition` 3 + `inventory-and-registry` 1) plus this unit's own boundary block (1), and the sweep introduced no mangled text, orphaned heading, or new internal contradiction. The Consolidated Summary's Q1 row is now honest about the correction's timing relative to the recorded human approval. No new findings survived verification, and every item the previous iteration verified in full remains unchanged. The artifact set is READY.
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.

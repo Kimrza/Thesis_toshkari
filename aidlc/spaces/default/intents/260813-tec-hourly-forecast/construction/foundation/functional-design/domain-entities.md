@@ -37,7 +37,7 @@ four governed configs and is frozen by D-number.
 - `../../../inception/application-design/component-methods.md` — the approved `ConfigSnapshot` and `DeterminismRecord` contracts.
 - `../../../inception/application-design/components.md` and `component-dependency.md` — the layering rule and § Shared resources' carve-out on `evidence/locked_test_restricted/`.
 - `../../../inception/application-design/services.md` — § Stage entry contract, § Run record and registry.
-- `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, and the three amendments — A **declined**, B and C **approved**, all resolved 2026-08-24.
+- `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, and the three amendments — A **declined** and B **approved** (2026-08-24), C **declined as drafted** (2026-08-25, reversing its 2026-08-24 approval). Q6 re-answered as **D′** and FU-2 rendered moot, 2026-08-25.
 
 ---
 
@@ -51,8 +51,7 @@ graph TD
   CM["CredentialNameMap<br/>(static, stage/provider)"]
   RR["RunRecord<br/>(per run)"]
   RE["RegistryEvent<br/>(append-only rows)"]
-  REL["ReleaseManifest<br/>(immutable)"]
-  RL["ReleaseLedgerEntry<br/>(append-only rows)"]
+  REL["ReleaseManifest<br/>(immutable, content-addressed)"]
   IE["IntegrityError<br/>(raised)"]
 
   RM -->|"consulted by assert_no_tbd"| CS
@@ -60,21 +59,30 @@ graph TD
   CS -->|"config hashes"| RR
   DR -->|"determinism fields"| RR
   RR -->|"opens with"| RE
-  REL -->|"label allocation"| RL
   CS -.->|"declares, never consumes"| CM
   CS -.->|"on violation"| IE
   DR -.->|"on violation"| IE
   REL -.->|"on violation"| IE
-  RL -.->|"on violation"| IE
 ```
 
 Text fallback: `RequiredFieldsMap` is consulted when validating `ConfigSnapshot`.
 `ConfigSnapshot` supplies seeds and versions to `DeterminismRecord`, and config
 hashes to `RunRecord`. `DeterminismRecord` also feeds `RunRecord`. `RunRecord`
-opens by writing a `RegistryEvent`. `ReleaseManifest` allocation writes a
-`ReleaseLedgerEntry`. `ConfigSnapshot` **declares** `CredentialNameMap` and never
-consumes it. Any of `ConfigSnapshot`, `DeterminismRecord`, `ReleaseManifest` and
-`ReleaseLedgerEntry` may raise an `IntegrityError` on violation.
+opens by writing a `RegistryEvent`. `ReleaseManifest` carries its own
+`dataset_version`, derived from its `content_hash`, and writes no separate ledger row.
+`ConfigSnapshot` **declares** `CredentialNameMap` and never consumes it. Any of
+`ConfigSnapshot`, `DeterminismRecord` and `ReleaseManifest` may raise an
+`IntegrityError` on violation.
+
+> *(Diagram and fallback amended 2026-08-25: the `ReleaseLedgerEntry` node and its two edges
+> — `ReleaseManifest -->|"label allocation"|` and its `IntegrityError` edge — are removed, and
+> the entity count moves **nine → eight**. **Amendment C was declined as drafted** by the
+> project decision owner on 2026-08-25, reversing its 2026-08-24 approval; no release ledger is
+> to be created. **Superseded fallback sentences, preserved:** *"`ReleaseManifest` allocation
+> writes a `ReleaseLedgerEntry`."* and *"Any of `ConfigSnapshot`, `DeterminismRecord`,
+> `ReleaseManifest` and `ReleaseLedgerEntry` may raise an `IntegrityError` on violation."* See
+> § 8 for the full withdrawal record, the Q6 re-answer (D′, 2026-08-25) that dropped the monotonicity requirement rather than leaving it unmet, and the
+> two upstream artifacts that contradicted this design and have since been corrected, 2026-08-25, on the owner's explicit authorisation.)*
 
 ---
 
@@ -337,7 +345,69 @@ content**. Repeated writes are **not** silently treated as successful — that
 behaviour would require explicit authorisation through change control, and none
 has been sought.
 
-## 8. `ReleaseLedgerEntry` — new, append-only, `foundation`-owned
+## 8. ~~`ReleaseLedgerEntry`~~ — **WITHDRAWN 2026-08-25. Amendment C declined as drafted.**
+
+> ## ⛔ THIS ENTITY IS WITHDRAWN — IT IS NOT PART OF THE DESIGN
+>
+> **Amendment C was DECLINED AS DRAFTED by the project decision owner on 2026-08-25**,
+> reversing its 2026-08-24 approval. The ruling: **no release ledger is to be created**,
+> `ReleaseLedgerEntry` is not to be created, `artifacts/registry/release_history.jsonl` is not
+> to be created, and **`dataset_version` is to be derived from `content_hash`** — with **no
+> exact hash-to-label encoding invented here**, since no approved artifact specifies one.
+>
+> **The ruling was given on the full evidence and reaffirmed.** Before it was executed, the
+> conflict was put to the owner in these terms: this entity **predates** Amendment C (C
+> propagated it upstream rather than creating it); its authority is the owner's own answers
+> **Q6 = D** and **FU-2 = D** in this stage's Q&A; deriving the label from `content_hash` is
+> **Q6 option C**, which the owner had read and declined in favour of D on the reasoning that
+> option C cannot yield a *monotonic* label because monotonicity requires durable state; and
+> executing the reversal necessarily changes the entity count and edits a workflow. The owner
+> chose the full reversal with those consequences stated. It is therefore a deliberate
+> override of Q6=D and FU-2=D, not an oversight, and is recorded as such.
+>
+> **Consequence carried forward — one item, after analysis, not two.** Of the two obligations
+> `Q6=D` placed on the label, **never-reused survives** and **monotonicity does not**:
+>
+> - **Never-reused — satisfied by determinism rather than by durable state.** The derivation is
+>   a pure function of `content_hash`, so it allocates nothing and consults nothing. The failure
+>   the ledger existed to prevent — delete a release directory, a rebuilt index forgets the
+>   label, the next allocation reuses it — requires *allocation from state* and cannot arise
+>   here; reproducing the same label from the same content is the correct outcome. A label bound
+>   to two genuinely different contents reduces to a **SHA-256 collision**, unreachable by any
+>   bookkeeping error.
+> - **Monotonicity — no longer required.** Ordering is information about *sequence*, which a
+>   function of content alone does not carry, so no test or implementation choice reaches it.
+>   Because that is a property of the mechanism rather than of its implementation, the
+>   requirement was changed instead of being left unmet: **Q6 was re-presented and re-answered
+>   as D′ on 2026-08-25**, dropping "monotonic". The owner decided that explicitly; the original
+>   Q6=D answer is preserved verbatim beside it, and **FU-2 is moot** because it existed only to
+>   locate the ledger Q6=D required. **What is disclosed is a capability, not a gap:** release
+>   labels can no longer be ordered, so a reviewer comparing two of them at a gate reads
+>   sequence from the run record or the experiment registry, which carry timestamps and
+>   `run_id`. Nothing else in this design depended on label ordering.
+>
+> **FU-2's integrity obligation is discharged in the form the re-answer leaves available.**
+> **R-12 is amended rather than deleted** and carries three negative controls — derivation
+> correspondence, derivation determinism, and injectivity against a degenerate encoding. The
+> ledger's own duplicate-row checks become vacuous once no rows exist and the label is a
+> function of the hash, so their absence is not an uncovered obligation.
+>
+> **Two upstream artifacts contradicted this design, and both have since been corrected.** They
+> were first **reported** rather than edited, because this stage's scope control forbade editing
+> an approved Inception artifact; the owner then authorised the edits explicitly on 2026-08-25,
+> and they were made the same day with every superseded wording preserved:
+> `inception/units-generation/unit-of-work.md` § 1 `foundation` → `Owns` no longer names
+> `artifacts/registry/release_history.jsonl`, and
+> `inception/application-design/services.md` § Run record and registry now reads *"Two
+> artifacts, one authoritative"* with the ledger row removed. **No other unit referenced the
+> ledger**, verified by search across `construction/`, so nothing further was orphaned and the
+> correction is contained to those two sites.
+>
+> **The entity count moves nine → eight.** Every count the owner fixed is untouched: 16
+> requirements, 2 untested, 7 acceptance rows, §19 at 36 rows, 17 rules, ten workflows
+> W-1…W-10 (W-7 loses a step; the workflow remains).
+
+**Superseded definition, preserved verbatim below.** Nothing in it is part of the design.
 
 **FU-2 = D.** One line per label allocation at
 `artifacts/registry/release_history.jsonl`, kept **separate from
@@ -366,7 +436,12 @@ that quietly stops applying to the rows it was written for.
 reused label, a label bound to two different content hashes, a content hash bound
 to two labels, and a malformed row.
 
-> **✅ Amendment status — APPROVED 2026-08-24**
+> **⛔ Amendment status — DECLINED AS DRAFTED 2026-08-25.** The box below records the
+> 2026-08-24 approval that the 2026-08-25 ruling reversed; it is preserved as the dated record
+> of what was approved then, and is **not** the current state. See the withdrawal box at the
+> head of this section.
+>
+> **✅ Amendment status — APPROVED 2026-08-24** *(superseded 2026-08-25)*
 > (`CR-2026-08-24-FOUNDATION-AMENDMENTS`). *Superseded, preserved:* *"PENDING, NOT
 > approved. This entity is **not** in `unit-of-work.md` § 1 `foundation` → `Owns`…
 > It is **not** in `services.md` § Run record and registry, which opens "Two
@@ -458,7 +533,7 @@ awk -F'|' 'NR>=145 && NR<=223 {r=$2; gsub(/[` *]/,"",r); print r": primary="$4" 
 | REQ-ENG-3 | `ConfigSnapshot` (no machine path in configs) | **TA-03, TA-26** | TA-03 → `foundation`; TA-26 → **`models-and-baselines`** |
 | REQ-ENG-4 | the `tests/` tree | **TA-09** — *bounded, see story-map § Known defects row 8* | `fixtures-and-reproducibility` |
 | REQ-ENG-6 | `ConfigSnapshot.platform`, `resolved_roots` | **TA-22** | `foundation` |
-| **REQ-ENG-7** | `RegistryEvent`, `ReleaseLedgerEntry` | ⚠ **NO ACCEPTANCE ROW, AND NONE WILL BE ADDED** — Amendment A **declined 2026-08-24**; untested by design | — |
+| **REQ-ENG-7** | `RegistryEvent` *(superseded 2026-08-25: `RegistryEvent`, `ReleaseLedgerEntry` — the ledger entity is withdrawn, Amendment C declined as drafted; see § 8)* | ⚠ **NO ACCEPTANCE ROW, AND NONE WILL BE ADDED** — Amendment A **declined 2026-08-24**; untested by design | — |
 | REQ-ENG-8 | `ConfigSnapshot` | **TA-16** | `regimes-diagnostics-reporting` |
 | **REQ-ENG-10** | `RunRecord` | ⚠ **NO ACCEPTANCE ROW, AND NONE WILL BE ADDED** — TA-03 verified not to cover it; Amendment A **declined 2026-08-24**; untested by design | — |
 | REQ-ENG-11 | `RunRecord.runtime_versions` | **TA-17, TA-26** | TA-17 → `fixtures-and-reproducibility`; TA-26 → **`models-and-baselines`** |
@@ -585,7 +660,7 @@ matching the story map's designation.
 - **[assumption]** `frontend-components.md` is not produced. `foundation` is `kind: library`; the stage's `produces_kinds` maps that artifact to `[ui]` only, and the engine's resolved list for this unit carries three artifacts.
 - **Closed — Amendment A** (Vision §15.2): §19 acceptance rows for REQ-ENG-7 and REQ-ENG-10. **Raised and DECLINED 2026-08-24.** No rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. **No acceptance coverage is claimed for either, permanently rather than pending.** *(Superseded status: "**Open** … **Not approved.**")*
 - **Closed — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **APPROVED 2026-08-24.** The approved contract now stands at **nine** fields. *(Superseded status: "**Not approved.** The approved contract stands at six fields.")*
-- **Closed — Amendment C** (approved 2.6 and 2.7 artifacts): the release ledger in `services.md` and `unit-of-work.md` § 1 `Owns`. **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D. *(Superseded status: "**Not approved.**")*
+- **Closed — Amendment C, and its consequences with it.** **DECLINED AS DRAFTED 2026-08-25**, reversing the 2026-08-24 approval: no release ledger, `ReleaseLedgerEntry` withdrawn (§ 8), `dataset_version` derived from `content_hash` with no encoding specified here. *(Superseded statuses, all preserved: "**Open — Amendment C, and now carrying an unresolved consequence** … Two things stay open and are carried to the stage gate rather than resolved here"; "**Closed — Amendment C** … **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D"; and "**Not approved.**")* Three consequences first read as open; all three are now closed. (a) **Monotonicity** could not be met by any mechanism available here, so the requirement was changed rather than left unmet — **Q6 was re-presented and re-answered as D′ on 2026-08-25**, dropping *"monotonic"*, and **FU-2 is moot** because it existed only to locate the ledger. What is disclosed is a capability rather than a gap: release labels cannot be ordered, so sequence is read from the run record or the experiment registry. (b) **Never-reuse** survives by determinism — a pure derivation allocates nothing, so the delete-and-rebuild failure cannot arise. (c) **`unit-of-work.md` § 1 `Owns` and `services.md`** were **corrected on 2026-08-25** on the owner's explicit authorisation, after this stage first reported rather than edited them; superseded wordings preserved at both sites, and no other unit referenced the ledger.
 - **Open** — the concrete `RequiredFieldsMap` contents cannot be enumerated until the four configs exist with their field names. This stage fixes the **mechanism**; the populated map is a Bolt 1 work product.
 - **G-09 is not signed.** Nothing here authorises creating `src/data/config.py`, `src/data/release.py` or `tests/test_determinism.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -630,10 +705,118 @@ an independent challenge of each amendment against the approved artifacts.
 
 - **Amendment A — DECLINED.** No project rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. **REQ-ENG-7 and REQ-ENG-10 are untested by design, permanently rather than pending.** No count moved: untested stays 36, this unit's stays 2 of 16, its acceptance rows stay 7, TE §19 stays at 36 rows.
 - **Amendment B — APPROVED.** `DeterminismRecord` is a **nine-field approved contract**, not a six-field contract plus three proposals.
-- **Amendment C — APPROVED**, on the authority of **Q6=D** and **FU-2=D**. `ReleaseLedgerEntry` is an approved entity, now named in `unit-of-work.md` § 1 `foundation` → `Owns` and in `services.md` § Run record and registry. **R-11 is unchanged** — the content hash remains authoritative and the label is a citation device.
+- **Amendment C — DECLINED AS DRAFTED 2026-08-25**, reversing the 2026-08-24 approval. No release ledger is created, `ReleaseLedgerEntry` is withdrawn (§ 8), `artifacts/registry/release_history.jsonl` is not created, and `dataset_version` is derived from `content_hash` with **no encoding invented here**. **R-11 is unchanged** — the content hash remains authoritative. **R-12 is amended, not deleted**, and states the resulting monotonicity gap. *(Superseded status, preserved: "**Amendment C — APPROVED**, on the authority of **Q6=D** and **FU-2=D**. `ReleaseLedgerEntry` is an approved entity, now named in `unit-of-work.md` § 1 `foundation` → `Owns` and in `services.md` § Run record and registry … the label is a citation device." The reversal is a deliberate owner override of Q6=D and FU-2=D, given after the conflict was put to them in full; it is not an oversight.)*
 
-**The nine-entity count is unchanged.** `ReleaseLedgerEntry` already existed in this
-document; what changed on 2026-08-24 is that the upstream artifacts now carry it too.
+**The entity count moves nine → eight, 2026-08-25.** *(Superseded: "**The nine-entity count is
+unchanged.** `ReleaseLedgerEntry` already existed in this document; what changed on 2026-08-24
+is that the upstream artifacts now carry it too." That was true then and is superseded by the
+Amendment C reversal.)* Numbering is **not** renumbered, because every cross-reference in this
+unit cites entities by section number: § 8 remains in place as a withdrawal record, so this
+document carries **nine numbered sections and eight live entities**. Any derived count must
+therefore read `grep -cE "^## [0-9]+\. " domain-entities.md` → 9 **minus the one withdrawn
+section** → **8**. The two upstream artifacts that named the ledger have both been
+**corrected** on 2026-08-25, on the owner's explicit authorisation after this stage had first
+reported them rather than edited them: `unit-of-work.md` § 1 `Owns` no longer lists it, and
+`services.md` now reads *"Two artifacts, one authoritative"*. Superseded wordings are preserved
+at both sites, and a search across `construction/` confirmed **no other unit referenced the
+ledger**, so nothing further was orphaned.
 
 **G-09 remains unsigned.** Nothing in this document authorises creating a module, and
 no scientific value is decided here.
+
+---
+
+> **Re-saved 2026-08-24 under the post-redo receipt floor.** The project decision owner
+> authorised a redo jump on `functional-design` at 2026-08-24T14:57:07Z so that three
+> standing reviewer findings on `models-and-baselines` could be fixed and re-reviewed;
+> a redo resets the receipt floor for **every** unit of the stage. **No content of this unit
+> changed** — not a question, answer, amendment, rule, entity, workflow, count or scientific
+> value. The only artifacts edited after the redo were `models-and-baselines`'s, whose
+> three fixes are confined to its own files. That unit returned **READY** on the second pass of
+> the restored budget, which is what the redo was authorised for. The two residuals riding that
+> verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
+> gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 under the sixth post-redo receipt floor.** The stage wedged on
+> `models-and-baselines`: its artifacts were written and the adversarial reviewer returned
+> READY on iteration 2 of 2 (2026-08-24T15:16:47Z) *before* its summary confirmation was
+> recorded (15:32:45Z). The engine requires a produces-artifact write after the confirmation
+> receipt, the write-freeze hook refused the re-save because a fresh READY receipt covered the
+> unit, and the 2-iteration adversarial budget was spent — a deadlock whose only sanctioned
+> exit is a redo jump. The project decision owner authorised one at **2026-08-25T06:30:05Z**,
+> which reset the receipt floor for every unit of the stage.
+>
+> **No entity, field or acceptance-status box in this document changed.** The owner directed
+> **evidence-driven revision** for this recovery — keep the adversarially-verified text as the
+> baseline and edit only where a real defect is found — rather than a blanket re-derive, on the
+> finding that all eight built units already carry a READY `## Review` section and that a
+> blanket rewrite would discard verified corrections.
+>
+> **Upstream provenance, enumerated per file** *(corrected 2026-08-25 on reviewer finding m-5;
+> **superseded wording, preserved:** "Every consumed upstream file was last modified at 12:26
+> UTC, three hours before this unit's 15:27 UTC artifacts and committed unchanged at `9c7afd9`"
+> — true of three of the six, generalised across all six)*:
+>
+> | Consumed artifact | Last modified | Commit |
+> |---|---|---|
+> | `unit-of-work.md` | 2026-08-24 12:26 UTC | `9c7afd9` |
+> | `component-methods.md` | 2026-08-24 12:26 UTC | `9c7afd9` |
+> | `services.md` | 2026-08-24 12:26 UTC | `9c7afd9` |
+> | `unit-of-work-story-map.md` | 2026-08-23 20:40 UTC | `45796f5` |
+> | `components.md` | 2026-08-23 19:05 UTC | `45796f5` |
+> | `requirements.md` | 2026-08-22 12:37 UTC | `89674b6` |
+>
+> **The no-drift conclusion is unchanged**: all six predate this unit's 15:27 UTC artifacts.
+>
+> The unit's figures were re-derived programmatically from the current `unit-of-work.md` § 1 —
+> **16** requirements, **2** untested (REQ-ENG-7, REQ-ENG-10), **7** acceptance rows — each
+> agreeing with what this document asserts, including § 5's REQ-ENG-10 box (site 10, *"untested
+> by design, permanently"*, which stands as applied since Amendment A was declined rather than
+> deferred).
+>
+> **Eight live entities**, down from nine, and their field contracts otherwise unchanged;
+> `DeterminismRecord` still at the nine fields Amendment B approved. *(Superseded: "The nine
+> entities and their field contracts are unchanged". **Amendment C was declined as drafted on
+> 2026-08-25**, reversing its 2026-08-24 approval, so `ReleaseLedgerEntry` is withdrawn — § 8
+> stays in place as the withdrawal record, giving nine numbered sections and eight live
+> entities. The monotonicity requirement was dropped by re-answering Q6 as D′ on 2026-08-25 rather than left unmet, and the two contradicting upstream artifacts
+> were corrected the same day on the owner's explicit authorisation, so neither is carried
+> forward as an open item.)* The unit's rule count is **17
+> (R-01–R-17)**, corrected 2026-08-25 on reviewer finding M-1 from a *"thirteen rules"* figure
+> that the sibling `business-rules.md` had carried from prose — a reporting correction, not a
+> change to the rule set, and no requirement, acceptance or §19 total moved with it.
+
+---
+
+> **Re-saved 2026-08-25 after the remediation of the iteration-1 findings**, under the receipt
+> recorded for this unit at the sixth post-redo floor.
+>
+> **What changed in this file:**
+>
+> - **§ 8 `ReleaseLedgerEntry` is withdrawn** — Amendment C declined as drafted, reversing its
+>   2026-08-24 approval. Its definition is preserved verbatim beneath a withdrawal box.
+>   **The section is deliberately not renumbered**, because every cross-reference in this unit
+>   cites entities by section number: § 8 stays in place as the withdrawal record, so this
+>   document carries **nine numbered sections and eight live entities**. A derived count must
+>   read 9 numbered sections **minus the one withdrawn** → **8**.
+> - **The entity map and its text fallback** lose the ledger node and its two edges;
+>   `ReleaseManifest` now carries its own `dataset_version`, derived from its `content_hash`.
+>   Both superseded fallback sentences are preserved.
+> - **§ 5's REQ-ENG-7 row** reads `RegistryEvent` alone, superseded value preserved.
+> - **§ Assumptions** records Amendment C as **closed**, with all three of its apparent
+>   consequences closed too: monotonicity by the **Q6 = D′** re-answer (which dropped the
+>   requirement rather than leaving it unmet — the original Q6 = D is preserved verbatim in the
+>   Q&A file, and FU-2 is moot), never-reuse by determinism, and the upstream contradiction by
+>   corrections to `unit-of-work.md` § 1 `Owns` and `services.md` made on the owner's explicit
+>   authorisation.
+>
+> **No entity contract other than § 8's changed.** `DeterminismRecord` still carries the **nine**
+> fields Amendment B approved. `ConfigSnapshot`, `RequiredFieldsMap`, `CredentialNameMap`,
+> `RunRecord`, `RegistryEvent`, `ReleaseManifest` and `IntegrityError` are untouched.
+>
+> **Counts, derived after the edits:** 16 requirements · 2 untested (REQ-ENG-7, REQ-ENG-10) · 7
+> acceptance rows · §19 at 36 rows, no TA-37/TA-38 added · 17 rules · 10 workflows · **8 live
+> entities**, the only figure the reversal moved. **G-09 remains unsigned**, and nothing here
+> decides a scientific value.
