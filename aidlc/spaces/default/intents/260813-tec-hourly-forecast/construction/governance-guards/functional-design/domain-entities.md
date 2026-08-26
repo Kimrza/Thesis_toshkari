@@ -346,6 +346,29 @@ close a cycle. The residual run-time-path-assembly gap is left open deliberately
 Deriving from `foundation`'s base (unit 1, R-01), each carrying the affected resource
 and the violated expectation:
 
+> **Base class, stated 2026-08-25 to discharge this unit's half of the cross-unit exception
+> obligation** (created by `foundation`'s R-01, on the authority of `component-methods.md`
+> § Assumptions, after these artifacts were written). **All FIVE exceptions in the table below
+> derive from `IntegrityError`, imported from `src/data/config.py`** — a legal import, since this
+> unit depends on `foundation`. `PhaseBoundaryError` and `LockedTestError` are two of the fourteen
+> that contract places in the shared base; `ReuseError`, `ManifestError` **and `EvidenceScanError`**
+> are this unit's own (Q1 permits per-unit naming) and derive from the same base under R-01's
+> *"any future integrity-related exception"* clause.
+>
+> *(Corrected 2026-08-25 on adversarial finding 1 of the post-reset pass, which was Major: the box
+> as first written said "all four" over a table of **five** rows — `EvidenceScanError`, R-27's
+> fail-closed December-scan limb, was left outside the enumeration, so a builder following it
+> literally would let a scan failure exit with no `aborted` registry row, the exact failure the
+> box's own rationale names. The same finding placed this box where it split the table's header
+> from its rows, breaking GFM rendering at the one moment the table is read for approval — it now
+> stands above the table. The count-in-prose lesson from `foundation` applies verbatim: the box now
+> says "the table below" rather than repeating a numeral anywhere else.)*
+>
+> **Why it matters here more than anywhere:** the stage-entry contract writes the `aborted`
+> registry row by catching `IntegrityError` — outside the hierarchy, a violation exits with no
+> `aborted` row, the one event NFR-PHASE-01 and NFR-AUD-01 most require recorded, and this unit
+> owns the guards.
+
 | Exception | Raised when |
 |---|---|
 | `PhaseBoundaryError` | A `RAW_MODULES` name is loaded under `phase == 1`; or a Phase 1 frame carries a DCB, STEC, mapping, satellite or arc field |
@@ -399,6 +422,7 @@ derived rather than reasoned.
 
 ## Assumptions & Open Questions
 
+- **OPEN — an amendment need on `build_transition_manifest`** *(added 2026-08-25 on adversarial finding 2 of the post-reset pass)*: the approved signature carries no mode parameter, three artifact statements correctly say the mode is not a build-time argument, yet the builder must be told which mode to build. The reconciliation (W-5) records an amendment need — a keyword `mode: Literal["draft","freeze"]` — for the owner, following `foundation`'s `write_release` precedent. Until ruled on, 3.5 must stop and report rather than invent the channel (TE §18.3).
 - **[assumption]** Rule IDs continue `foundation`'s sequence, so `business-rules.md` opens at **R-18**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** `tests/test_locked_test_guard.py` is **not** this unit's. ADR-03 splits the guard deliberately — the access-log limb here, the execution limb in `features-and-splits`'s `splits.py` — and the test covering both limbs is owned by `features-and-splits` to keep this unit a DAG root. Table 2 confirms `features-and-splits` owns WS-18 and TA-18 with this unit supporting.
 - **[assumption]** `RAW_MODULES` names four `gnss` modules, not two.
@@ -429,3 +453,38 @@ derived rather than reasoned.
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 under the post-ten-redo receipt.** One addition: the exception table now
+> carries the **base-class box** — **all five** exceptions this unit raises *(corrected from "all four" on adversarial finding 1, which caught `EvidenceScanError` omitted)* derive from
+> **`IntegrityError`, imported from `src/data/config.py`**; `PhaseBoundaryError` and
+> `LockedTestError` as two of the fourteen the shared-base contract names, `ReuseError` and
+> `ManifestError` as unit-local exceptions under R-01's *"any future integrity-related exception"*
+> clause. No entity changed; figures re-derived and unchanged. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-25 after the post-reset iteration-1 remediation.** The base-class box now
+> covers **all five** exceptions (finding 1 caught `EvidenceScanError` omitted and the box splitting
+> the exception table's header from its rows — it now stands above a contiguous table), and
+> § Assumptions carries the **`build_transition_manifest` mode-channel amendment need** (finding 2).
+> No entity changed; figures re-derived and unchanged. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-25 under the second receipt** (eleventh redo, taken for
+> `acquisition`; floor reset mechanical). **No content of this unit changed** since the terminal
+> READY. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the third receipt** (twelfth redo, taken for
+> `inventory-and-registry`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
+> for `external-products`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**

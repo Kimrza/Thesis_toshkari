@@ -50,6 +50,7 @@ per-unit numbering was intended, say so at the gate and the artifacts restart at
 - `../../../inception/requirements-analysis/requirements.md` — FR-P1-02-1…-5, -7, -8; § Known defects rows 3 and 9.
 - `../../../inception/units-generation/unit-of-work.md` § 4 — the `Owns` list, the boundary, the implementation notes.
 - `../../../inception/units-generation/unit-of-work-story-map.md` — Tables 1 and 2 plus § Per-unit coverage summary; both derivation paths agree.
+- `../../../inception/application-design/components.md` — the component map assigning `inventory.py` its two obligations *(added 2026-08-26, finding M4)*.
 - `../../../inception/application-design/component-methods.md` — `src/data/registry.py`'s raise-contract; `src/data/release.py`'s `write_release`.
 - `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract.
 - `../acquisition/functional-design/business-rules.md` — **R-32**, **R-33**.
@@ -114,7 +115,20 @@ not match its release hash → fails.
 >
 > **Consequence for the count:** this unit owes **one** amendment, not two — R-46's
 > `Station.provenance` field, which modifies an existing boundary dataclass.
-
+>
+> **Two obligations of `inventory.py`, mirrored here from W-1 on terminal finding N2 (2026-08-26)**
+> — `components.md` maps them to the module this unit owns:
+>
+> 1. **FR-P1-01-6's verbatim Kyoto/CEDAR acknowledgment notice**, carried per source whose
+>    provider requires it, due before the G-P1A gate this unit hosts. **Negative control:** an
+>    inventory entry for a notice-requiring provider whose notice text is absent or paraphrased
+>    → fails.
+> 2. **Surfacing `acquisition`'s recorded `suffix_mismatch` field** to `write_release`'s validation
+>    read. **⚠ PROPOSED, not settled** *(retraction on terminal finding N3: the earlier W-1 text
+>    claimed these obligations were "assigned to no other unit", which `acquisition`'s artifacts
+>    refute — its R-34 specifies FR-P1-01-2 fully and holds the release-manifest carriage of the
+>    field **Open for stage 3.2**. This clause proposes the inventory as the surfacing path and
+>    defers to 3.2's resolution rather than silently answering it)*.
 
 **Acceptance.** TA-04 (**owned by this unit**), TA-15 (owned by `foundation`).
 
@@ -179,7 +193,13 @@ does not → proceeds. Omit the provenance value entirely → raises.
 
 **Acceptance.** Contributes to WS-01 and TA-04.
 
-## R-47 — A resolved conflict equals some recorded source value, and carries a rationale
+## R-47 — A resolved value equals the single value of its NAMED source, and carries a rationale
+
+*(Terminology aligned 2026-08-26, terminal finding N5: the 2026-08-25 heading fix introduced
+"CHOSEN" beside the body's, § 3's and W-3's "NAMED" for the same field; NAMED is the term the
+entity contract uses.)*
+
+*(Heading corrected 2026-08-25 on adversarial finding 5: it read "equals **some** recorded source value" — the existence-check semantics this rule's own body withdraws with the {0,3,6} counterexample. Superseded heading preserved here.)*
 
 **Rule (FR-P1-02-1, Vision §6.2, Q3 = D).** *"A conflict must be resolved and recorded,
 never averaged or ignored."* Four limbs:
@@ -294,6 +314,27 @@ schema → the report's digest differs.
 **Acceptance.** TA-04 (**owned by this unit**).
 
 ## R-50 — The December audit logs per artifact, and reconciles against a declared scope
+
+**Rule (`project.md` § Forbidden, stated here as this workflow's own hard rule — mirrored from W-6 on
+terminal finding N1, 2026-08-26, which found it in the workflow narrative and not in the rule that
+carries this audit's negative controls).** **Membership derives from record timestamps, never from
+a directory name or filename**: every coverage count and every regime count attributes a record by
+its observation timestamp, and out-of-month and out-of-year records are excluded from every
+per-month statistic. The realized defect behind the rule is this project's own: a year-blind
+predicate filed locked-month records under `audit_evidence_2022-01/`.
+
+**Negative control (added with the rule; re-posed 2026-08-26 on finding M1 of this budget's
+iteration 1, which was Major and introduced by the first posing).** In a **synthetic fixture tree
+OUTSIDE `evidence/`** — never the live workspace — place a record whose observation timestamp
+falls in month *M+1* inside a directory named for month *M*, and run the audit against that tree:
+the record must be attributed to *M+1* and month *M*'s count must not move. A directory-keyed
+implementation fails both limbs. *(Superseded posing, preserved: "Place a record whose observation
+timestamp is 2022-12-15 inside a directory named `audit_evidence_2022-01/` and run the audit…" —
+read literally, that instructed planting a December record in a **live** directory outside the
+restricted root, which is `governance-guards` R-26 case 1, the exact act R-27's own negative
+control exists to catch, the realized TEC-09 defect, a run barred by this rule's own BLK-07
+clause, and a fixture violation under `team.md` § Walking Skeleton. December is what the control
+**models**; the synthetic months are what it **executes**.)*
 
 **Rule (FR-P1-02-3, Q4 = C).** Three checks, in order:
 
@@ -511,7 +552,7 @@ indistinguishable, months later, from an approved one.
 
 - **[assumption]** Rule IDs continue the single sequence, so this unit opens at **R-44**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** `tests/test_station_registry.py` is this unit's per `unit-of-work.md` § 4. **It does not exist** — `tests/` holds three modules and that is not one of them.
-- **[assumption]** WS-01's Phase 1 retention is settled governance; this stage records rather than revisits it.
+- **[assumption]** WS-01's Phase 1 retention rests on an **interim reading** — the cited Rec 12 reads "APPLIED as an interim reading… not yet held", its item 3 is still Open with no closure record *(overstatement corrected 2026-08-25 on adversarial finding 4; superseded: "settled governance")*; this stage records rather than revisits it.
 - **[assumption]** D-13 owns the December regime-count threshold — three independent storm events under Vision §9.3, counted from **GFZ Kp/Hp60 at a recorded release grade**, with **D-11 barring any provisional-Dst-derived figure**. This unit measures against it.
 - **[assumption]** `merge_coverage_year.py` migrates here with `--config configs/` and its `NN_verb_noun.py` position; its `sha256_of_file` copy consolidates into `foundation`'s `src/data/release.py`. This stage designs the target shape, not the migration commit.
 - **Corrected 2026-08-23 — `src/data/inventory.py` is NOT an amendment owed.** § Depth specifies boundary calls only and names **`functional-design` (3.1)** as where intra-package shapes are specified; `inventory.py` and `release.py` are the same package. R-44's contract is this stage's ordinary work.
@@ -537,3 +578,27 @@ indistinguishable, months later, from an approved one.
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 under the post-eleven-redo receipt.** ~~No rule changed~~ *(corrected
+> 2026-08-26, terminal finding N4: R-47's heading was rewritten that same day, so this box was
+> false when written)*; figures re-derived
+> and unchanged (7 requirements, 2 untested, 3 acceptance rows). The exception base is named
+> explicitly in `domain-entities.md`'s preamble (**`IntegrityError`**, R-01's "any future" clause;
+> declaration site the standing OPEN item). **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-26 under the twelfth-redo receipt, after the terminal-pass remediation.**
+> In this file: **R-50 gained the record-timestamp membership rule and its negative control**
+> (N1's mirror — the rule was in W-6's narrative only); **R-44's box gained the two
+> `inventory.py` obligations** with the ⚠ PROPOSED flag on the `suffix_mismatch` surfacing
+> (N2/N3); the false *"No rule changed"* box corrected (N4); **R-47's heading aligned on
+> NAMED** (N5). Figures unchanged: 7 requirements, 2 untested, 3 acceptance rows.
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (the unit's
+> question file was repaired from mojibake; no design artifact changed). **G-09 remains unsigned.**

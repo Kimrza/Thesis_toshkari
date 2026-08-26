@@ -54,7 +54,7 @@ intended, say so at the gate and the artifacts restart at R-01.
 - `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract, § Execution platforms.
 - `../governance-guards/functional-design/business-rules.md` — **R-25**, **R-26**, **R-27**, **R-28**. This unit is the first consumer of all four.
 - `../foundation/functional-design/business-rules.md` — R-01's `IntegrityError` base and the two-tier posture.
-- `evidence/DECISIONS.md` — D-5, D-6, D-9, D-10.1/.2/.3, D-15, D-18, D-21, D-22, D-23, D-143, D-144.
+- `evidence/DECISIONS.md` — D-5, D-6, D-9, D-10.1/.2/.3, D-15, D-18, D-21, D-22, D-23, **D-25, D-26** *(added 2026-08-25, finding F2)*, D-3/D-144, and **D-143** *(a **Vision-register** number — the ICTP rejection; `evidence/DECISIONS.md` runs D-1…D-27 and cites it inside D-3. An iteration-2 note here briefly denied it existed; corrected on terminal finding N1)*.
 - `functional-design-questions.md` (**Q1 through Q9**), `domain-entities.md`, `business-logic-model.md`.
 
 ---
@@ -70,6 +70,24 @@ output manifest — never console text — with the artifact marked derived and/
 **This unit is the first with rules in both tiers**, and the split is load-bearing here:
 provider version drift and retrieval shortfalls are normal events that must not halt
 acquisition, while an unlogged December access or a leaked credential must.
+
+**Base class of the exceptions this unit raises** *(stated 2026-08-25, discharging the cross-unit
+obligation `foundation`'s R-01 records)*: **`AcquisitionError` and `CredentialEgressError` derive
+from `IntegrityError`, imported from `src/data/config.py`**, under R-01's *"any future
+integrity-related exception"* clause — so the stage-entry contract's `except IntegrityError`
+catches each and writes the `aborted` registry row. Without it, a credential-egress violation
+would exit unrecorded, in the unit that owns the redaction boundary. **Declaration site** *(finding
+F6)*: this unit owns no `src/` module — its deliverables are scripts `00`/`01` and data artifacts —
+the declaration site is **an OPEN item for the owner** *(re-scoped 2026-08-25 on terminal finding
+N4: the iteration-2 text placed both subclasses "in `src/data/config.py` beside the base" — but
+that module is `foundation`'s Bolt-1 deliverable, and its R-01 enumerates its contents as the base
+plus the six subclasses **that unit** raises, with other units *importing* the base. Directing 3.5
+to edit a sibling's deliverable with no change record answers the counting question and not the
+ownership one.)* **The two stated options:** (a) `foundation` accepts the two additional
+declarations into `config.py` via a recorded cross-unit agreement, or (b) the owner approves
+`src/data/exceptions.py` (the §12 amendment already OPEN at `foundation`), which dissolves the
+ownership question for every unit at once. Until ruled, 3.5 must stop and report (TE §18.3);
+what IS settled is the base class and the import direction.
 
 ---
 
@@ -224,7 +242,11 @@ required to read.
 
 **Constraint — five fields per retrieved file**: provider, permanent citation, **full
 provider filename including its version suffix**, retrieval date, SHA-256. **`source_files`
-carries all six of TE §13.3's items, not five** — the earlier five-item list fixed a
+carries all six of TE §13.3's items — provider; permanent citation or request; **location/date**
+*(the dropped item, restored in this file 2026-08-25 on terminal finding N3 — the iteration-2 fix
+reached `domain-entities.md` only, leaving this file's five-field constraint juxtaposed with an
+all-six claim, the exact DATA-09 mechanism)*; filename; retrieval date; SHA-256 — not five** — the
+earlier five-item list fixed a
 truncated count as the bar (`DATA-09`).
 
 **A per-file D-number was declined**, with a reason: right in principle, but a
@@ -484,9 +506,21 @@ so that is **not determinable from it**.
 | Duplicate UT records | The **mean** of the duplicated measurements, with duplicate logging and a QC flag; **provider-defined correction semantics take precedence when documented** | **D-22** |
 | High-spread days | The four days whose within-day spread exceeds 20% of the median — **2022-01-18, 2022-03-31, 2022-08-28, 2022-08-29** — are flagged and retained with the approved daily median as representative | **D-23** |
 
-**Constraint — availability, binding (D-21).** The approved daily F10.7 value must not
-become available to a forecast before all observations required to compute it were
-actually available. **No same-day look-ahead is introduced.**
+**Constraint — availability, binding (D-21 as SUPPLEMENTED BY D-25, with D-26's provenance flag).**
+*(Corrected 2026-08-25 on adversarial finding F2 of the post-reset pass: this rule cited D-21 alone,
+and D-25 — decided 2026-08-22, "supplements D-21" — froze the STRICTER convention that a daily
+median becomes available no earlier than **00:00 UTC on day D+1**, an explicit project assumption
+rather than a demonstrated publication latency; D-21's own wording would permit 22–23 UT on day D.
+D-26 separately records the March–April provenance as UNRESOLVED with a thesis reporting
+obligation. Both were absent from all three artifacts and both § Sources lists; inherited from
+requirements.md FR-P1-01-7, which carries the same gap — reported upstream, not edited there.)*
+The approved daily F10.7 value `median(D)` becomes available **no earlier than 00:00 UTC on day
+D+1** — D-25's conservative convention, an explicit project assumption rather than a demonstrated
+publication latency. **No same-day availability, ever**, even when every observation of day D has
+completed intra-day. *(Operative sentence corrected 2026-08-25 on terminal finding N2.
+**Superseded wording, preserved:** "must not become available to a forecast before all
+observations required to compute it were actually available" — D-21's observation-completion
+rule, which permits 22–23 UT on day D and which D-25 froze narrower on 2026-08-22.)*
 
 **Constraint — no imputation, substitution or reconstruction** occurs until the measured
 gap is recorded and governed.
@@ -613,3 +647,27 @@ indistinguishable, months later, from an approved one, and §19 rows are owned b
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 under the eleventh-redo receipt, after the terminal-pass remediation.**
+> Three rules changed in this file: **R-41's operative sentence** now states D-25's convention
+> (available no earlier than 00:00 UTC on day D+1, never same-day; D-21's observation-completion
+> wording preserved as superseded — terminal finding N2); **R-34** now enumerates all six §13.3
+> `source_files` items including `location/date` (N3); and the exception **declaration site** is
+> re-scoped as an OPEN item with two stated options rather than directing 3.5 to edit
+> `foundation`'s module (N4). The Sources list carries the **two-register note** — D-143 is the
+> Vision-register ICTP rejection (N1). Figures unchanged: 15 requirements, 7 untested, 1 acceptance
+> row. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the third receipt** (twelfth redo, taken for
+> `inventory-and-registry`; floor reset mechanical). **No content of this unit changed** since its
+> READY. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
+> for `external-products`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**

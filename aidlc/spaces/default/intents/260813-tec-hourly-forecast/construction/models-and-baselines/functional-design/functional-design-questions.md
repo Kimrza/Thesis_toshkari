@@ -403,4 +403,20 @@ Does this all look correct before the stage proceeds?
 
 > **💡 Recommendation**: **Looks correct** — the redo achieved what it was authorised for, the disputed Critical was resolved on evidence rather than accepted, one author error the review missed was found and corrected, and the two residuals are left for your ruling rather than quietly applied.
 
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**Nothing in this unit changed** since its terminal READY (2026-08-24T15:15:00Z, post-redo iteration 2). Derived this pass: **13 rules** (`R-90`…`R-102`), **11 workflows**, **12 entities**, **8 questions** all answered, zero mojibake. The two residuals riding that READY — **R-96’s `PartitionError` mechanism** (§3 limb 4 weaker than claimed) and **R-95’s field label** (looser prose than the entity table) — remain carried to the stage gate as input, not applied. Floor reset by the fourteenth redo.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved natively, narrow confirming review runs.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — mechanical: this unit is untouched and its terminal READY adjudicated content already.
+
 [Answer]: Looks correct

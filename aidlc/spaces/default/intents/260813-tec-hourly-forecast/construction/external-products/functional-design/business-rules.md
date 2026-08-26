@@ -74,8 +74,16 @@ everything downstream of it.
 ## R-54 — The story map governs this unit's coverage figures
 
 **Rule (Q2 = D).** Where `unit-of-work.md` § 6 and `unit-of-work-story-map.md` disagree
-about this unit's untested count or acceptance rows, **the story map governs**, and both
-stale statements are **reported at the gate, not edited**.
+about this unit's untested count or acceptance rows, **the story map governs**, and any
+stale statement is **reported at the gate, not edited**.
+
+> **⛔ THE DISAGREEMENT THIS RULE WAS WRITTEN FOR NO LONGER EXISTS** *(marked 2026-08-26 on
+> adversarial finding 8, Critical — the 2026-08-26 correction had reached one file's one section
+> while this rule still stated the trigger as live)*. **§ 6 was swept**: the current file reads
+> **4** untested and `Acceptance rows (2). WS-09, TA-36 (Pending …)`, present since commit
+> `45796f5` (2026-08-24). The table and paragraphs below are the **dated record of the conflict
+> as it stood when this rule resolved it**, and the rule itself remains standing should the two
+> artifacts diverge again. **Nothing is currently reported to the gate under this rule.**
 
 | Claim | `unit-of-work.md` § 6 | Story map — **governing** |
 |---|---|---|
@@ -85,7 +93,8 @@ stale statements are **reported at the gate, not edited**.
 **Why the story map.** `TA-36` was approved **2026-08-22** under Vision §15.2
 (`CR-2026-08-22-LEAKAGE-TA`) as FR-P1-04-17's negative-path row, and the story map records
 the resulting sweep — *"Changed 2026-08-22 by the addition of TA-33…TA-36: untested
-40 → 36."* § 6 was not swept with it.
+40 → 36."* § 6 was not swept with it **at the time this was written; it has been since** (see
+the ⛔ box above).
 
 **Why reported and not edited.** `CHANGE_RECORD_PROCEDURE.md` reserves approved-stage
 artifacts: a sweep reports, absent owner approval for annotate-in-place.
@@ -158,9 +167,11 @@ states the importable-only rule. `component-methods.md` carries boundary-call bl
 `src/features`, `src/models` and `src/evaluation` — and **nothing for `src/external`**: no
 signature, no dataclass, no raise-contract.
 
-> ## ⚠ THIS IS THE THIRD CONSECUTIVE UNIT TO FIND A NAMED MODULE WITH NO CONTRACT
+> ## ⚠ A RECURRING PATTERN: NAMED MODULES WITH NO BOUNDARY CONTRACT
 >
-> `acquisition`'s named accessors, `inventory-and-registry`'s `inventory.py`, and now **an
+> *(Heading and lead corrected 2026-08-26, finding 6: the lead still listed `inventory.py` as a
+> missing-contract finding, which the table below itself rules "intra-package and owed nothing" —
+> and carried the typo "an three".)* `acquisition`'s named accessors, and now **this unit's
 > three boundary-importable modules**. The total is **five owed amendments across three
 > units**, derived by re-checking each claim against `component-methods.md`'s stated depth
 > policy:
@@ -298,7 +309,9 @@ centered mean uses future days and is a defect, not a fallback."*
    computed mean **unchanged**.
 
 **Why limb 2 carries the rule.** Limb 1 tests the value at chosen days; a window that is
-trailing everywhere except at a boundary — the series start, or across the March F10.7 gap —
+trailing everywhere except at a boundary — the series start *(the "March F10.7 gap" formerly
+named here is corrected 2026-08-26, finding 2: D-21 and D-26 measure **365/365 day presence**;
+what D-26 records for March–April is an **unresolved provenance question**, not missing days)* —
 passes a spot check. **Limb 2 is a property that holds at every index**, and it is exactly
 what *"uses future days"* means, stated so a test can fail on it. It covers boundary handling
 and gap fill without enumerating them.
@@ -322,6 +335,22 @@ on perturbation. Perturb a day after the safe-lagged day → the mean **must not
 the window by one day at the series start → limb 2 fails where limb 1 alone would pass.
 
 **Acceptance.** Contributes to WS-11 and TA-08 (both owned by `features-and-splits`).
+
+## R-57a — Missing driver values carry forward at most 3 hours, then the row is excluded
+
+**Rule (FR-P1-04-3; TC-09, `binding: hard` — the register names this the central
+leakage-prevention rule; TE §6.2's dictionary column "Carry-forward <= 3 h, then exclude").**
+A missing external-driver value at an epoch may be filled by carrying the last observed value
+forward for **at most 3 hours**; beyond that bound the row is **excluded**, never filled.
+The bound is read from `configs/features.yaml`, never hardcoded.
+
+**Negative control (FR-P1-04-3's own criterion).** Inject a 4-hour gap into a driver series →
+the affected rows are **excluded**, and a carry-forward of 4 hours anywhere → fails.
+
+**Acceptance.** ⚠ No §16/§19 row of its own; enforced through §18.3's gate-test list.
+*(Rule added 2026-08-26 on adversarial finding 4, which was Major: this unit carries
+FR-P1-04-3 and no rule, mechanism, entity field or negative control existed for it in any of
+the three artifacts — W-5, where the requirement-to-workflow map routed it, disclaims it.)*
 
 ## R-58 — Driver alignment, and its three limbs
 
@@ -371,7 +400,10 @@ than warning."* Four limbs:
    ordering is violated.
 3. **The report's seven content areas are asserted field by field.**
 4. **The benchmark's own drivers appear as rows in the same frozen availability matrix used
-   for ML features** — observation timestamp, publication timestamp, release status, safe lag.
+   for ML features** — observation timestamp, **publication timestamp or, absent one, the
+   approved conservative convention (for F10.7: D-25's 00:00 UTC on D+1, never same-day) with
+   the documented absence and an unverified-latency statement** (`CR-2026-08-22-EV-12`; corrected
+   2026-08-26, finding 2), release status, safe lag.
 
 **Why limb 2.** *"A passing report exists"* is satisfiable by a report whose tolerance was
 chosen **after** the comparison ran — the failure the **predeclared** clause exists to
@@ -585,7 +617,7 @@ by stage 3.2 and change control.
 - **Open — FR-P1-04-18's interpolation rule is UNSET** (R-60), a §18.2 Student-owned forbidden choice (Q-15). **Comparator generation refuses while it stands.**
 - **Open — four requirements with no acceptance row**: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18.
 - **Open — TA-36 is `Pending`**: approved, never run. Never cited as a result.
-- **Open — `unit-of-work.md` § 6 carries stale text**, reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`.
+- **Closed 2026-08-26 (finding 8): the § 6 conflict no longer exists — the file was swept 2026-08-24; kept as the dated record.** *(Superseded bullet:)*  — `unit-of-work.md` § 6 carries stale text**, reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`.
 - **Open — BLK-07's authorization limb**, carried forward. Nothing here reads the locked month; this unit's IRI/GIM products join at evaluation time onto the frozen comparison-wide mask.
 - **G-09 is not signed.** No rule here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`, `src/external/gim.py` or `scripts/04_build_external_products.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -602,3 +634,28 @@ by stage 3.2 and change control.
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25/26 under the post-twelve-redo receipt.** No rule changed; figures
+> re-derived and unchanged (7 requirements, 4 untested, 2 acceptance rows). The exception base is
+> named explicitly in `domain-entities.md` § 9. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-26 under the thirteenth-redo receipt, after the terminal-pass remediation.**
+> In this file: **R-54's trigger and table marked historical** (⛔ box — the § 6 conflict no
+> longer exists, swept 2026-08-24; nothing currently reported to the gate under this rule); its
+> "not swept" sentence dated; the Open bullet closed as a dated record; **R-57a stands** as
+> FR-P1-04-3's rule; R-55's lead corrected. Figures unchanged (7/4/2).
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo receipt** (the redo finished the
+> gate-record sweep in the sibling files; no rule here changed). **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (finding 17's
+> mojibake repair touched the question file only; no rule here changed). **G-09 remains unsigned.**

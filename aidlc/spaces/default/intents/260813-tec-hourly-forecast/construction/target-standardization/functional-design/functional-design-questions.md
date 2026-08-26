@@ -574,4 +574,20 @@ Does this all look correct before I generate the artifact?
 
 > **💡 Recommendation**: **Looks correct** — this unit is untouched; the reset is a mechanical consequence of a redo taken for a different unit, and that redo achieved what it was authorised for.
 
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**Nothing in this unit changed** since its terminal READY (2026-08-23T07:03:44Z, iteration 2). Derived this pass: **10 rules** (`R-64`…`R-73`), **9 workflows** (`W-1`…`W-9`), **9 entities**, **9 questions** all answered, **6 requirements / 1 without an acceptance row** (owns TA-19, supports TA-15), zero mojibake. The four `[Q&A] inventory-and-registry R-20` citations the READY flagged as deferred were already corrected in this file on 2026-08-23 (the correction record sits at its § “The correction”). Floor reset by the fourteenth redo (2026-08-26T08:18:34Z, taken for `external-products`).
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved natively, narrow confirming review runs.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — mechanical: this unit is untouched and its terminal READY adjudicated content already.
+
 [Answer]: Looks correct

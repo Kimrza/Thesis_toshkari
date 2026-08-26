@@ -209,11 +209,26 @@ X. Other (please specify)
 > human-readable field** on `ReleaseManifest` for citation at a human-reviewed gate — but
 > **derive** it from the release `content_hash` rather than allocating it from a durable
 > history. **Drop "monotonic."** **Drop the append-only release history**, the
-> `ReleaseLedgerEntry` entity and `artifacts/registry/release_history.jsonl`. **Keep
-> "never reused"** — now satisfied by determinism rather than by bookkeeping: a pure derivation
-> allocates nothing and consults nothing, so the delete-and-rebuild failure that motivated the
-> ledger cannot arise, and a label bound to two genuinely different contents reduces to a
-> SHA-256 collision. **Keep label/hash mismatch as an integrity violation.** **Do not invent
+> `ReleaseLedgerEntry` entity and `artifacts/registry/release_history.jsonl`.
+>
+> **On "never reused" — this clause was CORRECTED 2026-08-25 on adversarial finding M-2 of the
+> restored budget, and the correction matters because this block is the authority R-11 and R-12
+> both cite.** *(Superseded clause, preserved verbatim: "**Keep \"never reused\"** — now
+> satisfied by determinism rather than by bookkeeping: a pure derivation allocates nothing and
+> consults nothing, so the delete-and-rebuild failure that motivated the ledger cannot arise, and
+> a label bound to two genuinely different contents reduces to a SHA-256 collision.")* The
+> reasoning was unsound: a pure derivation gives **idempotence** — same content, same label — and
+> never-reuse is its converse, **injectivity**. The SHA-256-collision reduction holds only for an
+> encoding faithful to all 256 bits, and this very answer keeps the label **human-readable and
+> citable**, hence necessarily lossy. **So never-reuse is NOT retained as a satisfied property.**
+> What is retained: the delete-and-rebuild failure that motivated the ledger genuinely cannot
+> arise, because nothing allocates and nothing can forget. **Never-reuse becomes an obligation on
+> whoever specifies the encoding** — it must be injective over the release population in scope,
+> or its collision bound stated and accepted at a gate — and until then no artifact of this unit
+> may claim release labels are never reused.
+>
+> **Keep label/hash mismatch as an integrity violation**, tested against a **presented** manifest
+> (a pure function cannot emit a label mismatching its own input). **Do not invent
 > the hash-to-label encoding** — no approved artifact specifies one, and per TE §18.3 stage 3.5
 > must stop and report rather than pick a default.
 >
@@ -236,9 +251,31 @@ X. Other (please specify)
 > degenerate encoding), `business-logic-model.md` **W-7** (step 7 removed, step 5 changed to
 > derivation), and `domain-entities.md` **§ 8** (entity withdrawn; eight live entities).
 
-Derive the authoritative hash from a canonical manifest or content representation that excludes the human-readable label, volatile metadata, and any self-referential hash field. Persist the mapping between the label and content hash in an auditable release record.
+> **⛔ The two paragraphs below belong to the SUPERSEDED Q6 = D answer. They are preserved as
+> the record of what was answered and are NOT live instructions.** *(Marked 2026-08-25 on
+> adversarial reviewer finding M-5, which was Major: they sat un-blockquoted and unmarked three
+> lines below the D′ box that withdrew them, so the orphan was in the authority document that
+> R-12 and W-7 both cite, not merely in a summary. Every other ledger reference in this file was
+> already correctly inside a superseded box or an option Impact line; these were not.)*
+>
+> *"Derive the authoritative hash from a canonical manifest or content representation that
+> excludes the human-readable label, volatile metadata, and any self-referential hash field.
+> **Persist the mapping between the label and content hash in an auditable release record.**"*
+> — the first sentence survives verbatim under D′ and is restated below; **the second is
+> withdrawn**, because the auditable record was the ledger.
+>
+> *"**Allocate human-readable labels from a durable, append-only release history** rather than
+> solely by scanning existing directories, and **never reuse a previously assigned label**.
+> Detect label/hash mismatches as integrity violations."* — the allocation mechanism and the
+> durable history are **withdrawn**; the never-reuse guarantee is **not currently established**
+> and is carried as an open obligation on the label encoding (reviewer finding M-3); the
+> mismatch-detection clause survives as R-12 correspondence control.
 
-Allocate human-readable labels from a durable, append-only release history rather than solely by scanning existing directories, and never reuse a previously assigned label. Detect label/hash mismatches as integrity violations.
+**Live under D′:** derive the authoritative hash from a canonical manifest or content
+representation that **excludes** the human-readable label, volatile metadata, and any
+self-referential hash field. Derive `dataset_version` from that `content_hash`; **specify no
+encoding here**, and stage 3.5 must stop and report rather than choose one. Treat a
+label/hash mismatch in a **presented** manifest as an integrity violation.
 
 Preserve TE §13.3 and TA-15: write_release must reject an output directory that already contains a release and must never overwrite existing release content. Do not silently treat repeated writes as successful unless that behavior is explicitly authorized through the project's change-control process.
 
@@ -453,7 +490,7 @@ X. Other (please specify)
 > independent integrity test that rejects duplicate or reused labels and inconsistent
 > label/hash mappings."* The inconsistent-mapping half is carried by R-12's
 > derivation-correspondence control, joined by two more that the ledger design never had —
-> derivation determinism, and injectivity against a degenerate or truncating encoding. The
+> derivation determinism, and **non-degeneracy** — *(corrected 2026-08-25 on adversarial finding m-1 of the restored budget; superseded wording preserved: "injectivity against a degenerate **or truncating** encoding". That was affirmatively false: R-12 states plainly that a **truncating** encoding **passes** the two-sample check while still admitting collisions, so the control establishes neither injectivity nor coverage of truncation)*. The
 > duplicate-and-reused-label half becomes **vacuous**: with no rows there is nothing to
 > duplicate, and with the label a function of the hash, reuse across different content reduces
 > to a SHA-256 collision.
@@ -489,6 +526,16 @@ X. Other (please specify)
 > `services.md` § Run record and registry states "Two artifacts, one
 > authoritative" in a table that would become three rows. Both are approved-stage
 > artifacts, so neither is edited here.
+>
+> **⛔ SUPERSEDED 2026-08-25** *(marker added on an adversarial residual: this 2026-08-22 box
+> carried no superseded marker while every comparable box in this file does, three lines above a
+> record of both files being edited)*. Both artifacts **were** edited — twice. Annotated
+> 2026-08-24 to add the ledger under Amendment C, then corrected 2026-08-25 when Amendment C was
+> **declined as drafted**: `unit-of-work.md` § 1 `Owns` no longer names the ledger and
+> `services.md` is back to **"Two artifacts, one authoritative"**, both with superseded wording
+> preserved. The 2026-08-25 edits were made only after the owner authorised them explicitly,
+> this stage having first reported the two sites rather than editing them — which is the
+> discipline this box was written to insist on.
 >
 > **This is not a Vision §15.2 amendment.** §15.2 governs the authority documents
 > (Vision, Technical Environment). Annotating an approved AI-DLC stage artifact is
@@ -621,7 +668,7 @@ awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+
 | `declared_vs_observed_mismatches` | `Sequence[str]` | The result of Q3's config cross-check. Empty means the declared and observed sets agree; a non-empty value is an integrity finding under Q5's `IntegrityError` base. Without the field the cross-check happens and is not recorded |
 
 **Deliberately not proposed:** a field carrying the config-declared expected set
-itself. It is recoverable from the configuration snapshot hash already in
+itself. It is recoverable from the parsed configuration and the verbatim snapshot copies *(corrected 2026-08-25 on adversarial residual r-2 of the ninth-redo iteration 1 — the second representation of the m-2 defect: a hash has no preimage, so nothing is recoverable *from the hash*)* already in
 `ConfigSnapshot`, and adding it would duplicate governed data into a second place
 — the drift pattern this project has spent the session correcting.
 
@@ -865,7 +912,7 @@ evidence. All of it is executed and recorded in
 |---|---|---|---|
 | **A** — §19 rows for REQ-ENG-7 and REQ-ENG-10 | **DECLINED** | Owner, on the evidence that **no rule requires universal §19 coverage** and that the approved position dispositions uncovered requirements as *"Open by design"* | Both stay untested **by design, permanently**. Their negative-path test specifications keep the *"Test specification only"* label as a settled state, not a provisional one. **No count moved** — untested stays 36, this unit's 2 of 16, its acceptance rows 7, §19 at 36 rows |
 | **B** — three `DeterminismRecord` fields | **APPROVED** | Owner, under the Rec 7 annotate-in-place precedent. Required by your own **Q3=C** answer, which the six-field contract could not record | `component-methods.md` now defines **nine** fields. W-4 steps 5–7 are fully recordable and **the prohibition on stating that determinism was measured is lifted** — replaced by a narrower rule: a measured claim requires `probe_scope` recorded and `measurement_status` = `complete`. **R-06 unchanged** |
-| **C** — the release-history ledger | **APPROVED** | Owner, on the authority of **Q6=D** and **FU-2=D** | `services.md` reads **three artifacts, one authoritative**; `unit-of-work.md` § 1 `Owns` names the ledger. **R-11 unchanged** — the content hash stays authoritative and the label is a citation device |
+| **C** — the release-history ledger | ⛔ **SUPERSEDED — see below.** As recorded 2026-08-24: **APPROVED** | Owner, on the authority of **Q6=D** and **FU-2=D** — *both since superseded: Amendment C was **DECLINED AS DRAFTED** on 2026-08-25 and Q6 was re-answered as **D′**. This row is the dated record of the 2026-08-24 ruling, not the current state. Marked 2026-08-25 on adversarial finding m-4 of the restored budget: six of the seven occurrences of "three artifacts, one authoritative" in this file already sat inside ⛔ boxes and this one did not.* | `services.md` reads **three artifacts, one authoritative**; `unit-of-work.md` § 1 `Owns` names the ledger. **R-11 unchanged** — the content hash stays authoritative and the label is a citation device |
 
 ### One reversal, recorded rather than buried
 
@@ -897,7 +944,7 @@ during execution — both corrected.
 
 ### What still stands unchanged
 
-The design itself — nine entities, ten workflows W-1…W-10, thirteen business rules *(count wrong when written; seventeen, R-01–R-17, derived 2026-08-25 on reviewer finding M-1)*.
+The design itself — nine entities *(2026-08-25 correction, reviewer finding m-5: entity count is now **eight** — `ReleaseLedgerEntry` withdrawn when Amendment C was declined as drafted; and **Amendment C is DECLINED, not approved**.)*, ten workflows W-1…W-10, thirteen business rules *(count wrong when written; seventeen, R-01–R-17, derived 2026-08-25 on reviewer finding M-1)*.
 **G-09 is not signed**, so nothing here authorises creating a module. No scientific
 value was decided. ADR-11, D-27 and BLK-02…BLK-09 are untouched. The concrete
 `RequiredFieldsMap` and `CredentialNameMap` contents still await the four configs
@@ -942,7 +989,7 @@ numeral.
 **What did not change.** **No count moved** — untested stays 36, this unit's stays 2 of 16,
 its acceptance rows stay 7, TE §19 stays at 36 rows. No rule, entity, workflow or contract
 was edited. No scientific value was touched. The three rulings themselves are unchanged: A
-declined permanently, B and C approved and executed. **G-09 remains unsigned.**
+declined permanently, B and C approved and executed *(2026-08-25 correction, reviewer finding m-5: entity count is now **eight** — `ReleaseLedgerEntry` withdrawn when Amendment C was declined as drafted; and **Amendment C is DECLINED, not approved**.)*. **G-09 remains unsigned.**
 
 Does this all look correct before I generate the artifact?
 
@@ -1026,7 +1073,7 @@ as the baseline and edit only where a real defect is found. None was, so the thr
 are re-saved unchanged and go back to the reviewer for a fresh verdict under the restored
 2-iteration budget.
 
-**Everything this unit carried to the gate still stands, unchanged.** Nine entities, ten
+**Everything this unit carried to the gate still stands, unchanged.** *(2026-08-25 correction, reviewer finding m-5: entity count is now **eight** — `ReleaseLedgerEntry` withdrawn when Amendment C was declined as drafted; and **Amendment C is DECLINED, not approved**.)* Nine entities, ten
 workflows W-1…W-10, and **seventeen** business rules R-01–R-17. *(Corrected 2026-08-25 on reviewer finding M-1, which was Major: this line read "thirteen business rules", carried from the prose of an earlier section rather than derived. `grep -cE "^## R-[0-9]+" business-rules.md` returns **17**; `business-logic-model.md` § Implementability already read "the seventeen rules (R-01–R-17)" correctly, so the two disagreed. Superseded wording preserved here.)* Amendment A declined permanently, B and C
 approved and executed. Sites 9, 10 and 11 stand as applied. **G-09 remains unsigned**, so
 nothing here authorises creating a module. No scientific value was decided.
@@ -1264,7 +1311,7 @@ Does this all look correct before I generate the artifact?
 **What you directed after the third presentation:** *"resolve all the defects"* — rather than
 carrying any of them to the stage gate. Then two rulings on the items I could not close myself:
 **re-answer Q6 to drop monotonicity**, and **authorise the upstream edits**. All of it is done.
-Nothing from the Amendment C reversal is left open.
+*(Superseded 2026-08-25 on adversarial finding m-5 of the restored budget: "Nothing from the Amendment C reversal is left open." **Never-reuse is left open** — an obligation on the `dataset_version` label encoding, which is itself an open freeze-gate decision. Both are listed in all three § Assumptions sections.)*
 
 #### The seven reviewer findings — unchanged from the third presentation, all remediated
 
@@ -1281,8 +1328,8 @@ Part 1, restated because it matters for the verification command:** the rules li
 
 | | First read as | Closed by | Not by |
 |---|---|---|---|
-| **Never-reuse** | lost with the ledger | **Analysis.** The superseded R-12 objects to *allocation from an index*, and that objection does not transfer to a pure derivation: it allocates nothing and consults nothing, so there is no index to forget. Identical content yields an identical label **by construction**, and a label bound to two genuinely different contents reduces to a **SHA-256 collision** | a new mechanism, and not a decision |
-| **FU-2's integrity test** | removed, unreplaced | **Analysis.** Its inconsistent-mapping half is carried by R-12's derivation-correspondence control, now joined by two the ledger design never had — derivation **determinism** and **injectivity** against a degenerate or truncating encoding. Its duplicate-and-reused-label half is **vacuous**: no rows to duplicate, and reuse across different content is a hash collision | a decision |
+| **Never-reuse** | lost with the ledger | ⛔ **THIS ROW IS SUPERSEDED — the analysis it credits was WITHDRAWN AS UNSOUND on 2026-08-25** (adversarial finding M-3 of the restored budget). A pure derivation gives **idempotence**, and never-reuse is its converse, **injectivity**; the SHA-256-collision reduction needs a 256-bit-faithful encoding while Q6=D′ keeps the label human-readable and therefore lossy. **Never-reuse is OPEN**, an obligation on whoever specifies the `dataset_version` encoding. What *does* survive from that analysis: the delete-and-rebuild failure genuinely cannot arise, because nothing allocates. **Analysis.** The superseded R-12 objects to *allocation from an index*, and that objection does not transfer to a pure derivation: it allocates nothing and consults nothing, so there is no index to forget. Identical content yields an identical label **by construction**, and a label bound to two genuinely different contents reduces to a **SHA-256 collision** | a new mechanism, and not a decision |
+| **FU-2's integrity test** | removed, unreplaced | ⛔ **PARTLY SUPERSEDED 2026-08-25** (finding M-3): the *inconsistent-mapping* half is genuinely covered by R-12's correspondence control and the duplicate-row half is genuinely vacuous — but the third control is **non-degeneracy**, not injectivity, and cannot be credited for never-reuse. **Analysis.** Its inconsistent-mapping half is carried by R-12's derivation-correspondence control, now joined by two the ledger design never had — derivation **determinism** and **injectivity** against a degenerate or truncating encoding. Its duplicate-and-reused-label half is **vacuous**: no rows to duplicate, and reuse across different content is a hash collision | a decision |
 | **Monotonicity** | irreducibly unmet | **Your ruling.** Ordering is information about *sequence*, which a function of content alone cannot carry — no test or implementation choice reaches it. So the **requirement changed rather than the mechanism**: Q6 re-answered as **D′** | analysis, which could not reach it |
 
 #### Q6 = D′, re-presented rather than amended silently
@@ -1305,8 +1352,7 @@ upstream sites rather than editing them, and edited only after you authorised it
 **ordered**. A reviewer citing two labels at a human-reviewed gate cannot tell from the labels
 alone which release came first; sequence is read from the run record or the experiment registry,
 both of which carry timestamps and `run_id`. Nothing else in this design depended on label
-ordering. Because the requirement itself changed, R-12 is **fully compliant with Q6=D′** — this
-is no longer non-compliance against an answered question.
+ordering. Because the monotonicity requirement itself changed, R-12 is **compliant with Q6=D′ **on monotonicity, which D′ dropped — but NOT on never-reuse, which D′ retains and this design does not establish** *(narrowed 2026-08-25 on adversarial finding M-1/M-3 of the restored budget; the unqualified claim "fully compliant with Q6=D′" appeared at five sites and was false at all five)***.
 
 #### The two upstream artifacts — corrected, on your explicit authorisation
 
@@ -1338,7 +1384,7 @@ reversal that moved it.
 #### Staleness sweep — every representation, not every instance
 
 Swept for the *claims* the reversal invalidated, not only for the strings it changed, because a
-sweep keyed to a literal is what missed five sites on 2026-08-24. Live occurrences now **zero**
+sweep keyed to a literal is what missed five sites on 2026-08-24. **This claim was itself keyed to literals and was itself wrong** *(corrected 2026-08-25 on adversarial reviewer finding M-2)*: the next pass found **seven** live pre-D′ sites, one of them a normative rule (R-11), and the site this sweep most conspicuously missed reads *"neither of which is edited here"* — not the literal `"not edited here"` it was keyed to. The lesson stands and was not applied to the sweep that stated it. Live occurrences were reported as **zero**
 across all three artifacts for: *"not edited here"*, *"still name the ledger"*, *"irreducibly
 unmet"*, *"Monotonicity — OPEN"*, *"uncovered, and not replaced"*, *"unresolved Q6=D
 monotonicity"*, and *"all resolved 2026-08-24"* in the § Sources amendment summaries. Every
@@ -1355,11 +1401,24 @@ residual defects inside `business-logic-model.md` § Review history were correct
 annotation box on the `GOV-2026-08-22-INC-01` Rec 7 precedent, with the reviewer's own sentences
 and verdicts untouched.
 
-#### Nothing carried to the stage gate as an open item
+#### What is carried to the stage gate as an open item
 
-The third presentation listed four. All four are closed: monotonicity (by the Q6 re-answer),
-FU-2's integrity test (discharged by three controls), the upstream contradiction (corrected),
-and the two § Review residuals (annotated). **One reviewer iteration remains.** After this
+*(Heading and content corrected 2026-08-25 on adversarial reviewer finding M-4, which was
+Major. **Superseded heading, preserved:** "Nothing carried to the stage gate as an open item."
+That was wrong when written: the `dataset_version` hash-to-label encoding was stated as
+unspecified in all three artifacts and listed as an open item in none of them, so a decision
+blocking a §12-mandated module and a §18.3-critical test was invisible to the gate.)*
+
+**Five open items**, listed in all three § Assumptions sections *(count corrected 2026-08-25 on adversarial residual r-1 of the ninth-redo iteration 1 — it read "Four … verified at 4/4/4", the second time this same site needed correcting, and a fifth item was added for the cross-unit exception obligation. § Assumptions is the authority; this roll-up points at it rather than restating a number)* *(count corrected 2026-08-25 on adversarial finding m-3 of the restored budget; it read "**Two open items**" and two more — the `write_release` and `verify_release` amendment needs — were added to all three sections afterwards without this roll-up being swept. Verified equal at 4/4/4 rather than assumed)*: the **hash-to-label
+encoding** (a freeze-gate decision — `dataset_version` is a §13.3 manifest field W-7 step 5
+must produce, and 3.5 is forbidden to choose an encoding), and the **injectivity** that
+never-reuse depends on. Of the four items the third presentation declared closed, three are:
+monotonicity (by the Q6=D′ re-answer), the upstream contradiction (corrected 2026-08-25), and
+the § Review residuals (annotated — one of which was corrected in only one artifact of three
+and has since been fixed in the other two, reviewer finding m-4). **The fourth was overclaimed:**
+FU-2's *inconsistent-mapping* obligation is discharged by R-12's correspondence control and its
+duplicate-row obligation is vacuous, but never-reuse was never discharged — reviewer finding
+M-3 showed the argument proved idempotence, not injectivity. **One reviewer iteration remains.** After this
 confirmation the three artifacts are re-saved and the reviewer runs **iteration 2, the last of
 the budget** — and it will be reviewing a design whose release-labelling mechanism, Q6 answer
 and entity count all changed since iteration 1, not a lightly-edited version of what it saw.
@@ -1373,5 +1432,697 @@ Does this all look correct before I generate the artifact?
    > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — including reinstating Amendment C, restoring Q6 = D, reverting either upstream edit, or any individual remediation — and I re-present before touching anything.
 
 > **💡 Recommendation**: **Looks correct** — every defect is resolved rather than deferred, the two items needing your authority were put to you before being applied, the one capability the design gives up is disclosed rather than absorbed, and every count was derived after the edits instead of carried across them.
+
+*(Answered `Looks correct`, 2026-08-25T08:33:00Z. That receipt was reset by the authorised seventh redo jump at 2026-08-25T08:48:21Z, taken because reviewer iteration 2 returned NOT-READY with five Major findings and a spent budget. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 (fifth) — iteration-2 findings remediated, after a seventh redo
+
+**Iteration 2 returned NOT-READY with five Major findings and the budget spent**, so the
+terminal receipt barred any edit. You authorised a **seventh redo jump** (2026-08-25T08:48:21Z)
+to reset the floor and fix them. All five Majors, all five Minors and all five Residuals are
+remediated. **Two of the Majors were my errors rather than drift**, and one of them refuted a
+substantive claim I had put to you as settled.
+
+#### The five Major findings
+
+| # | The defect | Fixed |
+|---|---|---|
+| **M-1** | **R-11 — a live normative rule — still read `Rule (Q6 = D)` and "The *monotonic* human-readable label"**, and `domain-entities.md` § 7 headed the `ReleaseManifest` contract `Q6 = D` with a live `label` row *"Monotonic, human-readable"*. That table is **what stage 3.5 implements from**: it told an implementer the field is monotonic while R-12 told them the encoding is unspecified and to stop and report | Both cite **Q6 = D′**; "monotonic" struck; the row renamed `dataset_version` to match W-7 and R-12. Derived: **zero** live unquoted "monotonic" remains in any artifact |
+| **M-2** | **Seven live pre-D′ sites against six post-D′ sites** — the artifacts contradicted themselves and each other, including *"whether Q6=D should be re-answered"* (it was) and *"neither of which is edited here"* (both were) | All seven corrected, superseded wording preserved. **Why it was missed: my sweep was keyed to the literal `"not edited here"` and the site reads `"neither of which is edited here"`** — the literal-keyed sweep these artifacts already diagnose as blind, recurring in the sweep I offered as proof it had not |
+| **M-3** | **My never-reuse-by-determinism argument was unsound.** Purity gives *idempotence* (same input → same output); never-reuse is its converse, *injectivity* (different content → different label). "Reduces to a SHA-256 collision" holds only for a 256-bit-faithful encoding — but D′ **keeps the label human-readable and citable**, so it is necessarily lossy, the encoding is unspecified, and my "injectivity" control is a **two-sample** test that catches a degenerate encoding and passes a **truncating** one | Restated honestly in all five sites: **idempotence PROVIDED, injectivity NOT ESTABLISHED**. Never-reuse is now an **open obligation on whoever specifies the encoding**, and no artifact may claim it holds. This mattered because the argument was the *sole* stated reason D′ could drop "monotonic" while keeping "never reused" |
+| **M-4** | The **hash-to-label encoding** — a decision blocking `src/data/release.py`, W-7 step 5 and the §18.3-critical `tests/test_release_hashes.py` — appeared as an open item in **none** of the three § Assumptions sections, while the Q&A asserted *"Nothing carried to the stage gate as an open item."* | Two open items added to **all three** § Assumptions (encoding; injectivity), and that heading corrected to **"What is carried to the stage gate as an open item"** |
+| **M-5** | `functional-design-questions.md` — **three un-blockquoted, unmarked directive paragraphs** of Q6 still mandated the ledger, three lines below the D′ box that withdrew them. The orphan sat in the **authority document** R-12 and W-7 both cite | Marked as superseded, quoted verbatim, with each clause classified: which survives under D′, which is withdrawn, and which is now contingent |
+
+#### The five Minors
+
+- **m-1** — `business-logic-model.md`'s bullet marker read **Open** above a body saying all three consequences were closed, while both siblings read **Closed**. Marker corrected; iteration-1's m-2 class recurring in the primary artifact.
+- **m-2** — **W-7's interface was undecided.** Step 1 validated *"all 14 §13.3 fields present"* while step 5 **derived** one of the fourteen. Settled: **the caller supplies thirteen, `write_release` produces `dataset_version`** — it cannot be otherwise, since the field is a function of a `content_hash` that does not exist until step 3. Step 1 now also rejects a call that *supplies* it. Two error edges removed as **unreachable** — a pure function cannot emit a label mismatching its own input — with the check relocated to R-12's correspondence control over a *presented* manifest. R-11's negative control corrected the same way.
+- **m-3** — **the sentinel needed a pop, and this was a correctness bug, not hygiene.** Environment variables are inherited, and after a re-exec `PYTHONHASHSEED` is already set — so a subprocess launched from a re-exec'd stage script does **not** re-exec yet would still see the sentinel, recording `reexec_performed = True` falsely and making R-05's negative control **pass for the wrong reason**. The child now unsets it immediately after reading. Without the pop the bit that crosses is *some ancestor was*, not *this process is*.
+- **m-4** — the *"pending"* review-history row was corrected in one artifact of three. All three now struck and dated; `domain-entities.md`'s effect cell had been **affirmatively false** (*"Corrections 3 and 4 have not yet been adversarially reviewed"* — they were, and returned READY).
+- **m-5** — two Q&A sentences annotated for the rule count on 2026-08-25 were left asserting *"nine entities"* and *"B and C approved and executed"* **in the same clause**. One figure in a sentence carrying three.
+
+#### The five Residuals — including one that had been blocking verification for two passes
+
+- **The Technical Environment document was cited 13 and 10 times across two artifacts, listed in neither § Sources, and its derivations used an unresolved `<TE>` placeholder.** Raised at iteration 1, not addressed, and not among the four items I had declared closed. **The placeholder was resolvable all along** — the document is at `PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md`, 1158 lines. It is now listed in both § Sources with a path verified to resolve, and **all three figures it had blocked are derived and agree**:
+
+| Figure | Derivation | Result |
+|---|---|---|
+| §13.1 environment-lock bullets | `awk 'NR>=749 && NR<=760 && /^- /' <TE> \| wc -l` | **7** — agrees |
+| §12 file-level entries under `artifacts/` | `sed -n '709,721p' <TE> \| grep -cE '\.(jsonl\|json\|csv)'` | **0** — agrees |
+| §19 approval rows | `grep -oE "TA-[0-9]+" <TE> \| sort -u \| wc -l` | **36**, TA-01…TA-36 — **confirms the "§19 at 36 rows" figure this unit had been carrying rather than deriving through every prior pass** |
+
+- The two **upstream** edits said Q6 *"is being re-answered"* — present-progressive for a completed event. Both now read as completed.
+- The 2026-08-22 *"neither is edited here"* box carried no superseded marker where every comparable box does. Marked, noting both files were since edited **twice** — annotated 2026-08-24, corrected 2026-08-25.
+- `domain-entities.md`'s *"one item carried forward"* heading stood over two bullets carrying nothing forward. Corrected.
+- `domain-entities.md` named only `RequiredFieldsMap` as awaiting the configs where both siblings name both maps. `CredentialNameMap` added.
+
+#### Counts — every one derived after the edits
+
+| Figure | Value | Derivation |
+|---|---|---|
+| Rules | **17** | `grep -cE "^## R-[0-9]+" business-rules.md` |
+| Workflows | **10** | `grep -cE "^## W-[0-9]+" business-logic-model.md` |
+| Entities | **8 live** of 9 numbered sections | § 8 struck, kept in place so by-number cross-references resolve |
+| `DeterminismRecord` fields | **9** | `awk '/class DeterminismRecord/,/^$/' component-methods.md \| grep -cE "^ +[a-z_]+: "` |
+| §19 rows | **36** | derived from the TE for the first time |
+| Requirements / untested / acceptance | **16 / 2 / 7** | `unit-of-work.md` § 1 |
+
+No TA-37 or TA-38 added. Code fences balance in all three artifacts.
+
+#### What is genuinely open, stated plainly
+
+**Two items, both narrower and more concrete than anything previously carried**, and both listed
+in all three § Assumptions rather than in a narrative:
+
+1. **The `dataset_version` hash-to-label encoding.** A freeze-gate decision. No approved artifact
+   specifies it and TE §18.3 forbids stage 3.5 to choose. It blocks `src/data/release.py`,
+   W-7 step 5 and `tests/test_release_hashes.py`.
+2. **Injectivity of that encoding, and with it the never-reuse property.** Must be injective over
+   the release population in scope, or its collision bound stated and accepted at a gate.
+
+#### Governance state
+
+A **declined** · B **approved** · C **declined as drafted** · **Q6 = D′**, FU-2 moot ·
+**G-09 unsigned** · no ledger created · no scientific value decided · Phase 1 prohibition and
+the IRI boundary untouched · **no `## Review` section rewritten** — every reviewer sentence and
+verdict stands, corrections made only in dated annotation boxes on the Rec 7 precedent.
+
+**The reviewer budget is fresh (2 iterations) after the redo.** After this confirmation the three
+artifacts are re-saved and the reviewer runs iteration 1 of that budget — against a design whose
+R-11, R-12, W-7 interface, R-05 constraint, entity contract, § Sources and § Assumptions have all
+changed since it last saw them.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: A fresh receipt is recorded, the three artifacts are re-saved, and the reviewer runs iteration 1 of the restored budget. The two open items go to the stage gate as genuinely open, not as closed.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — including how to resolve the encoding decision, or reverting any remediation — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — every finding is remediated at its named location, the two claims I had overstated to you are now stated accurately rather than quietly softened, and the §19-at-36 figure is derived from the real document for the first time instead of carried.
+
+*(Answered `Looks correct`, 2026-08-25T09:05Z. That receipt covered the artifacts as they stood before the restored budget's iteration 1, which returned NOT-READY with five Major findings; the remediation below changed the artifacts after it, so a fresh confirmation is required. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 (sixth) — the M-3 sweep completed, and what it cost to find
+
+**The restored budget's iteration 1 returned NOT-READY.** Every count reproduced and, for the
+first time, **all three TE-dependent figures verified** — the reviewer confirmed 7 §13.1 bullets,
+0 file-level entries under `artifacts/`, 36 §19 rows TA-01…TA-36, §13.3 = 14 fields over 10 rows,
+and re-derived 17 rules / 10 workflows / 8 live entities / 9 `DeterminismRecord` fields /
+16 requirements / 2 untested / 7 owned + 2 supporting acceptance rows, all nine § Sources paths
+resolving. Hard rules clean: zero `iri`/`gim`/`rinex`/`calibration`/`dcb`/`stec` hits, G-09 stated
+unsigned throughout, no sentinel value filled, no scientific constant decided.
+
+**The refutation was the M-3 correction itself.** It had reached **5** sites. **16 live sites
+still asserted the withdrawn never-reuse-by-determinism claim** — including the `[Re-answer]: D′`
+block that R-11 and R-12 both cite as their authority, and both upstream artifacts this stage had
+edited the same day. That is the **fourth consecutive pass** in which a correction reached the
+site that stated a thing and missed the paragraphs that summarised it.
+
+#### The five Majors
+
+| # | The defect | Fixed |
+|---|---|---|
+| **M-1** | W-7's *current* amendment note read *"What this reversal actually costs is label ordering, and only that. The never-reuse guarantee survives by a different route"* and *"W-7 is fully compliant with Q6=D′"* — **35 lines above the M-3 correction in the same section saying the opposite** | Rewritten to state plainly what the derivation provides (**idempotence**) and what it does not (**injectivity**, hence never-reuse), with the superseded roll-up preserved |
+| **M-2** | The **`[Re-answer]: D′` block** — the authority R-11 and R-12 both cite — still read *"**Keep "never reused"** — now satisfied by determinism … reduces to a SHA-256 collision"*. Every compliance claim resting on it was false as written | The clause is corrected in place with its superseded text preserved: never-reuse is **not** retained as satisfied; it becomes an obligation on whoever specifies the encoding |
+| **M-3** | **Six live roll-ups declaring the obligation covered** — `business-rules.md` *"Nothing is left uncovered"* (twice), `domain-entities.md`'s *"not an uncovered obligation"* and its **Closed** bullet sitting **two bullets above** the OPEN injectivity item, `business-logic-model.md`'s *"All three consequences … now closed"* standing over its own **PARTLY CLOSED** sub-bullet | All six narrowed: FU-2's inconsistent-mapping and duplicate-row obligations are genuinely covered; **never-reuse is not** |
+| **M-4** | **Both upstream sites this stage edited on 2026-08-25 still asserted it** — `unit-of-work.md` *"The never-reused obligation is unaffected and is satisfied by determinism"*, `services.md` the same — while all three unit artifacts declared that correction made | Both corrected under the same owner authorisation, superseded wording preserved |
+| **M-5** | **m-2's relocation orphaned the check.** `verify_release` appears **0 times** in the artifacts, and its approved contract returns `Sequence[str]` and **never raises** — so R-11's and R-12's only remaining negative controls had **no owning function**, and §18.3 forbids 3.5 inventing one | The control is specified as a **test** obligation on `tests/test_release_hashes.py` (TA-15), where a negative control needs no production entry point. Runtime enforcement would require amending `verify_release` — now an open item |
+
+#### The five Minors
+
+- **m-1** — *"degenerate **or truncating** encoding"* was **affirmatively false**: R-12 states plainly that a truncating encoding **passes** the two-sample check. The control is renamed **non-degeneracy** everywhere, and the three sites still calling it *"injectivity against a degenerate encoding"* are corrected — a control must never be named for the claim it cannot support.
+- **m-2** — W-7's `RAISES` block listed 2 of 3 conditions (the supplies-`dataset_version` rejection was missing), and the 13/14 narrowing **changes an approved 2.6 raise-contract**. Both fixed; and rather than assert the contract change, it is recorded as an **amendment need for the owner** — because this stage demanded exactly that for `ensure_process_determinism`'s signature, and a looser standard here would be inconsistent.
+- **m-3** — no artifact named the function that reads and pops the sentinel, and *"before any subprocess is launched"* was unsatisfiable as written. Now: **`ensure_process_determinism` itself**, at W-1 step 1, the first statement of `main()` — so the pop precedes any stage logic and therefore any subprocess. W-4 step 4 records the captured value rather than re-reading the environment, which is the point of popping.
+- **m-4** — a live unmarked row still asserted Amendment C **APPROVED**, *"three artifacts, one authoritative"*, and the ledger in `Owns`, where **6 of 7** occurrences of that phrase already sat inside ⛔ boxes. Marked.
+- **m-5** — *"Nothing from the Amendment C reversal is left open."* Superseded.
+
+#### Residuals
+
+- **r-1** — `DeterminismRecord`'s `reexec_performed` row was the field's own contract and mentioned **no carrier at all**. It now names the sentinel, the pop, and where the rule lives.
+- **r-2** — **seven zero-byte files** in the stage directory named from fragments of my own prose (`truncating`, `citable`, `**idempotence**,` …). They were debris from a shell interpreting `>` inside markdown blockquotes as redirections. Inspected, confirmed empty, deleted; all four artifacts verified intact and unaffected.
+- **r-3** — § Sources cites four artifacts outside `consumes`, three outside the reviewer's read bound, so W-9's Gate 0 boundary, R-15's carve-out source and W-1's acyclicity argument went unchecked this pass. Recorded as unchecked rather than assumed sound.
+
+#### One defect this remediation found in itself
+
+Two amendment needs (m-2's and M-5's) were asserted in the rule text as *"recorded in
+§ Assumptions"* and **were not actually listed there**. That is the same
+claim-without-the-thing defect the pass was fixing. Both are now listed, so each § Assumptions
+section carries **four** OPEN items — verified equal across all three artifacts rather than
+assumed.
+
+#### Counts — derived after every edit
+
+17 rules · 10 workflows · **8 live entities** of 9 numbered sections · 9 `DeterminismRecord`
+fields · **36** §19 rows · 16 requirements · 2 untested · 7 acceptance rows. No TA-37/TA-38.
+Code fences balanced in all four files. Zero debris files.
+
+#### What is open — four items, in all three § Assumptions
+
+1. **The `dataset_version` hash-to-label encoding** — a freeze-gate decision; 3.5 is forbidden to
+   choose one, and it blocks `src/data/release.py`, W-7 step 5 and `tests/test_release_hashes.py`.
+2. **Injectivity of that encoding**, on which never-reuse depends.
+3. **An amendment need on `write_release`'s approved raise-contract** (14 → 13 caller-supplied
+   fields).
+4. **An amendment need on `verify_release`**, or acceptance that the correspondence check is
+   test-only.
+
+#### Governance state
+
+A **declined** · B **approved** · C **declined as drafted** · **Q6 = D′**, FU-2 moot ·
+**G-09 unsigned** · no ledger created · no scientific value decided · Phase 1 prohibition and the
+IRI boundary untouched · **no `## Review` section rewritten** on any artifact.
+
+**One reviewer iteration remains** in this budget. If it returns NOT-READY, the remaining findings
+go to the stage approval gate for your decision rather than into an eighth redo.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: A fresh receipt is recorded, the three artifacts are re-saved, and the reviewer runs iteration 2 — the last of this budget. The four open items go to the stage gate as genuinely open.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — including ruling on any of the four open items now — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — the withdrawn claim is now swept from every live site with each hit read rather than counted, the two claims that were false about my own bookkeeping are corrected, and the four open items are stated as open instead of declared closed.
+
+*(Answered `Looks correct`, 2026-08-25T12:20Z. That receipt covered the artifacts as they stood before the restored budget's iteration 2, which returned NOT-READY and spent the budget; the eighth redo and the remediation below changed the artifacts after it. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 (seventh) — the terminal findings, and the one real design gap
+
+**The restored budget's iteration 2 returned NOT-READY and spent the budget**, so you authorised an
+**eighth redo** (2026-08-25T13:14:42Z) to fix what it found rather than carry it eleven units to the
+stage gate. The reviewer's own summary of that pass: *"Every count reproduces. r-3 is discharged and
+all three previously unchecked claims hold. 11 of 13 iteration-1 findings are properly remediated.
+Nothing in this pass is unverified — every finding is a quoted line or a command I ran."*
+
+#### The one finding that was not bookkeeping
+
+**m-1 — the in-process carrier of the re-exec bit, and the only implementability gap no open item
+covered.** The previous pass specified how the bit crosses the `exec` boundary (a sentinel
+environment variable, popped by the child) and **never said where it lives in-process** between the
+pop at W-1 step 1 and the record at W-4 step 4. Nothing available could hold it:
+`ensure_process_determinism` returns `None`; `seed_everything(snapshot, *, stage)` takes no such
+argument; `ConfigSnapshot`'s eight approved fields carry no re-exec bit — and `ConfigSnapshot` is
+built at **step 2**, *after* the pop at step 1, so it could not receive the bit without reordering an
+approved contract. Stage 3.5 would have had to invent a holder, which is exactly what naming the
+sentinel existed to prevent.
+
+**Resolved: module-level state inside `src/data/config.py`.** `ensure_process_determinism` sets it
+when it pops the sentinel; the `DeterminismRecord` construction reads it. Setter and reader both live
+in that module, which `unit-of-work.md` § 1 gives to this unit, so the hand-off is **intra-module** —
+no cross-module coupling, no new parameter, and **no approved stage-2.6 signature altered**. Each
+alternative would change an approved contract and need the amendment this stage has demanded
+elsewhere. This is an engineering decision with no scientific content, no governed value and no
+config field, and it is applied on the same basis as your sentinel ruling rather than re-asked.
+
+#### The two Majors — both prose contradicting its own file
+
+| # | The defect | Fixed |
+|---|---|---|
+| **M-1** | `domain-entities.md` — I corrected this bullet's **heading** on the previous pass and **left its body** reading *"all three are now closed"* and *"(b) **Never-reuse** survives by determinism"*, two bullets above the OPEN injectivity item. Both siblings had it right. **Fifth consecutive pass of the heading-versus-body class** | Body rewritten: monotonicity CLOSED (by the re-answer), never-reuse **OPEN**, with the distinction between idempotence and injectivity stated where the claim used to be. Superseded wording preserved |
+| **M-2** | `business-rules.md` — two live sentences, *"Both loose ends have since been closed"* and *"**Nothing about the Amendment C reversal now stands open against this rule**"*, the second sitting **eighteen lines below** this rule's own *"Never-reuse is open"* and in a file whose § Assumptions lists two OPEN items caused by that very reversal. It was m-5's sentence, superseded in the Q&A and left standing in the rule | Both corrected; the second now names what *does* stand open — the encoding and its injectivity |
+
+**Why this class kept recurring, stated plainly because it recurred five times:** each sweep matched
+the phrase it had just written rather than the claim it was retiring. A correction that renames a
+heading does not make the body's assertion findable by searching for the new heading.
+
+#### The remaining Minors and Residuals
+
+- **m-2** — R-12's Constraint asserted an unscoped *"raises"* on label/hash mismatch, while
+  § Assumptions item 4 records that `verify_release` **never raises** and the control is test-only.
+  Now scoped: rejected on the **write path**, detected on read-back **by the test control only**,
+  with the read-back hole named as requiring the `verify_release` amendment.
+- **m-3** — a roll-up still said *"**Two open items**, now listed in all three § Assumptions"* when
+  the count is **four**; the two amendment needs were added afterwards without sweeping the sentence
+  that counted them. Corrected, and verified equal at **4/4/4** rather than assumed.
+- **r-1** — the withdrawn SHA-256-collision reduction was still deployed as surplus justification in
+  one place, undisarmed, where R-12 disarms its own instance of the same sentence. Disarmed; the
+  conclusion it decorated is independently supported and unaffected.
+- **r-2** — **`tests/test_release_hashes.py` already exists** (12,281 bytes; covers
+  `evidence/audit_evidence_2022-*` byte integrity; `grep -c dataset_version` → **0**), verified
+  directly. M-5's choice of owner is still correct — TE §12's tree names it, TA-15's evidence column
+  is *"Release manifest and mutation-protection test"*, and it is in this unit's `Owns` — so what
+  changes is that **stage 3.5 extends an existing module rather than writing a new one**, now stated
+  in the rule. **A related upstream statement is stale and deliberately not edited:**
+  `team-practices.md` § Testing Posture asserts *"No `tests/` directory exists yet in the
+  workspace"*, which is false. `org.md` reserves that file for the practices-affirmation gate, so it
+  is **reported, not corrected**.
+- **r-3 — discharged.** With `component-dependency.md`, `bolt-plan.md`, `team-practices.md` and
+  `unit-of-work-dependency.md` brought into the reviewer's scope, the three claims that had gone
+  unchecked for two passes — W-9's Gate 0 boundary, R-15's carve-out source, and W-1's acyclicity
+  argument — were all verified to hold. The reviewer also confirmed `src/`, `configs/` and
+  `pyproject.toml` are **absent on disk**, so nothing was created ahead of G-09.
+
+#### Counts — derived after every edit
+
+17 rules · 10 workflows · **8 live entities** of 9 numbered sections · 9 `DeterminismRecord` fields ·
+**36** §19 rows · 16 requirements · 2 untested · 7 acceptance rows · §13.3 = 14 fields over 10 rows.
+No TA-37/TA-38. Fences balanced in all four files. Zero debris files.
+
+#### Four items open, 4/4/4 across the artifacts
+
+1. **The `dataset_version` hash-to-label encoding** — a freeze-gate decision; 3.5 is forbidden to
+   choose one, and it blocks `src/data/release.py`, W-7 step 5 and `tests/test_release_hashes.py`.
+2. **Injectivity of that encoding**, on which never-reuse depends.
+3. **An amendment need on `write_release`**'s approved raise-contract (14 → 13 caller-supplied
+   fields).
+4. **An amendment need on `verify_release`**, or acceptance that the correspondence check is
+   test-only — this is the read-back hole m-2 scoped.
+
+#### Governance state
+
+A **declined** · B **approved** · C **declined as drafted** · **Q6 = D′**, FU-2 moot ·
+**G-09 unsigned** (stated 29 times) · no ledger created · no scientific value decided · no `TBD`
+filled · Phase 1 prohibition and the IRI boundary untouched · **no `## Review` section rewritten** on
+any artifact.
+
+**The budget is fresh again (2 iterations) after the redo.** After this confirmation the three
+artifacts are re-saved and the reviewer runs iteration 1 of that budget.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: A fresh receipt is recorded, the three artifacts are re-saved, and the reviewer runs iteration 1 of the restored budget. The four open items stand as open.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — including ruling differently on m-1's module-level carrier, or ruling now on any of the four open items — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — m-1 was the only finding that would have forced stage 3.5 to invent something, and it is now decided on the narrowest option that alters no approved contract; the two Majors were prose contradicting its own file and are corrected with their superseded wording preserved.
+
+*(Answered `Looks correct`, 2026-08-25T13:20Z. That receipt covered the artifacts as they stood before the eighth redo's iteration 1, which returned NOT-READY with two Minor findings; the remediation below changed the artifacts after it. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 (eighth) — zero Majors, and the design gap held under attack
+
+**The eighth redo's iteration 1 returned NOT-READY with 0 Major, 2 Minor, 2 Residual** — the first
+pass on this unit with no Major finding. Two things worth recording before the fixes.
+
+**m-1's design resolution held under attack.** The reviewer tested the module-level carrier on four
+independent angles and could not refute it: it is **reachable** by the `DeterminismRecord`
+construction (same-module `seed_everything`); it is **set in the child**, because the parent
+`execv`s and never builds a record; there is **no ordering hazard**, and the
+`ConfigSnapshot`-is-built-at-step-2 reasoning is correct; and **testability improves**, since
+module state is settable by a test where an inherited environment variable is not. That was the one
+finding that would otherwise have forced stage 3.5 to invent a mechanism.
+
+**The never-reuse sweep is finally clean.** *Zero* live sites claim never-reuse holds — the first
+pass in six where that class did not survive somewhere.
+
+#### The two Minors, both false status statements on the same subject
+
+| # | Defect | Fix |
+|---|---|---|
+| **Minor 1** · `business-rules.md` | **r-1 was half-swept.** The withdrawn SHA-256-collision reduction was still asserted **as live fact** in the gate-facing table — *"reuse across genuinely different content reduces to a SHA-256 collision"* — where R-12 refutes it and preserves it only as superseded. The reviewer derived the half-sweep: `git show HEAD \| grep -c` → **3**, working tree → **2**. The same cell also **self-contradicted**, bundling *duplicate-row* and *reused-label* as jointly *"vacuous"* when a **reused label *is* never-reuse**, which the very next sentence concedes as uncovered | Split: the **duplicate-row** obligation is vacuous (no ledger, no rows); the **reused-label** obligation is **not**, and remains uncovered pending injectivity. The collision clause is preserved as superseded, not asserted |
+| **Minor 2** · `domain-entities.md` | *"**Consequences carried forward — two open items**"* directly above its own bullet reading *"**Monotonicity — no longer required**"*. A **dropped requirement is not an open item**; exactly one of the two Q6=D obligations is open, as this file's § Assumptions already said. **Newly introduced by the previous remediation** — verified absent from HEAD — and the only live *"two open items"* status claim in any of the three design bodies | *"One open obligation, plus one requirement dropped."* Superseded heading preserved |
+
+#### Three further count-in-prose references, fixed by naming rather than counting
+
+The reviewer's Minor 2 pointed at a class rather than one line, so I swept it: three more
+*"two open items"* references were accurate when written and became misleading once the list grew
+from two to four. *"See the two open items above"* now **names** the encoding and injectivity items;
+the two dated records of *"two open items added"* now say **added at that time; the section now
+carries four**. Naming instead of counting is the actual fix for this class — a count in prose goes
+stale silently, a name does not.
+
+#### Residuals
+
+- **`config.py`'s framework-import ordering is derivable but unstated.** `seed_everything` lives in
+  the same module and needs TensorFlow, so a module-scope import would defeat FU-1=D's
+  re-exec-before-any-framework-import rule. **Inherited from the approved stage-2.6 contract, does
+  not block 3.5**, and recorded here rather than silently relied on.
+- `functional-design-questions.md` — the corrected *"Four open items"* introduces a colon-list of
+  two, with the other two named in the parenthetical; and one *"two open items"* remains inside an
+  answered, dated-historical block. Not a `produces[]` artifact, left as the record of what was
+  presented.
+
+#### Counts — re-derived after these edits
+
+17 rules · 10 workflows · **8 live entities** of 9 numbered sections · 9 `DeterminismRecord` fields
+(and `ConfigSnapshot` 8) · **36** §19 rows, TA-01…TA-36 · 16 requirements · 2 untested · 7 owned
+acceptance rows · §13.3 = **14 fields over 10 rows** · `source_files` = 6 · **four** OPEN items,
+**4/4/4** across the artifacts. Fences balanced. Zero debris files.
+
+**Worth noting about this pass's verification:** the reviewer re-derived §13.3 after catching **its
+own off-by-one** that had returned 13, and reconciled the requirement-to-workflow map by **set
+difference rather than totals** — 16 of 16 rows matching story-map Table 1. Both are the disciplines
+`project.md` § Way of Working records, applied by the reviewer to itself.
+
+#### Governance state
+
+A **declined** · B **approved** · C **declined as drafted** · **Q6 = D′**, FU-2 moot ·
+**G-09 unsigned** *(a "(36 statements)" figure was withdrawn here 2026-08-25 on adversarial residual r-3 — it was a prior pass's number and "statements" is not a countable unit; the fact needs no count)* · no ledger created · no scientific value decided · no `TBD`
+filled · zero IRI/GIM/RINEX/DCB/STEC references in any live design body · **no `## Review` section
+rewritten**.
+
+**One reviewer iteration remains** in this budget. If it returns NOT-READY, the surviving findings go
+to the stage approval gate for your decision rather than a ninth redo.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: A fresh receipt is recorded, the three artifacts are re-saved, and the reviewer runs iteration 2 — the last of this budget. The four open items stand as open.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — including ruling now on any of the four open items — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — no Major finding survived, the one design decision was tested on four angles and held, and both Minors were false status claims on the never-reuse subject, one of them introduced by the previous fix and now corrected along with the whole class it belonged to.
+
+*(Answered `Looks correct`, 2026-08-25T14:05Z. That receipt covered the artifacts as they stood before the eighth redo's iteration 2, which returned NOT-READY with one Major and three Minor findings; the ninth redo and the remediation below changed the artifacts after it. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 (ninth) — the exception hierarchy, settled from upstream authority
+
+**The eighth redo's iteration 2 returned NOT-READY: 1 Major, 3 Minor, 4 Residual.** Both of the
+previous pass's fixes landed and **introduced nothing** — the first time in four passes that was
+true. You authorised a ninth redo to fix what it found. All eight are fixed.
+
+#### m-1 — the only finding in this unit's entire review history that would have made stage 3.5 build the wrong thing
+
+W-1 step 4 raises `PhaseBoundaryError`. R-10 has the stage entry contract catch `IntegrityError` to
+write the `aborted` registry row. **R-01 and `domain-entities.md` § 9 both enumerated only six
+subclasses, and `PhaseBoundaryError` was not among them** — so an implementer writing
+`except IntegrityError` would let a **phase-boundary violation exit with no `aborted` row**, which
+is precisely the event **NFR-PHASE-01** and **NFR-AUD-01** most require recorded. Six consecutive
+adversarial passes did not examine it: `grep -rn "PhaseBoundaryError"` over this unit returned
+**one** hit, the diagram edge.
+
+**Settled from upstream authority rather than by judgement.** `component-methods.md` § Assumptions
+states that fourteen named exceptions *"are project-defined exceptions **in a shared base**. §12
+names no exceptions module; they are declared where raised **until 3.1 places them**."* **This stage
+is 3.1**, so placing them is its job, and it had placed only six. R-01 now reads: **all fourteen
+derive from `IntegrityError`**; `foundation` raises **six** (`ConfigError`, `PreflightError`,
+`PlatformError`, `DeterminismError`, `ReleaseError`, `RegistryError`); the other **eight are raised
+by other units and derive from the same base** (`PhaseBoundaryError`, `LockedTestError`,
+`LeakageError`, `AlignmentError`, `SeedError`, `FairnessError`, `BootstrapError`, `RegimeError`).
+`domain-entities.md` § 9 mirrors it, and both "why a base and not **six** independents" rationales —
+which had inherited the wrong count — now read **fourteen**.
+
+**This is exactly the failure R-01's own rationale predicted**, arriving in the form it did not
+anticipate: *"a hand-maintained catch list means a seventh subclass added later is silently
+uncaught"* — and it arrived as a **missing enumeration entry** rather than a missing catch clause.
+The rule was right; its list was not.
+
+**A cross-unit obligation is now recorded rather than assumed**, as a fifth OPEN item in all three
+§ Assumptions: the eight exceptions this unit does not raise must be declared as `IntegrityError`
+subclasses by **the units that do raise them** — `governance-guards` owns `phase_contract.py` and
+therefore `PhaseBoundaryError`. No cycle is created; every one of those units already depends on
+`foundation`.
+
+#### The Major — and why six sweeps missed it
+
+R-12's box heading read **"⚠ WHAT THIS RULE GIVES UP — ONE CAPABILITY, NO LONGER AN UNMET
+OBLIGATION"**, refuted twenty-six to eighty-three lines below by its own body (*"NOT ESTABLISHED"*,
+*"never-reuse obligation is **NOT**"*, *"Never-reuse is open"*) and by § Assumptions' OPEN items. It
+was true when written, above an item 1 that then read *"SATISFIED"*, and went stale the moment that
+item was corrected.
+
+**The reviewer identified precisely why the previous sweep reported zero live sites: it matched the
+words *never-reuse*, and this heading contains neither.** Seventh appearance of this class. Corrected,
+superseded heading preserved, and the durable remedy applied throughout this unit stands —
+**name what is open rather than count or characterise it.**
+
+#### The remaining findings
+
+| # | Defect | Fix |
+|---|---|---|
+| **m-2** | `domain-entities.md` claimed a value *"is recoverable from `ConfigSnapshot.hashes`"*. **False against the approved contract** — `hashes` is `Mapping[str, str]`, filename → SHA-256, and **a hash has no preimage.** Pre-existing and unflagged until now | Now cites the **parsed configuration** `ConfigSnapshot` carries, and the verbatim copies under `snapshot_dir` |
+| **m-3** | R-12's *"what still stands open against this rule"* named **two** items where R-12's own Constraint names a **third** — *"Closing the read-back hole requires the `verify_release` amendment"*. A roll-up narrower than the body it summarises | Now names **three** |
+| **r-1** | The one table row whose obligation is **uncovered** carried a ✅ glyph, where rows 1–2 use ⚠ for exactly that state | ⚠ |
+| **r-2** | That table — whose stated purpose is *"stated, not buried"* — **omitted R-17**, the other rule in the file declaring no acceptance row | R-17 added with its own row |
+| **r-3** | **The most serious of the residuals.** `domain-entities.md`'s `ReleaseManifest` row reduced §13.3 to **seven** items and collapsed `source_files` to *"hashes"* — the **exact defect closed upstream as `DATA-21` (MAJOR)**, whose remedy was to state §13.3 as *"ten rows naming fourteen fields, against the seven this requirement previously listed"* and to have `source_files` **cross-reference FR-P1-01-2 rather than be restated reduced**. It also contradicted this unit's own `business-logic-model.md`. FR-P1-04-11 names the consequence exactly: *"a release omitting its own processing provenance was conformant"* | **All fourteen fields enumerated** from FR-P1-04-11, with `source_files` deliberately **not** restated in reduced form |
+| **r-4** | My own *"*(a "(36 statements)" figure was withdrawn here 2026-08-25 on adversarial residual r-3 — it was a prior pass's number and "statements" is not a countable unit; the fact needs no count)*"* carried a prior pass's figure, and *"statements"* is not a countable unit — token occurrences derive as 21/11/8 = **40**, a different measure | Parenthetical **withdrawn**. The fact needs no count: G-09 is unsigned |
+
+#### Counts — re-derived after every edit
+
+17 rules · 10 workflows · **8 live entities** of 9 numbered sections · 9 `DeterminismRecord` fields ·
+**36** §19 rows · 16 requirements · 2 untested · 7 owned acceptance rows · §13.3 = **14 fields over
+10 rows, now enumerated in the entity contract** · **five** OPEN items, **5/5/5** across the
+artifacts. Fences balanced. Zero debris files. Zero live instances of the stale R-12 heading.
+
+#### Five items open
+
+1. The **`dataset_version` hash-to-label encoding** — freeze-gate decision; 3.5 forbidden to choose.
+2. Its **injectivity**, on which never-reuse depends.
+3. An **amendment need on `write_release`**'s raise-contract (14 → 13 caller-supplied fields).
+4. An **amendment need on `verify_release`**, or acceptance that the correspondence check is
+   test-only — the read-back hole.
+5. **NEW — the cross-unit exception obligation**: the eight exceptions other units raise must be
+   declared as `IntegrityError` subclasses by those units.
+
+#### Governance state
+
+A **declined** · B **approved** · C **declined as drafted** · **Q6 = D′**, FU-2 moot · **G-09
+unsigned** · no ledger created · no scientific value decided · no `TBD` filled · zero
+IRI/GIM/RINEX/DCB/STEC references in any live design body · **no `## Review` section rewritten**.
+
+**A fresh 2-iteration budget after the redo.** After this confirmation the artifacts are re-saved and
+the reviewer runs iteration 1.
+
+**One thing worth your attention beyond this unit.** This is the ninth redo, and the pattern is
+convergent but not converged: Major findings have gone 5 → 5 → 2 → 0 → 1, with each pass finding
+genuine defects, several of them created by the previous fix. `foundation` is 1 of **12** units, and
+four of those twelve have no functional-design artifacts at all. Whether to keep iterating this unit
+to READY or to accept a disclosed-defects state and move on is a judgement about the whole stage, not
+just this unit, and I will put it to you plainly at the next verdict rather than assume it.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: A fresh receipt is recorded, the three artifacts are re-saved, and the reviewer runs iteration 1 of the restored budget. The five open items stand as open.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — including ruling now on any of the five open items, or on how much further to iterate this unit — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — m-1 was the one finding that would have propagated a real defect into code generation, and it is settled from upstream authority rather than judgement; every other fix is a false statement corrected with its superseded wording preserved.
+
+*(Answered `Looks correct`, 2026-08-25T14:30Z. That receipt no longer stands: this file changed after it, to correct the four Q&A residuals the ninth-redo iteration 1 found. See the final re-confirmation below.)*
+
+
+### Re-confirmation, 2026-08-25 (tenth, and final for this unit) — accepted with disclosed defects
+
+**The project decision owner ruled, at the ninth-redo iteration-1 verdict, to accept this unit and
+move to unit 2.** One confirming reviewer pass records the final state; the workflow then proceeds
+to `governance-guards` **regardless of that verdict**, and any surviving findings ride to the stage
+approval gate as disclosed defects rather than into a tenth repair cycle. This section is the record
+of what is being accepted.
+
+**Why the ruling was put, and on what evidence.** The ninth-redo iteration 1 returned 1 Major,
+3 Minor, 4 Residual — all since fixed — with this implementability judgement, quoted because it is
+what the decision turned on:
+
+> *"The unit is one sentence away from being buildable up to the label encoding… every finding in the
+> last four passes — including three of my four this pass — is about what the documents say about
+> their own state, not about what they specify."*
+
+Major counts across the six adversarial passes ran **5 → 5 → 2 → 0 → 1 → 1**, each pass finding
+genuine defects and several of them created by the previous fix. Set against eleven units still
+owed — four of which have **no functional-design artifacts at all** — the owner chose progress over
+a perfect self-description. That is a trade, and it is recorded as one.
+
+#### What this pass fixed
+
+**The Major was blocking, and is decided.** Growing the exception enumeration from six to fourteen
+last pass named fourteen subclasses **and no module to hold the base** — `grep` for `exceptions.py`
+across all three artifacts returned **zero**, TE §12's `src/data/` tree names **nine** modules and
+none for exceptions, and `unit-of-work.md` § 1 `Owns` lists `config.py` by its seven functions with
+no exception class. That **stops** stage 3.5 rather than misleading it, and it was invisible at the
+gate. **Decided: `IntegrityError` and its hierarchy are declared in `src/data/config.py`** — already
+owned, already the first import of every stage script, already home to W-1's abort path, and
+requiring **no §12 amendment**. The eight exceptions other units raise import the base from there,
+which `component-dependency.md` permits for `src/features`, `src/models`, `src/evaluation`,
+`src/gnss` and `src/external`, and which creates no cycle because each of those units already
+depends on `foundation`.
+
+**The three Minors were the count-in-prose class in its eighth consecutive appearance**, and one of
+them is instructive: § 9's **defining cardinality sentence** still read *"six current subclasses"*
+twelve lines above the corrected fourteen-item list — **inside the very section the previous fix had
+edited**. Another was *"the section **now** carries four"*, where the word *now* asserts the present
+and so defeated the disclaimer written to defend those boxes as dated records. The third carried
+**no numeral at all**, which is why a numeral-keyed sweep could not see it.
+
+**Two items this pass's own text promised were also created**, because not creating them would have
+been the identical claim-without-the-thing defect the last three passes each caught: the **sixth OPEN
+item** on whether `IntegrityError` should move to a dedicated `src/data/exceptions.py` (a §12
+amendment, hence the owner's call), and **r-4's constraint that `config.py` must not import a
+framework at module scope** — `seed_everything` needs TensorFlow and `ensure_process_determinism` is
+in the same module and must run before any framework import, so a module-scope import would load the
+framework when the stage script imports `config.py`, before `main()`'s first statement, silently
+breaking FU-1 = D.
+
+The four Q&A residuals are corrected too: the *"Four open items … 4/4/4"* roll-up, the second
+representation of the hash-has-no-preimage claim, and both instances of the withdrawn
+*"(36 statements)"* figure.
+
+#### What is being accepted, stated plainly
+
+**The design is specified and buildable.** W-1–W-6, W-8, W-9, W-10 and R-01–R-10, R-13–R-17 are
+complete: the six-step entry contract with its ordering constraints and abort path, `load_configs`,
+preflight's double rejection keyed by `(stage, phase)`, `seed_everything` with the re-exec sentinel
+and its in-process carrier, the eight-field environment lock, the read-free append with its closed
+status enum, platform resolution that never touches a credential, and Bolt 1's permitted/barred
+boundary. W-7 and R-11/R-12 are complete except step 5's encoding, which is **correctly refused** and
+disclosed.
+
+**Six items are open**, in all three § Assumptions at **6/6/6**:
+
+1. The **`dataset_version` hash-to-label encoding** — a freeze-gate decision; TE §18.3 forbids 3.5
+   to choose one. Blocks `src/data/release.py`, W-7 step 5 and `tests/test_release_hashes.py`.
+2. Its **injectivity**, on which the never-reuse property depends.
+3. An **amendment need on `write_release`**'s raise-contract — 13 caller-supplied fields in, 14 out.
+4. An **amendment need on `verify_release`**, or acceptance that the correspondence check is
+   test-only — the read-back hole.
+5. The **cross-unit exception obligation**: the eight exceptions other units raise must be declared
+   as `IntegrityError` subclasses **by those units**.
+6. Whether **`IntegrityError` should move to `src/data/exceptions.py`** — needs a §12 amendment.
+
+**What may still be imperfect, disclosed rather than claimed resolved:** this unit's documents have
+had a self-description defect found in every pass, and the class recurred eight times. The
+specifications have been stable since the Amendment C reversal; the prose *about* them has not. A
+reader at the stage gate should treat the § Assumptions sections and the most recent dated box in
+each file as authoritative, and treat any count embedded in older prose as historical.
+
+#### Counts — derived after every edit
+
+17 rules · 10 workflows · **8 live entities** of 9 numbered sections · 9 `DeterminismRecord` fields ·
+**36** §19 rows · 16 requirements · 2 untested · 7 owned acceptance rows · §13.3 = **14 fields over
+10 rows, enumerated** · **six** OPEN items, **6/6/6**. Fences balanced. Zero debris files.
+
+#### Governance state
+
+A **declined** · B **approved** · C **declined as drafted** · **Q6 = D′**, FU-2 moot · **G-09
+unsigned** — nothing here authorises creating a module, including the one whose declaration site was
+just decided · no ledger created · no scientific value decided · no `TBD` filled · zero
+IRI/GIM/RINEX/DCB/STEC references in any live design body · **no `## Review` section ever rewritten**
+across all nine redos.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: A fresh receipt is recorded, the artifacts are re-saved, and the reviewer runs one confirming pass. The workflow then moves to `governance-guards` regardless of that verdict, with the six open items and any surviving findings carried to the stage approval gate.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change — including reversing the decision to move on, or ruling now on any of the six open items — and I re-present before touching anything.
+
+> **💡 Recommendation**: **Looks correct** — the one blocking finding is decided from upstream authority, the specifications are complete up to a gate-owned decision, and what remains imperfect is disclosed rather than described as resolved.
+
+*(Answered `Looks correct`, 2026-08-25T15:20Z. That receipt covered the acceptance state; the final confirming pass then found one genuine specification gap, the owner ruled a tenth redo to fix it alone, and the remediation below changed the artifacts. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 (eleventh) — the content_hash canonical representation, specified
+
+**The final confirming pass returned NOT-READY (1 Major, 8 Minor, 5 Residual) and found one thing
+that changed the premise of the acceptance ruling**: a genuine specification gap, not
+self-description. Four live sites named what `content_hash` *excludes* and none enumerated what it
+*includes*, whether `created_at_utc` is excluded, or the serialization — so stage 3.5 would have had
+to **invent the identity of every release**, and the obvious full-manifest reading silently falsifies
+the idempotence property W-7 and R-12 assert. You ruled: **tenth redo, fix the spec gap only, skip
+the documentation findings, one re-review, then move to unit 2 regardless.**
+
+**Specified, as an engineering decision on the same basis as the sentinel and the `IntegrityError`
+placement** (no scientific content; `components.md` sets the precedent by deferring the
+phase-contract's canonical set to 3.1, and this stage is 3.1):
+
+- **Included:** twelve of the thirteen caller-supplied §13.3 fields — everything except the three
+  exclusion categories Q6's answer already named, now bound to concrete fields.
+- **Excluded:** `dataset_version` (the label — derived *from* the hash, so circular),
+  `created_at_utc` (**the volatile metadata** — identical content re-released later must reproduce
+  the same identity or the idempotence claim is silently false), and `content_hash` itself (the
+  self-referential field).
+- **Serialization:** RFC 8785 canonical JSON (UTF-8, sorted keys, no insignificant whitespace), then
+  SHA-256 — platform-independent byte-for-byte, which WS-20/TA-17's two-platform reproduction
+  requires of the authoritative identity.
+- **Three content→hash negative controls** — the direction no existing control covered: same
+  manifest twice → identical hash; any included field changed → different hash; **only**
+  `created_at_utc` changed → **same** hash, proving idempotence rather than asserting it.
+
+Recorded in `business-rules.md` R-11 (full specification), `domain-entities.md` § 7's
+`content_hash` row, and W-7's step-2 diagram node.
+
+**Also fixed — the reviewer's two one-clause build risks, because they mislead a builder rather than
+a gate reader:** (m-6) the module-scope framework-import prohibition now binds **every stage
+script**, not only `config.py` — a script importing TensorFlow at module scope would make W-4's
+guard abort every run; (m-7) *"already been initialised"* is now observable — `"tensorflow" in
+sys.modules`, evaluated **before** `seed_everything`'s own deferred import, so the guard cannot trip
+on itself.
+
+**Deliberately NOT fixed, per your ruling:** the eight documentation Minors and five Residuals of
+the final pass (stale counts in dated boxes, an over-scoped phrase, a corrupted table row in a
+historical section, and the like). They are recorded in the final pass's `## Review` section, which
+the stage gate reads.
+
+**Counts, derived after the edits:** 17 rules · 10 workflows · 8 live entities of 9 · 36 §19 rows ·
+6 OPEN items 6/6/6 · fences balanced · zero debris. **G-09 remains unsigned**, no scientific value
+decided — the canonical representation is a hashing definition, not a scientific constant, and every
+threshold, seed, grid and window still arrives through `ConfigSnapshot`.
+
+**After this confirmation:** artifacts re-saved, one reviewer pass (iteration 1 of the tenth-redo
+budget), then **unit 2 regardless of its verdict**, per your standing ruling.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, one confirming review runs, then the workflow moves to `governance-guards` regardless of verdict.
+
+- Request changes
+   > **Impact**: No receipt, nothing re-saved. Tell me what to change — including the include/exclude split or the serialization choice — and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the identity of every release is now specified rather than left for 3.5 to invent, the exclusion of `created_at_utc` is what makes the claimed idempotence actually true, and the two build-risk clauses close the only remaining ways a correct implementer could go wrong.
+
+*(Answered `Looks correct`, 2026-08-25T15:50Z. That receipt was reset by the eleventh authorised redo, 2026-08-25T17:21:15Z, taken for `acquisition`. The live answer tag is the blank one at the end of this file.)*
+
+### Re-confirmation, 2026-08-25 (twelfth) — floor reset by the eleventh redo, taken for `acquisition`
+
+**Nothing in `foundation` changed.** Its artifacts are exactly the bytes the tenth-redo confirming
+pass reviewed to a terminal **READY**; the eleventh redo was authorised to fix `acquisition`'s
+seven terminal findings (one Critical), and resetting every unit's receipt floor was its stated
+cost. The re-saves after this receipt change no content, and the reviewer runs a narrow confirming
+pass against the identical bytes.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved unchanged, one narrow confirming review runs.
+
+- Request changes
+   > **Impact**: No receipt, nothing re-saved. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the unit is byte-identical to its READY state; the reset is purely mechanical.
+
+*(Receipt reset by the twelfth authorised redo, 2026-08-26T05:43:39Z, taken for `inventory-and-registry`. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — mechanical, floor reset by the twelfth redo (taken for `inventory-and-registry`)
+
+**Nothing in this unit changed**; artifacts are byte-identical to the state its terminal READY (or confirming READY) reviewed. Re-saves change no content; a narrow confirming review runs.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, unchanged re-save, narrow confirming review.
+
+- Request changes
+   > **Impact**: Nothing recorded or saved; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — purely mechanical.
+
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**Nothing in this unit changed**; byte-identical to its confirmed state. Floor reset by the fourteenth redo (2026-08-26T08:18:34Z, taken to finish `external-products`’ gate-record sweep).
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, review runs (narrow confirm for unchanged units; confirming pass for external-products).
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — mechanical for the unchanged units; for the two repaired question files the repair restores what a gate reader needs and touches no specification.
 
 [Answer]: Looks correct

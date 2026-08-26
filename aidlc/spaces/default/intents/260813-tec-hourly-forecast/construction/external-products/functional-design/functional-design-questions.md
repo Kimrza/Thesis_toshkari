@@ -18,8 +18,8 @@ evaluation time**, onto the already-frozen comparison-wide mask. `spaceweather.p
 deliberately outside that restriction — drivers **are** model inputs, subject to the
 availability lags.
 
-**7 requirements. The untested count is 4, not 5 — and the two upstream artifacts
-disagree.** Derived by reading the rows rather than carried from either:
+**7 requirements. The untested count is 4, not 5 — and the two upstream artifacts once
+disagreed — resolved: § 6 was swept 2026-08-24 (finding 15).** Derived by reading the rows rather than carried from either:
 
 | Source | Untested here | Acceptance rows owned |
 |---|---|---|
@@ -31,7 +31,7 @@ disagree.** Derived by reading the rows rather than carried from either:
 map records the sweep — *"Changed 2026-08-22 by the addition of TA-33…TA-36: untested
 40 → 36."* `unit-of-work.md` § 6's bold list and its `Acceptance rows (1)` line were not
 swept with it. **Question 2 decides what this stage does about that**; it does not edit an
-approved artifact.
+approved artifact. *(Standing corrected 2026-08-26, finding 12/16: § 6 HAS since been swept — 2026-08-24 — so this paragraph is the dated record of the conflict as it stood when Question 2 was asked.)*
 
 **TA-36's own status is `Pending`**: the row exists; it is **not implemented, not
 executed, not passing.** A row is not a result.
@@ -275,7 +275,7 @@ C) B, plus the report's **required content asserted field by field**, so an inco
    > **Impact**: FR-P1-04-15 enumerates seven content areas and a 5–10 sample range; a report missing the altitude ceiling or the driver-availability confirmation would otherwise pass a presence check. This is the same list-plus-completeness-test shape used three times already in this design. Costs one enumeration that must stay current.
 
 D) C, plus the benchmark's **own drivers appearing as rows in the same frozen availability matrix used for ML features**
-   > **Impact**: FR-P1-04-15's criterion states this explicitly, and it is the limb that makes the benchmark's fairness checkable: a benchmark fed better-timed drivers than the model gets is not a benchmark. Each row carries observation timestamp, publication timestamp, release status and safe lag. Costs extending the availability matrix, which `features-and-splits` owns.
+   > **Impact**: FR-P1-04-15's criterion states this explicitly, and it is the limb that makes the benchmark's fairness checkable: a benchmark fed better-timed drivers than the model gets is not a benchmark. Each row carries observation timestamp, publication timestamp *(or, absent one, the approved conservative convention — for F10.7, D-25's 00:00 UTC on D+1; field amended by CR-2026-08-22-EV-12, noted 2026-08-26, finding 11)*, release status and safe lag. Costs extending the availability matrix, which `features-and-splits` owns.
 
 X. Other (please specify)
    > **Impact**: Depends on your specific choice.
@@ -418,7 +418,7 @@ X. Other (please specify)
 - **Open — FIVE owed amendments across three units**, boundary contracts only: **`acquisition` 3** (the named accessors `open_d9_input` and the restricted writer; the `AccessRecord.purpose` extension plus a restricted-write function; `write_release`'s `identity_fields` parameter), **`inventory-and-registry` 1** (`Station`'s provenance field — its `inventory.py` contract is **intra-package** and owes nothing), **this unit 1** (boundary blocks for `iri.py`, `gim.py` and `spaceweather.py`). Question 1 proposes carrying them as one consolidated change record; that is the owner's call. **Corrected twice on 2026-08-23.** First: the opening reading said "four across three" and attributed the named accessors to `governance-guards`, which recorded no such finding. Then: **"six across three"** was corrected once `component-methods.md` § Depth was read — it specifies **cross-package boundary calls only** and names **this stage** as where intra-package shapes are specified, which removes `inventory-and-registry`'s `inventory.py` from the count and narrows this unit's from "the `src/external` package" to its three boundary-importable modules.
 - **Open — FR-P1-04-18's interpolation rule is a §18.2 Student-owned forbidden choice (Q-15)** and is **not set**. No implementer may fill it by convenience.
 - **Open — four requirements with no acceptance row**: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18. The artifacts state what evidence would close each and draft no §19 criterion.
-- **Open — `unit-of-work.md` § 6 carries stale text**, reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`. Both were correct before 2026-08-22.
+- **Closed 2026-08-26 (finding 12): the § 6 conflict no longer exists** — the file was swept 2026-08-24 (commit `45796f5`; current text: 4 untested, `Acceptance rows (2). WS-09, TA-36 (Pending …)`), so nothing is reported to the gate under this item. Kept as the dated record. *(Superseded bullet:)* "Open — `unit-of-work.md` § 6 carries stale text", reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`. Both were correct before 2026-08-22.
 - **Open — BLK-07's authorization limb**, carried forward. Nothing in this unit reads the locked month, but its products join at evaluation time onto the frozen comparison-wide mask.
 - **G-09 is not signed.** No answer here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`, `src/external/gim.py` or `scripts/04_build_external_products.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -433,7 +433,7 @@ owner's instruction to apply the recommendations. Consolidated:
 | Q | Answer | What it settles |
 |---|--------|-----------------|
 | 1 | D | `src/external`'s three modules get **boundary contracts** here, recorded as **one amendment owed**; and this stage proposes the **five** owed amendments (`acquisition` 3, `inventory-and-registry` 1, this unit 1) be carried as **one consolidated change record** — offered to you, not taken. **Corrected 2026-08-23**; superseded: *"three consecutive units have now found a named module with no contract… the six owed amendments (… `inventory-and-registry` 2 …)"* |
-| 2 | D | The **story map governs** (4 untested; **owns WS-09**); `unit-of-work.md` § 6's stale five-item list and `Acceptance rows (1)` line are **reported at the gate, not edited**; and **TA-36's `Pending` status** is stated wherever it is cited. **On TA-36 the story map contradicts itself**, and § Cross-unit responsibilities is the reconciling statement: **`features-and-splits` holds enforcement and the primary negative-path acceptance test** (`tests/test_feature_leakage_guards.py`); **this unit holds data production and upstream evidence**. This stage does **not** reallocate |
+| 2 | D | The **story map governs** (4 untested; **owns WS-09**); `unit-of-work.md` § 6's stale five-item list and `Acceptance rows (1)` line were **reported, not edited** — and have since been swept upstream (2026-08-24), so nothing is now reported to the gate under this row *(qualified in-cell 2026-08-26, finding 18)* |
 | 3 | D | The import allowlist is enforced by a **transitive** static reachability scan; a run-time caller check is declined with its reason; and the scan is declared **authoritative for this rule** — a module graph is a property of the source tree, unlike the phase boundary's `sys.modules` check |
 | 4 | C | F10.7 trailing-ness proven as a **property**: perturbing any day after the safe-lagged day must leave the 81-day mean unchanged. Catches boundary and gap-fill cases a spot check misses. Not generalised to the other drivers, which FR-P1-04-17 already governs |
 | 5 | D | All three TA-36 limbs built (Kp outside its interval fails; Dst shifted fails; grep finds no interpolation call), alignment and carry-forward asserted **separately**, and TA-36 cited with its `Pending` status |
@@ -456,8 +456,8 @@ Assumptions entry.
 `features-and-splits`' artifact; Q3's allowlist covers `src/evaluation/` paths owned by
 three different units. Both are stated, not claimed.
 
-Carried to the gate, unchanged by these answers: `unit-of-work.md` § 6's stale untested
-list and acceptance-row count, reported not edited; TA-36 `Pending`, never a result; four
+Carried to the gate, unchanged by these answers *(list corrected 2026-08-26, finding 15: the § 6 item is RETIRED — the file was swept 2026-08-24, so it no longer reaches the gate)*: ~~`unit-of-work.md` § 6’s stale untested
+list and acceptance-row count, reported not edited~~; TA-36 `Pending`, never a result; four
 requirements with no acceptance row (REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18);
 BLK-07's authorization limb; rule numbering assumed to continue at R-54; G-09 unsigned.
 
@@ -611,5 +611,69 @@ Does this all look correct before I generate the artifact?
    > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change and I re-present first.
 
 > **💡 Recommendation**: **Looks correct** — this unit is untouched; the reset is a mechanical consequence of a redo taken for a different unit, and that redo achieved what it was authorised for.
+
+*(Receipt reset by twelve authorised stage-wide redo jumps, all taken for other units, the last at 2026-08-26T05:43:39Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — after twelve receipt-floor resets taken for other units
+
+**Nothing in `external-products` changed.** Verified: **7** requirements derived (4 bold/untested: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18), **2** acceptance rows (WS-09, TA-36), **zero** Amendment C contamination, and the exception section already derives from `foundation`'s base. Proposed edit after this receipt, and only this: the same one-line tightening every prior unit received — the base named explicitly as **`IntegrityError`, imported from `src/data/config.py`**, with the declaration-site OPEN item. Then the reviewer runs on this unit's own budget.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, tightening applied, artifacts re-saved, reviewer runs.
+
+- Request changes
+   > **Impact**: Nothing recorded or edited; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — unchanged, verified clean, one consistency tightening.
+
+*(Receipt reset by the thirteenth authorised redo, 2026-08-26T07:26:22Z, taken for THIS unit's terminal findings. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 (second) — the terminal pass's four findings, fixed by claim across every site
+
+The terminal pass found the previous fixes had landed in one file's one section while eight passages elsewhere still asserted a FALSE upstream defect (the § 6 conflict, actually swept 2026-08-24). Fixed by claim this time: R-54's trigger and table marked historical with a ⛔ box; the DE upstream-disagreement box re-headed RESOLVED; all three Open bullets closed as dated records; the three retracted conditions removed from the DriverError Raised-when CELL itself (Kp/Dst misalignment raise the approved AlignmentError at build_features; interpolation is a static grep); the requirement map repointed FR-P1-04-3 to the new R-57a with a carry_forward/exclusion field added to DriverSeries; the Q&A Impact line carries the amended availability field. Counts unchanged: 7/4/2.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, reviewer runs iteration 1 of the fresh budget.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — the sweep was keyed to the claim, not a literal, and the gate is no longer handed a defect that does not exist.
+
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z, taken to finish THIS unit's gate-record sweep. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 (third) — the sweep finished, each edit verified after applying
+
+The terminal pass found my line-162 edit had silently no-opped (a .replace whose pattern missed; the script printed success anyway) and two Q&A surfaces still asserting the closed § 6 conflict live. All six sites are now fixed AND verified by re-reading after each edit: BLM 162's false completion sentence corrected in place; the Q&A header reads "disagreed — resolved"; the mid-sentence parenthetical moved to the sentence end; the fourth table cell moved outside the table (GFM drops it); the Carried-to-the-gate list strikes the retired § 6 item. Zero live instances remain outside dated records and review quotations. Spec unchanged; counts 7/4/2.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, one confirming review runs.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — verified-after-edit is the discipline the no-op failure demanded.
+
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**Two things this pass**: (1) the same mojibake repair as `inventory-and-registry` — ~142 lines of this question file restored by iterative latin-1 reversal (the corruption was Finding 17, Critical, introduced by my own perl edits; the three design artifacts were never corrupted, and the fix text of findings 15/16 is now actually readable); (2) finding 18’s row-2 qualification moved INTO the table cell before its closing pipe, so GFM renders it. Zero live instances of the closed-§ 6 claim remain. Spec unchanged; counts 7/4/2.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, review runs (narrow confirm for unchanged units; confirming pass for external-products).
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — mechanical for the unchanged units; for the two repaired question files the repair restores what a gate reader needs and touches no specification.
 
 [Answer]: Looks correct

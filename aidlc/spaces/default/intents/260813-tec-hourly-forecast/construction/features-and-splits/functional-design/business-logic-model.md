@@ -24,8 +24,13 @@
 >
 > Iteration-5 findings **4, 5, 6 and 7** are applied as mechanical corrections (W-2's signature
 > block, `domain-entities.md` § 10's two rows, the duplicated *"which representation"* sentence,
-> and the one-parameter Assumptions entries). Findings **9, 10 and 11** were not re-raised as
-> blocking and stand as they were. **BLK-04 is not closed by any of this** — it remains an exit
+> and the one-parameter Assumptions entries). Findings **9, 10 and 11** were left standing on
+> 2026-08-24 and **fixed 2026-08-26 under the fourteenth-redo floor, on the owner's "fix all"
+> ruling**: the `evaluate` rows now carry the read/emit split where the embargo term bites
+> (9); `business-rules.md`'s Sources list received the same R-24-in/R-25-R-28-out correction
+> the other two files got on 2026-08-23 (10); and R-76a's id and filing position are kept with
+> the reason stated — renumbering would break `models-and-baselines`' live citations under a
+> frozen READY receipt (11a; 11b's tree-revision half already carried its gate referral). **BLK-04 is not closed by any of this** — it remains an exit
 > condition on this unit and the four downstream units. **The NOT-READY verdict below belongs to
 > the previous attempt and predates all of it; a fresh adversarial pass follows.**
 
@@ -236,9 +241,10 @@ respectively — raising when any row falls outside, or when the frame is empty.
    boundary is recoverable.
 4. **Applying failure** — `apply_transforms` takes a **required `purpose`** (`train` or
    `evaluate`) and raises `LeakageError` when the frame's rows fall outside the set that
-   `purpose` permits for **that transform's own fold** — its training partition for `train`,
-   **exactly its validation month** for `evaluate` — and on an **empty or timestamp-less
-   frame**. **This is the second half of the same leak**: element 2 stops a transform being
+   `purpose` permits for **that transform's own fold** — its training partition for `train`;
+   for `evaluate`, its validation month **plus the causal history the frozen 24-hour window
+   requires, readable but never emitted** (W-4b; *aligned 2026-08-26*) — and on an **empty or
+   timestamp-less frame**. **This is the second half of the same leak**: element 2 stops a transform being
    *fitted* on the wrong rows; nothing in it stops one correctly fitted on F4 being *applied*
    to April as F1's evaluation.
 
@@ -297,7 +303,7 @@ respectively — raising when any row falls outside, or when the frame is empty.
 > | `purpose` | Fold *k*'s transform accepts | The refit's transform accepts |
 > |---|---|---|
 > | `train` | Fold *k*'s **training partition**, embargo rows **excluded and counted** | 1 Jan – 30 Nov |
-> | `evaluate` | **Exactly fold *k*'s validation month** | **December only**, and only through W-6's guard |
+> | `evaluate` | **Exactly fold *k*'s validation month** as the **emittable** set; the 24-h embargo rows are **readable as causal history only, never emitted** (W-4b) — an embargo row **emitted** under `evaluate` raises `LeakageError` *(row completed 2026-08-26, iteration-5 finding 9)* | **December only**, and only through W-6's guard |
 >
 > Anything else raises `LeakageError`; so does an **empty or timestamp-less** frame, because a
 > check that never fired and a check that passed must not be indistinguishable — the same
@@ -1351,3 +1357,13 @@ BLK-04's contract remains one whose closing half a developer would have to inven
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
 > **This unit is named in one of them**: R-96's ownership analysis rests on `features-and-splits`
 > R-80 owning the closed six-row partition list, which the reviewer verified directly and upheld.
+
+---
+
+> **Re-saved 2026-08-26 under the fourteenth-redo re-confirmation receipt, after completing the
+> iteration-5 remediation.** In this file: the accepted-set table's `evaluate` row completed with
+> the read/emit split (finding 9); element 4's applying-failure clause aligned with W-4b; the
+> header's "findings 9, 10 and 11 stand" claim updated to record their 2026-08-26 fixes. The
+> 2026-08-24 remediation (FU-4/5/6: stamp, W-4a/W-4b, three-call sequence, W-2 block, amendment
+> total 8 across 5) is unchanged. The adversarial review under this floor follows this save.
+> **BLK-04 remains an open exit condition. G-09 remains unsigned.**

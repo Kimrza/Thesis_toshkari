@@ -196,7 +196,7 @@ apply_transforms(frame: DataFrame, *, transform: Transform) -> DataFrame
 | **Allowed partitions** | The named fold's **training partition only** |
 | **Fitting failure** | `LeakageError` when `train`'s index is **not a subset** of that partition |
 | **Ownership of fitted state** | `Transform` **carries its `FoldSpec`** — resolved boundaries, not a bare `fold_id` string |
-| **Applying failure** | `apply_transforms` takes a **required `purpose`** (`train` \| `evaluate`, no default) and raises `LeakageError` when the frame leaves the set that `purpose` permits **for that transform's own fold** — its training partition for `train`, **exactly its validation month** for `evaluate` — or when the frame is **empty** |
+| **Applying failure** | `apply_transforms` takes a **required `purpose`** (`train` \| `evaluate`, no default) and raises `LeakageError` when the frame leaves the set that `purpose` permits **for that transform's own fold** — its training partition for `train`; for `evaluate`, its validation month **plus the causal history the frozen 24-hour window requires, which is readable but never emitted** (§ 5, W-4b; *row aligned 2026-08-26 with the read/emit split — the flat "exactly its validation month" reading raised on every first window*) — or when the frame is **empty** |
 
 > **⚠ Read this table with its condition.** These four elements are **complete and executable
 > for F1–F4**; for the **final refit** they are **conditional** on § 6's open shape question
@@ -235,8 +235,9 @@ operationally.
 > **The amendment, approved by the owner 2026-08-23.**
 > `apply_transforms(frame, *, transform, purpose: ApplyPurpose)` — `purpose` **required, no
 > default**. `train` accepts that fold's **training partition** (embargo excluded and
-> counted); `evaluate` accepts **exactly its validation month** — December for the refit,
-> through § 7's guard. `Transform` carrying its `FoldSpec` is free (unspecified, intra-package);
+> counted); `evaluate` accepts its validation month **as the emittable set, plus the readable
+> causal history W-4b permits and forbids emitting** *(aligned 2026-08-26)* — December for the
+> refit, through § 7's guard. `Transform` carrying its `FoldSpec` is free (unspecified, intra-package);
 > **`purpose` is a cross-package boundary amendment, the sixth this stage owes.**
 >
 > **December is routed, not excluded** — applying the refit transform to December **is** the
@@ -517,3 +518,11 @@ TA-36.
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied. One of them turns on **this unit's** `PartitionList` being a closed
 > six-row set, which the reviewer verified directly and upheld.
+
+---
+
+> **Re-saved 2026-08-26 under the fourteenth-redo re-confirmation receipt, after completing the
+> iteration-5 remediation.** In this file: the element-4 applying-failure row and § 6's amendment
+> box aligned with W-4b's read/emit split — no live sentence states `evaluate`'s set flat as
+> "exactly its validation month" any more. No entity shape changed.
+> **BLK-04 remains an open exit condition. G-09 remains unsigned.**

@@ -185,7 +185,7 @@ awk '/class DeterminismRecord/,/^$/' component-methods.md | grep -cE "^ +[a-z_]+
 |---|---|---|
 | `seeds_applied` | `Mapping[str, int]` | **approved** |
 | `pythonhashseed` | `str` | **approved** |
-| `reexec_performed` | `bool` | **approved** |
+| `reexec_performed` | `bool` | **approved**. `True` when a re-exec occurred. Carried across the `exec` boundary by a **sentinel environment variable** that `ensure_process_determinism` sets before `os.execv` and the child **unsets immediately after reading** — without the pop a subprocess of a re-exec'd script inherits it and records `True` falsely. See `business-rules.md` R-05 and `business-logic-model.md` W-4. *(Carrier noted here 2026-08-25 on adversarial residual r-1 of the restored budget: this row was the field's contract and mentioned no carrier at all.)* |
 | `framework_versions` | `Mapping[str, str]` | **approved** |
 | `tf_op_determinism` | `bool` | **approved** |
 | `nondeterministic_ops` | `Sequence[str]` | **approved** |
@@ -232,7 +232,8 @@ Amendment B was sought):
   not recorded, which makes it unauditable.
 
 **Deliberately not proposed:** a field carrying the config-declared expected set
-itself. It is recoverable from `ConfigSnapshot.hashes`, and duplicating governed
+itself. It is recoverable from the **parsed configuration** `ConfigSnapshot` carries — and from the
+verbatim copies under `snapshot_dir` — and duplicating governed
 data into a second location is the drift pattern
 `CR-2026-08-22-SWEEP-COMPLETENESS` documents at length.
 
@@ -325,13 +326,34 @@ silent rerun cannot hide.
 
 ## 7. `ReleaseManifest` — immutable, content-addressed
 
-**Q6 = D.** TE §13.3's ten manifest rows over fourteen fields.
+**Q6 = D′** (re-answered 2026-08-25). TE §13.3's ten manifest rows over fourteen fields.
+
+> *(Authority corrected 2026-08-25 on adversarial reviewer finding M-1, which was Major. This
+> section previously read `**Q6 = D.**` and its `label` row read *"Monotonic, human-readable"* —
+> **the entity contract stage 3.5 implements from**, telling an implementer the field is
+> monotonic while R-12 tells them the encoding is unspecified and they must stop and report. Q6
+> was re-answered as **D′**, which states verbatim "Drop 'monotonic.'" The sweep missed this
+> because three sites asserted *"R-11 is unchanged"* — true of R-11's substance, false of its
+> text, and the assertion stood where the check should have been.)*
 
 | Attribute | Type | Meaning |
 |---|---|---|
-| `content_hash` | `str` | **AUTHORITATIVE identity.** SHA-256 over a canonical representation that **excludes** the human-readable label, volatile metadata, and any self-referential hash field |
-| `label` | `str` | Monotonic, human-readable, for review and citation. **Derived and NOT authoritative** |
-| §13.3 fields | — | version, source manifest, hashes, schema, row counts, exclusions, fold/mask identifiers |
+| `content_hash` | `str` | **AUTHORITATIVE identity.** SHA-256 over the canonical representation **specified in `business-rules.md` R-11 (decided 2026-08-25)**: RFC 8785 canonical JSON of the twelve included caller-supplied fields — **array-valued fields sorted lexicographically by the RFC 8785 serialization of their elements before serializing** (F-1, 2026-08-25: JCS does not reorder arrays, and five included fields are arrays) — excluding `dataset_version` (the label), `created_at_utc` (volatile — identical content re-released later reproduces the same identity), and `content_hash` itself |
+| `dataset_version` | `str` | Human-readable, for review and citation. **Derived from `content_hash`, and NOT authoritative.** The exact hash-to-label encoding is **not specified** by any approved artifact; per TE §18.3 stage 3.5 must **stop and report** rather than choose one — see § Assumptions. *(Superseded 2026-08-25: `label` — "Monotonic, human-readable, for review and citation. **Derived and NOT authoritative**". "Monotonic" was dropped by Q6=D′; the field is named `dataset_version` in W-7 and R-12, and is named so here for consistency.)* |
+| §13.3 fields — **all fourteen, enumerated** | — | `dataset_version`; `created_at_utc`; `source_manifest_id`; **`source_files`, whose own six items are specified by FR-P1-01-2 and are deliberately NOT restated in reduced form here**; the whole **`processing`** group — phase and target-definition ID, provider experiment/kindat, parameters, the station-coordinate-to-cell rule, selected cell bounds and hourly aggregation; `schema_version`; `units`; `row_counts`; `exclusions_qc_summary`; `fold_ids`; `mask_ids`; `feature_set_ids`; `output_files`; `change_record_id` |
+
+> *(Row corrected 2026-08-25 on adversarial residual r-3 of the eighth-redo iteration 2.
+> **Superseded row, preserved:** "| §13.3 fields | — | version, source manifest, hashes, schema,
+> row counts, exclusions, fold/mask identifiers |" — **seven items, with `source_files` collapsed
+> to "hashes"**. That is the precise defect `requirements.md` closed upstream as **`DATA-21`
+> (MAJOR)**, whose remedy was to state §13.3 as **ten rows naming fourteen fields** *"against the
+> seven this requirement previously listed"* and to have `source_files` **cross-reference
+> FR-P1-01-2 instead of being restated in reduced form**. Reintroducing the reduction here would
+> have re-set the truncated count as the bar, and FR-P1-04-11 names the consequence exactly: *"a
+> release omitting its own processing provenance was conformant."* It also contradicted this unit's
+> own `business-logic-model.md`, which states `source_files`' six items are validated against
+> `inventory.py` **rather than restated as a bare hash**. Enumerated from FR-P1-04-11 rather than
+> summarised.)*
 
 **Which identifier wins, stated because leaving it implicit is the failure mode.**
 The **content hash is authoritative**; the label is for citation at a
@@ -365,16 +387,26 @@ has been sought.
 > chose the full reversal with those consequences stated. It is therefore a deliberate
 > override of Q6=D and FU-2=D, not an oversight, and is recorded as such.
 >
-> **Consequence carried forward — one item, after analysis, not two.** Of the two obligations
-> `Q6=D` placed on the label, **never-reused survives** and **monotonicity does not**:
+> **Consequence carried forward — one open obligation, plus one requirement dropped.** *(Corrected 2026-08-25 on adversarial finding of the eighth-redo iteration 1, which found this heading **newly introduced by the previous remediation**: it read "two open items, both narrower than the one first named" while its own first bullet reads "**Monotonicity — no longer required**". A dropped requirement is not an open item, and this file's § Assumptions had it right — only never-reuse is open. It was the only live "two open items" status claim in any of the three design bodies.)* Of the two obligations
+> `Q6=D` placed on the label, **neither now holds as originally stated** — monotonicity was
+> dropped by the Q6=D′ re-answer, and never-reuse turns out to be contingent rather than
+> satisfied *(corrected 2026-08-25 on reviewer finding M-3, which was Major; superseded claim
+> preserved: "**never-reused survives** and **monotonicity does not**")*:
 >
-> - **Never-reused — satisfied by determinism rather than by durable state.** The derivation is
->   a pure function of `content_hash`, so it allocates nothing and consults nothing. The failure
->   the ledger existed to prevent — delete a release directory, a rebuilt index forgets the
->   label, the next allocation reuses it — requires *allocation from state* and cannot arise
->   here; reproducing the same label from the same content is the correct outcome. A label bound
->   to two genuinely different contents reduces to a **SHA-256 collision**, unreachable by any
->   bookkeeping error.
+> - **Never-reused — NOT ESTABLISHED. Contingent on a label encoding that does not yet exist.**
+>   What determinism *does* buy: the derivation is a pure function of `content_hash`, so it
+>   allocates nothing and consults nothing, and the failure the ledger existed to prevent —
+>   delete a release directory, a rebuilt index forgets the label, the next allocation reuses it
+>   — requires *allocation from state* and cannot arise here. Reproducing the same label from the
+>   same content is the correct outcome. **But that is idempotence, and never-reuse is its
+>   converse — injectivity.** *(Corrected 2026-08-25 on reviewer finding M-3, Major. Superseded
+>   claim, preserved: "**Never-reused — satisfied by determinism rather than by durable state** …
+>   A label bound to two genuinely different contents reduces to a **SHA-256 collision**,
+>   unreachable by any bookkeeping error.")* The collision reduction needs an encoding faithful
+>   to all 256 bits, and Q6=D′ keeps the label **human-readable and citable** — necessarily
+>   lossy — while leaving the encoding unspecified and forbidding stage 3.5 to choose one. So
+>   never-reuse is an **open obligation on whoever specifies the encoding**, listed in
+>   § Assumptions, and nothing this unit produces may claim it holds.
 > - **Monotonicity — no longer required.** Ordering is information about *sequence*, which a
 >   function of content alone does not carry, so no test or implementation choice reaches it.
 >   Because that is a property of the mechanism rather than of its implementation, the
@@ -386,11 +418,19 @@ has been sought.
 >   sequence from the run record or the experiment registry, which carry timestamps and
 >   `run_id`. Nothing else in this design depended on label ordering.
 >
-> **FU-2's integrity obligation is discharged in the form the re-answer leaves available.**
-> **R-12 is amended rather than deleted** and carries three negative controls — derivation
-> correspondence, derivation determinism, and injectivity against a degenerate encoding. The
-> ledger's own duplicate-row checks become vacuous once no rows exist and the label is a
-> function of the hash, so their absence is not an uncovered obligation.
+> **FU-2's *inconsistent-mapping* obligation is discharged in the form the re-answer leaves
+> available**, and its duplicate-row checks become vacuous once no rows exist and the label is a
+> function of the hash — so *their* absence is not an uncovered obligation. **R-12 is amended
+> rather than deleted** and carries three negative controls: derivation correspondence,
+> derivation determinism, and a non-degeneracy check.
+>
+> **But never-reuse IS an uncovered obligation, and this passage previously implied otherwise.**
+> *(Corrected 2026-08-25 on adversarial finding M-3 of the restored budget; superseded wording
+> preserved: "carries three negative controls — derivation correspondence, derivation
+> determinism, and **injectivity against a degenerate encoding** … so their absence is not an
+> uncovered obligation.")* The third control catches a **degenerate** encoding and passes a
+> **truncating** one, so it does not establish injectivity and must not be named for it.
+> Never-reuse is **OPEN**, on whoever specifies the encoding — see § Assumptions.
 >
 > **Two upstream artifacts contradicted this design, and both have since been corrected.** They
 > were first **reported** rather than edited, because this stage's scope control forbade editing
@@ -473,7 +513,7 @@ to two labels, and a malformed row.
 
 ## 9. `IntegrityError` — the exception hierarchy as an entity
 
-**Q5 = B.** One base class, six current subclasses, and any future
+**Q5 = B.** One base class, **fourteen subclasses — six of them raised by this unit** *(cardinality corrected 2026-08-25 on adversarial finding m-1 of the ninth-redo iteration 1: it read "six current subclasses" twelve lines above § 9's own corrected enumeration of all fourteen. The previous fix edited the list and its rationale and left the entity's **defining cardinality sentence** — the eighth consecutive appearance of the count-in-prose class, inside the very section that fix had edited)*, and any future
 integrity-related exception.
 
 | Attribute | Type | Meaning |
@@ -485,11 +525,23 @@ integrity-related exception.
 *an integrity violation exits non-zero naming the file and the violated
 expectation* — is enforced by construction rather than by discipline.
 
-Subclasses: `ConfigError`, `PreflightError`, `PlatformError`, `DeterminismError`,
-`ReleaseError`, `RegistryError`.
+Subclasses — **all fourteen project-defined exceptions**, of which this unit **raises six**:
+`ConfigError`, `PreflightError`, `PlatformError`, `DeterminismError`, `ReleaseError`,
+`RegistryError`. The other **eight are raised by other units and derive from the same base**:
+`PhaseBoundaryError`, `LockedTestError`, `LeakageError`, `AlignmentError`, `SeedError`,
+`FairnessError`, `BootstrapError`, `RegimeError`.
 
-**Why a base rather than six independents.** The stage entry contract must catch
-*any* of them to write the `aborted` registry row. A bare list of six means a
+> *(Enumeration corrected 2026-08-25 on adversarial finding m-1 of the eighth-redo iteration 2.
+> **Superseded:** "Subclasses: `ConfigError`, `PreflightError`, `PlatformError`,
+> `DeterminismError`, `ReleaseError`, `RegistryError`." `component-methods.md` § Assumptions
+> places all fourteen in a shared base and defers placement to **stage 3.1**, which is this stage.
+> The omission mattered: W-1 step 4 raises `PhaseBoundaryError`, and with it outside the hierarchy an
+> `except IntegrityError` would let a phase-boundary violation exit **without the `aborted` registry
+> row** that NFR-PHASE-01 and NFR-AUD-01 require. See `business-rules.md` R-01 for the full record
+> and the cross-unit obligation this places on the units that raise the other eight.)*
+
+**Why a base rather than fourteen independents** *(count corrected 2026-08-25 with the enumeration above; "six" was this unit's own raises, not the hierarchy)*. The stage entry contract must catch
+*any* of them to write the `aborted` registry row. A bare list means a
 seventh added later is silently not caught — the same list-versus-rule failure as
 Q1, and the same one `DP-DATA-01` caught in this project already. Catching the base
 means a new subclass is covered by virtue of its base.
@@ -660,8 +712,14 @@ matching the story map's designation.
 - **[assumption]** `frontend-components.md` is not produced. `foundation` is `kind: library`; the stage's `produces_kinds` maps that artifact to `[ui]` only, and the engine's resolved list for this unit carries three artifacts.
 - **Closed — Amendment A** (Vision §15.2): §19 acceptance rows for REQ-ENG-7 and REQ-ENG-10. **Raised and DECLINED 2026-08-24.** No rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. **No acceptance coverage is claimed for either, permanently rather than pending.** *(Superseded status: "**Open** … **Not approved.**")*
 - **Closed — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **APPROVED 2026-08-24.** The approved contract now stands at **nine** fields. *(Superseded status: "**Not approved.** The approved contract stands at six fields.")*
-- **Closed — Amendment C, and its consequences with it.** **DECLINED AS DRAFTED 2026-08-25**, reversing the 2026-08-24 approval: no release ledger, `ReleaseLedgerEntry` withdrawn (§ 8), `dataset_version` derived from `content_hash` with no encoding specified here. *(Superseded statuses, all preserved: "**Open — Amendment C, and now carrying an unresolved consequence** … Two things stay open and are carried to the stage gate rather than resolved here"; "**Closed — Amendment C** … **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D"; and "**Not approved.**")* Three consequences first read as open; all three are now closed. (a) **Monotonicity** could not be met by any mechanism available here, so the requirement was changed rather than left unmet — **Q6 was re-presented and re-answered as D′ on 2026-08-25**, dropping *"monotonic"*, and **FU-2 is moot** because it existed only to locate the ledger. What is disclosed is a capability rather than a gap: release labels cannot be ordered, so sequence is read from the run record or the experiment registry. (b) **Never-reuse** survives by determinism — a pure derivation allocates nothing, so the delete-and-rebuild failure cannot arise. (c) **`unit-of-work.md` § 1 `Owns` and `services.md`** were **corrected on 2026-08-25** on the owner's explicit authorisation, after this stage first reported rather than edited them; superseded wordings preserved at both sites, and no other unit referenced the ledger.
-- **Open** — the concrete `RequiredFieldsMap` contents cannot be enumerated until the four configs exist with their field names. This stage fixes the **mechanism**; the populated map is a Bolt 1 work product.
+- **Closed — Amendment C. Its consequences are closed EXCEPT never-reuse, which is open.** *(Heading corrected 2026-08-25 on adversarial finding M-3 of the restored budget: it read "**Closed — Amendment C, and its consequences with it**" while sitting two bullets above the OPEN injectivity item below it.)* **DECLINED AS DRAFTED 2026-08-25**, reversing the 2026-08-24 approval: no release ledger, `ReleaseLedgerEntry` withdrawn (§ 8), `dataset_version` derived from `content_hash` with no encoding specified here. *(Superseded statuses, all preserved: "**Open — Amendment C, and now carrying an unresolved consequence** … Two things stay open and are carried to the stage gate rather than resolved here"; "**Closed — Amendment C** … **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D"; and "**Not approved.**")* Three consequences first read as open; **two are closed and one — never-reuse — is OPEN.** *(Body corrected 2026-08-25 on adversarial finding M-1 of the restored budget's iteration 2. The heading of this bullet was corrected on the previous pass and **its body was not**, so it went on asserting the withdrawn claim two bullets above the OPEN injectivity item. Superseded wording preserved: "Three consequences first read as open; **all three are now closed**" and "(b) **Never-reuse** survives by determinism — a pure derivation allocates nothing, so the delete-and-rebuild failure cannot arise." Both sibling artifacts had this right; this one did not. **Fifth consecutive pass of the heading-versus-body class**, and the reason it kept recurring is that each sweep matched the phrase it had just written rather than the claim it was retiring.)* (a) **Monotonicity — CLOSED**, and not by a mechanism: it could not be met by any mechanism available here, so the requirement itself was changed — **Q6 was re-presented and re-answered as D′ on 2026-08-25**, dropping *"monotonic"*, and **FU-2 is moot** because it existed only to locate the ledger. What is disclosed there is a capability rather than a gap: release labels cannot be ordered, so sequence is read from the run record or the experiment registry. (b) **Never-reuse — OPEN.** What determinism does close is the **delete-and-rebuild failure**: a pure derivation allocates nothing, so a rebuilt index cannot forget a label. That is **idempotence**, and never-reuse is its converse, **injectivity** — different content, different label — which holds only for an encoding faithful to all 256 bits, while Q6=D′ keeps the label human-readable and therefore lossy. It is an obligation on whoever specifies the encoding; see § Assumptions. (c) **`unit-of-work.md` § 1 `Owns` and `services.md`** were **corrected on 2026-08-25** on the owner's explicit authorisation, after this stage first reported rather than edited them; superseded wordings preserved at both sites, and no other unit referenced the ledger.
+- **OPEN — a cross-unit obligation on the eight exceptions this unit does not raise.** `foundation` owns `IntegrityError` and the stage-entry catch, and R-01 now places **all fourteen** project-defined exceptions in that hierarchy on the authority of `component-methods.md` § Assumptions. Eight of them are **raised by other units** — `PhaseBoundaryError` and `LockedTestError` (`governance-guards`), `LeakageError`, `AlignmentError`, `SeedError`, `FairnessError`, `BootstrapError`, `RegimeError` — and **each of those units' `functional-design` must declare its own exceptions as `IntegrityError` subclasses**. This unit cannot do it for them, and it is recorded here rather than assumed because the omission it replaces would have let a phase-boundary violation exit with **no `aborted` registry row**, against NFR-PHASE-01 and NFR-AUD-01 *(added 2026-08-25 on adversarial finding m-1 of the eighth-redo iteration 2)*. No cycle is created: every one of those units already depends on `foundation`.
+- **OPEN — whether `IntegrityError` should move to a dedicated `src/data/exceptions.py`.** This stage declared the hierarchy in **`src/data/config.py`** because TE §12's `src/data/` tree names **nine** modules and **none for exceptions**, so a dedicated module is a **§12 amendment** this stage may not make by assertion. `config.py` works and crosses no import boundary — every unit raising one of the other eight already depends on `foundation`. But a module whose §12 comment reads *"config load, per-run snapshot, hashes, determinism helper"* is not an obvious home for the project-wide exception base, and the fourteen-subclass hierarchy is now project-wide rather than `foundation`-local. **The owner's decision: accept `config.py`, or amend §12 for `src/data/exceptions.py`** *(added 2026-08-25 on adversarial finding M-1 of the ninth-redo iteration 1, whose fix names this item as recorded here — so not creating it would have been the same claim-without-the-thing defect the last three passes each caught)*.
+- **OPEN — the `dataset_version` hash-to-label encoding.** *(Added 2026-08-25 on adversarial reviewer finding M-4, Major: all three artifacts stated the encoding was unspecified while none listed it as an open item.)* Q6=D′ requires `dataset_version` derived from `content_hash` **and** human-readable; no approved artifact specifies the encoding, and per TE §18.3 stage 3.5 must **stop and report** rather than choose one. It blocks concrete work — `dataset_version` is a §13.3 manifest field that W-7 step 5 must produce, so `src/data/release.py` and the §18.3-critical `tests/test_release_hashes.py` cannot be completed. A freeze-gate decision, not an implementation choice.
+- **OPEN — injectivity of that encoding, and with it never-reuse.** The derivation gives idempotence, not injectivity, and a citable label is a lossy encoding of a 256-bit hash. Whoever specifies the encoding must make it injective over the release population in scope, or state and have accepted its collision bound.
+- **OPEN — an amendment need on `write_release`'s approved raise-contract.** `component-methods.md` has `write_release` raise `ReleaseError` *"when a field is absent"* over **all fourteen** §13.3 fields. Deriving `dataset_version` inside `write_release` (Q6=D′) narrows the **caller** precondition to thirteen while leaving the **output** obligation at fourteen. The release still carries all fourteen fields, so what the function writes is unchanged — but the caller contract does change, and this stage demanded a formal amendment for exactly this class when it declined to alter `ensure_process_determinism`'s `-> None` signature. Applying a looser standard here would be inconsistent, so this is **the owner's decision, not a settled contract** *(added 2026-08-25 on adversarial finding m-2 of the restored budget; the rule text claimed it was listed here and it was not)*.
+- **OPEN — an amendment need on `verify_release`, or acceptance that the correspondence check is test-only.** R-11's and R-12's correspondence negative control was relocated to *"a presented manifest"* without naming what performs it. The only candidate in the approved contracts, `verify_release(manifest_path) -> Sequence[str]`, **does not fit**: it reports files whose *file hash* mismatches and **never raises**, so it covers neither label/hash correspondence nor failure signalling. The control is therefore specified as a **test** obligation on `tests/test_release_hashes.py` (TA-15), which needs no production entry point. **If runtime enforcement is wanted, `verify_release` must be amended** — the owner's decision *(added 2026-08-25 on adversarial finding M-5 of the restored budget; likewise claimed as listed here and not)*.
+- **Open** — the concrete `RequiredFieldsMap` **and `CredentialNameMap`** contents cannot be enumerated until the four configs exist with their field names *(both maps named 2026-08-25 on an adversarial residual: this bullet named only the first where both siblings name both, and § 3's `CredentialNameMap` contents are equally unenumerable today)*. This stage fixes the **mechanism**; the populated maps are Bolt 1 work product.
 - **G-09 is not signed.** Nothing here authorises creating `src/data/config.py`, `src/data/release.py` or `tests/test_determinism.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
@@ -681,7 +739,7 @@ wrong twice and is the section to scrutinise first.
 | Iteration 1 of the fresh budget | **NOT-READY** | Confirmed corrections 1 and 2 both landed and every printed command reproduces. Found a **third** primary-vs-supporting defect, in a sentence added by correction 2: the supporting set was stated as three rows including TA-23, which this unit **owns** |
 | Correction 3 | — | Supporting set re-derived: **two** rows, TA-13 and TA-26. Both the primary and supporting sets now carry the commands that produce them |
 | Self-sweep before iteration 2 | — | Found a **fourth** occurrence: the same wrong supporting count ("3 more") in a **second location in this file**, which correction 3 had missed. Corrected and derived |
-| Iteration 2 of the fresh budget | *pending* | Corrections 3 and 4 have not yet been adversarially reviewed |
+| Iteration 2 of the fresh budget | ~~*pending*~~ → **READY**, completed 2026-08-24 | *(Row corrected 2026-08-25 on reviewer finding m-4; iteration-1 of the 2026-08-25 pass had named this row class explicitly and it was left un-swept. **Superseded effect cell, which was affirmatively false:** "Corrections 3 and 4 have not yet been adversarially reviewed." They were — that pass returned READY. Two further passes have run since, both **NOT-READY**: 2026-08-25 iteration 1 (seven findings) and iteration 2 (five Major).)* |
 
 **Four occurrences of one confusion class in one table.** Passes 1 and 2 and the fresh pass 1 each caught one; the fourth was caught by a self-sweep rather than by review. The through-line is identical every time: the **table cells** were derived, and then a **sentence summarising them** was written from memory instead of from the derivation output that was already on screen. Every figure in this section now carries its producing command, and the two set memberships are printed in full rather than counted in prose.
 
@@ -808,7 +866,10 @@ no scientific value is decided here.
 > - **§ Assumptions** records Amendment C as **closed**, with all three of its apparent
 >   consequences closed too: monotonicity by the **Q6 = D′** re-answer (which dropped the
 >   requirement rather than leaving it unmet — the original Q6 = D is preserved verbatim in the
->   Q&A file, and FU-2 is moot), never-reuse by determinism, and the upstream contradiction by
+>   Q&A file, and FU-2 is moot) and the upstream contradiction by
+>   *(never-reuse was listed here as closed "by determinism" and is NOT — corrected 2026-08-25 on
+>   adversarial finding M-3 of the restored budget; it is an OPEN obligation on the label
+>   encoding)*
 >   corrections to `unit-of-work.md` § 1 `Owns` and `services.md` made on the owner's explicit
 >   authorisation.
 >
@@ -820,3 +881,218 @@ no scientific value is decided here.
 > acceptance rows · §19 at 36 rows, no TA-37/TA-38 added · 17 rules · 10 workflows · **8 live
 > entities**, the only figure the reversal moved. **G-09 remains unsigned**, and nothing here
 > decides a scientific value.
+
+---
+
+> **Re-saved 2026-08-25 after the iteration-2 remediation**, under the receipt recorded at the
+> **seventh** post-redo floor.
+>
+> **What changed in this file:**
+>
+> - **§ 7 `ReleaseManifest` — the entity contract corrected (Major finding M-1).** The section
+>   was headed `**Q6 = D.**` and its live `label` row read *"Monotonic, human-readable"* — and
+>   that table is **what stage 3.5 implements from**, so it told an implementer the field is
+>   monotonic while R-12 told them the encoding is unspecified and to stop and report. Now
+>   `Q6 = D′`, the field named **`dataset_version`** for consistency with W-7 and R-12,
+>   "monotonic" struck, and the unspecified-encoding constraint stated in the row itself.
+>   Superseded wording preserved.
+> - **§ 8's withdrawal record — the never-reuse claim corrected (Major finding M-3).** It read
+>   *"Never-reused — satisfied by determinism rather than by durable state"*. Determinism gives
+>   **idempotence**, not the **injectivity** never-reuse requires, and a citable label is a lossy
+>   encoding of a 256-bit hash. Now stated as **not established, and contingent on an encoding
+>   that does not yet exist**, superseded claim preserved. Its heading no longer reads *"one
+>   item"* over two bullets.
+> - **§ Assumptions — two open items added at that time (Major finding M-4); the section carried four as of that pass — it now carries **five** *(the word "now" corrected 2026-08-25 on adversarial finding m-3 of the ninth-redo iteration 1: a dated record may state what was true then, but "now" asserts the present, so the historical-record defence did not hold)*** — the encoding and its
+>   injectivity; and **`CredentialNameMap`** added beside `RequiredFieldsMap`, which both sibling
+>   artifacts already named and this one did not.
+> - **§ Review history — the *"pending"* row struck (m-4).** Its effect cell had been
+>   **affirmatively false**: it stated that corrections 3 and 4 had not been adversarially
+>   reviewed, and that pass had returned READY.
+>
+> **No entity contract other than § 7's field naming and § 8's withdrawal changed.**
+> `DeterminismRecord` still carries the **nine** fields Amendment B approved; `ConfigSnapshot`,
+> `RequiredFieldsMap`, `CredentialNameMap`, `RunRecord`, `RegistryEvent` and `IntegrityError` are
+> untouched.
+>
+> **Counts, derived after the edits:** 16 requirements · 2 untested · 7 acceptance rows · **36**
+> §19 rows *(derived from the Technical Environment for the first time — the `<TE>` placeholder
+> two passes had reported as blocking proved resolvable)* · 17 rules · 10 workflows · **8 live
+> entities** of 9 numbered sections. **G-09 remains unsigned**, and nothing here decides a
+> scientific value.
+
+---
+
+> **Re-saved 2026-08-25 after remediating the restored budget's iteration-1 findings**, under the
+> receipt recorded at that iteration's floor.
+>
+> **What changed in this file:**
+>
+> - **§ 8's withdrawal record — the never-reuse residue swept (M-3).** Its *"not an uncovered
+>   obligation"* sentence and its **Closed — Amendment C, and its consequences with it** heading
+>   both declared the obligation covered, and the heading sat **two bullets above** the OPEN
+>   injectivity item contradicting it. Both narrowed: FU-2's *inconsistent-mapping* obligation and
+>   its duplicate-row checks are genuinely covered, and **never-reuse is not**. The third negative
+>   control is renamed **non-degeneracy** — naming it for injectivity was naming it for the claim
+>   it cannot support (m-1).
+> - **§ 4 `DeterminismRecord` — the `reexec_performed` row now names its carrier (r-1).** That row
+>   is the field's own contract and mentioned no carrier at all. It now names the sentinel
+>   environment variable, the requirement that the child **unset it immediately after reading**,
+>   and where the rule lives — without the pop, a subprocess of a re-exec'd script inherits it and
+>   records `True` falsely.
+> - **§ Assumptions — two further open items (m-2, M-5):** an amendment need on `write_release`'s
+>   approved raise-contract, and an amendment need on `verify_release` (or acceptance that the
+>   correspondence check is test-only). Both had been asserted elsewhere as *"recorded in
+>   § Assumptions"* while absent from it. This section now carries **four** OPEN items, equal to
+>   both sibling artifacts and verified rather than assumed.
+>
+> **No entity contract changed** beyond § 4's carrier note and § 8's withdrawal record.
+> `DeterminismRecord` still carries the **nine** fields Amendment B approved; `ConfigSnapshot`,
+> `RequiredFieldsMap`, `CredentialNameMap`, `RunRecord`, `RegistryEvent` and `ReleaseManifest` are
+> otherwise untouched, `ReleaseManifest` keeping the `dataset_version` naming and the
+> unspecified-encoding constraint set on the previous pass.
+>
+> **Counts, derived after the edits:** 16 requirements · 2 untested · 7 acceptance rows · **36**
+> §19 rows · 17 rules · 10 workflows · **8 live entities** of 9 numbered sections. **G-09 remains
+> unsigned**, and nothing here decides a scientific value.
+
+---
+
+> **Re-saved 2026-08-25 after remediating the restored budget's iteration-2 findings**, under the
+> receipt recorded at the **eighth** post-redo floor.
+>
+> **One correction lands in this file, and it is the one that had survived five passes.**
+> § Assumptions' Amendment C bullet had its **heading** corrected on the previous pass while **its
+> body was left asserting the withdrawn claim** — *"Three consequences first read as open; all three
+> are now closed"* and *"(b) **Never-reuse** survives by determinism"* — standing two bullets above
+> the `OPEN — injectivity … and with it never-reuse` item that contradicts it. Both sibling
+> artifacts had this right; this one did not. The body now reads **two closed, never-reuse OPEN**,
+> and states the distinction where the withdrawn claim used to sit: determinism closes the
+> **delete-and-rebuild** failure, which is **idempotence**; never-reuse is its converse,
+> **injectivity**, which holds only for a 256-bit-faithful encoding, and Q6=D′ keeps the label
+> human-readable and therefore lossy. Superseded wording preserved.
+>
+> **Why this class recurred through five consecutive passes**, recorded because five is a pattern:
+> each sweep matched the phrase it had just written rather than the claim it was retiring. Renaming a
+> heading does not make its body findable by searching for the new heading.
+>
+> **No entity contract changed in this pass.** `DeterminismRecord` still carries the **nine** fields
+> Amendment B approved, with the `reexec_performed` row's carrier note from the previous pass now
+> completed upstream in R-05 and W-4 by naming **module-level state in `src/data/config.py`** as the
+> in-process holder between the sentinel pop and the record — the one finding that would otherwise
+> have forced stage 3.5 to invent a mechanism. `ConfigSnapshot`, `RequiredFieldsMap`,
+> `CredentialNameMap`, `RunRecord`, `RegistryEvent` and `ReleaseManifest` are untouched.
+>
+> **Counts, re-derived after this pass:** 16 requirements · 2 untested · 7 acceptance rows · **36**
+> §19 rows · 17 rules · 10 workflows · **8 live entities** of 9 numbered sections · **four** OPEN
+> items, equal across all three artifacts. **G-09 remains unsigned**, and nothing here decides a
+> scientific value.
+
+---
+
+> **Re-saved 2026-08-25 after remediating the eighth-redo iteration-1 findings.** That pass returned
+> **zero Majors** — the first on this unit.
+>
+> **One correction lands here, and it was introduced by the previous remediation.** § 8's withdrawal
+> record was headed *"**Consequences carried forward — two open items**, both narrower than the one
+> first named"* while its own first bullet read *"**Monotonicity — no longer required.**"* A
+> **dropped requirement is not an open item**: exactly one of the two Q6=D obligations — never-reuse
+> — is open, which this file's § Assumptions already stated correctly. The reviewer verified the
+> heading absent from `HEAD`, so it was written by the fix that preceded it, and it was the **only
+> live "two open items" status claim in any of the three design bodies**. The heading now reads
+> **one open obligation, plus one requirement dropped**, superseded wording preserved.
+>
+> **What this keeps teaching:** a correction that rewrites a heading does not make the claim it
+> retired findable by searching for the new heading, and a count embedded in prose goes stale in
+> silence. Both siblings were swept for the same class in this pass, and the durable fix applied
+> throughout was to **name the open items rather than count them**.
+>
+> **No entity contract changed in this pass.** `DeterminismRecord` still carries the **nine** fields
+> Amendment B approved, and its `reexec_performed` carrier — module-level state in
+> `src/data/config.py`, upstream in R-05 and W-4 — was tested on four angles by the reviewer and
+> **held**: reachable, set in the child rather than the parent, no ordering hazard, and more testable
+> than an inherited environment variable. `ConfigSnapshot` (8 fields), `RequiredFieldsMap`,
+> `CredentialNameMap`, `RunRecord`, `RegistryEvent` and `ReleaseManifest` are untouched.
+>
+> **Counts, re-derived again after these edits:** 16 requirements · 2 untested · 7 acceptance rows ·
+> **36** §19 rows · 17 rules · 10 workflows · **8 live entities** of 9 numbered sections · **four**
+> OPEN items, 4/4/4. **G-09 remains unsigned**, and nothing here decides a scientific value.
+
+---
+
+> **Re-saved 2026-08-25 after remediating the eighth-redo iteration-2 findings**, under the receipt
+> recorded at the **ninth** post-redo floor.
+>
+> **Three corrections land in this file, and two of them were false against approved upstream
+> contracts rather than merely stale:**
+>
+> - **§ 9's subclass enumeration named six where the hierarchy holds fourteen** — the one defect in
+>   this unit that would have propagated into code. W-1 step 4 raises `PhaseBoundaryError`, R-10 has
+>   the stage entry contract catch `IntegrityError` to write the `aborted` registry row, and with
+>   `PhaseBoundaryError` outside the enumeration an `except IntegrityError` would let a
+>   **phase-boundary violation exit with no `aborted` row** — the event **NFR-PHASE-01** and
+>   **NFR-AUD-01** most require recorded. `component-methods.md` § Assumptions places all fourteen in
+>   a shared base *"until 3.1 places them"*, and this stage **is** 3.1. Now: **six raised by this
+>   unit, eight raised by other units on the same base**, with the *"why a base rather than six
+>   independents"* rationale corrected to **fourteen**.
+> - **§ 7's `ReleaseManifest` row had reintroduced a closed upstream defect.** It reduced §13.3 to
+>   **seven** items and collapsed `source_files` to *"hashes"* — exactly what `requirements.md`
+>   closed as **`DATA-21` (MAJOR)**, whose remedy was *"ten rows naming fourteen fields, against the
+>   seven this requirement previously listed"* with `source_files` **cross-referencing FR-P1-01-2
+>   rather than restated reduced**. It also contradicted this unit's own `business-logic-model.md`.
+>   FR-P1-04-11 states the consequence plainly: *"a release omitting its own processing provenance
+>   was conformant."* **All fourteen fields are now enumerated** from FR-P1-04-11.
+> - **§ 4's *"recoverable from `ConfigSnapshot.hashes`"* was false.** `hashes` is
+>   `Mapping[str, str]`, filename → SHA-256; **a hash has no preimage.** Now cites the parsed
+>   configuration `ConfigSnapshot` carries and the verbatim copies under `snapshot_dir`.
+>
+> **§ Assumptions gained a fifth OPEN item** — the cross-unit obligation that the eight exceptions
+> other units raise must be declared as `IntegrityError` subclasses **by those units**;
+> `governance-guards` owns `PhaseBoundaryError`, and no cycle is created because each of those units
+> already depends on `foundation`.
+>
+> **Counts, re-derived after these edits:** 16 requirements · 2 untested · 7 acceptance rows · **36**
+> §19 rows · 17 rules · 10 workflows · **8 live entities** of 9 numbered sections · §13.3 = **14
+> fields over 10 rows, now enumerated in § 7** · **five** OPEN items, **5/5/5**. The box above says
+> *"four"*, which was true when it was written and is not a current-state claim. **G-09 remains
+> unsigned**, and nothing here decides a scientific value.
+
+
+---
+
+> **Re-saved 2026-08-25 under the final acceptance receipt.** The owner ruled to accept this unit
+> with its defects disclosed and move to unit 2. **Eight live entities** of nine numbered sections;
+> `IntegrityError` carries **fourteen** subclasses (six raised here) and is **declared in
+> `src/data/config.py`** per the ninth-redo M-1 decision; §13.3 stands **enumerated at fourteen
+> fields over ten rows**; **six OPEN items** in § Assumptions, 6/6/6 across the artifacts. A reader
+> at the stage gate should treat § Assumptions and this box as authoritative and any count embedded
+> in older prose as historical. **G-09 remains unsigned.** *(This box was first appended by a script
+> write and is re-saved here with the native tooling so the acceptance state carries its audit
+> event.)*
+
+---
+
+> **Re-saved 2026-08-25 under the tenth-redo receipt.** § 7's `content_hash` row now carries the
+> **full canonical-representation specification** (decided this pass, recorded in
+> `business-rules.md` R-11): RFC 8785 canonical JSON of the twelve included caller-supplied fields,
+> excluding `dataset_version`, `created_at_utc` and `content_hash` itself, then SHA-256. The
+> exclusion of `created_at_utc` is what makes the idempotence property this entity asserts actually
+> true — identical content re-released later reproduces the same identity. Eight live entities of
+> nine sections, six OPEN items 6/6/6, **G-09 remains unsigned**.
+
+---
+
+> **Re-saved unchanged 2026-08-25 under the twelfth receipt** (eleventh redo, taken for
+> `acquisition`; floor reset mechanical). Byte-identical to the terminal-READY state.
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the thirteenth receipt** (twelfth redo, taken for
+> `inventory-and-registry`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
+> for `external-products`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**

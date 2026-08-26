@@ -48,7 +48,7 @@ is frozen elsewhere by a D-number.
 - `../../../inception/application-design/component-dependency.md` § Shared resources.
 - `../governance-guards/functional-design/domain-entities.md` — `AccessRecord`, `RESTRICTED_ROOT`, `DriverExclusionList`, the `IntegrityError` subclasses this unit raises through.
 - `../foundation/functional-design/` — `ConfigSnapshot`, the `IntegrityError` base, the two-tier posture, credential resolution.
-- `evidence/DECISIONS.md` — D-5, D-9, D-10.1/.2/.3, D-15, D-18, D-21, D-22, D-23, D-143, D-144.
+- `evidence/DECISIONS.md` — D-5, **D-6** *(cited in the body, added here 2026-08-25, finding F8)*, D-9, D-10.1/.2/.3, D-15, D-18, D-21, D-22, D-23, **D-25, D-26** *(finding F2)*, D-3/D-144, and **D-143** *(Vision-register number for the ICTP rejection; exists there, not in `evidence/DECISIONS.md` — terminal finding N1)*.
 - Workspace inspection, 2026-08-23: the twelve `request_manifest.json` / `sha256_manifest.json` pairs, `tests/test_acquisition_window.py`, `scripts/audit_ec1_drivers.py`, `scripts/merge_coverage_year.py`.
 - `functional-design-questions.md` (**Q1 through Q9**), `business-logic-model.md`, `business-rules.md`.
 
@@ -126,7 +126,7 @@ for the same logical file.
 > release fields and **`suffix_mismatch` is not among them**, so the release manifest's
 > input contract does not currently carry the field this refusal reads.
 
-**`source_files` carries all six of TE §13.3's items, not five** — the earlier
+**`source_files` carries all six of TE §13.3's items** — provider; permanent citation or request; `location/date` *(the item this artifact had dropped — corrected 2026-08-25 on adversarial finding F3: "location" appeared nowhere in the three artifacts while this sentence claimed all six, reproducing the DATA-09 defect inside the artifact that quotes it)*; filename; retrieval date; SHA-256 — not five — the earlier
 five-item list fixed a truncated count as the bar (`DATA-09`).
 
 ## 2. `RequestManifest` — per month, and the key that is missing today
@@ -354,6 +354,17 @@ ownership.
 Deriving from `foundation`'s base, each carrying the affected resource and the violated
 expectation:
 
+> **Base class, stated 2026-08-25 to discharge this unit's half of the cross-unit exception
+> obligation** (created by `foundation`'s R-01 after these artifacts were written). **Every
+> exception in the table below derives from `IntegrityError`, imported from
+> `src/data/config.py`** — a legal import, this unit depending on `foundation`. `AcquisitionError`
+> and `CredentialEgressError` are unit-local *(per-unit naming is the convention `component-methods.md` § Assumptions defers to 3.1; this unit's Q1 concerns the restricted-root path, not exceptions — misattribution corrected 2026-08-25, finding F5)* and derive from the base
+> under R-01's *"any future integrity-related exception"* clause; any exception listed below that
+> `foundation` or `governance-guards` owns is already in the hierarchy at its owner. **Why it
+> matters:** the stage-entry contract writes the `aborted` registry row by catching
+> `IntegrityError` — outside the hierarchy, a credential-egress violation would exit unrecorded,
+> in the unit that owns the redaction boundary.
+
 | Exception | Raised when |
 |---|---|
 | `AcquisitionError` | A retrieval applies a transformation; a required declaration or inventory field is absent; a driver series carries fewer than TE §5.1's nine fields |
@@ -375,7 +386,7 @@ cross-checked and in agreement.
 | Requirement | Entities | Tested by (Table 1) | Row primary owner |
 |---|---|---|---|
 | REQ-ENG-13 | `EquivalenceScope` | TA-16 | `regimes-diagnostics-reporting` |
-| FR-P1-00-1 | — (evidence set, § W-10) | TA-31 | `acquisition` supporting |
+| FR-P1-00-1 | — (evidence set, § W-10) | TA-31 — **no Table 2 owner row** *(finding F4, 2026-08-25)* | — *(superseded: "`acquisition` supporting")* |
 | FR-P1-00-2 | — (lineage check, § W-10) | TA-25 | `inventory-and-registry` |
 | FR-P1-01-1 | `RequestManifest`, `Sha256Manifest` | TA-32 | **`acquisition`** |
 | FR-P1-01-2 | `ProviderFileRecord` | TA-15 | `foundation` |
@@ -454,3 +465,24 @@ correct numeral is exactly the failure `project.md` § Corrections records. **Ow
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 under the eleventh-redo receipt, after the terminal-pass remediation.**
+> In this file: § 1's six-item `source_files` sentence had its nested-bold rendering fixed (N7);
+> the FR-P1-00-1 row states TA-31 has **no Table 2 owner row** (F4, from the prior pass); and the
+> Sources list carries the **two-register note** — D-143 is the Vision-register ICTP rejection,
+> not a phantom (N1). No entity changed; figures unchanged (15 requirements, 7 untested, 1
+> acceptance row). **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the third receipt** (twelfth redo, taken for
+> `inventory-and-registry`; floor reset mechanical). **No content of this unit changed** since its
+> READY. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
+> for `external-products`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**

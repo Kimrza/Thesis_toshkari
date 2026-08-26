@@ -576,4 +576,122 @@ Does this all look correct before I generate the artifact?
 
 > **💡 Recommendation**: **Looks correct** — this unit is untouched; the reset is a mechanical consequence of a redo taken for a different unit, and that redo achieved what it was authorised for.
 
+*(Answered `Looks correct`, 2026-08-24T15:26:16Z. That receipt was reset by ten authorised stage-wide redo jumps taken for `foundation`, the last at 2026-08-25T15:38:25Z. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 — after ten stage-wide redo floors taken for `foundation`
+
+**Why this is being re-asked.** Ten authorised redo jumps on `functional-design` — all aimed at
+`foundation`, which closed with a terminal **READY** — reset the receipt floor for every unit.
+`governance-guards` has since also closed **READY** on its own budget. Nothing in `acquisition`
+changed through any of the resets.
+
+**Verified before seeking this receipt** (derive-not-carry):
+
+| Figure | Declared upstream | Derived | Status |
+|---|---|---|---|
+| Requirements carried | 15 | **15** (incl. REQ-NFR-A1/A2, which a naive ID regex misses) | agrees |
+| Untested (bold, no §16/§19 row) | 7 of 15 | **7** (FR-P1-01-5/-7/-8/-9/-11, REQ-NFR-A1, REQ-NFR-A2) | agrees |
+| Acceptance rows | 1 | **1** (TA-32) | agrees |
+| Blockers named | BLK-07 | present in the unit's artifacts | agrees |
+| Amendment C / ledger contamination | — | **0 hits**, all four files | clean |
+
+**One gap, same class as `governance-guards`'s:** this unit raises **`AcquisitionError`** and
+**`CredentialEgressError`** and states no base class — the artifacts predate `foundation`'s R-01,
+which requires every unit to declare its exceptions as **`IntegrityError` subclasses** (imported
+from `src/data/config.py`) so the stage-entry contract's catch writes the `aborted` registry row.
+Both are unit-local exceptions under R-01's *"any future integrity-related exception"* clause.
+
+**Proposed edit after this receipt, and only this:** the same one-box base-class declaration the
+previous two units received, at the exception table in `domain-entities.md` and ahead of the
+relevant rule in `business-rules.md`. Then the adversarial reviewer runs on this unit's own budget.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, the base-class box applied, artifacts re-saved, reviewer runs. No other content changes.
+
+- Request changes
+   > **Impact**: No receipt, nothing edited. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the unit is unchanged and verified clean; the single edit discharges the same cross-unit obligation the previous two units discharged, in the unit that owns the credential-redaction boundary where an uncatchable exception would be least acceptable.
+
+*(Answered `Looks correct`, 2026-08-25T16:40Z. That receipt covered the artifacts before the terminal review pass, whose seven findings — one Critical introduced by the fix itself — required the eleventh redo. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 (second) — the terminal pass's seven findings, fixed under the eleventh redo
+
+**The terminal pass returned NOT-READY: 1 Critical, 4 Major, 2 lesser — and the Critical was
+introduced by my own iteration-2 fix.** You authorised an eleventh redo to fix all seven.
+
+**N1 (Critical), stated plainly because it was my error twice over.** I "corrected" W-10's D-143
+reference to D-3/D-144 on the ground that D-143 "matches no entry". **False: two decision registers
+coexist.** `evidence/DECISIONS.md` runs D-1…D-27 — and cites D-143 twice inside D-3 — while the
+**Vision register** holds **D-143 itself: the ICTP rejection**, cited by TE §7.0A P1-00 (*"store
+D-143"*), TA-31's evidence column, and FR-P1-00-1. My substitution pointed the evidence artifact for
+the **rejected** source at the decision that **adopts Madrigal**. Restored, with the two-register
+explanation recorded so it cannot be "corrected" a third time.
+
+**The other six:**
+- **N2** — R-41's operative sentence and W-6's build limb still carried D-21's observation-completion
+  wording (permits 22–23 UT same-day); both now state **D-25's convention: available no earlier than
+  00:00 UTC on day D+1, never same-day**. My iteration-2 fix had reached the heading and note only.
+- **N3** — `business-rules.md` R-34 still juxtaposed "five fields" with an all-six claim and no
+  `location/date`; the six items are now enumerated there too. My fix had reached one artifact of two.
+- **N4** — the declaration site I chose directed 3.5 to edit `foundation`'s Bolt-1 module with no
+  change record. Re-scoped as an **OPEN item** with the two options stated (a recorded cross-unit
+  agreement into `config.py`, or the `src/data/exceptions.py` §12 amendment already OPEN at
+  `foundation`); base class and import direction stay settled.
+- **N5** — W-10 named the TE §14 ICTP notebook as a creation input that the same finding proved
+  absent from the workspace. Now an **OPEN item**: recover it externally, or build from D-3's figures
+  alone with the absence recorded as a machine-readable field.
+- **N6/N7** — Sources lists completed (D-6, D-25, D-26, the two-register note); the nested-bold
+  rendering defect fixed.
+
+**Counts, unchanged and re-derived by the reviewer both passes:** 15 requirements · 7 untested ·
+1 acceptance row (TA-32). Hard rules clean both passes: D-5's NaN rule, record-date membership,
+IRI boundary, no scientific constant, no `TBD`, G-09 unsigned.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, reviewer runs iteration 1 of the fresh budget.
+
+- Request changes
+   > **Impact**: No receipt, nothing re-saved. Tell me what to change — including ruling now on N4's declaration-site options or N5's notebook recovery — and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the Critical is restored with the two-register explanation that prevents a third mis-correction, the availability convention now matches the freeze that narrowed it, and the two genuinely open questions are recorded as open rather than decided by convenience.
+
+*(Receipt reset by the twelfth authorised redo, 2026-08-26T05:43:39Z, taken for `inventory-and-registry`. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — mechanical, floor reset by the twelfth redo (taken for `inventory-and-registry`)
+
+**Nothing in this unit changed**; artifacts are byte-identical to the state its terminal READY (or confirming READY) reviewed. Re-saves change no content; a narrow confirming review runs.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, unchanged re-save, narrow confirming review.
+
+- Request changes
+   > **Impact**: Nothing recorded or saved; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — purely mechanical.
+
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**Nothing in this unit changed**; byte-identical to its confirmed state. Floor reset by the fourteenth redo, taken for `external-products`.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, review runs (narrow confirm for unchanged units; confirming pass for external-products).
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — mechanical for the unchanged units; for the two repaired question files the repair restores what a gate reader needs and touches no specification.
+
 [Answer]: Looks correct

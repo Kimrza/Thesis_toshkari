@@ -607,4 +607,62 @@ Does this all look correct before I generate the artifact?
 
 > **💡 Recommendation**: **Looks correct** — this unit is untouched; the reset is a mechanical consequence of a redo taken for a different unit, and that redo achieved what it was authorised for.
 
+*(Answered `Looks correct`, 2026-08-24T15:26:17Z. That receipt was reset by eleven authorised stage-wide redo jumps, all taken for other units, the last at 2026-08-25T17:21:15Z. The live answer tag is the blank one at the end of this file.)*
+
+### Re-confirmation, 2026-08-25 — after eleven receipt-floor resets taken for other units
+
+**Nothing in `inventory-and-registry` changed.** Verified: **7** requirements derived (2 bold/untested:
+FR-P1-02-7, FR-P1-02-8), **3** acceptance rows (WS-01, TA-04, TA-25), BLK-07 named, **zero**
+Amendment C contamination in all four files. One observation disclosed rather than re-litigated:
+WS-01 sits in §16.1's G-P3A set, but the approved `unit-of-work.md` § 4 declares it for this unit
+and these artifacts mirror the approved contract.
+
+**One gap, the same cross-unit class as units 2 and 3:** `AuditScopeError`, `SchemaError` and
+`InventoryError` are unit-local exceptions with no stated base. Proposed edit after this receipt,
+and only this: the standard base-class box — all derive from **`IntegrityError`** under
+`foundation` R-01's *"any future integrity-related exception"* clause, with the declaration site
+deferred to the same OPEN item as the previous units. Then the reviewer runs.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, base-class box applied, artifacts re-saved, reviewer runs.
+
+- Request changes
+   > **Impact**: No receipt, nothing edited. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — unchanged and verified clean; the single edit is the same obligation the previous units discharged.
+
+*(Receipt reset by the twelfth authorised redo, 2026-08-26T05:43:39Z, taken for THIS unit's terminal findings. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — the terminal pass's five findings, fixed at every named site
+
+The terminal pass found my fixes had again landed on a subset of named sites. This time all mirrors applied: the record-timestamp membership rule + negative control now in **R-50** and **DE § 6** (not only W-6); the two `inventory.py` obligations + controls in **R-44** and **DE § 1** (not only W-1); the "assigned to no other unit" overreach **retracted**; the `suffix_mismatch` surfacing flagged **⚠ PROPOSED**, deferring to stage 3.2's resolution of `acquisition` R-34's Open item; the false "No rule changed" box corrected; CHOSEN→NAMED terminology aligned. Counts unchanged: 7/2/3.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, reviewer runs iteration 1 of the fresh budget.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — every named site is now covered and the one cross-unit conflict is deferred to its owner rather than silently answered.
+
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**One repair to THIS file, none to the design artifacts**: my earlier perl edits had re-encoded this question file latin-1→UTF-8 on each save, layering mojibake across ~146 lines — unreadable exactly where a human reads it, while every ASCII engine token survived so nothing downstream reported it. Repaired 2026-08-26 by iterative latin-1 reversal, verified line-by-line: the header, all 13 💡 Recommendation markers and every em-dash/§ read cleanly again. The three design artifacts were never corrupted. Floor also reset by the fourteenth redo.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, review runs (narrow confirm for unchanged units; confirming pass for external-products).
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — mechanical for the unchanged units; for the two repaired question files the repair restores what a gate reader needs and touches no specification.
+
 [Answer]: Looks correct

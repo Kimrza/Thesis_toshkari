@@ -561,3 +561,60 @@ No stage-specified validation tooling was listed for this stage's dispatch; none
 All three Major findings from the post-redo pass are independently verified fixed at the location the fix targeted, with no regression in the touched text: `domain-entities.md` §11 now carries the complete four-control set matching R-90 and W-1; `domain-entities.md` §5's `criterion_used_hash` row now names the correct comparison target; and R-96 now separates the two prohibitions, and its ownership claim — that `features-and-splits`' R-80 partition list, not this unit, is where a second test period would have to be created, and that December 2022 is D-8's fixed test month — was checked against both cited sources directly and holds. One new, non-recurring Major finding surfaced on this pass: R-96's closing sentence claims a `PartitionError` check over "partitions outside the enumeration" that `domain-entities.md` §3 Limb 4 does not actually specify — Limb 4's own two stated conditions (cross-input disagreement, or a training partition) would not catch a hypothetical novel partition value, and the real reason no such value can arise is an upstream type-closure (R-80's fixed six-row list) that R-96 never names as the actual mechanism. This is a genuine gap between a claimed check and the cited contract's literal text, but it is narrowly scoped to one sentence's framing, has a cheap fix (restate the mechanism as upstream closure rather than a local enumeration check, or add the missing Limb 4 condition), and does not undermine the ownership analysis it sits inside — which is independently correct. A second, Minor, non-blocking wording residual (R-95's mechanism-2 label still pairs `criterion_declared_at` with `criterion_used_hash` rather than `criterion_hash`) survives in a non-authoritative location while the authoritative entity table is fully correct. One Major and one Minor finding, both narrowly scoped, neither reopening a previously "fixed" defect, together fall under this stage's ≤2-Major READY threshold, and an implementer working from the authoritative tables (domain-entities.md §§3, 5, 11) would build the correct behaviour for every mechanism this pass checked except the one-sentence overstatement in R-96, which is reporting-quality rather than implementation-blocking: the actual enforcement path (upstream partition-list closure) exists and is sound even though the sentence describing it points at the wrong table.
 
 **Verdict: READY.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
+> for `external-products`; floor reset mechanical). **No content of this unit changed.** The two
+> residuals riding the READY — R-96's `PartitionError` mechanism and R-95's field label — remain
+> carried to the stage gate rather than applied. **G-09 remains unsigned, and BLK-03 independently
+> bars implementation.**
+
+## Review — 2026-08-26 fourteenth-receipt confirming pass
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+
+**Verdict:** READY
+
+### Scope and method
+
+Narrow confirming pass under the fourteenth-redo re-confirmation receipt. No content
+re-litigation — only regression against the terminal `## Review — Post-redo pass, iteration 2`
+(READY, 2026-08-24T15:15:00Z) fails this pass. Read all four in-scope files in full and ran
+scripted checks (`bun -e`) rather than perl.
+
+### Findings
+
+1. **Provenance blockquote, all three artifacts.** Each of `business-logic-model.md`,
+   `business-rules.md`, `domain-entities.md` carries exactly one "Re-saved unchanged 2026-08-26
+   under the fourteenth-redo re-confirmation receipt" blockquote, immediately after its terminal
+   READY content, and nothing else was added or removed (grepped for `2026-08-26`: one hit per
+   file, at the tail). No regression.
+2. **The two residuals remain unapplied, verified at their named locations.**
+   `business-rules.md` R-96's closing sentence still claims a `PartitionError` check over "a
+   partition outside that enumeration"; `domain-entities.md` § 3 Limb 4 still states only two
+   `PartitionError` triggers (cross-input `partition_id` disagreement, or a training partition) —
+   the enumeration-membership condition the closing sentence implies is not there, exactly as the
+   terminal READY described. `business-rules.md` R-95 mechanism 2 still labels the compared pair
+   `criterion_declared_at` / `criterion_used_hash` rather than `criterion_hash` /
+   `criterion_used_hash`, while `domain-entities.md` § 5's authoritative table correctly pairs
+   `criterion_used_hash` with `criterion_hash`. Both residuals are correctly carried to the gate,
+   not applied.
+3. **Re-derived counts, independently, all match the questions file's re-confirmation claim.**
+   `business-rules.md`: `R-90`…`R-102`, 13 headers, sequential, no gaps. `business-logic-model.md`:
+   `W-1`…`W-11`, 11 headers. `domain-entities.md`: sections `1.`…`12.`, 12 headers.
+   `functional-design-questions.md`: `Question 1`…`Question 8`, all 8 answered (`D, D, D, D, D, C,
+   D, D`).
+4. **Questions file's new re-confirmation section is well-formed.** "### Re-confirmation,
+   2026-08-26 — under the fourteenth-redo floor" carries an `> **Impact**:` line under each of its
+   two options (`Looks correct`, `Request changes`), a single `> **💡 Recommendation**:` line
+   placed after both options and before `[Answer]:`, and the filled answer is the literal `Looks
+   correct`, matching the recommendation.
+5. **Zero mojibake across all four files.** Scripted scan (`bun -e`) for `Ã`/`Â` byte-run
+   artifacts and for C1 control characters (U+0080–U+009F) found zero hits in any of the four
+   files.
+
+No regression found against the terminal READY. G-09 remains unsigned and BLK-03 independently
+bars implementation — this pass adjudicates artifact regression only, not gate authority.
+
+READY

@@ -43,6 +43,7 @@ what is and is not established about them.
 - `../../../inception/units-generation/unit-of-work.md` § 4 — the `Owns` list, the boundary, the 7 requirements, the implementation notes.
 - `../../../inception/units-generation/unit-of-work-story-map.md` — Tables 1 and 2 plus § Per-unit coverage summary. **Derived by reading the rows:** 7 requirements, **2** with no acceptance row; **owns** WS-01, TA-04, TA-25; **supports** WS-18, TA-18, TA-32.
 - `../../../inception/requirements-analysis/requirements.md` — FR-P1-02-1…-5, -7, -8; § Known defects rows 3 and 9.
+- `../../../inception/application-design/components.md` — the component map assigning `inventory.py` its two obligations *(added 2026-08-26, finding M4)*.
 - `../../../inception/application-design/component-methods.md` — `src/data/registry.py`'s `Station`, `load_registry`, `assert_registry_resolved`; `src/data/release.py`'s `write_release`.
 - `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract.
 - `../acquisition/functional-design/domain-entities.md` — `SourceInventoryEntry`'s upstream, `RestrictedArtifactAccessor`, `DriverSeriesInventory`.
@@ -111,6 +112,11 @@ upstream change surfaces as a hash mismatch rather than as silently different co
 > so the absence is the artifact's stated design. **Superseded reading preserved:** that this
 > was a gap of the same class as `acquisition`'s `open_d9_input`, which is genuinely
 > cross-package and remains real. This unit owes **one** amendment — § 2's provenance field.
+>
+> **The module also carries FR-P1-01-6's verbatim-notice obligation and the ⚠ PROPOSED
+> `suffix_mismatch` surfacing** — mirrored here 2026-08-26 (terminal finding N2); the rule text
+> and negative controls live in R-44's box, and the PROPOSED flag defers the surfacing path to
+> stage 3.2's resolution of `acquisition` R-34's Open item.
 
 ## 2. `Station` — the approved contract, plus provenance
 
@@ -246,6 +252,11 @@ as G-05 inputs.
 **Performance-blind is checkable, not asserted:** FR-P1-02-3's criterion is that **no
 performance figure appears in the report or in its execution log**.
 
+**Membership is timestamp-attributed, also checkable** *(mirrored here 2026-08-26 on terminal
+finding N1)*: every count in both reports attributes records by **observation timestamp**, never
+by directory name or filename; out-of-month and out-of-year records are excluded from every
+per-month statistic. R-50 carries the rule and its negative control.
+
 **Routing is `acquisition`'s, not a second mechanism.** R-32's named accessors delegate to
 `open_restricted`; `governance-guards` R-25 makes the append **durable before the read**;
 R-33 governs writes. This unit constructs **no path** into the restricted root —
@@ -336,13 +347,18 @@ results are present and passing before G-P1A accepts.**
 
 ## 9. `IntegrityError` subclasses raised here
 
-Deriving from `foundation`'s base, each naming the affected resource and the violated
-expectation:
+Deriving from `foundation`'s base — **`IntegrityError`, imported from `src/data/config.py`**,
+under R-01's *"any future integrity-related exception"* clause for the unit-local names — each
+naming the affected resource and the violated expectation. *(Base named explicitly 2026-08-25:
+this sentence already discharged the cross-unit obligation `foundation`'s R-01 records, and is
+tightened rather than added. The **declaration site** for the unit-local exceptions is the same
+OPEN item as the previous units': a recorded cross-unit agreement into `config.py`, or the
+`src/data/exceptions.py` §12 amendment already OPEN at `foundation`.)*
 
 | Exception | Raised when |
 |---|---|
 | `InventoryError` | A source entry carries fewer than TE §5.1's nine fields; a released artifact's hash does not match its release ID |
-| `RegistryError` | A §6.2 field is missing; `igrf_version` is defaulted rather than pinned; provenance is insufficient for the requesting consumer; a value matches **no** recorded source value (an averaged resolution); a resolved field carries an empty rationale |
+| `RegistryError` | A §6.2 field is missing; `igrf_version` is defaulted rather than pinned; provenance is insufficient for the requesting consumer; **a resolved value does not equal the single value of its NAMED source** — matching merely *some* recorded value is insufficient, since an average of {0,6} matches the recorded 3 of another source; the check binds the value to its **NAMED** source *(terminology aligned on NAMED 2026-08-26, finding M3 — the entity contract's term, matching R-47's corrected heading)* *(raise condition corrected 2026-08-25 on adversarial finding 1, which was Major: this cell still carried the withdrawn existence-check wording "matches **no** recorded source value", contradicting § 3's own counterexample twelve lines above and the approved `assert_registry_resolved`)*; a resolved field carries an empty rationale |
 | `SchemaError` | A parameter name, unit, fill value, UTC cadence or duplicate policy does not match `PreparedSchema` |
 | `AuditScopeError` | The declared audit scope does not equal the governed reference set (raised **before any read**); or the access rows written do not reconcile against the declared scope |
 | `LockedTestError` | Raised **through** `acquisition`'s named accessor — a log write or durability failure, before any read proceeds |
@@ -397,7 +413,7 @@ cross-checked and in agreement.
 
 - **[assumption]** Rule IDs continue the single sequence, so `business-rules.md` opens at **R-44**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** `tests/test_station_registry.py` is this unit's per `unit-of-work.md` § 4. **It does not exist** — `tests/` holds three modules and that is not one of them.
-- **[assumption]** WS-01's Phase 1 retention is settled governance; this stage records rather than revisits it.
+- **[assumption]** WS-01's Phase 1 retention rests on an **interim reading** — the cited Rec 12 reads "APPLIED as an interim reading… not yet held", its item 3 is still Open with no closure record *(overstatement corrected 2026-08-25 on adversarial finding 4; superseded: "settled governance")*; this stage records rather than revisits it.
 - **[assumption]** D-13 owns the regime-count threshold; this unit measures against it.
 - **[assumption]** `frontend-components.md` is not produced — `kind: library`.
 - **Corrected 2026-08-23 — `src/data/inventory.py` is NOT an amendment owed**; § Depth specifies boundary calls only and names this stage as where intra-package shapes are specified.
@@ -423,3 +439,25 @@ cross-checked and in agreement.
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 after the post-reset iteration-1 remediation.** In this file: § 9's
+> `RegistryError` raise condition corrected from the withdrawn existence-check wording to
+> value-equals-its-**chosen**-source (finding 1, Major — the cell contradicted § 3's own
+> counterexample); the exception preamble names **`IntegrityError`** explicitly with the
+> declaration-site OPEN item; the WS-01 assumption corrected from "settled governance" to
+> **interim reading** (finding 4). Figures unchanged: 7 requirements, 2 untested, 3 acceptance
+> rows. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-26 under the twelfth-redo receipt, after the terminal-pass remediation.**
+> In this file: **§ 6 gained the timestamp-attribution checkable property** (N1's mirror);
+> **§ 1's box gained the two `inventory.py` obligations** with the ⚠ PROPOSED deferral to stage
+> 3.2 (N2/N3). No entity changed; figures unchanged. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (the unit's
+> question file was repaired from mojibake; no design artifact changed). **G-09 remains unsigned.**

@@ -464,3 +464,27 @@ Both iteration-1 findings resolve correctly on independent verification, not mer
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
+> for `external-products`; floor reset mechanical). **No content of this unit changed.** The four
+> stale `inventory-and-registry` R-20 citations the terminal READY deferred were already corrected
+> in the questions file on 2026-08-23. **G-09 remains unsigned.**
+
+## Review — 2026-08-26 fourteenth-receipt confirming pass
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+
+Narrow confirming pass over the fourteenth-redo re-confirmation receipt. Findings:
+
+1. **No regression in any of the three design artifacts.** `business-logic-model.md`, `business-rules.md`, and `domain-entities.md` each carry, after their terminal-READY `## Review` section, only the two disclosed provenance blockquotes (`Re-saved 2026-08-24 under the post-redo receipt floor` and `Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt`) — nothing else was added, removed, or altered.
+2. **Stale-citation fix confirmed discharged.** Every live "R-20" citation across all four files — including in `functional-design-questions.md` — now reads `governance-guards` R-20. The only occurrences of the superseded `inventory-and-registry` R-20 wording are historical quotations inside correction/disposition records (business-logic-model.md l.18-22, l.437, l.442; business-rules.md l.174-175; domain-entities.md l.229-230; functional-design-questions.md l.234, l.242, l.416, l.481-484), each explicitly framed as quoting the old, corrected text. No live cross-reference is broken.
+3. **New questions-file section is well-formed.** `### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor` carries `> **Impact**:` under both options (`Looks correct`, `Request changes`), exactly one `> **💡 Recommendation**:` line placed after the options and before `[Answer]:`, and `[Answer]: Looks correct` is the filled tag — matching the mandated question-file format.
+4. **No mojibake.** Scripted scan (Bun) across all four files for `Ã`/`Â`-prefixed byte-pair artifacts and C1 control characters (U+0080–U+009F) returned zero matches in each file.
+5. **Spot re-derivation matches every asserted count.** `business-rules.md` has exactly 10 rule headings `R-64` through `R-73`; `business-logic-model.md` has exactly 9 workflow headings `W-1` through `W-9`; `domain-entities.md` has exactly 9 numbered entity sections (`TargetRow` through `IntegrityError` subclasses); its Requirement coverage table lists 6 requirements with exactly 1 (`FR-P1-03-5`) marked "⚠ NO ROW" — all matching the questions file's 2026-08-26 re-confirmation summary line.
+6. G-09 remains unsigned, as disclosed; this narrow pass does not adjudicate content, only regression since the terminal READY.
+
+No regression found. This narrow confirming pass finds nothing that would disturb the terminal READY verdict.
+
+READY

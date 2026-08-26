@@ -56,7 +56,7 @@ ceiling — and record their grade, provenance and availability.
 graph TD
   DS["DriverSeries<br/>(grade + alignment + lag)"]
   GA["GradeEligibility<br/>(provisional = restricted use)"]
-  AM["AvailabilityRow<br/>(obs, publication, grade, safe lag)"]
+  AM["AvailabilityRow<br/>(obs; publication OR D-25 convention;<br/>grade; safe lag)"]
   BM["IRIBenchmark<br/>(B-01, generated not trained)"]
   VR["IRIValidationReport<br/>(7 areas + predeclared tolerance)"]
   GC["GIMComparator<br/>(C-01, generated not trained)"]
@@ -100,6 +100,7 @@ Program. **SSN is absent**, confirmed by `grep`.
 | `alignment` | How a **present** value maps onto the hourly grid (§ 2) |
 | `safe_lag` | The availability lag applied before a forecast origin (D-10.3) |
 | `values` | Time-indexed only — **one value per epoch, identical across all three cells** |
+| `carry_forward_h` / excluded rows | A missing value carries forward **at most 3 hours** (bound read from `configs/features.yaml`); beyond it the row is **excluded**, recorded machine-readably — R-57a, FR-P1-04-3, TC-09 *(field added 2026-08-26, finding 10)* |
 
 **Time-indexed only, and the consequence is stated** (FR-P1-04-4, TC-12): a join must never
 imply a per-cell measurement, and **a station performance difference must never be
@@ -173,7 +174,10 @@ consequence of the same fact and not restated as a rule here.
 
 ## 4. `AvailabilityRow` — the same matrix the benchmark must appear in
 
-Per driver, per epoch: **observation timestamp, publication timestamp, release status,
+Per driver, per epoch: **observation timestamp, publication timestamp OR — where the provider
+supplies none — the approved conservative convention (for F10.7: D-25's 00:00 UTC on day D+1,
+never same-day) plus the documented absence and an unverified-latency statement**
+(`CR-2026-08-22-EV-12`; field corrected 2026-08-26, finding 2)**, release status,
 safe lag.**
 
 **FR-P1-04-15 requires the IRI benchmark's OWN drivers to appear as rows in this same
@@ -303,12 +307,16 @@ unattributed number"* in the G-P1A decision this feeds.
 
 ## 9. `IntegrityError` subclasses raised here
 
-Deriving from `foundation`'s base, each naming the affected resource and the violated
-expectation:
+Deriving from `foundation`'s base — **`IntegrityError`, imported from `src/data/config.py`**,
+under R-01's *"any future integrity-related exception"* clause for the unit-local names — each
+naming the affected resource and the violated expectation. *(Base named explicitly 2026-08-26,
+matching every prior unit; the **declaration site** for the unit-local exceptions is the same
+OPEN item recorded at `foundation`: a cross-unit agreement into `config.py`, or the
+`src/data/exceptions.py` §12 amendment.)*
 
 | Exception | Raised when |
 |---|---|
-| `DriverError` | A series mixes release grades; a grade renders the series ineligible for the requested use; a Kp value is repeated outside its 3-hour interval; a Dst value is shifted to a neighbouring hour; an interpolation call is found on any driver series; a hash mismatch is detected |
+| `DriverError` *(scope corrected 2026-08-26, finding 3: the two alignment conditions previously claimed here are raised as **`AlignmentError`** — one of the fourteen in the shared base — by the approved `build_features` contract at `component-methods.md`, not by this unit; and "an interpolation call is found" is a **static grep check** per this unit's own R-58/W-5 limb 3, not a runtime raise)* | A series mixes release grades; a grade renders the series ineligible for the requested use; a hash mismatch is detected. *(Three conditions removed from THIS cell 2026-08-26, finding 9 — the 2026-08-26 note beside it had retracted them while the cell 3.5 implements from still listed them: Kp repeated outside its interval and Dst shifted to a neighbouring hour raise the approved **`AlignmentError`** at `build_features`, not here; "an interpolation call is found" is a **static grep check**, not a runtime raise.)* |
 | `BenchmarkError` | Generation is attempted without a passing validation report; the report is missing any of its seven content areas; the tolerance timestamp does not precede the comparison |
 | `ComparatorError` | Generation is attempted while the interpolation rule is **unset**; the hand-check timestamp does not precede generation; the overlap audit is absent where an independence claim is made |
 | `ImportBoundaryError` | A module outside the allowlist can reach `iri` or `gim`, directly or transitively |
@@ -339,7 +347,13 @@ Acceptance derived from story-map Table 1; owners from Table 2's `primary` cell.
 the **primary acceptance test** (`tests/test_feature_leakage_guards.py`) — see
 `business-logic-model.md` § W-2a. **Supports** WS-10, WS-11, TA-08, TA-12.
 
-> ## THE TWO UPSTREAM ARTIFACTS DISAGREE, AND THE DISAGREEMENT IS ABOUT THIS UNIT
+> ## THE TWO UPSTREAM ARTIFACTS DISAGREED — RESOLVED; § 6 WAS SWEPT 2026-08-24
+>
+> *(Heading and standing corrected 2026-08-26 on adversarial finding 8, Critical: this box still
+> asserted the disagreement as live. `unit-of-work.md` § 6 now reads **4** untested and
+> `Acceptance rows (2). WS-09, TA-36 (Pending …)`, present since commit `45796f5`. The text below
+> is the dated record of the conflict as it stood; **nothing is currently reported to the gate
+> from this box**.)*
 >
 > `unit-of-work.md` § 6 says **5 untested** (its bold list includes FR-P1-04-17) and
 > **`Acceptance rows (1). WS-09`**. The story map says **4 untested** and **WS-09 and
@@ -370,7 +384,7 @@ the **primary acceptance test** (`tests/test_feature_leakage_guards.py`) — see
 - **Open — FR-P1-04-18's interpolation rule is UNSET** (§ 6), a §18.2 Student-owned forbidden choice. Comparator generation refuses while it stands.
 - **Open — four requirements with no acceptance row**: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18.
 - **Open — TA-36 is `Pending`**: approved, never run.
-- **Open — `unit-of-work.md` § 6 carries stale text**, reported not edited.
+- **Closed 2026-08-26 (finding 8): the § 6 conflict no longer exists — the file was swept 2026-08-24; kept as the dated record.** *(Superseded bullet:)*  — `unit-of-work.md` § 6 carries stale text**, reported not edited.
 - **Open — FR-P1-04-18 obligation 4 has no code check**, and is named uncheckable rather than given one that would not test it.
 - **G-09 is not signed.** No entity here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`, `src/external/gim.py` or `scripts/04_build_external_products.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -387,3 +401,23 @@ the **primary acceptance test** (`tests/test_feature_leakage_guards.py`) — see
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-26 under the thirteenth-redo receipt, after the terminal-pass remediation.**
+> In this file: the upstream-disagreement box re-headed **RESOLVED** (the § 6 conflict no longer
+> exists); the `DriverError` **Raised-when cell purged** of the three retracted conditions —
+> Kp/Dst misalignment raise the approved **`AlignmentError`**, interpolation is a static grep;
+> `DriverSeries` gained the **carry-forward/exclusion field** (R-57a); the availability-row
+> field and mermaid node carry the D-25 branch. Figures unchanged (7/4/2).
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo receipt** (the redo finished the
+> gate-record sweep in the sibling files; no entity here changed). **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (finding 17's
+> mojibake repair touched the question file only; no entity here changed). **G-09 remains unsigned.**

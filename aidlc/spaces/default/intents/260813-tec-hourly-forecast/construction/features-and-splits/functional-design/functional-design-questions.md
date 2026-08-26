@@ -727,8 +727,12 @@ Findings **4, 5, 6 and 7** are mechanical corrections with no decision in them:
 - **The three Assumptions entries** read *"`build_features` gains `transform` **and**
   `purpose`, which travel together"*.
 
-Iteration-5 findings **9, 10 and 11** were not re-raised as blocking and are left as they
-stand, reported here so they are not mistaken for closed.
+Iteration-5 findings **9, 10 and 11** were not re-raised as blocking and were left standing
+on 2026-08-24. **Fixed 2026-08-26** on the owner's "fix all" ruling under the fourteenth-redo
+floor: the `evaluate` rows carry the read/emit split where the embargo term bites (9), this
+unit's `business-rules.md` Sources list received the R-24-in/R-25-R-28-out correction its two
+siblings already had (10), and R-76a's id is kept with the reason stated — renumbering would
+break `models-and-baselines`' live citations under a frozen READY receipt (11a).
 
 ### What still stands, unchanged by any of this
 
@@ -791,5 +795,45 @@ Does this all look correct before I generate the artifact?
    > **Impact**: No receipt is recorded and nothing is re-saved. Tell me what to change and I re-present first.
 
 > **💡 Recommendation**: **Looks correct** — this unit is untouched; the reset is a mechanical consequence of a redo taken for a different unit, and that redo achieved what it was authorised for.
+
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**This unit changed, and every change is the iteration-5 remediation you ruled on.** The 2026-08-24
+remediation (FU-4 = D, FU-5 = D, FU-6 = A, confirmed above) had applied the two Criticals, the three
+Majors and minors 6–7 — the provenance stamp with consumer refusal and the manifest-based test,
+the read/emit split that keeps 1 December in the G-06 locked test, the three-call sequence, W-2's
+signature block, § 10's two rows, and the amendment total re-derived to **8 across 5 units** — but
+was never re-reviewed: the last recorded verdict is iteration 5's NOT-READY, which predates all of it.
+
+**Fixed today (2026-08-26), completing your "fix all, stamp route" ruling** — the three findings
+the 2026-08-24 pass left standing, plus one alignment sweep:
+
+- **Finding 9**: the `evaluate` rows of both accepted-set tables now carry the read/emit split where
+  the embargo term bites — an embargo row **emitted** under `evaluate` raises `LeakageError`; the same
+  24 hours stay **readable** as the causal history the first `vtec_seq_24` window needs (W-4b).
+- **Finding 10**: `business-rules.md`'s Sources list received the R-24-in / R-25-R-28-out correction
+  its two sibling files got on 2026-08-23.
+- **Finding 11a**: R-76a's id and filing position are **kept, with the reason stated**: renumbering to
+  R-83 would break `models-and-baselines`' live "R-76a's third limb" citations under a frozen READY
+  receipt. (11b's tree-revision half already carried its gate referral.)
+- **Alignment sweep**: three more sites stating `evaluate`'s set flat as "exactly its validation
+  month" (both element-4 tables and § 6's amendment box) now carry the same read/emit split, so no
+  live sentence contradicts W-4b.
+
+**Unchanged**: every answer Q1–Q9 and FU-4/5/6, all counts (rules R-74…R-82 plus R-76a, 10
+workflows, 6 test modules, 39/5 accepted cells), BLK-04's status as an open exit condition, and
+G-09 unsigned. The adversarial review under this floor runs next and verifies the whole remediation.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved natively, adversarial review dispatched to verify the full iteration-5 remediation.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — the substantive mechanisms were confirmed by you at FU-4/5/6; today's additions are the three minors you ruled into scope and a consistency sweep, and the reviewer pass is what establishes READY, not this receipt.
 
 [Answer]: Looks correct

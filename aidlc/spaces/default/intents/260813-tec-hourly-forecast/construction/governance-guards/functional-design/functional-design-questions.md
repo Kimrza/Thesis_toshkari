@@ -673,4 +673,102 @@ Does this all look correct before I generate the artifact?
 
 > **💡 Recommendation**: **Looks correct** — this unit is untouched; the reset is a mechanical consequence of a redo taken for a different unit, and that redo achieved what it was authorised for.
 
+*(Answered `Looks correct`, 2026-08-24T15:26:16Z. That receipt was reset by ten authorised stage-wide redo jumps taken for `foundation`, the last at 2026-08-25T15:38:25Z. The live answer tag is the blank one at the end of this file.)*
+
+
+### Re-confirmation, 2026-08-25 — after ten stage-wide redo jumps taken for `foundation`
+
+**Why this is being re-asked.** Ten redo jumps on `functional-design` — all authorised by the
+project decision owner, all aimed at `foundation` — reset the receipt floor for every unit of the
+stage. That was the stated, accepted cost each time. `foundation` closed with a terminal **READY**
+under the tenth redo's budget.
+
+**Nothing in `governance-guards` changed through any of the ten resets.** Verified before seeking
+this receipt, per this project's derive-not-carry rule:
+
+| Figure | Declared upstream | Derived | In this unit's artifacts |
+|---|---|---|---|
+| Requirements carried | 10 | **10** (REQ-ENG-5, **FR-P1-02-6**, FR-P1-03-2, FR-P1-05-12, FR-P1-06-1…4, NFR-PHASE-01, NFR-LIC-01) | agrees |
+| Untested (no §16/§19 row) | 1 of 10 | **1** (FR-P1-02-6, the bolded one) | agrees |
+| Acceptance rows | 2 | **2** (TA-27, TA-28) | agrees |
+| Amendment C / ledger / "satisfied by determinism" contamination | — | **0 hits** in all four files | clean |
+
+**One genuine gap, created by a decision made after these artifacts were written.** `foundation`'s
+R-01 (ninth redo, on the authority of `component-methods.md` § Assumptions) places **all fourteen**
+project-defined exceptions in the `IntegrityError` hierarchy, declared in `src/data/config.py`, and
+records a cross-unit obligation: **each unit declares its own exceptions as `IntegrityError`
+subclasses**. This unit raises `PhaseBoundaryError` and `LockedTestError` — and its artifacts use
+both **without stating their base class**, because they predate that decision. Left unstated, the
+stage-entry contract's `except IntegrityError` would not catch a phase-boundary violation, which is
+the exact defect the R-01 correction exists to prevent — and *this* unit owns the two guards where
+it matters most.
+
+**Proposed edit after this receipt, and only this:** one addition to `domain-entities.md`'s
+exception table and one line in `business-rules.md`, stating that `PhaseBoundaryError` and
+`LockedTestError` **derive from `IntegrityError`, imported from `src/data/config.py`** (a legal
+import — this unit depends on `foundation`), discharging this unit's half of the cross-unit
+obligation. Then the adversarial reviewer runs on this unit's own budget.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: The receipt is recorded for `governance-guards`, the one base-class edit is applied, the artifacts are re-saved, and the reviewer runs. No other content of this unit changes.
+
+- Request changes
+   > **Impact**: No receipt is recorded and nothing is edited. Tell me what to change — including handling the base-class obligation differently — and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the unit is unchanged and verified clean; the single edit discharges an obligation created by a later, owner-approved decision, and skipping it would leave the phase-boundary guard uncatchable by the contract that must catch it.
+
+*(Answered `Looks correct`, 2026-08-25T16:20Z. That receipt was reset by the eleventh authorised redo, 2026-08-25T17:21:15Z, taken for `acquisition`. The live answer tag is the blank one at the end of this file.)*
+
+### Re-confirmation, 2026-08-25 (second) — floor reset by the eleventh redo, taken for `acquisition`
+
+**Nothing in `governance-guards` changed.** Its artifacts are exactly the bytes its terminal
+**READY** pass reviewed (iteration 2, three documentation-class findings disclosed as gate input);
+the eleventh redo was authorised to fix `acquisition` and reset every unit's floor as its stated
+cost. The re-saves after this receipt change no content; a narrow confirming review runs against
+identical bytes.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved unchanged, one narrow confirming review runs.
+
+- Request changes
+   > **Impact**: No receipt, nothing re-saved. Tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — byte-identical to its READY state; purely mechanical.
+
+*(Receipt reset by the twelfth authorised redo, 2026-08-26T05:43:39Z, taken for `inventory-and-registry`. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — mechanical, floor reset by the twelfth redo (taken for `inventory-and-registry`)
+
+**Nothing in this unit changed**; artifacts are byte-identical to the state its terminal READY (or confirming READY) reviewed. Re-saves change no content; a narrow confirming review runs.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, unchanged re-save, narrow confirming review.
+
+- Request changes
+   > **Impact**: Nothing recorded or saved; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — purely mechanical.
+
+*(Receipt reset by the fourteenth authorised redo, 2026-08-26T08:18:34Z. The live answer tag is the blank one below.)*
+
+### Re-confirmation, 2026-08-26 — under the fourteenth-redo floor
+
+**Nothing in this unit changed**; byte-identical to its confirmed state. Floor reset by the fourteenth redo, taken for `external-products`.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved, review runs (narrow confirm for unchanged units; confirming pass for external-products).
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — mechanical for the unchanged units; for the two repaired question files the repair restores what a gate reader needs and touches no specification.
+
 [Answer]: Looks correct

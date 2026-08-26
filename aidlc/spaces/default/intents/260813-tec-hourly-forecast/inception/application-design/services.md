@@ -299,9 +299,11 @@ Amendment C was declined as drafted)*:
 > then authorised the edit explicitly. The reversal itself was ruled after the full conflict was
 > put to them — that the ledger's authority was their own **Q6=D** and **FU-2=D** answers, and
 > that a `content_hash`-derived label is **Q6 option C**, which they had read and declined.
-> **Q6 is being re-answered to drop its monotonicity requirement** on their instruction, because
+> **Q6 was re-answered on 2026-08-25 as D′, dropping its monotonicity requirement**, on their instruction, because
 > monotonicity is information about *sequence* which a function of content alone cannot carry.
-> The **never-reused** obligation is unaffected: a pure derivation allocates nothing and
+> **On never-reuse — corrected 2026-08-25 (second upstream pass), on adversarial finding M-4.** The wording this edit originally carried — *"The never-reused obligation is unaffected and is satisfied by determinism: a pure derivation allocates nothing, so the delete-and-rebuild failure described below cannot arise"* — was **unsound and is withdrawn**. A pure derivation gives **idempotence** (same content, same label), and never-reuse is its converse, **injectivity** (different content, different label). The delete-and-rebuild failure genuinely cannot arise, and that much stands; but never-reuse holds only for an encoding faithful to all 256 bits, and Q6=D′ keeps the label human-readable and citable, hence lossy. **Never-reuse is therefore an OPEN obligation on whoever specifies the `dataset_version` encoding**, which is itself an open freeze-gate decision. No artifact may claim release labels are never reused.
+>
+> *(Superseded wording, preserved:)* The **never-reused** obligation is unaffected: a pure derivation allocates nothing and
 > consults nothing, so the delete-and-rebuild failure that motivated the ledger cannot arise.
 >
 > **Scope of the correction:** this row and `unit-of-work.md` § 1 `foundation` → `Owns`. No

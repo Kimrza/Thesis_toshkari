@@ -372,6 +372,15 @@ produce a reassuring empty diff.
 
 ## R-23 — Both phase-boundary limbs run, and neither substitutes for the other
 
+**Base class of every exception this unit raises** *(stated 2026-08-25, discharging the cross-unit
+obligation `foundation`'s R-01 records; corrected the same day on adversarial finding 1, which was
+Major — the first statement enumerated four and this unit raises **five**, omitting
+`EvidenceScanError`, R-27's fail-closed December-scan limb, in the very box whose rationale is that
+an unenumerated exception exits unrecorded)*: `PhaseBoundaryError`, `LockedTestError`, `ReuseError`,
+`ManifestError` **and `EvidenceScanError`** all **derive from `IntegrityError`, imported from
+`src/data/config.py`**, so the stage-entry contract's `except IntegrityError` catches each of them
+and writes the `aborted` registry row.
+
 **Rule (FR-P1-03-2, NFR-PHASE-01).** Two independent results are required:
 
 - **Import limb** — `assert_phase_boundary(phase, loaded_modules)`: under
@@ -656,6 +665,12 @@ check fails.
 
 ## R-29 — Reuse is registered before use, and reimplementation is the default
 
+**Evidence module, named** *(2026-08-25, adversarial finding 4 of the post-reset pass:
+`tests/test_reuse_registry.py` is in this unit's `Owns` and is TA-28's evidence, and appeared in
+none of the three artifacts while its sibling `tests/test_phase_boundary.py` is named
+throughout)*: this rule and R-30 are proven by **`tests/test_reuse_registry.py`**, which rejects a
+marked adapter module with no register entry and an entry missing any of the fifteen fields.
+
 **Rule (NFR-LIC-01, §10.1, Q8 = D).** Any reused or materially adapted third-party
 source is recorded in the register with **all fifteen fields**, **before the code is
 used** and before gate **G-P2**.
@@ -698,6 +713,7 @@ implement it; the count of untested *requirements* is one.
 
 ## Assumptions & Open Questions
 
+- **OPEN — an amendment need on `build_transition_manifest`** *(added 2026-08-25 on adversarial finding 2 of the post-reset pass)*: the approved signature carries no mode parameter, three artifact statements correctly say the mode is not a build-time argument, yet the builder must be told which mode to build. The reconciliation (W-5) records an amendment need — a keyword `mode: Literal["draft","freeze"]` — for the owner, following `foundation`'s `write_release` precedent. Until ruled on, 3.5 must stop and report rather than invent the channel (TE §18.3).
 - **[assumption]** Rule IDs continue `foundation`'s single sequence, so this unit opens at **R-18**. If per-unit numbering was intended, say so at the gate and the artifacts restart at R-01.
 - **[assumption]** `tests/test_locked_test_guard.py` is not this unit's — ADR-03 splits the guard, and `features-and-splits` owns the test covering both limbs to keep this unit a DAG root.
 - **[assumption]** `RAW_MODULES` names **four** `gnss` modules — `rinex`, `calibration`, `target`, `verification` — not the two FR-P1-03-2's earlier wording listed.
@@ -727,3 +743,43 @@ implement it; the count of untested *requirements* is one.
 > the restored budget, which is what the redo was authorised for. The two residuals riding that
 > verdict — R-96's `PartitionError` mechanism and R-95's field label — are carried to the stage
 > gate rather than applied, per the rule that a suggestion riding a READY verdict is gate input.
+
+---
+
+> **Re-saved 2026-08-25 under the post-ten-redo receipt.** One addition: the **base-class
+> declaration** ahead of the phase-boundary rule — `PhaseBoundaryError`, `LockedTestError`,
+> `ReuseError` and `ManifestError` all derive from **`IntegrityError`, imported from
+> `src/data/config.py`** — discharging this unit's half of the cross-unit obligation
+> `foundation`'s R-01 records. Without it the stage-entry contract's `except IntegrityError`
+> would let a phase-boundary violation exit with **no `aborted` registry row**, against
+> NFR-PHASE-01 and NFR-AUD-01, in the unit that owns the guard. No rule was added or removed;
+> figures re-derived and unchanged (10 requirements, 1 untested, 2 acceptance rows).
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-25 after the post-reset iteration-1 remediation.** The base-class declaration
+> was corrected to cover **all five** exceptions this unit raises — the first statement enumerated
+> four and omitted `EvidenceScanError`, the fail-closed December-scan limb, in the box whose own
+> rationale is that an unenumerated exception exits unrecorded (adversarial finding 1, Major).
+> R-29 now names **`tests/test_reuse_registry.py`** as TA-28's evidence (finding 4), and
+> § Assumptions carries the **amendment need on `build_transition_manifest`'s mode channel**
+> (finding 2). No rule added or removed; figures unchanged. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-25 under the second receipt** (eleventh redo, taken for
+> `acquisition`; floor reset mechanical). **No content of this unit changed** since the terminal
+> READY. **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the third receipt** (twelfth redo, taken for
+> `inventory-and-registry`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**
+
+---
+
+> **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
+> for `external-products`; floor reset mechanical). **No content of this unit changed.**
+> **G-09 remains unsigned.**

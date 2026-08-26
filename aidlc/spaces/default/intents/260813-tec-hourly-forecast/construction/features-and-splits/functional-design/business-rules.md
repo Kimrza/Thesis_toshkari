@@ -40,7 +40,7 @@ intended, say so at the gate and the artifacts restart at R-01.
 - `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract.
 - `../target-standardization/functional-design/business-rules.md` — the D-17 target contract consumed here.
 - `../external-products/functional-design/business-rules.md` — **R-56**, **R-57**, **R-58**.
-- `../governance-guards/functional-design/business-rules.md` — **R-19** (the exactly-one-member exclusion shape), **R-23**, **R-25**, **R-28**.
+- `../governance-guards/functional-design/business-rules.md` — **R-19** (the exactly-one-member exclusion shape), **R-23** and **R-24** (the two phase-boundary limbs). **Corrected 2026-08-26, iteration-5 finding 10 (iteration-4 finding 10):** R-24 is cited in this artifact's body and was absent here; **R-25** (access-log ordering) and **R-28** (restricted root) were listed and drawn on nowhere, and are removed — the same correction `business-logic-model.md` and `domain-entities.md` received on 2026-08-23, which this file had been left out of.
 - `evidence/DECISIONS.md` — **D-10.3**, **D-11**, **D-13**.
 - Workspace inspection, 2026-08-23: `tests/` holds three modules, none this unit's; `src/` and `configs/` absent.
 - `functional-design-questions.md` (**Q1 through Q9**), `domain-entities.md`, `business-logic-model.md`.
@@ -56,7 +56,7 @@ intended, say so at the gate and the artifacts restart at R-01.
 | 1 | **Allowed partitions** | The **named fold's training partition only** |
 | 2 | **Fitting failure** | `LeakageError` when `train`'s index is **not a subset** of that partition |
 | 3 | **Ownership of the fitted state** | `Transform` **carries its `FoldSpec`** — the resolved boundaries, not a bare `fold_id` string |
-| 4 | **Applying failure** | `apply_transforms` takes a **required `purpose`** (`train` \| `evaluate`, no default) and raises `LeakageError` when the frame leaves the set that `purpose` permits **for that transform's own fold** — its training partition for `train`, **exactly its validation month** for `evaluate` — or when the frame is **empty** |
+| 4 | **Applying failure** | `apply_transforms` takes a **required `purpose`** (`train` \| `evaluate`, no default) and raises `LeakageError` when the frame leaves the set that `purpose` permits **for that transform's own fold** — its training partition for `train`; for `evaluate`, its validation month **plus the causal history the frozen 24-hour window requires, readable but never emitted** (W-4b; *aligned 2026-08-26*) — or when the frame is **empty** |
 
 > **⚠ Read this table with its condition — the four downstream units cite it by name.**
 > Elements 1–4 are **complete and executable for F1–F4**. For the **final refit** they are
@@ -130,7 +130,14 @@ register's required list precisely for this.
 > | `purpose` | Fold *k*'s transform accepts | The refit's transform accepts |
 > |---|---|---|
 > | `train` | Fold *k*'s **training partition**, embargo rows **excluded and counted** | 1 Jan – 30 Nov |
-> | `evaluate` | **Exactly fold *k*'s validation month** | **December only**, through R-82's guard |
+> | `evaluate` | **Exactly fold *k*'s validation month** as the **emittable** set; the 24-h embargo rows are **readable as causal history only, never emitted** (W-4b) — an embargo row **emitted** under `evaluate` raises `LeakageError`, the control § 10's row carries | **December only**, through R-82's guard |
+>
+> *(Evaluate row completed 2026-08-26, iteration-5 finding 9 / iteration-4 finding 9: the
+> embargo term previously sat only on the `train` row, where embargo rows are outside the
+> training partition by construction and the qualifier binds nothing — the row where an
+> embargo row would appear if not dropped was silent. W-4b's read/emit split is what
+> reconciles the finding's remedy with the causal-history window: the same 24 hours must be
+> readable for the first `vtec_seq_24` window and must never appear as an emitted row.)*
 >
 > **`Transform` carrying its `FoldSpec` still costs nothing** — `component-methods.md` leaves
 > it *"referenced as a type and left unspecified: … intra-package"*. **The `purpose` parameter
@@ -293,6 +300,16 @@ final archive → fails on `release_status`.
 
 ## R-76a — TA-36's enforcement raise and primary test are THIS unit's
 
+> **The `R-76a` id and its filing position are kept deliberately** *(stated 2026-08-26,
+> iteration-5 finding 11a / iteration-4 finding 11a)*. The suffix does not claim kinship with
+> R-76 (dictionary closure) the way `external-products` R-54a claims kinship with R-54; it
+> records only that the rule was **added between** existing ids after the single sequence
+> R-74…R-82 was already cited downstream. Renumbering to R-83 now would break live cross-unit
+> citations: `models-and-baselines` cites "`features-and-splits` R-76a's third limb" in both
+> its business-rules and domain-entities artifacts, and that unit is terminal-READY under a
+> frozen receipt. A broken citation in two READY artifacts costs more than a non-sequential id
+> whose referent is unambiguous.
+>
 > **⚠ Added 2026-08-23, correcting the opposite claim in all three artifacts.** They stated
 > TA-36 was *"`external-products`' row, not this unit's"* — read off the story map's
 > § Per-unit coverage summary and Table 2, and **stopped there**. `external-products` **R-54a**
@@ -741,3 +758,12 @@ Writing a requirement into their inbox is deliberate: BLK-04 is an exit conditio
 > gate rather than applied. **R-80 below is named in one of them**: `models-and-baselines` records
 > the no-second-test-period prohibition as an obligation **this** unit owns, because R-80 fixes the
 > partition list to six closed rows. The reviewer verified that ownership claim directly.
+
+---
+
+> **Re-saved 2026-08-26 under the fourteenth-redo re-confirmation receipt, after completing the
+> iteration-5 remediation.** In this file: the Sources list corrected (finding 10 — R-24 in,
+> R-25/R-28 out, matching the siblings' 2026-08-23 correction); R-74's accepted-set `evaluate`
+> row completed with the read/emit split and its dated note (finding 9); the element-4 table's
+> applying-failure row aligned with W-4b; R-76a's id and filing position kept with the reason
+> stated (finding 11a). **BLK-04 remains an open exit condition. G-09 remains unsigned.**
