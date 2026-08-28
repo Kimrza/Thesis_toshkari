@@ -2,6 +2,37 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> ## ✳ AMENDED 2026-08-28 — GOVERNANCE REMEDIATION, `GOV-2026-08-28-FD-01` (verdict FAIL)
+>
+> The project decision owner ruled on governance report
+> `governance/reviews/GOV-2026-08-28-FD-01.md` (49 findings; Critical 6, High 25, Medium 13, Low 5).
+> Nine of its recommendations reach this unit and were applied on 2026-08-28. **Every edit carries a
+> dated note citing its Recommendation number at the site it changes**, and **no dated box, superseded
+> record or `## Review` section was deleted or rewritten** — this unit's annotate-in-place convention
+> is unchanged.
+>
+> | Rec | What changed here | Where |
+> |---|---|---|
+> | **8** | `PartitionError` promoted to a **fifteenth** project exception; the `PartitionError`/`LeakageError` discriminating rule stated; `InverseTransformError` explicitly left on the any-future clause with its reason; **R-01's count restated as DERIVED** | R-01; § Assumptions |
+> | **9** | **FR-WS-7** named as this unit's requirement discharging onto **TA-23**; `aws_ai_dlc_preflight_report` added to the artifact family with **G-09** as its gate | R-02 |
+> | **10** | **R-18** added — TE §13.4's **twenty columns**, the schema assertion, `prediction_hash` and `locked_test_accessed`; **R-19** added — the `run_id` join with orphan detection both ways | R-18, R-19 |
+> | **1**/**3** | The prediction-hash receipt's **destination** is the registry row; `07`/the bootstrap **may not be the writer**; `prior_period_exposure` carried | R-18 |
+> | **12** | **R-20** added — `exploratory` **derived** in the registry writer, with the G-06 carve-out and its negative control | R-20 |
+> | **39** | **R-08** gains §13.4's write mechanism — single newline-terminated append plus durability confirmation, **at no read**; trailing-versus-interior malformed-row distinction; controls. Citation corrected | R-08; the count/citation box after R-20 |
+> | **34** | **WS-17 re-labelled supporting**; the trailing *Superseded* annotation resolved | R-05 |
+> | **49** | Dated clause: the `.gitignore` deny-list precondition **satisfied** 2026-08-28; **NFR-SEC-01 and TA-22 stay unclaimed** pending TA-22's full-scope scan | R-14 |
+> | **42** | The board's encoding recommendation **recorded, not adopted**; the OPEN never-reuse posture left intact; the encoding remains **the owner's D-number decision** | § Assumptions |
+>
+> **The rule count moved 17 → 20** (R-01…R-20), derived after every edit; no other project count
+> moved. **G-09 remains unsigned and nothing added here authorises creating a module.** No scientific
+> value, governed constant, config field or approved signature is decided.
+>
+> **One item in the brief did not match the disk and is corrected rather than adapted around:**
+> Recommendation 39's *"verification table at `business-logic-model.md:1748`"* is a **reviewer's**
+> dated spot-check inside a preserved `## Review` section, not this unit's own live table. The
+> citation correction is therefore stated in live rule text (R-08's Acceptance line and the box after
+> R-20) instead of by editing a reviewer's sentence.
+
 > **Addendum re-confirmed 2026-08-24, and this box was itself wrong — corrected 2026-08-25
 > on adversarial reviewer finding M-3 (Major).** Sites **9–11** of
 > `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md` § Addendum corrected three
@@ -56,6 +87,10 @@ where no acceptance row exists to accept that control, it says so.
 - `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, the three amendments — A **declined** and B **approved** (2026-08-24), C **declined as drafted** (2026-08-25, reversing its 2026-08-24 approval). Q6 re-answered as **D′** and FU-2 rendered moot, 2026-08-25.
 - `../../../../../../../../PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md` — **the Technical Environment document**, cited throughout these rules (§7.0, §9.1–9.2, §12, §13.1, §13.3, §13.4, §18.2–18.3, §19). *(Added 2026-08-25 on an adversarial residual raised twice: the document was cited ten times here and listed in no § Sources entry, and its derivations used an unresolved `<TE>` placeholder. **The placeholder was resolvable** — the file is at `PreFlight/`, 1158 lines — and the three figures it had blocked now derive and agree: **7** §13.1 bullets, **0** file-level entries under `artifacts/` in the §12 tree, and **36** distinct TA rows, TA-01…TA-36, confirming the §19-at-36 figure these rules had been carrying rather than deriving.)*
 - `domain-entities.md` and `business-logic-model.md` — the shapes and workflows these rules constrain.
+- `../../../../../../../../governance/reviews/GOV-2026-08-28-FD-01.md` — **the governance report this unit was remediated against on 2026-08-28** (verdict **FAIL**; 49 findings). Recommendations reaching this unit: **1**, **3**, **8**, **9**, **10**, **12**, **34**, **39**, **42**, **49**. *(Added 2026-08-28 with the remediation, per this unit's standing practice that an operatively cited document appears in § Sources — the omission `external-products` was faulted for at Recommendation 46.)*
+- `../../../../../../../../PreFlight/vision_document(3)(2)(2).md` — **the Vision document**, § 13.1's gate table, read 2026-08-28 for **G-09**'s evidence artifact (`aws_ai_dlc_preflight_report`, owner Supervisor, status **Open**) as distinct from **G-07**'s (`environment_and_cpu_preflight_report`), and for §8.3's exploratory label. *(Added 2026-08-28 with Recommendations 9 and 12, which turn on the G-07/G-09 distinction this document fixes.)*
+- `../../governance-guards/functional-design/` — `AccessRecord`'s approved field set and **R-25**'s durable-append pattern, the comparator R-08's write mechanism and R-19's join are specified against. *(Added 2026-08-28 with Recommendations 10 and 39. **Two levels up, not one** — a sibling unit sits at `construction/<unit>/functional-design/`, so `../<unit>/…` would resolve inside this unit's own directory. Verified with `test -f`; noted because two sibling artifacts carry the one-level form and it does not resolve.)*
+- `../../models-and-baselines/functional-design/` — § 12's `IntegrityError` subclasses (`SeedError`, `AlignmentError`, **`PartitionError`**, `LeakageError`) and R-92's raise condition, the authority for R-01's fifteenth entry; and the `PredictionHashReceipt` half of Recommendation 1. *(Added 2026-08-28.)*
 
 ---
 
@@ -77,12 +112,165 @@ hierarchy at all.
 
 ## R-01 — `IntegrityError` is the single catchable base
 
-**Rule.** **All fourteen project-defined exceptions derive from `IntegrityError`**, and so does any
-future integrity-related exception. `foundation` owns the base class and **raises six** of them —
-`ConfigError`, `PreflightError`, `PlatformError`, `DeterminismError`, `ReleaseError`,
-`RegistryError`. The other **eight are raised by other units and derive from the same base**:
-`PhaseBoundaryError` and `LockedTestError` (`governance-guards`), `LeakageError` and
-`AlignmentError`, `SeedError`, `FairnessError`, `BootstrapError`, `RegimeError`.
+**Rule (amended 2026-08-28 — the enumeration is FIFTEEN, and the operative obligation is the base
+class, not the numeral).** **Every project-defined exception derives from `IntegrityError`**, and so
+does any future integrity-related exception. **Fifteen are named in the enumeration below.**
+`foundation` owns the base class and **raises six** of them — `ConfigError`, `PreflightError`,
+`PlatformError`, `DeterminismError`, `ReleaseError`, `RegistryError`. The other **nine are raised by
+other units and derive from the same base**: `PhaseBoundaryError` and `LockedTestError`
+(`governance-guards`), `LeakageError` and `AlignmentError`, `SeedError`, `FairnessError`,
+`BootstrapError`, `RegimeError`, and — **added 2026-08-28** — **`PartitionError`**
+(`models-and-baselines`, declared in **`src/models/`**, which that unit's `Owns` list carries:
+`src/models/persistence.py`, `climatology.py`, `ridge.py`, `random_forest.py`, `lstm.py`,
+`train.py`, `checkpoint.py`).
+
+> ## ✳ AMENDED 2026-08-28 — `PartitionError` PROMOTED TO A FIFTEENTH, AND THE COUNT IS NOW DERIVED
+>
+> *(Applied on the project decision owner's ruling on governance report
+> `governance/reviews/GOV-2026-08-28-FD-01.md` **Recommendation 8**, where the owner selected
+> **option 1** — promote `PartitionError` into the enumeration, formally amended. The three seats
+> that raised the finding split on the remedy and the Chair recorded the choice as the owner's
+> architectural call; the owner made it. **Superseded rule wording, preserved verbatim:** *"**All
+> fourteen project-defined exceptions derive from `IntegrityError`**, and so does any future
+> integrity-related exception. … The other **eight are raised by other units and derive from the
+> same base**: `PhaseBoundaryError` and `LockedTestError` (`governance-guards`), `LeakageError` and
+> `AlignmentError`, `SeedError`, `FairnessError`, `BootstrapError`, `RegimeError`."*)*
+>
+> **This is R-01's SECOND staleness**, and the reason the count is no longer asserted. The
+> enumeration was corrected from six to fourteen on 2026-08-25, for exactly the reason this rule's
+> own rationale gives — *"a hand-maintained catch list means a seventh subclass added later is
+> silently uncaught"* — and it went stale again within three days. A hand-maintained **enumeration**
+> fails the same way a hand-maintained **catch list** does. So the rule's operative obligation is
+> restated as the base-class relation (*every* project-defined exception derives from
+> `IntegrityError`), the fifteen are a **named subset** rather than a completeness claim, and the
+> total is **derived and printed** below rather than carried in prose.
+>
+> ### The derivation, run 2026-08-28 over all twelve units' 48 `functional-design` artifacts
+>
+> ```
+> bun: match /\b([A-Z][A-Za-z0-9]*Error)\b/g over
+>      construction/*/functional-design/*.md      (12 units, 48 artifacts)
+>
+> raw distinct *Error tokens ........................... 36
+>   of which Python builtins (NotImplementedError,
+>   TypeError) ........................................   2
+> distinct PROJECT-DEFINED *Error names ...............  34
+>   of which the base IntegrityError ..................   1
+> distinct project-defined SUBCLASS names ............   33
+>   named in R-01's enumeration (this amendment) ......  15
+>   riding R-01's any-future clause ...................  18
+> ```
+>
+> **The governance report's "36 distinct `*Error` names" and "19 outside R-01's fourteen" both
+> reproduce**, once the two figures are read against the right population: 36 is the **raw token**
+> count including two Python builtins, and 19 is the project-defined subclass count outside the
+> **fourteen** — which becomes **18** outside the **fifteen** this amendment names. Both agree with
+> the derivation above. **The eighteen riding the any-future clause, enumerated so the residue is
+> visible rather than counted:** `AcquisitionError`, `AuditScopeError`, `BenchmarkError`,
+> `BudgetError`, `ComparatorError`, `CredentialEgressError`, `DriverError`, `EvidenceScanError`,
+> `FixtureError`, `GateError`, `ImportBoundaryError`, `InventoryError`, `InverseTransformError`,
+> `ManifestError`, `ReuseError`, `SchemaError`, `StandardizationError`, `TargetQualityError`.
+>
+> **Standing obligation, so the numeral cannot go stale a third time.** Whoever revisits this
+> hierarchy **re-runs the derivation above and prints its output** rather than trusting "fifteen".
+> The base-class relation is what the stage-entry catch in R-10 depends on, and it holds whatever
+> the census returns. The governance report's closure evidence asks for exactly this: *"one
+> programmatic derivation of every `*Error` raised across the twelve units, reconciled against
+> R-01's list and printed in `foundation`'s artifact."*
+>
+> ### One correction to the finding's evidence, stated rather than silently adapted
+>
+> The report's evidence reads *"`PartitionError` … reaches **10 of 12 units** (23 hits in
+> `models-and-baselines`, 15 in `features-and-splits`)"*, and its Comparison rests option 1 partly
+> on that reach — *"ten units, which resembles R-01's eight 'raised by other units' far more than
+> the two genuinely narrow unit-local additions"*. **Ten is the raw token reach; the DESIGN reach is
+> two.** Derived 2026-08-28, separating live design prose from text inside a preserved `## Review`
+> section or inside the quoted 2026-08-24 re-save note (*"R-96's `PartitionError` mechanism and
+> R-95's field label are carried to the stage"*):
+>
+> ```
+> PartitionError, units with LIVE design-prose occurrences .............. 2
+>   models-and-baselines (live 10, review 6, quoted note 1)
+>   features-and-splits  (live  5, review 3, quoted note 3)
+> PartitionError, units carrying it ONLY in a preserved review or the
+>   quoted re-save note ................................................ 8
+>   acquisition, evaluation-and-comparison, external-products, foundation,
+>   governance-guards, inventory-and-registry, statistical-inference,
+>   target-standardization
+> ```
+>
+> `governance-guards`' own artifact records the same fact independently: *"`PartitionError`'s three
+> hits are all inside the 2026-08-24 re-save note quoting `models-and-baselines`' R-96 residual …
+> no sixth exception exists anywhere in the artifact set."* **`foundation`'s own three hits are that
+> same quoted sentence** — this unit does not raise `PartitionError` and does not begin to.
+>
+> **The ruling stands on the argument that survives.** Reach is not what forced the promotion; the
+> **cross-unit taxonomy disagreement** is, and it is real and unaffected by this correction:
+> `models-and-baselines` R-92 raises `PartitionError` for a `partition_id` mismatch,
+> `evaluation-and-comparison` R-105 raises `LeakageError` for the same condition while claiming to
+> *"mirror R-92"*, and `statistical-inference` R-113 imports R-105 *"as written"*, so a third unit
+> inherits it. Two units' designs must agree on the discriminating rule, which is why it belongs in
+> the shared enumeration rather than in one unit's private vocabulary. R-01's own anti-stale-list
+> rationale reaches the same conclusion independently of how many units raise it.
+>
+> ### The discriminating rule, stated because two units' designs must agree on it
+>
+> The owner's ruling promotes `PartitionError` **and keeps `LeakageError`**, so the boundary between
+> them is a rule rather than a preference. It is stated here, in the artifact that owns the
+> hierarchy, so neither unit has to infer it:
+>
+> | Raise | When | Test |
+> |---|---|---|
+> | **`PartitionError`** | A **declared-identity disagreement** — a `partition_id` mismatch across inputs, or a training partition where one is barred — **regardless of whether any information actually moved** | Would the fault be a fault even if the disagreeing partitions held identical rows? If yes → `PartitionError` |
+> | **`LeakageError`** | The disagreement **implies information flow** — future or out-of-partition rows reached a fit, a transform, or a scoring path | Does the fault mean a value from outside the permitted partition entered a computation? If yes → `LeakageError` |
+>
+> **Where both are literally true, `LeakageError` wins**, because it is the stronger claim and the
+> one §18.3's critical set names (*"train-only transforms"*, *"comparison-wide masks"*). This
+> tie-break is stated because the governance report's option 4 was refused partly on the ground that
+> *"the boundary is genuinely hard to draw for a comparison whose members disagree on partition — it
+> is simultaneously both"*. It is: and the tie-break resolves it deterministically rather than
+> leaving the site that prompted the finding unapplicable. **This is not option 4 adopted by the
+> back door** — option 4 was *keep both unit-local and state the rule*; option 1 promotes
+> `PartitionError` into the shared hierarchy, and the rule above exists because the promotion leaves
+> two live exception types on one path, not as an alternative to the promotion.
+>
+> **What this rule does NOT decide.** Whether `evaluation-and-comparison` R-105 changes its raise
+> from `LeakageError` to `PartitionError` is **that unit's** call against the table above, and
+> `statistical-inference` R-113 inherits whatever R-105 settles on. The governance report assigns
+> the taxonomy choice to those two units (*"Owner / due gate: `foundation` (hierarchy),
+> `models-and-baselines` + `evaluation-and-comparison` (taxonomy choice)"*). **This unit owns the
+> hierarchy and the discriminating rule; it does not reach into a sibling unit's raise site**, and
+> it does not close `evaluation-and-comparison`'s or `statistical-inference`'s side of
+> Recommendation 8.
+>
+> ### `InverseTransformError` — it RIDES the any-future clause, and here is why the treatment differs
+>
+> `InverseTransformError` is **not** promoted, and is **not** a sixteenth. It rides R-01's *"any
+> future integrity-related exception"* clause, exactly as `statistical-inference` already discloses
+> it and as `fixtures-and-reproducibility` discloses `FixtureError`. Three reasons, and the first is
+> the one the reach argument cannot supply:
+>
+> 1. **No cross-unit disagreement exists.** Derived 2026-08-28: `InverseTransformError` occurs in
+>    live design prose in exactly **two** units — `evaluation-and-comparison` (13) and
+>    `statistical-inference` (7) — and **both raise it for the same condition with the same
+>    meaning**. Nothing has to be reconciled, so nothing has to be centralised. `PartitionError`
+>    was promoted because two units disagreed about which exception a single condition raises; that
+>    is the whole discriminator, and it is absent here. **Reach cannot be the discriminator**: the
+>    derivation above puts both at two units of live design prose, so an argument from reach would
+>    promote both or neither.
+> 2. **It sits entirely inside one package.** The inverse-before-metric path is `src/evaluation/`,
+>    and both units that raise it depend on `foundation` already, so the base class is importable
+>    without any new edge. `PartitionError` spans `src/models/` and `src/features/`.
+> 3. **The owner ruled on `PartitionError` and on nothing else.** Recommendation 8's ruling names one
+>    promotion. Adding a sixteenth on this stage's own initiative would be the change-an-approved-
+>    contract-by-assertion move this unit has refused throughout — the same standard that sent
+>    `ensure_process_determinism`'s signature and `write_release`'s raise-contract to the owner.
+>
+> **The obligation this creates, and it is not nothing.** Because `InverseTransformError` is not
+> enumerated, the two units raising it **must** declare it as an `IntegrityError` subclass on their
+> own side, or R-10's stage-entry catch will let it exit with no `aborted` registry row — the
+> NFR-AUD-01 failure this rule was corrected once to prevent. That is recorded as a cross-unit open
+> item in § Assumptions alongside the nine, not left to inference.
 
 **Where the hierarchy is declared** *(decided 2026-08-25 on adversarial finding M-1 of the
 ninth-redo iteration 1 — **the enumeration above named fourteen subclasses and no module to hold
@@ -133,23 +321,56 @@ recorded as an open item for the owner, because it needs a §12 amendment this s
 > therefore `PhaseBoundaryError`; that unit depends on `foundation`, so importing the base is a
 > legal dependency direction and creates no cycle. Listed as an open cross-unit item in
 > § Assumptions.
+>
+> **⟶ Annotated 2026-08-28, not rewritten: this box's "eight" is now NINE.** The box above is the
+> dated record of the 2026-08-25 six-to-fourteen correction and its sentences stand as written.
+> `PartitionError` was promoted to a fifteenth on 2026-08-28 per Recommendation 8, so the
+> exceptions raised by other units are **nine**, and the cross-unit declaration obligation this
+> paragraph states now binds `models-and-baselines` for `PartitionError` as well — plus, under the
+> any-future clause rather than the enumeration, `evaluation-and-comparison` and
+> `statistical-inference` for `InverseTransformError`. § Assumptions carries all of them. The
+> annotate-in-place form follows the `GOV-2026-08-22-INC-01` Rec 7 precedent this unit has used
+> throughout: no dated sentence is rewritten, and the current state is stated beside it.
 
 **Constraint.** Every `IntegrityError` **must** carry the affected file or resource
 and the violated expectation. The constructor requires both, so the two-tier
 message format is enforced by construction rather than by convention.
 
-**Why a base and not fourteen independents** *(count corrected 2026-08-25 with R-01's enumeration; it read "six", which was this unit's own raises rather than the hierarchy)*. The stage entry contract must catch *any*
+**Why a base and not a fixed number of independents** *(numeral removed from this heading 2026-08-28
+per Recommendation 8 — it read "fourteen", and before that "six", and this rule has now gone stale
+on its own count twice; the heading no longer carries one. Prior correction note preserved: "count
+corrected 2026-08-25 with R-01's enumeration; it read 'six', which was this unit's own raises rather
+than the hierarchy")*. The stage entry contract must catch *any*
 of them to write the `aborted` registry row. A hand-maintained catch list means a
 seventh subclass added later is silently uncaught — the same list-versus-rule
 failure `DP-DATA-01` already caught in this project, where an obligation written as
-a list silently exempted whatever was not anticipated.
+a list silently exempted whatever was not anticipated. **The same failure reaches a
+hand-maintained enumeration**, which is what happened here twice, and why the count above is derived
+and the base-class relation is the operative obligation.
 
 **Negative control.** A test defines a fresh `IntegrityError` subclass not named in
 any catch list and asserts the stage entry contract still catches it and still
 writes the `aborted` row.
 
+**Negative control — the enumeration itself, added 2026-08-28 per Recommendation 8.** A test
+**re-derives** the distinct project-defined `*Error` names raised across the twelve units'
+`functional-design` artifacts and **fails when a name is neither in R-01's fifteen nor disclosed by
+its raising unit under the any-future clause**. This is the control that catches the failure R-01
+suffered twice: a subclass added later with nobody updating the enumeration. It asserts a
+**reconciliation**, not a number, so it does not itself go stale when the census legitimately grows.
+
+**Negative control — the taxonomy boundary, added 2026-08-28 per Recommendation 8.** One control per
+raising unit, on the discriminating table above: assert that a `partition_id` mismatch over
+*identical* rows raises **`PartitionError`** and not `LeakageError`, and that an out-of-partition row
+reaching a fit raises **`LeakageError`** and not `PartitionError`. This is the control that stops
+`pytest.raises(PartitionError)` passing at `06` and failing at `07`. **The per-unit controls are
+owned by the raising units** — this unit owns the boundary rule they assert against and states the
+obligation; it does not author another unit's test.
+
 **Acceptance.** Contributes to TA-10 (registry records failed as well as
-successful runs).
+successful runs). **No new acceptance row is sought** for the 2026-08-28 amendment: Amendment A was
+declined and §19 is held at 36 rows, so the enumeration control's enforcement rides §18.3's
+gate-test list and TA-10 rather than a row of its own.
 
 ## R-02 — Preflight rejects both a missing field and a `TBD` field
 
@@ -169,6 +390,75 @@ absent; both must raise `PreflightError`, and the message must name the field in
 each case.
 
 **Acceptance.** TA-02, and TA-23 as §18.3's preflight gate.
+
+> ## ✳ FR-WS-7 IS THIS UNIT'S OWN REQUIREMENT DISCHARGING ONTO TA-23 — NAMED 2026-08-28
+>
+> *(Added on the owner's ruling on `GOV-2026-08-28-FD-01` **Recommendation 9**, option 1. The
+> finding: TA-23 was cited as an acceptance row across this unit's artifacts with **neither its
+> evidence artifact designed nor its discharging requirement named**, while the structurally
+> identical REQ-ENG-4/TA-09 discharge gets an explicit callout in every artifact of the unit that
+> carries it. The asymmetry was the tell.)*
+>
+> **FR-WS-7 is `foundation`'s requirement whose acceptance row is TA-23 — and TA-23 is this unit's
+> PRIMARY row, not a supporting one.** Both halves derived rather than asserted:
+>
+> ```
+> unit-of-work-story-map.md:127        ->  | FR-WS-7 | `foundation` | TA-23 |
+> story-map Table 2, primary == foundation
+>   ->  TA-01 TA-02 TA-03 TA-10 TA-15 TA-22 TA-23        (count 7, TA-23 among them)
+> ```
+>
+> This mirrors the callout pattern `fixtures-and-reproducibility` already carries for the same
+> discharge shape — *"**REQ-ENG-4 is `foundation`'s requirement whose acceptance row is TA-09 — this
+> unit's primary row**"* — with the difference that here **both sides are ours**: this unit owns the
+> requirement *and* owns the row, so nothing is being discharged across a unit boundary.
+>
+> **The evidence artifact is `aws_ai_dlc_preflight_report`, and its gate is G-09.** Derived from the
+> authorities rather than inferred:
+>
+> | Source | States |
+> |---|---|
+> | TE:1083 (§18.3) | *"**Decision criterion:** zero unresolved P0 fields and no failing critical test. The evidence artifact is `aws_ai_dlc_preflight_report`."* |
+> | TE:1119 (§19, TA-23 row) | Evidence column = `aws_ai_dlc_preflight_report`; status **Pending** |
+> | Vision gate table, **G-09 Agent preflight** | Owner **Supervisor**; evidence `aws_ai_dlc_preflight_report`; due *"Before any affected component is coded"*; status **Open** |
+> | Vision gate table, **G-07 Reproducibility** | evidence `environment_and_cpu_preflight_report` — **a different artifact serving a different gate** |
+> | TE:530 | defines `environment_and_cpu_preflight_report` (install-from-pins on both platforms, completed skeleton run, measured CPU runtime/RAM/storage) |
+>
+> **The two reports are NOT aliases**, and this design does not treat them as one. Option 2 of
+> Recommendation 9 — declare them one artifact under two names — was **not** taken: they serve
+> different gates with different content and no basis for an alias was found. `foundation` produces
+> `aws_ai_dlc_preflight_report` for G-09/TA-23; `fixtures-and-reproducibility` produces
+> `environment_and_cpu_preflight_report` for G-07. **Nothing here reaches into that unit's
+> artifacts** — its TA-23 supporting claim is its own to reconcile, and Recommendation 9's owner
+> column assigns the fix here.
+>
+> **What `aws_ai_dlc_preflight_report` must show, quoted from FR-WS-7's criterion**, so 3.5 does not
+> have to reconstruct it: *"`aws_ai_dlc_preflight_report` shows all four preconditions met — zero
+> `TBD` fields, every declared source and hash resolving, all ten named tests passing, and the
+> sign-off present. A declared hash that does not resolve fails the gate rather than being reported
+> as a warning."* The four preconditions map onto rules already in this file: **zero `TBD`** →
+> **R-02** and **R-03**; **every declared source and hash resolves** → `assert_declared_sources_exist`
+> (W-3), whose failure is a raise and never a warning; **all ten named critical tests pass** → the
+> §18.3 set enumerated in `team-practices.md` § Testing Posture, which this unit does not own end to
+> end and therefore **aggregates rather than asserts**; **supervisor sign-off recorded** → a
+> supervisor act this unit records and never synthesises.
+>
+> **The report is an aggregation surface, and it must not become a self-certifying one.** Two limbs
+> of the gate — the ten critical tests and the supervisor sign-off — are **not this unit's to
+> produce**. `foundation` emits the report by collecting evidence produced elsewhere; a limb with no
+> evidence is rendered **absent**, never **passed**, and the report **refuses to render a green
+> overall verdict while any limb is absent**. Stated because the cheapest wrong implementation is a
+> report that treats an uncollected limb as satisfied, which is precisely how a gate control becomes
+> a formality.
+>
+> **Negative control.** Render the report with each limb withheld in turn — a `TBD` field present, a
+> declared hash that does not resolve, one named critical test failing, the sign-off absent — and
+> assert the overall verdict is **not** green in each of the four cases, and that the withheld limb
+> is reported **absent or failed by name** rather than omitted. A fifth case: a limb whose evidence
+> was never collected must render **absent**, not **passed**.
+>
+> **G-09 is Open and unsigned.** Designing this report's contents authorises nothing: it does not
+> fill a `TBD`, does not create a module, and does not satisfy the gate it evidences.
 
 ## R-03 — The required-fields map is keyed by `(stage, phase)`
 
@@ -303,7 +593,62 @@ oversight.
 `DeterminismError`. Invoke a stage script with `PYTHONHASHSEED` unset and assert
 `reexec_performed` is `True` and exactly one run is recorded.
 
-**Acceptance.** **WS-17, TA-13** (NFR-DET-01) and **TA-10** (FR-P1-05-13), both derived from story-map Table 1. *Superseded: `TA-13, TA-26`.*
+**Acceptance.** **WS-17 (supporting — process determinism precondition only; the replicate hash is
+`statistical-inference`'s)**, **TA-13** (NFR-DET-01) and **TA-10** (FR-P1-05-13), derived from
+story-map Table 1.
+
+> ## ✳ WS-17 RE-LABELLED SUPPORTING, 2026-08-28 — AND THE TRAILING SUPERSEDED ANNOTATION RESOLVED
+>
+> *(Applied on the owner's ruling on `GOV-2026-08-28-FD-01` **Recommendation 34**, option 2. The
+> finding: R-05's Acceptance claimed **WS-17** while R-05's own Constraint carves the bootstrap seed
+> out of `seed_everything` — *"`seed_everything` **does not** touch the bootstrap seed. That
+> carve-out is `src/evaluation/bootstrap.py` by ADR-05"* — so the rule claimed a row it cannot
+> evidence by its own constraint. **Superseded Acceptance line, preserved verbatim:** *"**WS-17,
+> TA-13** (NFR-DET-01) and **TA-10** (FR-P1-05-13), both derived from story-map Table 1. *Superseded:
+> `TA-13, TA-26`.*"*)*
+>
+> **Why supporting and not deleted.** The dependency is real and worth keeping visible: **no
+> replicate hash reproduces without `PYTHONHASHSEED=0` and the re-exec**, which is exactly what this
+> rule guarantees. Option 1 (delete WS-17 outright) would have made the ledger cleaner and rendered
+> that contribution invisible; the owner took option 2, and the label is written in full so a
+> supporting claim cannot be read as coverage.
+>
+> **WS-17's single primary owner is `statistical-inference`**, and its evidence is not ours. Derived
+> from the authority:
+>
+> ```
+> TE §16, line 969:
+>   | WS-17 | Vector time-block bootstrap carries all stations together and
+>            reproduces exactly from seed 20221201
+>          | `test_bootstrap.py`
+>          | Synthetic-correlation test and replicate output |
+> ```
+>
+> `statistical-inference` R-117 claims **"WS-17 (primary)"** and reciprocally returns **TA-13** and
+> **TA-26** to `foundation` and `models-and-baselines`. Its `BootstrapResult` records *"the seed key
+> consumed, the generator identity, and the replicate hash"* — the artifact fact TE §16 names as
+> WS-17's evidence. **This rule produces none of that**, by ADR-05's deliberate carve-out.
+>
+> **What this rule's supporting contribution actually is**, stated so a 3.2 verification planner
+> cannot substitute it for the replicate hash: `reexec_performed = True` with `PYTHONHASHSEED=0`
+> established before any framework import. It is a **precondition of exact reproduction, never
+> evidence of it.** A WS-17 row marked `PASS` on this unit's determinism record rather than on
+> `test_bootstrap.py`'s replicate hash is a row passed on evidence that does not test the thing —
+> the risk Recommendation 34 names, and the reason the label carries its full qualification here
+> rather than the bare word "supporting".
+>
+> **The trailing "*Superseded: `TA-13, TA-26`*" annotation — resolved, not merely deleted.** It was
+> terse to the point of suggesting unsettled churn, which is what the finding flagged. In full: this
+> Acceptance line **previously cited `TA-13, TA-26`** for NFR-DET-01, and that citation was replaced
+> on 2026-08-22 when every acceptance line in this file was re-derived from story-map Table 1.
+> Table 1 gives **NFR-DET-01 → WS-17, TA-13**; **TA-26's primary owner is `models-and-baselines`**,
+> and `foundation` is only a *supporting* unit on it — one of exactly two such rows (TA-13, TA-26),
+> derived in `domain-entities.md` § Requirement coverage. So TA-26 was dropped from this line because
+> it is another unit's row, and WS-17 was added because Table 1 names it. **There is no open churn
+> here**; the citation has been stable since 2026-08-22 and the only change on 2026-08-28 is WS-17's
+> primary-to-supporting re-label.
+
+
 
 ## R-06 — An empty `nondeterministic_ops` is never proof of determinism
 
@@ -415,13 +760,68 @@ trustworthy. Q4 chose D over C precisely to keep it.
 **Rejected by the integrity test:** duplicate `started` rows, repeated terminal
 statuses, any transition out of a terminal status, and unknown or malformed rows.
 
+**Constraint — the WRITE MECHANISM, added 2026-08-28. §13.4's *atomic or append-safe* is a
+requirement on how the row reaches disk, and it was specified nowhere.** Each registry row is
+written as **one single write of one newline-terminated record, under append mode**, followed by a
+**durability confirmation** before the writer returns. A durability failure is a
+**`RegistryError`** naming the registry file and the violated expectation — never a warning
+alongside a write reported as successful.
+
+**Why this shape and no other, and why it costs R-08 nothing.** It is `governance-guards` R-25's
+already-accepted pattern — *"`open_restricted` writes the `AccessRecord` **and flushes it**"*, with
+*"a **durability failure** must **prevent the read**"* and a negative control asserting *"the log row
+is **durable on disk**"*. Reusing it keeps one durability mechanism in the project instead of two.
+Critically, **it costs no read**: a single append plus a flush consults no prior row, so R-08's
+purity — *"append-only and do not require a prior read of the run history"* — survives **exactly**,
+which is why **Q4 chose D over C** and why the temp-file-and-atomic-rename alternative is refused.
+That alternative rewrites the whole file on every row, contradicts this rule's append-only design and
+its stated rationale, scales badly, and reintroduces the overwrite risk **R-09** exists to exclude.
+Recommendation 39 records it as *"not compatible with the accepted design"*, and this rule rejects it
+on the same ground.
+
+**Constraint — a TRAILING malformed row is a torn write, not corruption. Added 2026-08-28, and this
+is the limb that matters most.** The integrity test **distinguishes position**:
+
+| Where the malformed row sits | Read as | Reported as |
+|---|---|---|
+| **Last line of the file**, with no newline terminator, or truncated mid-record | A **torn write** — the process died during the append | **Reported, not rejected**: the test names it a torn final record and **names the run it belongs to**, recovered from whatever prefix of the record is legible (`run_id` is the first field for exactly this reason). The run **stays visible**, which is the NFR-AUD-01 obligation |
+| **Any interior line**, or a trailing line that is newline-terminated and still unparseable | **Corruption or an illegal row** | **Rejected**, as this rule already specifies |
+
+**Why the distinction is load-bearing rather than pedantic.** An `aborted` row is written *while the
+process is dying* — which is precisely when a non-atomic append tears. This rule already lists
+*"unknown or malformed rows"* among what the integrity test **rejects**, so **without this clause a
+torn `aborted` row would fail the integrity test rather than preserve that run's visibility**: the
+registry's own audit check would red-flag the file at the exact moment NFR-AUD-01 most needs the run
+recorded, and the recovery path would be undefined. That is the asymmetry Recommendation 39 found —
+flush and durability confirmation specified for the access log, nothing for the experiment registry —
+and this unit's own artifacts had already identified the missing-`aborted`-row scenario as *"the
+event **NFR-PHASE-01** and **NFR-AUD-01** most require recorded"* while adding *"Six adversarial
+passes did not examine it."* A seventh did not either; a governance board did.
+
+**Disclosed limit, not absorbed.** Durability semantics differ between the two governed platforms and
+**Kaggle's are characterised nowhere in this design**. The confirmation step is therefore specified
+as an obligation whose platform behaviour needs its own measured evidence before it is relied on at a
+freeze gate. Recommendation 39 raises this against option 1 and it is recorded here rather than left
+for 3.5 to discover.
+
 **Constraint — when it runs.** Before TA-10 / G-09 acceptance, and **before
 registry contents are relied on as audit evidence.**
 
 **Negative control.** Synthesise each rejected sequence and assert the integrity
 test fails on each.
 
+**Negative control — the torn write, added 2026-08-28 per Recommendation 39.** Three cases, because
+the clause has three outcomes. (1) **Truncate the final record mid-line** and assert the integrity
+test **reports a torn final record and names its `run_id`**, does **not** reject the file, and leaves
+that run visible. (2) Insert the **same malformed bytes as an interior line** and assert the test
+**rejects**. (3) Kill the writer between the append and the durability confirmation and assert the
+outcome is one of exactly two states — the record fully present, or reported as torn — and **never a
+row reported written that is not on disk**, which is R-10's *"without claiming that an aborted record
+was successfully written"* obligation reaching the durability layer.
+
 **Acceptance.** **TA-10, TA-21** — NFR-AUD-01 per story-map Table 1. *Superseded: `TA-10` alone.*
+**R-08 is the rule that carries §13.4's *atomic or append-safe* clause** *(citation fixed 2026-08-28;
+see the correction note under R-20 for where it was previously mis-cited to R-07 and R-09)*.
 
 ## R-09 — A failed or aborted run stays visible
 
@@ -828,7 +1228,52 @@ compliance is **not claimed until the required checks have actually passed** —
 `evidence.md` records NFR-SEC-01 as **not satisfied in this workspace today**, so
 this is a rule being built rather than one being ratified.
 
-**Acceptance.** TA-22.
+> ## ✳ DATED CLAUSE, 2026-08-28 — THE DENY-LIST PRECONDITION IS NOW SATISFIED; THE REQUIREMENT IS NOT
+>
+> *(Added on the owner's ruling on `GOV-2026-08-28-FD-01` **Recommendation 49**, option 1. **The
+> precondition framing above is preserved unchanged and is not weakened**, and **NFR-SEC-01 and
+> TA-22 remain unclaimed** — the board asked explicitly for the conservative half to stand. What was
+> dated is the attached status sentence.)*
+>
+> **The deny-list precondition was satisfied as of 2026-08-28.** Re-verified independently by this
+> unit on that date, not carried from the finding's text:
+>
+> ```
+> .gitignore § "Credentials and secrets" (lines 62-89) carries:
+>   .env  .env.*  (!.env.example)  *.key  *.pem  *.p12  *.keystore
+>   kaggle.json  .netrc  _netrc  credentials  credentials.*
+>   .aws/credentials  id_rsa*  secrets.yaml  secrets.yml  .madrigal_auth
+>
+> git ls-files filtered for credential-shaped names ...............  0 files
+>
+> bun scan over every tracked file, 5 patterns
+>   (AKIA[0-9A-Z]{16}; PEM private-key headers; xox[baprs]-;
+>    ghp_[0-9A-Za-z]{36}; AIza[0-9A-Za-z_-]{35}):
+>   tracked files listed ......................................... 1158
+>   tracked files read as text ................................... 1158
+>   pattern hits .................................................    0
+> ```
+>
+> So the §10 mechanism the rule above names as a precondition — *"environment configuration excluded
+> from version control"* — **now exists**, and the exposures the superseded status sentence was
+> written against are **not visible in the tracked tree today**.
+>
+> **NFR-SEC-01 and TA-22 stay UNCLAIMED, and this clause does not advance either.** TA-22's scope is
+> wider than the tracked working tree: it additionally requires a secret scan over the repository
+> **history**, configurations, logs and artifacts. **None of that was scanned** — the derivation above
+> is `git ls-files` at one commit, so a credential committed and later removed would be invisible to
+> it. The board stated the same limit and *"explicitly does not conclude NFR-SEC-01 is satisfied"*.
+> **The requirement therefore remains unclaimed pending the full-scope scan**, which is scheduled work
+> for TA-22 and not this stage's to run: a history scan needs tooling and an owner decision, and
+> Recommendation 49 records the two acts as *"sequential, not competing"*.
+>
+> **This clause carries its own date because it will itself go stale if the tree changes.** It is
+> tied to the **deny-list's existence** rather than to a scan result, which is the durable half; the
+> zero-hit scan is evidence as of 2026-08-28 and nothing more. `evidence.md`'s own NFR-SEC-01 status
+> line is the **project owner's** to refresh or reaffirm — this stage may not edit `evidence/`, so the
+> attribution in the sentence above stands and is corrected here rather than there.
+
+**Acceptance.** TA-22 — **and TA-22 is NOT claimed as satisfied**, per the dated clause above.
 
 ## R-15 — Only `foundation` reads `configs/`, and nothing reads the restricted root
 
@@ -876,7 +1321,283 @@ docstring containing all three elements.
 
 **Acceptance.** **No acceptance row.** The docstring rule is an affirmed practice (`project.md` § Mandated, interview Q12-C), not one of this unit's sixteen requirements, so it is outside the "2 of 16" count and has no §16/§19 row to cite. *Superseded: `TA-01`, which accepts the repository skeleton and does not check docstrings.*
 
+## R-18 — The registry row is TE §13.4's twenty columns, asserted at write time
+
+*(Rule ADDED 2026-08-28 on the owner's ruling on `GOV-2026-08-28-FD-01` **Recommendation 10**,
+option 1, and **Recommendation 1**/**Recommendation 3** for the two destination columns. Before this
+rule the registry schema was **TE §13.1's environment lock** — twelve designed fields — while
+`requirements.md` FR-P1-05-13's pass/fail criterion is TE **§13.4**'s twenty columns. Two different
+sections of the Technical Environment, and the requirement's criterion had **no design at all**.)*
+
+**Rule (FR-P1-05-13, TE §13.4).** Every `RegistryEvent` row carries **TE §13.4's twenty columns**.
+The set is **derived from the authority and printed**, never transcribed from prose:
+
+```
+TE:821-826, the §13.4 column block, split on comma and newline  ->  20
+
+ 1 run_id                    11 feature_set_id
+ 2 started_at_utc            12 model_id
+ 3 completed_at_utc          13 hyperparameters_json
+ 4 status                    14 seed
+ 5 code_commit               15 validation_metric_name
+ 6 environment_lock_hash     16 validation_metric_value
+ 7 platform                  17 artifact_manifest_path
+ 8 dataset_version           18 prediction_hash
+ 9 fold_id                   19 locked_test_accessed
+10 mask_id                   20 notes
+```
+
+`requirements.md` FR-P1-05-13 enumerates the identical twenty and states the criterion verbatim:
+*"a schema assertion confirms all twenty columns exist and that `code_commit` and
+`environment_lock_hash` are populated on every row."*
+
+**Constraint — the twenty are a FLOOR, not a closed set.** TE §13.4 reads *"CSV or JSONL,
+**including**:"*, so the twenty are a minimum. Three further fields are required by authorities
+outside the column block and are **named as extensions rather than smuggled into the twenty**, so the
+twenty-column assertion stays literally checkable:
+
+| Extension field | Required by | Why it is not one of the twenty |
+|---|---|---|
+| `reason` | §13.4's own prose — *"Failed and aborted runs remain visible with **status and reason**"* — and **R-07**, which requires it non-empty on `aborted` and `failed` | The prose states it; the column block does not list it. `notes` is a free-text column and **must not be repurposed** to carry it, or R-07's non-empty check has nothing to bind to |
+| `prior_period_exposure` | **TE §7.0B** — *"The locked-test guard **shall record** `prior_period_exposure=true`"* — a positive obligation, and `requirements.md` FR-P1-05-12 repeats it | Named in §7.0B, absent from §13.4's block |
+| `exploratory` | **Vision §8.3** / FR-P1-05-14, and **R-20** below, which derives it | Named in Vision, absent from §13.4's block |
+
+**Constraint — `prediction_hash`'s DESTINATION is this row, and `07` may not be its writer.**
+`prediction_hash` (column 18) is where the one-shot locked-test prediction receipt lands.
+`models-and-baselines` is being amended in parallel to make **`scripts/06_train_and_predict.py`** the
+writer of a `PredictionHashReceipt` (`prediction_path`, `sha256`, `recorded_at_utc`, `run_id`,
+`partition_id`), **durably flushed before `06` exits**, with `06` refusing to exit holding a `DEC`
+prediction file and no receipt. **This unit's side of that contract is stated here:**
+
+1. The receipt's **destination is the registry row** — its `sha256` becomes column 18
+   `prediction_hash`, joined by `run_id`;
+2. **neither `scripts/07_evaluate_and_report.py` nor the bootstrap may be the writer.** The registry
+   writer **refuses** a `prediction_hash` presented by the process that computes a metric over that
+   prediction. Writer and reader stay in **different processes**, which is the only thing that makes
+   *"the receipt precedes the metric"* mean anything;
+3. `prior_period_exposure` is likewise **recorded by the locked-test guard** (TE §7.0B names the
+   guard, and `governance-guards` owns it) and **carried** by this row. This unit is the destination,
+   not the source.
+
+**Why limb 2 is a rule and not an implementation note.** Recommendation 1's stated hazard is not the
+deadlock — a `DEC` metric that raises forever is fail-closed and not itself a breach — it is **the
+repair**: *"the cheapest way to clear the deadlock at implementation time is to write the receipt
+inside `07_evaluate_and_report.py`, in the same process that computes the metric, which makes 'the
+receipt precedes the metric' self-certifying and turns the control into a formality that passes its
+own test."* A refusal in the registry writer is what makes that repair unavailable.
+
+**Constraint — Phase 1's value of `prior_period_exposure` is `false`, and that is not a defect.**
+TE §7.0B's `true` is about the **Phase 2** December run, which replicates a fixed protocol over
+timestamps Phase 1 has already exposed. Phase 1 **is** the first exposure, so its rows carry `false`.
+The column is designed now because the field must exist before Phase 2 can populate it and because
+the phase-transition hash freeze forbids adding one later; **stating the Phase 1 value explicitly
+stops an implementer writing `true` on a Phase 1 row to satisfy §7.0B's *"shall record"*.**
+
+**Constraint — what happens to §13.1's eight-field environment lock.** It is **not displaced**.
+§13.4 column 6 is `environment_lock_hash` — a **hash over** the lock, not the lock itself — so the
+eight fields **R-09**/`RunRecord` already specify remain the lock's content and the hash is computed
+over them. **REQ-ENG-10's criterion is unchanged** (*"A registry row exists carrying all eight
+fields"*), and it stays **untested by design** under the declined Amendment A. Both readings coexist:
+the `started` row carries the eight fields **and** their hash, and the schema assertion below checks
+the twenty columns plus the extensions, not the eight.
+
+**Negative controls — four.** (1) Present a row missing any one of the twenty columns and assert the
+schema assertion **fails, naming the absent column** — run once per column, so the assertion cannot
+pass by checking a subset. (2) Present a row whose `code_commit` or `environment_lock_hash` is empty
+and assert it **fails**, FR-P1-05-13's second criterion being population and not mere presence.
+(3) Present a `prediction_hash` from the process that computes the metric over that prediction and
+assert the writer **refuses** — the limb-2 control, which must fail *at the write*, not later at an
+audit. (4) Present a Phase 1 row carrying `prior_period_exposure = true` and assert it is
+**rejected**, so §7.0B's obligation cannot be discharged in the wrong phase.
+
+**Acceptance.** **TA-10** — FR-P1-05-13 per story-map Table 1, whose *"schema assertion confirms all
+twenty columns exist"* criterion this rule is the design for. **TA-21** for the traceability limb.
+**No new §19 row is sought**: Amendment A was declined and §19 is held at 36 rows.
+
+## R-19 — `AccessRecord` and `RegistryEvent` join on `run_id`, with orphan detection both ways
+
+*(Rule ADDED 2026-08-28 per **Recommendation 10**'s closure evidence — *"a stated `run_id` join"*.
+The finding derived that **zero of the 48 `functional-design` artifacts names both `AccessRecord` and
+`RegistryEvent`**: the intersection was empty, so two record surfaces existed with **no stated
+relationship at all**.)*
+
+**Rule (Vision §8.3, TE §13.4).** `AccessRecord` — owned by **`governance-guards`**, fields
+`run_id`, `retrieved_at_utc`, `scope`, `purpose`, `performance_inspected`, `locked_test_accessed`,
+`authorization` — and `RegistryEvent` **join on `run_id`**, which both already carry. `run_id` is the
+only key: neither timestamps nor file paths are used, because both are reconstructable-looking and
+neither is stable.
+
+**Constraint — orphan detection runs in BOTH directions, and each direction means something
+different:**
+
+| Orphan | Reads as | Treatment |
+|---|---|---|
+| An `AccessRecord` under `RESTRICTED_ROOT` whose `run_id` matches **no** `RegistryEvent` | A December access by a run the experiment registry does not know about | **Integrity violation.** `RegistryError`, naming the `run_id` and the access record. This is the unregistered-access case, and it is the one the audit exists to find |
+| A `RegistryEvent` with `locked_test_accessed = true` whose `run_id` matches **no** `AccessRecord` | A run claiming December access with no logged access — either the flag is wrong or the log-then-read ordering of `governance-guards` R-25 was bypassed | **Integrity violation.** `RegistryError`, naming the `run_id` |
+
+**Why both directions, and why a derived flag would have been weaker.** Recommendation 10 permits a
+join-only design (option 2) *"**only** with orphan detection in both directions; without it a derived
+flag is weaker than the column it replaces."* This design takes **option 1** — `locked_test_accessed`
+is a real column on the row (R-18, column 19) — **and** the join, so the two surfaces are
+**reconciled** rather than one being derived from the other. A single-direction check would catch a
+missing registry row and miss a fabricated flag, or the reverse.
+
+**Constraint — the reconciliation is a test, not a write-path read.** It runs with the
+registry-integrity test of **R-08**, at the same times: before TA-10 / G-09 acceptance and **before
+registry contents are relied on as audit evidence**. It is emphatically **not** a write-time check —
+that would make the registry write depend on reading the access log and destroy **R-08**'s purity,
+which **Q4 = D** exists to protect.
+
+**Constraint — the five retrospective access rows are expected orphans and must not be laundered.**
+`governance-guards` R-25 records that the access log already holds **five retrospective rows**
+predating the guard (`evidence/experiment_registry.md` rows 3, 4, 5, 8 and 9), and
+`GOV-2026-08-28-FD-01` **Recommendation 31** records *one possible unauthorized access as expressly
+unresolved*. The reconciliation **reports these as known pre-guard orphans with their reason**, and
+**never suppresses them and never back-fills a registry row to clear them** — a fabricated row would
+be the `evidence/experiment_registry.md:39-41` reconstruction failure repeated deliberately, where
+*"a reviewer reconstructing custody from this log found two events while the manifests showed four."*
+**Recommendation 31 is `governance-guards`' and the owner's to close, not this rule's**; this rule
+only guarantees the orphans stay visible.
+
+**Negative controls — three.** (1) Synthesise an `AccessRecord` under `RESTRICTED_ROOT` with a
+`run_id` absent from the registry and assert **`RegistryError`** naming that `run_id`. (2) Synthesise
+a `RegistryEvent` with `locked_test_accessed = true` and no matching `AccessRecord` and assert
+**`RegistryError`**. (3) Run the reconciliation over the **five known retrospective rows** and assert
+they are **reported with their pre-guard reason and not cleared**, so a future clean run cannot be
+achieved by hiding them.
+
+**Acceptance.** **TA-10** (registry integrity) and **TA-18** via `governance-guards` — the
+*"guard test and access-log sample"* evidence. **`foundation`'s side is the registry half of the
+join**; the access-log half is `governance-guards`'.
+
+## R-20 — `exploratory` is DERIVED in the registry writer, never passed by a caller
+
+*(Rule ADDED 2026-08-28 on the owner's ruling on `GOV-2026-08-28-FD-01` **Recommendation 12**,
+option 1. The finding: Vision §8.3's exploratory label *"has a reader in one unit and a writer in
+none"* — `regimes-diagnostics-reporting` R-128 asserts the label's presence, states that *"a
+post-access run reported without it **fails**"*, and explicitly routes the **writer** to the gate:
+*"Which surface **writes** the label is the registry writer's design
+(`foundation`/`inventory-and-registry`) and is **routed to the gate rather than annexed**."*
+**This unit is the registry writer.** Derived in the finding: "exploratory" appears in **1 of 12
+units** and **0** times in either named writer candidate.)*
+
+**Rule (Vision §8.3, FR-P1-05-14).** `RegistryEvent.exploratory` is **computed by the registry
+writer** from the run's own `started_at_utc` against the access log, and is **never a caller
+argument**. The writer sets it `true` when `started_at_utc` **postdates the earliest `AccessRecord`
+under `RESTRICTED_ROOT`**, joined per **R-19**; `false` otherwise.
+
+**Why derived and not passed.** A caller argument distributes a governed fact across nine stage
+scripts, each of them a chance to pass `false` — the *"remembered, not checked"* pattern this stage
+has refused throughout. Derived, it **cannot be forgotten or suppressed by a caller**, and one place
+computes it. Recommendation 12's option 2 (every stage script passes `exploratory: bool`, preflight
+refusing an unset value) was **not** taken for exactly that reason; option 3 (leave the label
+human-written in the change record) was refused because it removes the only executable check, and
+`team.md` § Testing Posture fixes locked-test discipline as *"an executable guard, not only a
+signature."*
+
+**Constraint — THE CARVE-OUT, stated explicitly because the cheap wrong answer is to label
+everything.** The **G-06 confirmatory run is NOT exploratory**, notwithstanding that it postdates the
+earliest access record. It is the run whose access **is** the locked evaluation. The carve-out is
+keyed to the run's own identity, not to a caller's assertion:
+
+> A run is exempt from the derivation **iff** its own `AccessRecord` carries
+> `purpose = locked_evaluation` **and** it is the run G-06 authorises. It is then recorded
+> **`exploratory = false`, with the carve-out recorded on the row** — never left unset, never blank.
+
+**Why the carve-out is written this narrowly.** Recommendation 12's stated risk is that *"an
+unimplementable state resolves under pressure and both cheap resolutions are wrong: label every run,
+which is meaningless and would mark the G-06 confirmatory run itself exploratory, or relax the
+assertion."* A carve-out keyed to the caller saying *"this is the confirmatory run"* would be the
+first failure wearing the second's clothes. Keyed to `purpose = locked_evaluation` on the access
+record — a field `governance-guards` sets **structurally, not by caller choice** (`AccessRecord`'s
+`purpose` enum is `coverage_audit` | `regime_audit` | `locked_evaluation`) — it cannot be claimed by a
+run that is not it.
+
+**Constraint — the pre-G-05 coverage audit does NOT start the exploratory clock in the wrong place,
+and does not escape it either.** The required pre-G-05 December coverage and regime audit is a
+**legitimate access** (Vision §8.3; it is a precondition of G-05) and it **writes an `AccessRecord`**
+with `purpose = coverage_audit`. So the *"earliest `AccessRecord` under `RESTRICTED_ROOT`"* will
+normally be that audit, **not** the locked evaluation — which is correct and is the conservative
+direction: `project.md` § Forbidden fixes that *"the trigger is December being **seen**, not the
+locked test being opened."* The derivation therefore reads December-seen, exactly as the rule
+intends, and it must **not** be narrowed to `purpose = locked_evaluation` records only.
+
+**Constraint — the reader-side assertion stays broader than §8.3's literal text, deliberately.**
+Vision §8.3 says *"any **test-driven** change"*; R-128 asserts the label on **every** reported
+post-access run. That is broader, it is the conservative direction, and this rule **does not narrow
+it to match**. A change of scientific intent is not machine-detectable; the timestamp relation is.
+Recommendation 12 records the same judgement.
+
+**Negative controls — four.** (1) A run whose `started_at_utc` postdates the earliest restricted
+`AccessRecord` → assert `exploratory = true` **on the row**, not merely reported. (2) A run predating
+it → `false`. (3) **The carve-out's own control, which Recommendation 12 requires by name:** the G-06
+confirmatory run → assert `exploratory = false` **and** that the carve-out is recorded on the row;
+then present a run that postdates the access log and **claims** the carve-out **without** an
+`AccessRecord` carrying `purpose = locked_evaluation`, and assert the carve-out is **refused** and the
+run labelled `true`. (4) A caller passing `exploratory` explicitly → **rejected**, so the derived-only
+rule is enforced by signature rather than by discipline.
+
+**Acceptance.** **⚠ No §16/§19 row.** FR-P1-05-14 is recorded `UNTESTED` in `requirements.md` with no
+§16/§19 row, and **none is sought** — Amendment A was declined and §19 is held at 36 rows with
+TA-37/TA-38 explicitly not to be added. Enforcement rides R-128's reader-side assertion in
+`regimes-diagnostics-reporting`, which **fails** a post-access run reported without the label, plus
+this rule's four controls. **This is a rule whose acceptance gap is stated, not buried** — see the
+table below, which it joins.
+
 ---
+
+> ## ✳ THE RULE COUNT MOVED 2026-08-28: 17 → 20 (R-01…R-20)
+>
+> *(Three rules added — **R-18**, **R-19**, **R-20** — on the owner's ruling on
+> `GOV-2026-08-28-FD-01` Recommendations **10**, **1**/**3** and **12**. Derived, not asserted:)*
+>
+> ```
+> grep -cE '^## R-[0-9]+' business-rules.md          ->  20   (R-01…R-20, contiguous)
+> grep -cE '^## R-'       business-logic-model.md    ->   0   (rules live in this file only)
+> grep -cE '^## W-[0-9]+' business-logic-model.md    ->  10   (W-1…W-10, unchanged)
+> grep -cE '^## [0-9]+\.' domain-entities.md         ->   9 sections, § 8 withdrawn -> 8 live
+> ```
+>
+> **What did NOT move.** 16 requirements; 2 untested by design (REQ-ENG-7, REQ-ENG-10); 7 acceptance
+> rows owned (TA-01 TA-02 TA-03 TA-10 TA-15 TA-22 TA-23); 2 supporting rows (TA-13, TA-26); §19 held
+> at **36** rows with no TA-37/TA-38; 10 workflows; 8 live entities. **No scientific value, governed
+> constant, config field or approved signature is decided by any of the three new rules.**
+>
+> **Every prior "17 rules" statement in this file and in `business-logic-model.md` remains true as a
+> DATED record and is not rewritten.** They are scoped claims about specific earlier events — *"R-12
+> was amended, not removed"*, *"Neither correction moves a project count"* — and each was correct
+> when written. The current count is the derived one above. Sweeping them would rewrite dated
+> reviewer and remediation text, which this unit's annotate-in-place convention forbids.
+>
+> ### Citation correction — §13.4's atomicity clause, per Recommendation 39
+>
+> Recommendation 39 found §13.4's *"Registry writes must be **atomic or append-safe**"* requirement
+> *"checked off against two rules that do not carry it"*. The mis-citation reads
+> **"§13.4's atomic/append-safe registry with failed and aborted runs visible (TE:829) ✓ — R-07,
+> R-09"**, and **R-07 is the status enum** while **R-09 is stays-visible**; neither states a write
+> mechanism.
+>
+> | Clause of TE:829 | Rule that actually carries it |
+> |---|---|
+> | *"Registry writes must be **atomic or append-safe**"* | **R-08** — the single-write newline-terminated append under append mode plus durability confirmation, added 2026-08-28, with the trailing-versus-interior malformed-row distinction and its three controls |
+> | *"Failed and aborted runs remain visible **with status and reason**"* | **R-07** (the closed status enum and the non-empty `reason`) and **R-09** (no delete, no overwrite, no silent re-run) |
+> | *"silent reruns are prohibited"* | **R-09** |
+> | the twenty-column schema | **R-18** |
+>
+> So the correct citation for TE:829 is **R-07, R-08, R-09** — R-08 being the one that was missing and
+> the one the clause turns on.
+>
+> **⚠ Where the mis-citation lives, and why it is corrected HERE rather than at that line.** The
+> remediation brief located it as *"your verification table at `business-logic-model.md:1748`"*. On
+> disk that line is **not this unit's own verification table**: it sits inside
+> `## Review — 2026-08-25 post-redo pass, restored budget iteration 1`, under
+> `### What reproduced exactly — the refutations that failed`, and it is a **reviewer's** dated
+> spot-check of TE section citations. Preserved `## Review` sections are not editable, and rewriting a
+> reviewer's sentence would break this unit's annotate-in-place convention. **The correction is
+> therefore stated here, in live rule text, and on R-08's own Acceptance line** — the two places a
+> reader at the gate and an implementer at 3.5 will actually look. The reviewer's line stands as the
+> dated record of what that reviewer checked; it was accurate about *"failed and aborted runs
+> visible"* and incomplete about *atomicity*, which is precisely the finding.
 
 ## Rules with no acceptance row — stated, not buried
 
@@ -887,6 +1608,9 @@ docstring containing all three elements.
 | Probe scope, measurement status, declared-vs-observed mismatches | Q3 = C / NFR-DET-01 | ✅ **Fields now in the approved contract** — `DeterminismRecord` carries nine. Amendment B **APPROVED 2026-08-24** *(superseded status: "Fields not in the approved contract. Amendment B pending")* |
 | **R-17** — every module and script carries a purpose/inputs/re-run docstring | Human-selected candidate rule, interview Q12-C | ⚠ **No §16/§19 row accepts it.** The convention is observed in both existing scripts and is mandated in `project.md` § Mandated, but no acceptance row tests it; enforcement rides review rather than a gate *(row added 2026-08-25 on adversarial residual r-2 of the eighth-redo iteration 2: R-17 is the other rule in this file declaring no acceptance row, and this table — whose whole purpose is to state them rather than bury them — omitted it)* |
 | `dataset_version` derivation integrity — **correspondence and determinism covered** by two of R-12's negative controls; **never-reuse NOT covered** — its third control detects only a *degenerate* encoding, never a *truncating* one, so injectivity is an **OPEN** obligation on the encoding *(corrected 2026-08-25, adversarial finding M-3 of the restored budget; superseded: "**covered by three negative controls** in R-12 (derivation correspondence, derivation determinism, injectivity against a degenerate encoding)")* | **Q6 = D′** (re-answered 2026-08-25); FU-2 moot | ⚠ **Amendment C DECLINED AS DRAFTED 2026-08-25**, so there is no ledger and no `ReleaseLedgerEntry`. *(Glyph corrected 2026-08-25 on adversarial residual r-1 of the eighth-redo iteration 2: this row carried ✅ while its obligation is partly **uncovered**, and rows 1–2 of this table use ⚠ for exactly that state.)* FU-2's inconsistent-mapping obligation is carried by the correspondence control; its **duplicate-row** obligation is **vacuous** — with no ledger there are no rows to duplicate. Its **reused-label** obligation is **NOT** vacuous: that *is* never-reuse, and it **remains uncovered**, pending the encoding's injectivity. *(Corrected 2026-08-25 on adversarial finding of the eighth-redo iteration 1. **Superseded wording, preserved:** "its duplicate-and-reused-label obligation is **vacuous** — no rows to duplicate, and reuse across genuinely different content reduces to a SHA-256 collision." Two defects in one clause: it deployed the **withdrawn** SHA-256-collision reduction as live fact, where R-12 refutes it and preserves it only as superseded — the r-1 sweep removed one deployment and left this one — and it bundled *duplicate-row* with *reused-label* as jointly vacuous when the second is exactly the open obligation the next sentence concedes.)* *(Corrected 2026-08-25 on adversarial finding M-3 of the restored budget; superseded wording preserved: "Nothing is left uncovered." The third control is non-degeneracy, not injectivity, so it cannot cover never-reuse — an OPEN obligation on the label encoding.)* Both upstream sites were **corrected on 2026-08-25** on the owner's explicit authorisation after this stage first reported rather than edited them: `unit-of-work.md` § 1 `Owns` no longer lists the ledger and `services.md` reads *"Two artifacts, one authoritative"* *(superseded statuses, all preserved: "~~Release-label ledger integrity~~ — obligation withdrawn; `dataset_version` derivation carries no integrity test … uncovered, and not replaced"; "✅ **Artifact now in `unit-of-work.md` § 1 `Owns` and `services.md`.** Amendment C **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D"; and "Artifact not in any approved `Owns` list. Amendment C pending")* |
+
+| **R-20** — `exploratory` derived in the registry writer | **FR-P1-05-14** (Vision §8.3) | ⚠ **No §16/§19 row accepts it**, and none is sought. `requirements.md` records FR-P1-05-14 as `UNTESTED`; Amendment A was declined and §19 is held at 36 rows. Enforcement rides `regimes-diagnostics-reporting` R-128's reader-side assertion — which **fails** a post-access run reported without the label — plus R-20's four negative controls, including the carve-out's own control *(row added 2026-08-28 with R-20, per Recommendation 12: this table's whole purpose is to state acceptance gaps rather than bury them, and a new rule with no row belongs in it on the day it is written)* |
+| **R-18** — the twenty-column registry schema; **R-19** — the `run_id` join | **FR-P1-05-13** / **NFR-AUD-01** | ✅ **Covered — TA-10**, whose FR-P1-05-13 criterion is *"a schema assertion confirms all twenty columns exist"*, plus **TA-21** for the traceability limb. Listed here for completeness of the 2026-08-28 additions, **not** as a gap: R-18 and R-19 are the design the existing criterion had been missing, so they close a gap rather than opening one |
 
 **Test specifications for REQ-ENG-7 and REQ-ENG-10**, labelled exactly as Q7 = X
 directs:
@@ -934,9 +1658,68 @@ enforcement rides §18.3's gate-test list and TA-11 rather than a row of their o
   *(Corrected 2026-08-25 on adversarial reviewer finding M-2, which was Major. **Superseded wording, preserved:** "**Open — Amendments A, B and C.** All three **PENDING and NOT approved.** Enumerated at this stage's approval gate." That was refuted in the passed contracts at the time it was read, and both sibling artifacts had swept this same bullet while this file's § Assumptions was not — the omission finding M-3 traces to this file's own self-certification. The bullet carried **no numeral**, which is why the 2026-08-24 sweep, keyed to `DeterminismRecord` "six fields" and `services.md` "two artifacts", could not see it.)*
 
 - **OPEN — a cross-unit obligation on the eight exceptions this unit does not raise.** `foundation` owns `IntegrityError` and the stage-entry catch, and R-01 now places **all fourteen** project-defined exceptions in that hierarchy on the authority of `component-methods.md` § Assumptions. Eight of them are **raised by other units** — `PhaseBoundaryError` and `LockedTestError` (`governance-guards`), `LeakageError`, `AlignmentError`, `SeedError`, `FairnessError`, `BootstrapError`, `RegimeError` — and **each of those units' `functional-design` must declare its own exceptions as `IntegrityError` subclasses**. This unit cannot do it for them, and it is recorded here rather than assumed because the omission it replaces would have let a phase-boundary violation exit with **no `aborted` registry row**, against NFR-PHASE-01 and NFR-AUD-01 *(added 2026-08-25 on adversarial finding m-1 of the eighth-redo iteration 2)*. No cycle is created: every one of those units already depends on `foundation`.
+
+  *(**Amended 2026-08-28 per Recommendation 8 — the bullet above says eight and fourteen; it is now NINE and FIFTEEN.** The dated sentences stand; the current state is stated here. `PartitionError` was promoted into R-01's enumeration on the owner's ruling, so the exceptions raised by other units are **nine**, adding `PartitionError` → **`models-and-baselines`**, which declares it in `src/models/`. The declaration obligation this bullet states binds that unit for `PartitionError` on the same terms as the other eight, and it already depends on `foundation`, so no cycle is created.)*
+
+- **OPEN — the same declaration obligation on the eighteen exceptions riding R-01's any-future clause, and it is NOT a formality.** *(Added 2026-08-28 per Recommendation 8.)* Derived 2026-08-28: **33** distinct project-defined `*Error` subclass names exist across the twelve units' 48 artifacts, **15** named in R-01's enumeration and **18** riding its *"any future integrity-related exception"* clause — `AcquisitionError`, `AuditScopeError`, `BenchmarkError`, `BudgetError`, `ComparatorError`, `CredentialEgressError`, `DriverError`, `EvidenceScanError`, `FixtureError`, `GateError`, `ImportBoundaryError`, `InventoryError`, `InverseTransformError`, `ManifestError`, `ReuseError`, `SchemaError`, `StandardizationError`, `TargetQualityError`. **Riding the clause is not the same as being in the hierarchy**: each raising unit must still declare its own as an `IntegrityError` subclass, or R-10's stage-entry catch lets it exit with **no `aborted` row** — the NFR-AUD-01 failure R-01 was corrected once to prevent, reaching the residue instead of the enumeration. **Named specifically because the governance report examined them: `InverseTransformError`** is on the inverse-before-metric path in `evaluation-and-comparison` (13 live occurrences) and `statistical-inference` (7), both of which must declare it; **`FixtureError`** is `fixtures-and-reproducibility`', already disclosed by that unit as *"a fifteenth, named at the gate"* — a label that now needs its own numeral corrected, which is **that unit's** to do, not this one's. This unit cannot declare any of the eighteen for their owners; R-01's enumeration-reconciliation negative control is what makes an undeclared one visible rather than silent.
+
+- **OPEN — `evaluation-and-comparison`'s and `statistical-inference`'s side of Recommendation 8, which this unit does NOT close.** *(Added 2026-08-28.)* `models-and-baselines` R-92 raises `PartitionError` for a `partition_id` mismatch; `evaluation-and-comparison` R-105 raises **`LeakageError`** for the same condition while claiming to *"mirror R-92"*; `statistical-inference` R-113 imports R-105 *"as written"*, so a third unit inherits it. R-01 now states the **discriminating rule** those units must agree against — declared-identity disagreement → `PartitionError`; disagreement implying information flow → `LeakageError`; both true → `LeakageError` wins. **Whether R-105 changes its raise is that unit's decision**, and the governance report assigns the taxonomy choice to `models-and-baselines` + `evaluation-and-comparison`. Recorded here so the promotion is not mistaken for having settled the sibling units' raise sites: a test asserting `pytest.raises(PartitionError)` still passes at `06` and fails at `07` until they do.
 - **OPEN — whether `IntegrityError` should move to a dedicated `src/data/exceptions.py`.** This stage declared the hierarchy in **`src/data/config.py`** because TE §12's `src/data/` tree names **nine** modules and **none for exceptions**, so a dedicated module is a **§12 amendment** this stage may not make by assertion. `config.py` works and crosses no import boundary — every unit raising one of the other eight already depends on `foundation`. But a module whose §12 comment reads *"config load, per-run snapshot, hashes, determinism helper"* is not an obvious home for the project-wide exception base, and the fourteen-subclass hierarchy is now project-wide rather than `foundation`-local. **The owner's decision: accept `config.py`, or amend §12 for `src/data/exceptions.py`** *(added 2026-08-25 on adversarial finding M-1 of the ninth-redo iteration 1, whose fix names this item as recorded here — so not creating it would have been the same claim-without-the-thing defect the last three passes each caught)*.
 - **OPEN — the `dataset_version` hash-to-label encoding.** *(Added 2026-08-25 on adversarial reviewer finding M-4, which was Major: this decision was stated as unspecified in all three artifacts while appearing as an open item in none of them, and the Q&A simultaneously asserted "Nothing carried to the stage gate as an open item.")* Q6=D′ requires `dataset_version` to be **derived from the release `content_hash`** and human-readable, and **no approved artifact specifies the encoding**. Per TE §18.3 stage 3.5 must **stop and report** rather than choose one. **This blocks concrete work**, which is why it belongs here rather than in a narrative: `dataset_version` is a §13.3 manifest field, W-7 step 5 must produce it, and `src/data/release.py` plus the §18.3-critical `tests/test_release_hashes.py` cannot be completed without it. **The encoding also carries the never-reuse obligation** below. Resolution is a freeze-gate decision, not an implementation choice.
 - **OPEN — injectivity of that encoding, and with it the never-reuse property.** Never-reuse is *different content → different label*. The derivation gives idempotence, not injectivity, and a human-readable label is a lossy encoding of a 256-bit hash. Whoever specifies the encoding must make it **injective over the release population in scope**, or state and have accepted its collision bound. Until then `dataset_version` carries **correspondence and determinism guarantees only**, and nothing this unit produces may claim labels are never reused.
+
+  > **✳ THE BOARD'S RECOMMENDATION ON THE ENCODING, RECORDED 2026-08-28 — AND STILL NOT RULED.**
+  >
+  > *(Added per `GOV-2026-08-28-FD-01` **Recommendation 42**. **The two OPEN items above are left
+  > exactly as they stand** — the posture is correct and the board agrees with it. What is added is
+  > the board's recommendation, so the owner has it in hand when the decision is taken. **No encoding
+  > is invented here, and none is adopted.**)*
+  >
+  > The board recommended **option 2**: a **fixed-length prefix of the `content_hash`** (its example:
+  > 12 hex) **plus a recorded collision bound** and a **verify-on-write uniqueness check** that the
+  > prefix is unused. Its stated reason: it is *"the only option delivering both a citable label and
+  > an established never-reuse property"*, and its cost *"is exactly the `verify_release` amendment
+  > R-12 has already identified as needed, so it closes two of three open items in one act"* — the
+  > third open item against R-12, the `verify_release` amendment listed below, being the one it would
+  > also discharge. The named alternatives: **option 1**, `dataset_version` = the **full 64-hex
+  > `content_hash`**, injectivity inherited from SHA-256 with no ledger, no allocation state and no
+  > new failure mode, at the cost of being unreadable as the human citation label R-12 says the field
+  > exists for — the board calls it *"a sound fallback if hash-string citations are acceptable"*; and
+  > **option 3**, keep the label explicitly non-unique, mandate `content_hash` in every citation and
+  > **formally withdraw the never-reuse claim**, which the board would accept *"only if the supervisor
+  > prefers withdrawing the obligation to engineering it, and then by an explicit act rather than
+  > silence."*
+  >
+  > **The trade-off this unit is obliged to flag, since option 2 reintroduces what Q6 removed.** A
+  > verify-on-write uniqueness check is **a read back over existing releases** — a light form of the
+  > ledger the owner declined at Amendment C, and a departure from **R-08**-style purity on the
+  > release path (though not on the registry path, which R-08 governs and which is untouched). That is
+  > not an objection to option 2; it is the fact the ruling should be made with, because the owner
+  > declined durable release state once already and this reaches part of the way back to it.
+  >
+  > **The board's assessment of the current risk, recorded because it bounds the urgency**:
+  > *"**release immutability is not compromised.** It rests on R-13's directory-level overwrite
+  > refusal and R-11's identity-equals-`content_hash`, neither of which depends on `dataset_version`
+  > injectivity. What is open is **citation uniqueness** … a traceability defect rather than a
+  > mutation defect, and the design says so precisely and forbids claiming otherwise."*
+  >
+  > **⛔ THE ENCODING REMAINS A D-NUMBER DECISION THE OWNER MUST TAKE BEFORE 3.5 TOUCHES
+  > `write_release`.** It is unruled as of 2026-08-28. `dataset_version` is a §13.3 manifest field,
+  > W-7 step 5 must produce it, and `src/data/release.py` plus the §18.3-critical
+  > `tests/test_release_hashes.py` cannot be completed without it. Per **TE §18.3** stage 3.5 must
+  > **stop and report** rather than choose one, and per `team.md` a decision is not real until it has
+  > a **D-number**. **Nothing above is a choice made by this stage**, and the never-reuse posture in
+  > the two OPEN items stands unchanged: injectivity is **not established**, and no artifact this unit
+  > produces may claim labels are never reused.
+  >
+  > **One related fact the board verified, and it is this unit's to know rather than to fix**: the
+  > existing `tests/test_release_hashes.py` (267 lines) tests hash verification and mutation
+  > *detection* over existing evidence manifests, and a grep for
+  > `dataset_version|mask_id|feature_set_id|row_count|exclusion` in it returns **0** — so **none of
+  > §13.3's required manifest fields is covered today**, and it does not exercise **R-13**'s overwrite
+  > refusal. The module's name matches the mandated one, which invites a reader to believe TA-15 is
+  > covered when the §13.3 field contract is untested. Recorded as a **naming hazard against TA-15**,
+  > not as coverage.
 - **OPEN — an amendment need on `write_release`'s approved raise-contract.** `component-methods.md` has `write_release` raise `ReleaseError` *"when a field is absent"* over **all fourteen** §13.3 fields. Deriving `dataset_version` inside `write_release` (Q6=D′) narrows the **caller** precondition to thirteen while leaving the **output** obligation at fourteen. The release still carries all fourteen fields, so what the function writes is unchanged — but the caller contract does change, and this stage demanded a formal amendment for exactly this class when it declined to alter `ensure_process_determinism`'s `-> None` signature. Applying a looser standard here would be inconsistent, so this is **the owner's decision, not a settled contract** *(added 2026-08-25 on adversarial finding m-2 of the restored budget; the rule text claimed it was listed here and it was not)*.
 - **OPEN — an amendment need on `verify_release`, or acceptance that the correspondence check is test-only.** R-11's and R-12's correspondence negative control was relocated to *"a presented manifest"* without naming what performs it. The only candidate in the approved contracts, `verify_release(manifest_path) -> Sequence[str]`, **does not fit**: it reports files whose *file hash* mismatches and **never raises**, so it covers neither label/hash correspondence nor failure signalling. The control is therefore specified as a **test** obligation on `tests/test_release_hashes.py` (TA-15), which needs no production entry point. **If runtime enforcement is wanted, `verify_release` must be amended** — the owner's decision *(added 2026-08-25 on adversarial finding M-5 of the restored budget; likewise claimed as listed here and not)*.
 - **Closed — the three consequences the Amendment C reversal first appeared to carry.** Two closed on analysis and one on an owner ruling; a fourth, listed above, was missed by that analysis and is now open:
@@ -945,8 +1728,11 @@ enforcement rides §18.3's gate-test list and TA-11 rather than a row of their o
   - **Monotonicity — RESOLVED by re-answering the question, not by a mechanism.** Ordering is information about *sequence*, which a function of content alone cannot carry, so no test recovers it and no implementation choice reaches it. **Q6 was therefore re-presented and re-answered as D′ on 2026-08-25**, dropping "monotonic" — the owner's explicit decision, not an assumed amendment, with the original Q6=D answer preserved verbatim beside it. R-12 is compliant with Q6=D′ **on monotonicity — but NOT on never-reuse, which D′ retains and this design does not establish** *(narrowed 2026-08-25 on adversarial finding M-1/M-3 of the restored budget; this was the fifth and last unqualified "fully compliant with Q6=D′")*. **What was given up on the ordering side, and it is a capability rather than an unmet obligation:** release labels can no longer be ordered, so a reviewer comparing two labels at a gate must read sequence from the run record or the experiment registry instead. Nothing else in this design depended on label ordering. **FU-2 is moot** — it existed only to locate the ledger Q6=D required.
   - **The two upstream artifacts are no longer open.** `unit-of-work.md` § 1 `Owns` and `services.md` both named a ledger this design no longer has; they were first **reported** rather than edited, because this stage's scope control forbade editing an approved Inception artifact, and the owner then authorised the edits explicitly on 2026-08-25. Both were corrected the same day, superseded wordings preserved, and a search across `construction/` confirmed no other unit referenced the ledger.
 - **Open** — the concrete contents of both maps cannot be enumerated until the four configs exist. This stage fixes the mechanism; the populated maps are Bolt 1 work products.
-- **G-09 is not signed.** No rule here authorises creating any module.
-- **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
+- **OPEN — a cross-unit dependency on `models-and-baselines` for `PredictionHashReceipt`.** *(Added 2026-08-28 per Recommendations 1 and 3.)* **R-18** designs the registry row as the receipt's **destination** and forbids `07`/the bootstrap from being its writer, but the **producer** is `scripts/06_train_and_predict.py`, which `models-and-baselines` owns. That unit is being amended in parallel to name `06` as the writer with the refusal-to-exit control. **`foundation` cannot supply the producing half**, and until it exists column 18 `prediction_hash` has a designed destination and no designed source — which is fail-closed rather than a breach, since every `DEC` metric entry point already refuses without a verified receipt. Recorded so the two halves are known to be two: the governance report's adoption vehicle for this is the **R-103/BLK-08 two-half contract pattern**, registered as an exit condition on 3.1 for both owners, and **this unit does not declare that pattern satisfied from one side.**
+- **OPEN — a cross-unit dependency on `governance-guards` for the `run_id` join and for `prior_period_exposure`.** *(Added 2026-08-28 per Recommendation 10.)* **R-19**'s reconciliation reads `AccessRecord`, which `governance-guards` owns; `prior_period_exposure` is recorded by the locked-test guard per TE §7.0B and merely **carried** by the registry row. Both keys already exist on both entities (`run_id`), so no contract change is needed on either side — but the reconciliation is a **joint** obligation and this unit designs only the registry half. **Zero of the 48 artifacts named both entities before 2026-08-28**; R-19 is the first statement of the relationship and `governance-guards` has not yet stated its side.
+- **OPEN — Kaggle's durability semantics are characterised nowhere in this design.** *(Added 2026-08-28 per Recommendation 39.)* **R-08**'s durability confirmation is specified on `governance-guards` R-25's accepted pattern, and platform durability behaviour **differs between the two governed platforms**. Kaggle's is unmeasured here, so the confirmation step needs its own measured evidence before registry rows written inside a Kaggle session are relied on at a freeze gate. This is a **measurement obligation on Bolt 1's in-Kaggle work**, not an implementation choice, and it is not this stage's to measure.
+- **G-09 is not signed.** No rule here authorises creating any module — including the three rules added 2026-08-28, which decide a schema, a join and a derivation and create nothing. Vision's gate table records **G-09 Agent preflight** as **Open**, owner **Supervisor**, evidence `aws_ai_dlc_preflight_report`, due *"Before any affected component is coded"*.
+- **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant. **This holds for the 2026-08-28 amendments specifically**: R-01's promotion is a taxonomy decision, R-18/R-19/R-20 are schema and derivation decisions, R-08's is a write mechanism, R-05's is an acceptance-row label, R-14's is a dated status clause, and the `dataset_version` encoding is **explicitly left to the owner's D-number decision** rather than chosen.
 
 ## Review history
 

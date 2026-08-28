@@ -49,6 +49,7 @@ elsewhere and applied here.
 - `evidence/DECISIONS.md` — **D-1**, **D-16**, **D-17**, **D-19**.
 - Workspace inspection, 2026-08-23: `tests/` holds three modules, none this unit's; `src/` and `configs/` absent.
 - `functional-design-questions.md` (**Q1 through Q9**), `domain-entities.md`, `business-rules.md`.
+- `governance/reviews/GOV-2026-08-28-FD-01.md` — the full-board stage-3.1 review, verdict **FAIL**; **Recommendation 18** is this unit's. *(Added 2026-08-28, re-saved under the post-remediation receipt.)*
 
 ---
 
@@ -248,7 +249,7 @@ completeness assertion is what turns that from a reading into a check.
 > §15.2."* A reader who checks §6.9 finds six required items and this unit producing two —
 > **without this note that reads as non-compliance rather than a recorded, governed gap.**
 
-## W-5 — Labelling, and the mismatch disclosure
+## W-5 — Labelling, and the two mismatch disclosures
 
 **FR-P1-03-4**: the Phase 1 target is labelled **location-sampled gridded VTEC**, *"never
 receiver-specific station-observed VTEC, everywhere it is described."*
@@ -257,20 +258,92 @@ receiver-specific station-observed VTEC, everywhere it is described."*
 **Its criterion is a review, not a test** — *"a claims-checklist review over every artifact
 and figure caption finds no mislabelling"* — over artifacts that mostly do not exist yet.
 
-**Three limbs (Q8 = D), and one stated gap:**
+> ## ⚠ TWO PHYSICALLY DIFFERENT MISMATCHES, SEPARATED 2026-08-28 — ONE MECHANISM WAS DISCHARGING BOTH
+>
+> **Corrected 2026-08-28 per `governance/reviews/GOV-2026-08-28-FD-01.md` Recommendation 18**
+> (`High`, finding `TEC-06`), **owner-ruled `FAIL`.** The superseded
+> limb 2 read: *"The grid-cell-versus-IPP mismatch statement is emitted by the reporting
+> path."* It merged two physically different mismatches and discharged both through the
+> comparison-reporting path, so a Phase 1 artifact carrying **no** IRI/GIM comparison
+> disclosed the target-lineage one through **no mechanism at all**.
+>
+> | | **Comparison-geometry mismatch** | **Cross-phase target-lineage mismatch** |
+> |---|---|---|
+> | Required by | `project.md` § Mandated / **TEC-06**; Vision §6.6; TE §5 | `requirements.md` **NFR-TDEF-01**; Vision §6.6, §2.2 |
+> | What differs | the Phase 1 **target grid cell** against the **station-coordinate evaluation** the comparator is sampled at | the Phase 1 **grid-cell target population** against the Phase 2 **IPP target population** |
+> | Trigger | *"at the point where any IRI or GIM comparison is reported"* | **every artifact that describes or carries the Phase 1 target** |
+> | Emitting path | the **comparison-producing** path — **not this unit's**; `evaluation-and-comparison` **R-110 limb 3** emits it on every serialized IRI/GIM comparison | the **target-writing** path — **this unit's**, beside the `location-sampled gridded VTEC` label (limb 2 below) |
+> | Negative control | a comparison report without the spatial-representativeness sentence → **fails** (`evaluation-and-comparison` control 25) | a target artifact written without the grid-cell-versus-IPP statement → **fails** (this unit, W-5 limb 2) |
+>
+> **The lineage mismatch is neither of TEC-06's two limbs.** TEC-06's limbs are grid-cell
+> versus station-coordinate (Phase 1) and IPP cloud versus zenith estimate (Phase 2);
+> NFR-TDEF-01's is grid cell versus IPP. Routing it through the comparison path therefore
+> discharged it on comparison reports and on nothing else — not on a dataset release, a
+> target artifact, a coverage report or a results table.
+>
+> **Why the separation matters.** This is the mismatch `project.md` § Forbidden protects:
+> *"NEVER claim numerical equivalence between the Phase 1 and Phase 2 targets… agreement is
+> not proof that the two estimate the same physical quantity."* Phase 2 compares against
+> Phase 1's **reported December timestamps**, so **the moment the lineage mismatch matters
+> most is the moment no comparison report is in scope.** The `target_definition_id` stamp
+> keeps the distinction machine-readable — real mitigation — but the human-readable
+> disclosure NFR-TDEF-01 requires reached one artifact class only.
+>
+> **This restores Q8 = D's literal reading rather than overriding it.** Option D reads
+> *"C, with the grid-cell-versus-IPP mismatch statement emitted by **the same path**"*, and
+> the path in options B and C is *"the code that writes the target"*. The conflation entered
+> through D's impact line, which imported `project.md` § Mandated's comparison trigger. **No
+> answer to any question changes.**
+>
+> **The one-string alternative was considered and rejected** (the board's option 2):
+> broadening a single trigger to "any reported artifact describing the Phase 1 target" and
+> stating both mismatches in one string closes the coverage gap while **preserving the
+> conflation** — a comparison report would carry a cross-phase lineage caveat it does not
+> need while a Phase-1-only table carried a comparison-geometry caveat that does not apply,
+> and a later reviewer would have to separate them again.
+
+**Four limbs (Q8 = D; the mismatch limb split in two on 2026-08-28), and one stated gap:**
 
 1. **The label is emitted by the code that writes the target**, travelling with the rows the
    way `target_definition_id` already does. This removes the commonest cause of
    mislabelling: a writer who does not know which product they have.
-2. **The grid-cell-versus-IPP mismatch statement is emitted by the reporting path.**
-   `project.md` § Mandated requires the spatial-representativeness statement *"at the point
-   where any IRI or GIM comparison is reported"* — a rule about **every future report**,
-   which `external-products` W-7 answers the same way and for the same reason.
-3. **A grep-class check** that the prohibited phrasing does not appear in this unit's
+2. **The grid-cell-versus-IPP lineage statement is emitted by that same target-writing
+   path**, beside the label, so the caveat **travels with the product** and cannot be
+   separated from it. Its trigger is the **target artifact**, not a comparison: it fires on a
+   dataset release, a target artifact, a coverage report and a results table alike. Placing
+   it beside the label removes the same failure mode limb 1 removes — a writer who does not
+   know which product they have. This is the emit-from-the-path pattern
+   `external-products` W-7 obligation 3 uses, re-anchored to the path that produces **this**
+   unit's artifact, which is the writer, because this unit produces no IRI/GIM comparison.
+3. **TEC-06's spatial-representativeness sentence stays on the comparison-producing path**,
+   where its subject lives — and **that path is not this unit's.**
+   `evaluation-and-comparison` R-110 limb 3 already emits it, in the wording the governing
+   documents fix: *"Phase 1 compares a grid cell against a station-coordinate evaluation, and
+   part of any measured difference is a geometry and sampling artefact rather than skill."*
+   Recorded here so the obligation is visible rather than owned twice.
+4. **A grep-class check** that the prohibited phrasing does not appear in this unit's
    outputs — the pattern this project already uses for SSN, residual and GRU absence.
-4. **⚠ Stated gap:** a **figure caption inside a notebook image** reaches none of the three.
+5. **⚠ Stated gap:** a **figure caption inside a notebook image** reaches none of the four.
    That case stays with the claims-checklist review, and saying so is the difference between
-   a bounded mechanism and an overclaimed one.
+   a bounded mechanism and an overclaimed one — but **that checklist owes two rows it does
+   not yet carry**, per the box below.
+
+> ## ⚠ THE CLAIMS-CHECKLIST DESTINATION DOES NOT YET EXIST — TWO ROWS OWED BY A SIBLING
+>
+> **Recorded 2026-08-28 per Recommendation 18.** The gap above routes the notebook-caption
+> residue to FR-P1-03-4's **claims-checklist review**, and that checklist is
+> `regimes-diagnostics-reporting`'s. Its `reference` enumeration
+> (`regimes-diagnostics-reporting/functional-design/domain-entities.md` § 2) lists
+> **FR-P1-05-19, FR-P1-05-20, VAL-05, TEC-06, D-8, D-7** — **no NFR-TDEF-01 row and no
+> FR-P1-03-4 row.** The routing points at a destination that does not exist. ⚠ **As-found, and correct when written — SUPERSEDED 2026-08-28 on the resume pass**: both rows were written into that unit that day (its `domain-entities.md` § 2 and `business-rules.md` R-126 addition 4). See § Assumptions & Open Questions for the closure and its stated bound (those artifacts carry no review receipt yet).
+>
+> **Stated as a dependency on that unit, not fixed here.** Its claims-and-limitations
+> checklist owes an **NFR-TDEF-01** row — the grid-cell-versus-IPP lineage statement present
+> on every artifact that describes or carries the Phase 1 target — and an **FR-P1-03-4** row
+> — the `location-sampled gridded VTEC` label present, and the prohibited receiver-specific
+> phrasing absent, everywhere the target is described. **That unit is being remediated in
+> parallel and this stage does not edit it.** Until both rows exist the notebook-caption
+> residue is **routed but not yet landable** — stated rather than claimed.
 
 **Why not the review alone.** §16 and §19 both hold that visual inspection is insufficient,
 and this rule governs artifacts nobody has written.
@@ -418,7 +491,8 @@ No §19 criterion is drafted — §19 rows are owned by stage 3.2 and change con
 - **Open — the `02` ordinal collision**, a recorded §12 defect. **No `02a`/`02b` convention.** The Phase-2-script reachability check is left to `governance-guards` R-23.
 - **Open — Vision §6.9's content list is unqualified in the source.** The phase qualifier runs through **Vision §15.2**.
 - **Open — the zero-TBD preflight is not yet runnable** on this component; D-19 is a decision made, not a check passed.
-- **Open — the notebook-caption case of FR-P1-03-4 reaches no machine check** and stays with the claims-checklist review.
+- **Open — the notebook-caption case of FR-P1-03-4 reaches no machine check** and stays with the claims-checklist review. **Widened 2026-08-28 per Recommendation 18:** that checklist is `regimes-diagnostics-reporting`'s, and its `reference` enumeration carries **no NFR-TDEF-01 row and no FR-P1-03-4 row**, so the routing currently has **no destination**. Both rows are **owed by that unit**, which is being remediated in parallel; **the dependency is stated, not edited here**. ⚠ **CLOSED on the 2026-08-28 resume pass.** Both rows were written into `regimes-diagnostics-reporting` that day (`domain-entities.md` § 2 and `business-rules.md` R-126 addition 4, plus its W-4 mirror): `NFR-TDEF-01` as the **cross-phase target-lineage** disclosure row, kept distinct from the TEC-06 comparison-geometry row and required on **every reported artifact describing the Phase 1 target**, not only serialized IRI/GIM comparisons; `FR-P1-03-4` as the notebook-caption row with `human_residue` recorded. The routing now has a destination. **Bound, stated rather than assumed:** those artifacts carry **no review receipt and no adversarial pass yet** — the rows exist in draft and the stage verdict is still **FAIL**, so this is a closed *dependency*, not a discharged *obligation*.
+- **Open — NFR-TDEF-01's lineage disclosure and TEC-06's comparison-geometry disclosure are now two obligations, not one** (W-5, corrected 2026-08-28 per Recommendation 18). This unit emits **only** the lineage statement, from the target-writing path. TEC-06's sentence is `evaluation-and-comparison` R-110 limb 3's, and **no obligation is created on that unit here** — it is recorded so the split is legible rather than owned twice.
 - **Open — an obligation stated on a sibling:** W-7's cell-and-month keying must agree with `inventory-and-registry`'s G-P1A record.
 - **G-09 is not signed.** No workflow here authorises creating any module.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -488,3 +562,39 @@ Narrow confirming pass over the fourteenth-redo re-confirmation receipt. Finding
 No regression found. This narrow confirming pass finds nothing that would disturb the terminal READY verdict.
 
 READY
+
+---
+
+> ## Remediation, 2026-08-28 — GOV-2026-08-28-FD-01 Recommendation 18
+>
+> **The project decision owner ruled `FAIL` on Recommendation 18** (`High`, finding `TEC-06`)
+> and directed the board's **option 1 plus option 3's checklist rows**. A redo jump cleared
+> the write-freeze. **Only `W-5` and two `## Assumptions & Open Questions` bullets changed in
+> this file.** The `## Review` sections above and every dated provenance box are unchanged.
+>
+> **What changed.** NFR-TDEF-01's **cross-phase target-lineage** disclosure (grid-cell target
+> population versus IPP target population) is separated from TEC-06's **comparison-geometry**
+> disclosure (grid cell versus station-coordinate evaluation) and moved onto the
+> **target-writing** path beside the `location-sampled gridded VTEC` label, with its own
+> negative control: **a target artifact written without the grid-cell-versus-IPP statement
+> fails.** TEC-06's sentence stays on the comparison-producing path, which is
+> `evaluation-and-comparison` R-110 limb 3's and not this unit's, with its existing control.
+> The two rows `regimes-diagnostics-reporting`'s claims-and-limitations checklist owes —
+> **NFR-TDEF-01** and **FR-P1-03-4** — are recorded as a dependency; **that unit is not
+> edited here.** The board's option 2 (one broadened trigger stating both mismatches in one
+> string) was **rejected**, on the record, because it closes the coverage gap while preserving
+> the conflation.
+>
+> **What did not change.** No question, no answer, no rule ID, no entity, no count, no
+> scientific value. **G-09 remains unsigned**; **BLK-05 stands as it is**, both open limbs
+> intact; Phase 1 still produces no DCB, STEC, mapping, satellite or arc field; the gridded
+> product is still never labelled a receiver-specific station observation. **D-1's cell rule,
+> D-16's median and D-17's sixteen fields are applied, not reinterpreted.** The three open
+> items the terminal READY carried to the gate — the **"documented QC"** enumeration's
+> membership, the **D-17 conformance check's authority source** (`governance-guards` R-20),
+> and the **`02` ordinal collision** — are **all still open and unresolved**, verified
+> in place.
+>
+> **Derived counts, re-checked after the edit and unchanged:** **9** workflows (`W-1`…`W-9`),
+> **10** rules (`R-64`…`R-73`), **9** numbered entity sections, **6** requirements with
+> **1** (`FR-P1-03-5`) carrying no acceptance row.

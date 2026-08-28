@@ -1,0 +1,20 @@
+{
+  "_purpose": "Integrity record for loose December-bearing artifacts held at the top of the restricted root. Created 2026-08-28 under GOV-2026-08-28-FD-01 Rec 44(a); access-log row 11.",
+  "_scope_note": "Hashes only. This manifest records no coverage figure, day count, record count or any December target value.",
+  "artifacts": [
+    {
+      "path": "bbox___opt_openmadrigal_madroot_experiments4_2022_gps_31dec22_gps221231g.003.hdf5.txt",
+      "provider_filename": "gps221231g.003.hdf5",
+      "provider_file_version_suffix": "g.003",
+      "provider": "Madrigal / OpenMadrigal, experiments4/2022/gps",
+      "observation_date": "2022-12-31",
+      "retrieved_at_utc": "2026-08-12T22:41:57Z",
+      "retrieval_run": "access-log row 2 — January coverage run (RUN_MONTHS = [1]), year-blind predicate",
+      "sha256": "3a164af0864b2effde2e527ca190c1b050f5a47179eaffa3ccab770bb366f557",
+      "size_bytes": 1666816,
+      "retained_because": "the only physical record of the run-2 access (evidence/experiment_registry.md); not deleted, per that record",
+      "derived_artifacts_status": "the 743 ARUC-cell records it yielded were removed from audit_evidence_2022-01/ derived artifacts; see evidence/CORRECTION_2026-08-16_acquisition_window.md",
+      "provenance_caveat": "DATA-07: this is a provider-side text extraction, not a provider .hdf5 byte stream. Its provenance is recorded, not verified — no provider byte stream exists anywhere in the workspace."
+    }
+  ]
+}

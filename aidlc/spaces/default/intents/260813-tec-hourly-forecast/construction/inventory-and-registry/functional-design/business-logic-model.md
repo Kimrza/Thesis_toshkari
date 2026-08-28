@@ -346,12 +346,12 @@ ordinary work.
 
 ```mermaid
 graph TD
-  REF["governed reference set<br/>(12 months, 3 cells,<br/>named artifact classes)"]
+  REF["governed reference set<br/>(12 months, December 1-31,<br/>3 cells, named artifact classes)"]
   D["declare audit scope up front"]
   CHK{"declared == required?"}
   A["for each artifact:<br/>acquisition's named accessor"]
-  L["access row written + durable<br/>BEFORE the read"]
-  R["read, count"]
+  L["access row written + durable<br/>BEFORE the read<br/>purpose=coverage_audit (coverage limb)<br/>purpose=regime_audit (regime limb)<br/>performance_inspected=false"]
+  R["read, count<br/>coverage figures carry data07_caveat"]
   REC["reconcile rows written<br/>against declared scope"]
   X["AuditScopeError"]
   REF --> CHK
@@ -363,12 +363,53 @@ graph TD
 ```
 
 Text fallback: the audit declares its scope up front; that declaration is checked against a
-governed reference set — twelve 2022 months, all three cells, the named artifact classes,
-derived from the release inventory rather than from the declaration itself — and a short
-declaration fails **before anything is read**. It then opens each artifact through
-`acquisition`'s named accessor, which writes a durable access row before the read, counts,
-and finally reconciles the rows actually written against the declared scope. A mismatch at
-either check fails.
+governed reference set — twelve 2022 months, **December declared as the full calendar month,
+1–31**, all three cells, the named artifact classes, derived from the release inventory
+rather than from the declaration itself — and a short declaration fails **before anything is
+read**. It then opens each artifact through `acquisition`'s named accessor, which writes a
+durable access row before the read — **under `purpose="coverage_audit"` for the coverage
+limb and `purpose="regime_audit"` for the regime-count limb, each with
+`performance_inspected=false`** — counts, and finally reconciles the rows actually written
+against the declared scope. A mismatch at either check fails.
+
+**Two reads, two typed rows** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 11,
+option 1)*. This workflow produces **two** G-05 evidence artifacts that Vision §13.1 names
+separately, so it makes **two separately logged reads**, each binding its own
+`AccessRecord.purpose` literal from `governance-guards`' approved enum (`coverage_audit` |
+`regime_audit` | `locked_evaluation`), each carrying `performance_inspected=false` and an
+`authorization` reference to **Vision §8.3**. `locked_test_accessed` is `True` on both.
+**A read attempted under `purpose="locked_evaluation"` is refused** — that literal is G-06's,
+and an audit carrying it would trip `evaluation-and-comparison` R-109's must-not-fire control
+and block the read §8.3 *requires*, which is the *"opened exactly once"* misreading `team.md`
+records this project having already corrected once. R-50 carries the rule, the pairing table
+and the negative controls; the sibling-control consequence is raised at the gate there rather
+than edited into another unit's files.
+
+**The December day range is the full calendar month, and the one-day excess is stated**
+*(added 2026-08-28, Recommendation 15, option 2)*. Both limbs read **1–31 December 2022**:
+the coverage limb must, because **D-2** requires **31/31** December days, and the regime limb
+does so that December's activity distribution is characterised as a property of **the
+month**. The G-06 scored set is **2–31 December (30 days)** under **D-28**, so the count
+window **exceeds the scored window by one day**, and both reports say so. A storm event lying
+**wholly** outside 2–31 December — interval and its −12 h pre-event window — is **reported
+separately and excluded from D-13's ≥3 tally**, so a `Kp>=5` interval confined to 1 December
+cannot promote H4 and SRQ-5 to confirmatory while contributing zero scored rows. **Which day
+range governs the threshold is Student + Supervisor's**, not this workflow's: D-13 is a
+supervisor-countersigned demotion threshold, and **this unit measures, it does not demote**.
+
+**Every coverage figure leaves here carrying the DATA-07 caveat as a machine-readable field**
+*(added 2026-08-28, Recommendation 29, option 1)*. The coverage report emits a
+**`data07_caveat`** field on every station-month figure, **sourced from that month's
+`provenance_class`** (`acquisition` R-36) rather than restated; a figure emitted for a
+`derived_only` month with no caveat field **fails**. `team.md`'s DATA-07 caveat is
+unconditional and this workflow's whole output is FULL's coverage figures, so the caveat
+belongs on the **producing** surface — where prose has already failed once
+(`acquisition` R-42 on `PROVENANCE_NOTICE.md`: *"no ID, criterion or test link, so nothing
+checked it"*), and where the downstream consumer `fixtures-and-reproducibility` already
+carries exactly this field. **The source field is `acquisition`'s and reaches no other unit
+today**, so the constraint is proposed on that dependency; R-50 records the seam and requires
+a **stop-and-report under TE §18.3** rather than an uncaveated figure if the field is absent
+at implementation.
 
 **Why one row per artifact rather than one per run.** An audit spanning twelve months,
 three cells and several artifact classes is many operations. One row makes the log say
@@ -444,6 +485,21 @@ though it were blind, and defeats the purpose the disclosure was written for.
 threshold is genuinely useful at NICO's 93.2%, but *"near"* would be a new number this
 stage invented beside a **supervisor-frozen** hard threshold — and an adjacent number that
 becomes the real rule is a failure this project has already had to correct.
+
+**The DATA-07 caveat travels onto this record with the figures** *(added 2026-08-28,
+`GOV-2026-08-28-FD-01` Recommendation 29, option 1)*. The measured figures above **are**
+FULL's coverage figures: the nine cached non-December months are pre-TC-06 months classed
+**`derived_only`**, and the two absent from the nine — **2022-04** and **2022-07** — are
+absent because they hold no `raw_isprint_cache/`. `team.md` binds the caveat to appear
+*"wherever FULL's coverage figures are relied on"*, and this record is where a **supervisor**
+relies on them. Each station-month figure therefore carries R-50's **`data07_caveat`** field,
+and the record states the three facts W-6 enumerates — provenance **unverifiable in
+principle, not merely unverified**; **2022-04, 2022-07 and 2022-12** holding no retrieval
+cache; the **2026-08-16 corrected extracts produced under Python 3.14**, outside the governed
+**3.11** pin — together with `team.md`'s limit that **FULL must not be relied on at a freeze
+gate while its provenance chain points at superseded per-month hashes**. A `derived_only`
+figure reaching this record with no caveat field **fails**. One mechanism, named at the
+surface it has to reach.
 
 ## W-8 — The four G-P1A prohibitions
 
@@ -1165,3 +1221,26 @@ and repaired mojibake in the question file without altering its questions, optio
 tokens (`[Answer]:` and `Other` counts unchanged at 10/9; Recommendation markers at the expected
 13→14; all 9 question headings at identical line numbers). G-09 remains unsigned throughout.
 **READY.**
+
+---
+
+> **Re-saved 2026-08-28 under the post-redo receipt, remediating `GOV-2026-08-28-FD-01`
+> (verdict FAIL) on the project decision owner's ruling — mechanism written, value routed to
+> the gate.** **In this file: W-6** gained the three facts its rule side gained — the two typed
+> December reads (`purpose="coverage_audit"` / `"regime_audit"`, `performance_inspected=false`,
+> Vision §8.3 `authorization`, `"locked_evaluation"` refused; **Recommendation 11**); the
+> **full-calendar 1–31 December** day range with the one-day excess over D-28's 2–31 scored set
+> stated and the wholly-unscored-event carve-out from D-13's ≥3 tally (**Recommendation 15**);
+> and the machine-readable **`data07_caveat`** on every emitted coverage figure, sourced from
+> `provenance_class` (**Recommendation 29**). W-6's mermaid nodes were updated to carry the
+> December day range, the two purposes and the caveat, with the text fallback rewritten to
+> match. **W-7** gained the caveat obligation, because W-7 is where FULL's measured figures
+> reach a supervisor at G-P1A.
+>
+> **Counts derived 2026-08-28, printed before assertion.** Workflows **9** (W-1…W-9) —
+> unchanged, none added or removed. Entities **9**, rules **10**, requirements **7**, untested
+> **2**, acceptance rows **3** — all unchanged. **No scientific value was decided**: the
+> demotion threshold's day range is routed to **Student + Supervisor** as an Open item, not
+> chosen here. **G-09 remains unsigned**; **BLK-07's authorization limb remains open** and no
+> run may touch calendar 2022-12 while it stands; membership stays derived from **record
+> timestamps**, never from a directory name. Every `## Review` section above is unchanged.

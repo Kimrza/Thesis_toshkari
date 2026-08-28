@@ -7,7 +7,8 @@ The workflows this unit implements: the stamp match that guards every scoring pa
 model families' fit-and-predict path, the three-seed confirmatory prediction and the contract
 three downstream units inherit from it, checkpointing and restore, tuning and selection under a
 criterion declared before December could be seen, the grid freeze, the predeclared ablations, the
-config-only horizon, and the two evidence obligations that belong to siblings.
+config-only horizon, the two evidence obligations that belong to siblings, and the one-shot `DEC`
+write whose hash receipt must precede any metric.
 
 **Authored 2026-08-24** against `functional-design-questions.md` Q1–Q8 = **D, D, D, D, D, C, D,
 D**. Unit **8 of 12**, the first designed from contracts rather than carried forward.
@@ -16,6 +17,38 @@ D**. Unit **8 of 12**, the first designed from contracts rather than carried for
 fixed LSTM settings, Vision §8.7's selection criterion and TE §7.2's ablation registry are frozen
 upstream and are **restated, never chosen**.
 
+> ## ⚠ AMENDED 2026-08-28 — `GOV-2026-08-28-FD-01` REMEDIATION (verdict FAIL)
+>
+> A redo jump cleared the write-freeze so the project decision owner's approved remediations on this
+> unit could be applied. **This box is placed at the head of the file, not the tail, because the
+> tail is a preserved `## Review` section.** Every change carries its own dated box at the point of
+> change; nothing is deleted, and every superseded sentence is preserved verbatim beside its
+> replacement.
+>
+> | # | Change | Recommendation | Where in this file |
+> |---|---|---|---|
+> | 1 | The stamp-match guard rewritten onto ADR-11's live contract — `spec.partition_id`, `spec.role`, `transform_id`, replacing the retired `fold_id`/`purpose`/`"evaluate"` | **3** (`IMPL-01`, Critical, **veto**) | **W-1** — signature block, checks, and the four negative controls |
+> | 2 | New workflow: `06` writes the prediction-hash receipt and refuses to exit without it | **1** (`VAL-01`, Critical, **veto**) | **W-12** (new) |
+> | 3 | `PartitionError` as the fifteenth exception, with the `PartitionError`/`LeakageError` discriminating rule | **8** (High) | W-1's raises; stated once at `domain-entities.md` § 12 and `business-rules.md` R-92 |
+> | 4 | The stale amendment total re-derived and annotated in place, superseded figure preserved | **32** (Medium) | § Sources, W-1's cost box, § Amendments owed, § Assumptions |
+>
+> **Also swept in the same pass**, under `project.md`'s rule to correct every *representation* of a
+> corrected fact: two boxes asserting that `evaluation-and-comparison`'s design *"has not run"* and
+> that *"`07`'s half is unowned and open"* are dated as history — **R-105 owns `07`'s half now** —
+> and this unit's two carried READY residuals (R-96's mechanism framing, R-95's field label) are
+> **applied rather than carried**, together with a **third field-label defect no reviewer had
+> raised** (`AccessRecord.timestamp`, which does not exist). Details in `business-rules.md`.
+>
+> **What did NOT change.** No scientific value, grid, seed, threshold or frozen constant. **No
+> approved boundary signature** — `fit_predict`, `three_seed_mean`, `climatology_fit_partition` and
+> `Prediction` are still quoted from `component-methods.md` unmodified — so this unit still owes
+> **0** amendments and W-11's **"Ten files"** stands. **All five `## Review` sections are preserved
+> byte-for-byte**, as is every prior dated ⚠ box. No sibling unit's artifact and no
+> `functional-design-questions.md` was edited.
+>
+> **BLK-03 remains an open exit condition and G-09 remains unsigned.** Nothing in this file — W-12
+> included — authorises creating a module, and nothing in it closes BLK-03.
+
 ## Sources
 
 - `../../../inception/application-design/component-methods.md` § `src/models` — `Prediction`, `fit_predict(model_id, *, bundle, partition, snapshot)`, `three_seed_mean(predictions, *, expected_seeds)`, `climatology_fit_partition(prediction)`, `Transform.inverse(frame)`. **Quoted, not re-invented.**
@@ -23,7 +56,7 @@ upstream and are **restated, never chosen**.
 - `../../../inception/units-generation/unit-of-work.md` § 8 — `Owns`, boundary, **BLK-03**, the six implementation notes.
 - `../../../inception/units-generation/unit-of-work-story-map.md` — Tables 1 and 2; **9 requirements, 7 with no acceptance row**; owns WS-14, WS-15, TA-12, TA-13, TA-26; supports TA-20.
 - `../../../inception/requirements-analysis/requirements.md` — FR-P1-04-14, FR-P1-05-1…-6, -21, -22, each read with its `UNTESTED` note.
-- `../features-and-splits/functional-design/` — **W-4a**, **W-4b**, **R-74**, § Amendments owed at **8 across 5 units**. FU-4 = D lands W-1 below.
+- `../features-and-splits/functional-design/` — **W-4a**, **W-4b**, **R-74**, **R-80**'s six-partition list, ~~§ Amendments owed at **8 across 5 units**~~ ⚠ **re-derived there to 5 across 3 on 2026-08-26** and to a live chain total of **7 across 5** here (see § Amendments owed). FU-4 = D lands W-1 below.
 - `../foundation/functional-design/` — `ConfigSnapshot`, the stage entry contract, the two-tier error posture.
 - `PreFlight/vision_document(3)(2)(2).md` § Decision register, lines **1206–1207** — **D-121** (exact frozen grids: ridge 6, RF 18, LSTM 16, with fixed training settings; **Approved**) and **D-122** (development seed **42**; final seeds **{1337, 2024, 7}**; the confirmatory prediction is the element-wise three-seed mean; failed runs recorded, never silently rerun. **Approved; supervisor sign-off closed 2026-08-22** by the project owner under the recorded student/supervisor authority equivalence — `CR-2026-08-22-TE-AMEND`, `GOV-2026-08-22-REM-01` Rec 4 — with the note that **no supervisor signature artifact exists and none is claimed**, and the seed values verified unchanged before closure).
   > ⚠ **Two D-number namespaces, and the first draft cited the wrong one.** D-121 and D-122 are **Vision-document** decision IDs. `evidence/DECISIONS.md` is a **separate register running D-1…D-27** and contains neither — verified by enumerating its `D-<n>` headings. The first draft of these artifacts cited `evidence/DECISIONS.md — D-121, D-122`, which resolves to nothing. **Corrected 2026-08-24** (iteration-1 finding 1 — whose framing that the two decisions *"do not exist"* is itself wrong: they exist, in the other register, and both are Approved).
@@ -33,14 +66,42 @@ upstream and are **restated, never chosen**.
 ## W-1 — The stamp match, before every scoring path
 
 ```
-INPUT   bundle, fold_being_scored
+INPUT   bundle: FeatureBundle, partition_being_scored: Partition
 OUTPUT  None — proceeds, or raises
-RAISES  LeakageError
+RAISES  PartitionError, LeakageError
 ```
 
 A **named function in `src/models/train.py`**, called by `06_train_and_predict.py` before every
-scoring path. It checks `bundle.fold_id` equals the fold being scored, `bundle.purpose` equals
-`evaluate`, and `bundle.transform_id` is present.
+scoring path. Against the `Partition` being scored it checks three things, each with its own raise:
+
+| Check, in ADR-11's live vocabulary | Raises |
+|---|---|
+| `bundle.spec.partition_id == partition_being_scored.partition_id` | **`PartitionError`** |
+| `bundle.spec.role == "score"` | **`PartitionError`** |
+| `bundle.transform_id` not `None` **and** equal to that partition's own `Transform.transform_id` | **`LeakageError`** |
+
+This is `component-methods.md:719` made executable, verbatim: *"`06`/`07` assert that a bundle
+scored for partition *k* carries `spec.partition_id == k`, `spec.role == "score"`, and the
+`transform_id` of *k*'s own transform."* The two-type split follows `domain-entities.md` § 12's
+discriminating rule — the first two are **declared-identity** disagreements, the third **implies
+information flow**.
+
+> ⚠ **REWRITTEN 2026-08-28 — the first text checked three `FeatureBundle` fields ADR-11 retired.**
+> *(`GOV-2026-08-28-FD-01` **Recommendation 3** — `IMPL-01`, Critical, veto exercised;
+> owner-approved. The full derivation is in `business-rules.md` R-90's box; this is the workflow
+> mirror.)*
+>
+> **Superseded, preserved verbatim:** the `RAISES LeakageError` line, the `INPUT bundle,
+> fold_being_scored` line, and *"It checks `bundle.fold_id` equals the fold being scored,
+> `bundle.purpose` equals `evaluate`, and `bundle.transform_id` is present."*
+>
+> `fold_id` left `FeatureBundle` when ADR-11 retired `FoldSpec` on 2026-08-23; `purpose` is a
+> **`governance-guards` `AccessRecord`** field, never a `FeatureBundle` attribute; `"evaluate"` is a
+> value of neither `purpose` nor `role`. **The inconsistency was internal to this unit:** W-2 below
+> has used `Partition`/`partition_id` correctly since it was authored, and the only pass run after
+> the retirement — `## Review — 2026-08-26 fourteenth-receipt confirming pass` — **scoped itself to
+> regression against the terminal READY** and so never re-checked this text against the live
+> contract. A regression-only pass cannot find a defect already present in its own baseline.
 
 **Why it exists at all.** `features-and-splits` answered **FU-4 = D** on 2026-08-24: its pairing
 control asserted a scored frame *"was obtained from a call"* with `transform = T_k` and
@@ -64,10 +125,19 @@ even when one script is its only caller.
 > sibling asserts the **refusal's effect on emitted artifacts**; the two units share **match
 > semantics**, not a call edge. The `src/` placement rests on §7 alone, which is sufficient.
 
-**Negative controls** (R-90): `(fold 4, train)` reaching fold 4's validation scoring → **fails**;
-an **unstamped** frame reaching any scoring path → **fails**; `(fold 2, evaluate)` reaching fold
-3's scoring → **fails**. **Must not fire:** `(fold 4, evaluate)` reaching fold 4's scoring →
-**passes**.
+**Negative controls** (R-90), **four**, re-derived 2026-08-28 in ADR-11's vocabulary:
+`FrameSpec(partition_id="F4", role="train")` reaching F4's score path → **`PartitionError`**; an
+**untransformed** bundle (`transform_id is None`) reaching any score path → **`LeakageError`**;
+`FrameSpec(partition_id="F2", role="score")` reaching F3's score path → **`PartitionError`**,
+asserted by **enumeration over ordered pairs of R-80's six `partition_id` values**; and a
+`role="score"` F3 frame carrying **F1's** `transform_id` → **`LeakageError`**. **Must not fire:** an
+F4 `role="score"` frame carrying **F4's own** `transform_id`, reaching F4's score path → **passes**.
+
+> ⚠ **Superseded controls, preserved verbatim** *(2026-08-28, Recommendation 3)*: *"`(fold 4, train)`
+> reaching fold 4's validation scoring → **fails**; an **unstamped** frame reaching any scoring path
+> → **fails**; `(fold 2, evaluate)` reaching fold 3's scoring → **fails**. **Must not fire:**
+> `(fold 4, evaluate)` reaching fold 4's scoring → **passes**."* Two of the three raise types changed
+> and a fourth control was added — see `business-rules.md` R-90.
 
 > **Cost, and where it is counted.** The match function is an **intra-package** `src/models` shape
 > under `component-methods.md` § Depth, so it adds **no ninth amendment**; the stamp contract is
@@ -80,6 +150,24 @@ an **unstamped** frame reaching any scoring path → **fails**; `(fold 2, evalua
 > run. **`07`'s half of the refusal is unowned and open**, and is carried to the gate and into
 > § Assumptions & Open Questions rather than left for that unit to discover. The total is unchanged;
 > what was wrong was the first draft's implication that this workflow completed the amendment.
+
+> ⚠ **BOTH claims in the box above are now dated, 2026-08-28.**
+>
+> **(a) The figure.** *"**8 across 5 units**"* is **superseded**; the live chain total is
+> **7 across 5 units**, re-derived term by term in `business-rules.md` § Assumptions & Open Questions
+> under **Recommendation 32**. Cause: `features-and-splits` re-derived its own contribution from
+> **3 to 0** on 2026-08-26 when it rebuilt onto ADR-11. **The load-bearing half of this box is
+> unaffected** — the match function adds **no ninth amendment**, and this unit still owes **0**.
+>
+> **(b) `07`'s ownership.** *"whose functional design has not run"* and *"**`07`'s half of the
+> refusal is unowned and open**"* are **superseded**. `evaluation-and-comparison`'s design has run;
+> **R-105** claims `07`'s half at the object `07` receives and cites R-90 by name, and
+> `statistical-inference` **R-113** limb 2 imports it. **This workflow still discharges `06` only.**
+> What remains open is a **type** disagreement, not an ownership gap: R-105 limb 2 raises
+> `LeakageError` where R-92 raises `PartitionError` for the same `partition_id`-mismatch condition.
+> **That was corrected by the sibling in parallel and re-verified 2026-08-28**: R-105 limb 2 now
+> raises `PartitionError`, *"the same exception R-92 raises for the same condition"*. **This unit
+> edits no sibling artifact.**
 
 ## W-2 — Fit and predict, over six families
 
@@ -265,6 +353,89 @@ settings.
 > **Nothing above authorises building any of it.** **G-09 is not signed**, and **BLK-03
 > independently bars implementation** while its contract limbs stand unapproved.
 
+## W-12 — The one-shot `DEC` write, and the receipt that must precede any metric
+
+> **ADDED 2026-08-28** — `GOV-2026-08-28-FD-01` **Recommendation 1** (`VAL-01`, Critical, veto
+> exercised), owner-approved **option 1**. Entity at `domain-entities.md` § 13; rule at
+> `business-rules.md` **R-102a**. **Workflow count W-1…W-12 = 12**, derived by counting `^## W-` in
+> this file. It adds **no eleventh file** to W-11's build list: the writer is
+> `scripts/06_train_and_predict.py`, already there.
+
+```
+INPUT   prediction file (DEC), run_id, partition_id
+OUTPUT  PredictionHashReceipt, durably flushed; sha256 -> registry column 18
+RAISES  LockedTestError
+```
+
+**The sequence, and why its order is the control:**
+
+1. `06` writes the `DEC` prediction file **once**.
+2. `06` computes `sha256` over the file **as written**, and stamps `recorded_at_utc` — **at a moment
+   when no metric exists**.
+3. `06` **durably flushes** the receipt; its `sha256` becomes **`prediction_hash`**, TE §13.4's
+   column **18** of twenty, on `06`'s own registry row, joined by `run_id`. **`foundation` R-18 owns
+   that row**; this workflow owns the receipt it is populated from. **`prior_period_exposure` is not
+   written here** — on a Phase 1 row its value is **`false`**, and its source is `governance-guards`'
+   locked-test guard. See the deviation note below.
+4. `06` **refuses to exit** if step 1 happened and steps 2–3 did not: **`LockedTestError`**, on
+   `06`'s own exit path, so the failure reads *`06` aborted* rather than *`07` blocked*.
+5. Only then may `07` or the bootstrap score, and each re-verifies the file against `sha256` and
+   refuses on a `recorded_at_utc` that does not precede its own call
+   (`evaluation-and-comparison` R-109 limb 1; `statistical-inference` R-113 limb 3).
+
+**Rejected alternative, with the reason — this is the whole design.** *Writing the receipt inside
+`07_evaluate_and_report.py`*, or inside `vector_block_bootstrap`, is the cheapest way to satisfy the
+two consuming rules and is **prohibited**: both are metric callers, so the process that computes the
+metric would also be the process that timestamps the receipt. *"The receipt precedes the metric"*
+then holds **by construction on every run** — including a run where the prediction was regenerated
+after a score was seen. The control would pass its own test and detect nothing. **Writer and reader
+in different processes, with a file and a registry row between them, is the mechanism.** For the
+same reason step 4 is a refusal **to exit** and not a refusal to score: a refusal to score is the
+check `07` already owns, and duplicating it would leave the producer side unguarded.
+
+**Negative controls.** A `DEC` prediction file with **no receipt** → **raises in `06`**, not in
+`07`. A receipt whose `sha256` **does not match** the file as written → **raises in `06`**. A receipt
+written but **not flushed** before exit → **raises in `06`**.
+
+> **Why this workflow did not exist until now.** Derived over all **48** artifacts before this edit:
+> `PredictionHashReceipt` = **0** across this unit's four files (**5** hits project-wide, all in the
+> two consuming units), *"prediction hash"* = **0** here, and `prediction_hash` = **0** and
+> `prior_period_exposure` = **0** **across all 48**. Three sibling passages state the write is
+> **`06`'s act** — `evaluation-and-comparison` `domain-entities.md` § 5 and R-109 limb 1, and
+> `statistical-inference` R-113 limb 3 — and this unit, which owns `06`, mentioned it **zero** times.
+> The obligation had **two consumers and no producer**, so **G-06 could not execute**: every `DEC`
+> metric entry point would raise `LockedTestError` forever.
+>
+> **Whose requirement, so no coverage is claimed.** **FR-P1-05-12 is `governance-guards`'**
+> (`unit-of-work-story-map.md:108`; **WS-18, TA-18**). This workflow performs the `06`-side act of a
+> sibling's requirement — a **produced** cross-unit obligation, the mirror of W-10's two **consumed**
+> ones — and **claims no WS-18 or TA-18 coverage**. § Requirement-to-workflow map below is unchanged:
+> **9 requirements, 7 with no §16/§19 acceptance row.**
+>
+> ⚠ **DEVIATION FROM THE APPROVED REMEDIATION TEXT — `prior_period_exposure` is `false` here, and
+> this workflow writes no `true`.** The remediation said *"`prior_period_exposure = true`"*.
+> `foundation`'s **W-6 step 5**, amended 2026-08-28 on the same report, is a hard refusal:
+> *"**Refuse `prior_period_exposure = true` on a Phase 1 row** … Phase 1 *is* the first December
+> exposure; `true` belongs to the Phase 2 replication (TE §7.0B)."* TE §7.0B's own sentence
+> (`:372`) makes the flag a **Phase 2** predicate — *"The Phase 2 December run is a fixed-protocol
+> replication **because Phase 1 has already exposed December**"* — and **this unit is Phase 1**
+> (NFR-PHASE-01). `true` here would be a false statement about the run. `foundation` R-18 also
+> settles the attribution: the field's **source is `governance-guards`' locked-test guard**, its
+> **destination is `foundation`'s registry row**, and **this unit is neither**, so this workflow
+> claims no check over it. **Raised for the owner** at `business-rules.md` R-102a: if
+> Recommendation 1 meant a different predicate, it needs a different field name.
+>
+> **The registry side has landed and interlocks with this workflow.** `foundation` **R-18** carries
+> the twenty columns with `prediction_hash` at **18**, names `scripts/06_train_and_predict.py` as the
+> receipt's writer with these exact five fields and the durable flush, and its **W-6 step 4 refuses a
+> `prediction_hash` presented by the metric-computing process** — the destination-side complement to
+> step 4 above. Neither half suffices alone: this workflow stops the receipt being *created* in a
+> metric process, R-18 stops it being *recorded* from one.
+>
+> **Nothing here authorises writing it.** **G-09 is not signed**, **BLK-03 independently bars
+> implementation**, and the `DEC` write is additionally barred until **G-05 is signed** by
+> `features-and-splits` **R-82** and `governance-guards`' access chokepoint.
+
 ---
 
 ## Requirement-to-workflow map
@@ -291,9 +462,30 @@ printed before being asserted, not carried from prose. **Owns** WS-14, WS-15, TA
 
 | Source | Owed | Basis |
 |---|---|---|
-| `features-and-splits` § Amendments owed | **8**, across **5** units | Derived there, after its own FU-4 = D re-derivation from 7-across-4. **Not restated** — a restated count drifts, which is the failure this row exists to avoid. |
-| **This unit** | **0** | W-1's match function is an **intra-package** `src/models` shape under `component-methods.md` § Depth. `domain-entities.md` § 3's contract **describes** the approved `three_seed_mean` and `Prediction` without changing either signature. § 6's Option D — stamping fitted partitions onto `Prediction` — was **declined precisely to avoid a ninth**. |
-| | **8 across 5 units** | 8 + 0 |
+| ~~`features-and-splits` § Amendments owed~~ | ~~**8**, across **5** units~~ ⚠ **SUPERSEDED 2026-08-28** → the **live chain** total is **7 across 5 units** | Superseded basis, preserved: *"Derived there, after its own FU-4 = D re-derivation from 7-across-4. **Not restated** — a restated count drifts, which is the failure this row exists to avoid."* The warning was right and the mechanism it warned about is exactly what happened: **`features-and-splits` re-derived its own contribution from 3 to 0 on 2026-08-26** when it rebuilt onto ADR-11, moving the base to **5 across 3**. |
+| **This unit** | **0** | W-1's match function and **W-12's `PredictionHashReceipt`** are both **intra-package** `src/models` shapes under `component-methods.md` § Depth. `domain-entities.md` § 3's contract **describes** the approved `three_seed_mean` and `Prediction` without changing either signature; § 13 adds a shape without touching one. § 6's Option D — stamping fitted partitions onto `Prediction` — was **declined precisely to avoid a ninth**. |
+| | ~~**8 across 5 units**~~ → **7 across 5 units** | ~~8 + 0~~ → `5 + 0 + 1 + 1 + 0 + 0 + 0 = 7` |
+
+> ⚠ **RE-DERIVED 2026-08-28, not decremented.** *(`GOV-2026-08-28-FD-01` **Recommendation 32** —
+> `CHAIR-07`, Medium; owner-approved **option 1**, annotate in place, per
+> `governance/CHANGE_RECORD_PROCEDURE.md` and `project.md` dp-1.)* **The full term-by-term
+> derivation, with the source line for each unit, is printed once** in `business-rules.md`
+> § Assumptions & Open Questions and is **deliberately not restated here** — restating it is the
+> drift this table's own basis column warns against. In summary: `external-products` R-55 **5**
+> (across `acquisition`, `inventory-and-registry`, `external-products`), `features-and-splits` **0**,
+> `evaluation-and-comparison` **+1** (R-103), `statistical-inference` **+1** (R-118),
+> `regimes-diagnostics-reporting` **0**, `fixtures-and-reproducibility` **0**, **this unit 0** →
+> **7 across 5 units**.
+>
+> ⚠ **A correction to the remediation brief.** The brief gave the chain as ending **"8 across 6"** at
+> `fixtures-and-reproducibility`. That unit's **live** total is **7 across 5** (its
+> `business-rules.md:602`, `:612`); its four *"8 across 6"* mentions are one **explicitly labelled
+> conditional** — *"+1, to 8 across 6, **at that ruling** — counted **then, not now**"* — contingent
+> on an **unmade** owner ruling on its R-133 manifest-loader home. The chain is therefore recorded as
+> terminating at **7 across 5**, with a conditional **+1 → 8 across 6** pending that ruling.
+>
+> **This unit's own contribution was never in doubt and is unchanged at 0.** What was stale was the
+> **quoted base**.
 
 **`features-and-splits` counted its fifth landing site as *"the pair of consuming scripts"* — `06`
 and `07`. That is two units, not one.** `unit-of-work.md` assigns **`06` to this unit** and
@@ -316,7 +508,14 @@ counted once, by `features-and-splits`, and nothing here adds to it.
 
 - **[assumption]** Rule IDs continue the single sequence, so `business-rules.md` runs **R-90…R-102**. If per-unit numbering was intended, say so at the gate and the artifacts restart.
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 8 disagree. Neither is edited by this stage.
-- **[assumption]** `src/models/*` shapes beyond the named boundary calls are **intra-package** and this stage's to specify. **W-1's match function is one of them** — no amendment owed, total stays **8 across 5**.
+- **[assumption]** `src/models/*` shapes beyond the named boundary calls are **intra-package** and this stage's to specify. **W-1's match function is one of them**, and so is **W-12's `PredictionHashReceipt`** — no amendment owed by this unit. ⚠ ~~total stays **8 across 5**~~ **SUPERSEDED 2026-08-28**: the live chain total is **7 across 5 units** (§ Amendments owed; `business-rules.md` § Assumptions carries the term-by-term derivation). **This unit's 0 is unchanged.**
+- **[assumption]** Workflows run **W-1…W-12** — **12**, derived by counting `^## W-` before asserting. **W-12 added 2026-08-28** (Recommendation 1). The `## Review` sections below recorded **11** at their own dates and remain correct as of those dates; they are preserved unedited.
+- **CLOSED 2026-08-28 — `PartitionError` is the fifteenth project exception; `foundation` R-01's amendment HAS LANDED** (Recommendation 8, owner-ruled option 1; the discriminating rule is at `business-rules.md` R-92 and `domain-entities.md` § 12). Re-read directly at the close of this pass: R-01 names **fifteen**, adds `PartitionError`, restates its count as **derived**, and cites **this unit's § 12 as the authority for the fifteenth entry**. *(Mid-pass it read "All fourteen"; the draft's "in flight" wording is superseded and recorded.)* Derived before this edit: **10 of 12 units**, **71** occurrences across **48** artifacts, **23** here.
+- **CLOSED 2026-08-28 — the R-105 / R-92 disagreement is resolved by the sibling.** R-105 limb 2 now raises **`PartitionError`**, matching R-92, with limb 1 keeping `LeakageError` for an absent stamp and running first. `statistical-inference` R-113 limb 2 inherits the fix. **This unit edited no sibling artifact.**
+- **Open — W-12 discharges FR-P1-05-12, which belongs to `governance-guards`** (`unit-of-work-story-map.md:108`; WS-18, TA-18). This unit owns the script, not the requirement. **No WS-18/TA-18 coverage claimed**; the 9-requirement, 7-without-a-row tally is unchanged.
+- ⚠ **DEVIATION FROM THE APPROVED REMEDIATION TEXT — the one item needing an owner ruling.** The remediation said `prior_period_exposure = true`; **W-12 writes no `true`**, because `foundation` **W-6 step 5** refuses `true` on a **Phase 1** row and TE §7.0B (`:372`) makes the flag a **Phase 2** predicate. R-18 also settles the attribution — source `governance-guards`, destination `foundation`'s row, **this unit neither** — so W-12 claims no check over it. Full reasoning at `business-rules.md` R-102a's deviation box. **If a different predicate was intended, it needs a different field name; nothing is assumed.**
+- **CLOSED 2026-08-28 — R-102a/W-12's registry side has landed and interlocks.** `foundation` **R-18** carries TE §13.4's twenty columns with `prediction_hash` at **18**, names `scripts/06_train_and_predict.py` as the receipt writer with W-12's exact five fields and durable flush, and **W-6 step 4 refuses a `prediction_hash` presented by the metric-computing process**. The *"in flight"* wording in the draft of this list is superseded.
+- **Resolved 2026-08-28 — the two residuals that rode this unit's terminal READY are applied, not carried.** `business-rules.md` R-96's `PartitionError` mechanism is restated as `features-and-splits` **R-80**'s upstream six-value type-closure (the local *"outside that enumeration"* check it claimed **does not exist** in this unit), and R-95 mechanism 2's field pair is corrected to `criterion_hash` / `criterion_used_hash`. **A third defect, previously unraised by any reviewer, was found in the same sweep and fixed:** R-95 mechanism 3 read `AccessRecord.timestamp`, and `AccessRecord` has **seven** fields with no `timestamp` (`component-methods.md:266–273`) — the retrieval field is `retrieved_at_utc`; its `purpose`-absence fallback rested on a false premise and is withdrawn.
 - **Open — BLK-03's contract limbs are an EXIT condition** on this unit and on `evaluation-and-comparison`, `statistical-inference` and `regimes-diagnostics-reporting`. **W-3 authors the contract; approving it is the human's, at the gate.**
 - **Open — BLK-04 ↓ and BLK-09 ↓** inherited from `features-and-splits`; its 2026-08-24 answers supplied mechanism, **neither is closed**.
 - **Open — W-1's match function is a cross-unit contract surface**, asserted against by `features-and-splits`' `tests/test_train_only_transforms.py`. Neither unit owns it alone.
@@ -325,7 +524,7 @@ counted once, by `features-and-splits`, and nothing here adds to it.
 - **Closed, corrected 2026-08-24 — D-122's supervisor sign-off is NOT outstanding.** The first draft carried *"Approved — supervisor sign-off pending"*, which is the status of **D-126** and **D-128**, not D-122. The Vision decision register (line 1207) reads **"Approved; supervisor sign-off closed 2026-08-22"** by the project owner under the recorded student/supervisor authority equivalence (`CR-2026-08-22-TE-AMEND`; `GOV-2026-08-22-REM-01` Rec 4), noting that **no supervisor signature artifact exists and none is claimed** and that the seed values were verified unchanged before closure. `unit-of-work.md` § 8 already recorded the closure. **Found while verifying iteration-1 finding 1 against the source register; the reviewer did not raise it.**
 - **Open — FR-P1-05-4's residual** (W-5): a December figure carried in a human's head is unreachable by any mechanism. Narrowed by the audit-access precondition, **not eliminated**.
 - **G-09 is not signed**, and **BLK-03 independently bars implementation.** No workflow here authorises creating any of W-11's ten files.
-- **Open — `07`'s half of the eighth amendment is UNOWNED.** FU-4 = D names **`06` and `07`**; `unit-of-work.md` assigns `07_evaluate_and_report.py` to **`evaluation-and-comparison`**, whose functional design has not run. This unit discharges `06` only. Raised at the gate so it is not discovered later *(iteration-1 finding 3)*.
+- ~~**Open — `07`'s half of the eighth amendment is UNOWNED.**~~ **CLOSED 2026-08-28.** *(Superseded text preserved:* "FU-4 = D names **`06` and `07`**; `unit-of-work.md` assigns `07_evaluate_and_report.py` to **`evaluation-and-comparison`**, whose functional design has not run. This unit discharges `06` only. Raised at the gate so it is not discovered later *(iteration-1 finding 3)*." *)* That unit's design has run and its **R-105** claims `07`'s half, citing R-90 by name. **This unit still discharges `06` only** — that half stands. What survives is the **type** disagreement recorded above.
 - **Open — `requirements.md` FR-P1-05-2 carries TWO superseded clauses on one line, both reported and neither edited.** (a) It attributes bootstrap seed **20221201** to D-122, a reading `unit-of-work.md` § 8 records as corrected 2026-08-22 (`GOV-2026-08-22-UG-02` Rec 11) — the seed is frozen separately by **TE §13.6 / TC-19** (Q-27). (b) It states *"Vision §14.2 marks it 'Approved — supervisor sign-off pending'… still owes a signature at G-05"*, superseded by the same Vision-register closure at line 1207 that these artifacts cite correctly elsewhere — **"Approved; supervisor sign-off closed 2026-08-22"**. This unit follows the **corrected** reading of both. `requirements.md` is an approved upstream artifact and `CHANGE_RECORD_PROCEDURE.md` bars editing one absent owner approval for annotate-in-place, so both are **raised at the gate**. *(Clause (a) was iteration-1 finding 5; clause (b) is iteration-2 finding 2 — flagging one clause of a line and missing its neighbour is the same one-representation-short failure as iteration-2 finding 1, and clause (b) is where this author's own D-122 error originated.)*
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 

@@ -189,6 +189,22 @@ artifact is **marked as such**, not silently re-verified.
 **provenance** limb stands and is **FR-P1-01-11's**. A second, coarser rule here would
 be two rules about one fact.
 
+> ⚠ **THE RELEASE-SIDE REFUSAL THIS ENTITY EXISTS FOR HAS NO FIELD TO READ** *(added
+> 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1)*. This entity's stated
+> purpose is that *"a downstream consumer — G-P1A, a release, a freeze gate — can **refuse** a
+> `derived_only` month"*, and the field crosses **no unit boundary**. Derived 2026-08-28 across
+> all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**,
+> `producing_interpreter` = **3**, all in this unit; **0 in `foundation`**, whose
+> `domain-entities.md` enumerates the fourteen §13.3 release fields without it. `write_release`
+> raises on an absent §13.3 field, and § 3 establishes that `source_files` cannot be populated
+> with provider identity for the twelve months — so **3.5 faces a choice TE §18.3 forbids an
+> agent to make**. Recorded as an **Open item for stage 3.2**, amendment **routed to G-P1A**;
+> **no fifteenth field is added here**, because §13.3's set and FR-P1-04-11's fourteen are
+> approved artifacts and `foundation` declined the analogous unilateral change for D-24's
+> protected set. **Nothing here asserts the refusal is implemented.**
+> `inventory-and-registry`'s coverage-report DATA-07 caveat reads this same field and is
+> sequenced behind this seam.
+
 ## 5. `GapAccounting` — the conservation invariant, carried in the manifest
 
 | Field | Meaning |
@@ -225,6 +241,42 @@ Dst** from Kyoto WDC at a **single recorded release grade for all of 2022**, and
 2022; **grades never mixed within a series**; **no backfill from a future final or
 definitive archive.** NFR-LEAK-01 governs *timing* only — a series can satisfy its
 declared lag while being built from reanalysed values, invisible to every existing check.
+
+**Four fields carry the reanalysed-value check, which is now defined** *(added 2026-08-28,
+`GOV-2026-08-28-FD-01` Recommendation 14)*. **As found at the opening of this remediation** the
+check was named **3 times, all three in this unit**, and **defined nowhere** across this
+stage's **48** artifacts — a pre-remediation figure, since `external-products` R-63 was amended
+the same day on the same recommendation as *"the driver-product half only"*. **R-40 now defines
+the check** as a **declared-status check with a stated verifiability limit** (the **D-25**
+pattern, sanctioned by `CR-2026-08-22-EV-12`) and is authoritative for that definition; this
+entity carries its inputs:
+
+| Field | Content |
+|---|---|
+| `release_status` | The **declared** grade for the whole of calendar 2022, in the provider's own vocabulary. This is the *"version or release status"* slot of the nine, now given an asserted meaning rather than a label |
+| `retrieval_date` | When the bytes were retrieved |
+| `provider_product_identity` | The **full** provider filename or product identifier, **including any version suffix** — `g.002` versus `g.003` drift is already observed in this project's data |
+| `sha256` | Digest of the retrieved bytes |
+
+**Asserted on this entity:** exactly **one** `release_status` per series for 2022; that status
+**agrees with** the recorded `provider_product_identity`; and that it is the
+**contemporaneous** grade the feature contract requires at a 2022 forecast origin. Where the
+held file carries **no correction, revision, version or provenance column** — **D-22's**
+finding for `fluxtable.txt` — the **recorded absence plus an explicit unverified-status
+statement** is the sanctioned evidence; silence is not.
+
+**The two GFZ series carry a second, substantive limb**, because **Kp/ap3 and Hp60/ap60 have
+never been retrieved**: re-acquisition records the **near-real-time and the definitive
+product** for 2022 and asserts them **value by value**, a mismatch **raising**.
+
+> **Detection is BOUNDED, NOT CLOSED, for F10.7 and Dst.** On the bytes held, no mechanism can
+> detect a reanalysed substitution: **D-21** records F10.7's publication latency as **not
+> derivable** from the held file, and Dst's grade is inferable **from the filename alone**
+> (`dst_provisional_2022MM.html`) with **D-10.1's 2022-grade item still unchecked** per D-11.
+> The entity records a claim about a value for those two rather than detecting one, and the
+> residual is an open verification obligation against **G-04**. **Which grade each contract
+> requires is Student + Supervisor's**; EC1-R-4's provider-documentation limb is owned outside
+> this project.
 
 **Two citation obligations attach to this entity and are discharged before G-P1A**: the
 **Kyoto non-commercial-use notice recorded verbatim** (D-6, EC1-R-1) and the **CEDAR
@@ -443,6 +495,7 @@ correct numeral is exactly the failure `project.md` § Corrections records. **Ow
 - **Open — BLK-07's authorization limb.** § 9 fixes the mechanism only.
 - **Open — THREE amendments owed to approved stage-2.6 contracts**: **the named accessors** (`open_d9_input` and the restricted writer, absent from the approved `locked_test.py` block), the `AccessRecord.purpose` extension plus a restricted-write function, and `write_release`'s `identity_fields` parameter. Stated, not applied; all three need change records. The first is BLK-07's central mechanism, so BLK-07's contract is **proposed, not approved**, until it clears change control.
 - **Open — noted for stage 3.2:** `suffix_mismatch` is not among FR-P1-04-11's fourteen release fields, which § 1's refusal reads.
+- **Open — noted for stage 3.2:** **`provenance_class` (§ 4)** is not among FR-P1-04-11's fourteen release fields, which **§ 4's release-side refusal reads** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1 — the same form as the `suffix_mismatch` bullet above)*. § 4 states the field exists so *"a downstream consumer — G-P1A, a release, a freeze gate — can **refuse** a `derived_only` month"*, and § 3 establishes that **no provider byte stream exists anywhere in the workspace** for the twelve pre-TC-06 months. Derived 2026-08-28 across all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` = **3**, **all in this unit; 0 in every other unit including `foundation`**, whose `domain-entities.md` enumerates all fourteen §13.3 release fields without it. `write_release` therefore faces a choice **§18.3 forbids an agent to make** — no writable Phase 1 release, or `source_files` accepted with placeholder provider terms. **No fifteenth field is added here**: §13.3's set and FR-P1-04-11's fourteen are approved artifacts, and `foundation` declined the analogous unilateral change for D-24's protected set. Routed to **G-P1A / stage 3.2**; `code-generation` must **stop and report**. `foundation`'s half is **gate input**, not an edit to a sibling's files.
 - **Open — raised for `governance-guards`:** an enum-membership test pinning `AccessRecord.purpose`.
 - **Open — `RES-04`**, not started and deliberately not attempted. § 2's real-artifact test defers to it.
 - **Open — `RES-01`**, permitted-read access logging is NOT TESTED, owned by stage 3.2.
@@ -486,3 +539,25 @@ correct numeral is exactly the failure `project.md` § Corrections records. **Ow
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
 > for `external-products`; floor reset mechanical). **No content of this unit changed.**
 > **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-28 under the post-redo receipt, remediating `GOV-2026-08-28-FD-01`
+> (verdict FAIL) on the project decision owner's ruling — mechanism written, value routed to
+> the gate.** **In this file: § 6 `DriverSeriesInventory`** gained the four fields the now-defined
+> **reanalysed-value check** reads (`release_status`, `retrieval_date`,
+> `provider_product_identity` **including any version suffix**, `sha256`), the three assertions
+> over them, the sanctioned-evidence rule for a file with no provenance column, the **GFZ
+> two-product value-by-value limb** for the two series never retrieved, and the explicit
+> statement that **detection is bounded, not closed, for F10.7 and Dst** (**Recommendation
+> 14**; R-40 carries the rule and the re-worded negative controls). **§ 4 `ProvenanceClass`**
+> gained a ⚠ box naming the release-side seam at its point of use, and **one Open item** was
+> added in the `suffix_mismatch` form (**Recommendation 28**). **No fifteenth release-manifest
+> field was added**: the amendment is routed to **G-P1A / stage 3.2**, and `foundation`'s half
+> is gate input.
+>
+> **Counts derived 2026-08-28, printed before assertion.** Numbered entity sections **10**
+> (§ 1…§ 10) — unchanged, none added or removed. `provenance_class` **9**, `derived_only` **7**,
+> `producing_interpreter` **3** across this stage's **48** artifacts, all still inside this unit.
+> **No scientific value was decided.** **G-09 remains unsigned**; **BLK-07's authorization limb
+> remains open**; membership stays derived from **record timestamps**, never a directory name.

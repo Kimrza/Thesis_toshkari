@@ -288,6 +288,22 @@ discharging the **superseded-hash** limb; what remains open is the **provenance*
 **FR-P1-01-11 owns that distinction**, and a second, coarser rule here would create two
 rules about one fact.
 
+> ⚠ **THE RELEASE-SIDE REFUSAL THIS WORKFLOW PROMISES HAS NO FIELD TO READ** *(added
+> 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1)*. The justification two
+> paragraphs above is that a release or freeze gate *"can then refuse a derived-only month"* —
+> and `provenance_class` crosses **no unit boundary**. Derived 2026-08-28 across all **48**
+> artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**,
+> `producing_interpreter` = **3**, all in this unit; **0 in `foundation`**, which owns
+> `write_release` and the §13.3 contract and enumerates its fourteen fields without this one.
+> With `write_release` raising on an absent §13.3 field and `source_files` unable to carry
+> provider identity for the twelve months, **3.5 would face an unstated choice** — no writable
+> Phase 1 release, or a release accepting placeholder provider terms and laundering provenance
+> `team.md` calls *unverifiable in principle*. **TE §18.3 forbids an agent choosing.** The seam
+> is therefore an **Open item for stage 3.2** with the amendment **routed to G-P1A**; no
+> fifteenth manifest field is added here, because §13.3's set and FR-P1-04-11's fourteen are
+> approved artifacts and `foundation` declined the analogous unilateral change for D-24's
+> protected set. **Nothing here asserts the refusal is implemented.**
+
 ## W-5 — Identity-field agreement at release
 
 ```
@@ -344,6 +360,47 @@ carrying fewer than nine fails.
 future final or definitive archive.** NFR-LEAK-01 governs *timing* only — a series can
 satisfy its declared lag while being built from reanalysed values, which is invisible
 to every existing check and fatal on discovery.
+
+**The reanalysed-value check, defined** *(added 2026-08-28, `GOV-2026-08-28-FD-01`
+Recommendation 14, adopting its split recommendation)*. This workflow named the check and
+never said what it does. **As found at the opening of this remediation** — derived 2026-08-28
+over all **48** `functional-design` artifacts — the phrase appeared **3 times, all three in
+this unit**, and the check was **defined nowhere**; that is a pre-remediation figure, not a
+present-tense claim, because `external-products` R-63 was amended the same day on the same
+recommendation and declares itself *"the driver-product half only"*. **R-40 is authoritative
+for the definition**; R-63 is authoritative for the driver-product manifest surface, and the
+two agree on substance as at 2026-08-28. The check is a **declared-status check with a stated
+verifiability limit** — the **D-25 pattern**, sanctioned by `CR-2026-08-22-EV-12` for an
+unobtainable provider field:
+
+- **Recorded per series**, into the manifest this workflow writes: `release_status` (the
+  provider's own grade vocabulary), `retrieval_date`, `provider_product_identity` — the full
+  filename or product identifier **including any version suffix**, since `g.002`-versus-`g.003`
+  drift is already observed here — and `sha256`.
+- **Asserted:** exactly **one** status per series for calendar 2022; that status **agrees with
+  the recorded product identity**; and that it is the **contemporaneous** grade the feature
+  contract requires at a 2022 forecast origin, not a later reanalysed grade.
+- **Where the file carries no correction, revision, version or provenance column** — which is
+  **D-22's** finding for `fluxtable.txt`, seven columns and no such column — that **absence,
+  recorded explicitly with an unverified-status statement, is the sanctioned evidence.**
+  Silence is not.
+- **For the two GFZ series, substantive detection is required**, because **Kp/ap3 and
+  Hp60/ap60 have never been retrieved** (`evidence/audit_ec1_2026-08-15/` holds only
+  `kyoto_dst/` and `nrcan_f107/`): re-acquisition retrieves the **near-real-time product
+  alongside the definitive one** for 2022 and asserts them **against each other, value by
+  value**, a **mismatch raising**. Specified now it costs almost nothing; retrofitted after
+  acquisition it costs everything.
+
+**Detection is bounded, not closed — stated, not implied.** For **F10.7** the bytes support a
+declared status only: D-22 records no provenance column and **D-21** records the publication
+latency as **not derivable** from the held file. For **hourly Dst** the grade is inferable
+**from the filename alone** (`dst_provisional_2022MM.html`), and **D-10.1's open item on the
+2022 Kyoto grade remains unchecked** per D-11. So for those two the check records a claim
+about a value rather than detecting a reanalysed one, and the residual is carried as an open
+verification obligation against **G-04** rather than presented as discharged. **Which grade
+each contract requires is Student + Supervisor's**, with EC1-R-4's provider-documentation limb
+owned outside this project; R-40 carries the rule, the failure condition and the re-worded
+negative controls.
 
 **Two citation obligations are discharged before G-P1A rather than left uncollected**:
 the **Kyoto non-commercial-use notice recorded verbatim** (D-6, EC1-R-1) and the
@@ -598,7 +655,7 @@ indistinguishable, months later, from an approved one, and §19 rows are owned b
 | ID | Evidence that would close it |
 |---|---|
 | FR-P1-01-7 | The audit report with exact dates (exists), **plus** a passing check that `features.yaml` carries D-21, D-22 and D-23's three selection choices and that the zero-TBD preflight fails when any is unset |
-| FR-P1-01-8 | A passing reanalysed-value check per driver, plus each driver manifest carrying a release-status field |
+| FR-P1-01-8 | A passing reanalysed-value check per driver — **defined in R-40 and W-6 as at 2026-08-28** (a declared-status check with inputs, failure condition and a per-series verifiability limit, plus the GFZ near-real-time-versus-definitive value-by-value assertion) — plus each driver manifest carrying a populated `release_status`. **Detection is bounded, not closed, for F10.7 and Dst**; that residual is an open verification obligation against **G-04** and is not discharged by this evidence |
 | FR-P1-01-9 | A passing injected-gap round trip **and** a NaN-count conservation assertion over a fixture month (W-7) |
 | FR-P1-01-11 | A passing assertion that a derived release's `source_runs` digests equal current per-month manifest hashes, **or** that a D-number re-pointing provenance exists and is cited at G-P1A — D-18 satisfies the first branch today |
 | REQ-NFR-A1 | A passing mixed-grade injection test per series, and a single recorded grade for calendar 2022 |
@@ -615,6 +672,7 @@ indistinguishable, months later, from an approved one, and §19 rows are owned b
   2. The **`AccessRecord.purpose` extension** and the **restricted-write function** (W-2a), same file.
   3. The **`identity_fields` parameter** on `src/data/release.py`'s `write_release` (W-5).
 - **Open — noted for stage 3.2:** FR-P1-04-11's fourteen fields do not carry W-3's suffix-mismatch field, which W-3's release refusal reads.
+- **Open — noted for stage 3.2:** FR-P1-04-11's fourteen fields do not carry **W-4's `provenance_class`**, which **W-4's release-side refusal reads** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1 — the same form as the suffix-mismatch bullet above)*. W-4 built the field so a release or freeze gate could **refuse** a `derived_only` month, and established that for the twelve pre-TC-06 months **no provider byte stream exists anywhere in the workspace**, with **2022-04, 2022-07 and 2022-12** holding no `raw_isprint_cache/`. **As found at the opening of this remediation**, derived 2026-08-28 across all **48** artifacts: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` = **3**, **all in this unit; 0 elsewhere, including `foundation`**, which owns `write_release` and the §13.3 contract. ⚠ **The "all in this unit" clause is pre-remediation and was invalidated by the parallel `inventory-and-registry` remediation the same day** *(rebased 2026-08-28 on the resume pass; `GOV-2026-08-28-FD-01` Recommendation 29 gave that unit a `data07_caveat` sourced from this field)*. **Re-derived after the remediation. Basis stated, because it moves**: the figures below were derived over the 48 stage artifacts **immediately before this note was written**, and writing the note itself adds occurrences of each token — which is the same self-invalidation the superseded figures fell into, so the raw counts are recorded as a **dated observation, never as a live invariant**: `provenance_class` **43**, `derived_only` **38**, `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11** and `inventory-and-registry` **18 / 17 / 6**. **The two stable facts, which no edit to this note can change, are the ones to rely on**: the fields reach exactly **2** units, and `foundation` carries all three **zero** times. **The clause that matters is unchanged and is why this item stays Open**: `foundation` still carries all three **zero** times. `write_release` consequently faces an **unstated choice** — no writable Phase 1 release, or `source_files` accepted with placeholder provider terms — and **§18.3 forbids an agent choosing**. **This stage adds no fifteenth manifest field**: §13.3's set and FR-P1-04-11's fourteen are approved artifacts, and `foundation` declined the analogous unilateral change for D-24's protected set. The amendment is **routed to G-P1A / stage 3.2**, and `code-generation` must **stop and report**. `foundation`'s own half is **raised at the gate**, not edited here.
 - **Open — raised for `governance-guards`:** an enum-membership test pinning `AccessRecord.purpose` exactly. Not built here, because that enum is a sibling unit's.
 - **Open — `RES-04`.** Not started, deliberately not attempted. W-5's real-artifact test is the same shape and defers to it.
 - **Open — `RES-01`**, permitted-read access logging is NOT TESTED, owned by stage 3.2. This unit is a consumer of the untested contract.
@@ -1674,3 +1732,31 @@ artifact plus one appended re-confirmation section in the question file. No cont
 No regression found. This pass confirms the re-save carried no substantive change.
 
 READY
+
+---
+
+> **Re-saved 2026-08-28 under the post-redo receipt, remediating `GOV-2026-08-28-FD-01`
+> (verdict FAIL) on the project decision owner's ruling — mechanism written, value routed to
+> the gate.** **In this file: W-6** gained the definition of the **reanalysed-value check** —
+> named three times in this unit and defined nowhere across this stage's **48** artifacts — as
+> a **declared-status check with a stated verifiability limit** (the **D-25** pattern,
+> sanctioned by `CR-2026-08-22-EV-12`): the four recorded fields including
+> `provider_product_identity` **with any version suffix**, the three assertions, the
+> recorded-absence sanctioned-evidence rule for a file with no provenance column, and the
+> **GFZ near-real-time-versus-definitive value-by-value** limb for the two series that have
+> **never been retrieved**. W-6 also now states plainly that **detection is bounded, not
+> closed, for F10.7 and Dst**, citing D-21, D-22 and D-10.1, with the residual carried against
+> **G-04** (**Recommendation 14**). The **FR-P1-01-8 closure row** names the definition and the
+> bound. **W-4** gained a ⚠ box naming the release-side `provenance_class` seam at its point of
+> use, and **one Open item** was added in the suffix-mismatch form (**Recommendation 28**); **no
+> fifteenth release-manifest field was added**, the amendment being routed to **G-P1A / stage
+> 3.2** with `foundation`'s half raised as gate input. **Recommendation 46 is
+> `external-products`' and is not duplicated here** — this unit's § Sources already carries
+> **D-25, D-26** from its own finding-F2 fix.
+>
+> **Counts derived 2026-08-28, printed before assertion.** Workflows **12** (W-1…W-11 including
+> W-2a) — unchanged, none added or removed. Rules **14**, numbered entities **10**,
+> requirements without an acceptance row **7** (2 Class 1 + 5 Class 2) — all unchanged.
+> **No scientific value was decided.** **G-09 remains unsigned**; **BLK-07's authorization limb
+> remains open**; membership stays derived from **record timestamps**, never from a directory
+> name. Every `## Review` section above is unchanged.

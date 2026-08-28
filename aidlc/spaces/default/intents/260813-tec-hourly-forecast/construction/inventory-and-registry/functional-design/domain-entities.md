@@ -229,6 +229,18 @@ NICO 35/33), and the artifact classes FR-P1-02-3 names**, derived from the relea
 inventory (§ 1) and **never from the audit's own declaration**. A short declaration fails
 **before anything is read**.
 
+**The December cell carries an explicit day range: 1–31 December 2022, 31 days** *(added
+2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 15, option 2 — the scope previously
+declared December at month granularity with no day range at all)*. Both limbs read the full
+calendar month: the coverage limb must, because **D-2** requires **100% of December days
+(31/31)**, and the regime limb does so December's activity distribution is characterised as
+a property of **the month**. The **G-06 scored set is 2–31 December, 30 days** (**D-28**),
+so the declared count window **exceeds the scored window by one day** — a fact both reports
+state. A December cell declared shorter than 31 days **fails at the declared-versus-required
+check**. R-50 carries the rule, the ≥3-tally carve-out for an event lying wholly outside the
+scored set, and the negative controls; **which day range governs D-13's threshold is
+Student + Supervisor's**, not this entity's.
+
 **Why three checks, and why none substitutes.** Per-artifact rows prove **every read was
 logged**. The reconciliation proves **the audit read what it declared**. Only the
 declared-versus-**required** check proves **it declared everything required** — and this
@@ -256,6 +268,53 @@ performance figure appears in the report or in its execution log**.
 finding N1)*: every count in both reports attributes records by **observation timestamp**, never
 by directory name or filename; out-of-month and out-of-year records are excluded from every
 per-month statistic. R-50 carries the rule and its negative control.
+
+**Each of the two reads binds its own `purpose` literal, and the third is refused** *(added
+2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 11, option 1)*. This entity performs **two
+separately logged reads** — one per report Vision §13.1 names — and each writes an
+`AccessRecord` (`governance-guards` § 4) whose `purpose` is bound, not chosen at
+implementation:
+
+| Read | `purpose` | `performance_inspected` | `authorization` | `locked_test_accessed` |
+|---|---|---|---|---|
+| Coverage report | **`"coverage_audit"`** | **`false`** | **Vision §8.3** | `True` |
+| Regime-count report | **`"regime_audit"`** | **`false`** | **Vision §8.3** | `True` |
+
+**`"locked_evaluation"` is refused on either read** — it is G-06's literal, and an audit
+carrying it trips `evaluation-and-comparison` R-109's must-not-fire control and blocks the
+read §8.3 requires. `models-and-baselines`' ML-02 correlation reads exactly these two as
+*"the two performance-blind December literals"*, so the pairing is the value siblings
+already expect. R-50 carries the negative controls and the one sibling-control consequence
+raised at the gate.
+
+**The DATA-07 provenance caveat is a checkable field on every coverage figure, not prose**
+*(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 29, option 1)*. Every
+station-month figure this entity emits carries a **`data07_caveat`** field, **sourced from
+that month's `provenance_class`** (`acquisition` § 4): `derived_only` → populated; `full` →
+absent. A figure emitted for a `derived_only` month with **no caveat field fails**. What the
+caveat records, for the supervisor accepting G-P1A: the twelve months' provenance is
+**unverifiable in principle, not merely unverified** (no provider byte stream exists in the
+workspace); **2022-04, 2022-07 and 2022-12** hold **no `raw_isprint_cache/`**; and the
+**2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11
+pin** — which is why `acquisition` records a `producing_interpreter`. `team.md` bounds the
+reliance: **FULL must not be relied on at a freeze gate while its provenance chain points at
+superseded per-month hashes.**
+
+> ⚠ **The source field is `acquisition`'s and reaches `foundation` — the unit that must read
+> it — zero times.** **As found at the opening of this remediation**, derived 2026-08-28 over
+> all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**,
+> `producing_interpreter` = **3** — all inside `acquisition`. ⚠ **Those three figures are
+> pre-remediation; this entity's own § 6/§ 7 edits invalidated them** *(rebased 2026-08-28 on
+> the resume pass)*. **Re-derived after the remediation, printed before asserted**:
+> `provenance_class` = **43** occurrences across **2** units (`acquisition` **25**, this unit
+> **18**), `derived_only` = **38** (**21** / **17**), `producing_interpreter` = **17**
+> (**11** / **6**). The **load-bearing half is unchanged**: `foundation`, which owns
+> `src/data/release.py`, `write_release` and the §13.3 contract, carries all three **zero**
+> times, and
+> `provenance_class` is **not among FR-P1-04-11's fourteen release fields**. This entity's
+> caveat field is therefore **proposed on that dependency**, which `acquisition` now carries
+> as an Open item for stage 3.2. The **obligation** is not deferred: an absent source field
+> requires a **stop-and-report under TE §18.3**, never an uncaveated coverage figure.
 
 **Routing is `acquisition`'s, not a second mechanism.** R-32's named accessors delegate to
 `open_restricted`; `governance-guards` R-25 makes the append **durable before the read**;
@@ -300,6 +359,20 @@ and NICO's 93.2% look identical.
 **Measured as at 2026-08-21, straddle days excluded, nine cached non-December months:**
 ARUC 99.2–100.0%, BSHM 99.3–100.0%, **NICO 93.2–98.9%**. Every station-month clears 90%;
 **NICO's margin is thin**, and the record shows it.
+
+**These figures carry the DATA-07 caveat field, because they ARE FULL's figures** *(added
+2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 29, option 1)*. The nine cached
+non-December months are pre-TC-06 months classed **`derived_only`**; the two missing from the
+nine — **2022-04** and **2022-07** — are missing because they hold no `raw_isprint_cache/`.
+`team.md` binds the caveat to appear *"wherever FULL's coverage figures are relied on"*, and
+this record is the surface a **supervisor** relies on them at. Every station-month figure in
+the record therefore carries § 6's **`data07_caveat`**, and the record states the three facts
+§ 6 enumerates — provenance **unverifiable in principle**, three months with no retrieval
+cache, and the **Python 3.14** production of the 2026-08-16 corrected extracts outside the
+governed **3.11** pin — plus `team.md`'s limit that **FULL must not be relied on at a freeze
+gate while its provenance chain points at superseded per-month hashes**. A `derived_only`
+figure reaching the record with no caveat field **fails**; the mechanism is § 6's single one,
+named here at the surface it must reach rather than duplicated.
 
 **D-2's own disclosure is carried into the record**, not left to be cross-referenced: D-2
 states that **five of twelve months had already been audited at 100% day coverage when the
@@ -424,6 +497,9 @@ cross-checked and in agreement.
 - **Open — `RES-01`**, and **this unit performs the permitted read it is about.**
 - **Open — FR-P1-02-8's replacement acceptance row** after `TA-29`'s withdrawal.
 - **Open — D-24's protected set is not reopened.** The schema-block-as-eighteenth-item question is available to raise separately; it is not proposed here.
+- **Open — WHICH December day range governs D-13's ≥3 threshold** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 15)*. § 5 declares the audit's December cell as **1–31 December, 31 days**, and § 6 carries the wholly-unscored-event carve-out from the tally. **Whether the threshold is judged over 1–31 or D-28's scored 2–31 is Student + Supervisor's** — D-13 is a supervisor-countersigned demotion threshold. **This unit measures; it does not demote.** Unverifiable here today: **GFZ Kp/ap3 and Hp60/ap60 have never been retrieved**, and **D-11 bars any provisional-Dst-derived figure**.
+- **Open — the `data07_caveat` field's SOURCE crosses no unit boundary today** *(added 2026-08-28, Recommendation 29)*. § 6 and § 7 require the caveat sourced from each month's `provenance_class`. **As found at the opening of this remediation**, derived 2026-08-28 across all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` = **3**, **all inside `acquisition`**. ⚠ **Those three figures are pre-remediation and this entity's own § 6/§ 7 edits invalidated them** *(rebased 2026-08-28 on the resume pass)*. **Re-derived after the remediation. Basis stated, because it moves**: the figures below were derived over the 48 stage artifacts **immediately before this note was written**, and writing the note itself adds occurrences of each token — which is the same self-invalidation the superseded figures fell into, so the raw counts are recorded as a **dated observation, never as a live invariant**: `provenance_class` **43**, `derived_only` **38**, `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11** and `inventory-and-registry` **18 / 17 / 6**. **The two stable facts, which no edit to this note can change, are the ones to rely on**: the fields reach exactly **2** units, and `foundation` carries all three **zero** times. **The load-bearing half survives**: `foundation`, which owns `write_release` and the §13.3 contract, carries all three **zero** times; and `provenance_class` is **not among FR-P1-04-11's fourteen release fields**, an Open item `acquisition` now carries for stage 3.2 under Recommendation 28. The **obligation** stands regardless — an absent source field requires a **stop-and-report under TE §18.3**, never an uncaveated figure.
+- **Open — raised for `evaluation-and-comparison`, not applied:** R-109's must-not-fire control names **`"coverage_audit"` only** and so does not name the regime-count read § 6 now types **`"regime_audit"`**. Gate input, not an edit to a sibling's files *(added 2026-08-28, Recommendation 11)*.
 - **G-09 is not signed.** No entity here authorises creating `src/data/inventory.py`, `src/data/registry.py`, `scripts/01_inventory_and_registry.py` or `tests/test_station_registry.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
@@ -461,3 +537,26 @@ cross-checked and in agreement.
 
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (the unit's
 > question file was repaired from mojibake; no design artifact changed). **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-28 under the post-redo receipt, remediating `GOV-2026-08-28-FD-01`
+> (verdict FAIL) on the project decision owner's ruling — mechanism written, value routed to
+> the gate.** **In this file: § 5** gained the December cell's explicit **1–31 day range** and
+> the recorded one-day excess over D-28's 2–31 scored set (**Recommendation 15** — the scope
+> previously declared December at month granularity with no day range at all). **§ 6** gained
+> two checkable properties: the **per-limb `purpose` pairing table** with
+> `"locked_evaluation"` refused (**Recommendation 11**) and the machine-readable
+> **`data07_caveat`** sourced from each month's `provenance_class`, with the three facts a
+> G-P1A supervisor must be able to read off it (**Recommendation 29**). **§ 7** gained the
+> caveat obligation on its measured figures, because those figures **are** FULL's and `team.md`
+> binds the caveat wherever they are relied on. **Three Open items added**: the threshold day
+> range (**Student + Supervisor**), the caveat's cross-unit source field, and one sibling
+> literal raised as **gate input rather than applied**.
+>
+> **Counts derived 2026-08-28, printed before assertion.** Numbered entity sections **9**
+> (§ 1…§ 9) — unchanged, none added or removed. Requirements **7**, untested **2**, acceptance
+> rows **3** — unchanged; `Owns` WS-01, TA-04, TA-25 and `supports` WS-18, TA-18, TA-32
+> unchanged. **No scientific value was decided.** **G-09 remains unsigned**, **BLK-07's
+> authorization limb remains open**, and membership stays derived from **record timestamps**,
+> never from a directory name.

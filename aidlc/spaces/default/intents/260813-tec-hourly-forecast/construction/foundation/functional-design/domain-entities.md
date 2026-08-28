@@ -2,6 +2,22 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> ## ✳ AMENDED 2026-08-28 — GOVERNANCE REMEDIATION, `GOV-2026-08-28-FD-01` (verdict FAIL)
+>
+> Applied on the project decision owner's ruling. **No dated box, superseded record or `## Review`
+> section was deleted or rewritten.** What changed in this file:
+>
+> | Rec | Change | Where |
+> |---|---|---|
+> | **10**, **1**/**3**, **12** | **`RegistryEvent` extended from 12 fields (TE §13.1's environment lock) to TE §13.4's TWENTY columns**, plus three named extension fields — `reason`, `prior_period_exposure`, `exploratory`. The `run_id` join to `AccessRecord` with orphan detection both ways; the write mechanism; the twenty-column schema assertion | § 6 |
+> | **8** | **`PartitionError` added as a fifteenth** subclass; the count restated as **derived** | § 9 |
+> | **9**, **10** | **Two entity-mapping corrections** this board did not name: FR-P1-05-13 `DeterminismRecord` → **`RegistryEvent`**; FR-WS-7 `ReleaseManifest` → **the preflight surface**, with `aws_ai_dlc_preflight_report` and **G-09** named | § Requirement coverage |
+> | **49** | NFR-SEC-01's coverage cell points at R-14's dated clause; **TA-22 stays unclaimed** | § Requirement coverage |
+>
+> **Entity count unchanged at 8 live of 9 sections** — § 6 was *extended*, not added, and § 8 stays
+> withdrawn. No entity is created or removed. **G-09 remains unsigned**; nothing here authorises
+> creating a module, and no scientific value or governed constant is decided.
+
 > **Addendum re-confirmed 2026-08-24.** Site **10** of
 > `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md` § Addendum lands in this
 > file: § 5's REQ-ENG-10 acceptance-status box read *"a row is **sought** under Amendment A
@@ -38,6 +54,11 @@ four governed configs and is frozen by D-number.
 - `../../../inception/application-design/components.md` and `component-dependency.md` — the layering rule and § Shared resources' carve-out on `evidence/locked_test_restricted/`.
 - `../../../inception/application-design/services.md` — § Stage entry contract, § Run record and registry.
 - `functional-design-questions.md` — Q1–Q8, FU-1–FU-3, the TA-03 verification, and the three amendments — A **declined** and B **approved** (2026-08-24), C **declined as drafted** (2026-08-25, reversing its 2026-08-24 approval). Q6 re-answered as **D′** and FU-2 rendered moot, 2026-08-25.
+- `../../../../../../../../governance/reviews/GOV-2026-08-28-FD-01.md` — **the governance report this file was remediated against on 2026-08-28** (verdict **FAIL**). Recommendations reaching this file: **1**, **3**, **8**, **9**, **10**, **12**, **49**. *(Added 2026-08-28 with the remediation.)*
+- `../../../../../../../../PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md` — **§13.4** (TE:816–829) for the twenty registry columns, read and derived rather than transcribed; **§7.0B** (TE:372) for `prior_period_exposure`; **§13.1** (TE:749–760) for the eight environment-lock fields § 5 carries; **§18.3** (TE:1083) and **§19** (TE:1119) for TA-23's evidence artifact. *(Added 2026-08-28: §13.4 and §7.0B are the authorities § 6 is now designed against, and this file cited the document nowhere in § Sources.)*
+- `../../../../../../../../PreFlight/vision_document(3)(2)(2).md` — § 13.1's gate table for **G-09**'s evidence (`aws_ai_dlc_preflight_report`, owner Supervisor, status **Open**) versus **G-07**'s (`environment_and_cpu_preflight_report`), and **§8.3** for the exploratory label. *(Added 2026-08-28 with Recommendations 9 and 12.)*
+- `../../governance-guards/functional-design/` — **`AccessRecord`**'s approved field set (`run_id`, `retrieved_at_utc`, `scope`, `purpose`, `performance_inspected`, `locked_test_accessed`, `authorization`) and **R-25**'s durable-append pattern, the entity § 6's join and write mechanism are specified against. *(Added 2026-08-28. **Two levels up** — a sibling unit sits at `construction/<unit>/functional-design/`; verified with `test -f`.)*
+- `../../models-and-baselines/functional-design/` — § 12's `IntegrityError` subclasses, the authority for § 9's fifteenth entry `PartitionError`, declared in `src/models/`. *(Added 2026-08-28.)*
 
 ---
 
@@ -83,6 +104,15 @@ opens by writing a `RegistryEvent`. `ReleaseManifest` carries its own
 > `ReleaseManifest` and `ReleaseLedgerEntry` may raise an `IntegrityError` on violation."* See
 > § 8 for the full withdrawal record, the Q6 re-answer (D′, 2026-08-25) that dropped the monotonicity requirement rather than leaving it unmet, and the
 > two upstream artifacts that contradicted this design and have since been corrected, 2026-08-25, on the owner's explicit authorisation.)*
+
+> *(**One relationship added 2026-08-28 that is deliberately NOT a node**, per Recommendation 10.
+> `RegistryEvent` **joins `AccessRecord` on `run_id`**, with orphan detection in both directions
+> (`business-rules.md` **R-19**). `AccessRecord` is **`governance-guards`'** entity, not this unit's,
+> so drawing it here would misrepresent ownership and would move the node count this unit's own
+> derivations check. **The entity count therefore stays 8 live of 9 sections and the diagram keeps 8
+> nodes** — verified after this edit. The join is stated in § 6 and in R-19, which is where an
+> implementer reading either surface will find it; before 2026-08-28 **zero of the twelve units' 48
+> artifacts named both entities**, which is the gap R-19 closes.)*
 
 ---
 
@@ -288,18 +318,85 @@ forward.
 > approved.**" — a site the 2026-08-24 sweep missed, corrected 2026-08-24 as execution
 > of the same declined-A disposition already carried at § 9, § Coverage and § Assumptions.)*
 
-## 6. `RegistryEvent` — append-only rows
+## 6. `RegistryEvent` — append-only rows, TE §13.4's twenty columns
 
 **Q4 = D.** One line per run event in `experiment_registry.jsonl`, which is
 **authoritative**; the CSV is derived, hashed, and marked derived.
 
-| Attribute | Type | Meaning |
-|---|---|---|
-| `run_id` | `str` | Stable across every event for one run |
-| `status` | `str` | **Closed enum**: `started` \| `completed` \| `aborted` \| `failed` |
-| `reason` | `str` | **Required non-empty** when status is `aborted` or `failed` |
-| `timestamp` | `str` | UTC |
-| environment-lock fields | — | The eight `RunRecord` fields, on the `started` row |
+> ## ✳ SCHEMA EXTENDED 2026-08-28 — FROM §13.1's ENVIRONMENT LOCK TO §13.4's TWENTY COLUMNS
+>
+> *(Applied on the project decision owner's ruling on `governance/reviews/GOV-2026-08-28-FD-01.md`
+> **Recommendation 10**, option 1, with **Recommendation 1**/**3** for `prediction_hash` and
+> `prior_period_exposure` and **Recommendation 12** for `exploratory`. See `business-rules.md`
+> **R-18**, **R-19** and **R-20**, added the same day.)*
+>
+> **Superseded contract, preserved verbatim — the twelve fields this entity carried:**
+>
+> > | Attribute | Type | Meaning |
+> > |---|---|---|
+> > | `run_id` | `str` | Stable across every event for one run |
+> > | `status` | `str` | **Closed enum**: `started` \| `completed` \| `aborted` \| `failed` |
+> > | `reason` | `str` | **Required non-empty** when status is `aborted` or `failed` |
+> > | `timestamp` | `str` | UTC |
+> > | environment-lock fields | — | The eight `RunRecord` fields, on the `started` row |
+>
+> **Why it was wrong.** All twelve were sourced from TE **§13.1** — the *environment lock* — while
+> `requirements.md` **FR-P1-05-13**'s pass/fail criterion is TE **§13.4**'s twenty columns: *"a schema
+> assertion confirms all twenty columns exist and that `code_commit` and `environment_lock_hash` are
+> populated on every row."* Two different sections of the Technical Environment, and the requirement's
+> criterion had **no design at all**. The board derived that **10 of §13.4's twenty columns appeared
+> nowhere** in this unit's four artifacts, the absent set including **`prediction_hash`** and
+> **`locked_test_accessed`** — so a G-06 auditor asked to show that every December access is recorded
+> *in the experiment registry* could not do so from the registry, and Recommendation 1's computed
+> prediction hash had no column to land in.
+>
+> **Nothing is lost.** `timestamp` becomes the explicit pair `started_at_utc`/`completed_at_utc`
+> (§13.4 columns 2 and 3); the **eight `RunRecord` environment-lock fields remain exactly as § 5
+> specifies them** and are now additionally summarised by column 6 `environment_lock_hash`, a hash
+> **over** them. **REQ-ENG-10's criterion is unchanged** — *"A registry row exists carrying all eight
+> fields"* — and it stays **untested by design** under the declined Amendment A.
+
+**The twenty columns, derived from the authority and printed rather than transcribed:**
+
+```
+TE:821-826, the §13.4 column block, split on comma and newline  ->  20
+FR-P1-05-13 enumerates the identical twenty.
+```
+
+| # | Attribute | Type | Meaning |
+|---|---|---|---|
+| 1 | `run_id` | `str` | Stable across every event for one run. **The join key to `AccessRecord`** (R-19) |
+| 2 | `started_at_utc` | `str` | UTC. **The input to R-20's `exploratory` derivation** |
+| 3 | `completed_at_utc` | `str` | UTC; absent until a terminal row |
+| 4 | `status` | `str` | **Closed enum**: `started` \| `completed` \| `aborted` \| `failed` (R-07) |
+| 5 | `code_commit` | `str` | git HEAD. **Populated on every row**, asserted — FR-P1-05-13's second criterion |
+| 6 | `environment_lock_hash` | `str` | Hash **over** § 5's eight `RunRecord` fields. **Populated on every row**, asserted |
+| 7 | `platform` | `str` | `kaggle` \| `local` (TC-03c); from `ConfigSnapshot.platform` |
+| 8 | `dataset_version` | `str` | The §13.3 release label. **Not authoritative** — identity is `content_hash` (R-11); **its encoding is an open owner decision** (R-12) |
+| 9 | `fold_id` | `str` | The frozen fold this run used |
+| 10 | `mask_id` | `str` | The comparison-wide mask (NFR-FAIR-01) |
+| 11 | `feature_set_id` | `str` | The frozen feature manifest |
+| 12 | `model_id` | `str` | e.g. `"M-06"` |
+| 13 | `hyperparameters_json` | `str` | Serialized, from the frozen grid |
+| 14 | `seed` | `int` | From `seeds.yaml`; **each seed is its own registry run** (TE §13.5) |
+| 15 | `validation_metric_name` | `str` | January–November only (`project.md` § Forbidden) |
+| 16 | `validation_metric_value` | `float` | as above |
+| 17 | `artifact_manifest_path` | `str` | Resolves to a manifest whose hashes connect checkpoints, predictions, paired errors, metrics, bootstrap outputs, figures and tables (§13.4) |
+| 18 | `prediction_hash` | `str` | **The `PredictionHashReceipt`'s destination.** Written from `06`'s receipt, never by `07` or the bootstrap (R-18) |
+| 19 | `locked_test_accessed` | `bool` | `true` for a run that read under `RESTRICTED_ROOT`. **Reconciled against `AccessRecord` in both directions** (R-19) |
+| 20 | `notes` | `str` | Free text. **Must not be repurposed** to carry `reason` |
+
+**Three extension fields, named as extensions because §13.4 reads *"including:"* — so the twenty are
+a floor and the twenty-column assertion stays literally checkable:**
+
+| Attribute | Type | Required by | Meaning |
+|---|---|---|---|
+| `reason` | `str` | §13.4's own prose (*"visible with status and reason"*) and **R-07** | **Required non-empty** when status is `aborted` or `failed`. Kept as its own field so R-07's non-empty check has something to bind to |
+| `prior_period_exposure` | `bool` | **TE §7.0B** (*"shall record"*), FR-P1-05-12 | **Recorded by the locked-test guard** (`governance-guards`) and **carried** here. **`false` on every Phase 1 row** — Phase 1 *is* the first December exposure; `true` belongs to the Phase 2 replication, and a Phase 1 row carrying `true` is **rejected** (R-18) |
+| `exploratory` | `bool` | **Vision §8.3**, FR-P1-05-14 | **Derived by the registry writer** from `started_at_utc` against the earliest `AccessRecord` under `RESTRICTED_ROOT`; **never a caller argument**, with a stated G-06 carve-out (**R-20**) |
+
+**The eight §13.1 environment-lock fields are still § 5's**, unchanged, and are the content
+`environment_lock_hash` is computed over. They appear on the `started` row as before.
 
 **Status semantics, fixed by Q4:** `aborted` is an **intentional or
 preflight-triggered stop**; `failed` is an **execution failure**. They are not
@@ -323,6 +420,36 @@ registry contents are relied on as audit evidence.
 status and reason because removing its line would require rewriting a file nothing
 rewrites. Two `started` rows with one `completed` is visible in the log, so a
 silent rerun cannot hide.
+
+**How a row reaches disk, added 2026-08-28 (R-08, per Recommendation 39).** One **single write of one
+newline-terminated record under append mode**, followed by a **durability confirmation** before the
+writer returns; a durability failure raises `RegistryError` naming the file and the violated
+expectation. This costs **no read**, so the append-only purity above survives exactly — the reason
+**Q4 chose D over C**. **A trailing malformed row is read as a torn write and REPORTED with the
+`run_id` it belongs to, not rejected**; an interior malformed row is rejected. Without that
+distinction a torn `aborted` row — written while the process is dying, which is exactly when a
+non-atomic append tears — would **fail** the integrity test rather than preserve that run's
+visibility. `run_id` is column 1 so the owning run is recoverable from a truncated prefix.
+
+**The join to `AccessRecord`, added 2026-08-28 (R-19, per Recommendation 10).** `RegistryEvent` and
+**`AccessRecord`** — `governance-guards`', fields `run_id`, `retrieved_at_utc`, `scope`, `purpose`,
+`performance_inspected`, `locked_test_accessed`, `authorization` — **join on `run_id`**, which both
+already carry, with **orphan detection in both directions**: a restricted `AccessRecord` with no
+matching `RegistryEvent`, and a `RegistryEvent` with `locked_test_accessed = true` and no matching
+`AccessRecord`, are each an integrity violation. **Before 2026-08-28 zero of the twelve units' 48
+artifacts named both entities** — the intersection was empty, so two record surfaces existed with no
+stated relationship. The reconciliation runs **with the integrity test**, never on the write path.
+
+**The five retrospective access rows are expected orphans and are reported, never laundered.**
+`governance-guards` R-25 records five pre-guard rows (`evidence/experiment_registry.md` rows 3, 4, 5,
+8, 9) and `GOV-2026-08-28-FD-01` Recommendation 31 records one possible unauthorized access as
+**expressly unresolved**. The reconciliation surfaces them with their reason and **never back-fills a
+registry row to clear them**; Recommendation 31 is `governance-guards`' and the owner's to close.
+
+**The schema assertion, added 2026-08-28 (R-18).** FR-P1-05-13's criterion is a **control**, not
+prose: it asserts **all twenty columns exist** — checked one absent column at a time, so it cannot
+pass on a subset — and that **`code_commit` and `environment_lock_hash` are populated on every row**,
+population rather than mere presence.
 
 ## 7. `ReleaseManifest` — immutable, content-addressed
 
@@ -513,8 +640,20 @@ to two labels, and a malformed row.
 
 ## 9. `IntegrityError` — the exception hierarchy as an entity
 
-**Q5 = B.** One base class, **fourteen subclasses — six of them raised by this unit** *(cardinality corrected 2026-08-25 on adversarial finding m-1 of the ninth-redo iteration 1: it read "six current subclasses" twelve lines above § 9's own corrected enumeration of all fourteen. The previous fix edited the list and its rationale and left the entity's **defining cardinality sentence** — the eighth consecutive appearance of the count-in-prose class, inside the very section that fix had edited)*, and any future
-integrity-related exception.
+**Q5 = B.** One base class; **every project-defined exception is a subclass**, **fifteen of them
+named below — six raised by this unit**, and any future integrity-related exception.
+
+*(Cardinality amended 2026-08-28 per Recommendation 8: `PartitionError` promoted, fourteen → fifteen,
+and the **defining relation is now the base-class membership rather than the numeral** — this sentence
+has carried a wrong count twice and the numeral is no longer what the rule turns on. **Superseded
+sentence, preserved verbatim:** *"One base class, **fourteen subclasses — six of them raised by this
+unit** … and any future integrity-related exception."* Prior correction note preserved: "cardinality
+corrected 2026-08-25 on adversarial finding m-1 of the ninth-redo iteration 1: it read 'six current
+subclasses' twelve lines above § 9's own corrected enumeration of all fourteen. The previous fix
+edited the list and its rationale and left the entity's **defining cardinality sentence** — the eighth
+consecutive appearance of the count-in-prose class, inside the very section that fix had edited".
+That class has now appeared a ninth time, in the same sentence, three days later — which is the
+argument for deriving the count rather than restating it.)*
 
 | Attribute | Type | Meaning |
 |---|---|---|
@@ -525,11 +664,59 @@ integrity-related exception.
 *an integrity violation exits non-zero naming the file and the violated
 expectation* — is enforced by construction rather than by discipline.
 
-Subclasses — **all fourteen project-defined exceptions**, of which this unit **raises six**:
+Subclasses — **fifteen named project-defined exceptions** *(amended 2026-08-28; see the box below)*,
+of which this unit **raises six**:
 `ConfigError`, `PreflightError`, `PlatformError`, `DeterminismError`, `ReleaseError`,
-`RegistryError`. The other **eight are raised by other units and derive from the same base**:
+`RegistryError`. The other **nine are raised by other units and derive from the same base**:
 `PhaseBoundaryError`, `LockedTestError`, `LeakageError`, `AlignmentError`, `SeedError`,
-`FairnessError`, `BootstrapError`, `RegimeError`.
+`FairnessError`, `BootstrapError`, `RegimeError`, **`PartitionError`**.
+
+> ## ✳ `PartitionError` ADDED AS A FIFTEENTH, 2026-08-28 — AND THE COUNT IS NOW DERIVED
+>
+> *(Applied on the project decision owner's ruling on `governance/reviews/GOV-2026-08-28-FD-01.md`
+> **Recommendation 8**, option 1. **Superseded enumeration, preserved verbatim:** *"Subclasses —
+> **all fourteen project-defined exceptions**, of which this unit **raises six**: … The other
+> **eight are raised by other units and derive from the same base**: `PhaseBoundaryError`,
+> `LockedTestError`, `LeakageError`, `AlignmentError`, `SeedError`, `FairnessError`,
+> `BootstrapError`, `RegimeError`."* The full record, the derivation, the
+> `PartitionError`/`LeakageError` discriminating rule and the `InverseTransformError` disposition are
+> in `business-rules.md` **R-01**; this entity mirrors them and does not restate the reasoning.)*
+>
+> **`PartitionError` is `models-and-baselines`'**, declared in **`src/models/`** (that unit's `Owns`
+> list carries `persistence.py`, `climatology.py`, `ridge.py`, `random_forest.py`, `lstm.py`,
+> `train.py`, `checkpoint.py`), and its § 12 already lists it as an `IntegrityError` subclass
+> alongside `SeedError`, `AlignmentError` and `LeakageError`.
+>
+> **The count is DERIVED, and this is R-01's second staleness.** The enumeration was corrected from
+> six to fourteen on 2026-08-25 and went stale again in three days, for exactly the reason R-01's own
+> rationale gives about hand-maintained lists. Derived 2026-08-28 over the twelve units' 48
+> `functional-design` artifacts:
+>
+> ```
+> raw distinct *Error tokens ............................ 36  (2 are Python builtins)
+> distinct project-defined *Error names ................. 34  (1 is the IntegrityError base)
+> distinct project-defined SUBCLASS names .............. 33
+>   named in this enumeration ......................... 15
+>   riding R-01's "any future" clause ................. 18
+> ```
+>
+> **So "fifteen" is a named subset, not a completeness claim.** The operative obligation is the
+> base-class relation — *every* project-defined exception derives from `IntegrityError` — because
+> that is what R-10's stage-entry catch depends on, and it holds whatever the census returns. Whoever
+> revisits this hierarchy **re-runs the derivation and prints it** rather than trusting the numeral.
+>
+> **`InverseTransformError` is NOT a sixteenth**: it rides the any-future clause, disclosed by the
+> two units that raise it (`evaluation-and-comparison`, `statistical-inference`), which agree on its
+> meaning — so nothing needs reconciling. `PartitionError` was promoted because two units
+> **disagreed** about which exception one condition raises, not because of how many units mention it;
+> derived 2026-08-28, both names reach exactly **two** units in live design prose, so reach cannot be
+> the discriminator. The reasoning is in R-01.
+>
+> **The eighteen riding the clause still owe their own declaration.** Each raising unit must declare
+> its own exceptions as `IntegrityError` subclasses, or the stage-entry catch lets one exit with **no
+> `aborted` registry row** — the NFR-AUD-01 failure this section was corrected once to prevent,
+> reaching the residue instead of the enumeration. Listed as an open cross-unit item in
+> § Assumptions.
 
 > *(Enumeration corrected 2026-08-25 on adversarial finding m-1 of the eighth-redo iteration 2.
 > **Superseded:** "Subclasses: `ConfigError`, `PreflightError`, `PlatformError`,
@@ -540,11 +727,16 @@ Subclasses — **all fourteen project-defined exceptions**, of which this unit *
 > row** that NFR-PHASE-01 and NFR-AUD-01 require. See `business-rules.md` R-01 for the full record
 > and the cross-unit obligation this places on the units that raise the other eight.)*
 
-**Why a base rather than fourteen independents** *(count corrected 2026-08-25 with the enumeration above; "six" was this unit's own raises, not the hierarchy)*. The stage entry contract must catch
+**Why a base rather than a fixed number of independents** *(numeral removed from this heading
+2026-08-28 per Recommendation 8; it read "fourteen", and before that "six". Prior note preserved:
+"count corrected 2026-08-25 with the enumeration above; 'six' was this unit's own raises, not the
+hierarchy")*. The stage entry contract must catch
 *any* of them to write the `aborted` registry row. A bare list means a
 seventh added later is silently not caught — the same list-versus-rule failure as
 Q1, and the same one `DP-DATA-01` caught in this project already. Catching the base
-means a new subclass is covered by virtue of its base.
+means a new subclass is covered by virtue of its base. **And a hand-maintained *enumeration* fails
+the same way a hand-maintained *catch list* does** — twice here now — which is why the count above is
+derived and printed rather than carried in prose.
 
 **Completeness shortfalls are not in this hierarchy.** Per Q5, a non-fatal
 shortfall (a missing month, a partial retrieval) is **explicit manifest or
@@ -591,11 +783,57 @@ awk -F'|' 'NR>=145 && NR<=223 {r=$2; gsub(/[` *]/,"",r); print r": primary="$4" 
 | REQ-ENG-11 | `RunRecord.runtime_versions` | **TA-17, TA-26** | TA-17 → `fixtures-and-reproducibility`; TA-26 → **`models-and-baselines`** |
 | FR-P1-01-10 | `CredentialNameMap` | TA-22 | `foundation` |
 | FR-P1-04-11 | `ConfigSnapshot` | **TA-15** | `foundation` |
-| FR-P1-05-13 | `DeterminismRecord` | **TA-10** | `foundation` |
-| FR-WS-7 | `ReleaseManifest` | **TA-23** | `foundation` |
+| FR-P1-05-13 | **`RegistryEvent`** *(entity corrected 2026-08-28 — see note E-1 below; it read `DeterminismRecord`)* | **TA-10** | `foundation` |
+| FR-WS-7 | **`ConfigSnapshot`, `RequiredFieldsMap`; evidence artifact `aws_ai_dlc_preflight_report`** *(entity corrected 2026-08-28 — see note E-2 below; it read `ReleaseManifest`)* | **TA-23** | `foundation` |
 | NFR-AUD-01 | `RegistryEvent` | **TA-10, TA-21** | TA-10 → `foundation`; TA-21 → **`fixtures-and-reproducibility`** |
-| NFR-SEC-01 | `CredentialNameMap` | TA-22 | `foundation` |
+| NFR-SEC-01 | `CredentialNameMap` | TA-22 — **not claimed as satisfied**; see `business-rules.md` R-14's dated clause of 2026-08-28 | `foundation` |
 | NFR-DET-01 | `DeterminismRecord` | **WS-17, TA-13** | WS-17 → `statistical-inference`; TA-13 → `models-and-baselines` |
+
+> ## ✳ TWO ENTITY-MAPPING CORRECTIONS, 2026-08-28 — FOUND WHILE APPLYING RECOMMENDATIONS 9 AND 10
+>
+> **Neither was named by the governance report.** Both were found by checking each requirement's text
+> against the entity this table assigned it, which is the check `project.md` § Way of Working requires
+> ("check the drafted artifact against the governing normative core, not only the questions that
+> produced it"). They are stated as corrections rather than applied silently. **The `Tested by` and
+> `Row owner` columns are unaffected** — those were derived from story-map Tables 1 and 2 and remain
+> correct; the defect is in the `Entities` column, which this table's own correction history shows was
+> never itself derived.
+>
+> **E-1 — FR-P1-05-13's entity was `DeterminismRecord`; it is `RegistryEvent`.** FR-P1-05-13 reads
+> *"The experiment registry is operational, append-safe and atomic; failed and aborted runs remain
+> visible with status and reason; no entry is deleted, overwritten or silently re-run. **Its schema is
+> TE §13.4's twenty columns** …"*. That is `RegistryEvent` in every clause; `DeterminismRecord` is the
+> determinism probe and appears nowhere in the requirement. **Superseded cell, preserved:**
+> `` `DeterminismRecord` ``. **This is not a cosmetic mis-label — it is the same defect
+> Recommendation 10 found from the other end.** The board found FR-P1-05-13's *"schema assertion
+> confirms all twenty columns exist"* criterion had **no design**; this cell shows why nobody noticed:
+> the requirement was pointed at the wrong entity, so the twenty-column schema was never anyone's
+> obvious obligation. Corrected together with **R-18**, which now designs it.
+>
+> **E-2 — FR-WS-7's entity was `ReleaseManifest`; it is the preflight surface.** FR-WS-7 is TE
+> §18.3's **preflight gate** — *"zero unresolved P0 fields and no failing critical test"*, an
+> automated zero-`TBD` assertion over the four configs, every declared source and hash resolving, ten
+> named critical tests, and supervisor sign-off. Its entities are **`ConfigSnapshot`** and
+> **`RequiredFieldsMap`** (what R-02 and R-03 validate), and its **evidence artifact is
+> `aws_ai_dlc_preflight_report`** with **G-09** as its gate. `ReleaseManifest` is the §13.3 dataset
+> release and has nothing to do with the preflight gate. **Superseded cell, preserved:**
+> `` `ReleaseManifest` ``.
+>
+> **This sharpens Recommendation 9 rather than contradicting it.** The board wrote that FR-WS-7 *"is
+> never named"* in the unit that claims TA-23 — true of `fixtures-and-reproducibility`. In
+> `foundation` it **was** named, in this table and in the requirement-to-workflow map, but **mapped to
+> the wrong entity and the wrong workflow** (`ReleaseManifest` / W-7, the release writer), and its
+> evidence artifact was named nowhere. A reader following the mapping would have looked for the §18.3
+> preflight gate in `write_release`. That is worse than absence, because it looks answered — and it is
+> exactly the failure mode this table has been corrected for four times before, most recently on
+> 2026-08-22: *"the mapping was **reasoned from what each acceptance row's text sounded like it ought
+> to test**, rather than **derived**."* The `Entities` column was never brought under that discipline.
+> `business-logic-model.md`'s requirement-to-workflow map is corrected the same day for the
+> corresponding W-7 → W-3 error.
+>
+> **Neither correction moves a count.** 16 requirements; 2 untested by design; 7 acceptance rows
+> owned; 2 supporting; §19 at 36. No entity is added or removed by E-1 or E-2 — both requirements now
+> point at entities this section already defines.
 
 **`foundation` is a *supporting* unit on exactly two rows — TA-13 and TA-26** —
 which is a different relation again from owning them and from being tested by them.
@@ -710,6 +948,10 @@ matching the story map's designation.
 - **[assumption]** `src/data/registry.py` and its `Station` entity are **not** part of this unit. `component-methods.md` places them between two `foundation` modules, but `unit-of-work.md` § 1 does not list them under `Owns`; the station registry belongs to `inventory-and-registry`.
 - **[assumption]** `src/data/locked_test.py` is not this unit's, notwithstanding that `foundation` owns the boundary rule naming it. It belongs to `governance-guards` (BLK-07); § Shared resources fixes without qualification that nothing else may construct a path into `evidence/locked_test_restricted/`.
 - **[assumption]** `frontend-components.md` is not produced. `foundation` is `kind: library`; the stage's `produces_kinds` maps that artifact to `[ui]` only, and the engine's resolved list for this unit carries three artifacts.
+- **[assumption] — added 2026-08-28 with § 6's extension.** TE §13.4's *"CSV or JSONL, **including**:"* makes the twenty columns a **floor rather than a closed set**, so `reason`, `prior_period_exposure` and `exploratory` are legitimate extensions rather than a schema violation. This reading is stated because the alternative — that twenty is exhaustive — would force `reason` into the free-text `notes` column and leave **R-07**'s non-empty-`reason` check with nothing to bind to, and would leave TE §7.0B's *"shall record `prior_period_exposure=true`"* with nowhere to record it. If the owner reads §13.4 as closed, the three extensions need a §15.2 amendment instead; the reading is put here rather than assumed silently.
+- **[assumption] — `environment_lock_hash` is a hash over § 5's eight fields, not a thirteenth field of its own.** Added 2026-08-28. TE §13.4 names the column and does not define its input; §13.1 defines the lock's content, and § 5 designs it as eight fields over seven bullets. Reading column 6 as *the hash of that lock* is the only reading under which both sections describe one artifact. **No approved contract states it**, so it is an assumption, not a derivation — and it is the one place §13.1 and §13.4 have to be reconciled by inference rather than by citation.
+- **OPEN — `prior_period_exposure` has a designed carrier here and a producer in `governance-guards`.** Added 2026-08-28 per Recommendations 1 and 3. TE §7.0B assigns the recording to **the locked-test guard**; § 6 carries the field. That unit has not yet stated its side, and this unit cannot state it for them. Phase 1 rows are `false` by construction (Phase 1 *is* the first December exposure), so nothing is blocked in this phase — but the field exists now because the **phase-transition hash freeze** forbids adding a registry column later.
+- **OPEN — `prediction_hash` has a designed destination here and no designed producer yet.** Added 2026-08-28 per Recommendation 1. Column 18's source is `06`'s `PredictionHashReceipt`, which `models-and-baselines` is being amended to specify. Until that lands, the column has a home and no writer — **fail-closed, since every `DEC` metric entry point already refuses without a verified receipt**, and explicitly *not* something this unit may resolve by letting `07` write it.
 - **Closed — Amendment A** (Vision §15.2): §19 acceptance rows for REQ-ENG-7 and REQ-ENG-10. **Raised and DECLINED 2026-08-24.** No rule requires universal §19 coverage, and the approved position dispositions uncovered requirements as *"Open by design"*. **No acceptance coverage is claimed for either, permanently rather than pending.** *(Superseded status: "**Open** … **Not approved.**")*
 - **Closed — Amendment B** (approved 2.6 artifact): three `DeterminismRecord` fields. **APPROVED 2026-08-24.** The approved contract now stands at **nine** fields. *(Superseded status: "**Not approved.** The approved contract stands at six fields.")*
 - **Closed — Amendment C. Its consequences are closed EXCEPT never-reuse, which is open.** *(Heading corrected 2026-08-25 on adversarial finding M-3 of the restored budget: it read "**Closed — Amendment C, and its consequences with it**" while sitting two bullets above the OPEN injectivity item below it.)* **DECLINED AS DRAFTED 2026-08-25**, reversing the 2026-08-24 approval: no release ledger, `ReleaseLedgerEntry` withdrawn (§ 8), `dataset_version` derived from `content_hash` with no encoding specified here. *(Superseded statuses, all preserved: "**Open — Amendment C, and now carrying an unresolved consequence** … Two things stay open and are carried to the stage gate rather than resolved here"; "**Closed — Amendment C** … **APPROVED 2026-08-24** on the authority of Q6=D and FU-2=D"; and "**Not approved.**")* Three consequences first read as open; **two are closed and one — never-reuse — is OPEN.** *(Body corrected 2026-08-25 on adversarial finding M-1 of the restored budget's iteration 2. The heading of this bullet was corrected on the previous pass and **its body was not**, so it went on asserting the withdrawn claim two bullets above the OPEN injectivity item. Superseded wording preserved: "Three consequences first read as open; **all three are now closed**" and "(b) **Never-reuse** survives by determinism — a pure derivation allocates nothing, so the delete-and-rebuild failure cannot arise." Both sibling artifacts had this right; this one did not. **Fifth consecutive pass of the heading-versus-body class**, and the reason it kept recurring is that each sweep matched the phrase it had just written rather than the claim it was retiring.)* (a) **Monotonicity — CLOSED**, and not by a mechanism: it could not be met by any mechanism available here, so the requirement itself was changed — **Q6 was re-presented and re-answered as D′ on 2026-08-25**, dropping *"monotonic"*, and **FU-2 is moot** because it existed only to locate the ledger. What is disclosed there is a capability rather than a gap: release labels cannot be ordered, so sequence is read from the run record or the experiment registry. (b) **Never-reuse — OPEN.** What determinism does close is the **delete-and-rebuild failure**: a pure derivation allocates nothing, so a rebuilt index cannot forget a label. That is **idempotence**, and never-reuse is its converse, **injectivity** — different content, different label — which holds only for an encoding faithful to all 256 bits, while Q6=D′ keeps the label human-readable and therefore lossy. It is an obligation on whoever specifies the encoding; see § Assumptions. (c) **`unit-of-work.md` § 1 `Owns` and `services.md`** were **corrected on 2026-08-25** on the owner's explicit authorisation, after this stage first reported rather than edited them; superseded wordings preserved at both sites, and no other unit referenced the ledger.

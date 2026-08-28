@@ -42,6 +42,7 @@ say so at the gate and the artifacts restart at R-01.
 - `evidence/DECISIONS.md` — **D-1**, **D-16**, **D-17**, **D-19**.
 - Workspace inspection, 2026-08-23: `tests/` holds three modules, none this unit's; `src/` and `configs/` absent.
 - `functional-design-questions.md` (**Q1 through Q9**), `domain-entities.md`, `business-logic-model.md`.
+- `governance/reviews/GOV-2026-08-28-FD-01.md` — the full-board stage-3.1 review, verdict **FAIL**; **Recommendation 18** is this unit's. *(Added 2026-08-28, re-saved under the post-remediation receipt.)*
 
 ---
 
@@ -248,37 +249,104 @@ reason is recorded. A threshold present in config without its basis → fails. R
 
 **Acceptance.** ⚠ **NO ROW** for FR-P1-03-5's support limb.
 
-## R-69 — The label travels with the product, and the mismatch with the report
+## R-69 — The label and the lineage caveat both travel with the product
 
 **Rule (FR-P1-03-4, NFR-TDEF-01).** The Phase 1 target is labelled **location-sampled
 gridded VTEC**, *"never receiver-specific station-observed VTEC, everywhere it is
-described"*, and the **grid-cell-versus-IPP mismatch is disclosed**.
+described"*, and the **grid-cell-versus-IPP mismatch is disclosed** — on **every artifact
+that describes or carries the Phase 1 target**, not only where a comparison is reported.
 
-**Four limbs, three mechanical and one stated gap** (Q8 = D):
+> ## ⚠ TWO PHYSICALLY DIFFERENT MISMATCHES, SEPARATED 2026-08-28 — ONE MECHANISM WAS DISCHARGING BOTH
+>
+> **Corrected 2026-08-28 per `governance/reviews/GOV-2026-08-28-FD-01.md` Recommendation 18**
+> (`High`, finding `TEC-06`), **owner-ruled `FAIL`.** The superseded limb 3 read: *"The
+> mismatch statement is emitted by the reporting path… `project.md` § Mandated requires the
+> spatial-representativeness statement 'at the point where any IRI or GIM comparison is
+> reported'."* That merged two physically different mismatches into one mechanism, so a Phase
+> 1 artifact carrying **no** IRI/GIM comparison disclosed the target-lineage one through **no
+> mechanism at all**.
+>
+> | | **Comparison-geometry mismatch** | **Cross-phase target-lineage mismatch** |
+> |---|---|---|
+> | Required by | `project.md` § Mandated / **TEC-06**; Vision §6.6; TE §5 | `requirements.md` **NFR-TDEF-01**; Vision §6.6, §2.2 |
+> | What differs | the Phase 1 **target grid cell** against the **station-coordinate evaluation** the comparator is sampled at | the Phase 1 **grid-cell target population** against the Phase 2 **IPP target population** |
+> | Trigger | *"at the point where any IRI or GIM comparison is reported"* | **every artifact that describes or carries the Phase 1 target** |
+> | Emitting path | the **comparison-producing** path — **not this unit's**; `evaluation-and-comparison` **R-110 limb 3** | the **target-writing** path — **this unit's** (limb 3 below) |
+> | Negative control | a comparison report without the spatial-representativeness sentence → **fails** (`evaluation-and-comparison` control 25) | a target artifact written without the grid-cell-versus-IPP statement → **fails** (this rule) |
+>
+> **The lineage mismatch is neither of TEC-06's two limbs** — TEC-06's are grid cell versus
+> station-coordinate (Phase 1) and IPP cloud versus zenith estimate (Phase 2); NFR-TDEF-01's
+> is grid cell versus IPP — so routing it through the comparison path discharged it on
+> comparison reports and on nothing else.
+>
+> **This is what `project.md` § Forbidden protects:** *"NEVER claim numerical equivalence
+> between the Phase 1 and Phase 2 targets… agreement is not proof that the two estimate the
+> same physical quantity."* Phase 2 compares against Phase 1's **reported December
+> timestamps**, so **the moment the lineage mismatch matters most is the moment no comparison
+> report is in scope.**
+>
+> **Q8 = D's literal reading is restored, not overridden.** Option D reads *"C, with the
+> grid-cell-versus-IPP mismatch statement emitted by **the same path**"*, and the path in
+> options B and C is *"the code that writes the target"*. The conflation entered through D's
+> impact line, which imported § Mandated's comparison trigger. **No rule's answer letter
+> changes.**
+>
+> **The board's option 2 was rejected on the record:** one broadened trigger stating both
+> mismatches in one string closes the coverage gap while **preserving the conflation**, so a
+> comparison report would carry a cross-phase caveat it does not need and a Phase-1-only table
+> a comparison-geometry caveat that does not apply.
+
+**Five limbs, and one stated gap** (Q8 = D; the mismatch limb split in two on 2026-08-28):
 
 1. **`target_definition_id`** — the machine-readable half — is stamped on every row (R-70).
+   It keeps the two target lineages distinguishable **by machine**; limbs 2 and 3 are what
+   make them distinguishable **by a human reader**, which is what NFR-TDEF-01 requires.
 2. **The human-readable label is emitted by the writing path**, so an artifact cannot be
    described without it. This removes the commonest cause of mislabelling: a writer who does
    not know which product they have.
-3. **The mismatch statement is emitted by the reporting path.** `project.md` § Mandated
-   requires the spatial-representativeness statement *"at the point where any IRI or GIM
-   comparison is reported"* — **a rule about every future report**, which survives only if
-   the path that writes reports emits it. `external-products` R-60 answers the same problem
-   the same way.
-4. **A grep-class check** that the prohibited phrasing does not appear in this unit's
+3. **The grid-cell-versus-IPP lineage statement is emitted by that same writing path**,
+   beside the label, so the caveat **travels with the product** and cannot be separated from
+   the label it qualifies. It fires on a dataset release, a target artifact, a coverage report
+   and a results table alike — **a comparison is not its trigger.** This is the
+   emit-from-the-path pattern `external-products` R-60 obligation 3 uses, re-anchored to the
+   path that produces **this** unit's artifact, which is the writer, because this unit
+   produces no IRI/GIM comparison.
+4. **TEC-06's spatial-representativeness sentence is NOT emitted here.** It stays on the
+   comparison-producing path, which belongs to `evaluation-and-comparison` **R-110 limb 3**,
+   in the wording the governing documents fix: *"Phase 1 compares a grid cell against a
+   station-coordinate evaluation, and part of any measured difference is a geometry and
+   sampling artefact rather than skill."* Recorded so the obligation is visible rather than
+   guarded twice — **two rules about one fact is how they drift apart.**
+5. **A grep-class check** that the prohibited phrasing does not appear in this unit's
    machine-readable outputs — the pattern used for SSN, residual and GRU absence.
 
 > **⚠ Stated gap: a figure caption inside a notebook image reaches none of these.** That case
 > stays with FR-P1-03-4's **claims-checklist review**. Saying so is the difference between a
 > bounded mechanism and an overclaimed one.
+>
+> **Widened 2026-08-28 per Recommendation 18: that review has no destination row yet.** ⚠ **As-found, and correct when written — SUPERSEDED 2026-08-28 on the resume pass**: both rows were written into that unit that day (its `domain-entities.md` § 2 and `business-rules.md` R-126 addition 4). See § Assumptions & Open Questions for the closure and its stated bound (those artifacts carry no review receipt yet). The
+> checklist is `regimes-diagnostics-reporting`'s, and its `reference` enumeration lists
+> **FR-P1-05-19, FR-P1-05-20, VAL-05, TEC-06, D-8, D-7** — **no NFR-TDEF-01 row and no
+> FR-P1-03-4 row.** That unit's claims-and-limitations checklist **owes both**: an
+> **NFR-TDEF-01** row (the lineage statement present on every artifact that describes or
+> carries the Phase 1 target) and an **FR-P1-03-4** row (the label present and the prohibited
+> receiver-specific phrasing absent, everywhere the target is described). **Stated as a
+> dependency on that unit, which is being remediated in parallel; not edited here.** Until
+> both rows exist the notebook-caption residue is **routed but not yet landable**.
 
 **Why not the review alone.** §16 and §19 both hold that visual inspection is insufficient,
 and this rule governs artifacts nobody has written yet.
 
-**Negative controls.** Write a target artifact without the label → fails. Produce a
-comparison report without the mismatch statement → fails, because the reporting path emits
-it. Put *"station-observed VTEC"* into a machine-readable output → the grep-class check
-fails.
+**Negative controls — one per emitting path, and they are not interchangeable.** Write a
+target artifact without the label → fails. **Write a target artifact without the
+grid-cell-versus-IPP lineage statement → fails, because the writing path emits it** (the
+control added 2026-08-28; it is the one no mechanism carried before). Produce a comparison
+report without the **spatial-representativeness** sentence → fails, because the
+comparison-producing path emits it — **`evaluation-and-comparison` control 25, not this
+unit's.** Emit the lineage statement **instead of** the spatial-representativeness sentence
+on a comparison report, or the reverse on a target artifact → **fails**; substituting one for
+the other is the defect this split repairs. Put *"station-observed VTEC"* into a
+machine-readable output → the grep-class check fails.
 
 **Acceptance.** TA-15 (owned by `foundation`).
 
@@ -291,6 +359,12 @@ fails.
 targets.** Cross-phase results test **protocol transfer across a target-domain shift**;
 agreement is not proof that the two estimate the same physical quantity. The three IDs are
 what make the distinction machine-readable rather than a matter of prose.
+
+**The IDs are the machine-readable half only, and NFR-TDEF-01 requires both** (stated
+2026-08-28 per Recommendation 18). The **human-readable** half of the same obligation is
+**R-69 limb 3**'s grid-cell-versus-IPP lineage statement, emitted by the target-writing path.
+A stamped `target_definition_id` a human never reads does not disclose a mismatch; **neither
+half substitutes for the other.**
 
 **Negative controls.** Emit any of the four artifact classes missing any of the three IDs →
 fails. Compare a Phase 1 and a Phase 2 artifact carrying different `target_definition_id`
@@ -449,7 +523,8 @@ TA-36's primary test while it was sited in `features-and-splits`' module.
 - **Open — the `02` ordinal collision** (R-73), a recorded §12 defect. **No `02a`/`02b` convention.** The Phase-2-script reachability check is left to `governance-guards` R-23.
 - **Open — Vision §6.9's list is unqualified in the source** (R-72); the phase qualifier runs through Vision §15.2.
 - **Open — the zero-TBD preflight is not yet runnable** (R-68); D-19 is a decision made, not a check passed.
-- **Open — R-69's notebook-caption case reaches no machine check** and stays with the claims-checklist review.
+- **Open — R-69's notebook-caption case reaches no machine check** and stays with the claims-checklist review. **Widened 2026-08-28 per Recommendation 18:** that checklist is `regimes-diagnostics-reporting`'s and carries **no NFR-TDEF-01 row and no FR-P1-03-4 row**, so the routing has **no destination**. Both rows are **owed by that unit**, remediated in parallel; **the dependency is stated, not edited here**. ⚠ **CLOSED on the 2026-08-28 resume pass.** Both rows were written into `regimes-diagnostics-reporting` that day (`domain-entities.md` § 2 and `business-rules.md` R-126 addition 4, plus its W-4 mirror): `NFR-TDEF-01` as the **cross-phase target-lineage** disclosure row, kept distinct from the TEC-06 comparison-geometry row and required on **every reported artifact describing the Phase 1 target**, not only serialized IRI/GIM comparisons; `FR-P1-03-4` as the notebook-caption row with `human_residue` recorded. The routing now has a destination. **Bound, stated rather than assumed:** those artifacts carry **no review receipt and no adversarial pass yet** — the rows exist in draft and the stage verdict is still **FAIL**, so this is a closed *dependency*, not a discharged *obligation*.
+- **Open — NFR-TDEF-01 is now discharged by two obligations rather than one** (R-69, corrected 2026-08-28 per Recommendation 18): the machine-readable stamp (R-70) and the human-readable lineage statement on the target-writing path (R-69 limb 3). TEC-06's comparison-geometry sentence is **`evaluation-and-comparison` R-110 limb 3's**, recorded here so the split is legible; **no obligation is created on that unit by this stage**.
 - **Open — an obligation stated on a sibling:** R-71's cell-and-month keying must agree with `inventory-and-registry`'s G-P1A record.
 - **G-09 is not signed.** No rule here authorises creating `src/data/prepared.py`, `scripts/02_standardize_prepared_target.py`, `scripts/03_verify_processing.py` or `tests/test_prepared_target_schema.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -472,3 +547,39 @@ TA-36's primary test while it was sited in `features-and-splits`' module.
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
 > for `external-products`; floor reset mechanical). **No content of this unit changed.**
 > **G-09 remains unsigned.**
+
+---
+
+> ## Remediation, 2026-08-28 — GOV-2026-08-28-FD-01 Recommendation 18
+>
+> **The project decision owner ruled `FAIL` on Recommendation 18** (`High`, finding `TEC-06`)
+> and directed the board's **option 1 plus option 3's checklist rows**. A redo jump cleared
+> the write-freeze. **Only `R-69`, one paragraph added to `R-70`, and two
+> `## Assumptions & Open Questions` bullets changed in this file.** Every dated provenance box
+> above is unchanged.
+>
+> **What changed.** NFR-TDEF-01's **cross-phase target-lineage** disclosure (grid-cell target
+> population versus IPP target population) is separated from TEC-06's **comparison-geometry**
+> disclosure (grid cell versus station-coordinate evaluation) and moved onto the
+> **target-writing** path beside the `location-sampled gridded VTEC` label. Each statement now
+> has **its own emitting path and its own negative control**: a target artifact written
+> without the grid-cell-versus-IPP statement **fails** (new, R-69); a comparison report
+> without the spatial-representativeness sentence **fails** (existing, and
+> `evaluation-and-comparison` R-110 limb 3's, not this unit's). The two rows
+> `regimes-diagnostics-reporting`'s claims-and-limitations checklist owes — **NFR-TDEF-01**
+> and **FR-P1-03-4** — are recorded as a dependency; **that unit is not edited here.** The
+> board's option 2 was **rejected on the record**.
+>
+> **What did not change.** No question, no answer letter, no rule ID, no entity, no count, no
+> scientific value. **G-09 remains unsigned**; **BLK-05 stands as it is**, both open limbs
+> intact; Phase 1 still produces no DCB, STEC, mapping, satellite or arc field; the gridded
+> product is still never labelled a receiver-specific station observation. **D-1's cell rule,
+> D-16's median and D-17's sixteen fields are applied, not reinterpreted.** The three open
+> items the terminal READY carried to the gate — the **"documented QC"** enumeration's
+> membership, the **D-17 conformance check's authority source** (`governance-guards` R-20),
+> and the **`02` ordinal collision** — are **all still open and unresolved**, verified in
+> place.
+>
+> **Derived counts, re-checked after the edit and unchanged:** **10** rules (`R-64`…`R-73`),
+> **9** workflows (`W-1`…`W-9`), **9** numbered entity sections, **6** requirements with
+> **1** (`FR-P1-03-5`) carrying no acceptance row.

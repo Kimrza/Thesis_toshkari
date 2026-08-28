@@ -590,4 +590,68 @@ Does this all look correct before I generate the artifact?
 
 > **💡 Recommendation**: **Looks correct** — mechanical: this unit is untouched and its terminal READY adjudicated content already.
 
+*(Receipt superseded 2026-08-28 by the governance remediation below.)*
+
+### Re-confirmation, 2026-08-28 — after the governance remediation
+
+The full-board governance review of this stage (`governance/reviews/GOV-2026-08-28-FD-01.md`)
+returned **FAIL** on 49 findings, and you ruled: resolve them. One reaches this unit.
+
+**Recommendation 18 (High) — two physically different mismatches had been merged and
+discharged by one mechanism.** NFR-TDEF-01 requires the **grid-cell-versus-IPP** mismatch
+disclosed — a *cross-phase target-lineage* fact. TEC-06 requires the
+**spatial-representativeness** statement wherever an IRI or GIM comparison is reported — a
+*comparison-geometry* fact. Both were routed exclusively through the comparison-reporting
+path, so a Phase 1 release, target artifact or coverage report carrying no comparison
+disclosed the lineage mismatch **nowhere** — and that is the moment it matters most, because
+Phase 2 compares against Phase 1's reported December timestamps.
+
+**Applied:** the two statements are separated, each with its own emitting path and its own
+negative control. The lineage statement now travels on the **target-writing path, beside the
+`location-sampled gridded VTEC` label**, so it cannot be separated from the label. TEC-06's
+sentence stays on the comparison-producing path — which is **not this unit's** (that is
+`evaluation-and-comparison` R-110 limb 3). A new control fails a target artifact written
+without the lineage statement; a further control fails emitting one statement in place of the
+other. Board option 2 (one broadened trigger carrying both strings) is rejected on the record,
+because it would close the coverage gap while preserving the conflation.
+
+**Two corrections found while applying it, both strengthening the basis:**
+
+1. **Q8 = D's literal text already placed the statement on the target-writing path** — option
+   D reads "C, with the grid-cell-versus-IPP mismatch statement emitted by **the same path**",
+   and that path in options B and C is "the code that writes the target". The conflation entered
+   through D's **impact line**, which had imported `project.md`'s comparison trigger. So this
+   restores your answered option's own reading rather than overriding it, and **no answer letter
+   changes**.
+2. **The superseded limb claimed an emission this unit does not own.** This unit produces no
+   IRI/GIM comparison artifact, so the fix also removes a false ownership claim.
+
+**Recorded, not resolved:** `regimes-diagnostics-reporting`'s claims-and-limitations checklist
+owes an **NFR-TDEF-01 row** and an **FR-P1-03-4 row** — R-69's routing currently points at a
+destination that does not exist. That unit is being remediated in parallel; the dependency is
+stated here rather than annexed.
+
+**Unchanged and verified in place:** 9 workflows, 10 rules (`R-64`…`R-73`), 9 entity sections,
+6 requirements / 1 without an acceptance row. All three pre-existing open items stay open and
+correctly routed — the "documented QC" enumeration's membership, the D-17 conformance
+authority source (`governance-guards` R-20), and the `02` ordinal collision. D-1's cell rule,
+D-16's median and D-17's sixteen fields are applied, never reinterpreted. **G-09 remains
+unsigned; BLK-05's limbs stay open.**
+
+**Four items the agent raised for you rather than deciding** (none applied): the QC-membership
+item appears in no file's Assumptions register, only inside the rule boxes; the "6
+requirements" figure sits under a 7-row courtesy table; no `IntegrityError` subclass is named
+for a missing label or lineage statement; and NFR-TDEF-01 stays concentrated in this one unit
+until the sibling adds its two checklist rows.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, the three artifacts re-saved with a dated provenance note, and an adversarial pass reviews the remediated text.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change and I re-present first.
+
+> **💡 Recommendation**: **Looks correct** — the fix restores the literal reading of the option you already answered, separates two facts a later reviewer would otherwise have to separate again, and adds the control that was missing rather than changing any decision.
+
 [Answer]: Looks correct

@@ -34,11 +34,65 @@
 > condition on this unit and the four downstream units. **The NOT-READY verdict below belongs to
 > the previous attempt and predates all of it; a fresh adversarial pass follows.**
 
+> ## ⚠ REBUILT 2026-08-26 ON THE ADR-11 CONTRACT — OWNER RULING
+>
+> The 2026-08-26 fourteenth-receipt review (preserved in full at the end of this file) found
+> that the box above — and every mechanism the 2026-08-24 and 2026-08-26 remediation waves
+> built — targeted an interface `component-methods.md` had already retired on **2026-08-23**:
+> **ADR-11** removed `apply_transforms` entirely, replaced `FoldSpec`/`build_folds` with
+> **`Partition`**/`build_partitions`, replaced the separate matrix/tensor return with a single
+> **`FeatureBundle`** carrying `spec` (`partition_id`, `role`, `scored_start`, `scored_end`)
+> and `transform_id` as one persisted object, and replaced the purpose-scoped containment
+> check with an **identity check** — `LeakageError` when
+> `transform.partition_id != spec.partition_id`, with exactly one enumerated exception,
+> `REFIT` → `DEC` under `role="score"`, the G-06 apply. On the owner's authorization these
+> three artifacts are rebuilt on that contract. **Every dated ⚠ box below this one is
+> preserved as history of the retired `apply_transforms` lineage** — where such a box states
+> a mechanism, signature, token (`FoldSpec`, `ApplyPurpose`, `purpose`) or count, the ADR-11
+> text beside it is the live contract and the box is not. The FU-4/FU-5/FU-6 rulings above
+> are mapped onto ADR-11 in dated boxes at W-4a, W-4b and W-4; **one element of FU-5 = D is
+> defeated by ADR-11's own owner-approved `lead_in_hours` removal and is raised at the gate
+> rather than silently dropped** — see W-4b. § Amendments owed re-derives to **5 across 3
+> units** (this unit now owes none); the figure "8 across 5 units" survives in
+> `models-and-baselines`' frozen READY artifacts and is raised at the gate as stale, not
+> edited there. **BLK-04 remains an open exit condition and G-09 remains unsigned; nothing
+> here authorises implementation.**
+
+> ## ⚠ REMEDIATED 2026-08-28 ON GOVERNANCE REPORT `GOV-2026-08-28-FD-01` — OWNER RULINGS
+>
+> Verdict **FAIL**. Five rulings reach this unit, each applied with a dated note citing its
+> Recommendation number. **Workflow ids W-1…W-10 and their subject matter are unchanged.**
+>
+> - **Recommendation 4** — **the blocker, found independently by two board seats.** BLK-09 was
+>   unmet **and de-labelled** here, while **W-3 element 1 affirmatively asserted an
+>   unexecutable check was executable**: *"equality is checkable because `fit_transforms` takes
+>   the `Partition` itself in scope."* Derived before the fix: `BLK-09` = **0**,
+>   `train_start` = **0**, `BLK-08` = **0**, `inverse` = **0** across all four files. Board
+>   option 1 applied — `Partition` gains **`train_start: date`** from `configs/data.yaml`, both
+>   bounds are read from the `Partition`, a **BLK-09 status paragraph is restored**, and a
+>   **strict-subset** negative control is added. Contract: `business-rules.md` **R-83**.
+> - **Recommendation 25** — W-5 specifies **`train_end` for all six partitions**, with
+>   **`DEC.train_end = 2022-11-30`**; the ADR-11 carve-out is retained for interface clarity
+>   rather than necessity; the **30** raising conditions are enumerated.
+> - **Recommendation 7, narrowed to `ABL-DIFF` on D-27** — W-3 states explicitly that **the
+>   primary path needs no inverse transform**, and BLK-08 half B is authored as
+>   `business-rules.md` **R-84**. The `src/evaluation` → `src/features` edge is **owed and
+>   unapproved**; D-27 withheld authorisation.
+> - **Recommendation 6 / D-28** — the § Assumptions FU-5 item is **closed**; W-4b's dated box
+>   stands as the record of how the conflict was raised, and its superseded FU-5 = D quotations
+>   are untouched.
+> - **Recommendation 8** — `PartitionError` is `foundation` R-01's **fifteenth**; W-3's
+>   element 2 is reconciled with the discriminating rule (`domain-entities.md` § 10 carries it).
+>
+> § Amendments owed re-derives to **7 across 5 units**, arithmetic printed. **BLK-04, BLK-08
+> and BLK-09 all remain open exit conditions and G-09 remains unsigned; nothing here authorises
+> implementation or the creation of a module.**
+
 The workflows this unit implements: the availability matrix that asserts actual lag ≥
-declared safe lag, feature construction over a **closed** dictionary, **per-fold train-only
-transforms**, one shared window definition emitting both representations, the F1–F4 exact
-calendar folds with their 24-hour embargo, and the December locked partition's **execution
-guard**.
+declared safe lag, feature construction over a **closed** dictionary, **per-partition
+train-only transforms applied only inside `build_features`**, one shared window definition
+emitting both representations inside one `FeatureBundle`, the F1–F4 exact calendar folds with
+their 24-hour embargo, and the December locked partition's **execution guard**.
 
 **BLK-04 is an exit condition on this stage.** W-3 authors its contract. **This unit and
 four downstream units may not complete or exit stage 3.1 without it**, and **no
@@ -53,14 +107,17 @@ constant, the folds exact calendar boundaries — all fixed elsewhere and applie
 - `../../../inception/units-generation/unit-of-work.md` § 7 — the `Owns` list, the boundary, the 11 requirements, the implementation notes; **BLK-04** with its exit-condition ruling.
 - `../../../inception/units-generation/unit-of-work-story-map.md` — Tables 1 and 2, § Per-unit coverage summary, § Cross-unit responsibilities, § Open verification gaps. **Derived by reading the rows:** 11 requirements, **1** with no acceptance row (FR-P1-04-10); **12** rows as primary; **supports** TA-36.
 - `../../../inception/requirements-analysis/requirements.md` — FR-P1-04-1, -2, -5, -6, -8, -10, -12, -13, -16; NFR-IRI-01; NFR-LEAK-01; and the 40 → 36 recomputation record.
-- `../../../inception/application-design/component-methods.md` — `src/features`' boundary calls and `src/data/splits.py`'s.
-- `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract.
+- `../../../inception/application-design/component-methods.md` — `src/features`' boundary calls **as redesigned 2026-08-23 (ADR-11)**: § The `src/features` leakage boundary — redesigned 2026-08-23 (`FrameSpec`, `Transform`, `FeatureBundle`, `build_features(...) -> FeatureBundle`, `fit_transforms(bundle, *, partition)`, the identity-based leak check with its one enumerated `REFIT`→`DEC` exception, the `lead_in_hours` removal), `src/data/splits.py`'s `Partition`/`build_partitions` with the six-partitions/five-manifest-rows rule, `src/models`' `Prediction` carrying `partition_id`/`transform_id`, and § Depth. *(Sources line rewritten 2026-08-26: the prior line cited this file without naming the redesign, and the artifacts were built against its superseded interface — the fourteenth-receipt review's headline Critical.)*
+- `../../../inception/application-design/services.md` § The nine stage scripts (`05`'s Writes: **`FeatureBundle`s**), the ADR-11 boxes (M9 bundle addressing — `<partition_id>__<role>__<transform_id>/`, `untransformed` for `None`; M13 three-constructions cost), § Stage entry contract.
 - `../target-standardization/functional-design/business-rules.md` — the D-17 target rows consumed here.
 - `../external-products/functional-design/business-rules.md` — **R-56** (the transitive import scan), **R-57** (F10.7 future-independence), **R-58** (driver alignment).
 - `../governance-guards/functional-design/business-rules.md` — **R-19** (the exactly-one-member exclusion shape), **R-23** and **R-24** (the two phase-boundary limbs). **Corrected 2026-08-23:** R-19 and R-24 are cited in this artifact’s body and were absent here; **R-25** (access-log ordering) and **R-28** (restricted root) were listed and drawn on nowhere, and are removed.
-- `evidence/DECISIONS.md` — **D-10.3**, **D-11**, **D-13**.
+- `evidence/DECISIONS.md` — **D-10.3**, **D-11**, **D-13**; **D-27** (2026-08-24 — the primary configuration's train-only transform acts on target-**derived inputs**; the target stays **raw TECU**; the inverse obligation is `ABL-DIFF`'s alone; *"no import-boundary change is authorised by this decision"*) and **D-28** (2026-08-28 — the G-06 locked-test scored set is **2–31 December 2022, 30 days**, with the Vision §8.2 / TE §7.1 authority conflict disclosed and carried to G-05). *(Added 2026-08-28 per Recommendations 7 and 6.)*
+- `governance/reviews/GOV-2026-08-28-FD-01.md` — the full-board stage-3.1 review, verdict **FAIL**; Recommendations **4** (`CHAIR-03`, `ML-01`), **6** (`CHAIR-01`, `CHAIR-02`, `VAL-04`), **7** (`CHAIR-04`, `ML-02`), **8** (`CHAIR-05`, `ML-05`, `IMPL-02`) and **25** (`ML-06`). *(Added 2026-08-28.)*
+- `../evaluation-and-comparison/functional-design/business-rules.md` — **R-103** (the BLK-08 joint contract; half A binding there, half B authored here as R-84) and **R-104**. *(Added 2026-08-28 per Recommendation 7.)*
+- `../../../inception/application-design/component-dependency.md` — § Dependency matrix: `src/evaluation` → `src/features` is **`—`**, and `src/features` → `src/models` is **`—`** in both directions. *(Added 2026-08-28; both are load-bearing for R-84's edge and for the exception routing in `domain-entities.md` § 10.)*
 - Workspace inspection, 2026-08-23: `tests/` holds three modules, none this unit's; `src/` and `configs/` absent.
-- `functional-design-questions.md` (**Q1 through Q9**), `domain-entities.md`, `business-rules.md`.
+- `functional-design-questions.md` (**Q1 through Q9**, and **FU-7**), `domain-entities.md`, `business-rules.md`.
 
 ---
 
@@ -126,20 +183,27 @@ that anchor and compared.** A recorded end date is a **claim**; the recomputatio
 ## W-2 — Feature construction over a closed dictionary
 
 ```
-INPUT   target, drivers, registry, matrix, fold, snapshot, transform, purpose
-OUTPUT  (flattened matrix, sequence tensor) — from ONE window definition,
-        each stamped (fold_id, purpose, transform_id) — see W-4a
+INPUT   target, drivers, registry, matrix, spec: FrameSpec,
+        partitions: Sequence[Partition], snapshot,
+        transform: Transform | None = None
+OUTPUT  FeatureBundle — matrix + tensor from ONE window definition, carrying
+        spec (partition_id, role, scored_start, scored_end) and transform_id
+        as the same persisted object (W-4a)
 RAISES  LeakageError, AlignmentError
 ```
 
-> **`transform` and `purpose` travel together** (R-81): supplying one without the other
-> **raises**. `purpose` is one of `None` (the fitting call), `train`, or `evaluate`, and it is
-> what bounds the rows the call may read — see **W-4b**. Corrected 2026-08-24: this block had
-> not followed either amendment it carries, so an implementer reading W-2 — the section where
-> this unit specifies the call — was given the pre-amendment interface while W-4, three
-> sections later, amended it. `AlignmentError` was likewise missing here while this section's
-> own prose eleven lines below adds it as FR-P1-04-17's raise and `domain-entities.md` § 10
-> carries it as its own row. *(Iteration-5 finding 4.)*
+> **Rebuilt 2026-08-26 on ADR-11 (owner ruling) — the signature above is
+> `component-methods.md`'s current approved boundary call; the block it replaces targeted the
+> retired `apply_transforms` interface** (its 2026-08-24 iteration-5-finding-4 note recorded
+> the `transform`+`purpose` amendment, which has since **dissolved into ADR-11** — see
+> § Amendments owed). `spec` declares the partition, the **role** (`train` | `score`) and the
+> scored range; `build_features` **validates the spec against `partitions`** (a named
+> partition; scored range contained in the training range for `train`, in the
+> `validation_month` for `score`) and applies `transform` **internally** — no separate apply
+> call exists. A `transform` whose `partition_id` differs from `spec.partition_id` raises
+> `LeakageError`, with exactly one enumerated exception: `REFIT` → `DEC` under
+> `role="score"`, the G-06 apply (W-6). `transform=None` emits the **untransformed** fitting
+> bundle (`transform_id` `None`), whose consumption downstream is itself a raise — see W-4.
 
 **`build_features` raises** on: any field **outside the §6.2 dictionary**; a **carried-forward
 `vtec_lag_*`** value; an **incomplete `vtec_seq_24`** window not excluded; a **support field
@@ -173,13 +237,17 @@ what provenance is sufficient.
 ## W-3 — BLK-04: the train-only fitting contract
 
 ```
-INPUT   train: DataFrame, fold: FoldSpec
-OUTPUT  Transform  (carrying its FoldSpec)
+INPUT   bundle: FeatureBundle (role "train", transform_id None), partition: Partition
+OUTPUT  Transform — transform_id + partition_id, the identity the leak check compares
 RAISES  LeakageError
-
-AMENDED apply_transforms(frame, *, transform, purpose: ApplyPurpose)
-        purpose ∈ {train, evaluate} — required, no default
 ```
+
+> **Rebuilt 2026-08-26 on ADR-11 (owner ruling).** The signature above is the approved
+> `fit_transforms(bundle, *, partition)`; the fence it replaces read
+> `fit_transforms(train: DataFrame, fold)` plus an "AMENDED" apply call on the retired
+> interface. Everything in this section outside the dated ⚠ boxes is the ADR-11 contract;
+> the dated boxes record the retired lineage — the diagnosis that forced the redesign and the
+> five review cycles that killed the old mechanism — and are history, not contract.
 
 **The register names the required elements**, quoted: *"input and output types, alignment
 requirements, ownership of the fitted state, allowed partitions (the named fold's training
@@ -187,6 +255,10 @@ partition only) and failure conditions (`LeakageError` when `train`'s index is n
 of that partition), so validation and locked-test leakage are prevented by the contract
 rather than by review."*
 
+> **Historical box, preserved (rebuilt 2026-08-26): the interface it diagnoses was retired by
+> ADR-11 on 2026-08-23** — `component-methods.md` now preserves the same diagnosis itself,
+> under its own *"THE SUPERSEDED INTERFACE, PRESERVED, AND WHY IT COULD NOT WORK"* box.
+>
 > ## ⚠ THE APPROVED INTERFACE DOES NOT PREVENT WHAT IT CLAIMS TO
 >
 > `component-methods.md` states that a single `fit_transform(all_data)` is *"unrepresentable
@@ -202,52 +274,102 @@ rather than by review."*
 > it** — `models-and-baselines`, `evaluation-and-comparison`, `statistical-inference`,
 > `regimes-diagnostics-reporting` — because *"every reported number inherits the fit."*
 
-**The contract (Q1 = D), four elements:**
+**The contract (Q1 = D, mapped onto ADR-11), four elements:**
 
 ```mermaid
 graph TD
-  F["FoldSpec (fold_id, train_end,<br/>validation_month, embargo 24h)"]
-  T["train: DataFrame"]
-  A{"train.index subset of<br/>fold's training partition?"}
+  P["Partition (partition_id, kind,<br/>train_start, train_end,<br/>validation_month, embargo 24h)"]
+  RB["raw FeatureBundle<br/>(role train, transform_id None)"]
+  A{"role == train AND<br/>transform_id is None AND<br/>scored range equals<br/>train_start..train_end?"}
+  A2{"spec.partition_id ==<br/>partition.partition_id?"}
   X1["LeakageError<br/>(fitted on the wrong rows)"]
-  TR["Transform<br/>(carries its FoldSpec)"]
-  FR["frame + purpose<br/>(train | evaluate)"]
-  B{"rows inside the set<br/>purpose permits for<br/>THIS transform's fold?"}
-  X2["LeakageError<br/>(applied to the wrong rows)"]
-  OK["transformed frame"]
-  F --> A
-  T --> A
+  X0["PartitionError<br/>(declared ids disagree)"]
+  TR["Transform<br/>(transform_id, partition_id)"]
+  BF["build_features(spec, partitions,<br/>transform=T)"]
+  B{"transform.partition_id ==<br/>spec.partition_id, OR the one<br/>enumerated pair REFIT to DEC<br/>with role score?"}
+  X2["LeakageError<br/>(wrong partition's transform)"]
+  OK["FeatureBundle<br/>(spec + transform_id persisted)"]
+  P --> A2
+  RB --> A2
+  A2 -->|no| X0
+  A2 -->|yes| A
+  P --> A
   A -->|no| X1
   A -->|yes| TR
-  TR --> B
-  FR --> B
+  TR --> BF
+  BF --> B
   B -->|no| X2
   B -->|yes| OK
 ```
 
-Text fallback: fitting checks that the training frame's index is a subset of the named fold's
-training partition and raises otherwise; the fitted transform carries its fold specification;
-applying takes a required purpose of train or evaluate and tests the frame against the set
-that purpose permits for that transform's own fold — its training partition for train, exactly
-its validation month for evaluate, and for the final refit January to November or December
-respectively — raising when any row falls outside, or when the frame is empty.
+Text fallback *(extended 2026-08-28 per Recommendations 4 and 8)*: fitting takes the
+untransformed train-role bundle and the Partition itself; it raises **PartitionError** when the
+bundle's declared partition id and the passed partition's id disagree — a declared-identity
+disagreement, before anything is fitted — and **LeakageError** unless the bundle's role is
+train, its transform identity is empty, and its scored range is exactly
+**[partition.train_start, partition.train_end]**, both bounds being fields of the Partition
+since 2026-08-28 (R-83, BLK-09; before that the equality had no lower bound to compare
+against); the returned transform carries the partition's id. Applying happens only inside
+build_features, which raises unless the transform's partition id equals the spec's — the
+single enumerated exception being the refit transform scoring the December frame under role
+score, which is the G-06 apply — and independently validates the spec's scored range against
+the range its role permits: containment in the training range for train, containment in the
+validation month for score.
 
-1. **Allowed partitions** — the named fold's **training partition only**.
-2. **Failure condition, fitting** — `LeakageError` when `train`'s index is **not a subset**
-   of that partition. This is the register's own fix, and it closes what the type signature
-   cannot.
-3. **Ownership of the fitted state** — the `Transform` **carries its `FoldSpec`** (for the
-   refit, its resolved boundaries), not merely a `fold_id` **string**, from which no calendar
-   boundary is recoverable.
-4. **Applying failure** — `apply_transforms` takes a **required `purpose`** (`train` or
-   `evaluate`) and raises `LeakageError` when the frame's rows fall outside the set that
-   `purpose` permits for **that transform's own fold** — its training partition for `train`;
-   for `evaluate`, its validation month **plus the causal history the frozen 24-hour window
-   requires, readable but never emitted** (W-4b; *aligned 2026-08-26*) — and on an **empty or
-   timestamp-less frame**. **This is the second half of the same leak**: element 2 stops a transform being
-   *fitted* on the wrong rows; nothing in it stops one correctly fitted on F4 being *applied*
-   to April as F1's evaluation.
+1. **Allowed partitions** — a transform is fitted only on the named partition's **training
+   range, exactly**. ADR-11 strengthens the register's *"not a subset"* condition to **range
+   equality**: a strict subset of the training range is also a wrong fit. The range is
+   **`[partition.train_start, partition.train_end]`**, both bounds fields of the `Partition`
+   **since 2026-08-28** (`business-rules.md` **R-83**, BLK-09, Recommendation 4).
+   **Corrected 2026-08-28.** This paragraph previously read: "equality is checkable because
+   `fit_transforms` takes the `Partition` itself in scope" — an **over-claim, and the exact
+   Critical two board seats found independently**. Taking the `Partition` in scope was
+   necessary and **not sufficient**, because `Partition` carried only `train_end`, so the
+   equality had **no lower bound to compare against**. The upstream contract's own closing
+   note said so at `component-methods.md:904-906`. The superseded sentence is quoted above
+   rather than deleted.
+2. **Failure condition, fitting** — `fit_transforms(bundle, *, partition)` raises
+   **`PartitionError`** when `bundle.spec.partition_id != partition.partition_id` — a
+   **declared-identity disagreement**, raised before anything is fitted, and the same
+   condition `models-and-baselines` R-92 raises `PartitionError` on *(reassigned 2026-08-28
+   per Recommendation 8; see `domain-entities.md` § 10 for the discriminating rule and the
+   amendment this carries)*. It raises **`LeakageError`** when `bundle.spec.role != "train"`;
+   when `bundle.transform_id is not None`
+   (already transformed); and when
+   `[scored_start, scored_end]` is not exactly `[partition.train_start, partition.train_end]`
+   — **in either direction, over-wide or strict subset** — the check that
+   needs `partition` in scope, which the first ADR-11 draft omitted, the re-entry review
+   restored, and **R-83 made executable** by supplying the lower bound. This closes what the
+   old type signature could not: `fit_transforms(all_data,
+   fold=F1)` is no longer writable, because the input is a bundle `build_features` already
+   validated against the partition list.
+3. **Ownership of the fitted state** — `Transform` carries `transform_id` and
+   `partition_id`; its fitted state is intra-package. The identity is **persisted with the
+   data**: `FeatureBundle.transform_id` crosses the `05`→`06` handoff and
+   `Prediction.partition_id`/`transform_id` (ADR-11, added 2026-08-23) carry it on to `07`,
+   so ownership survives every file-mediated handoff rather than dying at the first consumer.
+4. **Applying failure** — **`apply_transforms` is removed** (ADR-11): transforms are applied
+   **only inside `build_features`**, so no call site exists that could take an arbitrary
+   frame. `build_features` raises `LeakageError` when
+   `transform.partition_id != spec.partition_id` — an **identity comparison**, which the
+   nested training ranges cannot defeat: F4's transform on a frame whose spec says `F1` fails
+   regardless of which months overlap. Exactly **one enumerated pair** is exempt: `REFIT` →
+   `DEC` with `spec.role == "score"`, the G-06 one-shot; the same pair with `role="train"`
+   **raises**, because fitting on December is the locked-test violation itself.
+   `build_features` also validates the spec against `partitions` — `spec.partition_id` must
+   name a real partition, and the scored range must be **contained in** the training range
+   for `role="train"`, in the `validation_month` for `role="score"` — because without it the
+   spec's fields are caller assertions, which is precisely how the superseded interface
+   failed. **This is the second half of the same leak**: element 2 stops a transform being
+   *fitted* on the wrong rows; element 4 stops one correctly fitted on F4 being *applied* to
+   April as F1's evaluation, now by identity rather than by any row rule.
 
+> **Historical box, preserved (rebuilt 2026-08-26 on ADR-11).** Everything inside the box
+> below — including its "amendment approved 2026-08-23", its `purpose` tables, its pairing
+> control, its residual and its refit-has-no-path finding — mechanised element 4 on the
+> retired `apply_transforms` interface and is **history, not contract**. The live mapping of
+> what it carried follows immediately after the box.
+>
 > ## ⚠ ELEMENT 4 — MECHANISM CORRECTED TWICE, 2026-08-23
 >
 > **First text, superseded:** *"`apply_transforms` **refuses** a transform whose fold does not
@@ -413,10 +535,140 @@ respectively — raising when any row falls outside, or when the frame is empty.
 > restated contract in four places drifts. `domain-entities.md:237-239` already carried this
 > rewrite; this file and `business-rules.md` did not.)*
 
+**The element-4 lineage, mapped onto ADR-11** *(rebuilt 2026-08-26; each item names where the
+box above's live content now stands)*:
+
+- **The `purpose` parameter and its per-purpose accepted-set tables → dissolved.** The role a
+  frame serves is a **declared field of the spec** (`FrameSpec.role`, `train` | `score`),
+  validated by `build_features` against the partition list, and the leakage decision is the
+  **identity check** — no accepted-set table over rows exists any more, because ADR-11's own
+  finding is that *"the constraint cannot be expressed over rows."* The old table's `train`
+  rows survive as the containment validation (a `train` spec's range ⊆ the training range,
+  embargo rows excluded and counted); its `evaluate` rows survive as `score`-role containment
+  in the `validation_month` — with the December read/emit consequence changed by ADR-11's
+  `lead_in_hours` removal, see **W-4b**.
+- **The pairing control → native.** `FeatureBundle` persists `spec` and `transform_id` as one
+  object with the data; `06`/`07` assert them and raise on `transform_id is None`. See
+  **W-4a** (FU-4 = D mapped).
+- **The 39-cell consequence → still true, restated.** A `train`-role bundle for partition *k*
+  lawfully carries *k*'s whole training range — 3 + 6 + 9 + 10 + 11 = **39** month-cells
+  across the five fitting-capable partitions, of which **10** are another partition's
+  validation month (F2→Apr; F3→Apr, Jul; F4→Apr, Jul, Oct; REFIT→Apr, Jul, Oct, Nov; derived
+  programmatically 2026-08-26). Every one is correct **as training**; reusing such a bundle as
+  an evaluation now fails **structurally** — a scoring site asserts `spec.role == "score"`,
+  and a `score` spec for another partition fails the identity check.
+- **December is routed, not excluded** — unchanged in substance: the G-06 apply is the one
+  enumerated `REFIT` → `DEC`/`score` pair, and the lock is held by **W-6's execution guard**
+  (`materialise_locked_partition` against a verified `g05_signature`), not by the identity
+  rule.
+- **"The refit has no path on either side" → resolved.** `Partition` represents the final
+  refit (`REFIT`, `kind=refit`, `validation_month=None`) and the locked month (`DEC`,
+  `validation_month=2022-12-01`), and both `fit_transforms` and `build_features` take
+  `Partition`s — the open shape decision W-5 carried to the gate is **discharged by ADR-11**;
+  see W-5's dated box.
+- **`assert_membership_from_timestamps` — unchanged**: it validates a row against the
+  partition it is filed under and derives nothing; any check needing "which partition" now
+  compares **declared identities**, which is exactly what ADR-11's own annotation says.
+- **"Which representation" — live statement**: `build_features` applies the `Transform` to
+  the assembled feature frame **before windowing**; both representations are built from one
+  window definition and travel **in one `FeatureBundle`**, and the `NDArray` tensor — which
+  carries no timestamps — is never transformed directly. A transformed matrix beside an
+  untransformed tensor is **no longer constructible**, because only `build_features` produces
+  both.
+
 **Stated once, consumed by name** — a property of the contract, not a fifth element. The
 register calls it a *"governed cross-unit contract"*. The four downstream units **cite** it;
 they do not restate it. A restated contract in four places drifts — this stage has corrected
 four counts that drifted between restatements.
+
+> ## ⚠ BLK-09 — THE BLOCKER THIS UNIT HAD DE-LABELLED, RESTORED AND ANSWERED 2026-08-28
+>
+> **The status, quoted rather than paraphrased.** `unit-of-work.md:867` assigns BLK-09 to
+> `features-and-splits` **solely**; `:857` records *"Status: **Open.** Exit condition on stage
+> 3.1"*; `:333` states *"**No affected unit may complete or exit 3.1 without its approved
+> contract**"* (`GOV-2026-08-22-REM-01` REM-02, options 1 + 3 approved — an exit condition,
+> not an entry one). The register's own **Why it matters** field names the two raises that
+> compare against a value which *"is not a field … reachable only by an **unwritten
+> convention** that every training range starts 1 January 2022"*, and rules out the cheap fix:
+> *"Deriving it from `train_end` and a hard-coded year is **not** available: that would put a
+> scientific constant in source, which TC-03e forbids."*
+>
+> **What this unit did instead, and why it was worse than leaving it open.** The 2026-08-26
+> ADR-11 rebuild **carried the dependent raise forward and dropped the blocker's name** —
+> `BLK-09` = 0 and `train_start` = 0 across all four artifacts, derived by two board seats
+> independently — while element 1 **affirmatively asserted the check was executable**. A reader
+> of `unit-of-work.md` at least finds the registered defect; a 3.5 implementer reading a
+> terminal-READY design found only an unexecutable check, and three bad options: hard-code
+> `2022-01-01` (TC-03e and `project.md` § Forbidden), derive `train_start` from the earliest row
+> present — which **degenerates the equality check into a tautology**, a check that can never
+> fire and is indistinguishable from one that passes — or stop.
+>
+> **Under the tautology path the failure has no downstream symptom**, which is the whole reason
+> BLK-04 exists: a transform fitted on a **strict subset** of the declared training range would
+> be accepted, stamped with the partition id, pass the apply-side identity check, and produce
+> standardization constants differing from the declared fold protocol with nothing anywhere
+> raising.
+>
+> **The answer — board option 1, applied.** `business-rules.md` **R-83** adds
+> **`train_start: date`** to `Partition`, sourced from **`configs/data.yaml`** (so TC-03e is
+> satisfied), and both `fit_transforms` and `build_features` read **both** bounds from the
+> `Partition`. W-5's table carries the six values. **No scientific value is decided**:
+> FR-P1-04-5's fold table and D-8's calendar-2022 boundary already fix `train_start` at
+> 2022-01-01 for all six partitions; what changes is where the value lives and what reads it.
+>
+> **Negative control added:** a `train` bundle whose scored range is a **strict subset** of the
+> declared training range — F4 (`2022-01-01`…`2022-10-31`) fitted on
+> `2022-02-01`…`2022-10-31` → **`LeakageError`**.
+>
+> **Cross-package shape change, therefore an amendment owed** to `component-methods.md`
+> § `src/data/splits.py`, bundled with element 2's `PartitionError` reassignment as one
+> consolidated change record. § Amendments owed re-derives to **7 across 5 units**.
+>
+> **Status: BLK-09 remains an open exit condition on this unit.** R-83 authors the contract;
+> **approving this design is not the amendment's approval.** Five sibling units record the
+> resolution as owed here (derived: `evaluation-and-comparison`,
+> `fixtures-and-reproducibility`, `models-and-baselines`, `regimes-diagnostics-reporting`,
+> `statistical-inference`), of which three name the `train_start` field itself.
+
+> ## ⚠ BLK-08 HALF B — AUTHORED HERE 2026-08-28, NARROWED TO `ABL-DIFF` ON D-27
+>
+> **The premise is frozen, not inferred.** **D-27** (2026-08-24, project decision owner, at the
+> delivery-planning gate): *"The **primary configuration's train-only transform does not touch
+> the target.** It acts on target-**derived input features**; the target itself remains **raw
+> TECU**."* Read from TE §7.2's `ABL-DIFF` row, whose **Primary remains** column reads **"Raw
+> TECU"**, and TE §6.2's dictionary, whose only train-only standardization on anything
+> target-derived applies to the **inputs**.
+>
+> **Stated explicitly, as D-27's Consequences require: the primary path needs NO inverse
+> transform.** Model output is already in raw TECU, so the paired loss differential, the vector
+> time-block bootstrap interval and the practical-relevance threshold are computed on the
+> quantity the model emits — *"visibly satisfied rather than silently assumed."* Derived
+> 2026-08-28 before this box existed: `D-27` was cited **0** times in this unit (and **0** in
+> `evaluation-and-comparison` and `statistical-inference`, both receipted and not edited here).
+>
+> **Half B, authored as `business-rules.md` R-84 and narrowed to `ABL-DIFF` alone:** each
+> fitted `Transform` **persisted retrievably by `transform_id`**;
+> **`load_inverse(transform_id) -> Inverse`** exposed from `src/features`, where `Inverse`
+> exposes **`inverse(frame)` and nothing else**; `Transform` declaring **`touches_target`**
+> machine-readably; and the round-trip control `inverse(apply(x)) == x` within the declared
+> fixture tolerance hosted **inside `src/features`**, where `apply` is visible.
+>
+> **Why not `load_transform` returning `Transform`** — R-103 half A's drafted surface. ADR-11 at
+> `component-methods.md:595-600`: *"**`apply_transforms` is removed.** A function that applies a
+> fitted transform to an arbitrary frame **is** the hole."* Handing a `Transform` across a
+> package boundary reconstitutes exactly that surface one package away from the frozen
+> comparison-wide mask and the G-06 path, **invisible to the identity check**, which lives
+> inside `build_features` rather than on `Transform`. `Inverse` is apply-less by construction.
+>
+> **The import edge is OWED AND UNAPPROVED.** `src/evaluation` → `src/features` is **`—`** in
+> `component-dependency.md`, and D-27 states *"**No import-boundary change is authorised by
+> this decision.** The §12 rule and its allowlist are untouched."* Recorded as an amendment
+> owed **and** a gate item, on the `ABL-DIFF` path only. **No module is created.**
+>
+> **Status:** BLK-08's **mechanism limb closes for the primary path** and **stays open,
+> narrowed to `ABL-DIFF`** — D-27's own words. The `load_inverse`/`load_transform` divergence
+> from R-103 half A is raised at the gate, not edited. **BLK-08 remains an open exit condition
+> on stage 3.1 for both owners.**
 
 > **BLK-04 remains open, and this design does not discharge it.** The register's ruling:
 > the affected units **may enter** 3.1, **none may complete or exit without its approved
@@ -427,15 +679,28 @@ four counts that drifted between restatements.
 ## W-4 — One window definition, two representations
 
 `windows.py` emits **both** the flattened matrix and the sequence tensor for a given
-feature-set ID, which is what makes FR-P1-04-8's parity *"structural rather than asserted"*.
+feature-set ID, and under ADR-11 the two **travel in one `FeatureBundle`** — which is what
+makes FR-P1-04-8's parity *"structural rather than asserted"*: `component-methods.md` states
+it directly, *"Both representations come from **one** window definition in `windows.py` and
+now travel in one object, so FR-P1-04-8 holds by construction rather than by assertion."*
 
-**Order, and the second amendment it costs** (added 2026-08-23; corrected the same day).
+**Order** *(rebuilt 2026-08-26 on ADR-11; the amendment story below is history)*.
 
-The `NDArray` tensor carries **no record timestamps**, so W-3's element 4 — which tests rows
-against a fold's calendar boundaries — **cannot reach it**. Left alone, the fit/apply leak
-survives untouched on **exactly the representation M-06 consumes**, which is the *"no
-downstream symptom"* class this contract exists to close.
+The `NDArray` tensor carries **no record timestamps**, so no row-level check can reach it.
+ADR-11 closes this natively: the `Transform` is applied to the assembled feature frame
+**inside `build_features`, before windowing**, so both representations inherit the identity
+check from one definition — and since `build_features` is the **only** producer of either
+representation, *"a transformed matrix beside an untransformed tensor is no longer
+constructible."* The `transform` parameter is part of the approved signature; **nothing here
+owes an amendment any more** (§ Amendments owed).
 
+> **Historical boxes and superseded amendment, preserved (rebuilt 2026-08-26).** The two dated
+> ⚠ notes below and the amendment fence between them record the retired lineage: the
+> unexecutable "transform the frame first" order, the `transform`+`purpose` pair R-81 owed as
+> an amendment, and the FU-6 = A restatement on the old interface. ADR-11's approved
+> signature carries `transform` natively and replaced `purpose` with the spec's `role`, so
+> **the amendment dissolved** — nothing below this note is contract.
+>
 > **⚠ The first statement of this order was unexecutable.** It read *"transforms are applied
 > to the timestamped frame first; `windows.py` then builds both representations from a frame
 > that has already passed"*. But `build_features(...) -> tuple[DataFrame, NDArray]` **emits
@@ -443,43 +708,48 @@ downstream symptom"* class this contract exists to close.
 > fitted on the features **that same call produces**. There is no point in the approved
 > sequence where a transformed frame exists before windowing. The remedy named an order the
 > interface cannot express — the third time this stage stated a mechanism that could not run.
-
-**Resolution: a second boundary amendment, declared rather than worked around.**
-`build_features` gains **two** optional parameters that travel together:
-
-```
-build_features(..., transform: Transform | None = None,
-                    purpose: ApplyPurpose | None = None)
-```
-
-With both `None` it emits untransformed features — the frame `fit_transforms` is fitted on.
-With both supplied it applies the transform **under that purpose**, running W-3's element 4
-inside `build_features`, **before** windowing — so **both** representations inherit it from
-**one** window definition and FR-P1-04-8's parity is untouched. **Supplying one without the
-other raises**; a transform reaching the tensor path with no declared purpose is exactly the
-hole this amendment closes, and a default would reinstate it.
-
+>
+> **Resolution as previously stated — a second boundary amendment, superseded:**
+> `build_features` gains `transform: Transform | None = None` and
+> `purpose: ApplyPurpose | None = None`, travelling together, supplying one without the other
+> raising.
+>
 > **⚠ `purpose` was missing from the first statement of this amendment** (corrected
 > 2026-08-23). It gave `build_features` a `transform` but no `purpose`, so the only path by
 > which a transform reaches the sequence tensor either **bypassed element 4** — reinstating the
 > hole this workflow exists to close — or had **no determinable accepted set**. Found by an
 > adversarial pass.
 
-**Three calls per fold, not two** *(restated 2026-08-24 on FU-6 = A; iteration-5 finding 3)*.
-The sequence is:
+**Three calls per partition, and the fitting output is consumable by nobody** *(FU-6 = A,
+re-derived 2026-08-26 against ADR-11 — the call count is **unchanged**)*. ADR-11's approved
+sequence for any partition *k* is itself three `build_features` calls plus one
+`fit_transforms`, quoted from `component-methods.md`:
 
-| # | Call | Rows it reads | What becomes of its output |
+```python
+raw   = build_features(..., spec=FrameSpec(k, "train", ...), partitions=P)   # transform_id None
+T_k   = fit_transforms(raw, partition=P[k])
+train = build_features(..., spec=FrameSpec(k, "train", ...), partitions=P, transform=T_k)
+score = build_features(..., spec=FrameSpec(k, "score",  ...), partitions=P, transform=T_k)
+```
+
+| # | Call | Rows it scores | What becomes of its output |
 |---|---|---|---|
-| 1 | `build_features(transform=None, purpose=None)` | that fold's **training partition** | **A fitting input only.** It is the frame `fit_transforms` is fitted on, and it is **never emitted, never persisted, and never consumed** by any downstream step. Both its representations are **untransformed** |
-| 2 | `build_features(transform=T_k, purpose="train")` | that fold's **training partition** | Emitted, stamped `(fold k, train, T_k)` |
-| 3 | `build_features(transform=T_k, purpose="evaluate")` | fold *k*'s **validation month**, plus the causal history W-4b permits | Emitted, stamped `(fold k, evaluate, T_k)` |
+| 1 | `raw` — `transform=None` | partition *k*'s **training range** | **A fitting input only** — the bundle `fit_transforms` is fitted on. Its `transform_id` is `None`, and **consuming it downstream is a contract raise**, not a convention: `fit_predict` and `06`/`07` raise `LeakageError` on any bundle whose `transform_id is None` |
+| 2 | `train` — `transform=T_k` | the same training range | Emitted as a `FeatureBundle` — spec `(k, "train")` and `transform_id` `T_k` persisted with the data |
+| 3 | `score` — `transform=T_k` | partition *k*'s **validation month** (containment; see W-4b) | Emitted as a `FeatureBundle` — spec `(k, "score")` and `transform_id` `T_k` |
 
-The earlier text described only *"two calls over disjoint months"*. Call 1 covers the **same**
-months as call 2, so it was neither of the two described — and because `05` **writes** what
-each call emits, leaving it uncounted meant three `(matrix, tensor)` pairs per partition could
-reach disk with nothing distinguishing them. **Negative control:** an **untransformed tensor
-reaching M-06 → fails.** With call 1's outputs barred from emission, the artifact inventory and
-the call count now agree.
+> **⚠ One limb of FU-6 = A is modified by the approved contract, stated rather than blurred
+> (2026-08-26).** FU-6 = A said the fitting call's outputs are *"never emitted, never
+> persisted, never consumed."* `services.md`'s owner-approved M9 box gives the raw bundle a
+> **named address** — `<partition_id>__train__untransformed/` — *"so a fixture or a reviewer
+> can see one was produced without opening it"*, and M13 counts all three constructions in the
+> cost envelope. So the raw bundle **may persist, visibly**; what survives of FU-6 = A intact
+> is the load-bearing half: the fitting output is **never consumed** — enforced by the
+> `transform_id is None` raise at every consumer, which is the same M-06 negative control
+> approached from the contract side. **Negative control (kept in ADR-11 form):** a bundle
+> whose `transform_id is None` — or an identity-less, bundle-less frame — reaching **M-06
+> fails.** The artifact inventory and the call count agree: three bundles per partition, the
+> `untransformed` one distinguishable **by address and by field**.
 
 **Why this is not the rejected "double call".** The alternative W-4 rejected is a **different**
 thing: transforming the *matrix* returned by one call while the *tensor* from that same call
@@ -488,70 +758,150 @@ emitted call emits both representations already transformed and consistent**. Th
 stands on its own reasoning; it never barred calling the function more than once for different
 row sets.
 
-### W-4a — The provenance stamp *(FU-4 = D)*
+### W-4a — The provenance stamp *(FU-4 = D, mapped onto ADR-11, 2026-08-26)*
 
-Every **emitted** feature artifact carries three recorded fields — `fold_id`, `purpose`,
-`transform_id` — written by `build_features` and defined in `domain-entities.md` § 5. They are
-what let `06` and `07` refuse a mismatched frame, since those scripts obtain their frames from
-**files** rather than from a call. Call 1's outputs are not emitted and therefore carry no
-stamp; an unstamped frame reaching `06`/`07` **fails**, which is the same control as the
-untransformed-tensor one above approached from the artifact side.
+> **The hand-rolled stamp DISSOLVES into ADR-11 — the contract already carries it.** FU-4 = D
+> ordered three recorded fields (`fold_id`, `purpose`, `transform_id`) added to every emitted
+> feature artifact, as an owed boundary amendment. ADR-11 had already made the equivalent
+> change at the application-design layer on 2026-08-23: **`FeatureBundle` persists
+> `spec.partition_id`, `spec.role`, `spec.scored_start`, `spec.scored_end` and
+> `transform_id` as the same object as the data** — *"so the stamp is the same object as the
+> data and cannot drift from it the way a side-car manifest can"* — and `Prediction` carries
+> `partition_id` and `transform_id` on to `07`, because *"the stamp has to travel the whole
+> way, not just to the first consumer."* Nothing remains for this unit to amend; the FU-4
+> decision's substance is preserved, its amendment is not owed (§ Amendments owed).
 
-**These fields are additional to, and do not replace, the project-wide `phase_id`,
+The FU-4 mechanism, restated in ADR-11 terms — three parts, each still a build instruction:
+
+1. **The stamp** — `FeatureBundle`'s identity fields, persisted per `services.md`'s on-disk
+   form (`matrix.parquet`, `tensor.npy`, `spec.json` in one bundle directory named
+   `<partition_id>__<role>__<transform_id>/`; loading reads all three or raises, and a
+   directory name disagreeing with its `spec.json` raises on load).
+2. **The assertion, at the consumer** — `06` and `07` assert, before scoring partition *k*,
+   that the bundle carries `spec.partition_id == k`, `spec.role == "score"`, and *k*'s own
+   `transform_id` — and **raise on any bundle whose `transform_id is None`**. The refusal
+   lives where the scoring happens, not where the transform was applied.
+3. **The test, with its kind declared** — `tests/test_train_only_transforms.py` stays
+   **manifest/bundle-based**: it reads the persisted bundles' identity fields and asserts the
+   refusal, with R-74's two controls — a `train`-role bundle reaching an evaluation
+   comparison **fails**, and partition *j*'s transform scoring partition *k*'s validation
+   month **fails** (now an identity mismatch). It is **not** static analysis of the nine
+   scripts, and **not** a monkeypatch-and-replay.
+
+**Residual, restated (FU-4's "unstamped or hand-assembled frame"):** a **bundle-less frame** —
+one that never passed through `build_features` and so never travelled as a `FeatureBundle`,
+leaving the consumers nothing to assert. That is still the boundary of what this contract
+delivers.
+
+**These identity fields are additional to, and do not replace, the project-wide `phase_id`,
 `source_id` and `target_definition_id` stamps**, which the mandated rule requires on every
 dataset, prediction, mask and comparison.
 
-### W-4b — Which rows a call may read *(FU-5 = D)*
+### W-4b — Which rows are scored *(FU-5 = D, mapped onto ADR-11, 2026-08-26 — one element defeated and raised at the gate)*
 
-`component-methods.md:380-393` approves
-`build_features(target, *, drivers, registry, matrix, fold, snapshot)` — **no period, month or
-row-range parameter**, and `fold` is the same value in every call for that fold. So the row set
-is **derived inside `build_features` from `fold` and `purpose`**, not passed in and not sliced
-by the caller. Stating this is a **behavioural specification of an approved signature**,
-legitimate under `component-methods.md` § Depth as an intra-package shape, and it is declared
-here rather than left implicit. *(Iteration-5 finding 2.)*
+Under ADR-11 the row question FU-5 answered is carried by the **spec, not derived from a
+`fold`-plus-`purpose` rule**: `FrameSpec.scored_start`/`scored_end` declare the scored range,
+and `build_features` **validates** it against the partition list — containment in the training
+range for `role="train"`, in the `validation_month` for `role="score"`. The emitted bundle's
+rows are the scored range and nothing else, so FU-5's emit-side control survives natively:
 
-| `purpose` | Rows the call may read | Rows it may emit |
+| `role` | The spec's scored range must be | The bundle's rows are |
 |---|---|---|
-| `None` | that fold's training partition | **none** — call 1 emits nothing |
-| `train` | that fold's **whole** training partition | the same rows |
-| `evaluate` | fold *k*'s validation month **plus the causal history the frozen 24-hour window requires** | **only** rows inside the validation month |
+| `train` (`transform=None`, the fitting call) | contained in that partition's **training range** | the scored range — `transform_id` `None`, consumable by nobody (W-4) |
+| `train` | contained in that partition's **training range** | the scored range, transformed |
+| `score` | **contained in** that partition's **`validation_month`** | the scored range, transformed — containment (not equality), so the D-11 fixture windows are representable |
 
-**Why the history rows must be readable.** `vtec_seq_24` is a **24-step causal sequence** and
-`vtec_lag_24h` an **exact 24-hour lag**, so the first window of any validation month needs the
-**preceding day's** rows. Those rows are **lawful inputs at the forecast origin** — they are
-past observations, not future ones — so denying them buys nothing scientific. The two
-alternatives both fail: assemble the natural leading buffer under a containment rule and
-**every `evaluate` call raises `LeakageError`** on lawful rows; or slice to exactly the month
-and the first ~24 hours of **every** validation month yield incomplete `vtec_seq_24` windows
-that W-2 requires excluded.
+**Control (FU-5's, kept):** a `score` spec whose range exceeds the validation month →
+`build_features` **raises**; emitted rows exceeding the month are therefore not constructible.
+**Control (kept):** an embargo row inside an emitted `score` bundle → **fails** — the first
+24 h of every validation month are **excluded and counted** (FR-P1-04-5), and the count is
+emitted, never merely dropped.
 
-**Which frame element 4 tests, stated exactly:** the **assembled pre-window frame**, inside
-`build_features`, before windowing. It is that frame the accepted set above is asserted
-against, and the emitted rows are the subset the third column permits.
+> ## ⚠ FU-5 = D's DECEMBER CONSEQUENCE IS DEFEATED BY ADR-11 — CONFLICT RAISED AT THE GATE, 2026-08-26
+>
+> **The two owner decisions, side by side.** FU-5 = D (2026-08-24, taken on the retired
+> interface) ruled that an `evaluate` call may **read** the causal history the frozen 24-hour
+> window requires while emitting only the month, and that therefore *"the G-06 locked-test
+> prediction covers the full December, 1–31, with no first-day loss."* ADR-11 (2026-08-23,
+> the approved contract) had already considered **exactly this mechanism** — `FrameSpec`'s
+> `lead_in_hours` field existed *"precisely to make a window cross the November/December
+> boundary"*, holding late-November rows *"present but never scored"* — and the owner
+> **removed it**, because FR-P1-04-5's acceptance criterion reads verbatim *"No window
+> crosses a boundary … the first 24 h are excluded and counted"*, and enlarging the
+> locked-test scored set is **supervisor-owned under Vision §8.2 and §8.7 and gate G-05**.
+> ADR-11's stated consequence, quoted: *"**1 December is not scored.** The locked test covers
+> **30 days, not 31**, and the first 24 h of **every** validation month (Apr, Jul, Oct, Nov)
+> are likewise excluded and counted. This is the requirement working as approved, not a
+> defect — but a December coverage figure that silently reads as 31 days would be wrong."*
+>
+> **What this artifact does.** It follows the approved contract: windows reaching before
+> `scored_start` are **excluded and counted**, December included — because writing FU-5's
+> "no first-day loss" as live text would (a) contradict the named upstream contract, the
+> exact Critical this rebuild exists to fix, and (b) adopt a reading on a supervisor-owned
+> value, which no artifact of this stage may do. The old "readable causal history" negative
+> control (*"the same 24 h readable as history must not raise"*) is **superseded** with the
+> mechanism that carried it.
+>
+> **What this artifact does NOT do.** It does not resolve the conflict. FU-5 = D is an
+> explicit owner ruling and is **not silently dropped**: the contradiction between it and
+> ADR-11's `lead_in_hours` removal — two owner decisions, the later taken without sight of
+> the earlier — **goes to the gate for the owner**, with the note that restoring "no
+> first-day loss" requires amending the approved `component-methods.md` and, per ADR-11's own
+> text, routes through the supervisor (Vision §8.2/§8.7, G-05), not through this unit.
+> **Stated where G-06 is described**, per FU-5 = D's own instruction: under the contract as
+> approved, the G-06 locked-test prediction covers **30 December days, 2–31, with the
+> first-day exclusion counted and disclosed** wherever December coverage is reported.
 
-**Control:** emitted rows exceeding the validation month under `purpose="evaluate"` →
-**fails**. This is the check that keeps a readable history buffer from becoming an emitted one.
+> ## ⚠ THE CONFLICT THE BOX ABOVE RAISED IS CLOSED BY `D-28` — RECOMMENDATION 6, 2026-08-28
+>
+> **The box above stays as the record of how the conflict was raised, and every FU-5 = D
+> quotation in it stays as the dated history it already is.** What follows is the resolution,
+> not a rewrite of it.
+>
+> **D-28** (2026-08-28; project decision owner under the recorded student/supervisor authority
+> equivalence, at this stage's governance gate, on `GOV-2026-08-28-FD-01` Recommendation 6,
+> board option 2 with the Chair's added condition): the G-06 locked-test scored set is
+> **2–31 December 2022 inclusive, 30 days**. The first 24 hours of the locked month are
+> **excluded and counted**, exactly as for every validation month, because no window may cross
+> a partition boundary. **A 1 December row reaching any metric entry point raises.**
+>
+> **What D-28 adds is the record, not the number.** The reduction was already decided at this
+> stage on 2026-08-26 as **FU-7 = A**, and already propagates as live design fact through eight
+> units. What was missing was a D-number, a change record and a split-manifest entry — the three
+> things Recommendation 6 found absent.
+>
+> **The authority conflict is disclosed, not resolved.** Vision:751 and TE:400 are byte-identical
+> — `| Locked test | — | — | December 2022 only |` — and assign the locked-test row **`—`** in
+> the Embargo column, the boundary protection there being the **frozen manifest** on the Final
+> refit row. `requirements.md` FR-P1-04-5, a **level-4** artifact, states the 24-hour embargo and
+> cites those very tables; its own acceptance criterion enumerates *"all five partitions"*, which
+> excludes December from the five. D-28 records that **a level-4 paraphrase is the sole textual
+> basis for the 30-day reading** and **carries the conflict to G-05** rather than deciding it.
+> This artifact adopts no reading on it.
+>
+> **Two obligations D-28 records that this unit does not own**, named so they are not lost: a
+> **revised split manifest** is owed at G-05 (Vision §8.2 requires one for any date
+> adjustment, and none exists because no manifest exists yet), and the 30-day scored window must
+> be **disclosed on every claim surface** (Recommendation 16, open elsewhere — `REQ-CLAIM-01`
+> still reads *"tested on December 2022 only"*).
+>
+> **D-28's own stated limitation, carried rather than summarised away:** it is an owner
+> ratification under the recorded equivalence; **no supervisor signature artifact exists and none
+> is claimed**, Vision §15.1 places "test dates" under *"Supervisor: Approval required"*, and both
+> board seats' readings of the equivalence's scope are on the record.
 
-> **The December consequence, stated where it is checkable.** Under this rule the **G-06
-> locked-test prediction covers the full December, 1–31**, with **no first-day loss**. Had the
-> row set been sliced to exactly the month, the first ~24 hours of December would have produced
-> incomplete windows that W-2 excludes, permanently removing **1 December** from the locked
-> test — a scientific consequence that § 6's fold table could not absorb, since December
-> carries **no embargo row**. The locked partition is still reached only through **W-6's
-> execution guard**, against a verified `g05_signature`; W-4b governs which rows the call may
-> read, never whether the lock is open.
+The other rejected alternatives stand unchanged: **re-windowing** a transformed frame would
+build a second window definition and break the one-definition property this workflow rests
+on; **tensor-side transformation** needs timestamps the `NDArray` does not carry.
 
-The other rejected alternatives: **re-windowing** a transformed frame would build a second
-window definition and break the one-definition property this workflow rests on;
-**tensor-side transformation** needs timestamps the `NDArray` does not carry.
+*(The "seventh amendment" this section previously declared dissolved into ADR-11 —
+`build_features`' approved signature carries `transform` and the role-bearing spec natively.
+See § Amendments owed.)*
 
-**This is the seventh amendment**, not a free consequence of the sixth — a different function,
-in a different package's boundary. Counted in § Amendments owed.
-
-**Negative controls:** build a tensor from a frame carrying rows outside its transform's
-permitted set → **fails**. Emit a transformed matrix beside an untransformed tensor for one
-feature-set ID → **fails** on parity.
+**Negative controls:** a spec whose scored range falls outside what its `role` permits →
+`build_features` **raises**. Emit a transformed matrix beside an untransformed tensor for one
+feature-set ID → **not constructible** under ADR-11 (one producer emits both), and the parity
+assertion **fails** if a hand-assembled pair is presented.
 
 **WS-13 is this unit's row**, and its evidence departs from the governing document:
 
@@ -583,6 +933,31 @@ departure goes to the gate.
 **F1** Jan–Mar/Apr · **F2** Jan–Jun/Jul · **F3** Jan–Sep/Oct · **F4** Jan–Oct/Nov ·
 **December locked**. Each carries a **24-hour embargo**; the first 24 h are **excluded and
 counted**. **No random or shuffled cross-validation.**
+
+**Both bounds of every training range, specified** *(added 2026-08-28 per Recommendations 4 and
+25; the full table with `kind` and `validation_month` is `business-rules.md` R-80's, and no fold
+boundary moves)*:
+
+| Partition | `train_start` | `train_end` |
+|---|---|---|
+| **F1** | `2022-01-01` | `2022-03-31` |
+| **F2** | `2022-01-01` | `2022-06-30` |
+| **F3** | `2022-01-01` | `2022-09-30` |
+| **F4** | `2022-01-01` | `2022-10-31` |
+| **`REFIT`** | `2022-01-01` | `2022-11-30` |
+| **`DEC`** | `2022-01-01` | **`2022-11-30`** |
+
+Both columns are read from **`configs/data.yaml`** by `build_partitions(snapshot)`, so TC-03e
+is satisfied and no scientific constant sits in source. F1–F4's and `REFIT`'s values are
+**restatements** of FR-P1-04-5's frozen fold table; **`DEC.train_end = 2022-11-30`** is the one
+genuine specification, made on Recommendation 25's board option 1 so that **a December fit is
+unrepresentable by the field itself** — a second structural bar on the lock, independent of
+W-6's signature guard. It changes no fold boundary, no test date and no scored range: D-28's
+2–31 December scored set governs `scored_start`/`scored_end`, a different field pair, and `DEC`
+is never a fitting scope. The ADR-11 carve-out is **retained for interface clarity rather than
+necessity**, and the residual — a Jan–Nov `DEC`-stamped `train` bundle is shape-representable
+though no call builds one — is carried to the gate, not closed here (that would be board option
+3, which was not ruled). See R-80's dated box.
 
 **A fifth partition, previously omitted** (FR-P1-04-5): **`Final refit: 1 Jan – 30 Nov`**, and
 November enters it **only after all features, hyperparameters, masks, seeds, thresholds and
@@ -619,15 +994,38 @@ against**."*
 > **unsatisfiable as written** and that is a defect in the governing document, not in this
 > design. **Flagged, not resolved.**
 
-> **Open shape decision, stated rather than assumed: the final refit is not a `FoldSpec`.**
-> `FoldSpec` carries `validation_month`; the final refit has none. How it is represented in
-> the same partition list is raised at the gate — **together with W-3's element 4**, since
-> `fit_transforms` takes a `FoldSpec` and the refit's transform has no fitting path until this
-> is settled. **One decision, not two**, and G-06 depends on it.
+> ## ⚠ THE OPEN SHAPE DECISION IS DISCHARGED BY ADR-11 — NOTED 2026-08-26
+>
+> **Superseded open item, preserved:** *"the final refit is not a `FoldSpec`. `FoldSpec`
+> carries `validation_month`; the final refit has none. How it is represented in the same
+> partition list is raised at the gate — together with W-3's element 4, since `fit_transforms`
+> takes a `FoldSpec` and the refit's transform has no fitting path until this is settled. One
+> decision, not two, and G-06 depends on it."*
+>
+> **Resolved upstream, 2026-08-23:** `component-methods.md` replaced `FoldSpec`/`build_folds`
+> with **`Partition`** (`partition_id`, `kind: fold | refit | locked`, `train_end`,
+> `validation_month: date | None`, `embargo_hours=24`) precisely because *"`validation_month:
+> int` is required, and the final refit … has none — so the refit was representable nowhere
+> … December inherited the same gap, and G-06 depends on the refit."* `build_partitions`
+> returns all **six** (`F1`–`F4`, `REFIT`, `DEC`); `None` means **the final refit alone**, and
+> `DEC` carries **2022-12-01**. Both `fit_transforms` and `build_features` take `Partition`s,
+> so the refit has a fitting path and a feature path, and the G-06 apply is the enumerated
+> `REFIT` → `DEC`/`score` pair (W-3, W-6). **This gate item is closed; what remains open at
+> the gate for this topic is nothing** — BLK-04 itself remains open on its own terms.
+>
+> **The two counts, carried from ADR-11's own M5 amendment so they are never confused
+> again:** `build_partitions` returns **6**; the **split manifest FR-P1-04-5 gates on
+> enumerates 5** (`F1`–`F4`, `REFIT`, each with training range, validation month and excluded
+> count); the locked partition record (`DEC`, its evaluated month, its access-gate state) is
+> recorded **separately**, because it is access-gated and the manifest is not. A split
+> manifest carrying six rows **fails** FR-P1-04-5, and so does one carrying four.
 
 **Membership derives from record timestamps** — `assert_membership_from_timestamps` raises on
 any row whose month or year disagrees with its partition. That is the defect that filed
-locked-month records into `audit_evidence_2022-01/`.
+locked-month records into `audit_evidence_2022-01/`. It **validates and derives nothing** —
+the training ranges nest, so no per-row label exists; any check needing "which partition"
+compares declared identities (`FrameSpec.partition_id` against `Transform.partition_id`), per
+ADR-11's own annotation.
 
 ## W-6 — The locked partition's execution guard
 
@@ -907,49 +1305,89 @@ signature block never updated for either amendment; and `domain-entities.md` § 
 `LeakageError` and `PartitionError` rows still carrying superseded wording. These are **not**
 repaired here, because the redesign changes what they should say.
 
+> **Closing note, 2026-08-26.** 2.6 **was** reopened and **did** resolve both structural
+> blockers on 2026-08-23 — `FeatureBundle` carries provenance across the `05`→`06` handoff,
+> and `FrameSpec`'s scored range with `build_features`' validation is the row selector. The
+> 2026-08-24 and 2026-08-26 waves over this unit failed to check back against the resolved
+> contract (the fourteenth-receipt review's headline Critical); this rebuild is that
+> reconciliation. The box above stays as the record of why the jump was taken.
+
 ## Amendments owed
 
-**Derived here, not carried.** Every prior count in this stage that was carried from adjacent
-prose was wrong; this one is built from its two sources.
+**Re-derived from scratch, 2026-08-28, after Recommendations 4 and 7.** Every prior count in
+this stage that was carried from adjacent prose was wrong; this one is built from its sources
+and the arithmetic is printed before it is asserted: **5 + 1 + 1 = 7, across 5 units**. *(The
+2026-08-26 re-derivation, `5 + 0 = 5 across 3 units`, was right on the day it was written and
+is superseded because this unit owes one amendment again.)*
 
 | Source | Owed | Basis |
 |---|---|---|
-| `external-products` **R-55** | **5**, across **3** units | Derived there, boundary contracts only, after two corrections of its own. **Not restated here** — a restated count drifts, which is the failure this row exists to avoid. |
-| **This unit**, W-3 | **1** | `apply_transforms` gains a required `purpose: ApplyPurpose`. Owner-approved 2026-08-23. |
-| **This unit**, W-4 | **1** | `build_features` gains `transform: Transform \| None = None` **and** `purpose: ApplyPurpose \| None = None`. **One function, one amendment** — the two travel together and supplying one without the other raises. |
-| **This unit**, W-4a | **1** | The **provenance stamp** — `fold_id`, `purpose`, `transform_id` as recorded fields on every emitted feature artifact, refused at the consumer by `06_train_and_predict.py` and `07_evaluate_and_report.py`. Added 2026-08-24 on **FU-4 = D**. The **fifth** unit it reaches is the pair of consuming scripts, whose own units have not designed yet. |
-| | **8 across 5 units** | 5 + 1 + 1 + 1 |
+| `external-products` **R-55** | **5**, across **3** units | Derived there (`acquisition` 3, `inventory-and-registry` 1, `external-products` 1), boundary contracts only, after two corrections of its own. **Not restated here** — a restated count drifts, which is the failure this row exists to avoid. None of its five rows touches the `src/features`/`src/data/splits.py` surface ADR-11 redesigned. |
+| `evaluation-and-comparison` **R-103** | **1**, **1** unit | Derived there as *"the BLK-08 resolution package (R-103), one consolidated amendment"* and **not recounted here**: the `component-dependency.md` edge row, `component-methods.md`'s resolver surface, `Transform`'s target-touching declaration, and `Prediction`'s inversion-lineage field. **R-84 changes that amendment's *content*, not its count** — `load_transform(...) -> Transform` narrows to `load_inverse(...) -> Inverse`, and the round trip relocates into `src/features`. Counting a second amendment here would **double-count** the co-owner surfaces R-103 already carries as *"pending adoption"*. |
+| **This unit** | **1** | **The BLK-09 resolution package (R-83), one consolidated change record**: `train_start: date` on `src/data/splits.py`'s `Partition`, **and** W-3 element 2's `PartitionError` reassignment for the id limb, which `component-methods.md:642-648` currently types `LeakageError`. Same granularity as R-55's one amendment for three `src/external` boundary blocks and R-103's one for four surfaces. |
+| | **7 across 5 units** | 5 + 1 + 1 |
 
-**Why the fifth unit counts as one.** `06` and `07` are two scripts, but R-55's counting unit
-is a **bundled contract change** rather than a parameter — its own rows already bundle a
-dataclass field with a function, and one row covers three modules' whole blocks. One stamp
-contract refused at both consumers is therefore **1**, consistent with the basis it is summed
-against rather than only with the arithmetic.
+**The five units, named so the count can be checked rather than trusted:** `acquisition`,
+`inventory-and-registry`, `external-products` (R-55's three), `evaluation-and-comparison`
+(R-103), `features-and-splits` (R-83).
 
-**Both of this unit's are cross-package boundary calls**, so `component-methods.md` § Depth's
-carve-out does not reach them. What that carve-out **does** still cover, and what therefore
-owes nothing: `Transform`'s internals (it carries its `FoldSpec`), `ApplyPurpose`'s definition,
-and every other `src/features/*` and `src/data/splits.py` shape beyond the named boundary
-calls — all *"referenced as a type and left unspecified: … intra-package"*, this stage's to
-specify.
+**What owes nothing, stated so a later sweep does not add it back.** W-5's and R-80's six
+`train_start`/`train_end` **values** are `configs/data.yaml` content, not a boundary shape: the
+field pair is the amendment (R-83), the values that fill it are configuration — the same
+reasoning `evaluation-and-comparison` applies to its Q5 (*"configuration content, not a
+boundary contract"*).
 
-> **The superseded claim, preserved.** Three artifacts and the question file previously stated
-> *"nothing here owes an amendment; the running total stays five across three units."* That was
-> true of the first two element-4 remedies, both of which avoided a signature change — and both
-> of which **did not work**. The amendment is what the third remedy cost, and hiding it inside
-> the old total would have made the count wrong in the direction that flatters this unit.
+> **⚠ The 5-unit coincidence is NOT agreement.** The stale figure in `models-and-baselines`'
+> frozen artifacts is *"**8** across **5** units"*; this re-derivation is *"**7** across **5**
+> units"*. Same unit count, different total, and **different sets**. A sweep comparing totals
+> would call it a disagreement; a sweep comparing unit counts would call it agreement; only the
+> named set-difference settles it (`project.md` § Way of Working, c21). Checked deliberately,
+> because this stage has now recorded that failure mode twice.
+
+> **The superseded totals, preserved in order.** *"Nothing here owes an amendment; the running
+> total stays five across three units"* (true of the first two element-4 remedies, which
+> avoided a signature change and did not work) → *"7 across 4"* (the `purpose` and
+> `transform`+`purpose` amendments) → *"8 across 5"* (FU-4 = D's stamp). All three unit-local
+> amendments mechanised the retired interface; ADR-11 absorbed their substance, so the total
+> returns to R-55's basis. **The old total was not wrong when written — it was written against
+> a contract that had already changed**, which is a different failure (the sweep that never
+> re-read its source) and is recorded in the fourteenth-receipt review below.
+
+> **Raised at the gate, not edited (frozen READY artifacts):** `models-and-baselines`'
+> `business-rules.md` (Assumptions) and `domain-entities.md` (Assumptions) both state *"the
+> total stays **8 across 5 units**"*. That figure is **stale** — the
+> correct total is **7 across 5 units** *(updated 2026-08-28; it read "5 across 3 units" from
+> 2026-08-26 until R-83 was added)* — but those artifacts are terminal-READY under a
+> frozen receipt and this stage does not edit them. `evaluation-and-comparison`'s own
+> § Amendments owed derives *"6 across 4 units"*, correct there on 2026-08-26 and now **7 across
+> 5** by the same arithmetic once R-83 is counted; that unit is receipted too, so the
+> reconciliation is a gate item rather than an edit. Their citations of **R-80** (the closed
+> six-row partition list) and **R-76a's third limb** remain valid: both rules keep their ids,
+> subject matter and limb structure in this rebuild. This unit's own
+> `functional-design-questions.md` history also carries "8 across 5" in its FU-4 record and
+> receipt notes; it is a question-file history this stage does not edit.
+
+**What § Depth's intra-package carve-out still covers, and what therefore owes nothing:**
+`Transform`'s fitted state, `windows.py`'s internals, the excluded-row counters, and every
+other `src/features/*` and `src/data/splits.py` shape beyond the named boundary calls — all
+*"referenced as a type and left unspecified: … intra-package"*, this stage's to specify.
 
 ## Assumptions & Open Questions
 
 - **[assumption]** Rule IDs continue the single sequence — `foundation` R-01…R-17, `governance-guards` R-18…R-29, `acquisition` R-30…R-43, `inventory-and-registry` R-44…R-53, `external-products` R-54…R-63, `target-standardization` R-64…R-73 — so `business-rules.md` opens at **R-74**. If per-unit numbering was intended, say so at the gate.
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 7 disagree. Neither artifact is edited by this stage.
-- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify (`component-methods.md` § Depth) — **still true, and still owes nothing for them.** But three boundary changes **are** owed: `apply_transforms` gains a required `purpose` (W-3), `build_features` gains `transform` **and** `purpose`, which travel together (W-4), and every emitted feature artifact gains the `fold_id`/`purpose`/`transform_id` stamp refused at `06`/`07` (W-4a, **FU-4 = D**). Running total **8 across 5 units**, derived in § Amendments owed. *(Corrected 2026-08-24 from "**No amendment is owed**; the running total stays five across three units" — a stale restatement that survived the 7-across-4 correction because the sweep was keyed to the numeral rather than to the claim.)*
+- **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify (`component-methods.md` § Depth) — **still true, but this unit owes one boundary amendment again**: `train_start` is a field of `Partition`, a **named boundary shape**, so § Depth's carve-out does not reach it. Running total **7 across 5 units** (`acquisition`, `inventory-and-registry`, `external-products`, `evaluation-and-comparison`, `features-and-splits`), re-derived in § Amendments owed with the arithmetic printed. *(Rewritten 2026-08-28 per Recommendation 4. The three that dissolved into ADR-11 — W-3's `purpose`, W-4's `transform`+`purpose` pair, W-4a's stamp — stay dissolved; R-83's is new. This entry read "5 across 3 units" from 2026-08-26 and "8 across 5 units" before that; every superseded total is preserved in § Amendments owed's box, which also records why the 5-unit coincidence with the stale "8 across 5" is not agreement.)*
+- **[assumption]** **`PartitionError` is declared where `src/features` and `src/data` can import it** — read as `src/data/config.py`, not `src/models/`. Recommendation 8's ruling states `src/models/`, but `component-dependency.md` marks **`src/features` → `src/models`** and **`src/data` → `src/models`** as **`—`**, and every `PartitionError` raise in this unit lives in `src/data/splits.py` or `src/features/*`, so on the matrix as approved this unit could not import it. **Owner ruling needed at the gate**; see `domain-entities.md` § 10's dated box. *(`foundation` R-01 on disk still reads "all fourteen" and names no `PartitionError`, so the amended fifteen-exception enumeration is cited as ruled, not as written.) ⚠ **SWEPT 2026-08-28 on the resume pass — this disk-state claim is SUPERSEDED.** `foundation` R-01 **has been amended** and now reads **fifteen**, with `PartitionError` promoted into the enumeration, the count restated as **derived and printed** rather than carried in prose, and `InverseTransformError` **explicitly disposed** — not a sixteenth, riding R-01's *"any future integrity-related exception"* clause, on the stated ground that the two units raising it agree on its condition and meaning, so nothing needs reconciling. Verified at `foundation/functional-design/business-rules.md` R-01 (the amendment row, the superseded-wording box, and the `InverseTransformError` box). **The dependency this sentence recorded is discharged; any open item stated alongside it is NOT** — see the sentence it accompanies.*
 - **[assumption]** `tests/test_locked_test_guard.py` is **this unit's**, per § 7 — it exercises both limbs and assigning it to `governance-guards` would close a cycle.
 - **Open — BLK-04 is an EXIT condition** on this unit and on `models-and-baselines`, `evaluation-and-comparison`, `statistical-inference` and `regimes-diagnostics-reporting`. **Approving this design is not the contract's approval.** NFR-LEAK-01's evidence is owed to the **Supervisor at G-04 and G-05**.
 - **Open — TA-33, TA-34, TA-35 and TA-36 are `Pending`** — approved, never run.
 - **Open — `unit-of-work.md` §§ 6 and 7 are stale on coverage figures, and § 5 on a module count.** The sweep above shows the other nine sections agree. Reported at the gate for one annotate-in-place decision; **not edited**.
 - **Open — WS-13's evidence departs from TE §16** and the story map adopts no reading. This stage adopts none either. `test_common_masks.py` is required here through **TA-11** regardless.
-- **Open — the final refit is not a `FoldSpec`** (no validation month). Its representation in the partition list is a shape decision stated at the gate.
+- **CLOSED 2026-08-28 by D-28 — the FU-5/ADR-11 December conflict.** Formerly *"Open — FU-5 = D's December consequence conflicts with ADR-11's `lead_in_hours` removal (two owner decisions; see W-4b's dated box)"*. **D-28** (2026-08-28, project decision owner under the recorded authority equivalence, on Recommendation 6) freezes the G-06 scored set as **2–31 December 2022 inclusive, 30 days**, first 24 h **excluded and counted**, and **discloses rather than resolves** the Vision §8.2 / TE §7.1 `—`-cell conflict, carrying it to **G-05**. W-4b's dated boxes stand as the record of how the conflict was raised, and their superseded FU-5 = D quotations are untouched. Two obligations D-28 records that this unit does not own: a **revised split manifest** at G-05, and the 30-day disclosure on every claim surface (Recommendation 16, open elsewhere). D-28's own limitation is carried: **no supervisor signature artifact exists and none is claimed.**
+- **Open — BLK-09 is an EXIT condition on THIS unit, solely** (`unit-of-work.md:867`, `:857`, `:333`). **`business-rules.md` R-83 is the contract**, authored 2026-08-28 per Recommendation 4. **Approving this design is not the amendment's approval.** Recorded here because the ADR-11 rebuild had **de-labelled** it while asserting the dependent check was executable — see W-3's dated BLK-09 box.
+- **Open — BLK-08 is an EXIT condition on this unit and `evaluation-and-comparison`, for both owners** (`unit-of-work.md:842`). **R-84 is this unit's half B**, narrowed to `ABL-DIFF` on **D-27**; the premise limb closes for the primary path, the mechanism limb stays open. The `src/evaluation` → `src/features` edge is **owed and unapproved** (D-27 withheld authorisation), and the `load_inverse`/`load_transform` divergence from R-103 half A goes to the gate.
+- **Open — a Jan–Nov `DEC`-stamped `train` bundle is shape-representable and built by no call**, the residual of Recommendation 25's option 1 (W-5, R-80's dated box). Closing it structurally is board option 3, which was not ruled.
+- **Discharged 2026-08-26 — the final-refit representation.** The former open item *"the final refit is not a `FoldSpec`"* is resolved by ADR-11's `Partition` (`REFIT`, `validation_month=None`; `DEC`, 2022-12-01); see W-5's dated box. Kept in this list so the gate sees the item closed rather than vanished.
 - **Open — FR-P1-04-10 has no acceptance row.**
 - **Open — an unresolved station registry blocks `station_lat` and excludes `lst_sin`/`lst_cos`.** Consumed from `inventory-and-registry` R-45/R-46; what provenance is sufficient is **not** decided here.
 - **G-09 is not signed**, and **BLK-04 independently bars implementation.**
@@ -1367,3 +1805,232 @@ BLK-04's contract remains one whose closing half a developer would have to inven
 > 2026-08-24 remediation (FU-4/5/6: stamp, W-4a/W-4b, three-call sequence, W-2 block, amendment
 > total 8 across 5) is unchanged. The adversarial review under this floor follows this save.
 > **BLK-04 remains an open exit condition. G-09 remains unsigned.**
+
+---
+
+## Review — 2026-08-26 fourteenth-receipt pass (iteration-5 remediation verification)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-26T19:02:17Z
+**Iteration:** 1 (full verification pass under the fourteenth-redo re-confirmation receipt; prior iterations 1–5 above predate this pass and are preserved in place)
+
+### Headline finding — the remediation is built on a superseded upstream contract
+
+**Critical.** `component-methods.md` — one of this unit's two named boundary-call sources
+(cited in all four artifacts' Sources lists) — was **redesigned on 2026-08-23** under its own
+`## The src/features leakage boundary — redesigned 2026-08-23` heading, explicitly because of
+*"a backward jump from stage 3.1 after five review [cycles]"* — the same backward jump this
+file's own `## ⚠ STAGE 3.1 SUSPENDED FOR THIS UNIT` box (still present, unedited, above)
+describes as directed by the owner on 2026-08-23. That redesign, verified by direct read of the
+current `component-methods.md`:
+
+- **Removes `apply_transforms` entirely.** Quoted: *"A function that applies a fitted
+  transform to an arbitrary frame **is** the hole — five cycles of trying to constrain its
+  argument established that the constraint cannot be expressed over rows. Transforms are now
+  applied **only** inside `build_features`."*
+- **Replaces the separate matrix/tensor return with a single `FeatureBundle`** carrying
+  `partition_id`, `role`, `scored_start`, `scored_end`, `transform_id` as one persisted,
+  reloaded unit — *"so the stamp is the same object as the data and cannot drift from it."*
+- **Replaces the `purpose`-scoped containment check with an identity check**:
+  `build_features` raises `LeakageError` when `transform.partition_id != spec.partition_id` —
+  *"the nesting that defeated every date-range rule is irrelevant to an id comparison."*
+- Is corroborated by `services.md`, this unit's other named boundary source, which independently
+  states (`M13`, added 2026-08-23): *"ADR-11 removed `apply_transforms`, which means a
+  transform is applied **only** inside `build_features`"*, and lists
+  `05_build_features_and_splits.py`'s output as **`FeatureBundle`s (matrix + tensor +
+  `FrameSpec` + `transform_id`)** — not the separate matrix/tensor pair W-2/W-4/W-4a describe.
+
+**None of this reached the four artifacts under review.** A direct search of all four files for
+the strings that mark the new interface returns zero hits: `ADR-11` — 0 occurrences in all four
+files; `FeatureBundle` — 0 in all four files. Meanwhile the interface the redesign removed is
+cited pervasively: `apply_transforms` — 40 times in this file, 12 in `business-rules.md`, 7 in
+`domain-entities.md`, 12 in `functional-design-questions.md`; `ApplyPurpose` — 7 / 5 / 4 / 1.
+`domain-entities.md`'s W-4b even cites a now-dead line range — *"`component-methods.md:380-393`
+approves `build_features(target, *, drivers, registry, matrix, fold, snapshot)`"* — but lines
+380-393 of the current `component-methods.md` contain the split-manifest row-count table
+(`build_partitions`'s return value vs. the manifest vs. the locked-partition record), not a
+`build_features` signature at all; the actual current signature is
+`build_features(target, *, drivers, ...) -> FeatureBundle`, located elsewhere in the file, with
+`apply_transforms` struck out under a box headed *"THE SUPERSEDED INTERFACE, PRESERVED, AND WHY
+IT COULD NOT WORK"* — the exact interface this unit's W-2 quotes as *"the approved interface."*
+
+**Why this invalidates the whole iteration-5 remediation, not one citation.** FU-4's provenance
+stamp (W-4a), FU-5's read/emit split (W-4b), FU-6's three-call sequence, R-74's element 4, and
+R-81's window-definition amendment are all mechanisms built to close gaps in the **old**
+`apply_transforms`/`build_features(..., transform, purpose)` interface. The redesigned
+`component-methods.md` already closes the identical gap — a leak with no downstream symptom,
+traced across the `05`→`06`/`07` file handoff — by a different and already-approved route:
+`FeatureBundle` carries its own stamp as one persisted object, and the leak check is an identity
+comparison rather than a purpose-scoped row-range check. The redesign's own text states plainly
+why the old shape could never be patched into safety: *"five cycles of trying to constrain its
+argument established that the constraint cannot be expressed over rows."* Continuing to patch
+`apply_transforms` — as both the 2026-08-24 and 2026-08-26 remediation waves did — patches a
+function this unit's own named upstream contract has deleted.
+
+**This is not a defect the redesign introduced silently.** This file's own suspended-stage box,
+written the same day as the redesign, already flagged that *"2.6 must resolve"* the two
+structural blockers (no provenance across the `05`→`06` handoff; `build_features` has no row
+selector) and stated plainly that everything below that box is *"not an approved contract"* and
+records only *"the best mechanism reachable without reopening 2.6."* 2.6 **was** reopened and
+**did** resolve both blockers on 2026-08-23 (`component-methods.md`) and again on 2026-08-23/25
+(`services.md`, ADR-11). What failed is that the "regenerated" 2026-08-24 pass and the "fixed"
+2026-08-26 pass over this unit never checked back against the resolved contracts before
+mechanising FU-4/5/6 on top of the interface 2.6 had already retired.
+
+### Disposition of iteration-5 findings 1–11 (fixes verified at their stated location; the superseded-contract caveat above applies to every mechanism cited)
+
+| # | Severity (orig.) | Claimed fix | Verified at location? |
+|---|---|---|---|
+| 1 | Critical | Provenance stamp (`fold_id`, `purpose`, `transform_id`), consumer refusal at `06`/`07`, manifest-based test | Present as claimed (W-4a; `domain-entities.md` § 5; R-74's pairing-control box) — but stamps a frame/tensor pair the redesigned `component-methods.md`/`services.md` no longer emit in that shape (headline finding) |
+| 2 | Critical | Row set derived from `fold`+`purpose`; read/emit split; element 4 tests the pre-window frame | Present as claimed (W-4b; `domain-entities.md` § 5) — derived from a `build_features` signature superseded 2026-08-23, and the cited line range (`component-methods.md:380-393`) no longer contains that signature |
+| 3 | Major | Three calls per fold; fitting outputs never emitted; M-06 negative control | Present as claimed (W-4, R-81, `domain-entities.md` § 5 three-call table) — built on the same superseded call shape |
+| 4 | Minor | W-2 signature block updated (adds `transform`, `purpose`, `AlignmentError`) | Confirmed present at this file's W-2 block |
+| 5 | Minor | `domain-entities.md` § 10's `LeakageError`/`PartitionError` rows restated | Confirmed present with the dated correction note at § 10 |
+| 6 | Minor | Duplicated "which representation" sentence rewritten | **NOT verified — regression found.** This file's W-3 (~line 404-414) and `business-rules.md`'s R-74 (~line 200-206) both carry the corrected, executable text with a dated note. `domain-entities.md` § 4's own "Which representation" paragraph (lines 250-253) still reads the **superseded, unexecutable** version verbatim — *"Transforms apply to the timestamped frame; both representations are built from a frame that has already passed... never transformed directly"* — with no correction marker, directly contradicting § 5's correct account two sections later in the same file. This file's own note on finding 6 (in the W-3 box) asserts *"`domain-entities.md`:237-239 already carried this rewrite"* — but lines 237-239 of the current `domain-entities.md` are part of the element-4 amendment table's `evaluate` row, not the "Which representation" paragraph; the claim misidentifies its own evidence |
+| 7 | Minor | One-parameter Assumptions entries corrected to name both `transform` and `purpose` | Confirmed present in all three files' Assumptions sections |
+| 9 | Major | `evaluate` accepted-set rows carry the read/emit split; alignment sweep of remaining flat-reading sentences | Confirmed: R-74's table (`business-rules.md`), the element-4 table (`domain-entities.md` § 4), and W-3's element 4 (this file) all carry the split with dated notes; no live "exactly its validation month" sentence found outside preserved/superseded quote boxes |
+| 10 | Minor | `business-rules.md` Sources list corrected: R-24 cited, R-25/R-28 removed | Confirmed at `business-rules.md`'s Sources list; R-24 verified as a citable rule in `external-products/business-rules.md`; R-25/R-28 not drawn on in this file's body |
+| 11a | Minor | R-76a id/position kept, reason stated (renumbering would break live citations) | Confirmed: `models-and-baselines`' `business-rules.md` and `domain-entities.md` both cite *"R-76a's third limb"* verbatim, corroborating the stated reason |
+| 11b | — | Tree-revision half already carries its gate referral | Not independently re-litigated; consistent with the prior record |
+
+### Other findings
+
+- **Critical (new).** Headline finding above: the artifact set's core mechanism (W-2/W-3/W-4/W-4a/W-4b,
+  R-74, R-81, `domain-entities.md` §§ 4–5) targets a `component-methods.md`/`services.md`
+  interface (`apply_transforms`, split matrix/tensor `build_features` return) replaced by a
+  `FeatureBundle`/identity-check design on 2026-08-23 — before either the 2026-08-24 or the
+  2026-08-26 remediation wave ran. No artifact under review references `ADR-11` or `FeatureBundle`.
+- **Major.** Direct consequence of the above: `domain-entities.md` § 4's own "Which
+  representation" paragraph (finding 6) still states the mechanism iteration 5 itself found
+  unexecutable, so even read purely as a description of the old interface, the file
+  self-contradicts between § 4 and § 5.
+
+### Counts re-derived (not carried)
+
+- Workflows: W-1 … W-10 (ten top-level sections; W-1a, W-4a, W-4b are subsections) — **10**, matches the claim.
+- Test modules named in `functional-design-questions.md`: `test_feature_availability.py`,
+  `test_iri_denial.py`, `test_split_embargo.py`, `test_train_only_transforms.py`,
+  `test_locked_test_guard.py`, `test_feature_leakage_guards.py` — **6**, matches the claim.
+- Rule ids: R-74, R-75, R-76, R-76a, R-77, R-78, R-79, R-80, R-81, R-82 — 10 ids total,
+  consistent with "R-74…R-82 plus R-76a."
+- `train`-purpose accepted cells: F1=3 + F2=6 + F3=9 + F4=10 + refit=11 = **39**; cells reused as
+  another fold's validation month: F2→Apr(1) + F3→Apr,Jul(2) + F4→Apr,Jul,Oct(3) +
+  refit→Apr,Jul,Oct,Nov(4) = **10**. Both match "39" and "10 of the 39."
+- Amendments owed: 5 (R-55, `external-products`) + 1 (R-74 `purpose`) + 1 (R-81 `transform`+`purpose`)
+  + 1 (W-4a stamp) = **8**, across 5 units. Arithmetic checks out internally — but every one of
+  these three unit-local amendments amends the superseded interface; the redesigned
+  `component-methods.md`/`services.md` already made the `apply_transforms`→`build_features`
+  folding and the stamp change unilaterally at the application-design layer, without needing
+  this unit's three "owed" amendments in their described form.
+- Mojibake / control-character scan: 0 `Ã`/`Â` runs, 0 C1 control characters (U+0080–U+009F)
+  across all four files.
+
+### Why this is NOT-READY
+
+One Critical (headline) plus a Major that is a direct symptom of it (`domain-entities.md` § 4's
+regression on finding 6). Per the stage's severity rule (any Critical, or more than two Majors,
+blocks READY), this is NOT-READY regardless of how faithfully findings 1–11 were individually
+applied against the artifacts' own prior text. BLK-04 remains an open exit condition and G-09
+remains unsigned; nothing here authorises implementation. The path forward is not a sixth
+iteration patching `apply_transforms` — it is reconciling W-2 through W-5 (and their
+`business-rules.md`/`domain-entities.md` counterparts) against `component-methods.md` and
+`services.md` as they have stood since 2026-08-23: `FeatureBundle`, `Partition`, `FrameSpec`,
+the identity-based leak check, and `apply_transforms`'s removal.
+
+---
+
+> **Re-saved 2026-08-26 under the post-rebuild re-confirmation receipt.** FU-7 = A is recorded:
+> the G-06 locked test scores 2–31 December (30 days) per ADR-11's `lead_in_hours` removal and
+> FR-P1-04-5; FU-5 = D's "no first-day loss" clause is superseded as dated history, ruled by the
+> project owner 2026-08-26 under the recorded student/supervisor authority equivalence. The
+> iteration-2 adversarial review of the rebuild follows this save. **BLK-04 remains an open
+> exit condition. G-09 remains unsigned.**
+
+---
+
+## Review — 2026-08-26 fourteenth-receipt pass, iteration 2 (ADR-11 rebuild verification)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-26T19:49:35Z
+**Iteration:** 2
+
+### Status of iteration-1's findings
+
+| Iter-1 # | Severity | Status | Basis |
+|---|---|---|---|
+| Critical (headline) | Critical | **Resolved** | The three artifacts are rebuilt on ADR-11. Every live signature and mechanism was line-verified against `component-methods.md`'s current text (not trusted): `FeatureBundle` (`matrix`, `tensor`, `spec`, `transform_id`, lines 554-559), `build_features(target, *, drivers, registry, matrix, spec, partitions, snapshot, transform=None) -> FeatureBundle` (lines 562-572), `fit_transforms(bundle, *, partition) -> Transform` (lines 575-579), the identity check `transform.partition_id != spec.partition_id` with the one enumerated exception `REFIT`→`DEC` under `role="score"` (lines 602-635), `Partition`/`build_partitions` returning six with the split manifest gating on five (lines 331-393), and the `lead_in_hours` removal with its stated "30 days, not 31" consequence (lines 674-694). Every one of these matches the unit's artifacts verbatim (`FeatureBundle` at `domain-entities.md` § 4/§ 5; the identity check at W-3 and R-74 element 4; six-partitions/five-manifest-rows at W-5/R-80/§ 6). `apply_transforms`, `FoldSpec`, `ApplyPurpose` and `build_folds` were swept across all four artifacts (67, 21, 13 and 24 raw hits respectively) and every hit resolves to a dated ⚠ historical box, a preserved `## Review` section from iterations 1–5, or `functional-design-questions.md`'s Q&A history (which the dispatch and this unit's own practice treat as an unedited record, correctly annotated by the two post-rebuild re-confirmation entries at its tail) — none is live contract text. |
+| Minor (R-57 framing) | Minor | **Still resolved, unaffected by the rebuild** | The by-property rationale (R-57 series-level vs. the anchor recomputation value-level) survives untouched in W-1a/R-75/§ 1 and is consistent with W-7's module-graph delegation. |
+
+*(Iterations 2–5's Criticals/Majors on the retired-interface mechanism are moot — that mechanism no longer exists in the artifact; see the preserved iteration reports below for their own history. Iteration-5's finding 6 regression, found unresolved by the fourteenth-receipt pass (iteration 1 of this dispatch), is verified fixed below.)*
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `business-logic-model.md` § Amendments owed; `business-rules.md` § Amendments owed | **The "R-80" citation claim overstates what was verified.** Both files state *"Their citations of R-80 (the closed six-row partition list) and R-76a's third limb remain valid"*, phrased as though `models-and-baselines` cites both by literal id. Grepped `models-and-baselines/functional-design/business-rules.md` and `domain-entities.md` directly (the two exempted files): `R-76a's third limb` is cited verbatim (`business-rules.md:272`), confirming that half. `R-80` is **not** cited by that literal string in either live artifact — R-96 references `features-and-splits`' `PartitionList` ("five partitions plus the locked month") by name and subject matter, not by rule id; the literal `R-80` string appears only inside that sibling's own preserved reviewer-report text (`business-logic-model.md`), not in its rule or entity prose. The underlying reliance (R-96's ownership claim on the closed six-row partition list) is real and independently correct — this is an imprecise description of the citation form, not a false claim about the dependency. | Reword to "the subject matter R-80 states (the closed six-row `PartitionList`) is relied on by `models-and-baselines`' R-96, and R-76a's third limb is cited by that literal id" — or verify the literal string before asserting it in future re-derivations, consistent with this project's own count-derivation rule. |
+
+### Verification performed
+
+- **Contract fidelity (point 1).** Line-verified five live citations against `component-methods.md` directly, as tabulated in the iteration-1 status row above. All five match; no live citation points at wrong or stale content.
+- **Retired-identifier sweep (point 2).** Grepped `apply_transforms|FoldSpec|ApplyPurpose|build_folds` across all four artifacts (67/21/13/24 hits). Read every hit's surrounding context in `business-logic-model.md`, `business-rules.md` and `domain-entities.md` in full (all three files read end-to-end for their live sections; the iteration 3–5 preserved-review midsection of `business-logic-model.md`, lines ~1276–1649, was spot-checked rather than read in full, since it is explicitly labelled preserved review history predating the rebuild and is exempt under the dispatch's own classification). Every hit is inside a `⚠`-marked historical/superseded box, a preserved `## Review` section, or `functional-design-questions.md`'s dated Q&A record. No live contract sentence uses a retired identifier.
+- **FU mappings (point 3).** FU-4 mapped at W-4a/R-74's element-4-lineage bullet ("pairing control → native"); FU-5 mapped at W-4b/R-81, with the one defeated element raised in a dedicated dated box at W-4b, R-74, § 5 and the FU-7 question in `functional-design-questions.md`; FU-6 mapped at W-4/R-81 ("call count unchanged... never persisted superseded by M9"); FU-7 recorded correctly at `functional-design-questions.md` Question FU-7 (Answer A, 30-day/2–31 December reading) and consistently reflected in all three design artifacts' live text (verified by grep: no live sentence anywhere states "no first-day loss" or "full December" outside a quoted/dated box — checked directly, not assumed).
+- **§ Amendments owed (point 4).** Re-derived independently: R-55's 5 across 3 units (`acquisition` 3 + `inventory-and-registry` 1 + `external-products` 1 = 5) plus this unit's 0 = **5 across 3 units**, matching the artifact's printed arithmetic. Read `models-and-baselines/functional-design/business-rules.md` and `domain-entities.md` directly (the two exempted files): both state "the total stays 8 across 5 units" verbatim in their Assumptions, confirming the stale-figure raise is accurate and those artifacts were not edited by this stage. See finding 1 for the one imprecision in how the R-80 half of that citation is described.
+- **domain-entities.md § 4 (point 5).** The "Which representation" paragraph (lines 294-305) now quotes the superseded sentence explicitly and states the ADR-11 order — `build_features` applies `Transform` to the assembled frame before windowing, one producer for both representations — matching § 5's account word-for-word in substance. Iteration-1's regression (the two sections contradicting each other) is fixed; no residual contradiction found.
+- **Counts (point 6).** All re-derived, not carried: rule ids R-74…R-82 + R-76a = **10**, grepped directly (`## R-` headers in `business-rules.md`). Workflow sections W-1…W-10 = **10**, grepped directly. `train`-purpose accepted cells 3+6+9+10+11 = **39**; cross-partition-validation-month cells 1+2+3+4 = **10** — both arithmetic re-checked and correct. Six partitions / five manifest rows verified directly against `component-methods.md`'s M5 box (lines 355-393), which states the same 6-vs-5 split in the same terms the unit's artifacts use. Mojibake/control-character scan re-run independently (codepoint-level, not byte-level, to avoid the false positive a naive UTF-8 byte grep produces): 0 real `Ã`/`Â` occurrences and 0 C1 controls across all four files — the two raw hits in `business-logic-model.md` are the preserved iteration-1 review text quoting the scan result as a literal string, not mojibake.
+- **Internal consistency (point 7).** No live sentence found contradicting the 30-day/2–31 December reading (grepped and read every hit). Negative controls present for the hard rules touched by this rebuild: fitting-scope equality, applying-identity mismatch (enumerated by all mismatched partition-id pairs), the one permitted exception with its `role="train"` counter-control, `transform_id is None` consumption, empty-frame, and the WS-13/TA-11 mask-test requirement regardless of the open reading.
+- **Requirements coverage (point 8).** All 11 requirements from the Requirement-to-workflow map (`business-logic-model.md`) and Requirement coverage table (`domain-entities.md`) land on a workflow, rule and/or entity; the one requirement without an acceptance row (FR-P1-04-10) is correctly flagged as such rather than silently dropped, consistent across all three artifacts.
+
+### Summary
+
+The fourteenth-receipt pass's headline Critical (targeting the retired `apply_transforms` interface) is resolved: every live signature, the identity check, the one enumerated exception, and the six-partitions/five-manifest-rows split were independently line-verified against `component-methods.md`'s current ADR-11 text and match. The retired-identifier sweep found no live contract sentence using `apply_transforms`, `FoldSpec`, `ApplyPurpose` or `build_folds` — every occurrence is inside a dated historical box or a preserved review/Q&A record. The iteration-5 finding-6 regression in `domain-entities.md` § 4 is fixed and no longer contradicts § 5. FU-4/5/6/7 are each mapped or superseded in a dated box rather than silently dropped, and FU-7's 30-day December reading is applied consistently everywhere it is stated live. § Amendments owed re-derives correctly to 5 across 3 units, and the stale "8 across 5" in `models-and-baselines`' frozen artifacts is correctly raised at the gate rather than edited there — verified directly against those two exempted files. The one finding surviving this pass (a Minor: the "R-80" half of a citation claim is loosely worded, though the underlying reliance is real and independently correct) does not block READY under this stage's severity rule (zero Critical, ≤2 Major). BLK-04 remains an open exit condition and G-09 remains unsigned; approving this design is not the contract's approval, and nothing here authorises implementation.
+
+**Verdict: READY**
+
+---
+
+> **Remediated 2026-08-28 under the post-redo receipt floor, on governance report
+> `GOV-2026-08-28-FD-01` (verdict FAIL) and the project decision owner's rulings.** This box is
+> appended **after** the preserved review record; **no byte of any `## Review` section above was
+> changed**, and every dated ⚠ box is preserved as history.
+>
+> In this file: the header remediation box added; Sources extended with D-27, D-28, the
+> governance report, R-103/R-104 and `component-dependency.md`; **W-3**'s mermaid node given
+> `train_start` and a separate `PartitionError` branch, its text fallback extended, element 1
+> **corrected in place with the superseded over-claim quoted** and element 2 split between
+> `PartitionError` and `LeakageError`; **two new dated boxes at W-3** — BLK-09 restored and
+> answered (Recommendation 4) and BLK-08 half B authored narrowed to `ABL-DIFF` on D-27
+> (Recommendation 7); a new dated box at **W-4b** closing the FU-5/ADR-11 December conflict by
+> **D-28** (Recommendation 6) while leaving the raising boxes and their FU-5 = D quotations
+> untouched; **W-5** given the six `train_start`/`train_end` values with the
+> `DEC.train_end = 2022-11-30` rationale and its residual (Recommendation 25); § Amendments owed
+> re-derived to **7 across 5 units** with the arithmetic printed and the 5-unit coincidence
+> distinguished from agreement; § Assumptions extended with BLK-09, BLK-08, the
+> `PartitionError` declaration-site item and the `DEC`-train residual, and its FU-5 item marked
+> **closed by D-28**.
+>
+> **Counts derived programmatically before being asserted, not carried:** `BLK-09` 0 → present;
+> `train_start` 0 → present; `BLK-08` 0 → present; `inverse` 0 → present; `D-27` 0 → cited;
+> six `train_end` values specified where none existed; **30** raising conditions
+> (36 ordered pairs − 6 identical = 30 mismatched, − 1 exempt = 29, + `REFIT`→`DEC`/`train`
+> = 30); the **39** lawful `train` month-cells and the **10** that are another partition's
+> validation month re-derived **unchanged**; rule headings 10 → **12** (R-83, R-84 added into the
+> observed R-83…R-89 gap); workflow ids and entity sections **unchanged at 13 and 10**.
+>
+> **Two derivations that refine what the remediation brief carried**, recorded because a figure
+> asserted from adjacent prose is this stage's most-repeated defect. (1) *"Five sibling units
+> record the resolution as owed here"* is **correct** on the BLK-09-ownership reading —
+> `evaluation-and-comparison`, `fixtures-and-reproducibility`, `models-and-baselines`,
+> `regimes-diagnostics-reporting`, `statistical-inference` — while **six** sibling units mention
+> `BLK-09` at all (add `foundation`) and only **three** name the `train_start` field itself
+> (`evaluation-and-comparison`, `regimes-diagnostics-reporting`, `statistical-inference`).
+> (2) *"`train_end` appears 6 times across all twelve units"* is exact, and **all six
+> occurrences were inside this unit** (4 / 1 / 1), which is why the specification was owed
+> here and nowhere else.
+>
+> **Workflow ids W-1…W-10 and rule ids R-74…R-82 plus R-76a are unchanged in id, subject matter
+> and limb structure** — `models-and-baselines`' citations of **R-80** and **R-76a's third
+> limb** remain valid. **BLK-04 remains an open exit condition; BLK-08 and BLK-09 remain open
+> exit conditions; G-09 remains unsigned. Nothing here closes BLK-04, authorises implementation,
+> or authorises creating a module.**

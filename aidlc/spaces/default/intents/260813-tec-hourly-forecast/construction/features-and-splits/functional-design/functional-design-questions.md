@@ -605,6 +605,25 @@ X) **Other (please specify)**
 
 ---
 
+### Question FU-7 — the December scored-set conflict
+Which reading governs the G-06 locked test's scored set?
+
+A) Accept ADR-11's 30-day consequence — FU-5 = D's December clause is recorded as superseded
+   > **Impact**: The locked test scores 2–31 December (30 days); the first 24 h are excluded and counted, consistent with every validation month and FR-P1-04-5. FU-5 = D's clause is kept as a dated superseded record, not deleted. No upstream artifact changes; the disclosure ADR-11 already mandates stands. Your ruling is recorded as the project owner's acceptance under the recorded student/supervisor authority equivalence.
+
+B) Reinstate 1 December — direct a 2.6 backward jump to restore a lead-in mechanism
+   > **Impact**: Reopens the approved application-design contract a second time, against ADR-11's own recorded rejection of that mechanism; touches a supervisor-owned value (Vision §8.2/§8.7, G-05) and re-derives this unit's rebuild. Costly, and it contradicts FR-P1-04-5 as worded.
+
+C) Defer to the G-05 gate — leave both records standing, decide with the supervisor
+   > **Impact**: The conflict stays an Open item through Construction; stage 3.5 cannot implement the scored-set boundary of `06`/`07` while it stands, which likely blocks models-and-baselines' scored-range code at code-generation.
+
+X. Other (please specify)
+   > **Impact**: Depends on your specific choice.
+
+> **💡 Recommendation**: Option A — ADR-11 is the later, contract-level decision, taken with this exact trade-off in view and already carrying its mandatory disclosure; FR-P1-04-5's wording supports it, and 30 scored December days remain a valid locked test under D-8's claim boundary. Option B reopens a supervisor-owned value to recover one day.
+
+[Answer]: A — Accept ADR-11’s 30-day consequence; FU-5 = D’s December clause is recorded as superseded. Ruled by the project owner 2026-08-26, recorded as their acceptance under the recorded student/supervisor authority equivalence.
+
 ## Consolidated Summary Confirmation
 
 Questions 1–9 are answered above as the recommended option in each case — **D throughout** —
@@ -835,5 +854,59 @@ Does this all look correct before I generate the artifact?
    > **Impact**: Nothing recorded; tell me what to change.
 
 > **💡 Recommendation**: **Looks correct** — the substantive mechanisms were confirmed by you at FU-4/5/6; today's additions are the three minors you ruled into scope and a consistency sweep, and the reviewer pass is what establishes READY, not this receipt.
+
+*(Superseded the same day: the review this receipt anticipated returned NOT-READY on the ADR-11 Critical, and the artifacts were rebuilt on the owner’s ruling. The live tags are in the section below.)*
+
+### Re-confirmation, 2026-08-26 — after the ADR-11 rebuild (owner-authorised)
+
+The fourteenth-receipt review found every mechanism of both remediation waves targeting an
+interface `component-methods.md` retired on 2026-08-23: **ADR-11** removed `apply_transforms`,
+replaced `FoldSpec`/`build_folds` with `Partition`/`build_partitions`, returned a single
+persisted **`FeatureBundle`** (matrix + tensor + `spec` + `transform_id`), and made the leak
+check an **identity comparison** with one enumerated exception (`REFIT` → `DEC` under
+`role="score"`, the G-06 apply). On your ruling the three design artifacts were **rebuilt on
+that contract**, rule and section identities preserved (R-74…R-82 + R-76a; `models-and-baselines`'
+citations of R-80 and R-76a's third limb remain valid), every superseded box kept as dated history.
+
+**How your standing decisions mapped:**
+
+- **FU-4 = D (stamp)** — dissolves into ADR-11: `FeatureBundle.transform_id`/`spec.partition_id`
+  ARE the stamp, natively persisted across 05→06→07; consumer refusal restates as `06`/`07`
+  raising on `transform_id is None` or identity mismatch; the test stays manifest/bundle-based;
+  the residual restates as a **bundle-less frame**.
+- **FU-6 = A (three calls)** — call count unchanged under ADR-11; "never persisted" superseded by
+  `services.md` M9 (the raw bundle has a named `__untransformed/` address, deliberately visible);
+  the load-bearing "never consumed" limb strengthened into a contract raise.
+- **§ Amendments owed** — re-derives to **5 across 3 units** (was 8 across 5): all three of this
+  unit's owed amendments were made unilaterally by ADR-11 at application-design.
+  `models-and-baselines`' frozen READY artifacts still state "8 across 5" — **raised at the
+  gate, not edited there**.
+- **Iteration-5 finding 6** — the domain-entities § 4 regression the review found is fixed on the
+  ADR-11 order.
+
+**One conflict is put to you rather than resolved** (Question below): **FU-5 = D's December
+clause**. FU-5 = D (2026-08-24, decided on the retired interface) ruled *"1 December stays in
+the G-06 locked test with no first-day loss."* ADR-11 (2026-08-23) considered exactly that
+mechanism (`lead_in_hours`) and removed it, honouring FR-P1-04-5 (*"no window crosses a
+boundary; the first 24 h are excluded and counted"*), with the stated mandatory-disclosure
+consequence: **1 December is not scored; the locked test covers 30 days, not 31** — and ADR-11
+notes that enlarging the locked-test scored set is **supervisor-owned** (Vision §8.2, §8.7,
+gate G-05). The rebuilt artifacts follow the approved contract and carry the conflict as a
+dated box at W-4b, in R-74/R-81's mapping notes, in § 5, and as an Open item in all three
+Assumptions lists. FU-5 = D's read/emit substance otherwise survives (spec-bound scored
+ranges, containment controls, the causal history readable and never emitted).
+
+
+### Re-confirmation — receipt, after the ADR-11 rebuild and FU-7
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, artifacts re-saved natively, iteration-2 adversarial review dispatched to verify the rebuild.
+
+- Request changes
+   > **Impact**: Nothing recorded; tell me what to change.
+
+> **💡 Recommendation**: **Looks correct** — the rebuild preserves every decision that survives ADR-11, states each mapping in a dated box, and puts the one genuine conflict to you above instead of resolving it silently.
 
 [Answer]: Looks correct

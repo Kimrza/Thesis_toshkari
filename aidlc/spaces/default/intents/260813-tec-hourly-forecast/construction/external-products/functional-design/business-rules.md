@@ -52,8 +52,8 @@ the artifacts restart at R-01.
 - `../../../inception/application-design/services.md` § The nine stage scripts, § Stage entry contract.
 - `../inventory-and-registry/functional-design/business-rules.md` — R-44, R-45, R-51.
 - `../governance-guards/functional-design/business-rules.md` — R-23, R-24 (the data-flow IRI rule and the subordinate-scan framing this unit's R-56 deliberately departs from), R-26.
-- `evidence/DECISIONS.md` — **D-5**, **D-10.1**, **D-10.2**, **D-10.3**, **D-11**, **D-13**, **D-21/22/23**.
-- Workspace inspection, 2026-08-23: `scripts/audit_ec1_drivers.py` line 184; `evidence/audit_ec1_2026-08-15/kyoto_dst/dst_provisional_202212.html`; the absence of `src/` and `configs/`.
+- `evidence/DECISIONS.md` — **D-5**, **D-10.1**, **D-10.2**, **D-10.3**, **D-11**, **D-13**, **D-21/22/23**, **D-25, D-26** *(added 2026-08-28, Recommendation 46 — both were already cited operatively in this file, D-25 at R-59 limb 4 and D-25/D-26 at R-57's boundary note, while neither appeared in this register; the same defect `acquisition` fixed on its own finding F2)*.
+- Workspace inspection, 2026-08-23: `scripts/audit_ec1_drivers.py` line 184; `evidence/audit_ec1_2026-08-15/kyoto_dst/dst_provisional_202212.html`; the absence of `src/` and `configs/`. **Re-inspected 2026-08-28** (Recommendation 14): `evidence/audit_ec1_2026-08-15/` contains exactly `EC1-AUDIT.md`, `ec1-audit-report.json`, `kyoto_dst/` and `nrcan_f107/` — **no GFZ directory, so Kp/ap3 and Hp60/ap60 have never been retrieved**.
 - `functional-design-questions.md` (**Q1 through Q9**), `domain-entities.md`, `business-logic-model.md`.
 
 ---
@@ -347,10 +347,80 @@ The bound is read from `configs/features.yaml`, never hardcoded.
 **Negative control (FR-P1-04-3's own criterion).** Inject a 4-hour gap into a driver series →
 the affected rows are **excluded**, and a carry-forward of 4 hours anywhere → fails.
 
+### Constraint — the bound has NO STATED MEANING on the one daily-cadence series, and this rule RAISES rather than guesses
+
+*(Added 2026-08-28 on **Recommendation 13** (reviewer finding `TEC-01`, `MAJOR`). The bound
+above is written for an **epoch-indexed** series; **F10.7's alignment is `Daily`** (R-58's
+table). D-21 makes the composition binding — F10.7's carry-forward *"composes with, and does
+not override, the ≤ 3 h carry-forward bound on external drivers"* — and **no rule in this
+artifact set states what a 3-hour bound means on a series whose native step is 24 hours.**
+This unit's own iteration-1 adversarial pass recorded the gap at `business-logic-model.md`
+§ Review — 2026-08-26, iteration 1, and R-57a, added on **finding 4 of that same review**,
+did not reach the daily case. Derived 2026-08-28 over all **48** `functional-design`
+artifacts: the only text joining `3 h` to `daily`/`F10.7` was that unremediated review note.)*
+
+**The mechanism, which is all this stage has authority to fix.** Where the **next daily
+F10.7 median is not yet available** at a forecast origin — `availability_ts(median(D)) =
+00:00 UTC on D+1` per **D-25**, so unavailability is a real, derivable state and not a
+hypothetical — driver-series availability resolution **raises `FeatureAvailabilityError`,
+naming the origin timestamp, the last available median's day, and the elapsed staleness in
+BOTH units (clock hours and whole daily steps)**, and **stops**. It does **not** silently
+carry forward, and it does **not** silently exclude.
+
+This is **TE §18.3's mandated posture, quoted**: *"Claude Code or any equivalent agent must
+not implement an affected component while its P0 decision is unresolved, and must stop and
+report rather than choose a default."* The raise is the report.
+
+**The substantive answer is a PROPOSAL PUT TO THE STUDENT AT G-04, and this rule does not
+choose between the two readings.** Both are stated so the gate rules on a scope it can see:
+
+| # | Reading | What it means for a day *D* whose `median(D-1)` is unavailable | Cost |
+|---|---|---|---|
+| **A — tabled as the proposal** | Bound staleness in the **series' own axis**: **one daily step = one carry-forward step**, the row excluded beyond one missing day | The day's rows survive on the previous median; a second consecutive missing median excludes | Re-expresses a frozen numeral in a **different unit**, which is §18.2-adjacent and needs the Student's explicit freeze. A one-day-stale median is **48 h old at hour 23** |
+| **B — the alternative** | Apply the bound **literally in clock hours**: rows beyond **hour 03** of day *D* are excluded, and the excluded count is recorded as a **split-manifest field** | **20 of 24 scored rows lost per affected day, in all three cells at once** | Changes no frozen numeral and is the most conservative reading; thins the December scored set for a reason **unrelated to the ionosphere**, on a driver that is constant across cells (R-63) |
+
+**Why A is the tabled proposal and not this stage's decision.** "≤ 3 h" bounds staleness in
+the **series' own resolution** — three hours is exactly **one step** of a 3-hourly Kp series,
+and the daily analogue of one step is one day; **D-10.2 already treats F10.7's alignment as
+`Daily`** rather than as an hourly series with gaps. That is an argument, not an authority.
+**Choosing between A and B here would be an agent filling a §18.2 item by convenience**, which
+`project.md` § Forbidden prohibits outright. **The freeze is the Student's, at G-04.**
+
+**The trigger is live, not hypothetical.** **D-26** records F10.7 **March–April 2022
+provenance as UNRESOLVED**, and **D-25**'s convention delays every value **1 to 2 hours**
+beyond observation completion (measured: completion at 22 UT on 120 days and 23 UT on 245 days
+of 2022), so the unavailability window is a designed property of the series rather than an
+outage scenario.
+
+**`configs/features.yaml` gains the composition rule as a NAMED FIELD —
+`carry_forward_composition`** — not a constant buried in `spaceweather.py` (TC-03e and
+`project.md` § Forbidden: no scientific constant lives in source or a notebook). The field
+carries the adopted reading (A or B), and the §18.3 preflight asserts it is **not `TBD`** before
+any component that applies the bound is implemented. Until the gate fills it, the field is `TBD`
+and the raise above is what runs. The field is mirrored on `DriverSeries` at
+`domain-entities.md` § 1.
+
+**Negative control, for whichever reading the gate adopts** (specification for
+`test_feature_availability.py`, whose primary siting is `features-and-splits`'):
+
+- **While the field is `TBD`:** inject an origin at which no daily median is available →
+  **`FeatureAvailabilityError`**, naming the origin and the staleness in both units. A
+  carry-forward or an exclusion that proceeds **silently** → **fails**.
+- **If A is adopted:** two consecutive missing medians → the rows **exclude**; one missing
+  median → the rows **survive** on the previous median. Both directions asserted, because a
+  single-direction test lets the other half regress silently (R-61's shape).
+- **If B is adopted:** hours 04–23 of the affected day **exclude**, hours 00–03 **survive**,
+  and the **excluded count appears as a split-manifest field** — a bare pass is not evidence.
+
+> **This rule decides no scientific value.** It fixes the failure mode (**stop and report**)
+> and routes the value (**the composition's unit**) to the Student at **G-04**.
+
 **Acceptance.** ⚠ No §16/§19 row of its own; enforced through §18.3's gate-test list.
 *(Rule added 2026-08-26 on adversarial finding 4, which was Major: this unit carries
 FR-P1-04-3 and no rule, mechanism, entity field or negative control existed for it in any of
 the three artifacts — W-5, where the requirement-to-workflow map routed it, disclaims it.)*
+*(Constraint added 2026-08-28 on Recommendation 13; the daily composition remains an **open
+G-04 freeze item** and is reported as such, not closed here.)*
 
 ## R-58 — Driver alignment, and its three limbs
 
@@ -367,11 +437,92 @@ the three artifacts — W-5, where the requirement-to-workflow map routed it, di
 
 1. Kp repeated **outside** its 3-hour interval → **fails**.
 2. Dst **shifted to a neighbouring hour** → **fails**.
-3. A **grep-level check** finds no interpolation call on any driver series.
+3. An **AST-level scan over a named token set**, plus a **NaN/fill conservation invariant**,
+   finds no interpolation on any driver series *(limb 3 rewritten 2026-08-28 —
+   **Recommendation 38**; superseded text: "A **grep-level check** finds no interpolation call
+   on any driver series.")*
 
 **Why limb 3 matters independently.** *"No driver is interpolated, at any stage"* is
-absolute, and a grep is the only check that reaches a call site no fixture exercises.
+absolute, and a static scan is the only check that reaches a call site no fixture exercises.
 **Building limbs 1 and 2 alone leaves the row partially satisfied while looking complete.**
+
+### Constraint — limb 3's mechanism: a NAMED token set, an AST-level scan, and a CONSERVATION INVARIANT
+
+*(Added 2026-08-28 on **Recommendation 38** (reviewer finding `DATA-06`). The prior limb 3 was
+a grep with **no declared token list and no conservation invariant**, and its stated rationale
+— *"a grep is the only check that reaches a call site no fixture exercises"* — is true of the
+class of check and false of the spelling. **TC-09 is `binding: hard` and the register names it
+the CENTRAL leakage-prevention rule**, so a spot check is not enough here. The sibling
+`acquisition` **R-37** already states this exact miss class in writing — *"An alias, or a
+vectorised expression that fills without naming a fill function"* — and closes it with
+**NaN-count conservation**; the mechanism was in hand, so deferring would have left a gap with
+the answer already written one unit over.)*
+
+**1. The token set, named rather than implied.** The scan flags, at minimum:
+
+| Spelling | Why it is listed separately |
+|---|---|
+| `.interpolate(` | The obvious case, and the only one the old limb plausibly caught |
+| `.ffill(` / `.bfill(` / `.pad(` / `.backfill(` | Method-name fills that contain no substring of "interpolate" |
+| `.fillna(` — **any** call, `method=` or not | A `value=`-form `fillna` fills just as effectively |
+| `.reindex(..., method=…)` / `.asfreq(..., method=…)` | Fill hidden in an **index operation** rather than a fill call |
+| `.resample(...).interpolate(` / `.resample(...).ffill(` / `.upsample`-style chains | Fill hidden behind a **resample**, which reads as an aggregation |
+| `np.interp`, `numpy.interp` | Function-level, no method receiver to key on |
+| `scipy.interpolate.*` — including `interp1d`, `griddata`, `splrep`/`splev`, `PchipInterpolator`, `CubicSpline` | A whole module, not one name |
+| `pandas.Series.combine_first`, `.update(`, `.where(...).fillna` composites | Fills by **merging another series in**, naming no fill function |
+
+**The list is a floor, not a ceiling, and that is why it is not the whole mechanism.** A
+`getattr`-dispatched call, a fill reached through an alias bound earlier in the module, or a
+vectorised boolean-mask assignment (`s[s.isna()] = <expr>`) **names none of these tokens**.
+
+**2. The scan is AST-LEVEL, not textual.** It resolves the call target through the module's
+import bindings and local aliases, so `import pandas as pd` / `f = pd.Series.interpolate` /
+`f(s)` is **reached**, and a token appearing inside a string literal or comment is **not**
+flagged. A textual grep gets both of those wrong in opposite directions.
+
+**3. The conservation invariant, which is what actually carries the rule.** This is the limb
+that holds regardless of spelling, and it makes `carry_forward_h` **load-bearing rather than
+decorative** (`domain-entities.md` § 1):
+
+> For every driver series, **the count of epochs carrying a value that is not an observation
+> at that epoch EQUALS the count of epochs recorded as carried-forward under R-57a.** Any
+> value present at an epoch with **no observation and no recorded carry-forward FAILS.**
+
+Carried as the machine-readable manifest field **`carried_forward_epochs`** (per series,
+`domain-entities.md` § 8), asserted equal to `DriverSeries.carry_forward_h`'s recorded count. A
+**manifest field rather than only a test result** is deliberate, for the reason `acquisition`
+R-37 gives: **FR-P1-04-17's row (TA-36) is `Pending` and FR-P1-04-3 has no row at all**, so a
+field is evidence that survives the absence of a gate, where a test result is not — nothing is
+obliged to run it.
+
+Stated as a law rather than a scan, this catches **any** fill — aliased, vectorised, dispatched
+or not yet invented — because it constrains the **emitted series** rather than the source text.
+It is `acquisition` R-37's third row applied to the alignment side of the same contract.
+
+**4. How the invariant distinguishes the SANCTIONED fill from a prohibited one, by
+construction.** R-57a's ≤ 3 h carry-forward **is a permitted fill**, so a naive token scan
+**false-positives on the project's own approved mechanism** — a collision the old limb 3 did
+not address. The invariant resolves it without an exclusion list: a carried-forward epoch is
+permitted **precisely because it is recorded** in `carry_forward_h`; an unrecorded filled epoch
+is prohibited **precisely because it is not**. The distinction is the record, not the spelling.
+The token scan is therefore scoped to **`src/external/spaceweather.py` and the driver path**,
+and R-57a's carry-forward is implemented as a **recorded** operation rather than as a
+fill-function call, so it does not trip the scan.
+
+**Negative controls for limb 3** — three, because the first two each miss what the third
+catches, mirroring `acquisition` R-37's table:
+
+| # | Injection | Expected |
+|---|---|---|
+| 1 | Add `.interpolate()` on a driver series | **The AST scan fails**, naming the module, line and resolved call target |
+| 2 | Add a fill through an **alias** (`f = pd.Series.ffill; f(s)`) or a `getattr` dispatch | **The AST scan fails** — this is the case a textual grep passes |
+| 3 | Add a **vectorised** fill that names no fill function (`s[s.isna()] = s.shift(1)[s.isna()]`) | **The AST scan MISSES it and the conservation invariant FAILS** — asserted in that order, so the test proves the invariant is doing the work rather than riding the scan |
+
+**Where the primary test lives.** TC-09 and NFR-LEAK-01 are enforced at the feature-building
+boundary: the primary test is **`features-and-splits`' `tests/test_feature_leakage_guards.py`**
+per **R-54a**. **The three controls above are this unit's UPSTREAM CONTRACT EVIDENCE**, and the
+conservation invariant's own manifest field is emitted here. **This unit does not own TA-36's
+row** and a passing control here does not satisfy it.
 
 **Constraint — alignment and carry-forward are TESTED SEPARATELY.** FR-P1-04-17 states it is
 *"distinct from FR-P1-04-3's ≤ 3 h carry-forward"*: alignment governs a **present** value,
@@ -380,9 +531,10 @@ exactly where one test gets counted twice, and this project has already had a re
 counted as covered on a neighbouring row's evidence.
 
 **Negative controls.** The three limbs above are themselves the negative controls — each
-asserts a violation is caught. Additionally: satisfy the carry-forward rule and violate
-alignment → **the alignment test still fails**, proving neither passes on the other's
-evidence.
+asserts a violation is caught, **and limb 3 carries three of its own** (the AST-scan,
+alias/`getattr`, and vectorised-fill injections in the Constraint above, added 2026-08-28 on
+Recommendation 38). Additionally: satisfy the carry-forward rule and violate alignment → **the
+alignment test still fails**, proving neither passes on the other's evidence.
 
 **Acceptance.** **TA-36** — ⚠ status **`Pending`: the row exists; not implemented, not
 executed, not passing.** **Its PRIMARY test is `features-and-splits`'**, sited at the
@@ -482,6 +634,62 @@ present and its result disclosed**; **no independence claim precedes the audit**
 value appears wherever GIM is compared**; and **C-01 is labelled generated, not trained** in
 the model/config inventory.
 
+### Constraint — the disclosure obligation is UNCONDITIONAL, and this unit's framing is confirmed rather than relaxed
+
+*(Confirmed and strengthened 2026-08-28 on **Recommendation 41** (reviewer finding `BENCH-07`).
+The board found this unit's framing **correct** and two sibling units' conditional; nothing here
+was wrong, so nothing here is reversed — the strengthening below states the ordering the
+conditional phrasing left implicit.)*
+
+**The authority is unconditional.** Vision **§6.10** line 599: *"The project **must** audit
+whether ARUC, BSHM, or NICO appear in the GIM input network and disclose any overlap as
+dependence. **No independence claim may be made before that audit.**"* `requirements.md`
+**FR-P1-04-9**'s criterion is that the tolerance report, config snapshot and **overlap audit
+ALL EXIST** — an existence condition, not a condition on the audit having been run at some
+later moment.
+
+**The distinction that matters, stated plainly.** *"Disclose the flag **once the audit has
+run**"* and *"an audit must exist before any GIM comparison is emitted"* are **not the same
+obligation**. The first is satisfied vacuously while no audit exists — a GIM comparison emitted
+before the audit **trips no control at all**. The second is the one §6.10 states. **This unit
+asserts the second**, and asserts it on the **existence of a GIM comparison artifact**, not on
+the audit's having run:
+
+> **Emitting, serializing or reporting ANY GIM comparison with no registered overlap-audit
+> result and its flag value FAILS.** The trigger is the comparison's existence.
+
+**Ordering, enforced the same way obligation 2 already enforces the hand-check.** The **overlap
+audit's recorded timestamp must PRECEDE comparator generation**, exactly as obligation 2
+requires of the interpolation hand-check, and generation **fails** if the ordering is violated
+rather than accepting the audit retrospectively. Obligation 2 already establishes that a
+timestamp-ordering assertion is the enforceable form here; this reuses it rather than inventing
+a second shape.
+
+**⚠ Obligation 1's generation refusal is a MITIGATION THAT EXPIRES, and must not be read as
+closing this.** Today no GIM comparator can be produced at all, because obligation 1 refuses
+generation while the **Q-15** interpolation rule is unset (a §18.2 Student-owned forbidden
+choice). That refusal is **absolute today and gone the moment Q-15 is decided** — the ordering
+risk becomes live at precisely the moment the mitigation disappears. **The residual outlives the
+mitigation**, so the ordering is enforced above rather than left to obligation 1.
+
+**The conditional phrasing was INHERITED, not invented.** `project.md` § Mandated itself reads
+*"ALWAYS disclose the `gim_network_overlap_flag` result **once the input-network overlap audit
+runs**"*, so the sibling units track the affirmed rule faithfully; the defect is in the affirmed
+wording, not in their fidelity to it. **A wording correction to `project.md` § Mandated is owed
+at the §13 learnings ritual** — human-gated, and **reported here rather than applied**: no stage
+edits a memory file directly (`org.md` § Mandated). Derived 2026-08-28: the conditional phrasing
+appears **7 times** across `evaluation-and-comparison` and `regimes-diagnostics-reporting`
+(2 in `evaluation-and-comparison/business-rules.md`, 1 each in that unit's
+`business-logic-model.md` and `domain-entities.md`, and 1 in each of
+`regimes-diagnostics-reporting`'s three) — **not the 5 the recommendation states**; the
+correction is recorded rather than carried forward.
+
+**Negative controls for this constraint.** Emit a GIM comparison artifact with **no registered
+overlap-audit result** → **fails**, keyed to the comparison's existence. Register an audit whose
+timestamp **follows** comparator generation → **fails** on ordering, not accepted
+retrospectively. Make an independence claim with the audit absent → **fails** (already stated
+below). Produce a GIM comparison whose report **omits the flag value** → **fails**.
+
 **Negative controls.** Attempt generation with the interpolation rule unset → **refused**.
 Generate before the hand-check is recorded → **fails**, not accepted retrospectively. Produce
 a comparison report without the map-to-map sentence → fails, because the reporting path emits
@@ -572,12 +780,93 @@ attributed to local forcing the dataset does not contain.**
 NFR-LEAK-01 governs *timing* only: a series can satisfy its declared lag while being built
 from reanalysed values, **invisible to every existing check and fatal on discovery**.
 
+### Constraint — the DRIVER-PRODUCT half of the reanalysed-value check, with its verifiability limits stated per series
+
+*(Added 2026-08-28 on **Recommendation 14** (reviewer finding `TEC-05`, `MAJOR`). Derived over
+all **48** `functional-design` artifacts: the phrase `reanalysed-value check` appears **3 times,
+all three in `acquisition`** — `business-logic-model.md:601`, `business-rules.md:482` and
+`business-rules.md:610` — **and the check is defined nowhere.** `requirements.md` **FR-P1-01-8**
+carries it as a criterion with status **`UNTESTED`**. `acquisition` is being amended in parallel
+to define the check itself; **this constraint carries the driver-product half only** and does
+not restate `acquisition`'s. Of every leakage guard in this design, this was the one that was a
+**name rather than a property with a negative control**.)*
+
+**What every driver manifest records, per series** (`domain-entities.md` § 8):
+
+| Field | Why it is required |
+|---|---|
+| `release_status` | The **declared** grade — real-time / provisional / final. One per series for 2022, never mixed (D-10.1) |
+| `retrieval_date` | Fixes **when** the bytes were obtained, which bounds which provider revision could have been served |
+| **Full provider product identity, INCLUDING any version suffix** | Version drift is **already observed in this dataset** (`g.002` versus `g.003`), so a product name without its suffix cannot be compared against anything later. Composes with the already-affirmed re-acquisition version-suffix obligation (`team.md` § Walking Skeleton, DATA-07) |
+| `sha256` | Binds the recorded identity to the actual bytes |
+
+**What the check ASSERTS, on this unit's side.** Internal consistency of those four fields, and
+that the **declared status matches the CONTEMPORANEOUS grade the feature contract requires** —
+not merely that a status is present. A series declared `final` where the feature contract
+requires a contemporaneous operational value **fails**, because `project.md` § Forbidden makes
+final archived values non-equivalent to what a 2022 forecast origin could have seen.
+
+**Where the file carries no provenance column, the SANCTIONED evidence is the absence plus an
+explicit unverified-status statement** — the same shape **D-25** uses for publication latency and
+the shape the project already approved under `CR-2026-08-22-EV-12`. Recording the absence is
+evidence; **inferring a grade from silence is not.**
+
+**⚠ Verifiability limits, stated PER SERIES rather than as one blanket claim.** On the evidence
+held today the check is **not substantively executable on any of the four series**, and saying so
+is part of the mechanism:
+
+| Series | Held today | Verifiability | Consequence |
+|---|---|---|---|
+| **F10.7** (NRCan) | `fluxtable.txt` | **DECLARED-STATUS ONLY.** **D-22** records the file as having *"exactly seven columns … and **no correction, revision, version or provenance column**"*; **D-21** records the provider's publication latency as *"not derivable"* from it | **No detection is possible from the bytes.** The declared status plus the documented absence and an unverified-status statement is the whole of the evidence, and is labelled as such |
+| **Dst** (Kyoto WDC) | `dst_provisional_2022MM.html` | **DECLARED-STATUS ONLY.** The grade is inferable **from the filename alone**, and **D-10.1**'s open item on the 2022 Kyoto grade *"remains unchecked"* per **D-11** | Same as F10.7. A filename is not a provenance column; recorded as declared, not verified |
+| **Kp / ap3** (GFZ) | ⚠ **NEVER RETRIEVED** | **SUBSTANTIVE DETECTION IS SPECIFIABLE NOW** | See below |
+| **Hp60 / ap60** (GFZ) | ⚠ **NEVER RETRIEVED** | **SUBSTANTIVE DETECTION IS SPECIFIABLE NOW** | See below |
+
+**For the two UNRETRIEVED GFZ series, acquisition retrieves BOTH the near-real-time and the
+definitive product and asserts them against each other value by value.** GFZ publishes distinct
+definitive and near-real-time products, so a disagreement is **detectable rather than declared**:
+a value matching the definitive product where the near-real-time product differs **fails**, which
+is the actual backfill this rule exists to catch.
+
+**Why this must be specified NOW and not after acquisition.** It costs almost nothing while the
+retrieval is unwritten and **everything if retrofitted**, because a provider archive is not
+guaranteed to retain an earlier-grade 2022 product once the definitive one supersedes it. This is
+exactly the ordering error `project.md` § Way of Working names — *"ALWAYS raise a targeted
+follow-up when an answer would require building something before the work that specifies its
+contents"* — read forward rather than backward. **It is a specification against the deferred
+retrieval, not a claim that the retrieval has happened.**
+
+**Negative controls, re-worded to assert ONLY what the mechanism can catch.** *(The
+`acquisition`-side control as written — *"Backfill a value from a final archive → the
+reanalysed-value check fails"* — **cannot fire** on F10.7 or Dst, because nothing in either
+byte stream distinguishes a reanalysed value from a contemporaneous one. Asserting an
+undetectable failure is how a requirement reads as designed while remaining unenforceable.)*
+
+| # | Injection | Expected |
+|---|---|---|
+| 1 | Declare `release_status` **inconsistent with the recorded provider product identity** (e.g. `final` against a `dst_provisional_*` filename) → | **FAILS.** This is the detectable form, and it replaces the undetectable-backfill wording |
+| 2 | Omit `release_status`, `retrieval_date`, the **version suffix**, or `sha256` from any driver manifest → | **FAILS** on manifest completeness |
+| 3 | Record a status for a file carrying **no provenance column** *without* the documented-absence and unverified-status statement → | **FAILS.** The absence must be **stated**, not implied by silence |
+| 4 | Mix two release grades within one series → | **FAILS at construction** (D-10.1, already asserted at R-62) |
+| 5 | **GFZ only:** supply a value matching the **definitive** product where the **near-real-time** product for that epoch differs → | **FAILS.** The one substantive backfill detection this design can offer |
+
+> **Stated as a residual, not discharged.** For **F10.7 and Dst** the rule's own failure mode —
+> a reanalysed value that satisfies every lag, alignment and carry-forward assertion — remains
+> **BOUNDED RATHER THAN CLOSED**, and no artifact may report it as closed. The verifiability
+> limit is the finding, and it is carried to **G-04** with the EV-12/`EC1-R-4` provider-
+> documentation limb, which is owned outside this project.
+
 **Negative controls.** Produce a driver value that differs between cells at one epoch → fails.
 Join a driver to the cell grid such that the result implies a per-cell measurement → fails.
-Build a series from a final archive for a date whose contemporaneous value differs → the
-release-status check fails.
+Build a series from a final archive for a date whose contemporaneous value differs → **for the
+two GFZ series the near-real-time cross-assertion fails; for F10.7 and Dst this is NOT
+DETECTABLE and control 1 above is what fires instead** *(control re-worded 2026-08-28 on
+Recommendation 14 — the superseded wording, "the release-status check fails", asserted a failure
+the mechanism cannot produce on either held series)*.
 
-**Acceptance.** ⚠ **NO ROW** for FR-P1-04-4.
+**Acceptance.** ⚠ **NO ROW** for FR-P1-04-4. The reanalysed-value criterion belongs to
+**FR-P1-01-8**, status **`UNTESTED`**, whose check `acquisition` defines; this unit's half is the
+manifest contract above and is **likewise unrowed**.
 
 ---
 
@@ -614,7 +903,10 @@ by stage 3.2 and change control.
 - **Open — TA-36's primary acceptance test is `features-and-splits`'** (R-54a), not this unit's. This unit holds data production and upstream evidence. The story map's § Per-unit coverage summary and § Cross-unit responsibilities disagree; the reconciliation governs, and this stage does **not** reallocate.
 - **Open — the import-allowlist scan cannot see a run-time-computed dynamic import** (R-56). Two partial controls are built; the residual is **accepted, not closed**.
 - **Open — FR-P1-04-18 obligation 4 is only partially checkable** (R-60): tuning performed outside `gim.py` and pasted in as a constant reaches no check.
-- **Open — FR-P1-04-18's interpolation rule is UNSET** (R-60), a §18.2 Student-owned forbidden choice (Q-15). **Comparator generation refuses while it stands.**
+- **Open — FR-P1-04-18's interpolation rule is UNSET** (R-60), a §18.2 Student-owned forbidden choice (Q-15). **Comparator generation refuses while it stands.** *(Added 2026-08-28, Recommendation 41: that refusal is a **mitigation that EXPIRES the moment Q-15 is decided**, and must not be read as closing the overlap-audit ordering — which R-60's new Constraint now enforces on the existence of a GIM comparison artifact instead.)*
+- **Open — the F10.7 daily carry-forward composition is a G-04 FREEZE ITEM, not decided here** (R-57a's new Constraint, added 2026-08-28 on Recommendation 13). D-21 makes the composition binding and no rule stated what a **3-hour** bound means on a series whose native step is **24 hours**. Reading **A** (one daily step = one carry-forward step) is **tabled as the proposal**; reading **B** (literal clock hours, excluding beyond hour 03 and recording the excluded count as a split-manifest field) is stated as the alternative. **This stage chooses neither** — choosing would be an agent filling a §18.2 item by convenience. Until the Student freezes it, `configs/features.yaml`'s **`carry_forward_composition`** field is `TBD` and driver-availability resolution **raises `FeatureAvailabilityError` and stops**. Owner: **Student**, §18.2 Q-16/Q-17, at **G-04**.
+- **Open — the reanalysed-value check is BOUNDED, NOT CLOSED, for F10.7 and Dst** (R-63's new Constraint, added 2026-08-28 on Recommendation 14). Both are **declared-status-only**: no detection is possible from the bytes (D-22's seven columns with no provenance column; D-21's non-derivable publication latency; Kyoto's grade inferable from the filename alone, with D-10.1's 2022-grade item still unchecked per D-11). For the two **unretrieved** GFZ series the design specifies **now** that acquisition retrieve the near-real-time product alongside the definitive one and assert them value by value. The rule's own failure mode remains **bounded rather than closed** and **no artifact may report it as closed**. Owner: **Student**, with the provider-documentation limb (**EV-12 / EC1-R-4**) owned outside this project, at **G-04**.
+- **Open — `FeatureAvailabilityError`'s DECLARATION SITE**, on the same open item as this unit's other unit-local exceptions (`domain-entities.md` § 9): a cross-unit agreement into `src/data/config.py`, or the `src/data/exceptions.py` §12 amendment. It derives from `foundation` R-01's `IntegrityError` base under that rule's *"any future integrity-related exception"* clause and is **not** claimed as one of R-01's named fifteen.
 - **Open — four requirements with no acceptance row**: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18.
 - **Open — TA-36 is `Pending`**: approved, never run. Never cited as a result.
 - **Closed 2026-08-26 (finding 8): the § 6 conflict no longer exists — the file was swept 2026-08-24; kept as the dated record.** *(Superseded bullet:)*  — `unit-of-work.md` § 6 carries stale text**, reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`.
@@ -659,3 +951,39 @@ by stage 3.2 and change control.
 
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (finding 17's
 > mojibake repair touched the question file only; no rule here changed). **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-28 under the post-redo receipt, on the project decision owner's ruling
+> against `governance/reviews/GOV-2026-08-28-FD-01.md` (verdict FAIL).** The owner's ruling for
+> the science items was **mechanism written, value routed to the gate**: this stage writes the
+> executable mechanism and the stop-and-report raise, and the **value goes to the
+> Student/Supervisor at G-04**. **No scientific value is decided here.**
+>
+> **Five items applied in this file, each with its Recommendation number at the point of change:**
+>
+> | Rec | Change | Where |
+> |---|---|---|
+> | **13** | R-57a gains a **daily-cadence Constraint**: a `FeatureAvailabilityError` stop-and-report raise on an unavailable daily median, reading **A tabled as the G-04 proposal** and reading **B** stated as the alternative with its 20-of-24-rows cost, **neither chosen**; `configs/features.yaml` gains the composition rule as a **named field**; negative controls specified for either adopted reading | R-57a |
+> | **14** | R-63 gains the **driver-product half of the reanalysed-value check**: the four manifest fields including the **full provider product identity with version suffix**, the contemporaneous-grade assertion, the documented-absence-plus-unverified-status evidence shape, **per-series verifiability limits** (F10.7 and Dst **declared-status-only**), the **GFZ near-real-time cross-assertion specified now**, and five controls asserting **only what the mechanism can catch** | R-63 |
+> | **38** | R-58 **limb 3 rewritten**: a **named token set**, an **AST-level** scan rather than a textual grep, and a **conservation invariant** binding filled epochs to `carry_forward_h`, with the sanctioned ≤ 3 h carry-forward distinguished **by construction** rather than by grep exclusion; three controls including the **vectorised** case | R-58 |
+> | **41** | R-60's unconditional framing **confirmed and strengthened**: the control is keyed to a **GIM comparison artifact existing**, the audit timestamp must **precede** comparator generation, and obligation 1's refusal is labelled a **mitigation that expires when Q-15 is decided**. The conditional phrasing was **inherited from `project.md` § Mandated**; a wording correction there is **owed at the §13 learnings ritual and reported, not applied** | R-60 |
+> | **46** | **D-25 and D-26 added to § Sources**, dated, in the form `acquisition` used on its own finding F2 | § Sources |
+>
+> **Counts re-derived programmatically 2026-08-28, not carried from prose:** **12** rule headings
+> (`R-54`, `R-54a`, `R-55`…`R-57`, `R-57a`, `R-58`…`R-63`) — **unchanged, no rule added or
+> renumbered**; **4** new `### Constraint` sections (one per science item, at R-57a, R-58, R-60,
+> R-63); **15** new negative controls across them (**R-57a 3** bullets, **R-58 3** rows,
+> **R-60 4**, **R-63 5** rows); **7** requirements, **4** with no acceptance row, **2** acceptance
+> rows (**WS-09** owned, **TA-36** `Pending`) — all unchanged.
+>
+> **Corrections to the dispatched brief, recorded rather than propagated:** the brief placed the
+> operative D-25 citation at **R-60** line 404 — line 404 is inside **R-59** limb 4 (R-59 opens at
+> 393, R-60 at 443); the brief placed R-60's FR-P1-04-9 Constraint at **486-489** — it was at
+> **480-483**, with 486-489 being that rule's Negative-controls paragraph; and the conditional
+> GIM phrasing counts **7** across the two sibling units, **not 5**.
+>
+> **IRI and CODE GIM remain evaluation-time-only comparators; Dst remains diagnostic-only; D-11
+> continues to bar provisional Dst from any G-05 regime count. G-09 remains unsigned** — no rule
+> here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`,
+> `src/external/gim.py` or `scripts/04_build_external_products.py`.

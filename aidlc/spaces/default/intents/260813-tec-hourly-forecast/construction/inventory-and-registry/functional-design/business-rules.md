@@ -339,10 +339,13 @@ clause, and a fixture violation under `team.md` § Walking Skeleton. December is
 **Rule (FR-P1-02-3, Q4 = C).** Three checks, in order:
 
 1. **Declared-versus-REQUIRED, before the audit runs.** The declared scope must **equal a
-   governed reference set** — the **twelve 2022 months**, **all three cells** (ARUC 40/44,
-   BSHM 32/35, NICO 35/33), and the artifact classes FR-P1-02-3 names. The reference set is
-   derived from the release inventory (R-44), **never from the audit's own declaration.** A
-   short declaration **fails before anything is read**.
+   governed reference set** — the **twelve 2022 months** with **December carried at day
+   granularity as 1–31 December 2022, 31 days** *(day range added 2026-08-28, Recommendation
+   15; the reference set previously carried December at month granularity only)*, **all three
+   cells** (ARUC 40/44, BSHM 32/35, NICO 35/33), and the artifact classes FR-P1-02-3 names.
+   The reference set is derived from the release inventory (R-44), **never from the audit's
+   own declaration.** A short declaration **fails before anything is read** — including a
+   December cell declared at fewer than 31 days.
 2. **Log-before-read, per artifact.** The audit opens **each artifact** through
    `acquisition`'s named accessor, which writes a **durable access row before the read**
    (R-32, R-33, and `governance-guards` R-25).
@@ -365,6 +368,63 @@ ordinary work.
 **Constraint — performance-blind, and checkable.** **No performance figure appears in the
 coverage report or in its execution log.**
 
+**Constraint — the two December reads BIND their `purpose` literal, and the third is
+refused** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 11, option 1)*. This
+audit is **two separately logged reads**, not one, and each binds an
+`AccessRecord.purpose` value from `governance-guards`' approved enum
+(`domain-entities.md:238` — `coverage_audit` | `regime_audit` | `locked_evaluation`):
+
+| Limb | `purpose` | `performance_inspected` | `authorization` |
+|---|---|---|---|
+| **Coverage figures** — the per-station-month counts § 7's G-P1A record judges against D-12 and D-2 | **`"coverage_audit"`** | **`false`** | a reference to **Vision §8.3** |
+| **Regime-event counts** — D-13's independent-storm-event tally | **`"regime_audit"`** | **`false`** | a reference to **Vision §8.3** |
+
+`locked_test_accessed` is `True` on **both** rows, as it is for every read under
+`RESTRICTED_ROOT`.
+
+**Why two rows rather than one.** Vision §8.3 describes the audit in a single sentence
+covering coverage *and* regime counts, so one row is a defensible reading of the prose — but
+the enum carries **three** members, and Vision §13.1 names the coverage report and the
+December regime-count report as **separate** G-05 evidence artifacts. Folding both limbs
+into `"coverage_audit"` would leave `"regime_audit"` a sanctioned-but-unused member of a
+custody enum — the kind of value that later gets repurposed — and would label the
+regime-count report's provenance row a coverage audit. Two typed rows give a G-05 auditor
+one dated row per required evidence artifact.
+
+**Why this unit binds the literal rather than leaving it to `code-generation`.** Sibling
+controls key on the value **this unit writes**, and before 2026-08-28 this unit wrote none —
+derived across its four artifacts, **`"coverage_audit"` = 0 bare uses**, all five substring
+hits being the notebook filename `madrigal_phase1_coverage_audit.ipynb`, with `"regime_audit"`
+and `"locked_evaluation"` likewise **0**. Meanwhile: `../evaluation-and-comparison/functional-design/business-rules.md`
+R-109's **two-events boundary** (*"a different event under a different purpose"*) and its
+**control that must *not* fire** (*"passes its own door"*) both name `"coverage_audit"`
+(verified 2026-08-28 at that file's lines **516-524** and **534-537**); and
+`../models-and-baselines/functional-design/business-rules.md`'s **ML-02** correlation
+restricts its `AccessRecord` join to **`"coverage_audit"` or `"regime_audit"`** — *"the two
+performance-blind December literals"* — with `"locked_evaluation"` deliberately included as
+itself a finding (verified 2026-08-28 at that file's lines **309-315**, as amended that day).
+**Line numbers are cited as verified on 2026-08-28 and sibling units are being amended in
+parallel**, so the quoted anchor phrases, not the numbers, are what identify the text. A
+typed separation the producer never commits to is a convention, not a control. TE §18.3
+separately bars an implementer from choosing a governed default, and a value sibling controls
+read is governed.
+
+**Negative control — the third literal is refused.** An audit read attempted under
+`purpose="locked_evaluation"` → **refused**. That literal is **G-06's**, and an audit
+carrying it would trip `evaluation-and-comparison` R-109's must-not-fire control and
+**block the read Vision §8.3 requires** — the *"opened exactly once"* misreading `team.md`
+§ Testing Posture records this project having already had to correct once.
+
+> ⚠ **ONE CONSEQUENCE STATED FOR THE GATE, NOT FIXED HERE.** `evaluation-and-comparison`
+> R-109's control that must *not* fire names **`"coverage_audit"` only**. With the regime
+> limb now typed `"regime_audit"`, that control does not name the second read, so a rule
+> keyed to it would not recognise the regime-count read as legitimate. The fix is one
+> literal in a **sibling unit's** file: it is **raised at this stage's gate rather than
+> applied**, because editing another unit's rules is not this unit's to do and
+> `project.md` § Corrections forbids applying a finding on the strength of the finding
+> alone. `acquisition` separately carries an Open item raising an enum-membership test
+> pinning `AccessRecord.purpose` exactly, which is where that pin belongs.
+
 **Constraint — this unit constructs NO path into the restricted root.** Routing is
 `acquisition`'s R-32, and `governance-guards` R-28's static check asserts no module outside
 `locked_test.py` holds the literal.
@@ -375,6 +435,105 @@ coverage report or in its execution log.**
 > of that unit's three. **This rule inherits that status**: until the change record clears,
 > the mechanism this audit routes through is a proposal. Stated at the point of use so a
 > builder does not read the dependency as settled.
+
+**Constraint — the audit's December day range is FULL CALENDAR DECEMBER, 1–31, for both
+limbs** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 15, option 2)*. The
+declared scope's December cell is **1–31 December 2022, 31 days**. Check 1's governed
+reference set carries that day range explicitly, so a December cell declared at anything
+less **fails before anything is read**. The coverage limb must read all 31 days regardless:
+**D-2** requires **100% of December days (31/31)**, which § 7's G-P1A record judges against.
+The regime limb reads the same 31 days so that December's activity distribution is
+characterised as a property of **the month**, not of a scored subset.
+
+**The window mismatch is RECORDED, not left to be discovered.** The G-06 scored set is
+**2–31 December 2022, 30 days**, first 24 h excluded and counted — ruled FU-7 = A on
+2026-08-26 and recorded as **D-28** (2026-08-28), whose own consequences list names *"the
+regime-count audit's relationship to the scored set"* as still open. This audit's count
+window therefore **exceeds the scored window by exactly one day**, and **both reports state
+that in those terms** rather than leaving the reader to compute it.
+
+**Constraint — an event lying WHOLLY outside the scored set is reported separately and does
+NOT count toward D-13's threshold.** D-13 makes H4's and SRQ-5's confirmatory status turn on
+December 2022 containing **≥3 independent storm events**. A storm event whose entire extent
+— the `Kp>=5` interval **and** its −12 h pre-event window — falls outside **2–31 December**
+is **reported as a separately labelled December-regime observation** and is **excluded from
+the ≥3 tally**. The reason is exact: an interval confined to **1 December** would otherwise
+promote H4 and SRQ-5 to confirmatory and lift the descriptive-only label while contributing
+**zero scored rows** to the confirmatory test; an event beginning early on 2 December whose
+pre-event window reaches back into 1 December has the same shape in reverse. D-13's stated
+virtue is *one* measured quantity instead of two thresholds that could disagree, and that is
+defeated if the quantity is measured over hours the test never scores.
+
+> ⚠ **WHICH DAY RANGE GOVERNS THE THRESHOLD IS A SUPERVISOR-OWNED VALUE, ROUTED TO THE
+> GATE.** This rule fixes the **mechanism** — a 31-day read, a disclosed one-day excess, and
+> per-event scored/unscored attribution. It does **not** decide the demotion: whether the ≥3
+> threshold is judged over 1–31 or 2–31 December is **Student + Supervisor's**, because D-13
+> is a supervisor-countersigned demotion threshold and TE §18.3 bars an implementer from
+> filling a freeze-gate value. **This unit measures; it does not demote.** The carve-out
+> above is the conservative posture pending that ruling — an unscored event is counted
+> **nowhere** toward promotion — so no reading of the ruling is pre-empted upward here.
+>
+> **Nobody can currently check whether the case is live.** **GFZ Kp/ap3 and Hp60/ap60 have
+> never been retrieved** (`evidence/audit_ec1_2026-08-15/` holds only `kyoto_dst/` and
+> `nrcan_f107/`), and **D-11 bars any provisional-Dst-derived figure** from standing in.
+> That is the argument for fixing the window in the design rather than discovering it at
+> G-05. `regimes-diagnostics-reporting` R-124 runs `count_storm_events` over *"the window the
+> registered audit covers"* and therefore inherits this range; that unit's consistency
+> control asserting the range rather than inheriting it is **raised at the gate**, not
+> edited here.
+
+**Constraint — every coverage figure carries the DATA-07 provenance caveat as a
+MACHINE-READABLE field** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 29,
+option 1)*. The coverage report carries a **`data07_caveat`** field on every station-month
+figure it emits, **sourced from that month's `provenance_class`** (`acquisition` R-36 and its
+§ 4) rather than restated: a month classed **`derived_only`** emits the caveat populated; a
+month classed **`full`** does not, because it does not carry the defect.
+
+**Negative control.** Emit a coverage figure for a **`derived_only`** month with **no
+`data07_caveat` field** → **fails**.
+
+**Why a field and not prose.** `team.md` § Walking Skeleton's DATA-07 caveat is
+unconditional — *"Every artifact produced before the re-acquisition carries that caveat and
+must state it wherever FULL's coverage figures are relied on"* — and this rule's entire
+output **is** FULL's coverage figures over the twelve 2022 months and all three cells.
+`acquisition` R-42 confirms the **provenance limb is untouched** by D-18's re-merge and
+still stands. Prose has already been measured and failed here: R-42 records that
+`PROVENANCE_NOTICE.md` stated this same obligation as prose *"with no ID, criterion or test
+link, so nothing checked it"*. Nor is the mechanism invented here —
+`fixtures-and-reproducibility`, a **downstream consumer** of this unit's figures, already
+carries the caveat as a machine-readable manifest field propagated onto every artifact
+bearing a coverage figure, with a caveat-less figure raising (its § 5, control (11)). This
+rule applies the same field at the **producing** surface, which is the one place it was
+missing.
+
+**What the supervisor accepting G-P1A must be able to read off the report.** Three facts,
+each established in a sibling's design and none of them previously on this unit's output:
+**(a)** the twelve months' provenance is **unverifiable in principle, not merely
+unverified** — no provider byte stream exists anywhere in the workspace, and the
+provider-side term of R-36's hash arithmetic is **zero**; **(b)** three of the twelve —
+**2022-04, 2022-07 and 2022-12, the locked month** — hold **no `raw_isprint_cache/` at
+all**; **(c)** the **2026-08-16 corrected extracts were produced under Python 3.14, local**,
+outside the governed **3.11** pin, which is why R-36 records a `producing_interpreter` — a
+passing hash on those files otherwise reads as evidence the envelope held, and it did not.
+`team.md` adds the limit this report must not overstate: **FULL must not be relied on at a
+freeze gate while its provenance chain points at superseded per-month hashes.**
+
+> ⚠ **THE SOURCE FIELD IS SEQUENCED BEHIND `acquisition`'s OPEN SEAM.** `provenance_class`
+> is `acquisition`'s field. **As found at the opening of this remediation** — derived
+> 2026-08-28 over all **48** `functional-design` artifacts of this stage — it reached **no
+> other unit**: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` =
+> **3**, every one of them inside `acquisition`. Those three figures are **pre-remediation**;
+> what remains true after it is the load-bearing part — **`foundation`, which owns
+> `src/data/release.py`, `write_release` and the §13.3 contract, still carries the field zero
+> times**, and it is **not among FR-P1-04-11's fourteen release fields**, which `acquisition`
+> now carries as an Open item for stage 3.2 under the same governance report
+> (Recommendation 28). Until that seam is
+> settled the field this caveat reads is **specified but not carried across the unit
+> boundary**, and this constraint is **proposed on that dependency** — stated at the point of
+> use, exactly as the R-32 routing dependency is stated above, so a builder does not read it
+> as settled. **What is NOT deferred is the obligation.** If `provenance_class` is
+> unavailable at implementation, this rule requires a **stop-and-report under TE §18.3**, not
+> a coverage figure emitted without a caveat.
 
 **Why one row per artifact rather than one per run.** An audit spanning twelve months,
 three cells and several artifact classes is many operations. One row makes the log say less
@@ -393,6 +552,17 @@ December record with no preceding row → **fails rather than proceeding** (chec
 twelve months and read eleven → `AuditScopeError` (check 3). Omit a cell, or an artifact
 class, from the declaration → fails (check 1). Emit any performance figure into the report
 or its log → fails.
+
+**Negative controls added 2026-08-28 with the three constraints above.** Write either
+December read under `purpose="locked_evaluation"` → **refused** (Recommendation 11). Write
+the regime-count read under `purpose="coverage_audit"`, or the coverage read under
+`purpose="regime_audit"` → **fails**: the limb and its literal are paired, not
+interchangeable. Declare a December cell shorter than **31 days** → `AuditScopeError` at
+check 1 (Recommendation 15). Count toward D-13's ≥3 tally a storm event lying **wholly**
+outside 2–31 December → **fails**; it must appear as a separately labelled observation
+instead. Emit a regime-count report that does **not** state the day range its count was
+taken over → **fails**. Emit a coverage figure for a `derived_only` month with **no
+`data07_caveat` field** → **fails** (Recommendation 29).
 
 > **BLK-07's authorization limb is open**, and this audit runs through the mechanism it
 > fixes. **No run may touch calendar 2022-12 while it stands.** A refusal keyed to that
@@ -438,9 +608,27 @@ threshold is genuinely useful at 93.2%, but *"near"* would be a number **this st
 invented beside a supervisor-frozen threshold**, and an adjacent number that becomes the
 real rule is a failure this project has already had to correct.
 
+**Constraint — the DATA-07 caveat travels onto the G-P1A record with the figures** *(added
+2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 29, option 1)*. The measured figures above
+**are** FULL's coverage figures — the nine cached non-December months are pre-TC-06 months
+classed **`derived_only`** (the two absent from the nine, **2022-04** and **2022-07**, are
+absent precisely because they hold no `raw_isprint_cache/`). `team.md` § Walking Skeleton
+binds the caveat to appear *"wherever FULL's coverage figures are relied on"*, and this
+record is the surface a **supervisor** relies on them at. Each station-month figure therefore
+carries R-50's **`data07_caveat`** field, sourced from that month's `provenance_class`, and
+the record states in its own text that the provenance is **unverifiable in principle, not
+merely unverified**; that **2022-04, 2022-07 and 2022-12** hold no retrieval cache; that the
+**2026-08-16 corrected extracts were produced under Python 3.14**, outside the governed
+**3.11** pin; and that **FULL must not be relied on at a freeze gate while its provenance
+chain points at superseded per-month hashes**. A record carrying a `derived_only` figure with
+no caveat field **fails**, the same control R-50 states — this rule adds no second mechanism,
+it names the surface the one mechanism must reach.
+
 **Negative controls.** A station-month passing the day rule and failing the hourly gate →
 the record fails, not passes. A verdict with no measured figure → fails. A figure with no
-D-number attribution → fails. A record omitting D-2's disclosure → fails.
+D-number attribution → fails. A record omitting D-2's disclosure → fails. **A
+`derived_only` station-month figure carried into the record with no `data07_caveat` field →
+fails** *(added 2026-08-28)*.
 
 **Acceptance.** TA-25 (**owned by this unit**).
 
@@ -563,6 +751,10 @@ indistinguishable, months later, from an approved one.
 - **Open — `RES-01`**, permitted-read access logging is NOT TESTED — and **this unit performs the permitted read it is about.**
 - **Open — FR-P1-02-8's replacement acceptance row** after `TA-29`'s withdrawal.
 - **Open — D-24's protected set is not reopened.** The schema-block-as-eighteenth-item question is available to raise separately; it is not proposed here.
+- **Open — WHICH December day range governs D-13's ≥3 threshold** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 15)*. R-50 fixes the **mechanism**: a 31-day read for both limbs, the one-day excess over D-28's 2–31 scored set stated in both reports, and an event lying wholly outside the scored set reported separately and excluded from the tally. **Whether the threshold itself is judged over 1–31 or 2–31 December is Student + Supervisor's** — D-13 is a supervisor-countersigned demotion threshold and TE §18.2/§18.3 bar an implementer from filling a freeze-gate value. **This unit measures; it does not demote.** Nothing here can be checked against December's actual event distribution yet: **GFZ Kp/ap3 and Hp60/ap60 have never been retrieved**, and **D-11 bars any provisional-Dst-derived figure** from standing in.
+- **Open — the DATA-07 caveat's SOURCE FIELD crosses no unit boundary today** *(added 2026-08-28, Recommendation 29)*. R-50, R-51, § 6 and § 7 require a machine-readable `data07_caveat` sourced from each month's `provenance_class`. **As found at the opening of this remediation**, derived 2026-08-28 across all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` = **3**, **all inside `acquisition`**. ⚠ **Those three figures are pre-remediation and this bullet's own edits invalidated them** *(rebased 2026-08-28 on the resume pass; the R-50 box at `:521` was rebased at the time and these three sites were not — the representation-sweep gap `project.md` names)*. **Re-derived after the remediation. Basis stated, because it moves**: the figures below were derived over the 48 stage artifacts **immediately before this note was written**, and writing the note itself adds occurrences of each token — which is the same self-invalidation the superseded figures fell into, so the raw counts are recorded as a **dated observation, never as a live invariant**: `provenance_class` **43**, `derived_only` **38**, `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11** and `inventory-and-registry` **18 / 17 / 6**. **The two stable facts, which no edit to this note can change, are the ones to rely on**: the fields reach exactly **2** units, and `foundation` carries all three **zero** times. **What survives the rebasing is the load-bearing half**: `foundation` — which owns `src/data/release.py`, `write_release` and the §13.3 contract — carries all three fields **zero** times, so the field still crosses no boundary to the unit that must read it; and `provenance_class` is **not among FR-P1-04-11's fourteen release fields**, which `acquisition` now carries as its own Open item for stage 3.2 under Recommendation 28. The **obligation** is not deferred — an absent source field requires a **stop-and-report under TE §18.3**, never an uncaveated coverage figure — but the field's arrival at this unit's boundary is `acquisition`'s and stage 3.2's to settle.
+- **Open — raised for `evaluation-and-comparison`, not applied:** R-109's control that must *not* fire names **`"coverage_audit"` only**, so it does not name the regime-count read R-50 now types **`"regime_audit"`**. One literal in a sibling unit's file; **gate input, not an edit** *(added 2026-08-28, Recommendation 11)*.
+- **Open — raised for `regimes-diagnostics-reporting`, not applied:** R-124 runs `count_storm_events` over *"the window the registered audit covers"* and so inherits R-50's 1–31 December range rather than asserting it. Recommendation 15's closure evidence asks that unit to assert the range; that edit is its own.
 - **G-09 is not signed.** No rule here authorises creating `src/data/inventory.py`, `src/data/registry.py`, `scripts/01_inventory_and_registry.py` or `tests/test_station_registry.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
@@ -602,3 +794,32 @@ indistinguishable, months later, from an approved one.
 
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (the unit's
 > question file was repaired from mojibake; no design artifact changed). **G-09 remains unsigned.**
+
+---
+
+> **Re-saved 2026-08-28 under the post-redo receipt, remediating `GOV-2026-08-28-FD-01`
+> (verdict FAIL) on the project decision owner's ruling — mechanism written, value routed to
+> the gate.** Three recommendations reach this unit, all three landing on the December audit.
+> **In this file: R-50 gained three constraints** — (a) **Recommendation 11**: the two December
+> reads bind their `AccessRecord.purpose` literal, `"coverage_audit"` for the coverage limb and
+> `"regime_audit"` for the regime-count limb, each `performance_inspected=false` with a Vision
+> §8.3 `authorization`, and `"locked_evaluation"` refused on either; (b) **Recommendation 15**:
+> the December day range fixed at **full calendar 1–31**, the one-day excess over D-28's 2–31
+> scored set stated in both reports, and an event lying wholly outside the scored set reported
+> separately and excluded from D-13's ≥3 tally; (c) **Recommendation 29**: every coverage figure
+> carries **`data07_caveat`** as a machine-readable field sourced from each month's
+> `provenance_class`. **R-50's negative-control block gained six controls** and **R-51 gained the
+> caveat constraint plus one control**, because R-51 is where FULL's measured figures reach a
+> supervisor. **Four Open items added**: the threshold day range (**Student + Supervisor**), the
+> caveat's cross-unit source field (`acquisition` / stage 3.2), and two sibling edits raised as
+> **gate input rather than applied** — `evaluation-and-comparison` R-109's must-not-fire literal
+> and `regimes-diagnostics-reporting` R-124's window assertion.
+>
+> **Counts derived 2026-08-28, printed before assertion.** Rules **10** (R-44…R-53) — unchanged,
+> no rule added or removed. Requirements **7**, untested **2**, acceptance rows **3** —
+> unchanged. Negative-control blocks in this file: **12 → 15** (three added to R-50; R-51's
+> existing block extended by one control rather than a block added). **No scientific value was
+> decided here**: not the demotion threshold's window, not a coverage threshold, not a fixture
+> value. **G-09 remains unsigned**, **BLK-07's authorization limb remains open** — no run may
+> touch calendar 2022-12 while it stands — and membership stays derived from **record
+> timestamps**, never from a directory name (D-2 / ML-07 / TEC-09).

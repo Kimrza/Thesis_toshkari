@@ -2,6 +2,41 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> ## ✳ AMENDED 2026-08-28 — GOVERNANCE REMEDIATION, `GOV-2026-08-28-FD-01` (verdict FAIL)
+>
+> Applied on the project decision owner's ruling on
+> `governance/reviews/GOV-2026-08-28-FD-01.md` (49 findings; Critical 6, High 25, Medium 13, Low 5).
+> **No dated box, superseded record or `## Review` section was deleted or rewritten** — every prior
+> reviewer verdict, finding and remediation section stands byte for byte, and this unit's
+> annotate-in-place convention (the `GOV-2026-08-22-INC-01` Rec 7 precedent) is unchanged. What
+> changed in this file:
+>
+> | Rec | Change | Where |
+> |---|---|---|
+> | **10**, **1**/**3**, **12** | **W-6 extended from 3 steps to 8** — the twenty-column §13.4 schema assertion, the refusal of a `prediction_hash` from the metric-computing process, the Phase 1 `prior_period_exposure` refusal, the derived `exploratory` field, the single-write append and the durability confirmation. The `AccessRecord` reconciliation stated. **Superseded 3-step contract preserved verbatim in place** | W-6 |
+> | **39** | W-6's write mechanism and the **trailing-versus-interior malformed-record distinction**; the disclosed Kaggle durability limit | W-6; § Assumptions |
+> | **9** | **W-3 named as the §18.3 preflight gate**, with FR-WS-7 as its requirement, TA-23 as its row, `aws_ai_dlc_preflight_report` as its evidence artifact and **G-09** as its gate — plus the anti-self-certification rule for a limb with no collected evidence | W-3 |
+> | **49** | Dated clause: the `.gitignore` deny-list precondition **satisfied** 2026-08-28 over 1158 tracked files; **NFR-SEC-01 and TA-22 stay unclaimed** pending TA-22's history/config/log/artifact scan | W-8 |
+> | **34** | NFR-DET-01's WS-17 marked **supporting** | § Requirement-to-workflow map |
+> | **8**, **42** | The exception-hierarchy obligations and the still-unruled `dataset_version` encoding recorded as open items | § Assumptions |
+> | *(unnamed by the board)* | **Two workflow-mapping corrections found while applying the above** — FR-P1-05-13 `W-4` → **`W-6`**, FR-WS-7 `W-7` → **`W-3`**, with their matching entity cells corrected in `domain-entities.md` | § Requirement-to-workflow map, note W-1/W-2 |
+>
+> **Counts after these edits, derived and printed** — `10` workflows (W-1…W-10, unchanged), `0` `## R-`
+> headings in this file, `20` rules in `business-rules.md` (**moved 17 → 20**: R-18, R-19, R-20 added),
+> `8` live entities of 9 sections. **16** requirements, **2** untested by design, **7** acceptance rows
+> owned, **2** supporting, §19 held at **36**. **G-09 remains unsigned**; nothing here authorises
+> creating a module, and no scientific value or governed constant is decided.
+>
+> **One item in the remediation brief did not match the disk, and is corrected rather than adapted
+> around.** Recommendation 39's *"your verification table at `business-logic-model.md:1748`"* is not
+> this unit's own live table: it sits inside `## Review — 2026-08-25 post-redo pass, restored budget
+> iteration 1` → `### What reproduced exactly`, and is a **reviewer's** dated spot-check of TE section
+> citations. Preserved `## Review` sections are not editable and rewriting a reviewer's sentence would
+> break the convention above, so the citation correction is stated in live rule text instead —
+> `business-rules.md` R-08's Acceptance line and the boxed correction after R-20. §13.4's atomicity
+> clause is carried by **R-08**; R-07 and R-09 carry its *status-and-reason* and *no-silent-rerun*
+> clauses, which is what that reviewer was checking and got right.
+
 > **Addendum re-confirmed 2026-08-24.** Site **9** of
 > `governance/CHANGE_RECORD_2026-08-24_foundation_amendments.md` § Addendum lands in this
 > file: a dated annotation box at the head of § Review, naming three statements the
@@ -42,6 +77,12 @@ mechanisms that move them are what this document fixes.
 - `../../../inception/practices-discovery/team-practices.md` — § Code Style, § Testing Posture.
 - `../../../../../../../../PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md` — **the Technical Environment document**, cited throughout this artifact (§7.0's Phase 1 prohibition, §9.1–9.2 platforms and fixtures, §12's repository tree, §13.1's environment lock, §13.3's release manifest, §13.4's registry, §18.2–18.3's forbidden choices and preflight gate, §19's approval checklist). *(Added 2026-08-25. Two adversarial passes had recorded as a residual that this document was cited but unlisted, and that its derivations used an unresolved `<TE>` placeholder. **The placeholder was resolvable all along** — the document is at `PreFlight/`, 1158 lines. All three previously unverifiable figures are now derived against it and all three agree: `awk 'NR>=749 && NR<=760 && /^- /' <TE> | wc -l` → **7** §13.1 bullets; `sed -n '709,721p' <TE> | grep -cE '\.(jsonl|json|csv)'` → **0** file-level entries under `artifacts/`; and `grep -oE "TA-[0-9]+" <TE> | sort -u | wc -l` → **36**, TA-01…TA-36, which confirms the "§19 at 36 rows" figure this unit had been carrying rather than deriving through both passes.)*
 - `functional-design-questions.md`, `domain-entities.md`, `business-rules.md`.
+- `../../../../../../../../governance/reviews/GOV-2026-08-28-FD-01.md` — **the governance report this unit was remediated against on 2026-08-28** (verdict **FAIL**; 49 findings). Recommendations reaching this file: **1**, **3**, **8**, **9**, **10**, **12**, **34**, **39**, **42**, **49**. *(Added 2026-08-28 with the remediation, per the standing practice that an operatively cited document appears in § Sources.)*
+- `../../../../../../../../PreFlight/vision_document(3)(2)(2).md` — **the Vision document**, § 13.1's gate table, read 2026-08-28 for **G-09 Agent preflight** (evidence `aws_ai_dlc_preflight_report`, owner Supervisor, status **Open**, due *"Before any affected component is coded"*) as distinct from **G-07 Reproducibility** (evidence `environment_and_cpu_preflight_report`), and **§8.3** for the exploratory label. *(Added 2026-08-28: Recommendations 9 and 12 both turn on distinctions only this document fixes, and it was cited in no § Sources entry of this unit.)*
+- `../../governance-guards/functional-design/` — **`AccessRecord`**'s approved field set and **R-25**'s durable-append pattern (*"writes the `AccessRecord` **and flushes it**"*; *"a **durability failure** must **prevent the read**"*; the control asserting the row is *"**durable on disk**"*), the comparator W-6 step 8 and R-19's join are specified against; and the five recorded pre-guard retrospective access rows. *(Added 2026-08-28. **Two levels up** — a sibling unit sits at `construction/<unit>/functional-design/`, so a one-level path resolves inside this unit's own directory; verified with `test -f`.)*
+- `../../models-and-baselines/functional-design/` — § 12's `IntegrityError` subclasses and R-92's `PartitionError` raise condition (the authority for R-01's fifteenth entry), that unit's `Owns` list placing `src/models/`, and the `PredictionHashReceipt`/`scripts/06_train_and_predict.py` half of Recommendation 1. *(Added 2026-08-28.)*
+- `../../regimes-diagnostics-reporting/functional-design/business-rules.md` — **R-128**, the **reader** of the `exploratory` label, which asserts its presence on every reported post-access run, fails a run reported without it, and routes the **writer** here. *(Added 2026-08-28 with Recommendation 12: R-20 exists because this rule named this unit as the writer and nothing here wrote it.)*
+- `../../statistical-inference/functional-design/business-rules.md` — **R-117**, which claims **WS-17 (primary)** and reciprocally returns TA-13/TA-26, and whose `BootstrapResult` records the replicate hash TE §16 line 969 names as WS-17's evidence. *(Added 2026-08-28 with Recommendation 34.)*
 
 ---
 
@@ -171,6 +212,40 @@ without anyone filling a sentinel — which `project.md` § Forbidden prohibits.
 **Completeness of the map is asserted separately** (R-03): a test walks the parsed
 configuration and fails when a governed required field appears in no map entry. The
 map is a list; the test is what makes it a rule.
+
+> ## ✳ W-3 IS THE §18.3 PREFLIGHT GATE, AND ITS EVIDENCE ARTIFACT IS `aws_ai_dlc_preflight_report`
+>
+> *(Added 2026-08-28 on the owner's ruling on `governance/reviews/GOV-2026-08-28-FD-01.md`
+> **Recommendation 9**, option 1. `business-rules.md` **R-02** carries the full record, the four
+> authority citations and the negative control; this is the workflow-side statement of what W-3 emits.)*
+>
+> **FR-WS-7 is `foundation`'s own requirement, its acceptance row is TA-23 — this unit's PRIMARY row —
+> and its evidence artifact is `aws_ai_dlc_preflight_report`, whose gate is G-09.** Derived:
+> `unit-of-work-story-map.md:127` → `| FR-WS-7 | foundation | TA-23 |`; TE:1083 (§18.3) and TE:1119
+> (§19, TA-23's Evidence column) both name `aws_ai_dlc_preflight_report`; Vision § 13.1's gate table
+> gives **G-09 Agent preflight** that artifact, owner **Supervisor**, due *"Before any affected
+> component is coded"*, status **Open**.
+>
+> **It is a DIFFERENT artifact from `environment_and_cpu_preflight_report`**, which Vision gives to
+> **G-07 Reproducibility** and TE:530 defines as install-from-pins on both platforms plus a completed
+> skeleton run and measured CPU runtime, RAM and storage. The two are **not aliases** and this design
+> does not merge them. `fixtures-and-reproducibility` builds the G-07 artifact; **its own TA-23
+> supporting claim is that unit's to reconcile, and nothing here reaches into its artifacts.**
+>
+> **What W-3 contributes, and what it only aggregates.** Two of the gate's four preconditions are
+> W-3's own: **zero `TBD`** (steps 1–4, R-02/R-03) and **every declared source and hash resolves**
+> (step 5, whose failure is a raise and never a warning). The other two are **not this unit's to
+> produce** — the **ten named critical tests** are spread across units, and the **supervisor sign-off**
+> is a supervisor act. `foundation` **collects** those; it does not assert them.
+>
+> **⛔ The report must not become self-certifying.** A limb with no collected evidence renders
+> **absent**, never **passed**, and the report **refuses a green overall verdict while any limb is
+> absent**. Stated because the cheapest wrong implementation treats an uncollected limb as satisfied,
+> which is how a gate control becomes a formality that passes its own test. The negative control — the
+> four withheld-limb cases plus the never-collected case — is in R-02.
+>
+> **G-09 is Open and unsigned.** Designing this report's contents fills no `TBD`, creates no module,
+> and does not satisfy the gate it evidences.
 
 ## W-4 — `seed_everything` and the determinism probe
 
@@ -329,17 +404,63 @@ run forward because the thirteen prior runs are recorded as violating it and the
 
 ## W-6 — Registry append
 
+*(Steps 4–8, the twenty-column schema, the write mechanism and the reconciliation were **added
+2026-08-28** on the owner's ruling on `GOV-2026-08-28-FD-01` Recommendations **10**, **1**/**3**,
+**12** and **39**. **Superseded contract, preserved verbatim:**)*
+
+> ```
+> INPUT   run_id, status, reason (required when aborted|failed), payload
+> OUTPUT  one appended JSONL line
+> RAISES  RegistryError — unknown status, or empty reason on aborted|failed
+> ```
+>
+> 1. **Validate the status** against the closed enum `started` | `completed` |
+>    `aborted` | `failed` (R-07). Needs no read of prior rows, so it costs nothing
+>    against the append-only guarantee.
+> 2. **Require a non-empty `reason`** for `aborted` and `failed`.
+> 3. **Append.** Never read the run history (R-08), never rewrite, never delete.
+>
+> *(Its three steps are preserved in place as steps 1–3 below; nothing was removed.)*
+
 ```
 INPUT   run_id, status, reason (required when aborted|failed), payload
-OUTPUT  one appended JSONL line
-RAISES  RegistryError — unknown status, or empty reason on aborted|failed
+OUTPUT  one appended JSONL record — TE §13.4's twenty columns plus three named extensions
+RAISES  RegistryError — unknown status; empty reason on aborted|failed;
+                        a missing or unpopulated §13.4 column;
+                        prediction_hash presented by the metric-computing process;
+                        prior_period_exposure = true on a Phase 1 row;
+                        exploratory passed by a caller;
+                        a durability failure on the append
 ```
 
 1. **Validate the status** against the closed enum `started` | `completed` |
    `aborted` | `failed` (R-07). Needs no read of prior rows, so it costs nothing
    against the append-only guarantee.
 2. **Require a non-empty `reason`** for `aborted` and `failed`.
-3. **Append.** Never read the run history (R-08), never rewrite, never delete.
+3. **Assert the schema** — **all twenty §13.4 columns present**, and `code_commit` and
+   `environment_lock_hash` **populated**, not merely present (R-18; FR-P1-05-13's criterion). Like
+   the enum, this is a **write-time** check that needs **no read**, so R-08's purity is untouched.
+4. **Refuse a `prediction_hash` presented by the process that computes a metric over that
+   prediction** (R-18). `06` writes the receipt; `07` and the bootstrap **may not**. Writer and
+   reader stay in different processes, which is the only thing that makes *"the receipt precedes the
+   metric"* mean anything.
+5. **Refuse `prior_period_exposure = true` on a Phase 1 row** (R-18). Phase 1 *is* the first December
+   exposure; `true` belongs to the Phase 2 replication (TE §7.0B).
+6. **Derive `exploratory`** — never accept it from a caller (R-20). `true` when `started_at_utc`
+   postdates the earliest `AccessRecord` under `RESTRICTED_ROOT`; `false` otherwise; **`false` with
+   the carve-out recorded** for the G-06 confirmatory run, identified by its own `AccessRecord`
+   carrying `purpose = locked_evaluation`. A caller passing the field is **rejected**.
+7. **Append** — **one single write of one newline-terminated record, under append mode** (R-08).
+   Never read the run history, never rewrite, never delete.
+8. **Confirm durability** before returning, on `governance-guards` R-25's accepted pattern. A
+   durability failure raises `RegistryError` naming the file and the violated expectation — **never a
+   warning beside a write reported as successful** (R-10's obligation reaching the durability layer).
+
+**Why step 6 is a derivation and not a parameter.** A caller argument spreads a governed fact across
+nine stage scripts, each of them a chance to pass `false`. Derived, one place computes it and no
+caller can suppress it. `regimes-diagnostics-reporting` R-128 **reads** the label and fails a
+post-access run reported without it; before 2026-08-28 nothing **wrote** it, and R-128 explicitly
+routed the writer here.
 
 **Transitions are not checked here.** The graph — `started → completed|aborted|failed`,
 with duplicate `started`, repeated terminals, transitions out of terminals and
@@ -347,8 +468,30 @@ malformed rows all rejected — is enforced by a **separate integrity test** (R-
 A log whose write path depends on reading is no longer a pure append, and that
 purity is the only reason append-only is trustworthy.
 
+**A trailing malformed record is a torn write, not corruption** (R-08, added 2026-08-28). The
+integrity test **distinguishes position**: an unterminated or truncated **final** line is reported as
+a torn write **with the `run_id` it belongs to** — recovered from the legible prefix, `run_id` being
+column 1 for exactly this reason — and the run **stays visible**; any **interior** malformed line, or
+a newline-terminated trailing line that is still unparseable, is **rejected**. Without the
+distinction a torn `aborted` row would **fail** the integrity test rather than preserve that run's
+visibility, and an `aborted` row is written *while the process is dying*, which is precisely when a
+non-atomic append tears.
+
+**The `AccessRecord` reconciliation runs with the integrity test, never on the write path** (R-19,
+added 2026-08-28). `RegistryEvent` and `AccessRecord` **join on `run_id`**, with orphan detection in
+**both** directions — a restricted access with no registry row, and a row claiming
+`locked_test_accessed = true` with no logged access. The five known pre-guard retrospective access
+rows are **reported as expected orphans with their reason and never back-filled**. Putting the
+reconciliation on the write path would make the registry write depend on reading the access log and
+destroy R-08's purity, which **Q4 = D** exists to protect.
+
 **Integrity test timing.** Before TA-10 / G-09 acceptance, and before registry
 contents are relied on as audit evidence.
+
+**Disclosed limit.** Durability semantics differ between the two governed platforms and **Kaggle's are
+characterised nowhere in this design**, so step 8 needs its own measured evidence before rows written
+inside a Kaggle session are relied on at a freeze gate. A measurement obligation on Bolt 1's in-Kaggle
+work, not an implementation choice — recorded in § Assumptions.
 
 **Derived CSV.** `experiment_registry.csv` is regenerated by folding the JSONL,
 hashed, and marked derived. A stale CSV is a **completeness shortfall recorded in
@@ -564,6 +707,35 @@ before the first relevant commit**, and NFR-SEC-01 / TA-22 compliance is **not
 claimed until the required checks have passed**. `evidence.md` records NFR-SEC-01 as
 not satisfied in this workspace today.
 
+> ## ✳ DATED CLAUSE, 2026-08-28 — THE PRECONDITION IS SATISFIED; THE REQUIREMENT REMAINS UNCLAIMED
+>
+> *(Added on the owner's ruling on `governance/reviews/GOV-2026-08-28-FD-01.md` **Recommendation 49**,
+> option 1. **The precondition framing above is preserved unchanged and deliberately not weakened**,
+> and **NFR-SEC-01 and TA-22 stay unclaimed** — the board asked for the conservative half to stand and
+> *"explicitly does not conclude NFR-SEC-01 is satisfied"*. What was dated is the status sentence.
+> `business-rules.md` **R-14** carries the full derivation; this is the workflow-side mirror.)*
+>
+> **Verified independently by this unit on 2026-08-28, not carried from the finding's text:**
+> `.gitignore` **does** carry the credential deny-list (lines 62–89: `.env`, `.env.*`, `*.key`,
+> `*.pem`, `*.p12`, `*.keystore`, `kaggle.json`, `.netrc`, `_netrc`, `credentials`, `credentials.*`,
+> `.aws/credentials`, `id_rsa*`, `secrets.yaml`, `secrets.yml`, `.madrigal_auth`); `git ls-files`
+> filtered for credential-shaped names returns **0**; a scan of **all 1158 tracked files** for
+> `AKIA[0-9A-Z]{16}`, PEM private-key headers, `xox[baprs]-`, `ghp_…`, `AIza…` returns **0 hits**
+> across 5 patterns. So §10's *"excluded from version control"* mechanism — which W-9 lists as a Bolt 1
+> permitted item — **now exists**, and the exposures the sentence above was written against are not
+> visible in the tracked tree today.
+>
+> **⚠ TA-22's SCOPE IS WIDER AND WAS NOT SCANNED.** TA-22 additionally requires a secret scan over the
+> repository **history**, configurations, logs and artifacts. The derivation above is `git ls-files` at
+> **one commit**, so a credential committed and later removed is invisible to it. **NFR-SEC-01 and
+> TA-22 therefore remain unclaimed**, and the full-scope scan is scheduled work for TA-22 with its own
+> tooling and owner decision — the board records the two acts as *"sequential, not competing"*.
+>
+> **This clause is dated because it will itself go stale if the tree changes.** It is tied to the
+> deny-list's **existence**, which is the durable half; the zero-hit scan is evidence as of 2026-08-28
+> and nothing more. `evidence.md`'s own status line is the **project owner's** to refresh — this stage
+> may not edit `evidence/` — so the attribution above stands and is corrected here rather than there.
+
 ## W-9 — What Bolt 1 builds, and what it must not
 
 **Permitted before G-09** (`bolt-plan.md` § Gate 0 boundary):
@@ -639,14 +811,56 @@ the owner column and the separate seven-row ownership set.
 | REQ-ENG-11 | W-5 | **TA-17, TA-26** |
 | FR-P1-01-10 | W-8 | TA-22 |
 | FR-P1-04-11 | W-2, W-3 | **TA-15** |
-| FR-P1-05-13 | W-4 | **TA-10** |
-| FR-WS-7 | W-7 | **TA-23** |
+| FR-P1-05-13 | **W-6** *(workflow corrected 2026-08-28 — see note W-1 below; it read `W-4`)* | **TA-10** |
+| FR-WS-7 | **W-3** *(workflow corrected 2026-08-28 — see note W-2 below; it read `W-7`)* | **TA-23** |
 | NFR-AUD-01 | W-6 | **TA-10, TA-21** |
-| NFR-SEC-01 | W-8 | TA-22 |
-| NFR-DET-01 | W-4 | **WS-17, TA-13** |
+| NFR-SEC-01 | W-8 | TA-22 — **not claimed as satisfied**; see W-8's dated clause of 2026-08-28 |
+| NFR-DET-01 | W-4 | **WS-17 (supporting — the replicate hash is `statistical-inference`'s; see `business-rules.md` R-05)**, TA-13 |
 
 **16 requirements, 2 without an acceptance row** — REQ-ENG-7 and REQ-ENG-10,
 matching the story map's designation.
+
+> ## ✳ TWO WORKFLOW-MAPPING CORRECTIONS, 2026-08-28 — FOUND WHILE APPLYING RECOMMENDATIONS 9 AND 10
+>
+> **Neither was named by the governance report.** Both were found by reading each requirement's text
+> against the workflow this map assigned it — the check `project.md` § Way of Working requires against
+> the governing normative core, not only against the questions that produced the artifact. They are
+> stated as corrections rather than applied silently. **The `Tested by` column is unaffected**: it was
+> derived from story-map Table 1 and remains correct cell for cell. The defect is in the `Workflow`
+> column, which — like `domain-entities.md`'s `Entities` column, corrected the same day for the
+> matching pair — was never itself brought under the derive-then-assert discipline that fixed the
+> `Tested by` column on 2026-08-22.
+>
+> **W-1 — FR-P1-05-13 was mapped to W-4; it is W-6.** FR-P1-05-13 reads *"The **experiment registry**
+> is operational, append-safe and atomic; failed and aborted runs remain visible with status and
+> reason; no entry is deleted, overwritten or silently re-run. **Its schema is TE §13.4's twenty
+> columns** …"*. **W-6 is the registry append**; W-4 is `seed_everything` and the determinism probe and
+> touches the registry nowhere. **Superseded cell, preserved:** `W-4`. The matching entity cell in
+> `domain-entities.md` read `DeterminismRecord` — the same substitution, in both artifacts, which is why
+> cross-checking the two against each other could never have caught it. **This is the same defect
+> Recommendation 10 found from the other end**: the board found FR-P1-05-13's twenty-column criterion
+> had *no design*, and these two cells show why nobody noticed — the requirement pointed at the
+> determinism probe, so the registry schema was never anyone's obvious obligation. Corrected together
+> with **R-18**, which now designs it, and W-6 steps 3–8, which now perform it.
+>
+> **W-2 — FR-WS-7 was mapped to W-7; it is W-3.** FR-WS-7 is TE §18.3's **preflight gate** — zero
+> unresolved P0 fields, no failing critical test, an automated zero-`TBD` assertion over the four
+> configs, every declared source and hash resolving, and supervisor sign-off. **W-3 is
+> `assert_no_tbd` and `assert_declared_sources_exist`** — two of the gate's four preconditions,
+> literally. **W-7 is `write_release`**, the §13.3 dataset release, which has nothing to do with the
+> preflight gate. **Superseded cell, preserved:** `W-7`. The matching entity cell in
+> `domain-entities.md` read `ReleaseManifest` — again the same substitution in both artifacts.
+>
+> **This sharpens Recommendation 9 rather than contradicting it.** The board wrote that FR-WS-7 *"is
+> named nowhere"*, which is true of `fixtures-and-reproducibility`. In `foundation` it **was** named —
+> in this map and in `domain-entities.md` § Requirement coverage — but pointed at the **release
+> writer**, and its evidence artifact `aws_ai_dlc_preflight_report` was named nowhere at all. **That is
+> worse than absence, because it looks answered**: a 3.5 developer following this map would have gone
+> looking for the §18.3 preflight gate inside `write_release`.
+>
+> **Neither correction moves a count.** 16 requirements; 2 untested by design; 7 acceptance rows owned;
+> 2 supporting rows; §19 at 36; 10 workflows, W-1…W-10 — **no workflow is added, removed or renumbered**
+> by W-1 or W-2. Both requirements now point at workflows this document already defines.
 
 > **CORRECTION, 2026-08-22 — the first issue of this table was wrong in 10 of 14
 > cited rows, and an adversarial review caught it.** Correct on first issue:
@@ -688,8 +902,13 @@ matching the story map's designation.
 - **OPEN — an amendment need on `verify_release`, or acceptance that the correspondence check is test-only.** R-11's and R-12's correspondence negative control was relocated to *"a presented manifest"* without naming what performs it. The only candidate in the approved contracts, `verify_release(manifest_path) -> Sequence[str]`, **does not fit**: it reports files whose *file hash* mismatches and **never raises**, so it covers neither label/hash correspondence nor failure signalling. The control is therefore specified as a **test** obligation on `tests/test_release_hashes.py` (TA-15), which needs no production entry point. **If runtime enforcement is wanted, `verify_release` must be amended** — the owner's decision *(added 2026-08-25 on adversarial finding M-5 of the restored budget; likewise claimed as listed here and not)*.
 - **Closed — Amendment C, DECLINED AS DRAFTED 2026-08-25**, reversing its 2026-08-24 approval. *(Marker corrected 2026-08-25 on reviewer finding m-1: it read "**Open**" above a body stating all three consequences were closed, and both sibling artifacts already read Closed. Iteration-1 m-2 class — marker versus body — recurring in the primary artifact, in the one bullet the reversal rewrote.)* No release ledger; `ReleaseLedgerEntry` withdrawn; `dataset_version` derived from `content_hash` with no encoding specified here. **R-11 unchanged** — the content hash stays authoritative. **R-12 amended, not deleted.** *(Superseded statuses, both preserved: "**Closed — Amendment C** … **APPROVED 2026-08-24**, on the authority of **Q6=D** and **FU-2=D** rather than as an engineering preference. `services.md` and `unit-of-work.md` are annotated in place." and, before that, "**Not approved.**")* **Two of the three consequences are closed; never-reuse is OPEN.** *(Corrected 2026-08-25 on adversarial finding M-3 of the restored budget; superseded wording preserved: "**All three consequences of the reversal are now closed, and none by this stage's own choice.**" It stood directly above its own bullet (b), which the previous pass had already marked **PARTLY CLOSED** — a roll-up contradicting the item it summarises.)* (a) **CLOSED — monotonicity, by re-answering the question.** Ordering is information about *sequence*, which a function of content alone cannot carry, so no test or implementation choice reaches it. **Q6 was re-presented and re-answered as D′ on 2026-08-25**, dropping "monotonic" — the owner's explicit decision, the original Q6=D answer preserved verbatim beside it, and **FU-2 is moot** since it existed only to locate the ledger. The design is compliant with Q6=D′ **on monotonicity, which D′ dropped — but NOT on never-reuse, which D′ retains and this design does not establish** *(narrowed 2026-08-25 on adversarial finding M-1/M-3 of the restored budget; the unqualified claim "fully compliant with Q6=D′" appeared at five sites and was false at all five)*. On the ordering side what is disclosed is a capability rather than a gap — release labels cannot be ordered, so sequence is read from the run record or the experiment registry. (b) **PARTLY CLOSED — the delete-and-rebuild failure is disposed of; never-reuse is not.** The superseded R-12 text objects to *allocation from an index*, and that objection does not transfer to a pure derivation, which allocates nothing and consults nothing. **But that is idempotence, not never-reuse** *(corrected 2026-08-25 on reviewer finding M-3, which was Major; superseded claim preserved: "**RESOLVED — the never-reused guarantee survives** … a label bound to two genuinely different contents reduces to a SHA-256 collision. FU-2=D's integrity obligation is likewise discharged by R-12's three replacement negative controls.")*. Never-reuse needs injectivity, the collision reduction needs a 256-bit-faithful encoding, and a citable label cannot be one — so it is now an **open** obligation, listed above. FU-2's **inconsistent-mapping** obligation is discharged by R-12's correspondence control and its duplicate-row obligation is vacuous, but the third control catches only a degenerate encoding and cannot stand in for injectivity. (c) **RESOLVED — the upstream contradiction is corrected.** `unit-of-work.md` § 1 `Owns` and `services.md` were first **reported** rather than edited, because this stage's scope control forbade editing an approved Inception artifact; the owner authorised the edits explicitly on 2026-08-25 and both were corrected the same day, superseded wordings preserved, with a search across `construction/` confirming no other unit referenced the ledger.
 - **Open** — the concrete `RequiredFieldsMap` and `CredentialNameMap` contents await the four configs existing. This stage fixes the mechanism.
-- **G-09 is not signed.** No workflow here authorises creating a module.
-- **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
+- **OPEN — `prediction_hash`'s producer is `models-and-baselines`', not this unit's.** *(Added 2026-08-28 per Recommendations 1 and 3.)* W-6 step 4 designs the registry row as the receipt's **destination** and refuses a hash presented by the metric-computing process; the **producer** is `scripts/06_train_and_predict.py`, which that unit owns and is being amended to specify (`PredictionHashReceipt`: `prediction_path`, `sha256`, `recorded_at_utc`, `run_id`, `partition_id`, durably flushed before `06` exits, with `06` refusing to exit holding a `DEC` prediction and no receipt). Until that lands the column has a home and no writer — **fail-closed**, since every `DEC` metric entry point already refuses without a verified receipt. The governance report's adoption vehicle is the **R-103/BLK-08 two-half contract** pattern registered as an exit condition on 3.1 for both owners; **this unit does not declare that pattern satisfied from one side.**
+- **OPEN — the `AccessRecord` half of W-6's reconciliation is `governance-guards`'.** *(Added 2026-08-28 per Recommendation 10.)* Both entities already carry `run_id`, so no contract change is needed on either side, but the reconciliation is a **joint** obligation and this document designs only the registry half. **Zero of the twelve units' 48 artifacts named both entities before 2026-08-28**; R-19 is the first statement of the relationship and `governance-guards` has not yet stated its side. Related and **not this unit's to close**: `GOV-2026-08-28-FD-01` **Recommendation 31** records five retrospectively logged December accesses and **one possible unauthorized access as expressly unresolved** — W-6's reconciliation reports them as known pre-guard orphans and never back-fills a registry row to clear them.
+- **OPEN — Kaggle's durability semantics are characterised nowhere in this design.** *(Added 2026-08-28 per Recommendation 39.)* W-6 step 8's durability confirmation reuses `governance-guards` R-25's accepted pattern, and platform durability behaviour differs between the two governed platforms. Kaggle's is unmeasured here, so step 8 needs its own measured evidence before rows written inside a Kaggle session are relied on at a freeze gate. A **measurement obligation on Bolt 1's in-Kaggle work** (W-10), not an implementation choice, and not this stage's to measure.
+- **OPEN — the `dataset_version` encoding is still the owner's D-number decision, and the board has now recommended one.** *(Added 2026-08-28 per Recommendation 42.)* The two OPEN items above on the encoding and its injectivity are **unchanged** — never-reuse remains **not established** and nothing this unit produces may claim otherwise. What is new is that the board **recommended** a fixed-length `content_hash` prefix plus a recorded collision bound and a verify-on-write uniqueness check (which would also discharge the `verify_release` amendment already listed as open), with the full 64-hex `content_hash` as the fallback and formal withdrawal of the never-reuse obligation as the third option. **No encoding is adopted here and none is invented.** `business-rules.md` § Assumptions carries the recommendation in full, including the trade-off that a verify-on-write check is a read back over existing releases — a light form of the release state the owner declined at Amendment C. **The decision must be taken before 3.5 touches `write_release`**, and per TE §18.3 stage 3.5 must stop and report rather than choose.
+- **OPEN — the exception-hierarchy obligations R-01's 2026-08-28 amendment creates.** *(Added 2026-08-28 per Recommendation 8.)* `PartitionError` is now a **fifteenth** named subclass, so the exceptions raised by other units are **nine** and `models-and-baselines` owes its declaration on the same terms as the other eight. Separately, **18** further project-defined subclasses ride R-01's any-future clause — derived, not counted from prose — and each raising unit still owes its own declaration, or the stage-entry catch lets one exit with **no `aborted` registry row**. And the **`PartitionError`/`LeakageError` taxonomy disagreement between `models-and-baselines` R-92 and `evaluation-and-comparison` R-105 is not closed by the promotion**: R-01 now states the discriminating rule those units must agree against, and whether R-105 changes its raise is their decision. `business-rules.md` § Assumptions carries all three items.
+- **G-09 is not signed.** No workflow here authorises creating a module — including W-3's `aws_ai_dlc_preflight_report` and W-6's extended row, which specify contents and create nothing. Vision § 13.1 records **G-09 Agent preflight** as **Open**, owner **Supervisor**, evidence `aws_ai_dlc_preflight_report`, due *"Before any affected component is coded"*.
+- **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant. **This holds for the 2026-08-28 amendments specifically**: W-3's report contents, W-6's twenty columns and its four new refusals, the `exploratory` derivation, R-01's promotion, R-08's write mechanism, R-05's acceptance label, W-8's dated status clause, and the four mapping corrections (W-1, W-2 here; E-1, E-2 in `domain-entities.md`) are all schema, taxonomy, mechanism or citation decisions. **The one value that would be scientific — the `dataset_version` encoding — is explicitly left unruled.**
 
 ## Review history
 

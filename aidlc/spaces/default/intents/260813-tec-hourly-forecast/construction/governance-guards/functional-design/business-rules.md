@@ -387,8 +387,76 @@ and writes the `aborted` registry row.
   `phase == 1`, no name in `RAW_MODULES` may be present. **Raises**
   `PhaseBoundaryError` naming the offending module.
 - **Produced-field limb** — `assert_no_raw_fields(frame, phase)`: a Phase 1 artifact
-  may carry no DCB, STEC, mapping, satellite or arc field. **Raises**
-  `PhaseBoundaryError` naming the field.
+  may carry **no field in D-17's excluded set** (enumerated immediately below).
+  **Raises** `PhaseBoundaryError` naming the field.
+
+> **Amended 2026-08-28 — the produced-field limb now enforces D-17's excluded set, not
+> §7.0's five classes.** `GOV-2026-08-28-FD-01` **Recommendation 37** (`TEC-08`, Medium /
+> `MINOR`), **board option 1**, approved by the project decision owner. As first written this
+> limb enforced *"no DCB, STEC, mapping, satellite or arc field"* — faithful to TE §7.0, which
+> names five classes, and **short of the set D-17 froze**. That mattered because this rule is
+> the **cross-cutting** guard invoked at step 4 of every Phase 1 stage entry: it is the check
+> that runs everywhere, while D-17's broader set was enforced only where each owning unit
+> happens to check it. The two quantities missing were **zenith angle or zenith weight** and
+> **elevation** — the two geometric inputs a mapping function is built from, and the two D-16
+> names as non-computable on the five-column Phase 1 product and not to be reinstated. Derived
+> 2026-08-28 by scripted match over all four of this unit's artifacts: `zenith` = **0**
+> occurrences, `elevation` = **0**, `IPP` = **0**, `D-17` = **0**. The extension costs nothing
+> scientifically because D-17 is frozen — no value is invented here.
+
+**Constraint — the enumeration is D-17's, not §7.0's, and the authority citation says so.**
+This limb now enforces **more than TE §7.0 states**, so its authority is
+`evidence/DECISIONS.md` **D-17** § *"Explicitly NOT in the Phase 1 row, and not
+substituted"* (lines 808–813) **together with** TE §7.0, and a reader must not take the
+wider set for the design over-reaching its authority. **Derived 2026-08-28** by splitting
+D-17's sentence on its semicolons and printing the result: **8 enumerated exclusions**, of
+which **6 name a §7.0 class token** (`valid_satellite_count` and *any per-satellite or
+per-IPP quantity* → satellite; DCB; STEC; *mapping function output* → mapping; *arc or
+cycle-slip statistics* → arc) and **2 name no §7.0 class at all** (*zenith angle or zenith
+weight*; *elevation*). Counted as distinct **quantities** rather than as string matches, §7.0's
+five classes leave **3** of D-17's quantities uncovered — **per-IPP quantity** (the half of
+exclusion 2 that the word "satellite" does not reach), **zenith angle or zenith weight**, and
+**elevation** — and D-17 additionally makes **cycle-slip** explicit inside the arc class.
+
+| # | D-17 exclusion (verbatim) | Named by TE §7.0? |
+|---|---|---|
+| 1 | `valid_satellite_count` | yes — satellite |
+| 2 | any per-satellite or per-IPP quantity | **partly** — satellite yes, **per-IPP no** |
+| 3 | zenith angle or zenith weight | **no** |
+| 4 | elevation | **no** |
+| 5 | DCB | yes |
+| 6 | STEC | yes |
+| 7 | mapping function output | yes — mapping |
+| 8 | arc or cycle-slip statistics | yes — arc (**cycle-slip** made explicit by D-17) |
+
+**Constraint — D-16's zenith finding is the reason exclusions 3 and 4 are not merely
+tidy.** D-16 records, measured 2026-08-21, that `parameters_requested` is exactly
+`["ut1_unix", "gdlat", "glon", "tec", "dtec"]` for every month and that there is *"no
+elevation, no zenith angle, no satellite identifier and no per-IPP record in the Phase 1
+data"* — so a zenith-weighted aggregate is **not computable** from this product, and the
+sensitivity is declared and **deferred**, not silently dropped. A Phase 1 frame carrying
+`zenith_angle` or `elevation` therefore cannot have been measured; it can only have been
+invented, imported from Phase 2, or mislabelled — which is precisely what a boundary guard
+exists to catch.
+
+**Constraint — this aligns the design with code that already does it, correcting this
+unit's own text.** Read from `tests/test_phase_boundary.py` on 2026-08-28 and counted
+programmatically: `FORBIDDEN_FIELD_FRAGMENTS` already holds **13** case-insensitive
+fragments — `satellite`, `n_sat`, `sat_count`, `prn`, `dcb`, `stec`, `slant`,
+`mapping_function`, `arc_`, `cycle_slip`, `elevation`, `zenith`, `ipp` — covering every one
+of D-17's 8 exclusions, and `D17_TARGET_FIELDS` holds the **17**-name allow-list with its own
+guard (`test_forbidden_*`, line 214) asserting that no Phase 2 quantity can be added to the
+contract itself. **The static early-warning limb was already stronger than the run-time limb
+this rule specifies.** The amendment closes that inversion in the design's favour rather than
+weakening the test, and it is why R-24's declared ordering — static subordinate, run time
+authoritative — needed re-checking rather than restating: a subordinate limb must not be the
+only limb enforcing three of the eight exclusions.
+
+**Constraint — fragments, not exact names, and the reason is recorded in the code.** The
+existing module states it: *"Deliberately fragments, not exact names: a column called
+`n_sat_valid` or `sat_count` must trip this as surely as `valid_satellite_count`."* The
+run-time limb adopts the same matching discipline, so a renamed column cannot walk past an
+exact-name list.
 
 **Constraint, quoted from the approved design.** *"Neither this nor
 `assert_phase_boundary` substitutes for the other."*
@@ -403,13 +471,32 @@ the stage entry contract, because a Kaggle session carries no git working tree, 
 commit hook cannot fire there and a local suite run proves nothing about the
 environment the governed run executes in (ADR-02).
 
-**Negative controls.** Import each of the four modules under `--phase 1` → each
-raises, naming that module. Present a frame carrying each of the five forbidden field
-classes → each raises, naming the field. Assert neither limb passing implies the
+**Negative controls — one per D-17 exclusion, plus three.** Import each of the four
+modules under `--phase 1` → each raises, naming that module. Present a frame carrying a
+field of **each of D-17's 8 exclusions** → **each raises, naming the field** — that is
+**8** produced-field controls, not five, and the three added by this amendment are
+**per-IPP quantity**, **zenith angle or zenith weight**, and **elevation**. Present a
+frame carrying a **renamed** instance of an exclusion (`n_sat_valid`, `zen_wt`,
+`elev_deg`) → raises, proving fragment matching rather than exact-name matching.
+Present a frame whose only offending column is `cycle_slip_count` → raises, since D-17
+makes cycle-slip explicit inside the arc class. Assert neither limb passing implies the
 other.
+
+**Constraint — the negative controls specified above target a module that does not yet
+exist.** `assert_no_raw_fields`'s run-time controls are a **test specification only**.
+`tests/test_phase_boundary.py` exists and already covers all 8 exclusions in its static
+limb; the run-time controls arrive with `src/data/phase_contract.py`, whose creation
+**G-09 does not authorise**. Nothing here states or implies that the three added
+exclusions are covered at run time today.
 
 **Acceptance.** TA-27; contributes to WS-10, TA-07, TA-08, TA-12 through REQ-ENG-5
 (all owned by other units — `features-and-splits` ×3, `models-and-baselines`).
+**Recommendation 37's closure evidence is partly deferred:** the board asks that
+*"`test_phase_boundary.py`'s specification carries a negative control per class"* and
+that *"a Phase 1 frame carrying `elevation` or `zenith_angle` raises
+`PhaseBoundaryError`"*. The specification limb is discharged here; the raising limb is a
+3.5/3.6 obligation on an unbuilt module, and the board's own due gate for this item is
+**G-P3C, safe to defer past G-05**.
 
 ## R-24 — Run time is authoritative; the static scan is subordinate, and both run
 
@@ -534,6 +621,49 @@ enforceable in the direction that matters: **a target file mislabelled as a driv
 detectable**, because the exclusion is an enumerated list a reviewer checks rather
 than an unstated omission.
 
+> **Amended 2026-08-28 — the driver-exclusion list is now actually enumerated, at four
+> classes.** Consequence of `GOV-2026-08-28-FD-01` **Recommendation 44(b)** (`VAL-08`,
+> Medium / `MINOR`), **board option 2**, approved by the project decision owner: relocating
+> `.dst_summary.json` under `evidence/` brings a December-bearing **driver-derived** file
+> **inside** R-27's scan root, so the exclusion that keeps it from being a hit must name its
+> class rather than be reached by silence. Auditing the scan root for that amendment surfaced
+> **two further December-bearing driver artifacts already present and never enumerated** —
+> stated as a new observation, not carried from the board's report, which named neither.
+> As written, the rule *said* it "names the driver classes" while the artifacts named **one
+> live instance and no class list at all**: the enumerated-membership test had nothing to
+> range over.
+
+**Constraint — the four excluded driver classes, enumerated exhaustively.** Derived
+2026-08-28 by walking `evidence/` and reading each candidate's December content
+programmatically; every figure below was printed before being written here.
+
+| # | Excluded driver class | Path | December content measured 2026-08-28 |
+|---|---|---|---|
+| 1 | Raw provisional-Dst monthly capture | `evidence/audit_ec1_2026-08-15/kyoto_dst/dst_provisional_YYYYMM.html` | **12** monthly captures present; `dst_provisional_202212.html` is hourly Dst for December 2022 |
+| 2 | Raw F10.7 flux table | `evidence/audit_ec1_2026-08-15/nrcan_f107/fluxtable.txt` | **95** lines dated `202212`; the EC-1 report records the 2022 range as `2022-01-01` → **`2022-12-31`** |
+| 3 | Derived driver audit report | `evidence/audit_ec1_2026-08-15/ec1-audit-report.json` | month-keyed `1`…`12`, **12** keys, the `"12"` entry carrying `expected_days: 31`, `day_rows_parsed: 31` |
+| 4 | Derived driver summary | `.dst_summary.json` — **class 4 applies only once Recommendation 44(b)'s relocation has happened**; see R-27 | **12** month keys; `"12"` carries `days_parsed: 31`, `hours: 744`, `min: -68`, `storm50: [7, 27]`, `storm30` with **15** days, `daily_min` with **31** entries |
+
+**Why classes 2 and 3 are a correction and not a widening.** Both files are inside R-27's
+scan root today and both carry December-dated driver records, so a guard implemented from
+the previous text would have **failed on first run against evidence already on disk** — and
+the failure would have looked like a breach rather than an unenumerated exclusion. Naming
+them makes the guard runnable and keeps the enumeration checkable; it grants no new licence,
+because every one of the four remains a **driver** artifact carrying no target value.
+
+**Constraint — the exclusion is a custody exclusion and never a licence to use the
+excluded file.** This must not be read as making an excluded driver artifact fit for a
+freeze-set input. **D-11** bars any provisional-Dst-derived figure from becoming a G-05
+regime count, a modelling input, or a frozen tolerance, and that restriction rides classes
+1, 3 and 4 wherever they go. The control that closes that channel is **not** in this unit:
+it is `regimes-diagnostics-reporting` **R-123**, whose `RegimeError` fires when a
+provisional-Dst-derived series is offered as the storm-count input, and which names
+`.dst_summary.json` as exactly the path of least resistance it closes. *(Rule ID corrected
+here: the remediation brief and `GOV-2026-08-28-FD-01` Recommendation 44 both cite this as
+"R-122". Derived 2026-08-28 by grepping both units' rule headings — `statistical-inference`
+runs R-113…R-122 and `regimes-diagnostics-reporting` opens at **R-123**, which is the rule
+carrying the `.dst_summary.json` control at that unit's `business-rules.md:84`.)*
+
 **The tension this rule resolves, stated rather than smoothed over.** FR-P1-02-6's
 first sentence says *"Any file containing a December 2022 target value is a
 locked-test artifact"* while its criterion says *"a record whose observation date
@@ -545,9 +675,12 @@ narrower target-plus-aggregate reading with the bounded driver exclusion.**
 
 **Negative controls.** Plant a December target record outside the restricted root →
 hit. Plant a December-derived aggregate column outside the restricted root → hit. Add
-a class to the driver-exclusion list → the membership test fails. Mislabel a target
-file as a driver class → fails, because the excluded classes are enumerated and the
-file does not belong to one.
+a class to the driver-exclusion list → the membership test fails. **Remove** a class from
+it → the membership test fails, so the list cannot be quietly narrowed either. Mislabel a
+target file as a driver class → fails, because the excluded classes are enumerated and the
+file does not belong to one. **Offer any of the four excluded classes as a G-05 regime-count
+input** → `RegimeError`, owned by `regimes-diagnostics-reporting` R-123, not by this rule —
+named here so the exclusion is never read as clearing the file for use.
 
 **Acceptance.** ⚠ None — see R-27's box. This rule shares FR-P1-02-6's missing
 acceptance row.
@@ -557,6 +690,84 @@ acceptance row.
 **Rule (Q4 = C).** `assert_no_december_outside_restricted` walks `evidence/`
 **recursively** and opens **every file**, dispatching each to a **declared parser for
 its artifact class**. An empty returned sequence is the pass condition.
+
+> **Amended 2026-08-28 — the scan root is now stated explicitly, and it stays at
+> `evidence/`.** `GOV-2026-08-28-FD-01` **Recommendation 44(b)** (`VAL-08`, Medium /
+> `MINOR`), **board option 2**, approved by the project decision owner. The rule always
+> walked `evidence/`; what it never did was **say so as a bounded scan root**, so the reader
+> could not see what the guard cannot reach. It cannot reach the **repository root**, and one
+> December-bearing artifact sits there.
+
+**Constraint — the scan root is `evidence/`, stated as a boundary rather than left as an
+implementation detail.** `assert_no_december_outside_restricted` takes `evidence_root` and
+is called with the repository's `evidence/` directory. **Everything outside `evidence/` is
+outside this guard by construction**, including the repository root, `src/`, `scripts/`,
+`notebooks/`, `artifacts/`, `configs/` and `tests/`. That is a deliberate bound, not an
+oversight, and it is written here so a future reader does not mistake "walks recursively" for
+"walks everything".
+
+**Constraint — the live instance, and why it is NOT a breach.** `.dst_summary.json` sits at
+the **repository root**, is **git-tracked and not gitignored** (both verified 2026-08-28 by
+`git ls-files` and `git check-ignore`), and carries December material: month keys `1`…`12`
+(**12** keys), the `"12"` entry holding `days_parsed: 31`, `hours: 744`, `min: -68`,
+`storm50: [7, 27]`, `storm30` with **15** days, and `daily_min` with **31** entries — every
+figure derived and printed 2026-08-28 before being written here. **This design does not call
+it a breach, and neither did the board.** Its classification is already correct and
+**reasoned** at `evidence/experiment_registry.md:119–123`: reading Kyoto provisional Dst for
+December 2022 is *"not a locked-test access: Dst is a public driver series, not a target
+value, and no December target record is touched by it"*, and **D-11** separately bars any
+provisional-Dst figure from becoming a G-05 regime count. The gap is narrower and purely
+mechanical: **the designed guard cannot reach the file its class belongs to.**
+
+**Constraint — the fix is relocation, not a widened scan root, and this design does NOT
+perform it.** The recorded disposition is that `.dst_summary.json` be **relocated under
+`evidence/audit_ec1_2026-08-15/kyoto_dst/`**, beside the twelve `dst_provisional_YYYYMM.html`
+captures it derives from (all twelve verified present 2026-08-28), so it falls inside the
+existing scan root **without widening it**, and so the derived summary sits next to its
+source. Two things follow and are stated rather than assumed:
+
+1. **The relocation is a custody-adjacent move and owes its own record** — a D-number and a
+   change record under `governance/CHANGE_RECORD_PROCEDURE.md`, on the D-15 precedent, which
+   is the only relocation of December-bearing material this project has performed. **This
+   stage does not perform the move, does not author that record, and claims no closure from
+   it.** Until it happens, the file remains outside the guard and this constraint is the
+   disclosure of that fact.
+2. **Once relocated it lands inside the scan root, where R-26's enumerated driver exclusion
+   must already name its class** — which is why R-26 now enumerates **four** classes with the
+   derived summary as class 4. Without that enumeration the relocation would convert a
+   file the guard cannot see into a file the guard **flags**, and the exclusion would then be
+   reached by an unstated omission rather than by a checkable list.
+
+**Constraint — why the scan root is not widened to the repository (board option 1,
+declined).** An exclusion list spanning `.claude/`, `graphify-out/`, `.git/` and any Bolt
+worktree is *"the kind of list that rots"*, and it makes the guard slow at the same time.
+The counter-consideration is recorded rather than suppressed, because it is this rule's own
+argument turned against it: leaving the repository root permanently out of scope (board
+option 3) reproduces the **`DATA-01`** lesson this rule already quotes against itself in its
+§ *recursive by construction* constraint — *"a narrowed glob silently stopped checking the
+artifacts that matter most."* **Relocation is the answer
+to that objection**: it removes the live instance from the unscanned region instead of
+declaring the unscanned region acceptable. A **future** root-level December artifact is still
+outside the guard, and that residual is real and is not closed here.
+
+**Constraint — the loose December artifact is now manifested, which repairs the other half
+of `VAL-08`.** `evidence/locked_test_restricted/loose_artifacts_sha256_manifest.json` was
+created **2026-08-28** under **Recommendation 44(a)**, on the project decision owner's
+authorisation, hashing run 2's preserved raw extract
+(`bbox___opt_openmadrigal_madroot_experiments4_2022_gps_31dec22_gps221231g.003.hdf5.txt`):
+`sha256 3a164af0864b2effde2e527ca190c1b050f5a47179eaffa3ccab770bb366f557`, **1,666,816
+bytes** — both **re-derived independently 2026-08-28** by streaming the file and recomputing
+the digest, and both matching the manifest exactly. The manifest also records the provider
+filename with its **`g.003` version suffix**, the retrieval timestamp, and the DATA-07
+provenance caveat. Access-log **row 11** was written **before** the read, as FR-P1-02-3
+requires and as rows 6 and 7 set the standard. Two properties of that act matter to this
+rule's integrity story: the file was previously named in **neither** restricted
+`sha256_manifest.json`, so a mutation of the one physical record of the run-2 irregularity
+would have been undetectable and TA-15's mutation-protection test — which operates on
+manifested artifacts — had nothing to bind to; and the read was **bytes-only for hashing**,
+with no field parsed, no record counted and no value inspected, so it produced no coverage
+figure this guard would then have to police. **This unit did not perform that act and
+records it as an input**, not as its own closure.
 
 **Constraint — an unparseable artifact is a FAILURE, not a pass.** A file the guard
 cannot read is exactly where a December record would hide, so treating it as clean is
@@ -597,7 +808,12 @@ not foreclosed.
 the guard finds it. Plant an unparseable file → the guard **fails**. Plant a
 December-bearing artifact of a class with no declared parser → **fails**. Run against
 the post-D-15 tree → assert the 21 relocated files are inside the restricted root and
-none is outside it.
+none is outside it. **Plant a December-bearing artifact at the repository root** → the
+guard **does not find it, and a test asserts that it does not** — the scan root's bound
+made executable, so the residual is a recorded property rather than a surprise, and the
+test fails the day someone silently widens or narrows `evidence_root`. **Call the guard with
+an `evidence_root` other than `evidence/`** → fails, so the bound cannot be relaxed by a
+call site.
 
 > ## ⚠ FR-P1-02-6 IS EXPLICITLY UNTESTED, AND STAYS THAT WAY
 >
@@ -620,15 +836,137 @@ none is outside it.
 
 ## R-28 — One path into the restricted root, and BLK-07 is not this design's to close
 
-**Rule (Q9 = D).** A **static check asserts no module outside `locked_test.py`
-contains the restricted-root literal.** `open_restricted` is the **only** path into
-`evidence/locked_test_restricted/`; `component-dependency.md` § Shared resources
-states it without qualification: *"nothing else may construct a path into it."*
-`foundation`'s **R-15** already states its own side of that as the absence of a path.
+**Rule (Q9 = D, as narrowed 2026-08-28).** A **static check asserts that no module
+outside `locked_test.py` and outside the enumerated `tests/` exemption below contains the
+restricted-root literal**, and that the exemption list's membership is **exactly** the four
+modules named. `open_restricted` remains the **only** path through which restricted
+**content** is read from `evidence/locked_test_restricted/`.
 
-**Why absolute.** **D-15** records that the restricted root is a **governance
-boundary, not an access control** — it holds only while exactly one code path reaches
-it. A second path does not weaken it slightly; it ends it.
+**Authority, and how the narrowing is reconciled with it.**
+`component-dependency.md` § Shared resources states the rule **without qualification**:
+*"nothing else may construct a path into it."* `foundation`'s **R-15** states its own side of
+that as the absence of a path. The exemption below **does not contradict that sentence; it
+fixes its referent.** A test module that holds the literal in order to assert *where the
+boundary is* does not "construct a path into" the root in the sense the carve-out protects —
+it constructs a path **to check custody**, and where it goes on to read content, the
+exemption requires that read to run through `open_restricted` or against a synthetic fixture
+root. **The reading taken is that "a path into it" means a route by which restricted content
+is obtained**, and that reading is stated here as an assumption rather than assumed silently,
+because it is the load-bearing move of this whole amendment. **If the project decision owner
+reads the carve-out as governing the literal itself**, the exemption is not available and
+board option 2 — refactor every test to obtain the root from `locked_test.py` — is the only
+remaining route, with the circularity recorded in row 1 accepted along with it. Raised at the
+gate on those terms.
+
+> ## ⚠ AMENDED 2026-08-28 — THE ONE-DOOR RULE NOW CARRIES A BOUNDED `tests/` EXEMPTION
+>
+> `GOV-2026-08-28-FD-01` **Recommendation 2** — the board's **BLOCKER**, finding `VAL-02`,
+> on which the **Validation Auditor exercised its veto**. **Board option 1**, approved by the
+> project decision owner. This is a **narrowing stated in the open**, not a concession
+> smuggled in, and the honest version of the concession is the first sentence of it: **more
+> than one module holds the literal, and the rule as first written was false against the
+> workspace this unit had already read.**
+>
+> **What was wrong.** The rule's pass condition was that exactly **one** module holds the
+> restricted-root literal. **Four hold it today** — three existing test modules plus the
+> future `locked_test.py` — so the design's own negative control was **satisfied by the
+> workspace as it stands**. Verified on disk 2026-08-28: `tests/test_acquisition_window.py:46`,
+> `tests/test_phase_boundary.py:49` and `tests/test_release_hashes.py:49` each define
+> `RESTRICTED_DIR = EVIDENCE_DIR / "locked_test_restricted"`.
+>
+> **How this unit missed it, stated exactly.** Of the three violating modules, **two were read
+> directly** — `test_phase_boundary.py` and `test_acquisition_window.py`, per
+> `business-logic-model.md` § Sources — and one of those two had its internals **quoted in
+> detail** in R-27's *"what the existing green check actually covers"* paragraph. **The third,
+> `tests/test_release_hashes.py`, was never read at all.** So the failure was not a
+> misreading of evidence in hand; it was a rule stated over the **whole tree** while the source
+> register recorded an inspection of **two of the tree's three** modules. The 2026-08-28
+> source line now records all three, and this is the lesson worth keeping: a rule whose pass
+> condition ranges over every module owes an inspection that ranges over every module.
+>
+> **Why it had to be fixed rather than left.** Both outcomes of leaving it were bad and
+> nothing chose between them. Implemented as written, the static check **fails against the
+> project's own custody tests** and gets relaxed under schedule pressure — most likely to a
+> substring exemption broad enough to re-admit arbitrary callers. Implemented with an
+> *undeclared* `tests/` exemption, test modules read December bytes with no `AccessRecord`,
+> which is the **RES-04** hazard `evidence/experiment_registry.md:79–83` already records as
+> *"BLK-07's registered hazard occurring in fact rather than in principle."*
+>
+> **Board option 3 was rejected by name.** Scoping the check to `src/` only and leaving
+> `tests/` out of scope is trivially implementable and *"is what will be chosen by default if
+> nothing is decided"* — and it **converts the largest known hole into a permanent blind
+> spot.** `evidence/experiment_registry.md:79–83` records that same hazard having already
+> fired once in fact, which is why it is refused here rather than weighed again.
+
+**Why the boundary is still absolute where it counts.** **D-15** records that the restricted
+root is a **governance boundary, not an access control** — it holds only while exactly one
+code path reaches it. **That sentence is retained verbatim, and its scope is now stated
+rather than left to inference: a "path" is a route through which restricted CONTENT is
+read.** D-15's boundary *"does not weaken slightly; it ends"*, and the exemption below is
+built so that nothing about that sentence changes: an exempt module may **name** the root, but
+if it **reads content beneath** it, the read goes through `open_restricted` or against a
+synthetic fixture root. Holding a string is not an access; reading bytes is.
+
+**Constraint — the exemption is enumerated exhaustively, and membership is asserted
+exactly.** This is the **same enumerated-list technique R-26 already uses** for the driver
+exclusion — a technique this design already trusts, and which fails in the direction that
+matters: an unlisted module holding the literal fails the static check, and a listed module
+that stops needing the literal fails the membership test until the list is edited. The list
+is **4 modules** (derived and printed 2026-08-28; **3 of the 4 exist on disk today**, the
+fourth being unbuilt):
+
+| # | Exempt module | Why it must hold the literal | Route for any CONTENT read beneath the root | On disk today |
+|---|---|---|---|---|
+| 1 | `tests/test_locked_test_guard.py` | It is the test **of the guard**. Obtaining the root by importing `locked_test.py` — board option 2 — is **circular**: the module under test would supply the constant the test exists to check, and an imported constant still yields a readable path with no `AccessRecord`, so the custody gain is cosmetic | **Synthetic fixture root only.** It never reads the real restricted root. This is consistent with Q6's option D having been **declined**: a positive-path read against the real root would produce evidence that looks like coverage of the pre-G-05 audit and is not, which is exactly why `RES-01` stays open | **No** — unbuilt; owned by `features-and-splits` (R-82) |
+| 2 | `tests/test_acquisition_window.py` | `RESTRICTED_DIR` (:46) feeds `EVIDENCE_ROOTS` (:50) so the run-window invariant covers **both** roots, and the custody helper (:195) filters restricted paths out **by ancestry rather than by name**, so a rename of the root cannot silently widen the scan | `_observed_dates()` (:117–122) **opens and `DictReader`-parses** a month's `madrigal_coverage_raw_records.csv`, and `_month_dirs()` (:81) supplies month directories from the restricted root — so this **is** a content read of December's raw records and **owes a pre-read access row** under RES-04. The :195 helper reads nothing beneath the root and owes no route | **Yes** |
+| 3 | `tests/test_phase_boundary.py` | :259–261 asserts the produced-field collector **reaches inside** the restricted root — *"a custody boundary is not a checking exemption"*, in the module's own words. Removing the literal would remove that assertion, which is the one guarding against D-15's relocation quietly excusing December from boundary checking | `_phase1_artifacts()` (:133–137) rglobs `madrigal_coverage_*.csv` across **both** roots and the parametrized field test reads each artifact's **CSV header** — a content read beneath the root, **owing a pre-read access row**. The :259–261 ancestry assertion itself reads no content | **Yes** |
+| 4 | `tests/test_release_hashes.py` | :137 asserts a manifest was found **under** the restricted root, because *"after D-15 the December and merged-year manifests live there, and a collector that misses them silently stops verifying the locked month"* | `_declared_artifacts()` (:84–91) `read_text`s each manifest and `test_declared_artifact_matches_its_recorded_hash` **streams `_sha256()`** over each declared artifact, both beneath the root — content and byte reads, **owing pre-read access rows**. Access-log rows 6 and 11 set the precedent that a **bytes-only hash read** is logged before the read and inspects no value | **Yes** |
+
+**Constraint — an exempt module that reads content still owes a pre-read access row.** The
+exemption composes with the **already-registered RES-04 obligation** and does not displace
+it: exemption from the *literal* check is **not** exemption from R-25's ordering rule. Any
+read of content beneath the restricted root by an exempt module is a December read, so the
+`AccessRecord` must be **durably appended before the read begins**, exactly as R-25 requires
+of every other caller. An exempt module that reads content without a prior durable row is a
+**failure**, and the control below makes that executable.
+
+> ## ⚠ A LIVE CONSEQUENCE THAT NEEDS AN OWNER RULING, STATED NOT RESOLVED
+>
+> Modules 2, 3 and 4 **read December content beneath the restricted root today, on every
+> suite run, with no access row** — because `open_restricted` does not exist (**G-09 is
+> unsigned**) and there is nothing to route through. That is not a hypothetical: it is the
+> RES-04 hazard in present tense, and this amendment surfaces it rather than creating it.
+> **Nothing here authorises those reads, retro-labels them, or writes a row for them.** Two
+> dispositions are available and **this design chooses neither** — the choice belongs to the
+> project decision owner:
+>
+> - **(i)** route each of the three modules' restricted-root content reads to **synthetic
+>   fixture roots**, leaving the real root read only through `open_restricted` once it
+>   exists; or
+> - **(ii)** keep the reads against the real root and record the standing obligation that
+>   each is owed an access row from the moment `open_restricted` exists, with the interim
+>   period disclosed in the G-05 and G-06 evidence packages alongside the five retrospective
+>   rows R-25 already names.
+>
+> Option (i) is what module 1's route already assumes and is the cheaper of the two to make
+> true; option (ii) preserves the three modules' present value as checks against **real**
+> evidence, which is what makes them worth exempting at all. **Raised at this stage's gate.**
+
+**Constraint — `test_locked_test_guard.py`'s route answers a question `features-and-splits`
+left open.** R-82 assigns that module to `features-and-splits` *"because it exercises **both**
+limbs"* and says nothing about how it reaches the restricted root without holding the literal.
+**Row 1 above is that answer**: it holds the literal under this exemption and reads only a
+synthetic root. The alternative — importing the root from `locked_test.py` — is the circularity
+rejected above. The module's **ownership does not move**; only its route is fixed here, and
+`governance-guards` remains a DAG root because an exemption-list entry is a name in this unit's
+static check, not a dependency edge on `features-and-splits`.
+
+**Why not a caller allow-list inside the guard.** Q9's option C would have
+`open_restricted` raise when its caller is not one of the four recorded consumers. That
+closes the run-time-path-assembly gap but couples this root unit to four downstream units,
+and the reverse edge would **close a cycle** the DAG was arranged to avoid. The residual gap
+— a path assembled at run time from fragments — is left open deliberately, because the
+static check plus review makes it unlikely and the acyclic structure is worth more.
 
 **Why not a caller allow-list inside the guard.** Q9's option C would have
 `open_restricted` raise when its caller is not one of the four recorded consumers.
@@ -638,8 +976,23 @@ avoid. The residual gap — a path assembled at run time from fragments — is l
 deliberately, because the static check plus review makes it unlikely and the acyclic
 structure is worth more.
 
-**Negative control.** Add the restricted-root literal to another module → the static
-check fails.
+**Negative controls — five, because the narrowed rule has more limbs than the absolute
+one did.** (1) Add the restricted-root literal to a module **not** on the exemption list →
+the static check **fails**. (2) **Add a module to the exemption list** → the **membership
+test fails**, so the list cannot grow silently and every addition is a reviewed edit — the
+board's named closure control. (3) **Remove** a module from the list while it still holds
+the literal → the static check fails, so the list cannot be narrowed into falsehood either.
+(4) Have an exempt module read content beneath the restricted root **without** a durable
+prior access row → **fails**, which is the limb that keeps the exemption from becoming the
+RES-04 hazard it was granted in spite of. (5) Point `test_locked_test_guard.py` at the
+**real** restricted root instead of a synthetic fixture root → **fails**, pinning module 1's
+declared route.
+
+**Constraint — every control above is a test specification only.** The static check and the
+membership test do not exist; **G-09 authorises no module**, and `src/data/locked_test.py` is
+unbuilt. Nothing in this rule states or implies that the exemption is enforced today. What
+*is* true today is the observation that motivated the amendment: **four modules hold the
+literal and no check exists to notice.**
 
 > ## ⚠ BLK-07 IS OPEN AND STAYS OPEN — AND IS A PRECONDITION OF BOLT 3
 >
@@ -713,6 +1066,10 @@ implement it; the count of untested *requirements* is one.
 
 ## Assumptions & Open Questions
 
+- **OPEN — which disposition the three existing exempt test modules take** *(added 2026-08-28 under Recommendation 2)*: options (i) synthetic fixture roots or (ii) real-root reads with a standing access-row obligation, set out in R-28's boxed live consequence. **No option is chosen here.** Until it is ruled on, `tests/test_acquisition_window.py`, `tests/test_phase_boundary.py` and `tests/test_release_hashes.py` continue to read December content beneath the restricted root with no access row, and 3.5 must stop and report rather than pick a route (TE §18.3).
+- **OPEN — the `.dst_summary.json` relocation is authorised in disposition but not performed** *(added 2026-08-28 under Recommendation 44(b))*: the move to `evidence/audit_ec1_2026-08-15/kyoto_dst/` owes a **D-number and a change record** on the D-15 precedent, and neither exists. **This stage does not perform the move and claims no closure from it.** Until it happens the file is outside R-27's scan root, and R-26's driver-exclusion class 4 is stated as conditional on the move having happened.
+- **[assumption]** The exemption list is **exactly four** modules — `test_locked_test_guard.py` plus the three that hold the literal today, all three **retained** rather than refactored. Retention is the reading taken because all three are green, all three are in `team.md`'s mandated 17-module set, and TC-06 directs that pre-TC-06 evidence be **re-verified under the new suite rather than re-acquired**, which those three modules are what performs. If the owner prefers refactoring any of them out, the list shrinks and the membership test changes with it.
+- **[assumption]** R-28's exemption is a **narrowing of D-15's framing**, not a relocation of D-15's requirement. The reading taken is that D-15's "exactly one path" governs routes through which restricted **content is read**, so holding the literal without reading content is outside it. If the owner reads D-15 as governing the literal itself, board option 2 (refactor every test to obtain the root from `locked_test.py`) is the only remaining route and the circularity recorded in R-28 row 1 has to be accepted with it.
 - **OPEN — an amendment need on `build_transition_manifest`** *(added 2026-08-25 on adversarial finding 2 of the post-reset pass)*: the approved signature carries no mode parameter, three artifact statements correctly say the mode is not a build-time argument, yet the builder must be told which mode to build. The reconciliation (W-5) records an amendment need — a keyword `mode: Literal["draft","freeze"]` — for the owner, following `foundation`'s `write_release` precedent. Until ruled on, 3.5 must stop and report rather than invent the channel (TE §18.3).
 - **[assumption]** Rule IDs continue `foundation`'s single sequence, so this unit opens at **R-18**. If per-unit numbering was intended, say so at the gate and the artifacts restart at R-01.
 - **[assumption]** `tests/test_locked_test_guard.py` is not this unit's — ADR-03 splits the guard, and `features-and-splits` owns the test covering both limbs to keep this unit a DAG root.
@@ -783,3 +1140,37 @@ implement it; the count of untested *requirements* is one.
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
 > for `external-products`; floor reset mechanical). **No content of this unit changed.**
 > **G-09 remains unsigned.**
+
+---
+
+> ## Re-saved 2026-08-28 — remediation of `GOV-2026-08-28-FD-01`, verdict FAIL
+>
+> The project decision owner ruled on governance report `governance/reviews/GOV-2026-08-28-FD-01.md`
+> (verdict **FAIL**) and authorised three remediations touching this unit. A redo jump cleared
+> the write-freeze. **Every `## Review` section and every earlier dated box above is preserved
+> unchanged**; the READY verdicts they record **predate these edits** and do not cover them.
+>
+> | Item | Rule | What changed |
+> |---|---|---|
+> | **Recommendation 2** (BLOCKER, `VAL-02`, Validation Auditor **veto**) — board option 1 | **R-28** | The one-door rule now carries a bounded, **enumerated `tests/` exemption of 4 modules**, each with its declared route for content reads, stated as a **narrowing** of D-15's framing — with `component-dependency.md`'s unqualified *"nothing else may construct a path into it"* quoted and the narrowing reconciled against it, not around it. Control clauses **1 → 5**. The live RES-04 consequence and its two dispositions are raised at the gate, unchosen |
+> | **Recommendation 37** (`TEC-08`) — board option 1 | **R-23** | The produced-field limb now enforces **D-17's 8 enumerated exclusions** instead of §7.0's **5** classes, with the authority citation naming D-17. Field classes requiring a raise **5 → 8**; **2** new control clauses (renamed-instance matching, `cycle_slip`) |
+> | **Recommendation 44(b)** (`VAL-08`) — board option 2 · and **44(a)** as recorded input | **R-27**, **R-26** | R-27's scan root **stated explicitly** as `evidence/` and deliberately not widened; the `.dst_summary.json` **relocation** recorded as the fix, with the move itself **not performed here**; the 44(a) loose-artifact manifest cited in R-27's integrity story with its hash independently re-derived. R-26's driver exclusion **enumerated at 4 classes** |
+>
+> **Counts derived and printed before assertion, per `project.md` § Way of Working.** Rules
+> unchanged at **12** top-level (R-18…R-29) plus **3** sub-rules (R-18a, R-18b, R-19a).
+> Requirements unchanged at **10**, **1** without an acceptance row (`FR-P1-02-6`), **2**
+> acceptance rows owned (TA-27, TA-28). D-17's excluded set: **8** enumerated exclusions,
+> **2** naming no §7.0 class token at all, **3** distinct quantities uncovered by §7.0's five.
+> Exemption list: **4** modules, **3** present on disk. Driver-exclusion classes: **4**.
+> `tests/` on disk: **3** modules, each defining `RESTRICTED_DIR` (`:46`, `:49`, `:49`).
+> **Negative-control clauses across all 12 rules: 37 → 47**, derived by counting arrow-form
+> clauses per rule against the pre-amendment file — R-23 **2 → 4**, R-26 **4 → 6**, R-27
+> **4 → 6**, R-28 **1 → 5**, and the **other eight rules unchanged**, which is the check that
+> the amendments touched only the four rules they were authorised to touch.
+>
+> **What this re-save does NOT do.** **BLK-06 remains open** — the protected-key list's
+> derivation from TE §7.0B is untouched and nothing above bears on it. **G-09 remains
+> unsigned**, and no rule here authorises creating `phase_contract.py`, `locked_test.py` or
+> `reuse_registry.py`. No scientific constant is decided, no supervisor-owned value is read
+> into, and no acceptance row is created. The three documentation-class findings riding the
+> terminal READY remain **gate input**, unchanged and unapplied.

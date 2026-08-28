@@ -1386,6 +1386,243 @@ in response to what a run produced.
 
 ---
 
+## D-28 — The G-06 locked-test scored set is 2–31 December 2022 (30 days)
+
+**Decision date:** 2026-08-28. **Decided by:** the project decision owner under the
+recorded authority equivalence (D-1 addendum), at the `functional-design` (3.1)
+governance gate, on governance report `GOV-2026-08-28-FD-01` Recommendation 6.
+**Authority:** `requirements.md` FR-P1-04-5; `component-methods.md` ADR-11
+(2026-08-23, the `lead_in_hours` removal); Vision §8.2, §8.7, §15.1; TE §7.1.
+**Raised by:** the full-board review of stage 3.1 — Review Chair findings CHAIR-01 and
+CHAIR-02 (graded BLOCKER) and Validation Auditor finding VAL-04 (graded MAJOR).
+
+**Decision.** The locked-test scored set is **2–31 December 2022 inclusive, 30 days**.
+The first 24 hours of the locked month are **excluded and counted**, exactly as they are
+for every validation month, because no window may cross a partition boundary. A
+1 December row reaching any metric entry point raises.
+
+**This ratifies a ruling already taken and already built upon.** The reduction was
+decided at stage 3.1 on 2026-08-26 as answer **FU-7 = A** in
+`construction/features-and-splits/functional-design/functional-design-questions.md`,
+superseding the earlier same-stage answer FU-5 = D ("1 December stays in the G-06 locked
+test with no first-day loss"), which had been decided on 2026-08-24 against the interface
+ADR-11 retired the day before. FU-7 = A now propagates as live design fact through eight
+units. **What this decision adds is the record, not the number.**
+
+**The authority conflict, disclosed rather than resolved by inference.**
+
+The board found — and this decision records without softening — that the two highest
+authorities do not say what FR-P1-04-5 says:
+
+| Source | Text, byte-exact |
+|---|---|
+| `PreFlight/vision_document(3)(2)(2).md:751` | `| Locked test | — | — | December 2022 only |` |
+| `PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md:400` | `| Locked test | — | — | December 2022 only |` |
+
+Both assign F1–F4 an explicit `24 hours` embargo and assign the Locked-test row **`—`**
+in the Embargo column. The November/December boundary protection those tables name is
+the **frozen manifest**, on the Final refit row, not a 24-hour exclusion. Vision §8.2
+adds that December 2022 is "the only locked test period".
+
+`requirements.md` FR-P1-04-5 — a level-4 artifact in the precedence chain — states
+"each with a 24-hour embargo … the first 24 h are excluded and counted", and cites as
+its source the very tables carrying `—`. Its own acceptance criterion says the split
+manifest "enumerates **all five partitions**", which excludes December from the five.
+**A level-4 paraphrase is therefore the sole textual basis for the 30-day reading, and
+it over-reaches the levels 1 and 2 it cites.** The conflict was not escalated when
+FU-7 = A was answered, and this decision does not pretend it was.
+
+**Why the number is nonetheless accepted, on three independent grounds.**
+
+1. **Physical.** 1 December is the day of December furthest from the 21 December
+   solstice, so removing it leaves a scored set whose mean solar-declination distance
+   from solstice is marginally *smaller*. No regime-skewing loss. No disturbed day named
+   in D-13's December characterisation falls on 1 December.
+2. **Statistical.** The vector time-block bootstrap loses one of 31 24-hour blocks — a
+   3.2% reduction (72 of 2,232 station-hours). Fewer blocks widens the interval, so the
+   error is toward under-claiming.
+3. **Arithmetic, and load-bearing.** 2–31 December is 720 hours, divisible by both 24
+   and 48, giving 30 blocks and 15 blocks. Under the superseded 31-day reading, 744
+   hours is **not** divisible by 48, so the 48-hour block-length sensitivity TE §13.6
+   *requires* would itself have raised. The 31-day reading was internally inconsistent
+   with a mandatory sensitivity.
+
+**What is NOT decided here.**
+
+- **No embargo is introduced on the locked test.** The 24-hour exclusion is the
+  boundary rule FR-P1-04-5 applies to every partition, not a new embargo row on a table
+  that carries `—`.
+- **The authority conflict is not resolved.** Whether FR-P1-04-5's paraphrase should be
+  amended to match Vision §8.2, or Vision §8.2's table annotated to match FR-P1-04-5,
+  is left open and is carried to G-05 as a stated item. This decision fixes the
+  operative value and records the disagreement; it does not rewrite either authority.
+- **No claim boundary is widened.** D-8's boundary is unchanged in substance; its
+  *statement* now owes the precision this decision supplies — see the consequence below.
+
+**Consequences.**
+
+- **The scored set is 30 days everywhere, and must be disclosed as 30 days.** Governance
+  report Recommendation 16 records that the reduction is encoded rigorously where it
+  bites (the DEC mask range assertion, the excluded-and-counted rule) and disclosed on
+  **no** claim surface, while `REQ-CLAIM-01` still reads "tested on December 2022 only".
+  The primary results table, the breakdown artifacts and the claims-and-limitations
+  checklist each carry the scored-window statement.
+- **A revised split manifest is owed.** Vision §8.2 requires one for any date
+  adjustment. None exists yet because no manifest exists yet; the obligation attaches at
+  G-05 and is recorded here so it is not discovered later.
+- **Every December denominator inherits this.** The bootstrap's 30 blocks (15 at 48 h),
+  the regime-count audit's relationship to the scored set (governance report
+  Recommendation 15, still open), the coverage denominator, and every reported December
+  figure.
+
+**Limitation, stated plainly.** This is an owner ratification under the recorded
+student/supervisor authority equivalence. **No supervisor signature artifact exists and
+none is claimed.** Vision §15.1 places "test dates" under "Supervisor: Approval
+required", and the Review Chair seat of the board held that the equivalence's scope over
+a G-05-frozen split value is unestablished; the Validation Auditor seat, whose exclusive
+domain this is, held the equivalence sufficient and the record the only defect. Both
+readings are on the record. An examining committee requiring an independent supervisor
+signature for a locked-test date adjustment is outside this repository's control, and
+this decision does not represent itself as satisfying such a requirement.
+
+---
+
+## D-29 — `dataset_version` is a 12-hex prefix of `content_hash`, verified unused on write (freeze)
+
+**Decision date:** 2026-08-28. **Decided by:** the project decision owner under the
+recorded authority equivalence (D-1 addendum), at the `functional-design` (3.1)
+governance gate, on governance report `GOV-2026-08-28-FD-01` Recommendation 42
+(board option 2, which was the board's own recommendation).
+**Authority:** TE §13.3 line 532 (`dataset_version` = "Stable release ID"; "The
+final-results dataset is write-protected or stored under a new version rather than
+overwritten"); §19 TA-15; `team.md` § Deployment. **Raised by:** Benchmark & Deployment
+seat finding `BENCH-08`, against `foundation` R-12's own disclosure that injectivity is
+**NOT YET ESTABLISHED** "and it is what 'never reused' actually requires".
+
+**Decision.** `dataset_version` is the **first 12 hexadecimal characters of the release's
+`content_hash`**, and `write_release` **verifies on write that the prefix is not already
+in use** among existing releases, raising `ReleaseError` if it is. Three parts, all
+binding:
+
+1. **Encoding — 12 hex characters** (48 bits) taken from the front of the SHA-256
+   `content_hash` that R-11 already makes the release's identity. The label is derived,
+   never allocated; no ledger is introduced.
+2. **A recorded collision bound.** At 48 bits, the probability that any two of *n*
+   releases share a prefix is approximately n² / 2⁴⁹. For **n = 1,000** releases that is
+   about **1.8 × 10⁻⁹**; for **n = 10,000**, about **1.8 × 10⁻⁷**. This project's expected
+   release population is far below either figure. **The bound is recorded so it can be
+   checked, not so it can be relied on** — the verify-on-write check below is what
+   actually establishes never-reuse, and the bound only says how rarely that check is
+   expected to fire.
+3. **Verify-on-write.** `write_release` reads back the existing release population and
+   refuses a write whose 12-hex prefix already names a different `content_hash`. A prefix
+   collision is therefore **surfaced, never silently accepted** — the integrity-violation
+   tier of the two-tier error posture `team.md` § Code Style fixes.
+
+**Why this option and not the other two.** The full 64-hex `content_hash` (board option 1)
+inherits injectivity for free and needs no read-back, but is unusable as the human
+citation label R-12 says is the label's entire purpose. Declaring the label explicitly
+non-unique (option 3) is honest but requires a Vision §15.2 act to withdraw an obligation
+§13.3 states, and pushes every citation to 64 hex anyway. Option 2 is the only one
+delivering **both** a citable label and an **established** never-reuse property, and its
+cost is exactly the `verify_release` amendment `foundation` R-12 had already listed as
+open — so this decision closes two of R-12's three open items in one act.
+
+**What this decision does NOT change.**
+
+- **Release immutability is untouched, and never depended on this.** It rests on R-13's
+  directory-level overwrite refusal and R-11's identity-equals-`content_hash`, neither of
+  which uses `dataset_version`. What was open, and is now closed, is **citation
+  uniqueness** — a traceability property, not a mutation property. `foundation` R-12's
+  characterisation of the label as "a citation device with idempotence, not an identity
+  guarantee" is **superseded**: it is now a citation device with idempotence **and**
+  verified injectivity within the release population.
+- **No release ledger is introduced.** The verify-on-write check reads the existing
+  releases; it allocates nothing and stores no separate index. The distinction matters
+  because a ledger was declined deliberately.
+
+**Consequences.**
+
+- **`write_release` becomes implementable**, and the 3.5 block recorded at
+  `fixtures-and-reproducibility` and `foundation` R-12 lifts.
+- **`foundation` R-12 owes an amendment**: injectivity moves from **NOT YET ESTABLISHED**
+  to **established by verify-on-write**, and the `verify_release` open item closes.
+- **TA-15 is still NOT covered, and this decision does not cover it.**
+  `tests/test_release_hashes.py` exists and its name matches §12's mandated module, but
+  derived 2026-08-28 it exercises **none** of §13.3's manifest fields and does not test
+  R-13's overwrite refusal. The closure evidence owed is: that module extended to assert
+  `write_release` refuses a second write to an occupied directory and leaves the original
+  bytes unchanged; every §13.3 field present including `mask_ids`, `feature_set_ids`,
+  `row_counts` and `exclusions_qc_summary`; and `dataset_version` corresponding to its
+  release's `content_hash` under this encoding. **Until that lands, no artifact may read
+  TA-15 as satisfied.**
+
+**Limitation, stated plainly.** The collision bound is arithmetic, not measurement — no
+release exists yet, so the release population is projected rather than observed. If the
+population ever approaches the figures above, the prefix length is the parameter to
+revisit, and revisiting it is a fresh D-number rather than an implementation choice
+(TE §18.2).
+
+---
+
+## D-30 — `.dst_summary.json` relocates into the guarded evidence tree (freeze)
+
+**Decision date:** 2026-08-28. **Decided by:** the project decision owner under the
+recorded authority equivalence (D-1 addendum), at the `functional-design` (3.1)
+governance gate, on governance report `GOV-2026-08-28-FD-01` Recommendation 44(b)
+(board option 2). **Authority:** D-15 (the custody-relocation precedent and its
+verify-byte-identical method); TE §13.4 and the locked-month access-log obligation;
+`governance-guards` R-26 and R-27. **Raised by:** Validation Auditor finding `VAL-08`.
+
+**Decision.** `.dst_summary.json` moves from the repository root to
+**`evidence/audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json`**, inside R-27's `evidence/`
+scan root, verified byte-identical across the move on the D-15 method (SHA-256 before and
+after). On completion, `governance-guards` R-26's driver-exclusion **class 4 ceases to be
+conditional** and becomes an unconditional enumerated class.
+
+**Why it matters, stated concretely.** The file carries December 2022 content: twelve
+month keys, with `"12"` holding `days_parsed: 31`, `hours: 744`, `min: -68`,
+`storm50: [7, 27]`, a `storm30` list of 15 days, and `daily_min` with 31 entries. At the
+repository root it sits **outside** the scan root of the guard designed to find exactly
+this class of artifact, so the December guard could not see it. `governance-guards`
+identified the relocation as the fix, **declined to perform it** without this decision,
+and made class 4 conditional on the move so the design would not claim a closure it had
+not earned.
+
+**Why relocation and not widening the scan root.** Widening R-27 to the repository root
+was considered and rejected by the owning unit: it pulls every unrelated file at the root
+into the guard's reach and makes its exclusion list unbounded, which trades a known gap
+for an open-ended one. Moving one file into the tree the guard already walks is the
+narrower act.
+
+**What this decision does NOT do.**
+
+- **It is not a December read.** The move is a byte-level relocation with hash
+  verification; **no field is parsed, no value inspected, no statistic computed** — the
+  same scope and method as D-15's relocation and access-log rows 6, 7 and 11. An
+  access-log row is written **before** the move, as FR-P1-02-3 requires.
+- **It changes no value.** The file's contents are untouched; only its path changes.
+- **It does not make `.dst_summary.json` an approved input to anything.** Dst remains
+  diagnostic/hindcast-only and never a confirmatory ML feature (`project.md` § Mandated;
+  TC-11), and the provisional-grade restriction recorded in D-11 is unaffected.
+
+**Consequences.**
+
+- `governance-guards` R-26 class 4 becomes unconditional; the OPEN item recorded at its
+  `business-rules.md` closes.
+- A change record is filed under Vision §15.2's six fields:
+  `governance/CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`.
+- Any path reference to the old root location is swept; none may remain pointing at a file
+  that has moved.
+
+**Limitation.** This decision closes the *reachability* gap only. Whether
+`.dst_summary.json` should exist as a derived artifact at all, and under whose provenance
+record, is not decided here — it is a derived driver summary whose own §13.1 environment
+capture was never taken, and it inherits the standing pre-git provenance limitation the
+experiment registry records for every artifact of that era.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -1464,3 +1701,6 @@ exposed to challenge and should be read first.
 | D-25 F10.7 availability convention | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Conservative convention: a daily median becomes available no earlier than `00:00 UTC` on the following day. **An explicit project assumption, not a demonstrated publication latency**; no operational real-time availability is claimed. **Requests, but does not take,** a §15.2 amendment to TE §7.0A stage 4 and EV-12; until granted, EV-12's F10.7 limb is unmet at G-04. |
 | D-26 F10.7 March–April provenance | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Provenance recorded **UNRESOLVED**; data retained; measured / reconstructed / interpolated / provider-corrected asserted in **no** direction. Carries a thesis reporting obligation. Identifies two clarification routes and an `ABL-NOSW`-style sensitivity — **none approved or scheduled** by this decision. |
 | D-27 Primary target untransformed; inverse is ABL-DIFF's | **Yes** | 2026-08-24 | Approved by the project owner under the recorded authority equivalence, at the delivery-planning approval gate. **A reading of frozen text, not a new scientific value.** The primary train-only transform touches target-derived inputs, not the target, which stays **raw TECU** (TE §7.2 `ABL-DIFF`: *Primary remains, Raw TECU*). Primary path needs no inverse; `ABL-DIFF` alone transforms the target and keeps its inverse-before-metrics obligation with error propagation recorded. Raised by blocker BLK-08; narrows but does not close its mechanism limb, which stays with `functional-design`. |
+| D-28 G-06 locked-test scored set = 2–31 Dec (30 d) | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, at the `functional-design` (3.1) governance gate on `GOV-2026-08-28-FD-01` Rec 6. **Ratifies FU-7 = A (2026-08-26), already built upon by eight units.** Basis is `requirements.md` FR-P1-04-5 + ADR-11's `lead_in_hours` removal; **discloses that Vision §8.2 and TE §7.1 both carry `—` in the Locked-test Embargo column**, so a level-4 paraphrase is the sole textual basis — conflict recorded, not resolved, and carried to G-05. Accepted on three grounds: 1 Dec is furthest from solstice; the bootstrap loses 1 of 31 blocks (conservative); and 720 h divides by 48 where 744 h does not, so the mandatory 48-h sensitivity would have raised under the 31-day reading. **No supervisor signature exists or is claimed.** A revised split manifest is owed at G-05. |
+| D-29 `dataset_version` = 12-hex prefix, verified on write | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, at the `functional-design` (3.1) governance gate on `GOV-2026-08-28-FD-01` Rec 42 (board option 2). Encoding **12 hex** from `content_hash`; collision bound **recorded** (~1.8e-9 at n=1,000; ~1.8e-7 at n=10,000) but **never relied on** — the verify-on-write prefix check is what establishes never-reuse, raising `ReleaseError` on collision. **No release ledger introduced.** Unblocks `write_release` at 3.5 and closes two of `foundation` R-12s three open items (injectivity, `verify_release`). **TA-15 is still NOT covered and this decision does not cover it** — `tests/test_release_hashes.py` exercises none of §13.3s manifest fields and not R-13s overwrite refusal. **No supervisor signature exists or is claimed.** |
+| D-30 `.dst_summary.json` relocation | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, on `GOV-2026-08-28-FD-01` Rec 44(b) (board option 2). Moves the file into `evidence/audit_ec1_2026-08-15/kyoto_dst/`, inside R-27s scan root, verified byte-identical on the D-15 method with the access-log row written **before** the move. Makes `governance-guards` R-26 driver-exclusion **class 4 unconditional**. **Not a December read** — bytes and hash only, no field parsed. Changes no value and approves no new input; Dst stays diagnostic-only. **No supervisor signature exists or is claimed.** |
