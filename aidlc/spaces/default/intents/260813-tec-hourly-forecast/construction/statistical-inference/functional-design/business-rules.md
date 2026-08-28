@@ -1,5 +1,32 @@
 # Business Rules — `statistical-inference`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `statistical-inference` · **Kind** `library` · **Complexity** M ·
 **Deployment** embedded · **Depends on** `evaluation-and-comparison`
 
@@ -35,7 +62,7 @@ BLK-08 ↓ is **`ABL-DIFF` alone**, whose inverse obligation TE §7.2 keeps in f
 precondition 4 stays as the check that proves it rather than assumes it. This unit **may
 enter** 3.1, **may not complete or exit** it while any contract is unapproved, and **no
 implementation may proceed while they stand** (`GOV-2026-08-22-REM-01` Rec 2, extended to
-BLK-08/BLK-09 on 2026-08-23). **G-09 is not signed**: no module named here may be created.
+BLK-08/BLK-09 on 2026-08-23). **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.: no module named here may be created.
 
 > **Remediation, 2026-08-28 — `GOV-2026-08-28-FD-01`, verdict FAIL.** Six owner-ruled
 > items were applied to this artifact set. Each carries its own dated note at the site it
@@ -737,5 +764,5 @@ context, not claimed here.
 - **Open — the CPU and memory figures are measured and recorded, not asserted** (§15.1): the doubled comparator cost and the 10,000-replicate primary run are **measured and recorded; storage is bounded by TE §9.3's 10.0 GB plan, and no numeric memory ceiling is currently frozen**; every runtime and tolerance is a placeholder until fixture time.
 
   > **Corrected 2026-08-28 — `GOV-2026-08-28-FD-01` Recommendation 40.** **TE §9.3** (line 532) is titled **"Storage budget"** and self-describes as *"A capacity plan, not a scientific freeze gate"*, totalling 10.0 GB across **eight disk categories**. **TE §9.2** records *"peak memory where available"* and names **no numeric value**, and a sweep of `PreFlight/` finds **no memory ceiling anywhere in the authorities**. R-120 limb 4 and `business-logic-model.md` therefore no longer measure a CPU/memory cost "against TE §9.3's 10.0 GB envelope"; they say **"measured and recorded; storage is bounded by TE §9.3's 10.0 GB plan, and no numeric memory ceiling is currently frozen"**. **The conflation is upstream, not introduced here:** `services.md:258-259` and `:264` state *"peak memory, not cumulative runtime, is the binding quantity against TE §9.3's 10.0 GB hard planning envelope"* and `unit-of-work.md:453` repeats it — both **approved upstream artifacts** this stage cited faithfully, which this unit's own `## Review` (finding 2) identified and traced correctly before the board did. **A change record against `services.md` and `unit-of-work.md` is owed** (Recommendation 40 option 1, owner: those artifacts' owners, due before G-07); **neither file is edited from here.** **Disambiguation hazard, recorded:** **two different §9.3s exist** — **TE §9.3** = Storage budget; **Vision §9.3** = Geomagnetic Regimes and Storm Events (Vision line 896) — and TE line 188 itself cross-cites "per Vision §9.3" while `unit-of-work.md:462` says "the §9.3 storm-event rule" unqualified, so this artifact set always writes **"TE §9.3"** or **"Vision §9.3"** explicitly. **A real memory envelope could be frozen from measurement after the fixtures run**, which §15.1 permits — inventing one now, which is what a 10.0 GB memory ceiling would be, it forbids.
-- **G-09 is not signed.** No rule here authorises creating `src/evaluation/bootstrap.py` or `tests/test_bootstrap.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No rule here authorises creating `src/evaluation/bootstrap.py` or `tests/test_bootstrap.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
 - **None** of the above decides a scientific value: 24 h, 10,000, 20221201, 95% and 2–31 December (now recorded as **D-28**) are already frozen and merely encoded; the interval method (R-119), the correlation series (R-121), the **block scheme** (R-115) and the `experiment.yaml` fields (R-118) are expressly routed to the gate as proposals, and TE §15.3's reduced replicate count is an apparatus constant rather than a scientific value. **Nor does the 2026-08-28 remediation decide one**: D-27 and D-28 are cited as already-recorded decisions, Recommendation 8's taxonomy is the owner's ruling being cited, Recommendation 23's raise relocation is **proposed at the gate** as an amendment owed, Recommendation 26 **adds a gate item rather than settling it**, and Recommendation 40 removes an unfounded ceiling instead of inventing a founded one.

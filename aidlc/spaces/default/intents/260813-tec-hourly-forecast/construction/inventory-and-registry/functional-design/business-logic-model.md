@@ -1,5 +1,32 @@
 # Business Logic Model — `inventory-and-registry`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Depends on**
 `acquisition`
 
@@ -607,7 +634,7 @@ an approved one.
 - **Open — `RES-01`**, permitted-read access logging is NOT TESTED, owned by stage 3.2 — and **this unit performs the permitted read it is about.**
 - **Open — FR-P1-02-8's replacement acceptance row** after `TA-29`'s withdrawal.
 - **Open — D-24's protected set is not reopened.** Hashing the schema block as an eighteenth item is available to raise separately; it is not proposed here.
-- **G-09 is not signed.** No workflow here authorises creating any module.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating any module.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
 ## Review
@@ -659,7 +686,7 @@ The correction itself is sound: `component-methods.md` § Depth and its Assumpti
 > BLK-07 named, zero Amendment C contamination. The one edit: `domain-entities.md`'s exception
 > preamble names **`IntegrityError`** explicitly and the declaration-site OPEN item — the base was
 > already stated as "`foundation`'s base", so this tightens rather than adds.
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1172,7 +1199,7 @@ corrected fact. **READY.**
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt.** The only
 > repair in this unit was to `functional-design-questions.md`, whose ~146 lines had been
 > mojibake-corrupted by the save path (latin-1 re-encode per save) — restored by iterative
-> latin-1 reversal and verified line-by-line. **No design artifact changed.** **G-09 remains unsigned.**
+> latin-1 reversal and verified line-by-line. **No design artifact changed.** **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1189,7 +1216,7 @@ re-litigated.
 **1 — Provenance blockquotes.** All three design artifacts (`business-logic-model.md`,
 `business-rules.md`, `domain-entities.md`) carry exactly one new appended blockquote after
 their prior terminal content, each reading "Re-saved unchanged 2026-08-26 under the
-fourteenth-redo re-confirmation receipt … No design artifact changed. G-09 remains unsigned."
+fourteenth-redo re-confirmation receipt … No design artifact changed. G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged."
 Tail inspection of all three files confirms nothing else was added, removed, or reordered
 above that final blockquote.
 

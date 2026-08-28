@@ -1,5 +1,32 @@
 # Business Rules — `features-and-splits`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `features-and-splits` (Bolt 7) · **Kind** `library` · **Depends on**
 `target-standardization`, `external-products`, `governance-guards`
 
@@ -33,7 +60,7 @@
 > 5" figure in `models-and-baselines`' frozen artifacts is raised at the gate as stale, not
 > edited there. One element of FU-5 = D is defeated by ADR-11's `lead_in_hours` removal —
 > see `business-logic-model.md` W-4b; R-74's `score`-side statement below follows the
-> approved contract. **BLK-04 remains an open exit condition; G-09 remains unsigned.**
+> approved contract. **BLK-04 remains an open exit condition; G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 > ## ⚠ REMEDIATED 2026-08-28 ON GOVERNANCE REPORT `GOV-2026-08-28-FD-01` — OWNER RULINGS
 >
@@ -1150,7 +1177,7 @@ other `src/features/*` / `src/data/splits.py` shape beyond the named boundary ca
 ## Assumptions & Open Questions
 
 - **[assumption]** Rule IDs continue the single sequence, so this unit opens at **R-74**. If per-unit numbering was intended, say so at the gate. *(Extended 2026-08-28: this unit now closes at **R-84**, taking the head of the observed **R-83…R-89** gap between R-82 and `models-and-baselines`' R-90. Derived — nothing occupies R-83…R-89, and four sibling units record the gap as "observed, not explained". No existing id moves, so `models-and-baselines`' **R-80** and **R-76a's third limb** citations are untouched.)*
-- **[assumption]** **`PartitionError` is declared where `src/features` and `src/data` can import it.** Recommendation 8's ruling promotes it to `foundation` R-01's **fifteenth** and states it is declared in **`src/models/`** — but `component-dependency.md` § Dependency matrix marks **`src/features` → `src/models`** and **`src/data` → `src/models`** as **`—`** (no import in either direction), and every `PartitionError` raise in this unit lives in `src/data/splits.py` or `src/features/*`. **On the matrix as approved this unit cannot raise it at all.** The natural declaration site is **`src/data/config.py`**, where R-01 already declares `IntegrityError` and `foundation`'s six and which every unit already imports. This artifact is written on that reading; **the declaration site needs an owner ruling at the gate**, and if it stays in `src/models/` the alternative is that this unit's raises revert to `LeakageError` and the R-92/R-105 taxonomy disagreement is resolved at `models-and-baselines` instead. *(Raised 2026-08-28 per Recommendation 8; `foundation` R-01 on disk still reads "all fourteen" and names no `PartitionError`, so the amended enumeration is cited as ruled, not as written.) ⚠ **SWEPT 2026-08-28 on the resume pass — this disk-state claim is SUPERSEDED.** `foundation` R-01 **has been amended** and now reads **fifteen**, with `PartitionError` promoted into the enumeration, the count restated as **derived and printed** rather than carried in prose, and `InverseTransformError` **explicitly disposed** — not a sixteenth, riding R-01's *"any future integrity-related exception"* clause, on the stated ground that the two units raising it agree on its condition and meaning, so nothing needs reconciling. Verified at `foundation/functional-design/business-rules.md` R-01 (the amendment row, the superseded-wording box, and the `InverseTransformError` box). **The dependency this sentence recorded is discharged; any open item stated alongside it is NOT** — see the sentence it accompanies.*
+- **[assumption]** **`PartitionError` is declared where `src/features` and `src/data` can import it.** Recommendation 8's ruling promotes it to `foundation` R-01's **fifteenth** and states it is declared in **`src/models/`** — but `component-dependency.md` § Dependency matrix marks **`src/features` → `src/models`** and **`src/data` → `src/models`** as **`—`** (no import in either direction), and every `PartitionError` raise in this unit lives in `src/data/splits.py` or `src/features/*`. **On the matrix as approved this unit cannot raise it at all.** The natural declaration site is **`src/data/config.py`**, where R-01 already declares `IntegrityError` and `foundation`'s six and which every unit already imports. This artifact is written on that reading; ~~**the declaration site needs an owner ruling at the gate**~~ ⚠ **RULED 2026-08-28: `src/data/config.py`.** The project decision owner amended the Rec 8 rulings wording at the `functional-design` gate, on exactly the ground this assumption raises — on the approved dependency matrix (`src/features` → `src/models` and `src/data` → `src/models` both `—`) this unit could not have raised the exception at all. Declaring it beside `IntegrityError` in `src/data/config.py` needs **no matrix amendment**, and this artifact was already written on that reading, so **no text here changes substantively**. `models-and-baselines` stays the semantic owner (R-92s discriminating rule unchanged); it is no longer the declaration site. **The assumption is now a recorded ruling, not an open item.**, and if it stays in `src/models/` the alternative is that this unit's raises revert to `LeakageError` and the R-92/R-105 taxonomy disagreement is resolved at `models-and-baselines` instead. *(Raised 2026-08-28 per Recommendation 8; `foundation` R-01 on disk still reads "all fourteen" and names no `PartitionError`, so the amended enumeration is cited as ruled, not as written.) ⚠ **SWEPT 2026-08-28 on the resume pass — this disk-state claim is SUPERSEDED.** `foundation` R-01 **has been amended** and now reads **fifteen**, with `PartitionError` promoted into the enumeration, the count restated as **derived and printed** rather than carried in prose, and `InverseTransformError` **explicitly disposed** — not a sixteenth, riding R-01's *"any future integrity-related exception"* clause, on the stated ground that the two units raising it agree on its condition and meaning, so nothing needs reconciling. Verified at `foundation/functional-design/business-rules.md` R-01 (the amendment row, the superseded-wording box, and the `InverseTransformError` box). **The dependency this sentence recorded is discharged; any open item stated alongside it is NOT** — see the sentence it accompanies.*
 - **[assumption]** The **story map governs** where it and `unit-of-work.md` § 7 disagree. `business-logic-model.md` § The `unit-of-work.md` sweep shows **ten of twelve sections agree**, and the two that do not are exactly the two `CR-2026-08-22-LEAKAGE-TA` touched — so this is **one change record that missed two sections**, not a pattern in the file.
 - **[assumption]** `src/features/*` and `src/data/splits.py` shapes beyond the named boundary calls are **intra-package** and this stage's to specify — **still true, but this unit now owes one boundary amendment again**: R-83's `train_start` field on `Partition` is a **named boundary shape**, not an intra-package detail, so § Depth's carve-out does not reach it. Running total **7 across 5 units**, re-derived in § Amendments owed with the arithmetic printed. *(Rewritten 2026-08-28 per Recommendation 4. The three amendments this entry recorded as dissolved into ADR-11 stay dissolved; R-83's is new. The entry read "5 across 3 units" from 2026-08-26 and "8 across 5 units" before that; every superseded total is preserved in § Amendments owed's box.)*
 - **[assumption]** `tests/test_locked_test_guard.py` is this unit's, per § 7.
@@ -1166,7 +1193,7 @@ other `src/features/*` / `src/data/splits.py` shape beyond the named boundary ca
 - **Discharged 2026-08-26 — the final-refit representation** (R-80's dated box): ADR-11's `Partition` resolves the former *"final refit is not a `FoldSpec`"* open item. Kept in this list so the gate sees the item closed rather than vanished.
 - **Open — FR-P1-04-10 has no acceptance row.**
 - **Open — an unresolved station registry blocks `station_lat` and excludes `lst_sin`/`lst_cos`** (R-76). Consumed from `inventory-and-registry` R-45/R-46; **not decided here**.
-- **G-09 is not signed**, and **BLK-04 independently bars implementation.**
+- **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged., and **BLK-04 independently bars implementation.**
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
 ---
@@ -1191,7 +1218,7 @@ other `src/features/*` / `src/data/splits.py` shape beyond the named boundary ca
 > R-25/R-28 out, matching the siblings' 2026-08-23 correction); R-74's accepted-set `evaluate`
 > row completed with the read/emit split and its dated note (finding 9); the element-4 table's
 > applying-failure row aligned with W-4b; R-76a's id and filing position kept with the reason
-> stated (finding 11a). **BLK-04 remains an open exit condition. G-09 remains unsigned.**
+> stated (finding 11a). **BLK-04 remains an open exit condition. G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1205,7 +1232,7 @@ other `src/features/*` / `src/data/splits.py` shape beyond the named boundary ca
 > with the stale "8 across 5" in `models-and-baselines`' frozen artifacts raised at the gate;
 > the FU-5/ADR-11 December conflict raised, not resolved. Rule ids, subject matter and limb
 > structures unchanged; every prior dated box preserved as history. **BLK-04 remains an open
-> exit condition. G-09 remains unsigned.**
+> exit condition. G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1213,7 +1240,7 @@ other `src/features/*` / `src/data/splits.py` shape beyond the named boundary ca
 > now RESOLVED by FU-7 = A**: the G-06 locked test scores 2–31 December (30 days) per ADR-11 and
 > FR-P1-04-5; FU-5 = D's December clause is superseded as dated history (owner ruling 2026-08-26,
 > recorded under the authority equivalence). The conflict boxes above stand as the record of how
-> it was raised. **BLK-04 remains an open exit condition. G-09 remains unsigned.**
+> it was raised. **BLK-04 remains an open exit condition. G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 

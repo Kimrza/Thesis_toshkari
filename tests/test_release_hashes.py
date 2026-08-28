@@ -40,17 +40,69 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 EVIDENCE_DIR = REPO_ROOT / "evidence"
 RESTRICTED_DIR = EVIDENCE_DIR / "locked_test_restricted"
 GITATTRIBUTES = REPO_ROOT / ".gitattributes"
 EC1_REPORT = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "ec1-audit-report.json"
 KYOTO_DIR = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "kyoto_dst"
 F107_FILE = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "nrcan_f107" / "fluxtable.txt"
+
+# --- the restricted-root chokepoint (R-28, ruled 2026-08-28) --------------------------
+#
+# This module is one of R-28s enumerated `tests/` exemption modules: it may HOLD the
+# restricted-root literal, because asserting where the boundary is requires naming it.
+# The exemption never covers obtaining the CONTENT. Every read below that touches a file
+# under the restricted root goes through `open_restricted`, which writes a durable
+# `AccessRecord` BEFORE returning the path (FR-P1-02-3, VAL-2, governance-guards R-25).
+#
+# Before 2026-08-28 this module read restricted content directly and wrote no access row
+# at all -- the RES-04 hazard `evidence/experiment_registry.md:79-83` recorded as
+# "occurring in fact rather than in principle" (GOV-2026-08-28-FD-01 Rec 2, VAL-02,
+# Validation Auditor veto). Corrected under D-31, which signed G-09 and thereby authorised
+# editing this file.
+
+ACCESS_LOG = EVIDENCE_DIR / "test_run_access_log.jsonl"
+
+
+def _test_access_record() -> AccessRecord:
+    """The access row this module writes before any restricted read.
+
+    `purpose` is `coverage_audit`: integrity verification is custody assessment, not
+    analysis, which is the performance-blind class Vision 8.3 permits before G-05. No
+    December target value, coverage figure or performance quantity is read, parsed,
+    counted or computed by this module.
+    """
+    return AccessRecord(
+        run_id="test_release_hashes",
+        retrieved_at_utc="recorded-at-call-time-by-the-runner",
+        scope="restricted-root manifests and declared artifacts, bytes and hashes only",
+        purpose="coverage_audit",
+        performance_inspected=False,
+        locked_test_accessed=True,
+        authorization="TA-15 integrity verification; Vision 8.3 performance-blind class",
+    )
+
+
+def _read_guarded(path: Path) -> Path:
+    """Return `path` for reading, routing it through the chokepoint when restricted.
+
+    A path outside the restricted root is returned unchanged: `open_restricted` REFUSES
+    ordinary paths by contract, so routing everything through it would raise rather than
+    protect.
+    """
+    if path.is_relative_to(RESTRICTED_DIR):
+        return open_restricted(path, record=_test_access_record(), registry=ACCESS_LOG)
+    return path
 
 # Paths whose bytes are governed and must never be line-ending normalized.
 PROTECTED_PATH_GLOBS = ("evidence/**", "artifacts/**", "tests/fixtures/**")
@@ -85,7 +137,7 @@ def _declared_artifacts() -> list[tuple[Path, str, str]]:
     """Flatten every manifest into (manifest_path, declared_filename, recorded_sha256)."""
     rows: list[tuple[Path, str, str]] = []
     for manifest in _manifests():
-        entries = json.loads(manifest.read_text(encoding="utf-8"))
+        entries = json.loads(_read_guarded(manifest).read_text(encoding="utf-8"))
         for name, recorded in sorted(entries.items()):
             rows.append((manifest, name, recorded))
     return rows
@@ -229,7 +281,7 @@ def test_declared_artifact_has_no_crlf_seam(manifest: Path, name: str, recorded:
     artifact = manifest.parent / name
     if not artifact.is_file():
         pytest.skip("absence is asserted by test_declared_artifact_matches_its_recorded_hash")
-    data = artifact.read_bytes()
+    data = _read_guarded(artifact).read_bytes()
     if b"\r\n" not in data:
         return
     stripped = data.replace(b"\r\n", b"\n")
@@ -257,10 +309,11 @@ def test_mutation_is_detected(tmp_path: Path) -> None:
         pytest.skip(f"{name} absent; covered by the presence assertion")
 
     copy = tmp_path / name
-    copy.write_bytes(source.read_bytes())
+    guarded_source = _read_guarded(source)
+    copy.write_bytes(guarded_source.read_bytes())
     assert _sha256(copy) == recorded, "copy of an unmutated artifact must still verify"
 
-    copy.write_bytes(source.read_bytes() + b"#")
+    copy.write_bytes(guarded_source.read_bytes() + b"#")
     assert _sha256(copy) != recorded, (
         "a mutated artifact hashed to its recorded value -- the verification path is "
         "not actually comparing content"

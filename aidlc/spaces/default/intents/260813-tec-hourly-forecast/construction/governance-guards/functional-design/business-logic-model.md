@@ -1,5 +1,32 @@
 # Business Logic Model — `governance-guards`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Depends on** `foundation`
 
 > **Re-established a sixth time 2026-08-24**, on a **new stage attempt**: Inception closed
@@ -678,7 +705,7 @@ under `kyoto_dst/`; (2) `nrcan_f107/fluxtable.txt`, **95** lines dated `202212`,
 range recorded by the EC-1 report as `2022-01-01` → **`2022-12-31`**; (3)
 `audit_ec1_2026-08-15/ec1-audit-report.json`, month-keyed `1`…`12` with the `"12"` entry
 carrying `expected_days: 31`, `day_rows_parsed: 31`; (4) the derived driver summary
-`.dst_summary.json`, **conditional on the Recommendation 44(b) relocation having happened**.
+`.dst_summary.json`, **conditional on the Recommendation 44(b) relocation having happened** ⚠ **NOW UNCONDITIONAL (2026-08-28, D-30)** — the relocation has happened, so class 4 applies without condition..
 Classes 2 and 3 are a **correction, not a widening**: both sit inside the scan root today,
 so a guard built from the previous text would have **failed on first run against evidence
 already committed**, and the failure would have read as a breach rather than as an
@@ -748,7 +775,7 @@ whose `"12"` entry holds `days_parsed: 31`, `hours: 744`, `min: -68`, `storm50: 
 being written here. Its classification is **already correct and reasoned** at
 `evidence/experiment_registry.md:119–123`: Dst is a public driver series, not a target value,
 and no December *target* record is touched. **D-11** separately bars any provisional-Dst figure
-from becoming a G-05 regime count. The gap is mechanical only: the guard cannot reach the file.
+from becoming a G-05 regime count. The gap is mechanical only: the guard cannot reach the file. ⚠ **PERFORMED 2026-08-28 under D-30 — this paragraph describes the state BEFORE the move.** The relocation the board recommended and this design declined to perform was authorised by the project owner on `GOV-2026-08-28-FD-01` Rec 44(b) and executed the same day: `.dst_summary.json` now lives at `evidence/audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json`, **inside R-27s scan root**, verified byte-identical across the move (`sha256 410927a4ff620b6f7597b18e07746f74233cf5aa87bc84d6f5b0ec25b3e9c064`, 5,653 bytes, before and after) on the D-15 method, with **access-log row 12 written BEFORE the read**. Its D-number is **D-30** and its change record is `governance/CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`. **The reasoning above stands unchanged** — the file was never a breach, the gap was mechanical, and relocation rather than a widened scan root was the right fix.
 
 **The fix is relocation, and this workflow does not perform it.** The recorded disposition is
 to move `.dst_summary.json` under `evidence/audit_ec1_2026-08-15/kyoto_dst/`, beside the twelve
@@ -984,7 +1011,7 @@ paths cross-checked and in agreement.
 ## Assumptions & Open Questions
 
 - **OPEN — which disposition the three existing exempt test modules take** *(added 2026-08-28 under Recommendation 2)*: options (i) synthetic fixture roots or (ii) real-root reads with a standing access-row obligation, set out in W-10's boxed live consequence. **No option is chosen here.** Until ruled on, the three modules continue to read December content beneath the restricted root with no access row, and 3.5 must stop and report rather than pick a route (TE §18.3).
-- **OPEN — the `.dst_summary.json` relocation is authorised in disposition but not performed** *(added 2026-08-28 under Recommendation 44(b))*: the move to `evidence/audit_ec1_2026-08-15/kyoto_dst/` owes a **D-number and a change record** on the D-15 precedent, and neither exists. **This workflow does not perform the move.** Until it happens the file is outside W-8a's scan root, and driver-exclusion class 4 is conditional on the move.
+- ~~**OPEN — the `.dst_summary.json` relocation is authorised in disposition but not performed**~~ *(added 2026-08-28 under Recommendation 44(b))*: the move to `evidence/audit_ec1_2026-08-15/kyoto_dst/` owes a **D-number and a change record** on the D-15 precedent, and neither exists. **This workflow does not perform the move.** Until it happens the file is outside W-8a's scan root, and driver-exclusion class 4 is conditional on the move. ⚠ **CLOSED 2026-08-28 — the relocation is PERFORMED.** The project owner authorised it on `GOV-2026-08-28-FD-01` Rec 44(b); it is recorded as **D-30** with change record `governance/CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`, and executed the same day: the file is now at `evidence/audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json`, byte-identical across the move (`sha256 410927a4ff620b6f7597b18e07746f74233cf5aa87bc84d6f5b0ec25b3e9c064`, 5,653 bytes), with **access-log row 12 written BEFORE the read**. The file is inside the scan root and **driver-exclusion class 4 is now unconditional**. The two things this item said were missing — the D-number and the change record — both exist.
 - **[assumption]** The exemption list is **exactly four** modules — `test_locked_test_guard.py` plus the three holding the literal today, all three **retained** rather than refactored, because all three are green, all three are in `team.md`'s mandated 17-module set, and TC-06 directs pre-TC-06 evidence to be **re-verified under the new suite rather than re-acquired**, which is what those three perform. If the owner prefers refactoring any out, the list shrinks with the membership test.
 - **[assumption]** W-10's exemption is a **narrowing of D-15's framing**, not a relocation of D-15's requirement: "exactly one path" is read as governing routes through which restricted **content** is read. If the owner reads D-15 as governing the **literal** itself, board option 2 is the only remaining route and its circularity must be accepted with it.
 - **[assumption]** R-23's produced-field enumeration is **D-17's**, not TE §7.0's. §7.0 names five classes; D-17 enumerates eight exclusions and is the frozen authority, so the cross-cutting guard is designed to the wider frozen set and cites both. No scientific value is created by the widening.
@@ -1004,7 +1031,7 @@ paths cross-checked and in agreement.
 - **Open — item 17's per-method "config hash" scope.** See § Open above.
 - **Open — a stale statement in three approved artifacts, reported not edited.** `component-methods.md`, `unit-of-work.md` § 2 and `components.md` line 61 all still describe the enumeration as deferred to stage 3.1, which D-24 resolved at 17 items; `bolt-plan.md` § Bolt 2 already reflects the resolution. Per `CHANGE_RECORD_PROCEDURE.md` a sweep reports on approved-stage artifacts and does not edit them absent owner approval for annotate-in-place.
 - **Open — the AGPLv3 distribution question.** Unresolved; reimplementation with a citation is the standing default.
-- **G-09 is not signed.** No workflow here authorises creating any module.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating any module.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
 ---
@@ -1090,7 +1117,7 @@ The single Critical finding from iteration 1 — a printed sum of 15 where 17 wa
 > clean of the Amendment C contamination classes. The one edit this pass makes is in the sibling
 > artifacts: the four exceptions this unit raises are declared **`IntegrityError` subclasses,
 > imported from `src/data/config.py`**, discharging the cross-unit obligation `foundation`'s R-01
-> records. **G-09 remains unsigned.**
+> records. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1313,7 +1340,7 @@ item in all three § Assumptions, following `foundation`'s `write_release` prece
 on, 3.5 stops and reports rather than inventing the channel. (3) The box no longer splits the
 exception table's header from its rows. (4) **`tests/test_reuse_registry.py`** is named as TA-28's
 evidence at R-29. Figures unchanged: 10 requirements, 1 untested, 2 acceptance rows.
-**G-09 remains unsigned.**
+**G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1490,7 +1517,7 @@ would not be stopped by. **G-09 remains unsigned, so nothing here authorises cre
 > **Re-saved unchanged 2026-08-25 under the second receipt** — the eleventh redo, taken for
 > `acquisition`, reset every unit's floor. **No content of this unit changed**; these are the bytes
 > the terminal READY pass reviewed, its three documentation-class findings still disclosed as gate
-> input. One narrow confirming review follows. **G-09 remains unsigned.**
+> input. One narrow confirming review follows. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1651,7 +1678,7 @@ applied. **G-09 remains unsigned, so nothing here authorises creating a module.*
 
 > **Re-saved unchanged 2026-08-26 under the third receipt** (twelfth redo, taken for
 > `inventory-and-registry`; floor reset mechanical). **No content of this unit changed.**
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1667,7 +1694,7 @@ The claim under review — *these three `produces[]` artifacts are unchanged in 
 2026-08-25 second-receipt confirming pass, apart from one dated re-save box per file* — **holds**.
 Every census that pass printed re-derives to the same value, and two further counts are re-derived
 independently. The three disclosed documentation-class findings are untouched and still ride as gate
-input; they are not re-litigated here. **G-09 remains unsigned.**
+input; they are not re-litigated here. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ### A — Byte-level proof that the reviewed body is intact
 
@@ -1797,7 +1824,7 @@ unsigned, so nothing here authorises creating a module.**
 
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
 > for `external-products`; floor reset mechanical). **No content of this unit changed.**
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ## Review — 2026-08-26 fourteenth-receipt confirming pass
 
@@ -1822,6 +1849,6 @@ receipt (2026-08-26T08:18:34Z, taken for `external-products`; floor reset mechan
    (U+0080–U+009F) found zero hits in every file.
 
 No regression found. This is a narrow confirming pass only — the underlying content was not
-re-litigated, and G-09 remains unsigned.
+re-litigated, and G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.
 
 READY

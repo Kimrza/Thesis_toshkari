@@ -36,18 +36,64 @@ import calendar
 import csv
 import datetime as dt
 import re
+import sys
 from pathlib import Path
 
 import pytest
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
+
 AUDIT_YEAR = 2022
 LOCKED_MONTH = 12
-EVIDENCE_DIR = Path(__file__).resolve().parent.parent / "evidence"
+EVIDENCE_DIR = REPO_ROOT / "evidence"
 RESTRICTED_DIR = EVIDENCE_DIR / "locked_test_restricted"
 # Roots that may hold per-month evidence. December 2022 lives only under the restricted
 # root (decision D-15, 2026-08-21), so the run-window checks below must search both or
 # they would silently stop covering the locked month.
 EVIDENCE_ROOTS = (EVIDENCE_DIR, RESTRICTED_DIR)
+
+# --- the restricted-root chokepoint (R-28, ruled 2026-08-28) --------------------------
+#
+# EVIDENCE_ROOTS deliberately includes RESTRICTED_DIR: the acquisition-window invariant
+# must hold for the locked month too, and skipping it would leave the one month that
+# matters most unchecked. That makes this module a genuine restricted READER, not merely
+# a holder of the literal -- so every record read below goes through `open_restricted`,
+# which writes a durable `AccessRecord` BEFORE returning the path.
+#
+# Before 2026-08-28 these reads happened with no access row at all (GOV-2026-08-28-FD-01
+# Rec 2, VAL-02, Validation Auditor veto). Corrected under D-31, which signed G-09.
+
+ACCESS_LOG = EVIDENCE_DIR / "test_run_access_log.jsonl"
+
+
+def _test_access_record() -> AccessRecord:
+    """`purpose` is `coverage_audit`: this module asserts record DATES for containment,
+    which is custody assessment rather than analysis -- the performance-blind class
+    Vision 8.3 permits before G-05. No VTEC value or coverage figure is read."""
+    return AccessRecord(
+        run_id="test_acquisition_window",
+        retrieved_at_utc="recorded-at-call-time-by-the-runner",
+        scope="acquisition record dates, for the out-of-window containment invariant",
+        purpose="coverage_audit",
+        performance_inspected=False,
+        locked_test_accessed=True,
+        authorization="FR-P1-02-6 containment guard; Vision 8.3 performance-blind class",
+    )
+
+
+def _read_guarded(path: Path) -> Path:
+    """Route a restricted path through the chokepoint; pass an ordinary path through.
+
+    `open_restricted` REFUSES ordinary paths by contract, so routing everything through
+    it would raise rather than protect.
+    """
+    if path.is_relative_to(RESTRICTED_DIR):
+        return open_restricted(path, record=_test_access_record(), registry=ACCESS_LOG)
+    return path
 
 # WHAT THE RESTRICTED PATH IS. A governance boundary, not an access control. The directory
 # carries no special filesystem permission, no encryption and no ACL in this repository:
@@ -114,7 +160,7 @@ def _allowed_dates(month: int) -> tuple[set[dt.date], dt.date]:
 
 
 def _observed_dates(records_csv: Path) -> set[dt.date]:
-    with records_csv.open(newline="", encoding="utf-8") as handle:
+    with _read_guarded(records_csv).open(newline="", encoding="utf-8") as handle:
         return {
             dt.date.fromisoformat(row["date"])
             for row in csv.DictReader(handle)

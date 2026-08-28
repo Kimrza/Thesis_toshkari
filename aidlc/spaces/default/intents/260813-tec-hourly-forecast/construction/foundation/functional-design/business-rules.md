@@ -1,5 +1,32 @@
 # Business Rules — `foundation`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
 > ## ✳ AMENDED 2026-08-28 — GOVERNANCE REMEDIATION, `GOV-2026-08-28-FD-01` (verdict FAIL)
@@ -120,7 +147,7 @@ does any future integrity-related exception. **Fifteen are named in the enumerat
 other units and derive from the same base**: `PhaseBoundaryError` and `LockedTestError`
 (`governance-guards`), `LeakageError` and `AlignmentError`, `SeedError`, `FairnessError`,
 `BootstrapError`, `RegimeError`, and — **added 2026-08-28** — **`PartitionError`**
-(`models-and-baselines`, declared in **`src/models/`**, which that unit's `Owns` list carries:
+(`models-and-baselines`, declared in **`src/models/`** ⚠ **RULED 2026-08-28 — `PartitionError` is declared in `src/data/config.py`.** *(Project decision owner, on the `functional-design` gate, amending the wording of the Rec 8 ruling. **Superseded wording, preserved: declared in `src/models/`.**)* The reason is the one `features-and-splits` raised and the Rec 8 ruling could not have known: `component-dependency.md` marks **`src/features` → `src/models`** and **`src/data` → `src/models`** both as **`—`**, while every `PartitionError` raise in that unit lives in `src/data/splits.py` or `src/features/*` — so on the approved matrix that unit could not have raised the exception at all. `src/data/config.py` is where R-01 already declares `IntegrityError` and the base every unit already imports, so **no dependency-matrix amendment is needed and none is taken**. `models-and-baselines` remains the exceptions **semantic owner** — R-92s discriminating rule is unchanged — but is no longer its declaration site. , which that unit's `Owns` list carries:
 `src/models/persistence.py`, `climatology.py`, `ridge.py`, `random_forest.py`, `lstm.py`,
 `train.py`, `checkpoint.py`).
 
@@ -1017,6 +1044,72 @@ buys, because the difference decides whether "never reused" holds:
    property never-reuse depends on is deferred to a decision no artifact is yet permitted to
    make.
 
+> ## ✳ AMENDED 2026-08-28 — **D-29 SETTLES THE ENCODING AND ESTABLISHES INJECTIVITY**
+>
+> *(Project decision owner, 2026-08-28, under the recorded authority equivalence, on
+> `GOV-2026-08-28-FD-01` **Recommendation 42**, board option 2 — the board's own
+> recommendation. Recorded as **D-29** in `evidence/DECISIONS.md`.)*
+>
+> **`dataset_version` is the first 12 hexadecimal characters of the release's `content_hash`,
+> and `write_release` verifies on write that the prefix is not already in use**, raising
+> `ReleaseError` if it names a different `content_hash`. Three binding parts:
+>
+> 1. **Encoding — 12 hex characters** (48 bits) from the front of the SHA-256 `content_hash`
+>    R-11 already makes the release's identity. Derived, never allocated. **No release ledger
+>    is introduced** — the Amendment C reversal stands.
+> 2. **A recorded collision bound**, so it can be checked rather than relied on: at 48 bits the
+>    probability that any two of *n* releases share a prefix is approximately n² / 2⁴⁹ — about
+>    **1.8 × 10⁻⁹** at n = 1,000 and **1.8 × 10⁻⁷** at n = 10,000. The bound says how rarely the
+>    check below is expected to fire; it is **not** what establishes never-reuse.
+> 3. **Verify-on-write.** `write_release` reads back the existing release population and
+>    **refuses** a write whose 12-hex prefix already names a different `content_hash`. A
+>    collision is **surfaced, never silently accepted** — the integrity-violation tier of
+>    `team.md` § Code Style's two-tier posture.
+>
+> **What this changes in the numbered constraint above.** Item 2's **"Injectivity — NOT YET
+> ESTABLISHED"** is **superseded**: injectivity is now **established by verify-on-write**, not
+> by the encoding. The analysis in item 2 was correct and is preserved — a 12-hex label *is* a
+> lossy encoding whose collisions are birthday-bounded on 48 bits, not on 256 — and D-29 does
+> not pretend otherwise. It closes the gap by **checking** rather than by **arguing**, which is
+> exactly the distinction item 2 was written to draw. The characterisation of the label as *"a
+> citation device with idempotence, not an identity guarantee"* is likewise superseded: it is
+> now a citation device with idempotence **and verified injectivity within the release
+> population**.
+>
+> **Two of this rule's three open items close.** The **encoding** is specified; **injectivity**
+> is established. The **`verify_release` amendment** (§ Assumptions item 4) is discharged **in
+> substance**: the read-back hole is closed on the write path by the prefix check, so
+> correspondence enforcement no longer depends on amending a function that never raises.
+> `verify_release`'s own signature is unchanged and **no amendment to it is claimed** — what
+> changed is that R-12 no longer *needs* one.
+>
+> **What is NOT changed, stated plainly.** Release **immutability** never depended on
+> `dataset_version` and is untouched — it rests on R-13's directory-level overwrite refusal and
+> R-11's identity-equals-`content_hash`. What was open, and is now closed, is **citation
+> uniqueness**: a traceability property, not a mutation property.
+>
+> ⚠ **TA-15 is still NOT covered, and D-29 does not cover it.** Derived 2026-08-28:
+> `tests/test_release_hashes.py` exists and its name matches §12's mandated module, but it
+> exercises **none** of §13.3's manifest fields and does not test R-13's overwrite refusal. The
+> closure evidence owed is that module extended to assert `write_release` refuses a second write
+> to an occupied directory and leaves the original bytes unchanged; every §13.3 field present
+> including `mask_ids`, `feature_set_ids`, `row_counts` and `exclusions_qc_summary`; and
+> `dataset_version` corresponding to its release's `content_hash` under this encoding. **No
+> artifact may read TA-15 as satisfied until that lands.**
+>
+> **Negative controls added by D-29, four.** A release whose `dataset_version` is not the first
+> 12 hex of its own `content_hash` → **`ReleaseError` on the write path**. A write whose 12-hex
+> prefix already names a **different** `content_hash` → **`ReleaseError`, refused**. A write
+> whose prefix matches an existing release with the **same** `content_hash` → that is
+> idempotence, and **R-13's directory-level refusal** is what fires, not a prefix collision. A
+> `dataset_version` of any length other than 12 → **`ReleaseError`**.
+>
+> **Limitation.** The collision bound is arithmetic, not measurement: no release exists yet, so
+> the population is projected rather than observed. If it ever approaches those figures, the
+> prefix length is the parameter to revisit, and revisiting it is a **fresh D-number**, not an
+> implementation choice (TE §18.2).
+
+
 > *(Corrected 2026-08-25 on adversarial reviewer finding M-3, which was Major and which refuted
 > a claim this design had been asserting as settled. **Superseded text, preserved verbatim:**
 > *"**Constraint — determinism, which is what replaces the ledger's guarantee.** … Two
@@ -1144,7 +1237,7 @@ this unit may state or imply that release labels are never reused.
 > `Owns` and `services.md` were first *reported* rather than edited, because this stage's scope
 > control forbade touching an approved Inception artifact; the owner authorised the edits
 > explicitly and both were corrected on 2026-08-25 with their superseded wording preserved.
-> **What still stands open against this rule, from that reversal — three items, not two** *(count corrected 2026-08-25 on adversarial finding m-3 of the eighth-redo iteration 2: this roll-up named two while this rule's own Constraint names a third, "Closing the read-back hole requires the `verify_release` amendment" — a roll-up narrower than the body it summarises)*: the `dataset_version` **encoding** (unspecified, and stage 3.5 forbidden to choose one), its **injectivity**, and the **`verify_release` amendment** that would close the read-back hole, on which never-reuse depends. *(Corrected 2026-08-25 on adversarial finding M-2 of the restored budget. **Superseded wording, preserved:** "Nothing about the Amendment C reversal now stands open against this rule." It was false when written and sat eighteen lines below this rule's own "**Never-reuse is open**, on whoever specifies the encoding" — the same sentence had already been superseded in the Q&A and was left standing here.)*
+> **What still stands open against this rule, from that reversal — three items, not two** *(count corrected 2026-08-25 on adversarial finding m-3 of the eighth-redo iteration 2: this roll-up named two while this rule's own Constraint names a third, "Closing the read-back hole requires the `verify_release` amendment" — a roll-up narrower than the body it summarises)*: the `dataset_version` **encoding** (unspecified, and stage 3.5 forbidden to choose one), its **injectivity**, and the **`verify_release` amendment** that would close the read-back hole, on which never-reuse depends. ⚠ **SUPERSEDED 2026-08-28 by D-29** (`GOV-2026-08-28-FD-01` Rec 42, board option 2, owner-approved): the **encoding** is specified — the first **12 hex** of `content_hash` — and **injectivity is established by verify-on-write**, `write_release` refusing a prefix that already names a different `content_hash`. The **`verify_release` amendment** is discharged in substance (the read-back hole closes on the write path) with **no change to that functions signature claimed**. **No release ledger is introduced.** Release immutability never depended on any of this. ⚠ **TA-15 remains NOT covered** — `tests/test_release_hashes.py` still exercises none of §13.3s manifest fields and not R-13s overwrite refusal. *(Corrected 2026-08-25 on adversarial finding M-2 of the restored budget. **Superseded wording, preserved:** "Nothing about the Amendment C reversal now stands open against this rule." It was false when written and sat eighteen lines below this rule's own "**Never-reuse is open**, on whoever specifies the encoding" — the same sentence had already been superseded in the Q&A and was left standing here.)*
 >
 > **The rule count is unchanged at 17 (R-01–R-17)** — R-12 was amended, not removed.
 
@@ -1653,7 +1746,7 @@ enforcement rides §18.3's gate-test list and TA-11 rather than a row of their o
 
 - **[assumption]** The `RequiredFieldsMap` and `CredentialNameMap` are declarative structures **inside `src/data/config.py`**, not governed config files. They name field and variable *identities*, never values, so they carry no scientific constant and TE §12's "exactly four" is untouched. FU-3's stronger form — a seventh module — has no legal home, since TE §12 fixes six `src/` packages.
 - **[assumption]** `foundation` hosting `CredentialNameMap` without consuming it is within the boundary. Stated explicitly in R-14 because, unstated, it reads as a boundary violation.
-- **Amendments A, B and C — all three ruled, none pending.** **A: DECLINED** (2026-08-24) — REQ-ENG-7 and REQ-ENG-10 untested by design, permanently; §19 held at 36 rows; TA-37/TA-38 not to be added. **B: APPROVED** (2026-08-24) — the three `DeterminismRecord` fields exist, nine in total. **C: DECLINED AS DRAFTED** (2026-08-25, reversing its 2026-08-24 approval) — no release ledger, `ReleaseLedgerEntry` withdrawn, `dataset_version` derived from `content_hash` with no encoding specified here. **Neither A nor C was approved; no amendment authorises execution of anything, and G-09 remains unsigned.**
+- **Amendments A, B and C — all three ruled, none pending.** **A: DECLINED** (2026-08-24) — REQ-ENG-7 and REQ-ENG-10 untested by design, permanently; §19 held at 36 rows; TA-37/TA-38 not to be added. **B: APPROVED** (2026-08-24) — the three `DeterminismRecord` fields exist, nine in total. **C: DECLINED AS DRAFTED** (2026-08-25, reversing its 2026-08-24 approval) — no release ledger, `ReleaseLedgerEntry` withdrawn, `dataset_version` derived from `content_hash` with no encoding specified here. **Neither A nor C was approved; no amendment authorises execution of anything, and G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
   *(Corrected 2026-08-25 on adversarial reviewer finding M-2, which was Major. **Superseded wording, preserved:** "**Open — Amendments A, B and C.** All three **PENDING and NOT approved.** Enumerated at this stage's approval gate." That was refuted in the passed contracts at the time it was read, and both sibling artifacts had swept this same bullet while this file's § Assumptions was not — the omission finding M-3 traces to this file's own self-certification. The bullet carried **no numeral**, which is why the 2026-08-24 sweep, keyed to `DeterminismRecord` "six fields" and `services.md` "two artifacts", could not see it.)*
 
@@ -1731,7 +1824,7 @@ enforcement rides §18.3's gate-test list and TA-11 rather than a row of their o
 - **OPEN — a cross-unit dependency on `models-and-baselines` for `PredictionHashReceipt`.** *(Added 2026-08-28 per Recommendations 1 and 3.)* **R-18** designs the registry row as the receipt's **destination** and forbids `07`/the bootstrap from being its writer, but the **producer** is `scripts/06_train_and_predict.py`, which `models-and-baselines` owns. That unit is being amended in parallel to name `06` as the writer with the refusal-to-exit control. **`foundation` cannot supply the producing half**, and until it exists column 18 `prediction_hash` has a designed destination and no designed source — which is fail-closed rather than a breach, since every `DEC` metric entry point already refuses without a verified receipt. Recorded so the two halves are known to be two: the governance report's adoption vehicle for this is the **R-103/BLK-08 two-half contract pattern**, registered as an exit condition on 3.1 for both owners, and **this unit does not declare that pattern satisfied from one side.**
 - **OPEN — a cross-unit dependency on `governance-guards` for the `run_id` join and for `prior_period_exposure`.** *(Added 2026-08-28 per Recommendation 10.)* **R-19**'s reconciliation reads `AccessRecord`, which `governance-guards` owns; `prior_period_exposure` is recorded by the locked-test guard per TE §7.0B and merely **carried** by the registry row. Both keys already exist on both entities (`run_id`), so no contract change is needed on either side — but the reconciliation is a **joint** obligation and this unit designs only the registry half. **Zero of the 48 artifacts named both entities before 2026-08-28**; R-19 is the first statement of the relationship and `governance-guards` has not yet stated its side.
 - **OPEN — Kaggle's durability semantics are characterised nowhere in this design.** *(Added 2026-08-28 per Recommendation 39.)* **R-08**'s durability confirmation is specified on `governance-guards` R-25's accepted pattern, and platform durability behaviour **differs between the two governed platforms**. Kaggle's is unmeasured here, so the confirmation step needs its own measured evidence before registry rows written inside a Kaggle session are relied on at a freeze gate. This is a **measurement obligation on Bolt 1's in-Kaggle work**, not an implementation choice, and it is not this stage's to measure.
-- **G-09 is not signed.** No rule here authorises creating any module — including the three rules added 2026-08-28, which decide a schema, a join and a derivation and create nothing. Vision's gate table records **G-09 Agent preflight** as **Open**, owner **Supervisor**, evidence `aws_ai_dlc_preflight_report`, due *"Before any affected component is coded"*.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No rule here authorises creating any module — including the three rules added 2026-08-28, which decide a schema, a join and a derivation and create nothing. Vision's gate table records **G-09 Agent preflight** as **Open**, owner **Supervisor**, evidence `aws_ai_dlc_preflight_report`, due *"Before any affected component is coded"*.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant. **This holds for the 2026-08-28 amendments specifically**: R-01's promotion is a taxonomy decision, R-18/R-19/R-20 are schema and derivation decisions, R-08's is a write mechanism, R-05's is an acceptance-row label, R-14's is a dated status clause, and the `dataset_version` encoding is **explicitly left to the owner's D-number decision** rather than chosen.
 
 ## Review history
@@ -1765,7 +1858,7 @@ The negative-path test specifications for REQ-ENG-7 and REQ-ENG-10 keep their
 *"Test specification only — not an approved acceptance row"* label as a **settled**
 state rather than a provisional one.
 
-**G-09 remains unsigned.** Nothing in this document authorises creating a module, and
+**G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.** Nothing in this document authorises creating a module, and
 no scientific value is decided here.
 
 ---
@@ -2074,7 +2167,7 @@ no scientific value is decided here.
 > `src/data/config.py`; the sentinel and its module-level in-process carrier) and the four that
 > await the owner or another unit. The rule count is unchanged at **17 (R-01–R-17)**. A reader at
 > the stage gate should treat § Assumptions and this box as authoritative and any count embedded in
-> older prose as historical. **G-09 remains unsigned.** *(This box was first appended by a script
+> older prose as historical. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.** *(This box was first appended by a script
 > write and is re-saved here with the native tooling so the acceptance state carries its audit
 > event — the same discipline `project.md` § Corrections records for shell-written artifacts.)*
 
@@ -2089,22 +2182,22 @@ no scientific value is decided here.
 > (`"tensorflow" in sys.modules`, checked before `seed_everything`'s own deferred import) and the
 > **module-scope framework-import prohibition binds every stage script**, not only `config.py`. The
 > rule count is unchanged at **17**; the final pass's documentation findings stand unfixed per the
-> ruling, recorded in `business-logic-model.md`'s final `## Review`. **G-09 remains unsigned.**
+> ruling, recorded in `business-logic-model.md`'s final `## Review`. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved unchanged 2026-08-25 under the twelfth receipt** (eleventh redo, taken for
 > `acquisition`; floor reset mechanical). Byte-identical to the terminal-READY state.
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved unchanged 2026-08-26 under the thirteenth receipt** (twelfth redo, taken for
 > `inventory-and-registry`; floor reset mechanical). **No content of this unit changed.**
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
 > for `external-products`; floor reset mechanical). **No content of this unit changed.**
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**

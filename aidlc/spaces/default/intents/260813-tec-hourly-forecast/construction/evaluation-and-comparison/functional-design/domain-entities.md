@@ -1,5 +1,32 @@
 # Domain Entities — `evaluation-and-comparison`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `evaluation-and-comparison` · **Kind** `library` · **Complexity** M ·
 **Deployment** standalone · **Depends on** `models-and-baselines`, `external-products`
 
@@ -355,5 +382,5 @@ rows. **8 entities**, derived 2026-08-28 by counting this file's numbered sectio
 - **Verification obligations owned here:** the deterministic-`mask_id`, once-only, pairwise and **reporting-surface presence** controls (§ 2, § 3); the orientation/weighting fixtures, unregistered-mask raise and **four-stamp presence/agreement** control (§ 4); the receipt absence/mismatch/ordering and second-write controls (§ 5); the unresolvable-id control (§ 6 — **the round-trip control is the co-owner's**); the completeness, `beats_model`, disclosure-presence and **overlap-audit existence and ordering** tests (§ 7); R-01's fresh-subclass catch control for `InverseTransformError` (§ 8).
 - **Governance dependencies owned outside:** the co-owner's adoption of § 6's half B **as narrowed** (the gate; BLK-08 stays open for both owners until then, and **the import edge it needs is unauthorised** per D-27); the § 1 membership confirmation for **all three** sets (student/supervisor); **`foundation`'s amendment of R-01 to fifteen exceptions** (§ 8, Recommendation 8); **`statistical-inference`'s correction of R-113 precondition 2** to raise `PartitionError` on a `partition_id` mismatch; **`regimes-diagnostics-reporting`'s printing of § 2's five reporting values and its tier-3 breakdown row**; **the `project.md` § Mandated wording correction on the GIM disclosure trigger, at the §13 learnings ritual** (no memory file is edited here); BLK-03/BLK-04/BLK-09's limbs at their owning units; acceptance rows for FR-P1-05-7 and FR-P1-05-17 (stage 3.2, Vision §15.2); the G-05 freeze itself, and **D-28's owed revised split manifest** (Supervisor).
 - **Open — BLK-08, BLK-03 ↓, BLK-04 ↓, BLK-09 ↓ are exit conditions on this stage.** Nothing in this file closes any of them; no implementation may proceed while any stands.
-- **G-09 is not signed.** These shapes are design only; no module, dataclass or test is created.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. These shapes are design only; no module, dataclass or test is created.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant: D-27 and D-28 are **cited**, not made, and the tier-3 membership is **proposed** to the gate as a §18.2/TC-03e frozen scientific choice.

@@ -1,5 +1,32 @@
 # Business Logic Model — `statistical-inference`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `statistical-inference` · **Kind** `library` · **Complexity** M ·
 **Deployment** embedded · **Depends on** `evaluation-and-comparison`
 
@@ -611,7 +638,7 @@ designed behaviour above.
 - **Open — TE §15.3's reduced-replicate fixture bootstrap** (Recommendation 24): its replicate count is an **apparatus constant** in `tests/fixtures/scientific_1month/fixture_manifest.yaml`, declared by `fixtures-and-reproducibility`, along with the execution's scored range and realised block counts. This unit's three obligations are discharged in W-3, W-5 and W-6 (comparator tracks its primary's count; control (17) scoped to confirmatory runs; the fixture scored range stated so the divisibility raise is checkable).
 - **Open — the exception taxonomy** (Recommendation 8): `PartitionError` is `foundation` R-01's **fifteenth** by owner ruling and is **imported** here, declared by `models-and-baselines`; `evaluation-and-comparison`'s R-105 is being corrected to raise it for the `partition_id`-mismatch limb; `InverseTransformError`'s placement is `foundation`'s to settle. `foundation` still reads "all fourteen" on disk and R-105 still raises `LeakageError` for the mismatch, so the dependency is **stated, not assumed discharged**. ⚠ **SWEPT 2026-08-28 on the resume pass — this disk-state claim is SUPERSEDED.** `foundation` R-01 **has been amended** and now reads **fifteen**, with `PartitionError` promoted into the enumeration, the count restated as **derived and printed** rather than carried in prose, and `InverseTransformError` **explicitly disposed** — not a sixteenth, riding R-01's *"any future integrity-related exception"* clause, on the stated ground that the two units raising it agree on its condition and meaning, so nothing needs reconciling. Verified at `foundation/functional-design/business-rules.md` R-01 (the amendment row, the superseded-wording box, and the `InverseTransformError` box). **The dependency this sentence recorded is discharged; any open item stated alongside it is NOT** — see the sentence it accompanies.
 - **Open — the G-06 abort policy** for a failed widening comparison at the locked evaluation is **owed to the Supervisor at G-05** (Recommendation 23) and is decided by no artifact here.
-- **G-09 is not signed.** No workflow here authorises creating `src/evaluation/bootstrap.py` or `tests/test_bootstrap.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating `src/evaluation/bootstrap.py` or `tests/test_bootstrap.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant. **Nor does the 2026-08-28 remediation**: D-27 and D-28 are cited as already-recorded decisions, Recommendation 8's taxonomy is the owner's ruling being cited rather than made here, Recommendation 23's raise relocation is **proposed at the gate** as an amendment owed, Recommendation 26 **adds a gate item instead of settling it**, Recommendation 24 classifies a test-apparatus constant rather than a protocol value, and Recommendation 40 **removes** an unfounded ceiling rather than inventing a founded one.
 
 ## Review — 2026-08-27 first adversarial pass

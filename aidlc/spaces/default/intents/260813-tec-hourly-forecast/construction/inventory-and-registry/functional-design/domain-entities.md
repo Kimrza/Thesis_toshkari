@@ -1,5 +1,32 @@
 # Domain Entities — `inventory-and-registry`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Depends on**
 `acquisition`
 
@@ -500,7 +527,7 @@ cross-checked and in agreement.
 - **Open — WHICH December day range governs D-13's ≥3 threshold** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 15)*. § 5 declares the audit's December cell as **1–31 December, 31 days**, and § 6 carries the wholly-unscored-event carve-out from the tally. **Whether the threshold is judged over 1–31 or D-28's scored 2–31 is Student + Supervisor's** — D-13 is a supervisor-countersigned demotion threshold. **This unit measures; it does not demote.** Unverifiable here today: **GFZ Kp/ap3 and Hp60/ap60 have never been retrieved**, and **D-11 bars any provisional-Dst-derived figure**.
 - **Open — the `data07_caveat` field's SOURCE crosses no unit boundary today** *(added 2026-08-28, Recommendation 29)*. § 6 and § 7 require the caveat sourced from each month's `provenance_class`. **As found at the opening of this remediation**, derived 2026-08-28 across all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` = **3**, **all inside `acquisition`**. ⚠ **Those three figures are pre-remediation and this entity's own § 6/§ 7 edits invalidated them** *(rebased 2026-08-28 on the resume pass)*. **Re-derived after the remediation. Basis stated, because it moves**: the figures below were derived over the 48 stage artifacts **immediately before this note was written**, and writing the note itself adds occurrences of each token — which is the same self-invalidation the superseded figures fell into, so the raw counts are recorded as a **dated observation, never as a live invariant**: `provenance_class` **43**, `derived_only` **38**, `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11** and `inventory-and-registry` **18 / 17 / 6**. **The two stable facts, which no edit to this note can change, are the ones to rely on**: the fields reach exactly **2** units, and `foundation` carries all three **zero** times. **The load-bearing half survives**: `foundation`, which owns `write_release` and the §13.3 contract, carries all three **zero** times; and `provenance_class` is **not among FR-P1-04-11's fourteen release fields**, an Open item `acquisition` now carries for stage 3.2 under Recommendation 28. The **obligation** stands regardless — an absent source field requires a **stop-and-report under TE §18.3**, never an uncaveated figure.
 - **Open — raised for `evaluation-and-comparison`, not applied:** R-109's must-not-fire control names **`"coverage_audit"` only** and so does not name the regime-count read § 6 now types **`"regime_audit"`**. Gate input, not an edit to a sibling's files *(added 2026-08-28, Recommendation 11)*.
-- **G-09 is not signed.** No entity here authorises creating `src/data/inventory.py`, `src/data/registry.py`, `scripts/01_inventory_and_registry.py` or `tests/test_station_registry.py`.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No entity here authorises creating `src/data/inventory.py`, `src/data/registry.py`, `scripts/01_inventory_and_registry.py` or `tests/test_station_registry.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
 ---
@@ -524,19 +551,19 @@ cross-checked and in agreement.
 > counterexample); the exception preamble names **`IntegrityError`** explicitly with the
 > declaration-site OPEN item; the WS-01 assumption corrected from "settled governance" to
 > **interim reading** (finding 4). Figures unchanged: 7 requirements, 2 untested, 3 acceptance
-> rows. **G-09 remains unsigned.**
+> rows. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved 2026-08-26 under the twelfth-redo receipt, after the terminal-pass remediation.**
 > In this file: **§ 6 gained the timestamp-attribution checkable property** (N1's mirror);
 > **§ 1's box gained the two `inventory.py` obligations** with the ⚠ PROPOSED deferral to stage
-> 3.2 (N2/N3). No entity changed; figures unchanged. **G-09 remains unsigned.**
+> 3.2 (N2/N3). No entity changed; figures unchanged. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (the unit's
-> question file was repaired from mojibake; no design artifact changed). **G-09 remains unsigned.**
+> question file was repaired from mojibake; no design artifact changed). **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 

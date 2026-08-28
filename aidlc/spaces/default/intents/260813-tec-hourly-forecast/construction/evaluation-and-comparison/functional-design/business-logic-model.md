@@ -1,5 +1,32 @@
 # Business Logic Model — `evaluation-and-comparison`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `evaluation-and-comparison` · **Kind** `library` · **Complexity** M ·
 **Deployment** standalone · **Depends on** `models-and-baselines`, `external-products`
 
@@ -446,7 +473,7 @@ any metric") without carrying a requirement of this unit's.
 - **Open — the WS-13 §16 evidence-column proposal** (W-8, R-111): one complete proposal for the owner to route through Vision §15.2 or decline.
 - **Open — FR-P1-05-17's freeze evidence is partly outside this unit's control**: the freeze timestamp must precede any December access, an ordering the G-05 record produces.
 - **Open — four corrections land in other units' files and are raised at the gate, not made here** *(2026-08-28)*: `foundation`'s amendment of R-01 to fifteen exceptions; `statistical-inference`'s R-113 precondition 2; `regimes-diagnostics-reporting`'s printing of the mask's five reporting values and its tier-3 breakdown row; and the `project.md` § Mandated wording correction on the GIM disclosure trigger, owed at the human-gated §13 learnings ritual. **No memory file and no sibling unit's artifact is edited by this remediation.**
-- **G-09 is not signed.** No workflow here authorises creating any module; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating any module; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant: **D-27 and D-28 are cited, not made**, and the tier-3 membership is proposed to the gate.
 
 ## Review — 2026-08-27 first adversarial pass

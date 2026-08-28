@@ -1,5 +1,32 @@
 # Business Logic Model — `external-products`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `external-products` (Bolt 5) · **Kind** `library` · **Depends on**
 `inventory-and-registry`
 
@@ -745,7 +772,7 @@ an approved one.
 - **Open — TA-36 is `Pending`**: approved, never run. Never cited as a result.
 - **Closed 2026-08-26 (finding 8): the § 6 conflict no longer exists — the file was swept 2026-08-24; kept as the dated record.** *(Superseded bullet:)*  — `unit-of-work.md` § 6 carries stale text**, reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`. Both were correct before 2026-08-22.
 - **Open — obligation 4 of FR-P1-04-18 has no code check.** "Never tuned and then claimed independent" is a claim about what was not done; no injected value proves that negation. Carried as a reporting-discipline rule and named uncheckable.
-- **G-09 is not signed.** No workflow here authorises creating any module.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating any module.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
 ## Review
@@ -802,7 +829,7 @@ The sole blocking Critical from iteration 1 — an incomplete sweep leaving "six
 > FR-P1-04-4, FR-P1-04-15, FR-P1-04-18), **2** acceptance rows (WS-09, TA-36 — **Pending**: the row exists, not implemented, not executed, not passing), zero Amendment C
 > contamination. The one edit: `domain-entities.md` § 9's base named explicitly
 > (**`IntegrityError`**, R-01's "any future" clause; declaration site the standing OPEN item).
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1930,7 +1957,7 @@ HEAD and fix the save path before the gate is asked to read this file. NOT-READY
 > in-place edits with non-ASCII escapes on these files any more — all non-ASCII writes go through
 > Bun with verified output**. Finding 18's row-2 qualification now sits inside the table cell.
 > The three design artifacts were never corrupted. The confirming review runs next on these bytes.
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ## Review — 2026-08-26 fourteenth-redo confirming pass, iteration 2
 
@@ -2085,7 +2112,7 @@ cross-unit count must be derived at its source rather than adjusted from a neigh
 read **fifteen**, so the file is internally split until the ruling lands, and saying so is the
 point of reporting it.
 
-> **G-09 remains unsigned.** No workflow, rule or entity here authorises creating
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.** No workflow, rule or entity here authorises creating
 > `src/external/spaceweather.py`, `src/external/iri.py`, `src/external/gim.py` or
 > `scripts/04_build_external_products.py`. **IRI and CODE GIM remain evaluation-time-only
 > comparators; Dst remains diagnostic-only; D-11 continues to bar provisional Dst from any G-05

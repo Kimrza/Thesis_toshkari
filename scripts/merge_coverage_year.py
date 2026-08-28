@@ -59,6 +59,54 @@ EVIDENCE_ROOTS = (EVIDENCE_DIR, RESTRICTED_DIR)
 # The merged year contains December, so it is written inside the restricted root.
 OUT_DIR = os.path.join(RESTRICTED_DIR, 'audit_evidence_%d-FULL' % AUDIT_YEAR)
 
+# --- the restricted-root chokepoint (R-28; corrected 2026-08-28 under D-31) -----------
+#
+# This script reads December-bearing content under the restricted root and WRITES the
+# merged year there. Until 2026-08-28 it did so holding the restricted-root literal with
+# no AccessRecord and no entry in R-28's enumerated exemption -- which is a tests/
+# exemption and never covered a production script. Found by the full-scope sweep the
+# project owner directed on 2026-08-28; the GOV-2026-08-28-FD-01 board named only the
+# three test modules and did not reach this file.
+#
+# Every restricted read below now routes through src.data.locked_test.open_restricted,
+# which writes a durable AccessRecord BEFORE returning the path (FR-P1-02-3, VAL-2,
+# governance-guards R-25). A failed log write aborts the read rather than proceeding.
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
+
+ACCESS_LOG = os.path.join(EVIDENCE_DIR, 'merge_run_access_log.jsonl')
+
+
+def _access_record():
+    """The row written before any restricted read in this run.
+
+    purpose is coverage_audit: the merge derives coverage counts and never inspects model
+    performance -- the performance-blind class Vision section 8.3 permits before G-05.
+    """
+    return AccessRecord(
+        run_id='merge_coverage_year',
+        retrieved_at_utc='recorded-at-call-time-by-the-runner',
+        scope='per-month acquisition artifacts, including December 2022 under D-15',
+        purpose='coverage_audit',
+        performance_inspected=False,
+        locked_test_accessed=True,
+        authorization='D-18 year re-merge; Vision 8.3 performance-blind coverage class',
+    )
+
+
+def guarded(path):
+    """Route a restricted path through the chokepoint; pass an ordinary path through.
+
+    open_restricted REFUSES ordinary paths by contract, so routing every path through it
+    would raise rather than protect.
+    """
+    from pathlib import Path as _Path
+    p = _Path(path).resolve()
+    if p.is_relative_to(_Path(RESTRICTED_DIR).resolve()):
+        return str(open_restricted(p, record=_access_record(), registry=_Path(ACCESS_LOG)))
+    return path
+
 DAYS_IN_YEAR = 366 if (AUDIT_YEAR % 4 == 0 and (AUDIT_YEAR % 100 != 0 or AUDIT_YEAR % 400 == 0)) else 365
 DAYS_IN_MONTH = {1: 31, 2: 29 if DAYS_IN_YEAR == 366 else 28, 3: 31, 4: 30, 5: 31, 6: 30,
                  7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
@@ -129,13 +177,13 @@ def main():
         hashes_path = os.path.join(path, 'sha256_manifest.json')
         if not os.path.exists(hashes_path):
             sys.exit('Month %d has no sha256_manifest.json -- refusing to merge unverified evidence.' % month)
-        with open(hashes_path) as fh:
+        with open(guarded(hashes_path)) as fh:
             hashes = json.load(fh)
         for name, expected in hashes.items():
             target = os.path.join(path, name)
             if not os.path.exists(target):
                 sys.exit('Month %d: %s listed in hash manifest but missing on disk.' % (month, name))
-            if sha256_of_file(target) != expected:
+            if sha256_of_file(guarded(target)) != expected:
                 sys.exit('Month %d: %s FAILED hash check -- evidence altered since the run.' % (month, name))
     print('All per-month hash manifests verify.')
 
@@ -148,7 +196,7 @@ def main():
 
     for month, path in months.items():
         raw_path = os.path.join(path, 'madrigal_coverage_raw_records.csv')
-        with open(raw_path, newline='') as fh:
+        with open(guarded(raw_path), newline='') as fh:
             reader = csv.DictReader(fh)
             fieldnames = reader.fieldnames
             count = 0
@@ -228,7 +276,7 @@ def main():
     # --- manifest: say plainly that this was derived, not retrieved -------------------
     source_manifests = {}
     for month, path in months.items():
-        with open(os.path.join(path, 'request_manifest.json')) as fh:
+        with open(guarded(os.path.join(path, 'request_manifest.json'))) as fh:
             src = json.load(fh)
         source_manifests[str(month)] = {
             'folder': os.path.basename(path),
@@ -236,11 +284,11 @@ def main():
             'run_months': src.get('run_months'),
             'rows_fetched_total': src.get('rows_fetched_total'),
             'file_level_errors': len(src.get('file_level_errors', [])),
-            'sha256_manifest': sha256_of_file(os.path.join(path, 'sha256_manifest.json')),
+            'sha256_manifest': sha256_of_file(guarded(os.path.join(path, 'sha256_manifest.json'))),
         }
 
     first = list(months.values())[0]
-    with open(os.path.join(first, 'request_manifest.json')) as fh:
+    with open(guarded(os.path.join(first, 'request_manifest.json'))) as fh:
         template = json.load(fh)
 
     manifest = {

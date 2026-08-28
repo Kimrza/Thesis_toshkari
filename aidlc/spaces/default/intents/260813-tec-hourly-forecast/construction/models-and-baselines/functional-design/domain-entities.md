@@ -1,5 +1,32 @@
 # Domain Entities — `models-and-baselines`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `models-and-baselines` (Bolt 8) · **Kind** `library` · **Depends on**
 `features-and-splits`
 
@@ -507,7 +534,7 @@ by R-90 and R-92 rather than restated:
 > box was first drafted saying the amendment was *"in flight in parallel"*; **it has since landed and
 > R-01 was re-read directly.** It now reads *"**Every project-defined exception derives from
 > `IntegrityError`** … **Fifteen are named in the enumeration below** … and — **added 2026-08-28** —
-> **`PartitionError`** (`models-and-baselines`, declared in **`src/models/`**)"*, and its Sources line
+> **`PartitionError`** (`models-and-baselines`, declared in **`src/models/`** ⚠ **RULED 2026-08-28 — `PartitionError` is declared in `src/data/config.py`.** *(Project decision owner, on the `functional-design` gate, amending the wording of the Rec 8 ruling. **Superseded wording, preserved: declared in `src/models/`.**)* The reason is the one `features-and-splits` raised and the Rec 8 ruling could not have known: `component-dependency.md` marks **`src/features` → `src/models`** and **`src/data` → `src/models`** both as **`—`**, while every `PartitionError` raise in that unit lives in `src/data/splits.py` or `src/features/*` — so on the approved matrix that unit could not have raised the exception at all. `src/data/config.py` is where R-01 already declares `IntegrityError` and the base every unit already imports, so **no dependency-matrix amendment is needed and none is taken**. `models-and-baselines` remains the exceptions **semantic owner** — R-92s discriminating rule is unchanged — but is no longer its declaration site. )"*, and its Sources line
 > cites **this section as *"the authority for R-01's fifteenth entry"*** — which is why the
 > discriminating rule is stated here in full rather than by reference. **The draft's "in flight"
 > wording is superseded and recorded, not left standing.** R-01 also **restated its own count as
@@ -606,7 +633,7 @@ this unit**, and on a Phase 1 row its value is **`false`** — see the deviation
 > the twenty-column assertion stays literally checkable"*. The draft's *"in flight in parallel"*
 > wording is superseded.
 >
-> **Naming a shape here is not authority to write it.** **G-09 is not signed**, **BLK-03
+> **Naming a shape here is not authority to write it.** **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged., **BLK-03
 > independently bars implementation**, and the `DEC` write is additionally barred until **G-05 is
 > signed** by `features-and-splits` **R-82** and `governance-guards`' access chokepoint.
 
@@ -649,7 +676,7 @@ TA-20.
 - **Open — 7 of 9 requirements have no acceptance row**, four naming their own candidate TA row via Vision §15.2. **None is added here.**
 - **Open — whether TA-11 reaches a model fit is unverified upstream** (§ 6). No reading adopted.
 - **Closed, corrected 2026-08-24 — D-122's supervisor sign-off is NOT outstanding.** The first draft carried *"Approved — supervisor sign-off pending"*, which is the status of **D-126** and **D-128**, not D-122. The Vision decision register (line 1207) reads **"Approved; supervisor sign-off closed 2026-08-22"** by the project owner under the recorded student/supervisor authority equivalence (`CR-2026-08-22-TE-AMEND`; `GOV-2026-08-22-REM-01` Rec 4), noting that **no supervisor signature artifact exists and none is claimed** and that the seed values were verified unchanged before closure. `unit-of-work.md` § 8 already recorded the closure. **Found while verifying iteration-1 finding 1 against the source register; the reviewer did not raise it.**
-- **G-09 is not signed**, and **BLK-03 independently bars implementation.** No entity here authorises creating any module.
+- **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged., and **BLK-03 independently bars implementation.** No entity here authorises creating any module.
 - ~~**Open — `07`'s half of the eighth amendment is UNOWNED.**~~ **CLOSED 2026-08-28.** *(Superseded text preserved:* "FU-4 = D names **`06` and `07`**; `unit-of-work.md` assigns `07_evaluate_and_report.py` to **`evaluation-and-comparison`**, whose functional design has not run. This unit discharges `06` only. Raised at the gate so it is not discovered later *(iteration-1 finding 3)*." *)* That unit's design has run and its **R-105** claims `07`'s half, citing R-90 by name. **This unit still discharges `06` only** — that half of the superseded entry stands. What survives is a **type** disagreement, recorded above and at § 11's closure box, not an ownership gap.
 - **Open — `requirements.md` FR-P1-05-2 carries TWO superseded clauses on one line, both reported and neither edited.** (a) It attributes bootstrap seed **20221201** to D-122, a reading `unit-of-work.md` § 8 records as corrected 2026-08-22 (`GOV-2026-08-22-UG-02` Rec 11) — the seed is frozen separately by **TE §13.6 / TC-19** (Q-27). (b) It states *"Vision §14.2 marks it 'Approved — supervisor sign-off pending'… still owes a signature at G-05"*, superseded by the same Vision-register closure at line 1207 that these artifacts cite correctly elsewhere — **"Approved; supervisor sign-off closed 2026-08-22"**. This unit follows the **corrected** reading of both. `requirements.md` is an approved upstream artifact and `CHANGE_RECORD_PROCEDURE.md` bars editing one absent owner approval for annotate-in-place, so both are **raised at the gate**. *(Clause (a) was iteration-1 finding 5; clause (b) is iteration-2 finding 2 — flagging one clause of a line and missing its neighbour is the same one-representation-short failure as iteration-2 finding 1, and clause (b) is where this author's own D-122 error originated.)*
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
@@ -680,5 +707,5 @@ TA-20.
 > changed.** No sibling artifact and no `functional-design-questions.md` was edited. Every prior
 > dated ⚠ box is preserved.
 >
-> **BLK-03 remains an open exit condition and G-09 remains unsigned. Naming a shape here — § 13
+> **BLK-03 remains an open exit condition and G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. Naming a shape here — § 13
 > included — is not authority to write a module, and nothing above closes BLK-03.**

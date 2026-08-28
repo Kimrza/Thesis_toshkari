@@ -1,5 +1,32 @@
 # Domain Entities — `regimes-diagnostics-reporting`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `regimes-diagnostics-reporting` · **Kind** `library` · **Complexity** L ·
 **Deployment** embedded · **Depends on** `statistical-inference`
 
@@ -477,7 +504,7 @@ verified on 2026-08-27 and are preserved as the historical record; the live coun
 - **Verification obligations owned here:** § 1's refusal, same-table, presence and units assertions, plus the provenance and metric presence assertions (controls (32)–(34)); § 2's presence checks, the planted-claim catch, the TC-12 planted-phrase catch (37), the fail-closed conclusion-surface refusal (36) and VAL-05's named falsifier (39); § 3's stamp, label, strata, fold, per-seed and inventory controls, the driver-identity caveat (38) and the outside-scored-set exclusion (40); § 4's source-ID, units-label and completeness controls; § 5's constructor-contract compliance on every `RegimeError` raise; § 6's registration and manifest-listing obligation.
 - **Governance dependencies owned outside:** BLK-03's limbs (`models-and-baselines`); BLK-04's limbs and BLK-09's `train_start` (`features-and-splits`); BLK-08's co-owner adoption of the R-103 joint contract — until then nothing returns model output to TECU and § 1's units assertion inherits that bound; the pre-G-05 audit's execution and registration **and its December day range** (`inventory-and-registry`, amended in parallel per Rec 15); the exploratory label's writer (registry surface; gate); the candidate §15.2 rows (owner/supervisor); **the Vision §15.2 amendment to FR-P1-05-16 re-citing §5.5's metric set — audit finding `TEC-14`, Open (owner/supervisor)**; **`REQ-CLAIM-01`'s boundary text, owed an owner-approved annotate-in-place or a §15.2 amendment (Rec 16 follow-on)**; **`feature_set_id`'s supply onto the comparison object (`evaluation-and-comparison`, Rec 16)**; **which text surface is authoritative for the thesis (Student, § 6)**; **which December day range governs D-13's storm count (Student + Supervisor, Rec 15)**; G-05's freeze of the evaluation code (Supervisor). **Added on the 2026-08-28 resume pass (Rec 18 limb (3)):** the **emission** of NFR-TDEF-01's cross-phase target-lineage sentence on the target-writing path (`target-standardization`, Rec 18 limb (1), applied there 2026-08-28) — this unit's two new checklist rows assert that sentence's **presence** and never author it, so if the upstream path does not write it the row **fails** rather than this unit emitting a second version; and the **FR-P1-03-4 notebook-caption text** itself, which `target-standardization` R-69 routes here for review and whose `human_residue` stays a human check.
 - **Open — BLK-03 ↓, BLK-04 ↓, BLK-08 ↓, BLK-09 ↓ are exit conditions on this stage.** Nothing in this file closes any of them; no implementation may proceed while any stands.
-- **G-09 is not signed.** These shapes are design only; no module, artifact writer or test is created.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. These shapes are design only; no module, artifact writer or test is created.
 - **None** of the above decides a scientific value; the enumerations encoded here (D-17's three fields, the F1–F4 folds, §5.5's metric set, the disclosure locations, D-28's 30-day scored window, the third comparison set's membership) are frozen upstream, ruled by the owner, or routed to the gate, and merely carried.
 - **[assumption]** *(added 2026-08-28)* **D-28's 30-day scored set is carried, and its own disclosed limits travel with it**: D-28 records that Vision §8.2 and TE §7.1 both carry `—` in the Locked-test Embargo column, that a level-4 `requirements.md` paraphrase is the sole textual basis, that the conflict is **disclosed rather than resolved** and carried to G-05, that a revised split manifest is owed at G-05, and that **no supervisor signature exists or is claimed**. This unit encodes the value and reports the limits; it neither resolves the conflict nor represents the ratification as a supervisor signature.
 - **Open — the 2026-08-28 remediation's residual obligations, recorded not fixed:** `functional-design-questions.md` retains **five** stale `seventeen` sites (lines 65, 357, 359, 362, 530) inside a receipted record this remediation may not edit; `team.md` § Testing Posture still states the superseded 17-module figure, affirmed 2026-08-16 before all four §12 amendments, which a sweep may not edit either — recorded as a residual obligation on the practices gate; FR-P1-05-18's advisory NOT-READY on its source criterion remains a `requirements.md` change reported here, not fixed.

@@ -1623,6 +1623,79 @@ experiment registry records for every artifact of that era.
 
 ---
 
+## D-31 — G-09 (Agent preflight) is signed, with its §18.3 preconditions recorded as unmet
+
+**Decision date:** 2026-08-28. **Decided by:** the project decision owner, in the
+`functional-design` (3.1) session, under the recorded student/supervisor authority
+equivalence (D-1 addendum). **Authority:** TE §18.3 (Preflight gate); TE §1.2 gate table
+row *"Agent preflight passed — Student and supervisor — Any affected component is coded —
+Pending — G-09"*; TE:97 (*"Blocks coding until P0 freezes pass"*); TE:735 (authority to
+create a module is not authority to write it). **Raised by:** the owner, unprompted, at the
+`functional-design` remediation gate.
+
+**Decision.** **G-09 is signed and approved.** The gate that blocked creation of any
+module — every `src/` package, every `configs/` file, every `tests/` module this stage
+designed — is **open**. Work previously deferred *solely* on the ground "G-09 is unsigned"
+may now proceed.
+
+**This decision is recorded with its preconditions disclosed rather than presumed
+satisfied.** TE §18.3 states three preconditions and a decision criterion. As of
+2026-08-28, derived by direct workspace inspection and printed here before assertion,
+**none of the three is met**:
+
+| §18.3 precondition | State on 2026-08-28 | Evidence |
+|---|---|---|
+| 1. All P0 decision-register entries for the affected component resolved and recorded | **Partially met.** D-1…D-31 exist and the register is maintained, but freeze-gate holes remain open by design — D-17's four support thresholds, D-25's requested §15.2 amendment, D-26's UNRESOLVED provenance, and the nine unfrozen scientific values this stage routed to G-04/G-05 rather than defaulting | `evidence/DECISIONS.md`; stage 3.1 gate items |
+| 2. An automated preflight asserts no required field in `data.yaml`, `features.yaml`, `experiment.yaml` or `seeds.yaml` is `TBD`, that every declared source and hash exists, **and that all gate tests pass** | **NOT MET — the assertion cannot run.** `configs/` does not exist; none of the four config files exists; `src/` does not exist; `pyproject.toml` does not exist. There is no preflight to run and nothing for it to assert over | Workspace inspection 2026-08-28 |
+| 3. The supervisor has signed the scientific hierarchy, IRI role, horizons, estimand, seeds and locked-test protocol | **Met only under the recorded authority equivalence.** No independent supervisor signature artifact exists for any of the six, and none is claimed. G-05 and G-06 remain `Blocked` | `evidence/DECISIONS.md` D-1 addendum; Vision §13.1 gate table |
+| **Decision criterion:** zero unresolved P0 fields **and no failing critical test** | **NOT VERIFIABLE in this environment.** The ten named critical tests cannot be executed: no Python interpreter is installed (`python.exe` is a zero-byte Windows Store stub; no registry entry; no interpreter on disk). "No failing critical test" is therefore **unproven, not proven** — an absence of executions, not an absence of failures | Environment inspection 2026-08-28 |
+| **Evidence artifact:** `aws_ai_dlc_preflight_report` | **DOES NOT EXIST.** No unit produces it; `foundation` owns FR-WS-7/TA-23, which discharge onto it, and the artifact is designed but unwritten | `GOV-2026-08-28-FD-01` Rec 9 |
+
+**What this decision therefore is, stated exactly.** It is the **owner exercising authority
+to open the gate**, not a record that the gate's evidentiary conditions were satisfied. The
+owner may do this — G-09 is theirs to sign under the recorded equivalence, exactly as D-11
+through D-30 were taken — and the project is entitled to proceed on it. What must never
+happen is a later reader inferring from "G-09 signed" that a preflight ran, that the four
+configs exist and are TBD-free, or that the ten critical tests were executed and passed.
+**None of those things happened.** This entry exists so that inference is impossible.
+
+**What G-09's signature unblocks.**
+
+- Creation of `src/`, `configs/`, `pyproject.toml`, `tests/fixtures/` and the modules §12
+  mandates — the authority TE:735 says is separate from the authority to write them.
+- Correction of defects previously deferred *solely* because G-09 barred editing the file.
+  Specifically: `tests/test_release_hashes.py`'s §13.3 field coverage and R-13 overwrite
+  refusal (TA-15), and routing the two unlogged restricted reads at
+  `tests/test_release_hashes.py:137` and `tests/test_acquisition_window.py:195` through
+  `open_restricted`.
+
+**What G-09's signature does NOT unblock, and this list is exhaustive of the gates that
+still bind.**
+
+- **G-05 and G-06 remain `Blocked`.** No locked-test access, no December prediction, no
+  metric. `tests/test_locked_test_guard.py`'s obligations are untouched.
+- **G-P1A, G-P2, G-P3A, G-P3C and G-07 are unaffected.** G-09 is the coding gate, not the
+  scientific, licence, phase-transition or reproducibility gate.
+- **TE §18.2's absolute rule stands**: no scientific value may be changed after seeing a
+  result, and no agent may fill a freeze-gate value by convenience. **Every value this
+  stage routed to G-04/G-05 stays routed.** G-09 authorises writing code; it authorises
+  nothing about choosing a constant.
+- **TE §18.3's stop-and-report obligation survives its own gate.** The sentence *"Claude
+  Code or any equivalent agent must not implement an affected component while its P0
+  decision is unresolved, and must stop and report rather than choose a default"* is a
+  standing rule on implementation, not a one-time gate condition. An unresolved P0 still
+  stops implementation of the component it governs.
+
+**Limitation, stated plainly.** This is an owner signature under the recorded
+student/supervisor authority equivalence. **No independent supervisor signature artifact
+exists and none is claimed.** TE §1.2 assigns G-09 to "Student and supervisor" jointly. An
+examining committee requiring an independent supervisor signature for the coding gate — in
+a project where the automated preflight it names never ran — is outside this repository's
+control, and this decision does not represent itself as satisfying such a requirement. The
+row in the §18.3 table above is the disclosure that makes that judgeable.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -1704,3 +1777,4 @@ exposed to challenge and should be read first.
 | D-28 G-06 locked-test scored set = 2–31 Dec (30 d) | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, at the `functional-design` (3.1) governance gate on `GOV-2026-08-28-FD-01` Rec 6. **Ratifies FU-7 = A (2026-08-26), already built upon by eight units.** Basis is `requirements.md` FR-P1-04-5 + ADR-11's `lead_in_hours` removal; **discloses that Vision §8.2 and TE §7.1 both carry `—` in the Locked-test Embargo column**, so a level-4 paraphrase is the sole textual basis — conflict recorded, not resolved, and carried to G-05. Accepted on three grounds: 1 Dec is furthest from solstice; the bootstrap loses 1 of 31 blocks (conservative); and 720 h divides by 48 where 744 h does not, so the mandatory 48-h sensitivity would have raised under the 31-day reading. **No supervisor signature exists or is claimed.** A revised split manifest is owed at G-05. |
 | D-29 `dataset_version` = 12-hex prefix, verified on write | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, at the `functional-design` (3.1) governance gate on `GOV-2026-08-28-FD-01` Rec 42 (board option 2). Encoding **12 hex** from `content_hash`; collision bound **recorded** (~1.8e-9 at n=1,000; ~1.8e-7 at n=10,000) but **never relied on** — the verify-on-write prefix check is what establishes never-reuse, raising `ReleaseError` on collision. **No release ledger introduced.** Unblocks `write_release` at 3.5 and closes two of `foundation` R-12s three open items (injectivity, `verify_release`). **TA-15 is still NOT covered and this decision does not cover it** — `tests/test_release_hashes.py` exercises none of §13.3s manifest fields and not R-13s overwrite refusal. **No supervisor signature exists or is claimed.** |
 | D-30 `.dst_summary.json` relocation | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, on `GOV-2026-08-28-FD-01` Rec 44(b) (board option 2). Moves the file into `evidence/audit_ec1_2026-08-15/kyoto_dst/`, inside R-27s scan root, verified byte-identical on the D-15 method with the access-log row written **before** the move. Makes `governance-guards` R-26 driver-exclusion **class 4 unconditional**. **Not a December read** — bytes and hash only, no field parsed. Changes no value and approves no new input; Dst stays diagnostic-only. **No supervisor signature exists or is claimed.** |
+| D-31 G-09 Agent preflight SIGNED | **Yes** | 2026-08-28 | **Signed and approved by the project decision owner**, in session, under the recorded student/supervisor authority equivalence. **Recorded WITH its §18.3 preconditions disclosed as UNMET**: `configs/`, `src/` and `pyproject.toml` do not exist, so the mandated automated zero-TBD preflight **cannot run**; the ten named critical tests **cannot be executed** (no Python interpreter is installed in this environment); and the evidence artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is therefore **unproven, not proven**. **Unblocks** module creation and the two defects deferred solely on G-09 (TA-15s §13.3 field coverage and R-13 overwrite refusal; routing the two unlogged restricted reads through `open_restricted`). **Does NOT unblock** G-05, G-06, G-P1A, G-P2, G-P3A/C or G-07, and does not relax TE §18.2s absolute rule or §18.3s standing stop-and-report obligation. **No independent supervisor signature artifact exists and none is claimed.** |

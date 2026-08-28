@@ -1,5 +1,32 @@
 # Business Rules — `governance-guards`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Depends on** `foundation`
 
 > **Re-established a sixth time 2026-08-24**, on a **new stage attempt** — Inception closed
@@ -642,7 +669,7 @@ programmatically; every figure below was printed before being written here.
 | 1 | Raw provisional-Dst monthly capture | `evidence/audit_ec1_2026-08-15/kyoto_dst/dst_provisional_YYYYMM.html` | **12** monthly captures present; `dst_provisional_202212.html` is hourly Dst for December 2022 |
 | 2 | Raw F10.7 flux table | `evidence/audit_ec1_2026-08-15/nrcan_f107/fluxtable.txt` | **95** lines dated `202212`; the EC-1 report records the 2022 range as `2022-01-01` → **`2022-12-31`** |
 | 3 | Derived driver audit report | `evidence/audit_ec1_2026-08-15/ec1-audit-report.json` | month-keyed `1`…`12`, **12** keys, the `"12"` entry carrying `expected_days: 31`, `day_rows_parsed: 31` |
-| 4 | Derived driver summary | `.dst_summary.json` — **class 4 applies only once Recommendation 44(b)'s relocation has happened**; see R-27 | **12** month keys; `"12"` carries `days_parsed: 31`, `hours: 744`, `min: -68`, `storm50: [7, 27]`, `storm30` with **15** days, `daily_min` with **31** entries |
+| 4 | Derived driver summary | `.dst_summary.json` — **class 4 applies only once Recommendation 44(b)'s relocation has happened** ⚠ **NOW UNCONDITIONAL (2026-08-28, D-30)** — the relocation has happened, so class 4 applies without condition.; see R-27 | **12** month keys; `"12"` carries `days_parsed: 31`, `hours: 744`, `min: -68`, `storm50: [7, 27]`, `storm30` with **15** days, `daily_min` with **31** entries |
 
 **Why classes 2 and 3 are a correction and not a widening.** Both files are inside R-27's
 scan root today and both carry December-dated driver records, so a guard implemented from
@@ -717,7 +744,7 @@ it a breach, and neither did the board.** Its classification is already correct 
 December 2022 is *"not a locked-test access: Dst is a public driver series, not a target
 value, and no December target record is touched by it"*, and **D-11** separately bars any
 provisional-Dst figure from becoming a G-05 regime count. The gap is narrower and purely
-mechanical: **the designed guard cannot reach the file its class belongs to.**
+mechanical: **the designed guard cannot reach the file its class belongs to.** ⚠ **PERFORMED 2026-08-28 under D-30 — this paragraph describes the state BEFORE the move.** The relocation the board recommended and this design declined to perform was authorised by the project owner on `GOV-2026-08-28-FD-01` Rec 44(b) and executed the same day: `.dst_summary.json` now lives at `evidence/audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json`, **inside R-27s scan root**, verified byte-identical across the move (`sha256 410927a4ff620b6f7597b18e07746f74233cf5aa87bc84d6f5b0ec25b3e9c064`, 5,653 bytes, before and after) on the D-15 method, with **access-log row 12 written BEFORE the read**. Its D-number is **D-30** and its change record is `governance/CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`. **The reasoning above stands unchanged** — the file was never a breach, the gap was mechanical, and relocation rather than a widened scan root was the right fix.
 
 **Constraint — the fix is relocation, not a widened scan root, and this design does NOT
 perform it.** The recorded disposition is that `.dst_summary.json` be **relocated under
@@ -857,6 +884,55 @@ reads the carve-out as governing the literal itself**, the exemption is not avai
 board option 2 — refactor every test to obtain the root from `locked_test.py` — is the only
 remaining route, with the circularity recorded in row 1 accepted along with it. Raised at the
 gate on those terms.
+
+> ## ⚠ A SIXTH HOLDER, FOUND 2026-08-28 BY THE FULL-SCOPE SWEEP — **`scripts/merge_coverage_year.py`**
+>
+> *(Found on the project decision owners 2026-08-28 instruction to sweep the full repository
+> scope rather than assume the boards two sites were the only ones. The
+> `GOV-2026-08-28-FD-01` board named **three** test modules; this is a **fourth** file and
+> **not a test at all**.)*
+>
+> `scripts/merge_coverage_year.py` holds the restricted-root literal at its line 55, defines
+> `EVIDENCE_ROOTS = (EVIDENCE_DIR, RESTRICTED_DIR)`, **writes** the merged year into the
+> restricted root, and **read six restricted content sites with no `AccessRecord`**: the
+> per-month `sha256_manifest.json`, the raw records CSV, two `request_manifest.json` reads,
+> and two `sha256_of_file` calls.
+>
+> **This is more serious than the three test modules, and the rule as written did not reach
+> it.** R-28s exemption is a **`tests/` exemption**. A production script is outside it
+> entirely, so this file was not an exempted holder — it was an **unexempted** one, and the
+> static check as specified would have failed against it on first run. The one-door property
+> was broken by a production path, not only by test scaffolding.
+>
+> **Corrected the same day under D-31** (which signed G-09 and authorised editing the file):
+> all six reads now route through `src.data.locked_test.open_restricted`, which writes a
+> durable `AccessRecord` before returning the path and **aborts the read if the log write
+> fails**. The script is added to the enumerated exemption **explicitly** — an exemption a
+> reader cannot see is not an exemption, it is a hole — bringing the list to **six**: the
+> chokepoint itself, four `tests/` modules, and this one production script whose restricted
+> access is legitimate under **D-18** (the year re-merge).
+>
+> **The exemption is therefore no longer `tests/`-only, and R-28s rule text above is
+> narrowed accordingly**: membership is an **exact enumerated list**, not a directory
+> predicate. That is a widening of *what may be listed* and a **narrowing of how membership
+> is decided** — a substring or prefix exemption remains expressly refused, and
+> `tests/test_locked_test_guard.py` asserts exact set membership so a seventh holder
+> **fails** rather than being silently admitted.
+>
+> ⚠ **The guard test is written but has NOT been executed.** No Python interpreter exists in
+> this environment (a zero-byte Windows Store stub; no registry entry; no interpreter on
+> disk), so every claim above about runtime behaviour is **a claim about code as written,
+> not a passing test result**. WS-18 and TA-18 are **not** discharged.
+
+
+> ## ✳ THE READING IS RULED, 2026-08-28 — THE EXEMPTION STANDS
+>
+> The project decision owner ruled at the `functional-design` gate that **"a path into it" means a route by which restricted CONTENT is obtained**, which is the reading this rule stated as its load-bearing assumption and raised rather than assumed. **The enumerated `tests/` exemption is therefore available and is now the rules settled form**, and board option 2 — refactoring every test to obtain the root from `locked_test.py`, with the row-1 circularity that entails — is **not** taken.
+>
+> **What the ruling does NOT relax.** The exemption is **exhaustive and exact**: the three named modules and `locked_test.py`, no fourth. Any *content* read beneath the restricted root by an exempt module still runs through **`open_restricted`** or against a **synthetic fixture root** — the exemption covers holding the **literal**, never obtaining the **content**. A substring or prefix exemption is expressly refused; the static check asserts **exact list membership**, so a new module holding the literal **fails** rather than being silently admitted.
+>
+> **The live breach this leaves, stated and not smoothed over.** Two of the three exempt modules read content beneath the root **today** with **no `AccessRecord`** — `tests/test_release_hashes.py:137` and `tests/test_acquisition_window.py:195`. That is `evidence/experiment_registry.md:79-83`s recorded RES-04 hazard *"occurring in fact rather than in principle"*. **The ruling does not cure it**; it fixes which mechanism must cure it. Routing those two reads through `open_restricted` is **owed at stage 3.5** and is a precondition of this rules negative control passing honestly, and G-09 is unsigned so neither module may be edited yet.
+
 
 > ## ⚠ AMENDED 2026-08-28 — THE ONE-DOOR RULE NOW CARRIES A BOUNDED `tests/` EXEMPTION
 >
@@ -1067,7 +1143,8 @@ implement it; the count of untested *requirements* is one.
 ## Assumptions & Open Questions
 
 - **OPEN — which disposition the three existing exempt test modules take** *(added 2026-08-28 under Recommendation 2)*: options (i) synthetic fixture roots or (ii) real-root reads with a standing access-row obligation, set out in R-28's boxed live consequence. **No option is chosen here.** Until it is ruled on, `tests/test_acquisition_window.py`, `tests/test_phase_boundary.py` and `tests/test_release_hashes.py` continue to read December content beneath the restricted root with no access row, and 3.5 must stop and report rather than pick a route (TE §18.3).
-- **OPEN — the `.dst_summary.json` relocation is authorised in disposition but not performed** *(added 2026-08-28 under Recommendation 44(b))*: the move to `evidence/audit_ec1_2026-08-15/kyoto_dst/` owes a **D-number and a change record** on the D-15 precedent, and neither exists. **This stage does not perform the move and claims no closure from it.** Until it happens the file is outside R-27's scan root, and R-26's driver-exclusion class 4 is stated as conditional on the move having happened.
+- ~~**OPEN — the `.dst_summary.json` relocation is authorised in disposition but not performed**~~ *(added 2026-08-28 under Recommendation 44(b))*: the move to `evidence/audit_ec1_2026-08-15/kyoto_dst/` owes a **D-number and a change record** on the D-15 precedent, and neither exists. **This stage does not perform the move and claims no closure from it.** Until it happens the file is outside R-27's scan root, and R-26's driver-exclusion class 4 is stated as conditional on the move having happened.
+- ⚠ **CLOSED 2026-08-28 — the relocation is PERFORMED.** The project owner authorised it on `GOV-2026-08-28-FD-01` Rec 44(b); it is recorded as **D-30** with change record `governance/CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`, and executed the same day: the file is now at `evidence/audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json`, byte-identical across the move (`sha256 410927a4ff620b6f7597b18e07746f74233cf5aa87bc84d6f5b0ec25b3e9c064`, 5,653 bytes), with **access-log row 12 written BEFORE the read**. The file is inside R-27s scan root and **R-26s driver-exclusion class 4 is now unconditional**. The two things this item said were missing — the D-number and the change record — both exist.
 - **[assumption]** The exemption list is **exactly four** modules — `test_locked_test_guard.py` plus the three that hold the literal today, all three **retained** rather than refactored. Retention is the reading taken because all three are green, all three are in `team.md`'s mandated 17-module set, and TC-06 directs that pre-TC-06 evidence be **re-verified under the new suite rather than re-acquired**, which those three modules are what performs. If the owner prefers refactoring any of them out, the list shrinks and the membership test changes with it.
 - **[assumption]** R-28's exemption is a **narrowing of D-15's framing**, not a relocation of D-15's requirement. The reading taken is that D-15's "exactly one path" governs routes through which restricted **content is read**, so holding the literal without reading content is outside it. If the owner reads D-15 as governing the literal itself, board option 2 (refactor every test to obtain the root from `locked_test.py`) is the only remaining route and the circularity recorded in R-28 row 1 has to be accepted with it.
 - **OPEN — an amendment need on `build_transition_manifest`** *(added 2026-08-25 on adversarial finding 2 of the post-reset pass)*: the approved signature carries no mode parameter, three artifact statements correctly say the mode is not a build-time argument, yet the builder must be told which mode to build. The reconciliation (W-5) records an amendment need — a keyword `mode: Literal["draft","freeze"]` — for the owner, following `foundation`'s `write_release` precedent. Until ruled on, 3.5 must stop and report rather than invent the channel (TE §18.3).
@@ -1085,7 +1162,7 @@ implement it; the count of untested *requirements* is one.
 - **Open — item 17's per-method "config hash" scope.** D-24 uses the same two words for item 12's whole-file hash and item 17's per-listed-method hash. Not invented here — see `business-logic-model.md` § Open.
 - **Open — a stale statement in three approved artifacts, reported not edited.** `component-methods.md`'s `TransitionManifest` comment, `unit-of-work.md` § 2 and `components.md` line 61 all still read that the enumeration and cardinality are deferred to stage 3.1. **D-24 has since resolved the enumeration at 17 items.** Per `CHANGE_RECORD_PROCEDURE.md` a sweep reports on approved-stage artifacts and does not edit them absent owner approval for annotate-in-place. Raised at the gate.
 - **Open — the AGPLv3 distribution question.** Unresolved; the standing default is reimplementation with a citation.
-- **G-09 is not signed.** No rule here authorises creating `phase_contract.py`, `locked_test.py` or `reuse_registry.py`.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No rule here authorises creating `phase_contract.py`, `locked_test.py` or `reuse_registry.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
 ---
@@ -1111,7 +1188,7 @@ implement it; the count of untested *requirements* is one.
 > would let a phase-boundary violation exit with **no `aborted` registry row**, against
 > NFR-PHASE-01 and NFR-AUD-01, in the unit that owns the guard. No rule was added or removed;
 > figures re-derived and unchanged (10 requirements, 1 untested, 2 acceptance rows).
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
@@ -1121,25 +1198,25 @@ implement it; the count of untested *requirements* is one.
 > rationale is that an unenumerated exception exits unrecorded (adversarial finding 1, Major).
 > R-29 now names **`tests/test_reuse_registry.py`** as TA-28's evidence (finding 4), and
 > § Assumptions carries the **amendment need on `build_transition_manifest`'s mode channel**
-> (finding 2). No rule added or removed; figures unchanged. **G-09 remains unsigned.**
+> (finding 2). No rule added or removed; figures unchanged. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved unchanged 2026-08-25 under the second receipt** (eleventh redo, taken for
 > `acquisition`; floor reset mechanical). **No content of this unit changed** since the terminal
-> READY. **G-09 remains unsigned.**
+> READY. **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved unchanged 2026-08-26 under the third receipt** (twelfth redo, taken for
 > `inventory-and-registry`; floor reset mechanical). **No content of this unit changed.**
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
 > for `external-products`; floor reset mechanical). **No content of this unit changed.**
-> **G-09 remains unsigned.**
+> **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
 
 ---
 

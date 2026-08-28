@@ -1,5 +1,32 @@
 # Business Rules — `models-and-baselines`
 
+> ## ✳ G-09 IS SIGNED — 2026-08-28, **D-31** (read this before any G-09 statement below)
+>
+> The project decision owner **signed and approved G-09 (Agent preflight)** on 2026-08-28,
+> recorded as **D-31** in `evidence/DECISIONS.md` with change record
+> `governance/CHANGE_RECORD_2026-08-28_G09_signed.md`. **Every statement below of the form
+> "G-09 is not signed" / "G-09 stays unsigned" is superseded as to the gate's status**, and
+> is left standing as the accurate record of the constraint that applied when it was
+> written.
+>
+> ⚠ **D-31 records the gate's own TE §18.3 preconditions as UNMET, and that disclosure
+> travels with the signature.** `configs/`, and until 2026-08-28 `src/`, did not exist, so
+> the mandated automated zero-TBD preflight **could not run**; the ten named critical tests
+> **cannot be executed in this environment** (no Python interpreter is installed — a
+> zero-byte Windows Store stub, no registry entry, no interpreter on disk); and the evidence
+> artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is
+> therefore **unproven, not proven** — an absence of executions, not an absence of failures.
+> This is the owner **opening the gate by authority**, not a record that its evidentiary
+> conditions were satisfied, and no reader may infer the second from the first.
+>
+> **What the signature changes here:** module creation is authorised, and any defect this
+> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
+> and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
+> unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
+> convenience; and **§18.3's stop-and-report obligation survives its own gate**, being a
+> standing rule on implementation rather than a one-time gate condition.
+
 **Unit** `models-and-baselines` (Bolt 8) · **Kind** `library` · **Depends on**
 `features-and-splits`
 
@@ -235,7 +262,7 @@ pair the wrong rows.
 > was *"in flight in parallel"*. **It has since landed and was re-read directly.** R-01 now reads
 > *"**Every project-defined exception derives from `IntegrityError`** … **Fifteen are named in the
 > enumeration below** … The other **nine are raised by other units** … and — **added 2026-08-28** —
-> **`PartitionError`** (`models-and-baselines`, declared in **`src/models/`**)"*, under its own
+> **`PartitionError`** (`models-and-baselines`, declared in **`src/models/`** ⚠ **RULED 2026-08-28 — `PartitionError` is declared in `src/data/config.py`.** *(Project decision owner, on the `functional-design` gate, amending the wording of the Rec 8 ruling. **Superseded wording, preserved: declared in `src/models/`.**)* The reason is the one `features-and-splits` raised and the Rec 8 ruling could not have known: `component-dependency.md` marks **`src/features` → `src/models`** and **`src/data` → `src/models`** both as **`—`**, while every `PartitionError` raise in that unit lives in `src/data/splits.py` or `src/features/*` — so on the approved matrix that unit could not have raised the exception at all. `src/data/config.py` is where R-01 already declares `IntegrityError` and the base every unit already imports, so **no dependency-matrix amendment is needed and none is taken**. `models-and-baselines` remains the exceptions **semantic owner** — R-92s discriminating rule is unchanged — but is no longer its declaration site. )"*, under its own
 > ✳ AMENDED box citing Recommendation 8 and the owner's option-1 ruling. Its Sources line now cites
 > **this unit's § 12 as *"the authority for R-01's fifteenth entry"***, which is why § 12 states the
 > discriminating rule in full rather than by reference. **The draft's "in flight" wording is
@@ -678,7 +705,7 @@ match the file as written → **raises in `06`**; a receipt written but **not fl
 > `fit_predict`, `three_seed_mean` and `climatology_fit_partition` are untouched. So **W-11's "Ten
 > files" stands** and this unit's amendment ledger stays at **0** — see § Assumptions.
 >
-> **Nothing here authorises writing it.** **G-09 is not signed** and **BLK-03 independently bars
+> **Nothing here authorises writing it.** **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. and **BLK-03 independently bars
 > implementation.** The `DEC` write this rule governs is additionally barred until **G-05 is
 > signed**, by `features-and-splits`' locked-partition execution guard (R-82) and
 > `governance-guards`' access chokepoint.
@@ -784,7 +811,7 @@ supplied their mechanism; **neither is closed**.
 - **Open — whether TA-11 reaches a model fit is unverified upstream** (R-98). No reading adopted.
 - **Closed, corrected 2026-08-24 — D-122's supervisor sign-off is NOT outstanding.** The first draft carried *"Approved — supervisor sign-off pending"*, which is the status of **D-126** and **D-128**, not D-122. The Vision decision register (line 1207) reads **"Approved; supervisor sign-off closed 2026-08-22"** by the project owner under the recorded student/supervisor authority equivalence (`CR-2026-08-22-TE-AMEND`; `GOV-2026-08-22-REM-01` Rec 4), noting that **no supervisor signature artifact exists and none is claimed** and that the seed values were verified unchanged before closure. `unit-of-work.md` § 8 already recorded the closure. **Found while verifying iteration-1 finding 1 against the source register; the reviewer did not raise it.**
 - **Open — FR-P1-05-4's residual**: a choice informed by a December figure a human carries in their head is unreachable by any mechanism (R-95). Narrowed by the audit-access precondition, not eliminated.
-- **G-09 is not signed**, and **BLK-03 independently bars implementation.** No rule here authorises creating `src/models/persistence.py`, `climatology.py`, `ridge.py`, `random_forest.py`, `lstm.py`, `train.py`, `checkpoint.py`, `scripts/06_train_and_predict.py`, `tests/test_models_smoke.py` or `tests/test_checkpoint_restore.py`.
+- **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged., and **BLK-03 independently bars implementation.** No rule here authorises creating `src/models/persistence.py`, `climatology.py`, `ridge.py`, `random_forest.py`, `lstm.py`, `train.py`, `checkpoint.py`, `scripts/06_train_and_predict.py`, `tests/test_models_smoke.py` or `tests/test_checkpoint_restore.py`.
 - ~~**Open — `07`'s half of the eighth amendment is UNOWNED.**~~ **CLOSED 2026-08-28.** *(Superseded text preserved:* "FU-4 = D names **`06` and `07`**; `unit-of-work.md` assigns `07_evaluate_and_report.py` to **`evaluation-and-comparison`**, whose functional design has not run. This unit discharges `06` only. Raised at the gate so it is not discovered later *(iteration-1 finding 3)*." *)* That unit's design **has** since run and its **R-105** claims `07`'s half explicitly, citing R-90 by name; `statistical-inference` R-113 limb 2 then imports it. See R-90's 2026-08-28 closure box. **One live disagreement survives the closure**: R-105 limb 2 raises `LeakageError` for the `partition_id`-mismatch condition it says mirrors R-92, which raises `PartitionError`. Recorded next.
 - **CLOSED 2026-08-28 — `PartitionError` is the fifteenth project exception, and `foundation` R-01's amendment HAS LANDED** (R-92's box; Recommendation 8, owner-ruled option 1). Re-read directly at the close of this pass: R-01 names **fifteen**, adds `PartitionError` (`models-and-baselines`, declared in `src/models/`), restates its count as **derived** rather than asserted, and cites **this unit's § 12 as the authority for the fifteenth entry**. *(Mid-pass it still read "All fourteen"; the draft's "in flight" wording is superseded and recorded, not left standing.)* Derived here before this edit: **10 of 12 units**, **71** occurrences across all **48** artifacts, **23** of them here — the largest share of any unit. **This unit still claims no check over `foundation`'s text.**
 - **CLOSED 2026-08-28 — the R-105 / R-92 exception-type disagreement is resolved BY THE SIBLING.** R-105 limb 2 now raises **`PartitionError`**, *"the same exception R-92 raises for the same condition"*, with limb 1 keeping `LeakageError` for an **absent** stamp and stating that limb 1 runs first — a refinement R-92 accepts, since an absent stamp is not a disagreement. `statistical-inference` R-113 limb 2, which imports R-105 *"as written"*, inherits the fix. **This unit edited no sibling artifact.**
@@ -824,5 +851,5 @@ supplied their mechanism; **neither is closed**.
 > `functional-design-questions.md` was edited. Every prior `## Review` section and every dated
 > ⚠ box is preserved.
 >
-> **BLK-03 remains an open exit condition and G-09 remains unsigned. Nothing above authorises
+> **BLK-03 remains an open exit condition and G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. Nothing above authorises
 > creating a module, and nothing above closes BLK-03.**
