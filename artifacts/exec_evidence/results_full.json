@@ -1,0 +1,2521 @@
+{
+  "counts": {
+    "passed": 277,
+    "failed": 0,
+    "error": 0,
+    "skipped": 2
+  },
+  "results": [
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_a_supplied_wrong_dataset_version_is_refused",
+      "status": "passed",
+      "time": 0.0044,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_collision_bound_is_recorded_and_matches_d29",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_dataset_version_is_the_first_twelve_hex_of_content_hash",
+      "status": "passed",
+      "time": 0.0084,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_declared_output_file_absent_is_refused",
+      "status": "passed",
+      "time": 0.002,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_different_content_yields_a_different_label",
+      "status": "passed",
+      "time": 0.0127,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_empty_output_files_is_refused",
+      "status": "passed",
+      "time": 0.0023,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_identical_content_yields_an_identical_label",
+      "status": "passed",
+      "time": 0.0122,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[dataset_version]",
+      "status": "skipped",
+      "time": 0.0022,
+      "message": "dataset_version is derived by write_release; see the D-29 tests",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[created_at_utc]",
+      "status": "passed",
+      "time": 0.0042,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[source_manifest_id]",
+      "status": "passed",
+      "time": 0.0038,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[source_files]",
+      "status": "passed",
+      "time": 0.0039,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[processing]",
+      "status": "passed",
+      "time": 0.0038,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[schema_version]",
+      "status": "passed",
+      "time": 0.0037,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[units]",
+      "status": "passed",
+      "time": 0.0039,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[row_counts]",
+      "status": "passed",
+      "time": 0.0046,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[exclusions_qc_summary]",
+      "status": "passed",
+      "time": 0.0036,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[fold_ids]",
+      "status": "passed",
+      "time": 0.0036,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[mask_ids]",
+      "status": "passed",
+      "time": 0.0041,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[feature_set_ids]",
+      "status": "passed",
+      "time": 0.0035,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[output_files]",
+      "status": "passed",
+      "time": 0.0018,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_missing_required_field_is_refused[change_record_id]",
+      "status": "passed",
+      "time": 0.0036,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_output_file_hash_mismatch_is_refused",
+      "status": "passed",
+      "time": 0.0059,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_prefix_collision_on_different_content_is_refused",
+      "status": "passed",
+      "time": 0.0072,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_refusal_fires_before_any_content_is_examined",
+      "status": "passed",
+      "time": 0.0055,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_required_field_enumeration_matches_te_13_3",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_same_prefix_with_same_content_is_not_a_collision",
+      "status": "passed",
+      "time": 0.01,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_second_write_to_an_occupied_directory_is_refused",
+      "status": "passed",
+      "time": 0.0094,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_sha256_helper_agrees_with_hashlib",
+      "status": "passed",
+      "time": 0.0033,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_verify_release_is_clean_for_a_good_release",
+      "status": "passed",
+      "time": 0.0074,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_verify_release_reports_a_mutated_artifact",
+      "status": "passed",
+      "time": 0.0092,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_contract.py",
+      "name": "test_written_manifest_carries_every_required_field",
+      "status": "passed",
+      "time": 0.0065,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_access_record_is_written_and_flushed_before_the_path_is_returned",
+      "status": "passed",
+      "time": 0.0208,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_caller_supplied_timestamp_is_not_trusted_for_ordering",
+      "status": "passed",
+      "time": 0.0144,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_each_call_appends_its_own_row",
+      "status": "passed",
+      "time": 0.0217,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_failed_registry_write_aborts_the_read",
+      "status": "passed",
+      "time": 0.0086,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_log_timestamp_is_guard_stamped_and_precedes_the_read",
+      "status": "passed",
+      "time": 0.0162,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_ordinary_path_is_refused",
+      "status": "passed",
+      "time": 0.003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_record_rejects_an_empty_required_field[run_id]",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_record_rejects_an_empty_required_field[retrieved_at_utc]",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_record_rejects_an_empty_required_field[scope]",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_record_rejects_an_empty_required_field[purpose]",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_record_rejects_an_empty_required_field[authorization]",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_record_rejects_an_unknown_purpose",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_record_rejects_locked_test_accessed_false",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_refused_path_writes_no_access_row",
+      "status": "passed",
+      "time": 0.0028,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_restricted_literal_holders_are_exactly_the_enumerated_exemption",
+      "status": "passed",
+      "time": 0.0087,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_locked_test_guard.py",
+      "name": "test_traversal_out_of_the_restricted_root_is_refused",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-madrigal_coverage_monthly.csv-e9a8b3d7d12ce8fc44ae5f6917f4ff7dbb4337475bb7189615b9e0a37a6b8a11]",
+      "status": "passed",
+      "time": 0.0006,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-madrigal_coverage_raw_records.csv-5eddbc3bf5daeb0042dd3637e494f774a6649e0606858e6d3f6ff35d52157c05]",
+      "status": "passed",
+      "time": 0.0179,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-madrigal_coverage_summary.csv-53ebe50b272fd35d54bb2b52ff43f21d53dd61ccf7d097fa33efba3679af92cc]",
+      "status": "passed",
+      "time": 0.0007,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-request_manifest.json-86ce8082497265354282b50450ed38f429e381cf4a5c78a3e7665cf48860e3f0]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-madrigal_coverage_monthly.csv-68ae9bcab2031ab05e0e8c5db96acadc719d37f06342e8e46281f5c19bc198f8]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-madrigal_coverage_raw_records.csv-bc0034ab94ef2d7cd0b6a86837f7eb8a55acab3d187b47c99ea14f48ba36152a]",
+      "status": "passed",
+      "time": 0.0034,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-madrigal_coverage_summary.csv-16ccf643df5419ed2df8a25ec90a8652db9bfaffbf10cb72bb55a430e14d75ef]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-request_manifest.json-2bc4d1bd7616a44b728a2b83925212d18ad7bc1bc0a1309411837f0666caa1ae]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-madrigal_coverage_monthly.csv-2f59aa4c17e553d125d7c2ef9392c80c24101377cc112fa6a335385b0ab1fc5c]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-madrigal_coverage_raw_records.csv-d88f66d9f81da079b1f39b8163a3ae0e125314d9902cc55d291072f2b663f528]",
+      "status": "passed",
+      "time": 0.0041,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-madrigal_coverage_summary.csv-1f42e1dce814dfdd408f3cbf3750e777c35da59c39e1116d15c1c3fa991f166b]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-request_manifest.json-8d52fd6b67d63cadc7aa617786311a2ed9fdb62a2e7ba06eeed56659fe3d77ae]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-madrigal_coverage_monthly.csv-2d35c48647ceb4152efb98e5c860bce42fd3ce5987438835bdb244135863eeea]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-madrigal_coverage_raw_records.csv-c0215131b8024ea7d7b7b276b60bc11907a5e515c5b57672b00847c50a89ca73]",
+      "status": "passed",
+      "time": 0.0037,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-madrigal_coverage_summary.csv-8cecd7363d64b2e0ff0dc46d03882370f769e8663e3d8ccb9ff0c0d9975460f7]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-request_manifest.json-6bfa0aa595fbc8cc2981749d80af46c74e38dc1d01b2b28087f03e35b9eef5d5]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-madrigal_coverage_monthly.csv-4a45f93f5ea160f52f5d48f5ecab8ced263aad853b96315f1ecae61fa6c9c9fe]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-madrigal_coverage_raw_records.csv-7c3c0fdacb3067596527c8a401500b871b3b2e67f7ba6862871b956023bef0a3]",
+      "status": "passed",
+      "time": 0.004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-madrigal_coverage_summary.csv-b0ccb2d195d4c7e91271d50a396c07788211e930effc738e21292403d3a58be5]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-request_manifest.json-5eade8da01810b292895d4a14eac0b6d046039936782ee09edec7d54d9ef4071]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-madrigal_coverage_monthly.csv-11647183ad3c760e810b481285db4bfc9abcf05381a450434476c6967f70e9f1]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-madrigal_coverage_raw_records.csv-18e9b0eb828acdfd6933c9adfe3459976359095882c5c0ddfba782f6802daa81]",
+      "status": "passed",
+      "time": 0.0034,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-madrigal_coverage_summary.csv-7a77325d3eafa1163a22c22b7ba5d72cb87d37f28ff8eb9a54cd989843704b61]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-request_manifest.json-110125a1d494d559376cf3605955f6d6d5d9d1f58624d6f4b295b36822719171]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-madrigal_coverage_monthly.csv-2076ccfcbad1f4d6dafef8038125d6990514371b6c9c521b710b095c2a7f8fa5]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-madrigal_coverage_raw_records.csv-488efb875681bfe80010bec110901bceb574da4e24db7ba0a9c144502beb89cb]",
+      "status": "passed",
+      "time": 0.0042,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-madrigal_coverage_summary.csv-2858aae3a6a65af05e748ca91d384a780c1cd6e13fd9e36e387c37691f0bef8e]",
+      "status": "passed",
+      "time": 0.0006,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-request_manifest.json-f4b533724e96426cf883af5ebb7e7a6fca89c37d700e4d6462c5cb571d21614f]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-madrigal_coverage_monthly.csv-a4f2c18fd3b4b948c2f2199e92c0cad85f77afc1439b3fcf1db9b9d695d29d9b]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-madrigal_coverage_raw_records.csv-0b2170340b52d638b20409ea504042549d0da976fd656fef906f40c8398db069]",
+      "status": "passed",
+      "time": 0.0037,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-madrigal_coverage_summary.csv-46fc96c2343c23b9eaa011b8beedf02f0c82f64618a4f19540da7f434a6a282b]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-request_manifest.json-d090368ea448e37cb546abbc0926dd7742da98e8e4a7f72a29b506d1def96f48]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-madrigal_coverage_monthly.csv-3edbc5db9042b8cc0c5d21b2627e6291967decbd46de47feaf9291f359f52b56]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-madrigal_coverage_raw_records.csv-36d1e87d1326a76a7c43a12b6ef36c0362647c9eaec4136be82a50b0dfa12a36]",
+      "status": "passed",
+      "time": 0.004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-madrigal_coverage_summary.csv-216647b117800f63489dc721e4ae523429ad5df39f9d5d5b54036e3520f1d1c5]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-request_manifest.json-110df5fd8a1140a042cdd3efd4fbc1b3c36fee8e37a201b523537f3b1174b00d]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-madrigal_coverage_monthly.csv-d6ebb4b1cea65a7a47f48bae9fe61a0415d08e2482380809320a677a81b8d981]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-madrigal_coverage_raw_records.csv-53c0391670a4b29781d45b1384de9969f002fbed8a5435a7242c41c36855434f]",
+      "status": "passed",
+      "time": 0.004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-madrigal_coverage_summary.csv-4b0854a6fb89927c2ac5f177806692e0515b1f3355828a3b23e420b031a95e03]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-request_manifest.json-95553d5fad01c9616a65d55af11e2ec2a7bcc489f4c0df98b66a81bf87bf8e6e]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-madrigal_coverage_monthly.csv-ab14a2c23868dd6d1402e3903d8d665a7250d525d27efb4952aed54be46af2a8]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-madrigal_coverage_raw_records.csv-570d1be5e22191bc3248873e711610b580a77ffb5dcbf7988eca92011e7baff9]",
+      "status": "passed",
+      "time": 0.0035,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-madrigal_coverage_summary.csv-02269afef517d719f9696625ca5aa0764466e6fc1c732d8836a7b792aa49e370]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-request_manifest.json-ba13717f6e3e56203c07f7cab491edfedf64f6a6ea2530ed3af106340e12825e]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-madrigal_coverage_monthly.csv-6d1442e829a1971b27216aa9016316ef64dc393fa4d068a8d0c492c09b1399d3]",
+      "status": "passed",
+      "time": 0.0046,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-madrigal_coverage_raw_records.csv-8ed7f406ca14f4e9393014dda60362f20f70a9344c36ef58faf87260f65e0acb]",
+      "status": "passed",
+      "time": 0.0233,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-madrigal_coverage_summary.csv-46fb533fd2aa0ae53f0241b81392603f98eb6e38873f3b579c5b1c4df7feda68]",
+      "status": "passed",
+      "time": 0.0049,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-request_manifest.json-dbbed3db88a145c87536a9b013c3efedc80894e17c01aab261ac214a012ac886]",
+      "status": "passed",
+      "time": 0.0046,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-madrigal_coverage_monthly.csv-06d1130483bddad98d15cf040564c13b6cb0c81a8e4ad9de78b1f1969d525f14]",
+      "status": "passed",
+      "time": 0.0054,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-madrigal_coverage_raw_records.csv-00a7942a9161264d6d117532024bb44cfb6b91b3dbf467074e2b779d0a286d3a]",
+      "status": "passed",
+      "time": 0.0106,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-madrigal_coverage_summary.csv-f6ba3247140be583f3cba880928bfee929739a95921bb5ecd441c749add9771b]",
+      "status": "passed",
+      "time": 0.0053,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-request_manifest.json-dbbed3db88a145c87536a9b013c3efedc80894e17c01aab261ac214a012ac886]",
+      "status": "passed",
+      "time": 0.0047,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_monthly.csv-6b53d385e5fd9293f4b5335308c7b98cc7964bfd14f0d266d2c2929a3ff05efc]",
+      "status": "passed",
+      "time": 0.0049,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_raw_records.csv-d1527ecad77516ea41556ac0637b96d7a8f2b563113d602b82ac951b9f7012e1]",
+      "status": "passed",
+      "time": 0.1812,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_summary.csv-b40304b54f8fecc269e3408f723fd98325d7fafc1537b1cef92e153c8e5268cc]",
+      "status": "passed",
+      "time": 0.0059,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-request_manifest.json-0ffd2d0ab5ceb2b08cbad4e998747d4544721a939a5a5807067ee552ab18c052]",
+      "status": "passed",
+      "time": 0.0053,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-madrigal_coverage_monthly.csv-b5070dafdceafec7b822688cc668d40c175ed7bf0f8cfc1217135e086fba01b6]",
+      "status": "passed",
+      "time": 0.0052,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-madrigal_coverage_raw_records.csv-8c525632e8e0fa0e71bc47122df35834d660b36b4da2a1a4e9ca465e6245e1d9]",
+      "status": "passed",
+      "time": 0.0093,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-madrigal_coverage_summary.csv-5c48dcc2f4b3dd8e82edad9e70e5106b2c18ac06dd32bdbecbd60defd87515c7]",
+      "status": "passed",
+      "time": 0.0053,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-request_manifest.json-86ce8082497265354282b50450ed38f429e381cf4a5c78a3e7665cf48860e3f0]",
+      "status": "passed",
+      "time": 0.0047,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_monthly.csv-6b53d385e5fd9293f4b5335308c7b98cc7964bfd14f0d266d2c2929a3ff05efc]",
+      "status": "passed",
+      "time": 0.0048,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_raw_records.csv-b53d8d69b1232314ffa4c7fcc035c68f1efc04da5139bb87d3a39f3f457eafec]",
+      "status": "passed",
+      "time": 0.1836,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_summary.csv-b40304b54f8fecc269e3408f723fd98325d7fafc1537b1cef92e153c8e5268cc]",
+      "status": "passed",
+      "time": 0.0055,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_has_no_crlf_seam[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-request_manifest.json-542fc4503fb8fa0167cad95992f0b79583547c3b40a1a647008112fa3c75e83d]",
+      "status": "passed",
+      "time": 0.0051,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-madrigal_coverage_monthly.csv-e9a8b3d7d12ce8fc44ae5f6917f4ff7dbb4337475bb7189615b9e0a37a6b8a11]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-madrigal_coverage_raw_records.csv-5eddbc3bf5daeb0042dd3637e494f774a6649e0606858e6d3f6ff35d52157c05]",
+      "status": "passed",
+      "time": 0.0134,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-madrigal_coverage_summary.csv-53ebe50b272fd35d54bb2b52ff43f21d53dd61ccf7d097fa33efba3679af92cc]",
+      "status": "passed",
+      "time": 0.0013,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\sha256_manifest.json-request_manifest.json-86ce8082497265354282b50450ed38f429e381cf4a5c78a3e7665cf48860e3f0]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-madrigal_coverage_monthly.csv-68ae9bcab2031ab05e0e8c5db96acadc719d37f06342e8e46281f5c19bc198f8]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-madrigal_coverage_raw_records.csv-bc0034ab94ef2d7cd0b6a86837f7eb8a55acab3d187b47c99ea14f48ba36152a]",
+      "status": "passed",
+      "time": 0.0119,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-madrigal_coverage_summary.csv-16ccf643df5419ed2df8a25ec90a8652db9bfaffbf10cb72bb55a430e14d75ef]",
+      "status": "passed",
+      "time": 0.0017,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\sha256_manifest.json-request_manifest.json-2bc4d1bd7616a44b728a2b83925212d18ad7bc1bc0a1309411837f0666caa1ae]",
+      "status": "passed",
+      "time": 0.0013,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-madrigal_coverage_monthly.csv-2f59aa4c17e553d125d7c2ef9392c80c24101377cc112fa6a335385b0ab1fc5c]",
+      "status": "passed",
+      "time": 0.0015,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-madrigal_coverage_raw_records.csv-d88f66d9f81da079b1f39b8163a3ae0e125314d9902cc55d291072f2b663f528]",
+      "status": "passed",
+      "time": 0.0137,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-madrigal_coverage_summary.csv-1f42e1dce814dfdd408f3cbf3750e777c35da59c39e1116d15c1c3fa991f166b]",
+      "status": "passed",
+      "time": 0.0014,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\sha256_manifest.json-request_manifest.json-8d52fd6b67d63cadc7aa617786311a2ed9fdb62a2e7ba06eeed56659fe3d77ae]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-madrigal_coverage_monthly.csv-2d35c48647ceb4152efb98e5c860bce42fd3ce5987438835bdb244135863eeea]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-madrigal_coverage_raw_records.csv-c0215131b8024ea7d7b7b276b60bc11907a5e515c5b57672b00847c50a89ca73]",
+      "status": "passed",
+      "time": 0.012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-madrigal_coverage_summary.csv-8cecd7363d64b2e0ff0dc46d03882370f769e8663e3d8ccb9ff0c0d9975460f7]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\sha256_manifest.json-request_manifest.json-6bfa0aa595fbc8cc2981749d80af46c74e38dc1d01b2b28087f03e35b9eef5d5]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-madrigal_coverage_monthly.csv-4a45f93f5ea160f52f5d48f5ecab8ced263aad853b96315f1ecae61fa6c9c9fe]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-madrigal_coverage_raw_records.csv-7c3c0fdacb3067596527c8a401500b871b3b2e67f7ba6862871b956023bef0a3]",
+      "status": "passed",
+      "time": 0.0125,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-madrigal_coverage_summary.csv-b0ccb2d195d4c7e91271d50a396c07788211e930effc738e21292403d3a58be5]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\sha256_manifest.json-request_manifest.json-5eade8da01810b292895d4a14eac0b6d046039936782ee09edec7d54d9ef4071]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-madrigal_coverage_monthly.csv-11647183ad3c760e810b481285db4bfc9abcf05381a450434476c6967f70e9f1]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-madrigal_coverage_raw_records.csv-18e9b0eb828acdfd6933c9adfe3459976359095882c5c0ddfba782f6802daa81]",
+      "status": "passed",
+      "time": 0.0115,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-madrigal_coverage_summary.csv-7a77325d3eafa1163a22c22b7ba5d72cb87d37f28ff8eb9a54cd989843704b61]",
+      "status": "passed",
+      "time": 0.0012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\sha256_manifest.json-request_manifest.json-110125a1d494d559376cf3605955f6d6d5d9d1f58624d6f4b295b36822719171]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-madrigal_coverage_monthly.csv-2076ccfcbad1f4d6dafef8038125d6990514371b6c9c521b710b095c2a7f8fa5]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-madrigal_coverage_raw_records.csv-488efb875681bfe80010bec110901bceb574da4e24db7ba0a9c144502beb89cb]",
+      "status": "passed",
+      "time": 0.0122,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-madrigal_coverage_summary.csv-2858aae3a6a65af05e748ca91d384a780c1cd6e13fd9e36e387c37691f0bef8e]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\sha256_manifest.json-request_manifest.json-f4b533724e96426cf883af5ebb7e7a6fca89c37d700e4d6462c5cb571d21614f]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-madrigal_coverage_monthly.csv-a4f2c18fd3b4b948c2f2199e92c0cad85f77afc1439b3fcf1db9b9d695d29d9b]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-madrigal_coverage_raw_records.csv-0b2170340b52d638b20409ea504042549d0da976fd656fef906f40c8398db069]",
+      "status": "passed",
+      "time": 0.0123,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-madrigal_coverage_summary.csv-46fc96c2343c23b9eaa011b8beedf02f0c82f64618a4f19540da7f434a6a282b]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\sha256_manifest.json-request_manifest.json-d090368ea448e37cb546abbc0926dd7742da98e8e4a7f72a29b506d1def96f48]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-madrigal_coverage_monthly.csv-3edbc5db9042b8cc0c5d21b2627e6291967decbd46de47feaf9291f359f52b56]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-madrigal_coverage_raw_records.csv-36d1e87d1326a76a7c43a12b6ef36c0362647c9eaec4136be82a50b0dfa12a36]",
+      "status": "passed",
+      "time": 0.0119,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-madrigal_coverage_summary.csv-216647b117800f63489dc721e4ae523429ad5df39f9d5d5b54036e3520f1d1c5]",
+      "status": "passed",
+      "time": 0.0012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\sha256_manifest.json-request_manifest.json-110df5fd8a1140a042cdd3efd4fbc1b3c36fee8e37a201b523537f3b1174b00d]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-madrigal_coverage_monthly.csv-d6ebb4b1cea65a7a47f48bae9fe61a0415d08e2482380809320a677a81b8d981]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-madrigal_coverage_raw_records.csv-53c0391670a4b29781d45b1384de9969f002fbed8a5435a7242c41c36855434f]",
+      "status": "passed",
+      "time": 0.0129,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-madrigal_coverage_summary.csv-4b0854a6fb89927c2ac5f177806692e0515b1f3355828a3b23e420b031a95e03]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\sha256_manifest.json-request_manifest.json-95553d5fad01c9616a65d55af11e2ec2a7bcc489f4c0df98b66a81bf87bf8e6e]",
+      "status": "passed",
+      "time": 0.0012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-madrigal_coverage_monthly.csv-ab14a2c23868dd6d1402e3903d8d665a7250d525d27efb4952aed54be46af2a8]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-madrigal_coverage_raw_records.csv-570d1be5e22191bc3248873e711610b580a77ffb5dcbf7988eca92011e7baff9]",
+      "status": "passed",
+      "time": 0.012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-madrigal_coverage_summary.csv-02269afef517d719f9696625ca5aa0764466e6fc1c732d8836a7b792aa49e370]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\sha256_manifest.json-request_manifest.json-ba13717f6e3e56203c07f7cab491edfedf64f6a6ea2530ed3af106340e12825e]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-madrigal_coverage_monthly.csv-6d1442e829a1971b27216aa9016316ef64dc393fa4d068a8d0c492c09b1399d3]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-madrigal_coverage_raw_records.csv-8ed7f406ca14f4e9393014dda60362f20f70a9344c36ef58faf87260f65e0acb]",
+      "status": "passed",
+      "time": 0.0141,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-madrigal_coverage_summary.csv-46fb533fd2aa0ae53f0241b81392603f98eb6e38873f3b579c5b1c4df7feda68]",
+      "status": "passed",
+      "time": 0.0012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\sha256_manifest.json-request_manifest.json-dbbed3db88a145c87536a9b013c3efedc80894e17c01aab261ac214a012ac886]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-madrigal_coverage_monthly.csv-06d1130483bddad98d15cf040564c13b6cb0c81a8e4ad9de78b1f1969d525f14]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-madrigal_coverage_raw_records.csv-00a7942a9161264d6d117532024bb44cfb6b91b3dbf467074e2b779d0a286d3a]",
+      "status": "passed",
+      "time": 0.0146,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-madrigal_coverage_summary.csv-f6ba3247140be583f3cba880928bfee929739a95921bb5ecd441c749add9771b]",
+      "status": "passed",
+      "time": 0.0012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\sha256_manifest.json-request_manifest.json-dbbed3db88a145c87536a9b013c3efedc80894e17c01aab261ac214a012ac886]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_monthly.csv-6b53d385e5fd9293f4b5335308c7b98cc7964bfd14f0d266d2c2929a3ff05efc]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_raw_records.csv-d1527ecad77516ea41556ac0637b96d7a8f2b563113d602b82ac951b9f7012e1]",
+      "status": "passed",
+      "time": 0.1397,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_summary.csv-b40304b54f8fecc269e3408f723fd98325d7fafc1537b1cef92e153c8e5268cc]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\sha256_manifest.json-request_manifest.json-0ffd2d0ab5ceb2b08cbad4e998747d4544721a939a5a5807067ee552ab18c052]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-madrigal_coverage_monthly.csv-b5070dafdceafec7b822688cc668d40c175ed7bf0f8cfc1217135e086fba01b6]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-madrigal_coverage_raw_records.csv-8c525632e8e0fa0e71bc47122df35834d660b36b4da2a1a4e9ca465e6245e1d9]",
+      "status": "passed",
+      "time": 0.0146,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-madrigal_coverage_summary.csv-5c48dcc2f4b3dd8e82edad9e70e5106b2c18ac06dd32bdbecbd60defd87515c7]",
+      "status": "passed",
+      "time": 0.0012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\sha256_manifest.json-request_manifest.json-86ce8082497265354282b50450ed38f429e381cf4a5c78a3e7665cf48860e3f0]",
+      "status": "passed",
+      "time": 0.0012,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_monthly.csv-6b53d385e5fd9293f4b5335308c7b98cc7964bfd14f0d266d2c2929a3ff05efc]",
+      "status": "passed",
+      "time": 0.0015,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_raw_records.csv-b53d8d69b1232314ffa4c7fcc035c68f1efc04da5139bb87d3a39f3f457eafec]",
+      "status": "passed",
+      "time": 0.1379,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-madrigal_coverage_summary.csv-b40304b54f8fecc269e3408f723fd98325d7fafc1537b1cef92e153c8e5268cc]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_declared_artifact_matches_its_recorded_hash[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\sha256_manifest.json-request_manifest.json-542fc4503fb8fa0167cad95992f0b79583547c3b40a1a647008112fa3c75e83d]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-01-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202201.html-98319fa4aa04ca3c3acb3aa476e0d81e8a958cd246d46118c90a9640b51ca1a0]",
+      "status": "passed",
+      "time": 0.001,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-02-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202202.html-f6561832f996c3905b88587f16d5d0d5276ea6977843f7c1acdcf0c563cefdaa]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-03-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202203.html-c4c96eff798eb539d4c4bafe34e1fabcb7d1d1716b4955d496445cb96ecb3ba4]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-04-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202204.html-69656d10c05a4a6795346d06b1ca3a2879143117cc1b9f7e6d8966da70b08395]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-05-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202205.html-70015482a17247347bdab4e38ad23c75080a3c1715e602e9f5ac90a4020370cc]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-06-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202206.html-939d5149d0119eb523a9d0c5a5e2dfb9b23660d353cecf7126ae99ff25e7faea]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-07-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202207.html-e5f1e10e2e0c82f518a866c1ed00a73bfb10353e2e754e3a3ff8943a4d1e8b8f]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-08-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202208.html-272d8310eb4440d9f671596b7960918001a5d260bfbd767458c3b4752925f5f1]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-09-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202209.html-477405ab43a8179196308bb3de61f1aa2beb859982183d8c820b0e7710d8e1ef]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-10-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202210.html-a9ddc03aefdc7bd3a69a70cef2a20093186981e3ac62367c08b61406ec502240]",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-11-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202211.html-56562cf040e1b12b7fae5156d2bd1e4f5d2489fb215071fdd5883143864fb592]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[kyoto_dst_2022-12-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\kyoto_dst\\dst_provisional_202212.html-0edd417ae93550d1ff91da8d4c8dd240472cd98a0909f827c425417ec7f9c26c]",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_ec1_recorded_hash_matches[canadian_f107_fluxtable-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_ec1_2026-08-15\\nrcan_f107\\fluxtable.txt-4b7fbfde3b9d0140ef43e7487f5986fe18f93182dac5e1ee37a93fb6ebd690b9]",
+      "status": "passed",
+      "time": 0.0077,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_gitattributes_disables_normalization_for_governed_paths",
+      "status": "passed",
+      "time": 0.0006,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_manifests_are_present",
+      "status": "passed",
+      "time": 0.009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_release_hashes.py",
+      "name": "test_mutation_is_detected",
+      "status": "passed",
+      "time": 0.0416,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[1-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01]",
+      "status": "passed",
+      "time": 0.0797,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[2-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02]",
+      "status": "passed",
+      "time": 0.0694,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[3-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03]",
+      "status": "passed",
+      "time": 0.0707,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[4-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04]",
+      "status": "passed",
+      "time": 0.071,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[5-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05]",
+      "status": "passed",
+      "time": 0.0729,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[6-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06]",
+      "status": "passed",
+      "time": 0.0676,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[7-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07]",
+      "status": "passed",
+      "time": 0.0705,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[8-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08]",
+      "status": "passed",
+      "time": 0.073,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[9-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09]",
+      "status": "passed",
+      "time": 0.0789,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[10-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10]",
+      "status": "passed",
+      "time": 0.0709,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[11-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11]",
+      "status": "passed",
+      "time": 0.074,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_at_most_one_straddle_day[12-C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12]",
+      "status": "passed",
+      "time": 0.0894,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_december_run_excludes_the_previous_year_experiment",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_january_run_excludes_the_locked_month_experiment",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_locked_month_values_exist_only_under_the_restricted_path",
+      "status": "passed",
+      "time": 0.8116,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_locked_test_month_records_appear_only_in_their_own_folder",
+      "status": "passed",
+      "time": 0.9293,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_negative_control_the_year_blind_predicate_admits_both_intruders",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[1-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01]",
+      "status": "passed",
+      "time": 0.082,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[2-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02]",
+      "status": "passed",
+      "time": 0.0783,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[3-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03]",
+      "status": "passed",
+      "time": 0.0916,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[4-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04]",
+      "status": "passed",
+      "time": 0.0711,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[5-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05]",
+      "status": "passed",
+      "time": 0.0736,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[6-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06]",
+      "status": "passed",
+      "time": 0.0666,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[7-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07]",
+      "status": "passed",
+      "time": 0.0691,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[8-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08]",
+      "status": "passed",
+      "time": 0.0739,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[9-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09]",
+      "status": "passed",
+      "time": 0.0927,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[10-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10]",
+      "status": "passed",
+      "time": 0.0769,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[11-C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11]",
+      "status": "passed",
+      "time": 0.0787,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_acquisition_window.py",
+      "name": "test_no_record_outside_the_run_window[12-C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12]",
+      "status": "passed",
+      "time": 0.0913,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_d17_contract_excludes_every_phase2_quantity",
+      "status": "passed",
+      "time": 0.0,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_gnss_package_is_not_imported_by_phase1_packages",
+      "status": "passed",
+      "time": 0.0109,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0006,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-01\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-02\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-03\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-04\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-05\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0002,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-06\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0002,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-07\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-08\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-09\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-10\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\audit_evidence_2022-11\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-12\\superseded_2026-08-16\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0004,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\audit_evidence_2022-FULL\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-16_from_2022-01\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\madrigal_coverage_monthly.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\madrigal_coverage_raw_records.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_phase1_artifact_carries_no_phase2_field[C:\\Users\\s_inv\\Desktop\\test\\evidence\\locked_test_restricted\\superseded_2026-08-21_audit_evidence_2022-FULL\\madrigal_coverage_summary.csv]",
+      "status": "passed",
+      "time": 0.0003,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_raw_processing_modules_are_absent_or_unreferenced_from_phase1_code",
+      "status": "passed",
+      "time": 0.0181,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_restricted_root_artifacts_are_checked_too",
+      "status": "passed",
+      "time": 0.0176,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_phase_boundary.py",
+      "name": "test_target_artifact_conforms_to_d17_when_it_exists",
+      "status": "skipped",
+      "time": 0.0145,
+      "message": "no hourly target artifact exists yet; produced by scripts/02_standardize_prepared_target.py against the D-17 contract",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_every_restricted_read_site_is_routed",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_guarded_aborts_when_the_access_log_cannot_be_written",
+      "status": "passed",
+      "time": 0.0077,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_guarded_passes_an_ordinary_path_through_unlogged",
+      "status": "passed",
+      "time": 0.0037,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_guarded_routes_a_restricted_path_and_writes_a_row",
+      "status": "passed",
+      "time": 0.021,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_restricted_root_is_inside_the_searched_roots",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_script_imports_without_running_the_merge",
+      "status": "passed",
+      "time": 0.0009,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

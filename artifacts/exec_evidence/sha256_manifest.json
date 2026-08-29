@@ -1,0 +1,26 @@
+{
+  "artifacts/exec_evidence/environment.json": {
+    "sha256": "483873d1ef3077b61452cb79d42f2bdb446810ada65e09de068722dc5c56be7b",
+    "bytes": 983
+  },
+  "artifacts/exec_evidence/junit_full.xml": {
+    "sha256": "e913bb82683e8b27f0f4f55870a7f58066d000b05c1e01b3398a1f4751434252",
+    "bytes": 69888
+  },
+  "artifacts/exec_evidence/junit_merge.xml": {
+    "sha256": "1a010eb2f82e379bf69ccb0830c9f6f15d3d4d86cdec942df9b577e468d4735b",
+    "bytes": 1075
+  },
+  "artifacts/exec_evidence/results_full.json": {
+    "sha256": "54f55fb6cee0c5e641936751536d28f464cdbddff014660c9f684c5ff0377b84",
+    "bytes": 101464
+  },
+  "artifacts/exec_evidence/results_merge.json": {
+    "sha256": "66411ca117d20b532239415749a076370390dbbcfd76f9cca9ea1c6da4b1c8b5",
+    "bytes": 1675
+  },
+  "evidence/test_run_access_log.jsonl": {
+    "sha256": "ff6f7feebf74b84a86699c7c5cf827b3126488df34e866f2395a1101267c801a",
+    "bytes": 15063
+  }
+}

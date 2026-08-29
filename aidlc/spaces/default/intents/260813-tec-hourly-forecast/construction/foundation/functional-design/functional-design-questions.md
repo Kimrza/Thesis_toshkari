@@ -896,7 +896,7 @@ instead, which changed the facts this summary asserted. See the amendment pass b
 
 ---
 
-## Consolidated Summary Confirmation
+## Consolidated Summary Confirmation (superseded by the 2026-08-28 post-execution pass below)
 
 *(2026-08-24 — the amendment pass)*
 
@@ -2124,5 +2124,37 @@ Does this all look correct before I generate the artifact?
    > **Impact**: Nothing recorded; tell me what to change.
 
 > **💡 Recommendation**: **Looks correct** — mechanical for the unchanged units; for the two repaired question files the repair restores what a gate reader needs and touches no specification.
+
+[Answer]: Looks correct
+
+---
+
+## Consolidated Summary Confirmation
+
+**What changed in this unit since the last receipt.** R-12 amended by **D-29** (12-hex `dataset_version`, verify-on-write; injectivity now **established**, `verify_release` discharged in substance); `PartitionError`'s declaration site ruled to **`src/data/config.py`**; W-4 step 5 mermaid node updated; **G-09 signed (D-31)** with its §18.3 preconditions disclosed unmet.
+
+**Governance recorded this pass.** **D-29** (`dataset_version` = first 12 hex of
+`content_hash`, verify-on-write), **D-30** (`.dst_summary.json` relocation, performed and
+hash-verified), **D-31** (**G-09 signed**, with its §18.3 preconditions recorded as
+**unmet**), **D-32** (**all eight Vision §15.2 acceptance rows approved**, board option 1,
+none deferred). Change records: `CHANGE_RECORD_2026-08-28_G09_signed.md`,
+`CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`.
+
+**Execution evidence, and its exact limits.** Python **3.11.16** — the governed pin (TE §8.1, TC-03d) — obtained via `uv` and used to run the suites: **277 passed, 0 failed, 0 errors, 2 skipped** (both skips justified and recorded). Evidence packaged at `artifacts/exec_evidence/` with a SHA-256 manifest. **The runner was not pytest**: PyPI is unreachable in this environment, so a harness providing the pytest API surface was used; it has no plugins, no conftest and no assertion rewriting, and it **errors** rather than passes on an unsupported fixture. Two defects were found *by execution*: the access log could not evidence its own ordering (fixed — the guard now stamps `logged_at_utc` itself; 37 rows, 37 distinct monotonic instants), and the one-door assertion **failed against a file this session had just written**, which is the behaviour R-28 specifies.
+
+⚠ **What is still NOT discharged, and this receipt does not claim otherwise:** TA-15, WS-18 and TA-18 have passing tests against **current** code, but their acceptance rows are discharged only at their own gates; `aws_ai_dlc_preflight_report` does not exist; `configs/` and the §18.3 zero-TBD preflight are unbuilt; and **D-31 records G-09's own preconditions as unmet**. Stage 3.1 remains **FAIL** and no board has passed it.
+
+Does this all look correct before I generate the artifact?
+
+- Looks correct
+   > **Impact**: Receipt recorded, this unit's artifacts re-saved, and a fresh adversarial review dispatched against the post-execution state.
+
+- Request changes
+   > **Impact**: Nothing recorded for this unit; name what to change and it is corrected before any receipt is taken.
+
+- Other (please specify)
+   > **Impact**: Depends on what you specify.
+
+> **💡 Recommendation**: **Looks correct** — every claim above is either a recorded decision, a hash-verified act, or a test result from a run whose runner limitations are stated; nothing here asserts a gate is discharged.
 
 [Answer]: Looks correct

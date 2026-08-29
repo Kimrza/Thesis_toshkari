@@ -1,0 +1,64 @@
+{
+  "counts": {
+    "passed": 6,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_every_restricted_read_site_is_routed",
+      "status": "passed",
+      "time": 0.0005,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_guarded_aborts_when_the_access_log_cannot_be_written",
+      "status": "passed",
+      "time": 0.0225,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_guarded_passes_an_ordinary_path_through_unlogged",
+      "status": "passed",
+      "time": 0.0043,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_guarded_routes_a_restricted_path_and_writes_a_row",
+      "status": "passed",
+      "time": 0.0197,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_restricted_root_is_inside_the_searched_roots",
+      "status": "passed",
+      "time": 0.0011,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "tests\\test_merge_script_restricted_reads.py",
+      "name": "test_script_imports_without_running_the_merge",
+      "status": "passed",
+      "time": 0.0013,
+      "message": "",
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

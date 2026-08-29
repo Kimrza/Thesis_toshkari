@@ -43,6 +43,7 @@ Governance
 
 from __future__ import annotations
 
+import datetime as _dt
 import json
 import os
 from dataclasses import asdict, dataclass
@@ -112,20 +113,35 @@ def _restricted_root(repo_root: Path) -> Path:
     return (repo_root / RESTRICTED_ROOT).resolve()
 
 
-def _append_and_flush(registry: Path, record: AccessRecord) -> None:
-    """Append one row and force it to disk before returning.
+def _append_and_flush(registry: Path, record: AccessRecord) -> str:
+    """Append one row, stamp it with the guard's OWN write time, force it to disk.
 
     `os.fsync` is what makes "durable before the read" true rather than merely intended
     (R-25). A row sitting in the OS page cache when the process dies is a read that
     happened with no record of it -- exactly the failure the ordering rule exists to
     prevent.
+
+    **`logged_at_utc` is stamped here, by the guard, never by the caller.**
+    `retrieved_at_utc` is caller-supplied and descriptive; a field the caller controls
+    cannot evidence that the log preceded the read. `logged_at_utc` is written
+    immediately before the fsync, and therefore before `open_restricted` returns the path
+    the caller then reads -- so comparing it against any later artifact or run timestamp
+    is a real ordering check rather than a restatement of the caller's intent.
+
+    Found by execution, 2026-08-28: the first run of the routed suites produced 37 rows
+    whose `retrieved_at_utc` was all the same caller-supplied placeholder string, leaving
+    FR-P1-02-3's ordering requirement unverifiable from the log it is recorded in. This
+    field is that defect's fix.
     """
     registry.parent.mkdir(parents=True, exist_ok=True)
-    line = json.dumps(asdict(record), sort_keys=True, ensure_ascii=False)
+    row = asdict(record)
+    row["logged_at_utc"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
+    line = json.dumps(row, sort_keys=True, ensure_ascii=False)
     with registry.open("a", encoding="utf-8") as handle:
         handle.write(line + "\n")
         handle.flush()
         os.fsync(handle.fileno())
+    return row["logged_at_utc"]
 
 
 def open_restricted(path: Path, *, record: AccessRecord, registry: Path) -> Path:

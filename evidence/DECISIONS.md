@@ -1696,6 +1696,86 @@ row in the §18.3 table above is the disclosure that makes that judgeable.
 
 ---
 
+## D-32 — All eight candidate Vision §15.2 acceptance rows are approved (freeze)
+
+**Decision date:** 2026-08-28. **Decided by:** the project decision owner under the
+recorded student/supervisor authority equivalence (D-1 addendum), at the
+`functional-design` (3.1) governance gate, on governance report `GOV-2026-08-28-FD-01`
+**Recommendation 22**, **board option 1** — which was the board's own recommendation.
+**Authority:** Vision §15.2 (acceptance-row amendments); TE §16/§16.1 (WS-01…WS-20
+pass/fail, *"visual inspection alone is insufficient"*); TE §19 (TA-01…TA-36); TE §18.3
+(*"zero unresolved P0 fields and no failing critical test"*); `team.md` § Testing Posture
+(the §16/§19 rows are "the real bar"). **Raised by:** Benchmark & Deployment seat finding
+`BENCH-05`, graded `MAJOR` and recorded as a **gate condition rather than an artifact
+defect**.
+
+**Decision.** **All eight candidate rows are approved** and become part of the §16/§19
+acceptance surface. None is deferred; the deferral option the board offered as its
+fallback (option 3, four rows now and four at G-05) is **not taken**.
+
+| # | ID | What the row accepts | Owning rule(s) | Gate |
+|---|---|---|---|---|
+| 1 | **FR-P1-04-15** | The IRI-2016 benchmark is validated **before** generation and generation is **blocked** if validation fails; `iri_implementation_validation_report` records the pinned build, all model switches and the topside option, the **2000 km altitude ceiling stated explicitly**, units and extraction | `external-products` R-59 | G-04, G-05 |
+| 2 | **FR-P1-04-18** | The GIM comparator contract — bilinear-in-space / linear-in-time interpolation with the longitude-rotation correction, plus the independence obligations split out of FR-P1-04-9 | `external-products` R-60 | G-05 |
+| 3 | **FR-P1-05-7** | The **confirmatory estimand**: paired loss differential, mean within-station difference of squared errors, **benchmark minus model**, equal-station weighting, positive favouring the model, at 95%; percentage reduction only as a labelled derived summary; **every table states the sign convention** | `evaluation-and-comparison` R-108 | G-05, G-06 |
+| 4 | **FR-P1-05-20** | The **binding honesty rule**: any baseline beating the LSTM on the locked test appears in the primary results table **and** the abstract-level conclusion | `evaluation-and-comparison` R-110; `regimes-diagnostics-reporting` R-126 | G-06 |
+| 5 | **`TST-CLAIMS-01`** | The claims-and-limitations checklist test — **named by Vision §11.2 with no acceptance row anywhere in the project** until now | `regimes-diagnostics-reporting` R-126 | G-06, G-07 |
+| 6 | **FR-P1-05-19** | The plasmaspheric-offset disclosure accompanies **every** interpretation of the primary comparison (Vision §6.11: the discrepancy carries a physical, structured, time-varying component that is **not forecast error**) | `regimes-diagnostics-reporting` R-126 | G-06 |
+| 7 | **FR-P1-05-16** | The required reporting breakdowns, with observation-quality strata computed from **D-17's measured-available fields only** | `regimes-diagnostics-reporting` R-127 | G-05 |
+| 8 | **FR-P1-05-18** | The December regime-count audit as **required G-05 evidence**, and the H4 / SRQ-5 demotion legitimate **only if recorded before the freeze** | `regimes-diagnostics-reporting`; `inventory-and-registry` | **G-05** |
+
+**Why option 1 rather than the alternatives.** Option 2 (approve 3.1 and make the
+dispositions a G-05 precondition) would have left the unrowed set as exactly what
+Construction builds against during the interval — the `GOV-F-06` hazard `team.md` records
+as precedent, where a narrow executing-test threshold is misread as narrowing the
+critical-test obligation. Option 3 (four now, four at G-05) leaves a partial acceptance
+surface, and `project.md` § Way of Working warns that partial lists are what make the
+unlisted items invisible. Option 1 closes the class at one sitting, and because each
+design already names the row it would point at, this decision **chooses among stated
+candidates rather than drafting new ones**.
+
+**What each approval means, stated precisely.** A row is now part of §18.3's *"no failing
+critical test"* criterion. It is **not** a claim that any of them currently passes: **none
+of the eight is executable today**, because none of the producing code exists. That is the
+same for every option the board offered and is not a consequence of this choice.
+
+**What this decision does NOT do.**
+
+- **It does not discharge any row.** Approval creates the bar; it does not clear it. Each
+  row is discharged only by its own passing execution evidence against final code.
+- **It does not decide any scientific value.** FR-P1-04-18's interpolation method is a
+  **§18.2 Student-owned forbidden choice (Q-15)** and remains unfrozen; FR-P1-05-18's
+  supervisor-approved disturbed-hour minimum likewise. Approving the acceptance row makes
+  the obligation checkable; it does not fill the value, and **TE §18.3's stop-and-report
+  rule continues to bar an agent from filling either**.
+- **It does not amend Vision or TE.** A Vision §15.2 amendment adding these rows to the
+  §16/§19 tables is **owed** and is recorded here as owed. The authority documents are not
+  edited by a decision record.
+- **It does not alter the `models-and-baselines` exclusion.** That unit uses an inline
+  acceptance form and the board excluded it from the 23% derivation rather than guessing
+  at it. Whether its inline form needs the same treatment is **not decided here** and is
+  carried as an open item.
+
+**Consequences.**
+
+- The 28-of-124 unrowed `**Acceptance.**` statements shrink by the eight rules these rows
+  attach to. **The remainder are not thereby closed** — the residual is carried as an open
+  item against stage 3.2, enumerated by rule ID at each owning unit rather than as a
+  percentage.
+- §18.3's ten-item critical set is re-checked against these dispositions, per the board's
+  stated closure evidence.
+- **`TST-CLAIMS-01` gains its first acceptance row in the project's history.** Vision
+  §11.2 named it and nothing pointed at it; that gap closes here.
+
+**Limitation, stated plainly.** This is an owner approval under the recorded
+student/supervisor authority equivalence. Vision §15.2 places acceptance-row amendments
+with the **Supervisor**, with the Student proposing. **No independent supervisor signature
+artifact exists and none is claimed.** An examining committee requiring one for an
+acceptance-surface amendment is outside this repository's control, and this decision does
+not represent itself as satisfying such a requirement.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -1778,3 +1858,4 @@ exposed to challenge and should be read first.
 | D-29 `dataset_version` = 12-hex prefix, verified on write | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, at the `functional-design` (3.1) governance gate on `GOV-2026-08-28-FD-01` Rec 42 (board option 2). Encoding **12 hex** from `content_hash`; collision bound **recorded** (~1.8e-9 at n=1,000; ~1.8e-7 at n=10,000) but **never relied on** — the verify-on-write prefix check is what establishes never-reuse, raising `ReleaseError` on collision. **No release ledger introduced.** Unblocks `write_release` at 3.5 and closes two of `foundation` R-12s three open items (injectivity, `verify_release`). **TA-15 is still NOT covered and this decision does not cover it** — `tests/test_release_hashes.py` exercises none of §13.3s manifest fields and not R-13s overwrite refusal. **No supervisor signature exists or is claimed.** |
 | D-30 `.dst_summary.json` relocation | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, on `GOV-2026-08-28-FD-01` Rec 44(b) (board option 2). Moves the file into `evidence/audit_ec1_2026-08-15/kyoto_dst/`, inside R-27s scan root, verified byte-identical on the D-15 method with the access-log row written **before** the move. Makes `governance-guards` R-26 driver-exclusion **class 4 unconditional**. **Not a December read** — bytes and hash only, no field parsed. Changes no value and approves no new input; Dst stays diagnostic-only. **No supervisor signature exists or is claimed.** |
 | D-31 G-09 Agent preflight SIGNED | **Yes** | 2026-08-28 | **Signed and approved by the project decision owner**, in session, under the recorded student/supervisor authority equivalence. **Recorded WITH its §18.3 preconditions disclosed as UNMET**: `configs/`, `src/` and `pyproject.toml` do not exist, so the mandated automated zero-TBD preflight **cannot run**; the ten named critical tests **cannot be executed** (no Python interpreter is installed in this environment); and the evidence artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is therefore **unproven, not proven**. **Unblocks** module creation and the two defects deferred solely on G-09 (TA-15s §13.3 field coverage and R-13 overwrite refusal; routing the two unlogged restricted reads through `open_restricted`). **Does NOT unblock** G-05, G-06, G-P1A, G-P2, G-P3A/C or G-07, and does not relax TE §18.2s absolute rule or §18.3s standing stop-and-report obligation. **No independent supervisor signature artifact exists and none is claimed.** |
+| D-32 All eight §15.2 acceptance rows approved | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, on `GOV-2026-08-28-FD-01` Rec 22, **board option 1** (the boards own recommendation). All eight approved, **none deferred**: FR-P1-04-15, FR-P1-04-18, FR-P1-05-7, FR-P1-05-20, `TST-CLAIMS-01`, FR-P1-05-19, FR-P1-05-16, FR-P1-05-18. Closes the `GOV-F-06` interval that options 2 and 3 would have left open. **Approval creates the bar and discharges nothing** — none of the eight is executable today because no producing code exists, which was true of every option. **No scientific value is decided**: FR-P1-04-18s interpolation method stays a §18.2 Student-owned forbidden choice (Q-15) and FR-P1-05-18s disturbed-hour minimum stays supervisor-owned. A Vision §15.2 amendment to the §16/§19 tables is **owed**. `models-and-baselines` inline acceptance form stays excluded and open. **No supervisor signature artifact exists and none is claimed.** |

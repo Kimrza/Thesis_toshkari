@@ -33,6 +33,7 @@ Governance
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import sys
 from pathlib import Path
@@ -107,6 +108,67 @@ def test_each_call_appends_its_own_row(tmp_path: Path) -> None:
     open_restricted(target, record=_record(purpose="regime_audit"), registry=registry)
     rows = registry.read_text(encoding="utf-8").strip().splitlines()
     assert len(rows) == 2
+
+
+def test_log_timestamp_is_guard_stamped_and_precedes_the_read(tmp_path: Path) -> None:
+    """Ordering must be VERIFIABLE from the log, not merely intended by the caller.
+
+    Regression test for a defect found by execution on 2026-08-28: the first routed run
+    wrote 37 rows whose `retrieved_at_utc` was all the same caller-supplied placeholder
+    string. Every row was present, every read was logged -- and the log still could not
+    evidence that logging preceded reading, because the only timestamp in it came from
+    the caller.
+
+    `logged_at_utc` is stamped by the guard immediately before the fsync. This test pins
+    that it exists, that it parses as a real UTC instant, and that it lands before the
+    artifact is read -- proved by reading the file only afterwards and comparing.
+    """
+    target = _any_restricted_file()
+    if target is None:
+        pytest.skip("no restricted artifact present to guard")
+    registry = tmp_path / "access.jsonl"
+
+    returned = open_restricted(target, record=_record(), registry=registry)
+    row = json.loads(registry.read_text(encoding="utf-8").splitlines()[-1])
+
+    assert "logged_at_utc" in row, (
+        "the guard wrote no timestamp of its own; ordering would rest entirely on a "
+        "caller-supplied field, which is the defect this test exists for"
+    )
+    logged = dt.datetime.fromisoformat(row["logged_at_utc"])
+    assert logged.tzinfo is not None, "logged_at_utc must be timezone-aware UTC"
+
+    # The read happens only now -- after the row was flushed.
+    returned.read_bytes()
+    assert logged <= dt.datetime.now(dt.timezone.utc)
+
+
+def test_caller_supplied_timestamp_is_not_trusted_for_ordering(tmp_path: Path) -> None:
+    """A caller may write anything in `retrieved_at_utc`; the guard's stamp still holds.
+
+    Negative control for the same defect: a caller that supplies a meaningless or even a
+    future-dated `retrieved_at_utc` must not be able to corrupt the ordering evidence.
+    """
+    target = _any_restricted_file()
+    if target is None:
+        pytest.skip("no restricted artifact present to guard")
+    registry = tmp_path / "access.jsonl"
+
+    bogus = AccessRecord(
+        run_id="r",
+        retrieved_at_utc="not-a-timestamp-at-all",
+        scope="s",
+        purpose="coverage_audit",
+        performance_inspected=False,
+        locked_test_accessed=True,
+        authorization="a",
+    )
+    open_restricted(target, record=bogus, registry=registry)
+    row = json.loads(registry.read_text(encoding="utf-8").splitlines()[-1])
+
+    assert row["retrieved_at_utc"] == "not-a-timestamp-at-all"
+    # The guard's own stamp is still a real instant, independent of the caller's field.
+    assert dt.datetime.fromisoformat(row["logged_at_utc"]).tzinfo is not None
 
 
 # --- 2. reads outside the chokepoint are refused ---------------------------------------
@@ -229,6 +291,12 @@ def test_restricted_literal_holders_are_exactly_the_enumerated_exemption() -> No
         "tests/test_phase_boundary.py",
         "tests/test_release_hashes.py",
         "tests/test_locked_test_guard.py",
+        # Added 2026-08-28: the test that pins merge_coverage_year.py's routing must name
+        # the boundary to assert where it is. It reads no restricted content -- it drives
+        # that script's `guarded()` helper, which routes through this chokepoint.
+        # This entry exists because THIS ASSERTION CAUGHT IT on first run, which is the
+        # behaviour R-28 specifies: a new holder fails rather than being silently admitted.
+        "tests/test_merge_script_restricted_reads.py",
     }
     holders: set[str] = set()
     for tree in ("src", "tests", "scripts"):

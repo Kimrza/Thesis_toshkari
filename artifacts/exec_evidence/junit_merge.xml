@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+  <testsuite name="critical-set" tests="6" failures="0" errors="0" skipped="0">
+    <testcase classname="test_merge_script_restricted_reads" name="test_every_restricted_read_site_is_routed" time="0.0005">
+    </testcase>
+    <testcase classname="test_merge_script_restricted_reads" name="test_guarded_aborts_when_the_access_log_cannot_be_written" time="0.0225">
+    </testcase>
+    <testcase classname="test_merge_script_restricted_reads" name="test_guarded_passes_an_ordinary_path_through_unlogged" time="0.0043">
+    </testcase>
+    <testcase classname="test_merge_script_restricted_reads" name="test_guarded_routes_a_restricted_path_and_writes_a_row" time="0.0197">
+    </testcase>
+    <testcase classname="test_merge_script_restricted_reads" name="test_restricted_root_is_inside_the_searched_roots" time="0.0011">
+    </testcase>
+    <testcase classname="test_merge_script_restricted_reads" name="test_script_imports_without_running_the_merge" time="0.0013">
+    </testcase>
+  </testsuite>
+</testsuites>
