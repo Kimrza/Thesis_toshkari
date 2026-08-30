@@ -29,6 +29,35 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> ## ⛔ D-29 RULES THE `dataset_version` ENCODING — 2026-08-28 (read this before any encoding statement below, INCLUDING R-12's own Rule statement)
+>
+> *(Banner added 2026-08-30, after two adversarial iterations found the D-29 correction had landed
+> in `§ Assumptions` while **R-12's own Rule statement 37 lines above its AMENDED box** still read
+> that the encoding is "NOT specified here". Modelled on the G-09 banner above. Superseded text is
+> left standing everywhere, never deleted.)*
+>
+> **D-29 (2026-08-28) fixes the encoding**: `dataset_version` is the **first 12 hex characters of
+> `content_hash`**, with a **verify-on-write** uniqueness check. **Every statement below of the
+> form "the encoding is unspecified / NOT specified here / still unruled / no approved artifact
+> specifies one", and every instruction that stage 3.5 must stop and report ON THE ENCODING, is
+> superseded as to the encoding's status** and is left standing as the accurate record of the
+> constraint that applied when it was written. **This governs R-12's Rule statement, its
+> Constraint sub-items, its negative controls' rationale, and this file's § Assumptions alike.**
+>
+> **What D-29 settles:** the encoding, and with it **injectivity in substance** — the
+> verify-on-write check is what establishes it — so the **never-reuse** obligation Q6=D′ retains is
+> **no longer open on the encoding**, and `verify_release` is discharged in substance.
+>
+> ⚠ **What D-29 does NOT settle, and what remains a §18.3 stop-and-report point for stage 3.5:**
+> **where the existing release population that verify-on-write must read back actually lives, and
+> how it is enumerated.** The ledger that would have answered this was **declined as drafted at
+> Amendment C** and `ReleaseLedgerEntry` withdrawn with it, so the mechanism is **specified but
+> not yet implementable**. Three candidate surfaces are named at § Assumptions and **none is
+> chosen here**. Owner decision; per TE §18.3 stage 3.5 must **stop and report**.
+>
+> **Nothing else changes.** No scientific value becomes fillable, **TA-15 is NOT discharged**, and
+> TE §18.2's absolute rule stands.
+
 > ## ✳ AMENDED 2026-08-28 — GOVERNANCE REMEDIATION, `GOV-2026-08-28-FD-01` (verdict FAIL)
 >
 > The project decision owner ruled on governance report
@@ -1001,7 +1030,10 @@ a `dataset_version` to a `content_hash` it does not correspond to; the check mus
 > **presented** manifest whose label and hash do not correspond, which is the case that actually
 > arises when a manifest is read back or hand-edited. The first limb — one label on two different
 > hashes — is subsumed by R-12's injectivity obligation and is testable only once the encoding is
-> specified; see the open item in § Assumptions.)*
+> specified; see the open item in § Assumptions. ⛔ **Superseded 2026-08-30 by D-29** *(adversarial
+> finding 3, Minor)*: **the encoding IS specified** — first 12 hex of `content_hash`,
+> verify-on-write — so this limb is **testable now**. The open item it points at is no longer the
+> encoding but the **release-population read-back mechanism**.)*
 
 **Acceptance.** TA-15.
 
@@ -1009,9 +1041,20 @@ a `dataset_version` to a `content_hash` it does not correspond to; the check mus
 
 **Rule (Q6 = D′, re-answered 2026-08-25 — supersedes Q6 = D and moots FU-2 = D).** `dataset_version` is
 **derived from the release's `content_hash`**. There is **no release ledger**, no allocation
-step and no `ReleaseLedgerEntry`. **The exact hash-to-label encoding is NOT specified here**,
-because no approved artifact specifies one — and stage 3.5 must **not** choose one either: per
-TE §18.3 it must stop and report rather than pick a default.
+step and no `ReleaseLedgerEntry`. ⛔ **AMENDED BY D-29 (2026-08-28) — the encoding IS specified.**
+*(Corrected 2026-08-30 on adversarial finding 1, Critical: this Rule statement — R-12's canonical
+definition, and the first thing an implementer reads — still carried the pre-D-29 text while the
+AMENDED box **37 lines below it** already recorded the ruling, so the rule contradicted itself
+within a single rule.)* **`dataset_version` is the FIRST 12 HEX CHARACTERS of `content_hash`,
+with a verify-on-write uniqueness check.** That check is what establishes **injectivity in
+substance**, so never-reuse is no longer open on the encoding and `verify_release` is discharged
+in substance. ⚠ **The §18.3 stop-and-report obligation has MOVED, not lapsed**: stage 3.5 must
+stop and report on **where the existing release population that verify-on-write reads back
+lives** — the ledger that would have answered was declined at Amendment C, so the mechanism is
+specified but not yet implementable, and three candidate surfaces are named at § Assumptions with
+none chosen. **Superseded text preserved:** ~~"**The exact hash-to-label encoding is NOT
+specified here**, because no approved artifact specifies one — and stage 3.5 must **not** choose
+one either: per TE §18.3 it must stop and report rather than pick a default."~~
 
 **Constraint.** `dataset_version` is never authoritative. Release identity is the
 `content_hash` (R-11, unchanged). A `dataset_version` that does not match its release's
@@ -1042,7 +1085,14 @@ buys, because the difference decides whether "never reused" holds:
    encoding of the hash whose collisions are birthday-bounded on the bits it retains, not on 256.
    Since **the encoding is not specified here and stage 3.5 is forbidden to choose one**, the
    property never-reuse depends on is deferred to a decision no artifact is yet permitted to
-   make.
+   make. ⛔ **SUPERSEDED 2026-08-30 by D-29** *(marker added on adversarial finding 1, Critical —
+   a live site the two prior repair passes did not reach)*: **the encoding IS specified** — the
+   first 12 hex of `content_hash` with a **verify-on-write** uniqueness check — and that check
+   is what establishes **injectivity in substance**, so never-reuse is **no longer deferred to an
+   unmade decision**. The birthday-bound reasoning above remains correct about a *bare* lossy
+   label; what it could not anticipate is that verify-on-write closes the gap at write time
+   rather than in the encoding's bit-width. **What IS still deferred**: where the existing release
+   population the check reads back lives — see § Assumptions.
 
 > ## ✳ AMENDED 2026-08-28 — **D-29 SETTLES THE ENCODING AND ESTABLISHES INJECTIVITY**
 >
@@ -1181,6 +1231,14 @@ this unit may state or imply that release labels are never reused.
 > obligations, therefore:
 >
 > 1. **Never-reused — NOT ESTABLISHED. Contingent on an encoding that does not yet exist.**
+>    ⛔ **SUPERSEDED 2026-08-30 by D-29 — never-reuse IS established in substance.** *(Marker
+>    added on adversarial finding 1, Critical: a live site the two prior repair passes did not
+>    reach.)* The encoding now exists — first 12 hex of `content_hash` — and its **verify-on-write**
+>    uniqueness check is what establishes **injectivity**, so this item reads **ESTABLISHED IN
+>    SUBSTANCE**, not "NOT ESTABLISHED". `verify_release` is discharged in substance with no
+>    signature change claimed. ⚠ **Still open, and now the §18.3 stop-and-report point:** where
+>    the existing release population the check reads back lives — the ledger that would have
+>    answered was declined at Amendment C. **TA-15 remains NOT covered** regardless.
 >    *(Corrected 2026-08-25 on reviewer finding M-3. **Superseded claim, preserved:** *"**Never-reused
 >    — SATISFIED, by a different mechanism.** Not by durable state but by determinism: identical
 >    content derives an identical label by construction, and a label bound to two genuinely
@@ -1818,7 +1876,12 @@ enforcement rides §18.3's gate-test list and TA-11 rather than a row of their o
   > **stop and report** rather than choose one, and per `team.md` a decision is not real until it has
   > a **D-number**. **Nothing above is a choice made by this stage**, and the never-reuse posture in
   > the two OPEN items stands unchanged: injectivity is **not established**, and no artifact this unit
-  > produces may claim labels are never reused.
+  > produces may claim labels are never reused. ⛔ **SUPERSEDED 2026-08-30 by D-29** *(marker added
+  > on adversarial finding 1, Critical — a live site the two prior repair passes did not reach)*:
+  > **injectivity IS established in substance** by D-29's verify-on-write check, so this unit's
+  > artifacts **may** state never-reuse holds on the encoding. What no artifact may yet claim is
+  > that the check is **implementable**, because the release population it reads back is
+  > unspecified — that is the surviving open item and the §18.3 stop-and-report point.
   >
   > **One related fact the board verified, and it is this unit's to know rather than to fix**: the
   > existing `tests/test_release_hashes.py` (267 lines) tests hash verification and mutation

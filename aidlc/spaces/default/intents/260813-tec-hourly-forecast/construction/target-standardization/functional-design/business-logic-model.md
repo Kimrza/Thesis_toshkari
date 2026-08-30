@@ -752,3 +752,93 @@ Did not check `evaluation-and-comparison` R-110 limb 3 (out of read scope; not t
 the carve-out target for this pass — the carve-out used was `regimes-diagnostics-reporting`).
 
 READY
+
+---
+
+## Review — 2026-08-30 fresh adversarial pass (post-gate-rejection reset)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T00:00:00Z (see tool timestamp; system clock rolled over mid-session from
+2026-08-29 to 2026-08-30 during this dispatch)
+**Iteration:** 1 of max 2 (fresh budget after the human gate rejection; not a re-verification of
+a repair — treated the prior `READY` verdicts above as unproven and re-derived independently)
+
+### Read scope this pass
+
+Full text of all three `produces[]` artifacts, read fresh rather than trusted from the embedded
+prior reviews. Attempted the Recommendation-18-limb-(3) sibling spot-check into
+`regimes-diagnostics-reporting/functional-design/domain-entities.md`; the reviewer read-scope
+hook refused it (this dispatch's own brief also explicitly says "You may NOT browse that
+sibling" for this hunt, so the refusal is consistent with the assigned scope, not a blocker).
+Assessed the sibling-dependency claim on internal scope-honesty grounds only, per the brief.
+
+### Hunt 1 — sweep completeness ("six sites")
+
+Independently grepped all three artifacts for `no destination` (the literal string the stated
+gap uses). Result: exactly two hits per file — the `## W-5` / `## R-69` / `## 8` stated-gap box,
+and the matching `## Assumptions & Open Questions` bullet — six total, every one carrying the
+identical `⚠ As-found, and correct when written — SUPERSEDED 2026-08-28 on the resume pass`
+annotation with the same closure text. No stale, unmarked "no destination" claim survives. This
+independently confirms the "six sites swept" figure asserted in the questions-file Consolidated
+Summary Confirmation (not merely re-trusting the embedded 2026-08-29 review's identical finding).
+
+### Hunt 2 — the target contract (mislabeling / numerical-equivalence sweep)
+
+Grepped all three artifacts for `receiver-specific` (11 hits) and `numerical equivalence` (7
+hits). Read every hit in context: all eleven `receiver-specific` occurrences are prohibitions
+("never label…", "prohibited receiver-specific phrasing absent") — none asserts or implies the
+Phase 1 gridded target IS receiver-specific station-observed VTEC. All seven `numerical
+equivalence` occurrences are likewise prohibitions ("NEVER claim numerical equivalence…", "No
+numerical equivalence may be claimed…") — none asserts equivalence. No blurring found in any
+Mermaid node label, table cell, section heading, or Assumptions bullet.
+
+### Hunt 3 — stale-count sweep (19 vs. 21 test modules)
+
+Grepped all three artifacts for the pattern; every live assertion reads **21**, with the
+superseded **19** appearing only inside quoted/historical text explicitly marked stale (`§ 5's
+**19** is stale`, `contradicted by BLK-05's own limb table`). No unmarked "19" site found.
+
+### Hunt 4 — Recommendation 18 limb (3), scope honesty
+
+Every occurrence of the sibling-dependency claim (six sites, per Hunt 1) uses "closed
+*dependency*, not discharged *obligation*" language and explicitly states the destination
+artifacts "carry no review receipt and no adversarial pass yet." This is the correct epistemic
+posture for a unit that cannot itself verify a sibling's review status, and it is applied
+consistently across all six representations — no site overclaims the dependency as resolved or
+the sibling row as verified. Could not independently re-verify the sibling's actual file content
+this pass (scope-blocked per the brief); this is a stated coverage limit, not a defect, and the
+2026-08-29 embedded review already did that spot-check directly with a matching result.
+
+### Hunt 5 — leakage / fold-boundary construction
+
+Re-confirmed: this unit's only fitted values are D-19's four support thresholds (measured from
+January–November distributions, "December excluded by construction," R-68/§3) and D-16's median
+aggregation, a fixed per-row statistic applied uniformly rather than a fold-conditioned fit.
+NFR-LEAK-01's train-only-fit obligation is not this unit's — no standardization/scaling
+transform is owned here. No leakage path constructed.
+
+### Findings
+
+No Critical or Major finding survives. Independently re-derived counts (9 `W-` headings via
+`grep -c "^## W-" business-logic-model.md`, 10 `R-` headings via `grep -c "^## R-"
+business-rules.md`, 9 numbered entity sections via `grep -c "^## [0-9]\." domain-entities.md`,
+all printed before assertion) match every count the artifacts and the embedded prior reviews
+claim. FR-P1-03-5's "no acceptance row" status is stated consistently and without contradiction
+across all three files.
+
+No new findings this pass beyond the one standing non-blocking suggestion already on record
+above (W-9's open-item list omitting the QC-enumeration artifact) — re-checked and still valid,
+still non-blocking.
+
+### Coverage limits, stated
+
+Did not read `functional-design-questions.md` beyond the Rec-18 closure and final confirmation.
+Did not re-open `governance-guards` R-20/R-23 or `inventory-and-registry` R-45/R-49 (out of this
+unit's read scope; relied on the 2026-08-23 direct verification preserved above, itself
+independently redone that iteration). Could not spot-check `regimes-diagnostics-reporting`
+directly this pass — scope-blocked per the dispatch brief for this specific hunt; relies on the
+2026-08-29 embedded review's direct spot-check of that file plus this unit's own internally
+consistent, honestly-scoped claim language.
+
+READY

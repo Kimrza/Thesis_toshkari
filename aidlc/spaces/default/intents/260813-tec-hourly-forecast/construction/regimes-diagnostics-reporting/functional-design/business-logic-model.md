@@ -509,9 +509,23 @@ machine-checkable halves", is superseded by this derived count.)* The checklist 
    - *(added 2026-08-28 on the resume pass, Rec 18 — board recommendation "(1) plus (3)'s
      checklist rows", **limb (3)**)* two further disclosure rows, **`NFR-TDEF-01`** and
      **`FR-P1-03-4`**. Limb (1) — moving NFR-TDEF-01's statement onto the target-writing
-     path — was applied by `target-standardization` on 2026-08-28; limb (3) was recorded
-     **there** as owed by **this** unit and was never written, so the routing had **no
-     destination**. Derived before this fix across this unit's four artifacts:
+     path — is **recorded by `target-standardization` as applied on 2026-08-28**, ⚠ **and
+     this unit has not verified that and cannot**: the per-unit review read-scope bars this
+     unit's artifacts and its reviewer from reading a sibling's design directory, and no
+     review receipt confirmed the sibling's remediation at the time this sentence was
+     written. *(Hedged 2026-08-30 on adversarial finding 2, Major. The sentence previously
+     read "**was applied by `target-standardization` on 2026-08-28**" — an unqualified
+     cross-unit completion fact stated as established input, which `project.md`'s own rule
+     forbids: "ALWAYS verify a fact independently before handing it to another reviewer as
+     established input; a wrong fact promoted to established status is built upon rather
+     than questioned." Every other claim this file cannot independently establish — BLK-08,
+     BLK-09 — is carried as open; this one was not, and is now carried the same way.)*
+     **The cross-unit pairing is therefore routed to the gate**: the owner confirms that the
+     sentence this unit's rows check for presence is the sentence the sibling actually
+     emits. **This matters because a presence check against a sentence nobody writes fails
+     closed** — it would surface as a defect in this unit's design rather than as a missing
+     upstream emitter. Limb (3) was recorded **there** as owed by **this** unit and was
+     never written, so the routing had **no destination**. Derived before this fix across this unit's four artifacts:
      `NFR-TDEF-01` = **0**, `FR-P1-03-4` = **0**.
      **`NFR-TDEF-01`** carries the **cross-phase target-lineage** mismatch (grid-cell
      population versus IPP population) — **a different physical fact from TEC-06's
@@ -559,12 +573,15 @@ machine-checkable halves", is superseded by this derived count.)* The checklist 
    from the conclusion, (11) a caption missing the plasmaspheric sentence and (12) a planted
    prohibited-class phrase — VAL-05's two neighbours in the same rule each had one and
    VAL-05 did not, which is exactly why its absence was hard to see.
-6. **The acceptance-row routing**: `TST-CLAIMS-01` is named by Vision §11.2 with no
-   §16/§19 row, and adding one is a Vision §15.2 amendment this stage may not make. The
-   candidate rows — FR-P1-05-20, FR-P1-05-19 (both named candidates in
-   `requirements.md`), FR-P1-05-16, FR-P1-05-18 and `TST-CLAIMS-01` — are **proposed at
-   the gate, never applied here**, each naming the checklist or test-module evidence it
-   would point at.
+6. **The acceptance-row routing.** ⛔ **CORRECTED 2026-08-30 — the rows were APPROVED under
+   D-32 (2026-08-28)**, board option 1, all eight Vision §15.2 rows, none deferred.
+   **FR-P1-05-20, FR-P1-05-19, FR-P1-05-16, FR-P1-05-18 and `TST-CLAIMS-01` now hold
+   `Pending` rows — approved, never run, and NOT passed, satisfied or discharged** — each
+   naming the checklist or test-module evidence it points at. **What is unchanged:** adding a
+   row is a Vision §15.2 amendment **this stage may not make**, and it did not — the approval
+   was the **owner's act**, and an approved-but-unrun row is **not evidence**. *(Superseded:
+   ~~"`TST-CLAIMS-01` is named by Vision §11.2 with no §16/§19 row … The **candidate** rows …
+   are **proposed at the gate, never applied here**"~~.)*
 
 ## W-5 — The breakdown family: producing functions, stamped artifacts, the D-17 bound
 
@@ -583,7 +600,10 @@ RAISES  RegimeError (non-D-17 stratum bypass, missing declared breakdown, unlabe
         the stamp/label assertions fail per the two-tier posture
 ```
 
-FR-P1-05-16's enumeration — the longest single criterion this unit carries, `UNTESTED` —
+FR-P1-05-16's enumeration — the longest single criterion this unit carries, and one whose
+§15.2 row is **`Pending` under D-32: approved 2026-08-28, never run, NOT passed** *(corrected
+2026-08-30; superseded: "`UNTESTED`", which since D-32 reads as "no row exists" rather than "no
+result exists" and is no longer accurate for this ID)* —
 becomes a checkable inventory (Q5 = C). Each named breakdown is a **producing function in
 `diagnostics.py`** emitting a machine-readable artifact stamped
 `phase_id`/`source_id`/`target_definition_id` (TEC-05):
@@ -853,8 +873,10 @@ fixtures — no full-year data needed:
 
 The module emits **machine-readable evidence** named as what the candidate Vision §15.2
 acceptance rows would point at (FR-P1-05-20, FR-P1-05-19, FR-P1-05-16, FR-P1-05-18,
-`TST-CLAIMS-01` — proposed at the gate, never applied here); FR-P1-05-14 and FR-P1-05-15
-remain rowless and are covered by the module's controls meanwhile. Fixture assertion data
+`TST-CLAIMS-01` — ⛔ **no longer "proposed at the gate, never applied": all five rows were
+APPROVED under D-32 on 2026-08-28** and are now **`Pending` — approved, never run, NOT passed**
+*(corrected 2026-08-30; superseded: "proposed at the gate, never applied here")*); FR-P1-05-14 and FR-P1-05-15
+remain genuinely rowless and are covered by the module's controls meanwhile. Fixture assertion data
 lives in `tests/fixtures/<fixture_id>/fixture_manifest.yaml` (§15.2), never hardcoded in
 test bodies; synthetic Kp series, artifact fixtures and planted-text fixtures are declared
 constants **of the test apparatus**, not scientific values, while the thresholds, window
@@ -872,18 +894,25 @@ and D-13 count arrive **from config even under test** (TC-03e).
 | FR-P1-05-11 | W-7 | WS-19 (primary) |
 | FR-P1-05-14 | W-6 (post-access assertion) | ⚠ no row — covered by R-128's controls meanwhile |
 | FR-P1-05-15 | W-6 (timestamp, budget comparison, TECU refusal) | ⚠ no row — covered by R-128's controls meanwhile |
-| FR-P1-05-16 | W-5 (the enumeration), W-2 (the storm guard) | ⚠ no row — candidate Vision §15.2 row proposed at the gate |
-| FR-P1-05-18 | W-1 (clauses 3–4, the count), W-2 (clauses 1–2) | ⚠ no row — candidate row proposed; the advisory NOT-READY on the source criterion reported, not fixed |
-| FR-P1-05-19 | W-4 (three-location presence check) | ⚠ no row — named candidate in `requirements.md`, proposed at the gate |
-| FR-P1-05-20 | W-3 (`beats_model` printed), W-4 (conclusion check) | ⚠ no row — named candidate in `requirements.md`, proposed at the gate |
-| REQ-CLAIM-01 | W-4 (one row per prohibited class, cited from § Out of scope C) | ⚠ no row — `TST-CLAIMS-01` named by Vision §11.2 with no §16/§19 row; row proposed at the gate |
+| FR-P1-05-16 | W-5 (the enumeration), W-2 (the storm guard) | ⚠ **`Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed.** *(Corrected 2026-08-30, adversarial finding 1, Critical; superseded: "⚠ no row — candidate Vision §15.2 row proposed at the gate".)* |
+| FR-P1-05-18 | W-1 (clauses 3–4, the count), W-2 (clauses 1–2) | ⚠ **`Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed.** The advisory NOT-READY on the source criterion is still **reported, not fixed**, and is unaffected by the row's approval. *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — candidate row proposed; …".)* |
+| FR-P1-05-19 | W-4 (three-location presence check) | ⚠ **`Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed.** *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — named candidate in `requirements.md`, proposed at the gate".)* |
+| FR-P1-05-20 | W-3 (`beats_model` printed), W-4 (conclusion check) | ⚠ **`Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed.** D-32 approved **all eight** Vision §15.2 rows, board option 1, none deferred. *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — named candidate in `requirements.md`, proposed at the gate".)* |
+| REQ-CLAIM-01 | W-4 (one row per prohibited class, cited from § Out of scope C) | ⚠ **`Pending` — `TST-CLAIMS-01` row APPROVED under D-32 (2026-08-28), never run; NOT passed.** *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — `TST-CLAIMS-01` named by Vision §11.2 with no §16/§19 row; row proposed at the gate".)* **Unchanged and still owed:** `REQ-CLAIM-01`'s own *"tested on December 2022 only"* text is a completed-stage artifact and is **not edited here** — it needs an owner-approved annotate-in-place or a §15.2 amendment. |
 
 **11 requirements, 7 untested — derived from the story map's rows, the two upstream
 artifacts agreeing**: 4 with rows (REQ-ENG-12/TA-16, FR-P1-05-9/TA-20, FR-P1-05-10/TA-19,
 FR-P1-05-11/WS-19) + 7 without (FR-P1-05-14, FR-P1-05-15, FR-P1-05-16, FR-P1-05-18,
-FR-P1-05-19, FR-P1-05-20, REQ-CLAIM-01) = 11. Every untested requirement lands in a
-designed falsifier above; the acceptance-row gap is addressed only through Vision §15.2
-proposals at the gate — **nothing minted here**.
+FR-P1-05-19, FR-P1-05-20, REQ-CLAIM-01) = 11. ⛔ **The "7 without" split is SUPERSEDED as to
+five of the seven** *(corrected 2026-08-30; superseded: "the acceptance-row gap is addressed only
+through Vision §15.2 proposals at the gate — **nothing minted here**")*: **D-32 (2026-08-28)
+approved all eight Vision §15.2 rows**, board option 1, none deferred, so **FR-P1-05-16, -18,
+-19, -20 and `REQ-CLAIM-01`/`TST-CLAIMS-01` now hold `Pending` rows — approved, never run, NOT
+passed** — and only **FR-P1-05-14 and FR-P1-05-15** are still genuinely rowless. **The count of
+requirements carrying no result is unchanged at 7**, because an approved-but-unrun row is not
+evidence either; what changed is that five of the seven are no longer rowless. Every requirement
+carrying no result still lands in a designed falsifier above. **Nothing was minted by this
+stage** — the rows were approved by the owner, not created here.
 
 ## Assumptions & Open Questions
 
@@ -897,7 +926,7 @@ proposals at the gate — **nothing minted here**.
 - **[assumption]** *(added 2026-08-28)* The five provenance values W-3 point 7 and W-5 print are **owned by their producing units** and merely asserted and printed here: `mask_id` and per-station surviving row counts from the registered frozen mask (`evaluation-and-comparison` R-107 limbs 1–2); the DEC scored range from R-109 limb 3; the excluded count from `features-and-splits`' partition record; `feature_set_id` from the feature-set identity `features-and-splits` freezes and `foundation`'s §13.3 `feature_set_ids` manifest field. **`feature_set_id` is not among R-107's enumerated mask fields today** — supplying it is `evaluation-and-comparison`'s half of Rec 16, named not annexed, and until it lands control (32)'s presence assertion is what fires.
 - **[assumption]** *(added 2026-08-28)* **D-28 is carried with its own disclosed limits**: the Vision §8.2 / TE §7.1 `—` cells, the level-4 `requirements.md` paraphrase as the sole textual basis, the conflict **disclosed rather than resolved** and carried to G-05, the revised split manifest owed at G-05, and the fact that **no supervisor signature exists or is claimed**. This unit encodes the 30-day value and reports those limits; it resolves nothing and claims no signature.
 - **[assumption]** *(added 2026-08-28)* The third declared comparison set `{M-04, M-05, M-06}` is the **owner's ruling** on Rec 19. W-5 point 10 adds only the tier-3 reported surface; membership, mask registration and Vision §8.9's matched-window assertion stay `evaluation-and-comparison`'s, and the **primary** set is unchanged.
-- **Open — routed to the gate**: the migrated coverage notebook's home (W-9, proposed `01_data_and_target_audit`); the exploratory label's writer (W-6, the registry surface); the Vision §15.2 acceptance-row proposals (W-4, W-10 — owner/supervisor, proposed never applied); the regime config content under the four-config regime. **Added 2026-08-28:** **which December day range governs D-13's storm count** (Student + Supervisor — W-2 point 5, Rec 15; `inventory-and-registry` amended in parallel); **which text surface is authoritative for the thesis** (Student — `domain-entities.md` § 6, Rec 21); **the Vision §15.2 amendment to FR-P1-05-16** re-citing §5.5's metric set (owner/supervisor — audit finding `TEC-14`, Open, Rec 20); **`REQ-CLAIM-01`'s boundary text**, owed an owner-approved annotate-in-place or a §15.2 amendment (Rec 16 follow-on); **`feature_set_id`'s supply onto the comparison object** (`evaluation-and-comparison`, Rec 16); and **placing `tests/test_regimes_and_reporting.py` inside §12's tree**, which W-10's corrected precedent shows is a §12 amendment (owner/supervisor, Rec 27).
+- **Open — routed to the gate**: the migrated coverage notebook's home (W-9, proposed `01_data_and_target_audit`); the exploratory label's writer (W-6, the registry surface); ~~the Vision §15.2 acceptance-row proposals (W-4, W-10 — owner/supervisor, proposed never applied)~~ ⛔ **DISCHARGED — approved under D-32 (2026-08-28)**, all eight, none deferred; the five rows this unit carries are `Pending`, never run, and no longer routed as proposals *(corrected 2026-08-30)*; the regime config content under the four-config regime. **Added 2026-08-28:** **which December day range governs D-13's storm count** (Student + Supervisor — W-2 point 5, Rec 15; `inventory-and-registry` amended in parallel); **which text surface is authoritative for the thesis** (Student — `domain-entities.md` § 6, Rec 21); **the Vision §15.2 amendment to FR-P1-05-16** re-citing §5.5's metric set (owner/supervisor — audit finding `TEC-14`, Open, Rec 20); **`REQ-CLAIM-01`'s boundary text**, owed an owner-approved annotate-in-place or a §15.2 amendment (Rec 16 follow-on); **`feature_set_id`'s supply onto the comparison object** (`evaluation-and-comparison`, Rec 16); and **placing `tests/test_regimes_and_reporting.py` inside §12's tree**, which W-10's corrected precedent shows is a §12 amendment (owner/supervisor, Rec 27).
 - **Open — the 2026-08-28 remediation's residual obligations, recorded not fixed:** `functional-design-questions.md` retains **five** stale `seventeen` sites (lines 65, 357, 359, 362, 530) inside a receipted record this remediation may not edit; `team.md` § Testing Posture still states the superseded 17-module figure, affirmed 2026-08-16 before all four §12 amendments — a residual obligation on the practices gate, not a sweep this stage may perform.
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating `src/evaluation/regimes.py`, `diagnostics.py`, `plots.py`, any notebook, or `tests/test_regimes_and_reporting.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
 - **None** of the above decides a scientific value, and December never informs model, feature, threshold or hyperparameter selection through any path designed here (ML-02). This holds unchanged for every 2026-08-28 addition: **no regime threshold, no December day range and no storm-count criterion is decided here**; §5.5's metric set, §5.4's reference magnitude, D-28's 30-day scored window, D-13's >=3-event threshold and the third comparison set's membership are frozen upstream, ruled by the owner, or routed to the gate; and **D-11's bar on any provisional-Dst figure entering a G-05 regime count stands unchanged**.
@@ -998,3 +1027,178 @@ The iteration-1 Critical is genuinely fixed, not merely reworded: the single-cla
 > **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
 > discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
 > stage 3.1 remains **FAIL** with no board having passed it.
+
+## Review — 2026-08-30 adversarial pass (iteration 1, post-2026-08-28/29 state)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T06:34:51Z
+**Iteration:** 1
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-logic-model.md` § Requirement coverage table (lines 867–886) and W-4 point 6 (lines 562–567) and W-10's evidence sentence (lines 854–857); `business-rules.md` § Requirement coverage table (lines 850–864) and its point-6-equivalent (lines 436–440); `domain-entities.md` § Requirement coverage table (lines 484–490) | **D-32's acceptance-row approval — decided in the same governance pass as G-09/D-31 — was propagated to every occurrence of the G-09 fact across all three artifacts, but to zero occurrences of the D-32 fact.** `functional-design-questions.md`'s Consolidated Summary Confirmation (the receipted record this unit's own `## Review`-adjacent re-confirmation receipt cites as authoritative) states: *"four acceptance rows approved under D-32 (FR-P1-05-16, -18, -19, `TST-CLAIMS-01`)"* and separately *"D-32 (all eight Vision §15.2 acceptance rows approved, board option 1, none deferred)"*. Yet in all three design artifacts, every Requirement-coverage row for FR-P1-05-16, FR-P1-05-18, FR-P1-05-19, and REQ-CLAIM-01/`TST-CLAIMS-01` still reads **"⚠ no row — … proposed at the gate, never applied here"** (business-logic-model.md lines 875–877/879; business-rules.md lines 852–856; domain-entities.md lines 486–490), and `business-logic-model.md`'s own "11 requirements, 7 untested" derivation (lines 881–886) and W-10's "proposed at the gate, never applied here" sentence (lines 854–857) are unchanged. Grep confirms `D-32` appears **nowhere** in the live prose of any of the three design artifacts — only in each artifact's terse, undated-detail "post-execution pass (D-29 through D-32…)" re-confirmation footer, which names the decision number but never updates a single downstream representation of what it decided. This is the exact multi-representation sweep failure `project.md`'s learned corrections warn against (*"sweep every REPRESENTATION of a corrected fact"*), made worse here because the sibling fact from the **same governance pass** (D-31/G-09) *was* swept into the banner, W-1, W-2, W-10 and the Assumptions section everywhere it appears, proving the mechanism for propagating a same-pass decision exists and was used — just not for D-32. The "**No line above this marker was touched by this pass**" receipt self-certifies the stale "no row" claims as current, which is worse than an unmarked staleness per this project's own governing standard. | Before the next iteration, sweep all three artifacts' Requirement-coverage tables, `business-logic-model.md` W-4 point 6, W-10's summary sentence, and `business-rules.md`'s equivalent "acceptance-row routing" paragraph to state D-32's actual effect — an **approved-but-not-yet-executed acceptance row now exists** for at least FR-P1-05-16, FR-P1-05-18, FR-P1-05-19 and REQ-CLAIM-01/`TST-CLAIMS-01` (and confirm whether "all eight" also covers FR-P1-05-20, FR-P1-05-14, FR-P1-05-15, REQ-ENG-12/TA-16 or another set, since the Q&A file's two D-32 sentences name only four IDs but claim eight rows total) — while preserving, per this project's own D-32-adjacent caution (hunt item 2), a clear distinction between a row being **approved/added** and a row being **passed or discharged**: none of these rows has executed evidence, so "7 untested" may still be the right substantive count, but "no row" is no longer accurate for at least four of the seven and the artifacts currently assert otherwise as live design content. |
+| 2 | Major | `business-logic-model.md` W-4 point 2, Rec 18 limb (3) sub-bullet (lines 509–526), specifically: *"Limb (1) — moving NFR-TDEF-01's statement onto the target-writing path — was applied by `target-standardization` on 2026-08-28"* | This sentence states, as unqualified established fact and without any verification caveat, that a sibling unit (`target-standardization`) completed a specific remediation on a specific date. Per this project's own mandated practice (`project.md`, learned 2026-08-16, *"ALWAYS verify a fact independently before handing it to another reviewer as established input; a wrong fact promoted to established status is built upon rather than questioned"*) and the dispatch brief's own recorded risk for this exact pairing (*"Neither unit had a review receipt on that remediation when the risk was recorded"*), this artifact is asserting a cross-unit completion fact it has no mechanism to verify under this stage's read-scope, and states it flatly rather than as a checked-elsewhere / to-be-confirmed claim. The rest of the same passage is careful and correctly scoped — it distinguishes "emitted upstream… presence asserted here, nothing emitted here" for the checklist mechanism itself — but the factual claim about the *sibling's own completed work* is not hedged the same way, unlike this unit's treatment of BLK-08/BLK-09 elsewhere in this file, which are explicitly carried as open/unverified rather than asserted closed. | Reframe the sentence to state what this unit can actually attest — e.g. "Limb (1)… is recorded by `target-standardization` as applied on 2026-08-28 (unverified by this unit; no review receipt confirmed at time of writing)" — or route the cross-unit completion claim to the gate alongside this unit's other routed items, consistent with how this same file already treats every other claim it cannot independently establish. |
+
+### Verified and found sound
+
+- The 2026-08-27 iteration-1 and iteration-2 `## Review` sections preserved above remain byte-for-byte intact; their Critical finding's disposition (the `inventory-and-registry` call-path correction) was not re-litigated here and no new contradiction against it was found in the pages read.
+- The G-09/D-31 fact (gate signed, §18.3 preconditions unmet, no scientific value fillable) is represented consistently everywhere it appears in this file — banner, W-1's inline annotation, the Rec-18 preamble, W-10, and the closing Assumptions bullet — a genuine, complete sweep of that one fact, which is what makes finding #1's asymmetric treatment of D-32 stand out rather than reading as a blanket neglect of the 2026-08-28/29 governance pass.
+- W-4's Rec 18 limb (3) mechanism itself (checklist rows `NFR-TDEF-01` and `FR-P1-03-4`, presence-asserted-here / emitted-elsewhere split, `required_location` scoping) is internally consistent with the established R-110-limb-3 / TEC-06 emit-there/assert-here pattern used throughout this design, and is not itself a new mechanism requiring separate justification — only the one unverified date-stamped completion claim inside it is flagged (finding #2).
+- Rec 18's limb (3) keeps the `NFR-TDEF-01` cross-phase target-lineage mismatch textually and substantively distinct from TEC-06's comparison-geometry mismatch, as the dispatch brief asked to confirm — the two rows have different `required_location` scopes and different underlying physical claims, and neither row's text collapses into the other's.
+
+### Coverage limits
+
+This pass read `business-logic-model.md` in full and grepped `business-rules.md` and `domain-entities.md` for the Requirement-coverage tables, the D-32 string, and the acceptance-row routing prose; it did not re-read `business-rules.md` or `domain-entities.md` in full, so a defect confined entirely to prose outside the grepped sections (e.g. an isolated new rule/control not touching acceptance rows, D-32, or Rec 18) could be missed. No sibling-unit file was read, per the hard read-scope bound.
+
+**NOT-READY**
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T06:39:28Z
+**Iteration:** 2 (final)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-logic-model.md` lines 869–871 ("The module emits **machine-readable evidence**…") and lines 895–900 (the post-table "**11 requirements, 7 untested**…" summary, ending "the acceptance-row gap is addressed only through Vision §15.2 proposals at the gate — **nothing minted here**"); `business-rules.md` lines 436–441 (the "**The acceptance-row routing.**" paragraph — the exact site iteration 1's own recommendation named to sweep) and lines 858–864 (the post-table "**11 requirements, 7 untested**…" summary, ending "every §15.2 acceptance-row proposal is a gate item — proposed, never applied here"); `domain-entities.md` lines 296–297 (the "**Routing**" bullet under § 2) | The iteration-1 repair corrected the five Requirement-coverage table rows in all three files, but left at least **five other representations** of the pre-D-32 fact standing, unswept, in the *same three files* — three of them only a few lines below the corrected table they now contradict. `business-logic-model.md`'s own summary line, directly under the corrected table, still reads *"the acceptance-row gap is addressed only through Vision §15.2 proposals at the gate — nothing minted here"*, flatly contradicting the row immediately above it that reads *"row APPROVED under D-32… NOT passed."* `business-rules.md`'s "acceptance-row routing" paragraph — the specific site iteration 1's own recommendation column named by description ("`business-rules.md`'s equivalent 'acceptance-row routing' paragraph") — is untouched and still reads *"proposed at the gate, never applied here"*, and its own post-table summary independently repeats *"proposed, never applied here."* `domain-entities.md`'s "Routing" bullet under § 2 (FR-P1-05-20, FR-P1-05-19, `TST-CLAIMS-01`) likewise still reads *"proposed at the gate, never applied here."* Grepping all three files for the literal strings `no row`, `proposed at the gate`, and `untested` (after excluding the corrected table rows and the file-provenance/citation lines) surfaces these five hits; none carries a 2026-08-30 correction marker or superseded-text note, unlike every corrected table cell. This is the identical multi-representation-sweep failure iteration 1 found (`project.md`, learned 2026-08-23, *"sweep every REPRESENTATION of a corrected fact, not every instance of the entity that carries it"*) — now recurring **inside the very repair meant to fix it**, and worse in one respect: `business-logic-model.md` lines 895–900 and `business-rules.md` lines 858–864 now sit in direct textual contradiction with the corrected rows a few lines above them in the same document, which a reader working top-to-bottom will hit within the same section. | Sweep all five sites to state D-32's actual effect, consistent with the corrected table cells: reword `business-logic-model.md` 869–871 and 895–900, `business-rules.md` 436–441 and 858–864, and `domain-entities.md` 296–297 to read "row APPROVED under D-32, never run, NOT passed" (or equivalent) rather than "proposed at the gate, never applied here" / "nothing minted here" / "proposed, never applied here." Re-grep for the same three literal strings after the edit and confirm zero uncorrected hits outside citation/provenance lines. |
+| 2 | Minor | `business-logic-model.md` line 937 (closing "Counts, re-derived, not carried" bullet: *"11 requirements / 7 untested…"*) | This roll-up restates "7 untested" without D-32's now-established distinction between an approved-but-unrun row and a rowless requirement — it is not factually wrong (none of the 7 is passed) but it is one more representation that reads as though nothing changed on 2026-08-28/30, in a file that otherwise takes care to state that distinction everywhere else it touches this fact. | Optional: append a one-clause pointer to the Requirement-coverage table / D-32 note so this roll-up doesn't read as a sixth silent-stale site to a future sweep. |
+
+### Repairs verified from iteration 1
+
+- **Critical (D-32 propagation)** — the five Requirement-coverage table rows themselves (FR-P1-05-16, -18, -19, -20, REQ-CLAIM-01/`TST-CLAIMS-01`) are correctly repaired in all three artifacts: each now reads `Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed, with the superseded text quoted inline and a dated correction marker. `domain-entities.md`'s summary line correctly states the count of requirements without a result is unchanged at 7, that 5 of the 7 now carry an approved-but-unrun row, that 2 (FR-P1-05-14, FR-P1-05-15) still have no row at all, and that none of the 7 is passed. No corrected cell claims D-32 *passed* a row or that FR-P1-05-14/-15 gained one. This part of the repair is sound — but see finding #1: the repair stopped at the table boundary and did not extend to the other representations of the same fact in the same files, which is precisely the failure mode it was meant to fix.
+- **Major (unverified cross-unit claim)** — `business-logic-model.md` W-4 point 2 (lines 512–517) is correctly reworded to "is **recorded by `target-standardization` as applied on 2026-08-28**" with an explicit unverified caveat, the superseded wording quoted, and the cross-unit pairing routed to the gate. This repair holds and introduces no new inconsistency in the sections checked.
+
+### Coverage limits
+
+This pass re-derived the D-32 sweep by grepping all three artifacts for `D-32`, `no row`, `proposed at the gate`, and `untested`, and read the surrounding context of every hit (business-logic-model.md lines 862–900 and 937; business-rules.md lines 430–445 and 856–866; domain-entities.md lines 290–300 and 484–492) plus the W-4/target-standardization hedge. It did not re-read either sibling file in full, so a defect confined to prose entirely outside those greps could be missed. No sibling-unit file was read, per the hard read-scope bound. This is the final iteration (2 of 2); any residual finding above is gate input for the human, not grounds for a further automated repair pass.
+
+**NOT-READY**
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T11:46:44Z
+**Iteration:** 1 (fresh budget after human gate rejection)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-rules.md` lines 160–161 (R-123 Acceptance), 255–256 (R-124 Acceptance), 477–478 (R-126 Acceptance), 551 (R-127 Acceptance), 710–713 (R-132's "machine-readable evidence" paragraph) | The 2026-08-30 repair swept the three Requirement-coverage tables and five named routing/roll-up paragraphs, but five further per-rule **Acceptance** mini-sections in `business-rules.md` — sites the prior two iterations never enumerated — still assert the pre-D-32 fact. R-123's Acceptance line reads *"⚠ No row — FR-P1-05-18 is `UNTESTED`; a candidate Vision §15.2 row is proposed at the gate"*; R-124's reads *"⚠ No row — FR-P1-05-16 and FR-P1-05-18 are `UNTESTED`; candidate rows proposed at the gate"*; R-126's reads *"⚠ No row today — the five candidate rows above are gate items"* (covering all five approved IDs); R-127's reads *"⚠ No row — FR-P1-05-16 is `UNTESTED`; the candidate §15.2 row (R-126) is a gate item"*; R-132's fixture-evidence paragraph reads *"the proposals **routed to the gate, proposed not applied**"* for FR-P1-05-20/19/16/18/`TST-CLAIMS-01`. None of these five carries a 2026-08-30 correction marker or superseded-text note, unlike every corrected cell in the Requirement-coverage tables a few hundred lines away in the same file. This is the identical multi-representation-sweep failure both prior iterations already found and flagged as fixed (`project.md`, learned 2026-08-23 and 2026-08-30) — recurring a third time, now in a set of sites neither iteration's own coverage-limits paragraph claims to have checked (iteration 2's stated grep scope was lines 430–445 and 856–866 of `business-rules.md`, which excludes all five sites above). A reader who reaches R-123 through R-132 in document order — the normal reading path for a rule-by-rule design — hits five separate contradictions of the corrected table before ever reaching it. | Sweep all five Acceptance/evidence sites to the corrected form ("`Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed", with FR-P1-05-14/-15 correctly left as genuinely rowless in R-126/R-132's per-rule text where applicable), preserving superseded text with a dated marker as done elsewhere. Before the next repair pass, derive the full site list programmatically (e.g. grep every file for `No row`, `candidate`, `proposed at the gate`, `gate item` and inspect every hit, not only the ones named by a prior finding) rather than re-scoping the check to the sites the last finding happened to name — this is the third occurrence of exactly that scoping error in this unit's own review history. |
+
+### Validation Tool Results
+
+No stage-declared validation tools were run for this pass (none listed for `functional-design` beyond sensors); the check above was a targeted grep-and-inspect of `business-logic-model.md`, `business-rules.md`, and `domain-entities.md` for the literal strings `D-32`, `no row`, `proposed at the gate`, `never applied`, `nothing minted`, `untested`, `candidate`, and each of the five approved requirement IDs plus `TST-CLAIMS-01`, with full surrounding context read at every hit.
+
+### What checks out
+
+- The three Requirement-coverage tables (all three files) and the five previously-flagged routing/roll-up paragraphs (`business-logic-model.md` lines 869–871 and 895–905; `business-rules.md`'s "acceptance-row routing" paragraph at 436–449 and its 866–876 roll-up; `domain-entities.md`'s § 2 Routing bullet at 296–302 and its 496 summary line) are correctly repaired, consistently distinguish an approved-but-unrun `Pending` row from a passed one, correctly state the 7-carrying-no-result count is unchanged with 5 of 7 now holding an approved row and only FR-P1-05-14/FR-P1-05-15 genuinely rowless, and correctly avoid ever claiming D-32 *passed* a row.
+- The W-4 target-standardization cross-unit claim is honestly hedged (lines 512–524): stated as "recorded by `target-standardization` as applied", explicitly marked unverified under the read-scope bound, and routed to the gate — not asserted as established fact.
+- No site found asserting D-32 *passed* rather than *approved*, and no site found crediting FR-P1-05-14 or FR-P1-05-15 with a row they do not have.
+- Provisional Dst is correctly barred from the G-05 storm-count input at `RegimeError`'s raise conditions (`domain-entities.md` line 417, citing R-123) — no site found letting provisional Dst reach a G-05 regime count.
+- No baseline-to-appendix, missing Phase-2-independence disclosure, or missing geometry-artefact-caveat defect was found in the sections read, though this pass's coverage of those four hunt items was a targeted grep rather than a full re-read of all three files (see Coverage limits).
+
+### Coverage limits
+
+This pass re-verified the D-32 propagation via a full-file grep of all three artifacts (not scoped to prior iterations' named sites) for `D-32`, `no row`, `proposed at the gate`, `never applied`, `nothing minted`, `untested`, `candidate`, and each of the five approved requirement IDs plus `TST-CLAIMS-01`, reading full context at every hit. It also spot-checked the W-4 hedge and the provisional-Dst / G-05 regime-count rule. It did not perform a full line-by-line re-read of `business-rules.md` or `domain-entities.md` end to end, and did not separately re-verify the baseline-primary-table, Phase-2-independence, or geometry-artefact hunt items beyond the sections surfaced by the above greps — a defect confined entirely to prose those greps did not touch could be missed. No sibling-unit `construction/<other-unit>/` file was read, per the hard read-scope bound.
+
+**NOT-READY**
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T11:51:51Z
+**Iteration:** 2 (final)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `domain-entities.md` line 509, § Assumptions & Open Questions, "Governance dependencies owned outside" bullet | This pass's repair swept `business-rules.md`'s equivalent list (line 923, now struck through and marked "⛔ DISCHARGED — approved under D-32 (2026-08-28)") and `business-logic-model.md`'s equivalent list (line 929, same treatment), but `domain-entities.md`'s own "Governance dependencies owned outside" bullet still reads, un-struck and with no correction marker: `"the candidate §15.2 rows (owner/supervisor)"`. This asserts the pre-D-32 state — that the five approved rows remain a governance dependency awaiting owner/supervisor ruling — in the exact same file whose Requirement-coverage table 15–20 lines above it (lines 490–494) and § 2 Routing bullet (lines 297–302) were correctly corrected to `Pending — approved, never run, NOT passed`. This is the identical failure mode iteration 1 found (a per-file "governance dependency" list is a distinct representation of the same fact, parallel across all three artifacts, and repairing two of the three parallel lists while leaving the third untouched reproduces `project.md`'s own logged pattern, learned 2026-08-23 and 2026-08-30, of a corrected fact left standing in one representation while its siblings are fixed) — now surfacing in a fourth representation-type (the per-file governance-dependency-list bullet) that neither iteration 1's stated grep scope (`business-logic-model.md` 862–900/937; `business-rules.md` 430–445/856–866; `domain-entities.md` 290–300/484–492) nor this iteration's own stated scope covered, since 509 falls just past 494. A reader who reaches § Assumptions after the corrected coverage table sees a direct, unexplained contradiction three paragraphs later. | Correct `domain-entities.md` line 509: strike `"the candidate §15.2 rows (owner/supervisor)"` and mark it discharged under D-32 (2026-08-28), consistent with the parallel bullets already fixed in the other two files. Before any further repair, grep specifically for the phrase `"Governance dependencies owned outside"` / `"governance dependenc"` across all three files (a fourth fact-representation class distinct from the coverage table, the routing paragraph, and the per-rule Acceptance line) and confirm every parallel list agrees. |
+
+**Minor / SUGGESTIONS (non-blocking):**
+
+- `business-rules.md` lines 846 and 849–853 (§ Amendments owed table row "This unit" and the "Why the gate items add no rows" paragraph) still describe the approved rows in present-tense proposal language — "the Q4/Q10 acceptance-row proposals are Vision §15.2 amendments owned by the owner/supervisor" and "the §15.2 acceptance-row candidates are gate confirmations". The underlying classification claim (these are not `component-methods.md` boundary-contract amendments) is still correct and not evidentiary about row status, but the wording is stale relative to the rest of the file's sweep and reads as though the rows are still pending rather than `Pending`-approved-under-D-32. Consider a light word-level pass ("were" / "the now-approved §15.2 acceptance rows") for consistency, though this does not misstate the fact.
+- `domain-entities.md` lines 488–489 (FR-P1-05-14 / FR-P1-05-15 rows) read "⚠ no row — gate item". These two are correctly left rowless per D-32 (D-32 gave them nothing), but "gate item" implies something is still pending a gate ruling for them specifically, when nothing is — they are simply, and permanently under D-32, without a §15.2 row. `business-rules.md`'s equivalent cells (lines 879–880) use the clearer "⚠ no row — rowless" and avoid this ambiguity. Consider aligning the wording.
+
+### Validation Tool Results
+
+No stage-declared validation tools apply to this stage. This pass was a full-file grep (not scoped to either prior iteration's named sites) of all three live regions — `business-logic-model.md` lines 1–933 (excluding all `## Review` sections from line 934 on), `business-rules.md` in full, `domain-entities.md` in full — for `no row`, `No row`, `UNTESTED`, `proposed at the gate`, `never applied`, `nothing minted`, `candidate`, `gate item`, `D-32`, and each of FR-P1-05-14/-15/-16/-18/-19/-20, `REQ-CLAIM-01`, `TST-CLAIMS-01`, with full context read at every hit (see the two Bash tool calls of 2026-08-30T11:4x–11:5x). Strikethrough-marker balance was checked programmatically per file: `business-rules.md` 14 `~~` (even), `domain-entities.md` 0, `business-logic-model.md` live region 4 — no dangling markers found.
+
+### What checks out
+
+- Re-deriving the site list independently (not reusing iteration 1's five-site list) confirms all five per-rule `business-rules.md` Acceptance sections iteration 1 flagged (R-123 line 160–161, R-124 line 261–263, R-126 line 487–492, R-127 line 565–569, R-132's evidence paragraph line 729–734) are now correctly repaired, with superseded text preserved via `~~…~~` and a dated correction marker, and the "owner's act, no row minted" framing applied consistently.
+- The three Requirement-coverage tables (all three files: `business-rules.md` 879–885, `business-logic-model.md` 895–901, `domain-entities.md` 488–494) are internally consistent with each other and with the roll-up prose: FR-P1-05-16/-18/-19/-20 and `REQ-CLAIM-01`/`TST-CLAIMS-01` uniformly read `Pending — approved under D-32 (2026-08-28), never run, NOT passed`; FR-P1-05-14/-15 uniformly read no-row/rowless. No site found where D-32 is credited with having *passed* a row, and none found crediting FR-P1-05-14 or FR-P1-05-15 with a row.
+- The "11 requirements, 7 carrying no result" arithmetic is stated identically and correctly in all three files (`business-rules.md` 890–897, `business-logic-model.md` 904–911, `domain-entities.md` 496), each correctly noting the count-without-result is unchanged at 7 while 5 of the 7 now carry an approved-but-unrun row.
+- No baseline-beats-LSTM-to-appendix defect, no missing Phase-2-not-independent (VAL-05) disclosure, and no missing IRI/GIM spatial-representativeness caveat were found: VAL-05's disclosure and falsifier (control 39) and the spatial-representativeness sentence are both present and correctly routed to the co-reporting/upstream-emission path (`domain-entities.md` 238–239, 460–462; `business-rules.md` 363–364, 489–492, 566–575). Provisional Dst remains correctly barred from the G-05 storm-count input via `RegimeError`'s raise conditions (`domain-entities.md` 417, citing R-123/D-11); no regime threshold is decided in this unit rather than routed (D-13's threshold and the pre-G-05 audit's day range are both consistently marked owner/supervisor-owned and routed to the gate).
+
+### Coverage limits
+
+This pass grepped the full live text of all three artifacts (excluding `business-logic-model.md`'s prior `## Review` sections) rather than re-scoping to any earlier iteration's named site list, and read full surrounding context at every hit of the query terms listed above. It did not perform a token-by-token re-read of every line outside those hits, so a defect expressed in vocabulary outside the searched terms (e.g., a paraphrase of "approved" or "candidate" using neither word) could still be missed. No sibling-unit `construction/<other-unit>/` file was read, per the hard read-scope bound; the W-4 cross-unit hedge was not independently re-verified against `target-standardization` beyond re-reading this unit's own hedge text. This is the final iteration (2 of 2); the Critical finding above is gate input for the human, not grounds for a further automated repair pass.
+
+**NOT-READY**
+
+## Review — 2026-08-30 adversarial pass (fresh cycle, iteration 1 of 2, after human gate rejection)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T13:34:44Z
+**Iteration:** 1 (fresh budget)
+
+### Findings
+
+No Critical or Major findings survive verification.
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| — | — | — | None found. | — |
+
+**SUGGESTIONS (non-blocking, carried forward from prior iterations, still present):**
+
+| # | Location | Suggestion |
+|---|---|---|
+| S1 | `business-rules.md` lines 846, 849–853 | "Why the gate items add no rows" paragraph and the § Amendments-owed "This unit" row still use present-tense proposal wording ("the Q4/Q10 acceptance-row proposals are Vision §15.2 amendments...", "the §15.2 acceptance-row candidates are gate confirmations") in a section adjacent to, but distinct from, the corrected coverage table and routing paragraphs. The underlying classification claim is correct and not evidentiary about row status; a word-level pass ("were" / "the now-approved rows") would remove the residual staleness-flavoured phrasing. |
+| S2 | `domain-entities.md` lines 488–489 | FR-P1-05-14 / FR-P1-05-15 cells read "⚠ no row — gate item". These two are correctly left rowless under D-32 (D-32 gave them nothing), but "gate item" implies a still-pending gate ruling specific to them, when there is none — they are permanently rowless. `business-rules.md`'s parallel cells (lines 879–880) use the clearer "⚠ no row — rowless" and avoid the ambiguity; align `domain-entities.md`'s wording to match. |
+
+### Verification of the dispatched defect class (D-32 propagation)
+
+Re-derived the site list independently via a full-file grep of all three live regions for `no row`, `No row`, `UNTESTED`, `proposed at the gate`, `never applied`, `nothing minted`, `candidate`, `gate item`, `D-32`, and each of FR-P1-05-14/-15/-16/-18/-19/-20, `REQ-CLAIM-01`, `TST-CLAIMS-01`, reading full context at every hit (2 Bash calls, ~70 hits across the three files).
+
+- **The last outstanding site named in the dispatch — `domain-entities.md` line 509's "Governance dependencies owned outside" bullet — is confirmed fixed.** It now reads `~~the candidate §15.2 rows (owner/supervisor)~~ ⛔ **DISCHARGED — APPROVED under D-32 (2026-08-28)**, board option 1, all eight rows, **none deferred**` and states the five rows this unit carries are `Pending: approved, never run, NOT passed`, with FR-P1-05-14/-15 explicitly stated as gaining nothing and remaining genuinely rowless. Both sibling files' parallel bullets (`business-rules.md` line 923, `business-logic-model.md` line 929) carry the identical discharge treatment.
+- **No live site asserts FR-P1-05-16, -18, -19, -20, or `REQ-CLAIM-01`/`TST-CLAIMS-01` has "no row" or is still "proposed at the gate."** Every hit of those phrases for these five IDs across all three files sits inside a `~~struck-through~~` superseded-text quotation with a `(Corrected 2026-08-30, ...)` marker, or inside a prior `## Review` section (out of scope per the dispatch note).
+- **Sites correctly still reading "no row" for FR-P1-05-14 / FR-P1-05-15 are correct** — these two genuinely have no §15.2 row under D-32, and every live occurrence (`business-logic-model.md` 895–896; `business-rules.md` 490, 623, 879–880; `domain-entities.md` 488–489) says so consistently, with no claim that D-32 gave them anything.
+- **Nothing reads as though D-32 *passed* rather than *approved* a row.** Every corrected cell uses `Pending`, "approved, never run, NOT passed" or equivalent; `domain-entities.md`'s summary line (496) is explicit: "None of the seven is passed — an approved-but-unrun row and an absent row are both `Pending`, and neither is evidence."
+- **Arithmetic is right and consistent across all three files.** All three coverage tables carry 11 requirement rows with an identical "**11 requirements, 7 carrying no result**" summary line, each stating 5 of the 7 now hold an approved-but-unrun row (FR-P1-05-16, -18, -19, -20, `REQ-CLAIM-01`/`TST-CLAIMS-01`) and 2 remain genuinely rowless (FR-P1-05-14, FR-P1-05-15). No file states a different total or a different split.
+- **No dangling strikethrough.** A file-wide `~~` count is misleading on its own (`business-logic-model.md` shows 7, odd) because prior `## Review` sections quote `~~...~~` syntax inside prose describing earlier corrections; restricting the count to the live region above the first `## Review` heading gives 4 (even) in `business-logic-model.md`, 14 (even) in `business-rules.md`, and 2 (even) in `domain-entities.md` — no unpaired markers in live content.
+
+### Verification beyond the dispatched fact
+
+Spot-checked, within budget, the five additional hunt items named in the dispatch:
+- **Baseline-beats-LSTM relegated to an appendix**: not found — `business-rules.md` R-125 states appendix relegation is "unrepresentable" by construction (same primary-table artifact); `TA-20 (primary)` names the primary table as the Acceptance evidence.
+- **Phase-2-not-independent-blind-test (VAL-05) disclosure missing from the abstract-level interpretation**: not found — present and routed (`business-logic-model.md` 489–490, citing the abstract-level location; `domain-entities.md` 238–239, 460–462; `business-rules.md` 363–364).
+- **Geometry/spatial-representativeness caveat missing at an IRI/GIM comparison**: not found — asserted present on every serialized IRI/GIM comparison (`business-logic-model.md` 492; `business-rules.md` 364).
+- **A regime threshold decided here rather than routed**: not found — `business-rules.md` line 928 states explicitly "no regime threshold, no December day range and no storm-count criterion is decided here."
+- **Provisional Dst reaching a G-05 regime count**: not found — barred via `RegimeError`'s raise condition and R-62/D-11, asserted consistently in both `business-rules.md` (231, 661) and `business-logic-model.md` (337).
+
+None of these five were exhaustively re-verified line-by-line across both files (budget-bounded sampling of the sites a targeted grep surfaced); this is a coverage limit, not a clean bill beyond what was sampled.
+
+### Validation Tool Results
+
+No stage-declared validation tools are listed for `functional-design` beyond sensors; none were run.
+
+### Coverage limits
+
+This pass grepped the three live artifacts for the D-32-defect-class terms plus the five dispatched hunt-item keyword families, reading full surrounding context at every hit (3 Bash calls total). It did not perform a token-by-token re-read of every line outside those hits, and did not re-open either sibling artifact beyond the targeted greps above. No sibling-unit `construction/<other-unit>/` file was read, per the hard read-scope bound; the consumed contract paths (`unit-of-work.md`, `unit-of-work-story-map.md`, `requirements.md`, `components.md`/`component-methods.md`/`services.md`) were not independently re-read this pass — their content was taken as already verified by the prior two iterations' passes, which did read them.
+
+### Summary
+
+The single defect class this cycle was dispatched to verify — D-32's approved acceptance rows corrected in some representations and stale in others — is now fully and consistently repaired across all three artifacts: every representation found by an independent re-derivation of the site list (coverage tables, routing/roll-up paragraphs, per-rule Acceptance mini-sections, and the previously-outstanding `domain-entities.md` governance-dependency bullet) states the corrected fact, with superseded text preserved and dated. No new contradiction was introduced by the repair, the 11/7/5/2 arithmetic is internally consistent across all three files, and no dangling markup was found in live content. A budget-bounded sample of five other project-critical hunt items (baseline-to-appendix, VAL-05 disclosure, geometry caveat, regime-threshold routing, provisional-Dst-into-G-05) turned up nothing further. Two non-blocking wording SUGGESTIONS remain, carried forward from prior iterations, neither of which misstates a fact.
+
+READY

@@ -550,7 +550,17 @@ freeze gate while its provenance chain points at superseded per-month hashes.**
 > 2026-08-28 over all **48** `functional-design` artifacts of this stage — it reached **no
 > other unit**: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` =
 > **3**, every one of them inside `acquisition`. Those three figures are **pre-remediation**;
-> what remains true after it is the load-bearing part — **`foundation`, which owns
+> ⚠ **and the "every one inside `acquisition`" clause is superseded — the field now reaches TWO
+> units, this one included** *(added 2026-08-30 on adversarial finding 1, Minor: this box is the
+> rule-catalogue entry a builder implements from, and it was the one representation of the
+> cross-unit reach that the 2026-08-29 rebase did not reach. It never asserted a live invariant —
+> it correctly labels its own figures pre-remediation — but it omitted the current complementary
+> fact, leaving a reader of R-50 alone with the single-unit picture)*. **Current figures, a dated
+> observation and never a live invariant**: `provenance_class` **43**, `derived_only` **38**,
+> `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11** and this unit
+> **18 / 17 / 6** — acquired here under `GOV-2026-08-28-FD-01` **Recommendation 29**, which gave
+> this unit the `data07_caveat` sourced from the field.
+> What remains true after the remediation is the load-bearing part — **`foundation`, which owns
 > `src/data/release.py`, `write_release` and the §13.3 contract, still carries the field zero
 > times**, and it is **not among FR-P1-04-11's fourteen release fields**, which `acquisition`
 > now carries as an Open item for stage 3.2 under the same governance report

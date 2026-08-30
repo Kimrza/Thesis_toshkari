@@ -100,7 +100,7 @@ be created.
 - `../models-and-baselines/functional-design/business-rules.md` — R-90 (`06`'s stamp refusal, closing the eighth amendment's `06` half "and only `06`'s"), R-91 (`three_seed_mean`), R-92 (provenance agreement; the (`station`, `interval_start_utc`) alignment key); the open item "`07`'s half of the eighth amendment is UNOWNED", raised at its gate for this unit.
 - `../external-products/functional-design/business-rules.md` — R-55 (the amendment basis: **5 across 3 units**, boundary contracts only), R-56 (the transitive allowlist scan; `src/evaluation/` is a path grant owned by three units), R-60 (the emitted-sentence pattern; `gim_network_overlap_flag`; C-01 labelled generated, not trained), R-62 (Dst diagnostic-only), R-63 (driver series time-indexed only).
 - `../governance-guards/functional-design/business-rules.md` — R-25 (the access log is durably appended **before** the December read begins), R-28 (one path into the restricted root; BLK-07 is not this design's to close).
-- `../foundation/functional-design/business-rules.md` — R-01 (`IntegrityError` is the single catchable base; every project exception derives from it, and so does *"any future integrity-related exception"*; the cross-unit obligation that each raising unit declares its exceptions as subclasses), R-10's stage-entry catch; § Stage entry contract (the six ordered steps `07` performs). **Its enumeration reads "all fourteen" on disk as of 2026-08-28; `PartitionError` is its fifteenth on the owner's Recommendation 8 ruling, and that amendment is `foundation`'s to write** — see R-105's correction box and `domain-entities.md` § 8.
+- `../foundation/functional-design/business-rules.md` — R-01 (`IntegrityError` is the single catchable base; every project exception derives from it, and so does *"any future integrity-related exception"*; the cross-unit obligation that each raising unit declares its exceptions as subclasses), R-10's stage-entry catch; § Stage entry contract (the six ordered steps `07` performs). ~~**Its enumeration reads "all fourteen" on disk as of 2026-08-28; `PartitionError` is its fifteenth on the owner's Recommendation 8 ruling, and that amendment is `foundation`'s to write**~~ ⚠ **SWEPT 2026-08-30 — SUPERSEDED, and this site was one of five the 2026-08-28 sweep missed** *(adversarial finding 1, Critical: three sites were corrected while five others went on asserting the amendment pending, two of them the artifact's own dedicated correction box for the same rule — an active internal contradiction, not mere staleness)*. **`foundation` R-01 HAS been amended and now reads FIFTEEN**, with `PartitionError` promoted into the enumeration, the count restated as **derived and printed** rather than carried in prose, and `InverseTransformError` **explicitly disposed** — not a sixteenth, riding R-01's *"any future integrity-related exception"* clause. Verified at `foundation/functional-design/business-rules.md` R-01. **The dependency is discharged; any open item stated alongside it is NOT** — see R-105's correction box and `domain-entities.md` § 8.
 - `aidlc/spaces/default/memory/project.md` § Mandated/Forbidden — the comparison-wide mask rule (NFR-FAIR-01, TC-16), the estimand (Vision §2.3, TE §1.3), IRI evaluation-time-only (NFR-IRI-01), GIM evaluation-time-only plus the overlap disclosure (TE §5.2), the three difficulty controls co-reported, the beats-the-LSTM disclosure, the spatial-representativeness statement (TEC-06), G-06 hash-before-metrics, `ABL-DIFF` inverse-to-TECU, the `phase_id`/`source_id`/`target_definition_id` stamp.
 - Workspace inspection, 2026-08-26: `tests/` holds three modules, none this unit's; `src/` and `configs/` absent.
 - `functional-design-questions.md` (**Q1 through Q9**, answered), `business-logic-model.md`, `domain-entities.md`.
@@ -365,13 +365,29 @@ the mask records the **set**.
 > | A disagreement that **implies information flow** — `transform_id` disagreement, or a `None` stamp | **`LeakageError`** | A fit from one partition reaching another partition's rows is the leak itself. |
 > | A member-versus-**mask** partition disagreement (limb 3) | **`FairnessError`** | Not a provenance disagreement among members but scoring against the wrong exam — the fairness class R-107 and `statistical-inference` R-113 already use, unchanged here. |
 >
-> **The `foundation` amendment is `foundation`'s to author, and it is not on disk yet.**
+> ⚠ **SWEPT 2026-08-30 — THE BOX BELOW IS SUPERSEDED. The amendment IS on disk.** *(Corrected
+> on adversarial finding 1, Critical. This box is one of **five** sites the 2026-08-28 sweep
+> missed while correcting three others — and it is the artifact's own **dedicated correction
+> box for this very rule**, so a reader arriving at R-105 was told the amendment was pending
+> while a reader of the W-4 box in the sibling file was told it was done. That is an active
+> internal contradiction on whether `PartitionError` belongs to `foundation`'s hierarchy — a
+> fact this unit's own § 8 exception table and stage-entry catch depend on — and is worse than
+> an unmarked stale claim.)* **`foundation` R-01 has been amended and now reads FIFTEEN**, with
+> `PartitionError` promoted into the enumeration, the count **derived and printed** rather than
+> carried in prose, and `InverseTransformError` explicitly disposed under R-01's *"any future
+> integrity-related exception"* clause rather than admitted as a sixteenth. Verified at
+> `foundation/functional-design/business-rules.md` R-01 (the amendment row, the
+> superseded-wording box, and the `InverseTransformError` box). **R-105 may therefore cite
+> R-01's fifteen-exception enumeration as WRITTEN, not merely as ruled.** The superseded text
+> is preserved below because it records the disk state this rule was authored against.
+>
+> ~~**The `foundation` amendment is `foundation`'s to author, and it is not on disk yet.**
 > Derived 2026-08-28: `foundation`'s `business-rules.md` R-01 still reads *"All fourteen
 > project-defined exceptions"* and its enumeration still omits `PartitionError`
 > (`grep "PartitionError"` over `foundation/functional-design/*.md` returns only three hits,
 > all inside a preserved quotation of a *different* unit's R-96 verdict — none in R-01). This
 > rule cites **R-01's amended enumeration** on the owner's ruling and **discloses that the
-> amendment is pending at its owner**; no claim is made here that R-01 already reads fifteen.
+> amendment is pending at its owner**; no claim is made here that R-01 already reads fifteen.~~
 >
 > **This correction propagates downstream.** `statistical-inference` **R-113 precondition 2**
 > imports R-105 *"as written"* and currently reads *"absence or mismatch **raises
@@ -583,8 +599,18 @@ or `partition_id` → **fails**; and one whose four values differ from the regis
 → **fails**, which is the drift the construction-time copy is bounded by *(new 2026-08-28,
 Recommendation 35)*.
 
-**Acceptance.** ⚠ No row — FR-P1-05-7 is `UNTESTED`; controls (15)–(17) are the only bar it
-gets until stage 3.2 proposes a row under Vision §15.2.
+**Acceptance.** ⚠ **UPDATED 2026-08-30 — D-32 APPROVED A ROW for FR-P1-05-7** *(adversarial
+finding 2, Critical: all three artifacts still asserted "no acceptance row" after D-32 approved
+one on 2026-08-28, and the 2026-08-29 receipt's "no line above this marker was touched"
+self-certified that stale claim as current)*. **Read the status precisely, because approval and
+discharge are different things:** D-32 approved **all eight Vision §15.2 acceptance rows** (board
+option 1, none deferred), which gives FR-P1-05-7 the §16/§19 row it previously lacked. **The row
+is `Pending` — approved, never run.** It is **NOT** passed, satisfied or discharged, and no
+artifact may say otherwise. Controls (15)–(17) remain the contract-level design obligations they
+always were. *(Superseded text preserved: "⚠ No row — FR-P1-05-7 is `UNTESTED`; controls
+(15)–(17) are the only bar it gets until stage 3.2 proposes a row under Vision §15.2." That was
+accurate before D-32; stage 3.2 no longer needs to propose the row, because the owner approved
+it.)*
 
 ## R-109 — The G-06 evaluation: hash-receipt before metrics, one chokepoint, and exactly 2–31 December
 
@@ -916,18 +942,27 @@ independently on both sides, and does not touch the frozen artifacts.
 
 | Requirement | Rules | Why untested, and where the check lands |
 |---|---|---|
-| **FR-P1-05-7** — the confirmatory estimand and its sign convention | R-108 | **Untested by omission, not by design**: no §16/§19 row covers the estimand. Controls (15)–(17) are contract-level design obligations — the only bar until stage 3.2 proposes an acceptance row under Vision §15.2. The result object's machine-readable convention (R-108) is what makes a future row assertable. |
+| **FR-P1-05-7** — the confirmatory estimand and its sign convention | R-108 | ⚠ **UPDATED 2026-08-30 (adversarial finding 2, Critical): D-32 APPROVED a §16/§19 row for this requirement on 2026-08-28** — board option 1, all eight Vision §15.2 rows approved, none deferred. The row is **`Pending`: approved, never run — NOT passed, satisfied or discharged.** Stage 3.2 no longer needs to propose it. The result object's machine-readable convention (R-108) is what makes the row assertable, and controls (15)–(17) remain contract-level design obligations. *(Superseded: "**Untested by omission, not by design**: no §16/§19 row covers the estimand … the only bar until stage 3.2 proposes an acceptance row under Vision §15.2." Accurate before D-32.)* |
 | **FR-P1-05-17** — evaluation code authored, reviewed and frozen inside the G-05 set before December opens | R-107 (limb 5), R-109 | **Untested by omission**: no row covers evaluation-code completeness, review or freeze. R-107 places the registered mask set inside the G-05 frozen bundle; R-109 requires the freeze-timestamp-precedes-December-access ordering — **an ordering the G-05 record produces, which this stage can require but not manufacture.** |
 
 > **No artifact, manifest or report may state or imply that FR-P1-05-7 or FR-P1-05-17 is
 > covered, satisfied or verified.** A design obligation is not a result.
+>
+> ⚠ **NARROWED 2026-08-30 — the prohibition STANDS, and its ground for FR-P1-05-7 has changed**
+> *(adversarial finding 2, Critical)*. **D-32 approved a §16/§19 acceptance row for
+> FR-P1-05-7** on 2026-08-28. That removes the *"no row exists"* ground and **removes nothing
+> else**: the row is **`Pending` — approved, never run**, so stating it covered, satisfied or
+> verified remains **forbidden on the stronger ground that an approved row is not a passed
+> row**. **FR-P1-05-17 is untouched**: it still carries no row and the original prohibition
+> applies to it in full. An approved-but-unrun row and an absent row are both `Pending`; neither
+> is evidence.
 
 ## Requirement coverage
 
 | Requirement | Rules | Acceptance |
 |---|---|---|
 | FR-P1-04-7 | R-106, R-107, R-111 | WS-16 (primary), TA-11 (supporting) |
-| FR-P1-05-7 | R-104, R-108 | `UNTESTED` — see the table above |
+| FR-P1-05-7 | R-104, R-108 | ⚠ **`Pending` — row APPROVED under D-32 (2026-08-28), never run.** Not `UNTESTED` by omission any longer, and **not** passed either. *(Corrected 2026-08-30, adversarial finding 2; superseded: "`UNTESTED` — see the table above".)* |
 | FR-P1-05-17 | R-107, R-109 | `UNTESTED` — see the table above |
 | NFR-FAIR-01 | R-106, R-107, R-111 (matched-windows limb), R-112 | WS-16, TA-11 |
 
@@ -942,10 +977,10 @@ this unit's.
 - **[assumption]** This unit designs `masks.py` and `metrics.py` only; `vector_block_bootstrap` and `count_storm_events` sit in `src/evaluation/` but belong to `statistical-inference` and `regimes-diagnostics-reporting` — the allowlist is a module-path grant (R-56), and no unit-level narrowing of TE §12 is asserted (R-112).
 - **[assumption]** B-01 and C-01 are producible as `Prediction`s with `seed = None` and generated-not-trained provenance, stamped per R-105's contract with the reserved literal `untransformed`.
 - **Verification obligations owned here:** controls **(1) and (3)–(32) — 31 distinct, (2) vacated by relocation** — enumerated per rule and re-derived 2026-08-28 in § Negative-control count; the three presence tests of R-110; `test_common_masks.py`'s **four** module controls (R-111, one of them the tier-3 matched-window instance).
-- **Governance dependencies owned outside this unit** *(re-enumerated 2026-08-28)***:** **the gate's adoption ruling on the R-103 joint contract, and the import edge's authorisation** — the co-owner **has now authored half B as its R-84** (mtimes 02:09–02:21 on 2026-08-28) and **the two halves agree limb for limb**, so what the gate arbitrates is one reconciled contract rather than two texts; **D-27 withholds the edge's authorisation in terms**, so the edge needs a change record and a gate ruling before stage 3.5 may use it; **`foundation`'s amendment of R-01's enumeration to fifteen, adding `PartitionError`** (Recommendation 8's owner ruling — `foundation`'s artifacts still read "all fourteen" on disk today); **`statistical-inference`'s correction of R-113 precondition 2**, which imports R-105 "as written" and still raises `LeakageError` for a `partition_id` **mismatch**; **`regimes-diagnostics-reporting`'s printing of R-107 limb 6's five reporting values and its tier-3 breakdown row** (Recommendations 16 and 19); **the `project.md` § Mandated wording correction on the GIM overlap-disclosure trigger, owed at the §13 learnings ritual** (Recommendation 41 — human-gated, and no memory file is edited here); the **`REQ-CLAIM-01` boundary-text amendment** to state the 30-day scored set (Vision §15.2, D-28's follow-on); **D-28's owed revised split manifest** at G-05; BLK-03's limbs (`models-and-baselines`); BLK-04's limbs and BLK-09's `train_start` (`features-and-splits`); the comparison-set membership confirmation for **all three** sets (student/supervisor, R-106); any WS-13 §16 evidence-column change (Vision §15.2, R-111); acceptance rows for FR-P1-05-7 and FR-P1-05-17 (stage 3.2 under Vision §15.2); G-05's freeze of the evaluation code this stage designs (Supervisor); the AGPLv3 distribution question (outside the project).
+- **Governance dependencies owned outside this unit** *(re-enumerated 2026-08-28)***:** **the gate's adoption ruling on the R-103 joint contract, and the import edge's authorisation** — the co-owner **has now authored half B as its R-84** (mtimes 02:09–02:21 on 2026-08-28) and **the two halves agree limb for limb**, so what the gate arbitrates is one reconciled contract rather than two texts; **D-27 withholds the edge's authorisation in terms**, so the edge needs a change record and a gate ruling before stage 3.5 may use it; ~~**`foundation`'s amendment of R-01's enumeration to fifteen, adding `PartitionError`** (Recommendation 8's owner ruling — `foundation`'s artifacts still read "all fourteen" on disk today)~~ ⚠ **DISCHARGED, swept 2026-08-30** *(adversarial finding 1, Critical — one of five sites the 2026-08-28 sweep missed)*: `foundation` R-01 **has been amended and reads FIFTEEN**, `PartitionError` promoted, the count derived and printed, `InverseTransformError` disposed on the any-future clause. This is **no longer a governance dependency owed at `foundation`** and must not be counted as one; the other dependencies listed in this bullet are untouched and remain owed; **`statistical-inference`'s correction of R-113 precondition 2**, which imports R-105 "as written" and still raises `LeakageError` for a `partition_id` **mismatch**; **`regimes-diagnostics-reporting`'s printing of R-107 limb 6's five reporting values and its tier-3 breakdown row** (Recommendations 16 and 19); **the `project.md` § Mandated wording correction on the GIM overlap-disclosure trigger, owed at the §13 learnings ritual** (Recommendation 41 — human-gated, and no memory file is edited here); the **`REQ-CLAIM-01` boundary-text amendment** to state the 30-day scored set (Vision §15.2, D-28's follow-on); **D-28's owed revised split manifest** at G-05; BLK-03's limbs (`models-and-baselines`); BLK-04's limbs and BLK-09's `train_start` (`features-and-splits`); the comparison-set membership confirmation for **all three** sets (student/supervisor, R-106); any WS-13 §16 evidence-column change (Vision §15.2, R-111); ~~acceptance rows for FR-P1-05-7 and FR-P1-05-17 (stage 3.2 under Vision §15.2)~~ ⚠ **narrowed 2026-08-30** *(adversarial finding 2)*: **FR-P1-05-7's row was APPROVED under D-32** on 2026-08-28 and is no longer owed — it is `Pending`, approved and never run. **Only FR-P1-05-17's row remains owed** at stage 3.2 under Vision §15.2; G-05's freeze of the evaluation code this stage designs (Supervisor); the AGPLv3 distribution question (outside the project).
 - **Open — BLK-08's mechanism limb is an exit condition on this stage for both owners.** R-103 authors this unit's half binding **as narrowed to `ABL-DIFF`**, and the co-owner **has now authored the matching half as its R-84** (2026-08-28), agreeing limb for limb — so **the divergence R-84 raised is resolved by this pass**, not left to the gate. What remains outside both owners is **the gate's adoption ruling** and **the import edge's authorisation, which D-27 expressly withholds**; so `ABL-DIFF` has no executable inverse path today and **the blocker does not close on either unit's artifacts alone**. Its **premise limb closes for the primary path** on D-27: no inverse, no edge, on the confirmatory path.
 - **Open — BLK-03 ↓, BLK-04 ↓, BLK-09 ↓ remain inherited exit conditions.** Nothing in this file closes them; no implementation may proceed while any stands.
-- **Open — FR-P1-05-7 and FR-P1-05-17 carry no acceptance row** (2 of this unit's 4).
+- **Open — FR-P1-05-17 carries no acceptance row** (1 of this unit's 4). ⚠ *(Narrowed 2026-08-30 on adversarial finding 2, Critical; superseded: "**FR-P1-05-7 and FR-P1-05-17 carry no acceptance row** (2 of this unit's 4)".)* **FR-P1-05-7's row was APPROVED under D-32 on 2026-08-28** — board option 1, all eight Vision §15.2 rows approved, none deferred — so it no longer belongs in this bullet. Its row is **`Pending`: approved, never run, and NOT passed**, which is tracked as a pending row rather than as a missing one. **FR-P1-05-17 is unchanged and still has no row at all.**
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No rule here authorises creating `src/evaluation/masks.py`, `src/evaluation/metrics.py`, `scripts/07_evaluate_and_report.py` or `tests/test_common_masks.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant: R-106's memberships are proposed, not made — **including the new tier-3 set, which is a §18.2/TC-03e frozen scientific choice going to the gate as a confirmation**; R-109's scored set is FU-7 = A's ruling **as ratified by D-28**, cited not decided; D-27 is a reading of frozen text, cited not made; R-103's tolerance is the fixture manifest's, not a value fixed here.
 

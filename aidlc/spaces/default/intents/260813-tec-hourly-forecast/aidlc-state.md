@@ -71,7 +71,7 @@
 - **In Progress**: functional-design
 
 ## Runtime State
-- **Revision Count**: 17
+- **Revision Count**: 19
 
 - **Skeleton Stance**: off
 ## Phase Progress
@@ -112,7 +112,7 @@
 
 ### CONSTRUCTION PHASE
 Per unit: [TBD]
-- [-] functional-design — EXECUTE
+- [?] functional-design — EXECUTE
 - [ ] nfr-requirements — EXECUTE
 - [ ] nfr-design — EXECUTE
 - [ ] infrastructure-design — SKIP
@@ -134,7 +134,7 @@ Per unit: [TBD]
 - **Current Stage**: functional-design
 - **Next Stage**: nfr-requirements
 - **Status**: Running
-- **Last Updated**: 2026-08-29T07:08:40Z
+- **Last Updated**: 2026-08-30T13:37:22Z
 
 ## Session Resume Point
 - **Last Completed Stage**: delivery-planning

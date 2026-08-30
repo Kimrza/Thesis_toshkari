@@ -29,6 +29,37 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> ## ⛔ D-29 RULES THE `dataset_version` ENCODING — 2026-08-28 (read this before any encoding statement below)
+>
+> *(Banner added 2026-08-30, after two adversarial iterations found the D-29 correction had landed
+> in `§ Assumptions` while the rule's own Rule statement, the entity field tables and the design
+> body kept asserting the superseded state. Modelled on the G-09 banner above. Superseded text is
+> left standing everywhere, never deleted.)*
+>
+> **D-29 (2026-08-28) fixes the encoding**: `dataset_version` is the **first 12 hex characters of
+> `content_hash`**, with a **verify-on-write** uniqueness check. **Every statement below of the
+> form "the encoding is unspecified / not specified here / still unruled / no approved artifact
+> specifies one", and every instruction that stage 3.5 must stop and report ON THE ENCODING, is
+> superseded as to the encoding's status** and is left standing as the accurate record of the
+> constraint that applied when it was written.
+>
+> **What D-29 settles:** the encoding, and with it **injectivity in substance** — the
+> verify-on-write check is what establishes it — so the **never-reuse** obligation Q6=D′ retains is
+> **no longer open on the encoding**, and `verify_release` is discharged in substance. Statements
+> below that never-reuse is *"contingent on an encoding that does not yet exist"* are superseded.
+>
+> ⚠ **What D-29 does NOT settle, and what remains a §18.3 stop-and-report point for stage 3.5:**
+> **where the existing release population that verify-on-write must read back actually lives, and
+> how it is enumerated.** The release-history ledger that would have answered this was **declined
+> as drafted at Amendment C** and `ReleaseLedgerEntry` withdrawn with it, so the mechanism is
+> **specified but not yet implementable**. Three candidate surfaces are named at § Assumptions — a
+> release-root directory scan, the experiment registry's release columns, or a narrower
+> re-proposal of the declined ledger — and **none is chosen here**. Owner decision; per TE §18.3
+> stage 3.5 must **stop and report** rather than pick one.
+>
+> **Nothing else changes.** No scientific value becomes fillable, **TA-15 is NOT discharged**, and
+> TE §18.2's absolute rule stands.
+
 > ## ✳ AMENDED 2026-08-28 — GOVERNANCE REMEDIATION, `GOV-2026-08-28-FD-01` (verdict FAIL)
 >
 > Applied on the project decision owner's ruling on
@@ -617,9 +648,19 @@ and its manifest with all **fourteen** fields complete.
 > **What it does NOT provide: never-reuse.** That requires **injectivity** — different content,
 > different label — which is idempotence's converse. It holds only for an encoding faithful to
 > all 256 bits, and Q6=D′ keeps the label human-readable and citable, so it is necessarily lossy.
-> The encoding is unspecified and stage 3.5 is forbidden to choose one, so **never-reuse is an
+> ⛔ **SUPERSEDED 2026-08-29/30 by D-29 — see the "Label derivation (R-12 … ⛔ further amended by
+> D-29)" paragraph ~20 lines below, and the D-29 banner at the head of this file.** *(Marker added
+> 2026-08-30 on adversarial finding 2, Critical: this passage sat **above** the corrected R-12
+> paragraph in the same file, so a reader of the W-7 narrative met the stale claim first with no
+> forward pointer — the "heading updated, body not" pattern this file's own Review history already
+> names five times.)* **The encoding IS specified**: D-29 fixes it as the first 12 hex of
+> `content_hash` with a verify-on-write check, which establishes **injectivity in substance**, so
+> never-reuse is **no longer open on the encoding** and **W-7 may be described as compliant with
+> Q6=D′ on that point**. What stage 3.5 must still stop and report on is **where the release
+> population verify-on-write reads back lives**. Superseded text preserved:
+> ~~The encoding is unspecified and stage 3.5 is forbidden to choose one, so **never-reuse is an
 > open obligation**, listed in § Assumptions, and **W-7 must not be described as compliant with
-> Q6=D′ on that point**.
+> Q6=D′ on that point**.~~
 >
 > **Ordering** is a separate and genuine loss: information about sequence, which a function of
 > content alone does not carry and no implementation choice reaches. The requirement was changed
@@ -637,10 +678,19 @@ label in charge would elevate the weaker identifier.
 **Never overwritten (R-13).** A directory already holding a release is rejected, and
 repeated writes are **not** silently treated as successful.
 
-**Label derivation (R-12, amended 2026-08-25).** `dataset_version` is **derived from the
-release's `content_hash`**. **No exact hash-to-label encoding is specified here**, because no
-approved artifact specifies one and this stage must not invent it — stage 3.5 must not choose
-one either, and must stop and report instead. There is **no ledger and no allocation step**.
+**Label derivation (R-12, amended 2026-08-25; ⛔ further amended by D-29, 2026-08-28).**
+`dataset_version` is **derived from the release's `content_hash`** — specifically, **the first 12
+hex characters of it, with a verify-on-write uniqueness check** (**D-29**). That check is what
+establishes **injectivity in substance**, so never-reuse is no longer open on the encoding and
+`verify_release` is discharged in substance. There is **no ledger and no allocation step**.
+⚠ **The §18.3 stop-and-report obligation MOVED rather than lapsed**: stage 3.5 must stop and
+report on **where the existing release population that verify-on-write reads back lives** — the
+ledger that would have answered was declined at Amendment C, so the mechanism is specified but
+not yet implementable; three candidate surfaces are named at § Assumptions and none is chosen.
+*(Corrected 2026-08-30 on adversarial finding 1; superseded text preserved: ~~"**No exact
+hash-to-label encoding is specified here**, because no approved artifact specifies one and this
+stage must not invent it — stage 3.5 must not choose one either, and must stop and report
+instead."~~ See the D-29 banner at the head of this file.)*
 
 > *(**Superseded mechanism, preserved:** *"**Label allocation (R-12).** From a durable
 > append-only ledger at `artifacts/registry/release_history.jsonl`, **separate** from the
@@ -680,7 +730,19 @@ restated as a bare hash.
 > including its *"three artifacts, one authoritative"* reading of `services.md`, which is now
 > wrong at two. **That upstream correction has since been made** (2026-08-25, on the owner's explicit authorisation after this stage had first reported it rather than made it): `services.md` now reads "Two artifacts, one authoritative" with the ledger row removed, and `unit-of-work.md` § 1 `Owns` no longer names the ledger, both superseded wordings preserved. **Of the two Q6=D guarantees it cites, monotonicity was dropped by the
 > Q6=D′ re-answer, and never-reuse is now an open obligation on the label encoding** — see R-12
-> and § Assumptions. *(Corrected 2026-08-25 on reviewer finding M-2: this previously read "the
+> and § Assumptions. ⛔ **That second clause is SUPERSEDED 2026-08-30 by D-29 — never-reuse is
+> NOT an open obligation on the encoding.** *(Marker added on the final adversarial finding of
+> this cycle, Critical: this box's own live explanatory prose still asserted the pre-D-29 state
+> in the present tense, twenty-five lines below the corrected R-12 paragraph and at the end of
+> the very pointer — "see R-12 and § Assumptions" — that sends a reader to text saying the
+> opposite. Unlike the preserved-record box two paragraphs below, this sentence is not a labelled
+> historical quotation.)* **D-29 fixes the encoding** as the first 12 hex of `content_hash` with a
+> **verify-on-write** uniqueness check, which establishes **injectivity in substance**, so
+> never-reuse holds on the encoding and `verify_release` is discharged in substance. **Monotonicity
+> stays dropped** — that half of the sentence is untouched and correct. ⚠ **What IS open, and is
+> the surviving §18.3 stop-and-report point:** where the existing release population that
+> verify-on-write reads back lives, the ledger that would have answered having been declined at
+> Amendment C. *(Corrected 2026-08-25 on reviewer finding M-2: this previously read "the
 > two things the reversal gives up, and both are carried to the stage gate", contradicting this
 > file s own § Assumptions and the Q6 re-answer.)*
 >
@@ -938,6 +1000,35 @@ matching the story map's designation.
 - **OPEN — the exception-hierarchy obligations R-01's 2026-08-28 amendment creates.** *(Added 2026-08-28 per Recommendation 8.)* `PartitionError` is now a **fifteenth** named subclass, so the exceptions raised by other units are **nine** and `models-and-baselines` owes its declaration on the same terms as the other eight. Separately, **18** further project-defined subclasses ride R-01's any-future clause — derived, not counted from prose — and each raising unit still owes its own declaration, or the stage-entry catch lets one exit with **no `aborted` registry row**. And the **`PartitionError`/`LeakageError` taxonomy disagreement between `models-and-baselines` R-92 and `evaluation-and-comparison` R-105 is not closed by the promotion**: R-01 now states the discriminating rule those units must agree against, and whether R-105 changes its raise is their decision. `business-rules.md` § Assumptions carries all three items.
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating a module — including W-3's `aws_ai_dlc_preflight_report` and W-6's extended row, which specify contents and create nothing. Vision § 13.1 records **G-09 Agent preflight** as **Open**, owner **Supervisor**, evidence `aws_ai_dlc_preflight_report`, due *"Before any affected component is coded"*.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant. **This holds for the 2026-08-28 amendments specifically**: W-3's report contents, W-6's twenty columns and its four new refusals, the `exploratory` derivation, R-01's promotion, R-08's write mechanism, R-05's acceptance label, W-8's dated status clause, and the four mapping corrections (W-1, W-2 here; E-1, E-2 in `domain-entities.md`) are all schema, taxonomy, mechanism or citation decisions. **The one value that would be scientific — the `dataset_version` encoding — is explicitly left unruled.** *(⛔ **Superseded 2026-08-29**: D-29 ruled the encoding on 2026-08-28 — first 12 hex of `content_hash`, verify-on-write. The sentence is preserved as the accurate record of this section when it was written. What remains open is not the encoding but the **release population** verify-on-write must read back, which is its own item above and is likewise not decided here.)*
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T07:13:33Z
+**Iteration:** 1 (fresh budget after human gate rejection)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `domain-entities.md` lines 554–632 (entire `## 8. ~~ReleaseLedgerEntry~~ — WITHDRAWN` section, live body, well before the `## Review history` cutoff at line 1026) | **A whole live section restates the pre-D-29 state as current fact, with zero D-29 marker anywhere in it — a fifth site the two-iteration repair never reached.** Line 580: `"Never-reused — NOT ESTABLISHED. Contingent on a label encoding that does not yet exist."` Line 591: `"leaving the encoding unspecified and forbidding stage 3.5 to choose one."` Lines 592–593: `"never-reuse is an open obligation on whoever specifies the encoding, listed in § Assumptions, and nothing this unit produces may claim it holds."` Line 611: `"But never-reuse IS an uncovered obligation..."` Line 617: `"Never-reuse is **OPEN**, on whoever specifies the encoding — see § Assumptions."` None of these five sentences carries the `⛔`/superseded treatment applied everywhere else in this pass (the `dataset_version` field-table row 526 in the same file *was* corrected). This is the identical defect class both prior NOT-READY iterations were raised on ("sweep every REPRESENTATION of a corrected fact"), landing in a section the repair's own enumeration (banner + four named sites) did not cover — proving the sweep was scoped to the sites a prior finding named rather than derived independently, which `project.md`'s `fd-2026-08-30-sweep-derive-sites` learning names as the exact failure mode. | Add the same `⛔ SUPERSEDED 2026-08-29 by D-29` treatment used at line 526 to every one of the five sentences (or replace the whole §8 passage with a pointer to the D-29 banner), then re-derive the full list of `dataset_version`-encoding representations across all three files from scratch (grep for both `unspecified`/`not specified`/`unruled` **and** `never-reuse`/`never-reused` near `encoding`) rather than trusting the four-site list this iteration's dispatch brief inherited from iteration 2. |
+| 2 | Critical | `business-logic-model.md` lines 644–653 (inside the live W-7 workflow narrative, ~20 lines above the correctly-patched R-12 paragraph at lines 671–683) | **Self-contradiction within the same file, a few lines apart.** Lines 651–653, unmarked: `"The encoding is unspecified and stage 3.5 is forbidden to choose one, so **never-reuse is an open obligation**, listed in § Assumptions, and **W-7 must not be described as compliant with Q6=D′ on that point**."` Immediately below it, line 671 correctly reads `"Label derivation (R-12, amended 2026-08-25; ⛔ further amended by D-29, 2026-08-28)"` and states the encoding is now ruled. A reader of the W-7 narrative (which the workflow-diagram consumer reads first, per this file's own structure) meets the stale claim before the corrected one, with no forward pointer between them. This is the same "heading updated, body not" pattern this file's own Review history calls out five separate times as its own recurring defect class. | Add a `⛔ SUPERSEDED 2026-08-29 by D-29` marker to lines 648–653 pointing forward to line 671, matching the treatment given to the sibling passage at lines 634–642 one paragraph above it (which already carries "That claim was withdrawn as unsound... this roll-up was not swept with it"). |
+| 3 | Minor | `business-rules.md` line 1032 (footnote to R-11/R-08's superseded-control discussion, ~5 lines before R-12 begins) | Stale, unmarked: `"...is subsumed by R-12's injectivity obligation and is testable only once the encoding is specified; see the open item in § Assumptions."` The encoding is now specified (D-29); the open item this footnote points to is no longer the encoding but the release-population read-back mechanism. Low-traffic site (a footnote inside a preserved-quote block about a different rule's superseded control), so scored Minor rather than Major/Critical — but it is one more instance of the same unswept-representation pattern and should be corrected in the same pass as findings 1–2 rather than left for a fourth iteration. | Update the cross-reference to name the correct current open item (release-population enumeration) or mark the sentence superseded. |
+
+### Verification of the repair's stated scope (findings 1–4 from iteration 2)
+
+The banner (all three files, lines ~32–60) and the four named sites — `business-rules.md` R-12 Rule statement (line 1041), `business-logic-model.md`'s W-7 diagram/design paragraph (lines 590, 671–683), `domain-entities.md` `RegistryEvent` §13.4 row 8 (line 432), and `domain-entities.md` `ReleaseManifest` `dataset_version` row (line 526) — are all correctly patched, each carrying an explicit `⛔`/superseded marker with the D-29 ruling stated and the pre-D-29 text preserved. `business-rules.md` § Assumptions (lines 1801–1817) and `business-logic-model.md` § Assumptions (lines 966–980) both correctly carry the superseded/open-item treatment. The new "no specified release population to read back" open item is present and consistently stated in all three files. TA-15's non-discharge and G-09's unmet §18.3 preconditions are correctly and repeatedly disclosed, never overclaimed as settled. No site was found where D-29 is misread as discharging TA-15, filling a scientific value, or settling the release-population question. The repair's failure mode is scope, not method: it re-fixed the same four-site list iteration 2 named instead of independently re-deriving every representation, which is exactly why it missed `domain-entities.md` §8 (a section, not a sentence) and the W-7 narrative paragraph in `business-logic-model.md`.
+
+### Scope note
+
+Adversarial budget (~12 calls) was spent on: (a) locating every live occurrence of `D-29`/`unspecified`/`not specified`/`unruled`/`never-reuse` across the three artifacts' live bodies (excluding the appended `## Review` history sections, per the review-scope instruction), (b) confirming the banner and the four named repair sites are sound, (c) reading full context around every remaining hit to classify live-and-unmarked versus properly-superseded. Not independently re-verified this pass: the non-D-29 portions of the artifacts (rule/entity/workflow completeness generally), which prior iterations already covered and which the dispatch brief scoped this pass to the D-29 repair plus "keep hunting beyond the repair" — findings 1–3 above are what that further hunting surfaced within the available budget.
+
+### Summary
+
+The repair pattern (banner + targeted site fixes) is sound in method but was applied to a list of sites carried over from the prior finding rather than re-derived from scratch, and so missed at least one entire live section (`domain-entities.md` §8) and one live paragraph (`business-logic-model.md`'s W-7 narrative) that still assert the pre-D-29 "encoding unspecified, never-reuse open" state as current fact with no superseded marker — the identical defect class both previous iterations were rejected on.
+
+NOT-READY
 
 ## Review history
 
@@ -4794,7 +4885,7 @@ back to the owner, which is the outcome `functional-design` exists to prevent.
 
 NOT-READY
 
-## Review
+## Review — 2026-08-29 adversarial review, iteration 2 (final, superseded below)
 
 **Verdict:** NOT-READY
 **Reviewer:** aidlc-architecture-reviewer-agent
@@ -4903,3 +4994,169 @@ own to block READY per this project's severity rules, and this is the final iter
 finding-2 repair (the release-population open item) stands verified and is not itself a defect.
 
 NOT-READY
+
+## Review — 2026-08-30 adversarial re-confirmation, iteration 2 of 2 (final)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T07:18:39Z
+**Iteration:** 2 of 2 (final)
+
+### Method
+
+Re-derived the site list independently rather than trusting the dispatch brief's enumeration.
+Grepped all three artifacts (`business-logic-model.md`, `business-rules.md`, `domain-entities.md`)
+for `unspecified|not specified|unruled|NOT ESTABLISHED|not established|does not yet exist|open
+obligation|forbidden to choose|stop and report|never-reus`, excluding each file's own `## Review`
+region (line 992 in this file, 1908 in `business-rules.md`, 1057 in `domain-entities.md`), and
+read every hit's surrounding context to classify it as (a) a preserved/superseded historical
+quotation carrying a marker, (b) a correctly-current statement of the post-D-29 or
+post-release-population-item state, or (c) a live, unmarked assertion of the pre-D-29 state.
+
+### What the 2026-08-30 repair got right
+
+The four sites the prior iteration-2 finding named are now correctly repaired and internally
+consistent:
+
+- `domain-entities.md:560–584` — the section-head ⛔ banner superseding all six quoted phrases in
+  § 8, with the §18.3 obligation correctly described as **moved** (to the release-population
+  question), not lapsed.
+- `business-logic-model.md:684–692` (W-7 narrative) — ⛔ marker with a forward pointer to the
+  corrected R-12 paragraph, superseded text struck through and properly closed (`~~…~~`).
+- `business-rules.md:1233–1298` (R-11/R-08 footnote, the birthday-bound paragraph, R-12's
+  obligation item 1, the Recommendation-42 box) — all four carry ⛔/⚠ supersession markers dated
+  2026-08-28/30, correctly stating the encoding is settled while the release population read-back
+  remains open.
+- `domain-entities.md:518–530` (the R-12 field-table entry naming the `label` field) — ⛔ marker
+  with the current D-29 text as the primary statement and the pre-D-29 text preserved as a
+  parenthetical superseded quote.
+
+Balanced-strikethrough check across all three files (`~~` occurrence counts: 12 / 6 / 4, all
+even) found no dangling `~~` introduced by the repair. No site inspected makes an overclaim: no
+site reads as though D-29 discharged TA-15 (`business-rules.md:1058` still states "⚠ TA-15
+remains NOT covered"), made a scientific value fillable, settled the release-population question,
+or reinstated the withdrawn `ReleaseLedgerEntry`.
+
+### New finding — one further live, unmarked site (Critical, same defect class)
+
+`business-logic-model.md`, inside the "Amendment C DECLINED AS DRAFTED 2026-08-25" narrative box
+(the paragraph immediately preceding the "✅ Amendment C APPROVED 2026-08-24" superseded-record
+box, roughly 15 lines above the "W-8 — `resolve_platform_roots`" heading):
+
+> "**Of the two Q6=D guarantees it cites, monotonicity was dropped by the Q6=D′ re-answer, and
+> never-reuse is now an open obligation on the label encoding** — see R-12 and § Assumptions.
+> *(Corrected 2026-08-25 on reviewer finding M-2: …)*"
+
+This sentence asserts, in the present tense and with no ⛔/⚠ marker anywhere in the paragraph or
+its immediate surroundings, that never-reuse "is now an open obligation on the label encoding" —
+exactly the pre-D-29 state the rest of this file's own repair (25 lines earlier, at the W-7
+narrative, and again at R-12 in the "Label derivation" paragraph) has already superseded. It is
+not a preserved historical quotation: unlike the adjacent "✅ Amendment C APPROVED 2026-08-24" box
+two paragraphs below it, which is explicitly labelled a superseded record, this sentence is the
+box's own live, unqualified explanatory prose — the text a reader lands on when following the
+"see R-12 and § Assumptions" pointer this same box supplies. A reader who follows that pointer
+lands on a paragraph that (correctly) says the opposite.
+
+This is the same defect class the 2026-08-30 repair was dispatched to eliminate: a corrected
+fact's representation was not on the enumerated site list because no prior pass had grepped for
+it inside this particular narrative box, even though the box sits in the same file, in the same
+W-7/R-12 vicinity, as three of the four sites that were repaired. It is Critical for the same
+reason the withdrawn iteration-1 findings were: an implementer or reviewer reading this box in
+isolation is told never-reuse is unresolved, when R-12 twenty-five lines later — and D-29 itself —
+say it is resolved in substance, with only the release-population question left open.
+
+### Sites checked and found clean (not defects)
+
+- `business-logic-model.md:717` and `:705–732` — the "What the reversal costs" and "Superseded
+  mechanism, preserved" blockquote boxes. Both contain unmarked-looking pre-D-29 phrases
+  ("NOT on never-reuse… this design does not establish", "contingent on an encoding that does not
+  yet exist") but both are explicitly introduced as preserved historical quotations dated
+  2026-08-25, inside a box whose own opening line states the correction and points forward to the
+  D-29-amended R-12 paragraph. Read in context these are not live claims.
+- `business-rules.md:1298` — the "three items, not two" roll-up. Carries its own ⚠ SUPERSEDED
+  2026-08-28 marker inline, correctly scoped.
+- `domain-entities.md:1045` ((b) "Never-reuse — OPEN") — sits inside the bullet whose heading
+  (`Closed — Amendment C. Its consequences are closed EXCEPT never-reuse, which is open.`)
+  is itself dated 2026-08-25 and is a different, non-D-29-superseded fact at that point in this
+  file's history; the file's own later ⛔ banner at line 1048 supersedes it correctly two bullets
+  down.
+- `business-logic-model.md:79` and equivalents in the other two files (the repair-history table
+  row naming "the still-unruled `dataset_version` encoding recorded as open items") — dated
+  descriptions of what the 2026-08-28 amendment changed, not current-state claims; consistent with
+  this unit's annotate-in-place change-log convention.
+
+### Verdict rationale
+
+One further Critical finding — a fifth live, unmarked representation of the pre-D-29 state,
+missed by both the 2026-08-29 and 2026-08-30 repair passes — is sufficient on its own to block
+READY under this project's severity rules (`## Corrections` in `functional-design`'s own review
+history; any Critical blocks READY). This is the final scheduled iteration; the finding is
+reported for gate-level, human-directed correction per `project.md`'s standing rule against
+applying an advisory/adversarial finding to a completed artifact outside the redo-jump/owner-
+directed-fix conditions.
+
+NOT-READY
+
+## Review — 2026-08-30 (fresh budget, iteration 1)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T13:31:19Z
+**Iteration:** 1 (of max 2, fresh budget after the human gate rejection recorded above)
+
+### Scope and method
+
+Re-derived the D-29 site list independently rather than trusting the prior pass's own account.
+Grepped all three artifacts, restricted to the live region (before each file's first `## Review`
+heading — `business-logic-model.md` <979, `business-rules.md` <1885, `domain-entities.md` <1026),
+for the full pre-D-29 vocabulary named in the dispatch brief (`unspecified`, `not specified`,
+`unruled`, `NOT ESTABLISHED`, `not established`, `does not yet exist`, `open obligation`,
+`forbidden to choose`, `never-reus`, plus `dataset_version`, `D-29`, `ReleaseLedgerEntry`,
+`verify_release`, `verify-on-write`). Every hit in every file resolves to one of: (a) the live
+D-29 banner or its correlate at R-12 / the field-table row / § 8, all correctly stating the
+current fact; or (b) a superseded quotation carrying its own `⛔`/strikethrough marker pointing at
+D-29. Checked `~~` strikethrough balance in all three files (16 / 6 / 4 — all even, no dangling
+markup from the repair). Confirmed the single site the dispatch brief named as newly fixed — the
+"Amendment C DECLINED AS DRAFTED" narrative box's live explanatory prose at
+`business-logic-model.md` ~728–744 — now carries the `⛔ SUPERSEDED 2026-08-30 by D-29` marker
+(line 733) and correctly keeps monotonicity dropped while moving the open point to the
+release-population read-back. Grepped for overclaim patterns (`TA-15 … discharged/covered`,
+`ReleaseLedgerEntry … reinstated`, `release population … resolved`) — zero hits; every live TA-15
+statement still reads NOT covered, and the one `ReleaseLedgerEntry`-creation hit found
+(`domain-entities.md:591`) is a negation ("is not to be created"), not a reinstatement claim.
+
+**Conclusion on the review's central question: the defect class this pass targets — a live site
+inside the three artifacts under review asserting the pre-D-29 state without a marker — is not
+found.** All prior-iteration findings on this class, including the Critical one the previous
+`## Review` section above records, read as fixed on the current text.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `inception/application-design/services.md:304-306`, `inception/units-generation/unit-of-work.md:121` (consumed contracts, not owned by this stage) | D-29 (2026-08-28) supersedes the "never-reuse is therefore an OPEN obligation … No artifact may claim release labels are never reused" claim that this unit itself put into both upstream contracts on 2026-08-25 (the M-4 remediation, with owner authorisation, tracked at `business-logic-model.md:2270` and `business-rules.md:1294`). That 2026-08-25 correction was explicitly reported to the owner as an "upstream correction owed" before being made. No parallel report exists anywhere in the three artifacts under review for the D-29 correction: neither file's D-29 banner, § Assumptions, nor the Amendment-C consequence bullets (`business-logic-model.md` ~731, `business-rules.md:1900`, `domain-entities.md:1045`) flag that `services.md`/`unit-of-work.md` now assert a superseded fact and, per the unit's own established practice for exactly this situation (scope control forbids editing an approved Inception artifact directly), owe a report to the human. Left as-is, the two upstream contracts permanently assert the pre-D-29 "never-reuse OPEN" state with no marker and no path to correction, which is the same fact-staleness failure mode this review pass exists to catch — just one hop upstream of the three files in scope. | Add one line to each artifact's § Assumptions (or the D-29 banner) naming `services.md:304-306` and `unit-of-work.md:121` as an owed upstream correction under D-29, mirroring the M-4 precedent, so the gap is visible to the human at the gate rather than silently carried. |
+
+No Critical findings. No other Major findings — the D-29 sweep inside the three artifacts under
+review is, on this independent re-derivation, complete: no unmarked pre-D-29 site, no
+overclaim beyond what D-29 actually settles, no dangling strikethrough.
+
+### Suggestions (non-blocking)
+
+- The remediation-history apparatus in these three files (dated superseded-quotation chains,
+  `⛔`/`✅` markers, cross-file roll-up counts) has grown very deep — five-plus nested corrections
+  on some sentences. It is internally consistent on this pass, but each additional layer raises
+  the cost of the next sweep; consider, at the next practices-affirmation gate, whether some of
+  the fully-resolved historical chains (e.g. the Amendment A/B/C ruling narrative, now stable
+  since 2026-08-25) can be compacted into a single dated summary rather than carried verbatim
+  forever.
+
+### Coverage limits
+
+This pass re-verified the D-29 sweep (the stage's stated focus) exhaustively via full-file grep
+across all three artifacts' live regions, and spot-checked the two named upstream contracts for
+the one cross-reference this unit's own text pointed at. It did not re-review the remainder of
+the functional design (entity/rule/workflow correctness outside the D-29 fact) beyond what the
+grep passes surfaced incidentally; that ground was covered by the prior iterations recorded above
+and is not re-litigated here absent a reason to doubt it.
+
+READY

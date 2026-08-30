@@ -599,6 +599,17 @@ correct numeral is exactly the failure `project.md` § Corrections records. **Ow
 > **Counts derived 2026-08-28, printed before assertion.** Numbered entity sections **10**
 > (§ 1…§ 10) — unchanged, none added or removed. `provenance_class` **9**, `derived_only` **7**,
 > `producing_interpreter` **3** across this stage's **48** artifacts, all still inside this unit.
+> ⛔ **REBASED 2026-08-30 — the "all still inside this unit" clause is SUPERSEDED; the field
+> reaches TWO units.** *(Corrected on the second adversarial iteration's finding F2, Critical: the
+> 2026-08-28 rebase was swept into five sites and **not into this change-log paragraph**, which
+> then sat directly beneath a 2026-08-29 receipt certifying "no line above this marker was touched
+> by this pass" — so the stale claim was self-certified as current.)* **Current figures, a dated
+> observation and never a live invariant** (derived over the 48 stage artifacts immediately before
+> the rebase note was written; writing such a note adds occurrences of each token):
+> `provenance_class` **43**, `derived_only` **38**, `producing_interpreter` **17**, split
+> `acquisition` **25 / 21 / 11** and `inventory-and-registry` **18 / 17 / 6** — that unit acquired
+> the field under `GOV-2026-08-28-FD-01` **Recommendation 29**. **The two stable facts: the fields
+> reach exactly 2 units, and `foundation` carries all three ZERO times.**
 > **No scientific value was decided.** **G-09 remains unsigned**; **BLK-07's authorization limb
 > remains open**; membership stays derived from **record timestamps**, never a directory name.
 

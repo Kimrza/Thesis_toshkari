@@ -1340,3 +1340,35 @@ leaving a reader of R-50 alone with the pre-remediation, single-unit picture. It
 misstate a number, does not affect a buildable negative control, and does not reopen a
 decision or a governed value — it is a one-clause completion of a sweep that reached three of
 four representations. **READY.**
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T11:58:18Z
+**Iteration:** 1 (fresh budget after a human gate rejection)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Suggestion | `domain-entities.md`, `business-rules.md`, `business-logic-model.md` (whole unit) | `grep -i "phase_id\|source_id\|target_definition_id"` returns zero hits in this unit's three artifacts. `project.md` § Mandated requires stamping `phase_id`, `source_id` and `target_definition_id` on "every dataset, prediction, mask and comparison"; this unit owns the source inventory and station registry, which are arguably datasets in that sense. Not raised as a defect because the rule's own examples (dataset/prediction/mask/comparison) read more naturally as Phase-1/Phase-2 scientific artifacts than registry metadata, so applicability is genuinely arguable rather than clearly violated | Confirm at the gate whether the station registry / source inventory falls under this stamp rule; if so, add the three fields to the relevant entity/table before the next stage consumes it |
+
+### Re-verification of the instructed check (R-50's `provenance_class` constraint box)
+
+Re-derived the site list independently rather than trusting the prior pass's enumeration: `grep -c provenance_class` across the three artifacts = 36 occurrences. Every 9/7/3-adjacent hit resolves to the sites the dispatch names — `business-rules.md:551` (R-50's box), `domain-entities.md:332` and `:528` (§6/§7), plus review/Open prose in `business-logic-model.md`. Read `business-rules.md:548-575` directly: R-50's box now carries the `⚠ … added 2026-08-30 on adversarial finding 1` clause, states the current split (`provenance_class` 43 / `derived_only` 38 / `producing_interpreter` 17; `acquisition` 25/21/11; this unit 18/17/6), and both stable facts ("reaches exactly 2 units"; `foundation` carries all three zero times) — matching the two sibling sites (`domain-entities.md:332-343`, `:528`) character-for-character in content and framing. `grep -niE "all in this unit|confined|no other unit|0 in every other unit"` surfaced no live site asserting the pre-remediation single-unit state as a current fact — every such hit is explicitly bracketed "pre-remediation" / "as found at the opening of this remediation," or belongs to the separate, already-retracted "assigned to no other unit" (N3/M2) thread. **The prior Minor finding is discharged.**
+
+### Other adversarial checks (this unit's subject matter)
+
+- **NFR-AUD-01 registry writes (atomic/append-safe, visible failed runs, silent reruns, `code_commit`).** `business-logic-model.md:1323` correctly scopes these to `foundation`'s `src/data/release.py` write path — `unit-of-work.md` §4's `Owns` list for this unit is source inventory, station registry, migration, schema validation, coverage/G-P1A audit, with no experiment-registry write path. This unit's own audit mechanism (W-6/R-50's per-artifact access-log row, `locked_test_accessed = True` confirmed at `business-logic-model.md:407`, `business-rules.md:409`, `domain-entities.md:305`, tested by three negative controls per `functional-design-questions.md:165`) is the discipline that does apply, and it is present and tested. No path to a silent rerun, a vanished failed-run row, or an overwrite-instead-of-append found in this unit's own design.
+- **`data07_caveat` coherence.** Sourced from `provenance_class`, mapped `derived_only → populated / full → absent`, stated identically at R-50, R-51, §6 and §7, cross-verified against `acquisition/business-rules.md:339` (R-36, which fixes `derived_only` for the twelve pre-TC-06 months) — consistent, no fabricated enum value.
+
+### Coverage limits
+
+Budget-bound adversarial pass (6 tool calls). Did not re-derive the 7/2/3/10/9 requirement/rule/section counts (unchanged from the prior terminal pass and not touched by this iteration's fix), and did not independently re-open the one permitted sibling spot-check (`acquisition`'s R-50 mirror) since this unit's own three sites already resolve cleanly and the prior pass's cited cross-read (`acquisition/business-rules.md:800`, `domain-entities.md:538`) was not contradicted by anything found here.
+
+### Summary
+
+The one instructed check — R-50's constraint box — is verified fixed: it now carries the current cross-unit figures and both stable facts, consistent with its two siblings, and no live site anywhere in the unit still asserts the pre-remediation single-unit state as current. No Critical or Major defect found against this unit's registry/audit-trail or DATA-07 design. One Suggestion (phase_id/source_id/target_definition_id applicability) is left for the human to rule on at the gate.
+
+READY

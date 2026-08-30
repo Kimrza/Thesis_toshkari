@@ -884,7 +884,19 @@ indistinguishable, months later, from an approved one, and §19 rows are owned b
 > 5 Class 2) — unchanged. Negative-control blocks in this file: **14 → 15**. In-unit field
 > counts across this stage's 48 artifacts: `provenance_class` **9**, `derived_only` **7**,
 > `producing_interpreter` **3**, `reanalysed-value check` **3** — all still confined to this
-> unit, which is precisely what Recommendation 28's Open item records. **No scientific value
+> unit, which is precisely what Recommendation 28's Open item records. ⛔ **REBASED 2026-08-30 —
+> the "all still confined to this unit" clause is SUPERSEDED; the field reaches TWO units.**
+> *(Corrected on the second adversarial iteration's finding F2, Critical: the 2026-08-28 rebase
+> was swept into five sites and **not into this change-log paragraph**, which then sat directly
+> beneath a 2026-08-29 receipt certifying "no line above this marker was touched by this pass" —
+> so the stale claim was self-certified as current.)* **Current figures, a dated observation and
+> never a live invariant** (derived over the 48 stage artifacts immediately before the rebase note
+> was written; writing such a note adds occurrences of each token): `provenance_class` **43**,
+> `derived_only` **38**, `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11** and
+> `inventory-and-registry` **18 / 17 / 6** — that unit acquired the field under
+> `GOV-2026-08-28-FD-01` **Recommendation 29**. **The two stable facts: the fields reach exactly
+> 2 units, and `foundation` carries all three ZERO times.** The second is what Recommendation 28's
+> Open item actually rests on, and it is **unchanged**, so the item stays open. **No scientific value
 > was decided**: not a release grade, not a feature-contract grade requirement, not a release
 > field. **G-09 remains unsigned**; **BLK-07's authorization limb remains open**; membership
 > stays derived from **record timestamps**, never from a directory name (D-2 / ML-07 / TEC-09).

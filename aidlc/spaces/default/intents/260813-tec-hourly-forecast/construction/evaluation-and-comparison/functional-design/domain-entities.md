@@ -60,7 +60,7 @@ this stage.**
 - `../features-and-splits/functional-design/domain-entities.md` — `Transform` (`transform_id`, `partition_id`) and `FeatureBundle`, the shapes R-103's half B extends, pending adoption.
 - `../models-and-baselines/functional-design/business-rules.md` — R-92's provenance-agreement fields and alignment key, mirrored on the mask.
 - `../external-products/functional-design/business-rules.md` — R-60 (the emitted sentence and `gim_network_overlap_flag`), consumed by § 7.
-- `../foundation/functional-design/business-rules.md` — R-01: the `IntegrityError` hierarchy, its `src/data/config.py` base, and the *"any future integrity-related exception"* clause § 8 places this unit's exceptions under. **Its enumeration reads "all fourteen" on disk as of 2026-08-28; `PartitionError` is its fifteenth on the owner's Recommendation 8 ruling, an amendment `foundation` owns and has not yet written** (§ 8 discloses this rather than presuming it).
+- `../foundation/functional-design/business-rules.md` — R-01: the `IntegrityError` hierarchy, its `src/data/config.py` base, and the *"any future integrity-related exception"* clause § 8 places this unit's exceptions under. ~~**Its enumeration reads "all fourteen" on disk as of 2026-08-28; `PartitionError` is its fifteenth on the owner's Recommendation 8 ruling, an amendment `foundation` owns and has not yet written**~~ ⚠ **SWEPT 2026-08-30 — SUPERSEDED; this site was one of five the 2026-08-28 sweep missed** *(adversarial finding 1, Critical)*. **`foundation` R-01 HAS been amended and now reads FIFTEEN**, `PartitionError` promoted into the enumeration, the count derived and printed, `InverseTransformError` explicitly disposed under the *"any future integrity-related exception"* clause rather than admitted as a sixteenth. Verified at `foundation/functional-design/business-rules.md` R-01. **§ 8 may cite the fifteen-exception enumeration as written, not as pending.**
 - `aidlc/spaces/default/memory/project.md` § Mandated — the `phase_id`/`source_id`/`target_definition_id` stamp on *"every dataset, prediction, mask **and comparison**"*, the estimand, the disclosures.
 - **Added 2026-08-28:** `governance/reviews/GOV-2026-08-28-FD-01.md` Recommendations **6, 7, 8, 16, 19, 35, 41**; `evidence/DECISIONS.md` **D-27** and **D-28**, read in full; Vision **§2.4** tier 3, **§8.4**'s model table (M-04/M-05/M-06) and **§8.9**'s reported-exclusions and matched-window clauses; `component-methods.md:595-600` (`apply_transforms` removed) and `:894` (the fourteen-exception `[assumption]`); `models-and-baselines/…/business-rules.md` R-92 (`PartitionError` vs `LeakageError`); `foundation/…/business-rules.md` R-01 as it stands on disk (still "all fourteen"). ⚠ **SWEPT 2026-08-28 on the resume pass — this disk-state claim is SUPERSEDED.** `foundation` R-01 **has been amended** and now reads **fifteen**, with `PartitionError` promoted into the enumeration, the count restated as **derived and printed** rather than carried in prose, and `InverseTransformError` **explicitly disposed** — not a sixteenth, riding R-01's *"any future integrity-related exception"* clause, on the stated ground that the two units raising it agree on its condition and meaning, so nothing needs reconciling. Verified at `foundation/functional-design/business-rules.md` R-01 (the amendment row, the superseded-wording box, and the `InverseTransformError` box). **The dependency this sentence recorded is discharged; any open item stated alongside it is NOT** — see the sentence it accompanies.
 - `functional-design-questions.md` (**Q1 through Q9**, answered), `business-rules.md`, `business-logic-model.md`.
@@ -347,12 +347,26 @@ against the wrong exam rather than a provenance disagreement among members.
 > an exception outside the declared hierarchy exits with **no `aborted` registry row**, the
 > NFR-AUD-01 failure `foundation` documented and fixed once already.
 >
-> **Disclosed, not glossed:** the R-01 amendment is **`foundation`'s to author and is not on
+> ⚠ **SWEPT 2026-08-30 — THE PARAGRAPH BELOW IS SUPERSEDED. The amendment IS on disk.**
+> *(Corrected on adversarial finding 1, Critical. This box is one of **five** sites the
+> 2026-08-28 sweep missed while correcting three others — and it is this section's own
+> **dedicated correction box**, so a reader arriving at § 8 was told the amendment was pending
+> while a reader of the sibling W-4 box was told it was done. An active internal contradiction
+> on whether `PartitionError` belongs to `foundation`'s hierarchy — the very fact this
+> section's exception table and the stage-entry catch depend on.)* **`foundation` R-01 has
+> been amended and now reads FIFTEEN**, `PartitionError` promoted, the count derived and
+> printed, `InverseTransformError` explicitly disposed under the *"any future integrity-related
+> exception"* clause rather than admitted as a sixteenth. Verified at
+> `foundation/functional-design/business-rules.md` R-01. **This section cites the amended
+> enumeration as WRITTEN.** Unchanged and still owed elsewhere: **`statistical-inference`
+> R-113 precondition 2** imports R-105 *"as written"* and still raises `LeakageError` for a
+> `partition_id` mismatch; that correction is its owner's and is raised at the gate.
+>
+> ~~**Disclosed, not glossed:** the R-01 amendment is **`foundation`'s to author and is not on
 > disk yet** — derived 2026-08-28, `foundation`'s `business-rules.md` R-01 still reads *"All
 > fourteen project-defined exceptions"* and omits `PartitionError`. This section cites the
 > **amended** enumeration on the owner's ruling and claims nothing about what R-01 currently
-> says. **`statistical-inference` R-113 precondition 2** imports R-105 *"as written"* and still
-> raises `LeakageError` for a mismatch; that correction is its owner's and is raised at the gate.
+> says.~~
 
 Every raise carries the affected file or resource and the violated expectation — R-01's
 constructor contract, enforced by construction. The stage-entry catch (`foundation` R-10)
@@ -366,12 +380,17 @@ including the unit-local one, which is exactly the negative control R-01 specifi
 | Requirement | Entities | Acceptance |
 |---|---|---|
 | FR-P1-04-7 | § 1, § 2, § 3 | WS-16 (primary), TA-11 (supporting) |
-| FR-P1-05-7 | § 4, § 6 | `UNTESTED` — no acceptance row; § 4's machine-readable convention is what makes a future row assertable (stage 3.2, Vision §15.2) |
+| FR-P1-05-7 | § 4, § 6 | ⚠ **`Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed.** § 4's machine-readable convention is what makes the row assertable. *(Corrected 2026-08-30, adversarial finding 2, Critical; superseded: "`UNTESTED` — no acceptance row; … a future row assertable (stage 3.2, Vision §15.2)". D-32 approved all eight Vision §15.2 rows, board option 1, none deferred, so stage 3.2 no longer needs to propose this one.)* |
 | FR-P1-05-17 | § 3 (the frozen bundle), § 5 (the ordering consumed) | `UNTESTED` — the freeze timestamp's precedence is the G-05 record's to produce |
 | NFR-FAIR-01 | § 1, § 2 (matched-windows fields), § 3 | WS-16, TA-11 |
 
-**4 requirements, 2 untested** (FR-P1-05-7, FR-P1-05-17) — derived from the story map's
-rows. **8 entities**, derived 2026-08-28 by counting this file's numbered sections
+**4 requirements, 1 with no acceptance row** (FR-P1-05-17) and **1 with an approved-but-unrun
+row** (FR-P1-05-7, `Pending` under **D-32**) — derived from the story map's rows. ⚠ *(Corrected
+2026-08-30 on adversarial finding 2, Critical; superseded: "**4 requirements, 2 untested**
+(FR-P1-05-7, FR-P1-05-17)". Both remain unevidenced, so the count of requirements carrying no
+result is still **2** — but the two are now in **different** states, and collapsing them hides
+that D-32 approved one of the rows. **Neither is passed.**)* **8 entities**, derived 2026-08-28
+by counting this file's numbered sections
 (§ 1…§ 8 — unchanged by the remediation, which widened five sections and added none).
 
 ## Assumptions & Open Questions
@@ -380,7 +399,7 @@ rows. **8 entities**, derived 2026-08-28 by counting this file's numbered sectio
 - **[assumption]** B-01 and C-01 are producible as `Prediction`s with `seed = None`, generated-not-trained provenance, stamped with the scored partition and the reserved literal `untransformed` (§ 6, R-105).
 - **[assumption]** The declared fixture tolerance for the round-trip control lives in `tests/fixtures/<fixture_id>/fixture_manifest.yaml` (§15.2) — no tolerance value is decided here. **The control itself is no longer hosted in § 6**: it relocated to `src/features` with R-103's 2026-08-28 narrowing, because `src/evaluation` no longer obtains an object exposing `apply`.
 - **Verification obligations owned here:** the deterministic-`mask_id`, once-only, pairwise and **reporting-surface presence** controls (§ 2, § 3); the orientation/weighting fixtures, unregistered-mask raise and **four-stamp presence/agreement** control (§ 4); the receipt absence/mismatch/ordering and second-write controls (§ 5); the unresolvable-id control (§ 6 — **the round-trip control is the co-owner's**); the completeness, `beats_model`, disclosure-presence and **overlap-audit existence and ordering** tests (§ 7); R-01's fresh-subclass catch control for `InverseTransformError` (§ 8).
-- **Governance dependencies owned outside:** the co-owner's adoption of § 6's half B **as narrowed** (the gate; BLK-08 stays open for both owners until then, and **the import edge it needs is unauthorised** per D-27); the § 1 membership confirmation for **all three** sets (student/supervisor); **`foundation`'s amendment of R-01 to fifteen exceptions** (§ 8, Recommendation 8); **`statistical-inference`'s correction of R-113 precondition 2** to raise `PartitionError` on a `partition_id` mismatch; **`regimes-diagnostics-reporting`'s printing of § 2's five reporting values and its tier-3 breakdown row**; **the `project.md` § Mandated wording correction on the GIM disclosure trigger, at the §13 learnings ritual** (no memory file is edited here); BLK-03/BLK-04/BLK-09's limbs at their owning units; acceptance rows for FR-P1-05-7 and FR-P1-05-17 (stage 3.2, Vision §15.2); the G-05 freeze itself, and **D-28's owed revised split manifest** (Supervisor).
+- **Governance dependencies owned outside:** the co-owner's adoption of § 6's half B **as narrowed** (the gate; BLK-08 stays open for both owners until then, and **the import edge it needs is unauthorised** per D-27); the § 1 membership confirmation for **all three** sets (student/supervisor); ~~**`foundation`'s amendment of R-01 to fifteen exceptions** (§ 8, Recommendation 8)~~ ⚠ **DISCHARGED, swept 2026-08-30** *(adversarial finding 1, Critical)* — R-01 **has been amended and reads FIFTEEN**; no longer owed. **`statistical-inference`'s correction of R-113 precondition 2** to raise `PartitionError` on a `partition_id` mismatch **remains owed**; **`regimes-diagnostics-reporting`'s printing of § 2's five reporting values and its tier-3 breakdown row**; **the `project.md` § Mandated wording correction on the GIM disclosure trigger, at the §13 learnings ritual** (no memory file is edited here); BLK-03/BLK-04/BLK-09's limbs at their owning units; ~~acceptance rows for FR-P1-05-7 and FR-P1-05-17 (stage 3.2, Vision §15.2)~~ ⚠ **narrowed 2026-08-30** *(adversarial finding 2)*: **FR-P1-05-7's row was APPROVED under D-32** and is no longer owed — `Pending`, never run. **Only FR-P1-05-17's row remains owed**; the G-05 freeze itself, and **D-28's owed revised split manifest** (Supervisor).
 - **Open — BLK-08, BLK-03 ↓, BLK-04 ↓, BLK-09 ↓ are exit conditions on this stage.** Nothing in this file closes any of them; no implementation may proceed while any stands.
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. These shapes are design only; no module, dataclass or test is created.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant: D-27 and D-28 are **cited**, not made, and the tier-3 membership is **proposed** to the gate as a §18.2/TC-03e frozen scientific choice.

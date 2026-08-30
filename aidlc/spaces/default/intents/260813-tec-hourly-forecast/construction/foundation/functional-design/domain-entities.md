@@ -29,6 +29,36 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Depends on** — (dependency root)
 
+> ## ⛔ D-29 RULES THE `dataset_version` ENCODING — 2026-08-28 (read this before any encoding statement below, INCLUDING the entity field tables)
+>
+> *(Banner added 2026-08-30, after two adversarial iterations found the D-29 correction had landed
+> in `§ Assumptions` while **`RegistryEvent`'s §13.4 field-table row and `ReleaseManifest`'s own
+> attribute-table definition of `dataset_version`** — the entity schema an implementer reads
+> first — still described the encoding as unspecified. Modelled on the G-09 banner above.
+> Superseded text is left standing everywhere, never deleted.)*
+>
+> **D-29 (2026-08-28) fixes the encoding**: `dataset_version` is the **first 12 hex characters of
+> `content_hash`**, with a **verify-on-write** uniqueness check. **Every statement below of the
+> form "the encoding is unspecified / not specified here / still unruled / no approved artifact
+> specifies one", and every instruction that stage 3.5 must stop and report ON THE ENCODING, is
+> superseded as to the encoding's status** and is left standing as the accurate record of the
+> constraint that applied when it was written. **This governs the § 8 `ReleaseManifest` attribute
+> table, the `RegistryEvent` §13.4 field table, and this file's § Assumptions alike.**
+>
+> **What D-29 settles:** the encoding, and with it **injectivity in substance** — the
+> verify-on-write check is what establishes it — so the **never-reuse** obligation Q6=D′ retains is
+> **no longer open on the encoding**, and `verify_release` is discharged in substance.
+>
+> ⚠ **What D-29 does NOT settle, and what remains a §18.3 stop-and-report point for stage 3.5:**
+> **where the existing release population that verify-on-write must read back actually lives, and
+> how it is enumerated.** The ledger that would have answered this was **declined as drafted at
+> Amendment C** and `ReleaseLedgerEntry` withdrawn (§ 8) with it, so the mechanism is **specified
+> but not yet implementable**. Three candidate surfaces are named at § Assumptions and **none is
+> chosen here**. Owner decision; per TE §18.3 stage 3.5 must **stop and report**.
+>
+> **Nothing else changes.** No scientific value becomes fillable, **TA-15 is NOT discharged**, and
+> TE §18.2's absolute rule stands.
+
 > ## ✳ AMENDED 2026-08-28 — GOVERNANCE REMEDIATION, `GOV-2026-08-28-FD-01` (verdict FAIL)
 >
 > Applied on the project decision owner's ruling. **No dated box, superseded record or `## Review`
@@ -399,7 +429,7 @@ FR-P1-05-13 enumerates the identical twenty.
 | 5 | `code_commit` | `str` | git HEAD. **Populated on every row**, asserted — FR-P1-05-13's second criterion |
 | 6 | `environment_lock_hash` | `str` | Hash **over** § 5's eight `RunRecord` fields. **Populated on every row**, asserted |
 | 7 | `platform` | `str` | `kaggle` \| `local` (TC-03c); from `ConfigSnapshot.platform` |
-| 8 | `dataset_version` | `str` | The §13.3 release label. **Not authoritative** — identity is `content_hash` (R-11); **its encoding is an open owner decision** (R-12) |
+| 8 | `dataset_version` | `str` | The §13.3 release label. **Not authoritative** — identity is `content_hash` (R-11). ⛔ **Encoding RULED by D-29 (2026-08-28): the first 12 hex characters of `content_hash`, with a verify-on-write uniqueness check** *(corrected 2026-08-30; superseded: "**its encoding is an open owner decision** (R-12)")*. What stays open is **not** the encoding but **where the release population verify-on-write reads back lives** — see the banner at the head of this file |
 | 9 | `fold_id` | `str` | The frozen fold this run used |
 | 10 | `mask_id` | `str` | The comparison-wide mask (NFR-FAIR-01) |
 | 11 | `feature_set_id` | `str` | The frozen feature manifest |
@@ -485,7 +515,11 @@ population rather than mere presence.
 > *(Authority corrected 2026-08-25 on adversarial reviewer finding M-1, which was Major. This
 > section previously read `**Q6 = D.**` and its `label` row read *"Monotonic, human-readable"* —
 > **the entity contract stage 3.5 implements from**, telling an implementer the field is
-> monotonic while R-12 tells them the encoding is unspecified and they must stop and report. Q6
+> monotonic while R-12 tells them the encoding is unspecified and they must stop and report. ⛔ *(That
+> second clause is **superseded 2026-08-30 by D-29** — marker added on adversarial finding 1: the
+> encoding IS specified, first 12 hex of `content_hash` with verify-on-write, so R-12 no longer
+> tells an implementer to stop and report **on the encoding**. The stop-and-report point moved to
+> the release population the check reads back.)* Q6
 > was re-answered as **D′**, which states verbatim "Drop 'monotonic.'" The sweep missed this
 > because three sites asserted *"R-11 is unchanged"* — true of R-11's substance, false of its
 > text, and the assertion stood where the check should have been.)*
@@ -493,7 +527,7 @@ population rather than mere presence.
 | Attribute | Type | Meaning |
 |---|---|---|
 | `content_hash` | `str` | **AUTHORITATIVE identity.** SHA-256 over the canonical representation **specified in `business-rules.md` R-11 (decided 2026-08-25)**: RFC 8785 canonical JSON of the twelve included caller-supplied fields — **array-valued fields sorted lexicographically by the RFC 8785 serialization of their elements before serializing** (F-1, 2026-08-25: JCS does not reorder arrays, and five included fields are arrays) — excluding `dataset_version` (the label), `created_at_utc` (volatile — identical content re-released later reproduces the same identity), and `content_hash` itself |
-| `dataset_version` | `str` | Human-readable, for review and citation. **Derived from `content_hash`, and NOT authoritative.** The exact hash-to-label encoding is **not specified** by any approved artifact; per TE §18.3 stage 3.5 must **stop and report** rather than choose one — see § Assumptions. *(Superseded 2026-08-25: `label` — "Monotonic, human-readable, for review and citation. **Derived and NOT authoritative**". "Monotonic" was dropped by Q6=D′; the field is named `dataset_version` in W-7 and R-12, and is named so here for consistency.)* |
+| `dataset_version` | `str` | Human-readable, for review and citation. **Derived from `content_hash`, and NOT authoritative.** ⛔ **Encoding RULED by D-29 (2026-08-28): the FIRST 12 HEX CHARACTERS of `content_hash`, with a verify-on-write uniqueness check**, which is what establishes injectivity in substance and discharges `verify_release` *(corrected 2026-08-30; superseded: "The exact hash-to-label encoding is **not specified** by any approved artifact; per TE §18.3 stage 3.5 must **stop and report** rather than choose one")*. **The §18.3 stop-and-report point has MOVED, not vanished**: what 3.5 must stop and report on is now **where the existing release population that verify-on-write reads back lives** — the ledger that would have answered was declined at Amendment C. See the banner at the head of this file and § Assumptions. *(Superseded 2026-08-25: `label` — "Monotonic, human-readable, for review and citation. **Derived and NOT authoritative**". "Monotonic" was dropped by Q6=D′; the field is named `dataset_version` in W-7 and R-12, and is named so here for consistency.)* |
 | §13.3 fields — **all fourteen, enumerated** | — | `dataset_version`; `created_at_utc`; `source_manifest_id`; **`source_files`, whose own six items are specified by FR-P1-01-2 and are deliberately NOT restated in reduced form here**; the whole **`processing`** group — phase and target-definition ID, provider experiment/kindat, parameters, the station-coordinate-to-cell rule, selected cell bounds and hourly aggregation; `schema_version`; `units`; `row_counts`; `exclusions_qc_summary`; `fold_ids`; `mask_ids`; `feature_set_ids`; `output_files`; `change_record_id` |
 
 > *(Row corrected 2026-08-25 on adversarial residual r-3 of the eighth-redo iteration 2.
@@ -522,6 +556,33 @@ behaviour would require explicit authorisation through change control, and none
 has been sought.
 
 ## 8. ~~`ReleaseLedgerEntry`~~ — **WITHDRAWN 2026-08-25. Amendment C declined as drafted.**
+
+> ## ⛔ EVERY NEVER-REUSE / ENCODING STATEMENT IN THIS WHOLE SECTION IS SUPERSEDED BY D-29 (2026-08-28)
+>
+> *(Marker added 2026-08-30 on adversarial finding 1, Critical. This entire section — not one
+> sentence but the whole of § 8 — went on asserting the pre-D-29 state as current fact while the
+> `dataset_version` field-table row **25 lines earlier in this same file** had already been
+> corrected. It was missed because the two prior repair passes fixed the sites the findings
+> enumerated instead of re-deriving every representation, which is exactly the failure
+> `project.md`'s `fd-2026-08-30-sweep-derive-sites` learning names.)*
+>
+> **D-29 fixes the encoding**: `dataset_version` = the **first 12 hex characters of
+> `content_hash`**, with a **verify-on-write** uniqueness check, which is what establishes
+> **injectivity in substance**. **Therefore, throughout this section:** *"Never-reused — NOT
+> ESTABLISHED"*, *"contingent on a label encoding that does not yet exist"*, *"leaving the
+> encoding unspecified and forbidding stage 3.5 to choose one"*, *"never-reuse is an open
+> obligation on whoever specifies the encoding"*, *"never-reuse IS an uncovered obligation"* and
+> *"Never-reuse is **OPEN**"* are **ALL superseded as to the encoding and its injectivity**, and
+> are left standing as the accurate record of the constraint that governed this withdrawal when it
+> was written.
+>
+> ⚠ **What is NOT superseded, and what this section's reasoning correctly anticipated:** D-29's
+> verify-on-write must read back **the existing release population**, and **no artifact says where
+> that population lives or how it is enumerated** — because the ledger that would have answered is
+> precisely what this section records as withdrawn. The mechanism is **specified but not yet
+> implementable**; three candidate surfaces are named at § Assumptions and none is chosen. Per TE
+> §18.3 stage 3.5 must **stop and report**. **The §18.3 obligation moved here; it did not lapse.**
+> **TA-15 is NOT discharged**, and the entity stays withdrawn — D-29 reinstates nothing.
 
 > ## ⛔ THIS ENTITY IS WITHDRAWN — IT IS NOT PART OF THE DESIGN
 >

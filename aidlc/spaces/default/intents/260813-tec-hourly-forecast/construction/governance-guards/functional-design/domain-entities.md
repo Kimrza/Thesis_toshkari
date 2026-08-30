@@ -85,7 +85,7 @@ graph TD
   IE["IntegrityError<br/>(foundation base)"]
   DX["DriverExclusionList<br/>(4 enumerated classes)"]
   PX["PHASE1_EXCLUDED_FIELDS<br/>(D-17, 8 exclusions)"]
-  EX["RESTRICTED_LITERAL_EXEMPT_MODULES<br/>(4 members, asserted exactly)"]
+  EX["RESTRICTED_LITERAL_EXEMPT_MODULES<br/>(5 members, asserted exactly)"]
 
   CS -->|"config-section digests"| TM
   PS -->|"own digest, stored externally"| TM
@@ -112,7 +112,12 @@ December scan does *not* treat as a hit, across four enumerated classes.
 `PHASE1_EXCLUDED_FIELDS` carries D-17's eight exclusions and raises when a Phase 1 frame
 holds one. `RESTRICTED_LITERAL_EXEMPT_MODULES` bounds which modules may hold the
 restricted-root literal in the static one-door check, and a member that reads content
-beneath the root without a prior durable access row fails. Any of the import limb, a log or
+beneath the root without a prior durable access row fails. **Its membership is FIVE**
+(⛔ the diagram node above read `(4 members …)` until 2026-08-30 and is corrected; see § 10's
+correction box for the two counting conventions — **five** members in addition to the chokepoint
+`src/data/locked_test.py`, which is the **six** R-28's box counts. Member 5,
+`scripts/merge_coverage_year.py`, is **not a test**, which is why membership is an exact
+enumerated list and never a `tests/` directory predicate). Any of the import limb, a log or
 durability failure, unregistered reuse, or a short or hollow key list at freeze raises an
 `IntegrityError` subclass.
 
@@ -750,7 +755,7 @@ how many requirements exist or which of them has a row. **Entities: 8 → 10.**
 >
 > | Item | Entity | What changed |
 > |---|---|---|
-> | **Recommendation 2** (BLOCKER, `VAL-02`, Validation Auditor **veto**) — board option 1 | **§ 7**, new **§ 10** | § 7's mechanism narrowed to admit a bounded, **enumerated `tests/` exemption**; new § 10 `RESTRICTED_LITERAL_EXEMPT_MODULES` carries the **4 members** with each one's route for content reads, the exact-membership assertion, and the RES-04 composition. Member 1's route answers what `features-and-splits` R-82 left open |
+> | **Recommendation 2** (BLOCKER, `VAL-02`, Validation Auditor **veto**) — board option 1 | **§ 7**, new **§ 10** | § 7's mechanism narrowed to admit a bounded, **enumerated `tests/` exemption**; new § 10 `RESTRICTED_LITERAL_EXEMPT_MODULES` carries the **4 members** with each one's route for content reads, the exact-membership assertion, and the RES-04 composition. Member 1's route answers what `features-and-splits` R-82 left open. ⛔ *(Dated 2026-08-28 record of what this recommendation delivered; the figure is **superseded** — the 2026-08-28 full-repository sweep found a fifth member, `scripts/merge_coverage_year.py`, and § 10 now carries **5**. Marked 2026-08-30; the row is left as written because it records the remediation as performed.)* |
 > | **Recommendation 37** (`TEC-08`) — board option 1 | new **§ 9**, **§ 8** table | New § 9 `PHASE1_EXCLUDED_FIELDS` carries **D-17's 8 exclusions** with the §7.0 mapping; § 8's `PhaseBoundaryError` row now names it instead of §7.0's five classes |
 > | **Recommendation 44(b)** (`VAL-08`) — board option 2 | **§ 5** | The driver exclusion is **enumerated at 4 classes** with per-class December figures, two of them previously unenumerated and already on disk; the custody-versus-licence distinction and R-123's `RegimeError` control stated |
 >

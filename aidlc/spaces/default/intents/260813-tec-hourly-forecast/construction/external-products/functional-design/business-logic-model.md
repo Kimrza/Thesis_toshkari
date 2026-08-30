@@ -1343,7 +1343,13 @@ completion sentence is corrected in place (no "seven … this pass"); the Q&A he
 sentence's end; the row-2 note stands **outside** the three-column table GFM would have dropped it
 from; and the Carried-to-the-gate list **strikes the retired § 6 item**. Zero live instances of the
 closed-conflict claim remain outside dated records and review quotations. **G-09 remains
-unsigned.**
+unsigned.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** *(annotation added 2026-08-30 — the one
+live occurrence in this file the 2026-08-29 pass missed, which falsified that pass's own claim to
+have annotated every one)* — module creation is authorised, **and nothing else changes**. D-31's
+disclosure travels with the signature: the TE §18.3 zero-TBD preflight **never ran**, `configs/`
+does not exist, the ten critical tests are **unexecuted in this environment**, and
+`aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2
+and §18.3's stop-and-report rule are unchanged.
 
 ---
 
@@ -2287,5 +2293,45 @@ No stage-listed validation tooling was available for this stage/scope; all check
 ### Summary
 
 Both iteration-1 findings are correctly repaired: the two missed Critical-finding annotation sites are fixed and honestly labelled, and obligation-4's checkability is now stated identically across all three `produces[]` artifacts, each corrected site preserving its superseded wording inline. A programmatic sweep for iteration 2 surfaced one further live, unannotated `**G-09 remains unsigned.**` occurrence the repair's own completeness claim missed (`business-logic-model.md:1345-1346`) — rated Major, not Critical, because it is not the file's last live word on the subject and no artifact-embedded receipt certifies it as swept. With one Major and zero Critical findings, this does not cross the NOT-READY threshold.
+
+READY
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T11:55:03Z
+**Iteration:** 1 (fresh budget after human gate rejection; this is a new adversarial pass, not a continuation of the iteration numbering in the review block immediately above)
+
+### Scope and re-derivation
+
+Re-ran the dispatch's own required derivations rather than trusting the prior pass's report:
+
+- `grep -n "G-09 remains unsigned\|G-09 is not signed\|G-09 stays unsigned"` across all three artifacts: every body occurrence (`business-logic-model.md:787,844,1329,1345-1346,1978,2133`; `business-rules.md:941,961,970,975,980,1014`; `domain-entities.md:511,535,540,545,583`) now carries `⚠ G-09 IS SIGNED as of 2026-08-28 (D-31)` on the same statement, including the one the previously-open Major finding named (`business-logic-model.md:1345-1346`, now annotated with an inline note dated 2026-08-30 naming itself as the site the 2026-08-29 pass missed). No live, unannotated occurrence of either superseded phrase survives outside a `## Review` heading span. **The outstanding Major finding from the prior iteration is confirmed fixed.**
+- `grep -n "no code check\|uncheckable\|not fully checkable"` across all three artifacts: the five sites the prior pass named as corrected (`business-logic-model.md:540,786`; `domain-entities.md:349-352,510`; `business-rules.md` R-60 itself at 622-654) all state the "partial grep-class control + one uncovered reporting-discipline residual" reading, with superseded wording preserved and labelled inline. Four further occurrences of the bare word "uncheckable" remain, at `business-logic-model.md:1252,1475,1685,1903`, inside dated "carried unchanged from [pass]"/"inherited and already disclosed" changelog-style list items belonging to historical iteration write-ups (Finding 8/9/10/11 and "Residuals disclosed" boxes), not restatements of R-60's own definition. I attempted to refute the prior pass's justification for leaving these unannotated (that a changelog entry records what was true at that past pass, and rewriting it to the present-tense corrected reading would misrepresent the log) and could not — these are dated, first-person "carried from iteration N" narration, structurally the same class of entry the dispatch's own G-09 carve-out treats as historical record, not live assertion. No overclaim found: the annotations state only that module creation is authorised and that D-31's TE §18.3 preconditions are recorded unmet: the zero-TBD preflight never ran, `configs/` does not exist, the ten critical tests are unexecuted, `aws_ai_dlc_preflight_report` does not exist, and no scientific value becomes fillable.
+
+### Additional adversarial probes (this pass, not previously reported)
+
+- **IRI/GIM data-flow and module-import graph** (`business-rules.md:194-320`): the import allowlist is stated at module-path granularity — only `scripts/04_build_external_products.py` and `src/evaluation/` may import `iri.py`/`gim.py` — with negative controls that fail a direct `src/features` import, a shim under `src/data` re-exporting `gim` and imported from `src/models`, and a citation-only reference; a `spaceweather` import from `src/features` is the one control asserted to pass, consistent with `spaceweather.py` (Kp/ap3, Hp60/ap60, F10.7, Dst) being outside the IRI/GIM boundary by design. No path was found by which an `iri_*` or `gim_*` value reaches `src/features` or `src/models`.
+- **F10.7 trailing-vs-centered mean** (`business-logic-model.md:324-326`; `business-rules.md:329-360`): the centered-mean prohibition is stated as a property with an explicit negative control ("compute a centered mean → limb 1 fails at every index and limb 2 fails"), not merely a comment. No live text anywhere in the three artifacts describes or permits a centered window.
+- **Driver release status vs. lag** (`business-rules.md:825-875`): `release_status` (real-time/provisional/final, D-10.1, one grade per 2022 series) is modelled as a field distinct from `safe_lag`, with a dedicated FAILS control for a declared status inconsistent with the recorded provider filename, and a detectable-disagreement control for the two GFZ series design retrieves both near-real-time and definitive products for. This satisfies TEC-04/R-09's "record release status, not only lag" obligation; no driver was found asserting a lag without a paired release-status field.
+- **Carry-forward bound** (`business-rules.md:366-516`, R-57a): ≤3 h carry-forward with row exclusion beyond that is stated as a property with a negative control ("a carry-forward of 4 hours anywhere → fails"), and a value present with no observation and no recorded carry-forward is itself a FAIL condition — stricter than, not weaker than, TC-09.
+- **G-09 overclaim re-check**: independently re-read all six D-31 annotation instances in `business-logic-model.md` plus the equivalents in the other two files; none claims a P0 decision is resolved, a `TBD — freeze gate` value is fillable, or that G-05/G-06/G-P1A/G-P2/G-P3A/G-P3C/G-07 have moved. TA-15, WS-18, TA-18, `aws_ai_dlc_preflight_report`, `configs/`, and the §18.3 zero-TBD preflight are stated as outstanding at every site they are mentioned in the live text I read (top-of-file banner, all annotated closing lines, and the review boxes at the tail of `business-logic-model.md`).
+
+### Findings
+
+No Critical or Major findings survive this pass.
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Suggestion | `business-logic-model.md:1252,1475,1685,1903` | Four historical "carried unchanged"/"inherited and disclosed" changelog bullets still use the bare word "uncheckable" for FR-P1-04-18 obligation 4, without the "partial control, one residual" qualifier now stated at the five live definitional sites. Read in context (dated, first-person narration of a past pass's findings) these are historical record rather than a live claim, consistent with how the dispatch's own G-09 carve-out treats dated entries, so this is not grounds for NOT-READY. | Optional, non-blocking: a future sweep could append "(see R-60 for the corrected reading)" to these four bullets to remove the risk of a reader skimming them in isolation. |
+
+### Validation Tool Results
+
+No stage-listed validation tooling is configured for this stage/scope. All checks were performed by direct `grep`-derived enumeration against the live regions of all three artifacts, cross-checked against `business-rules.md` R-60 (the contract-designated authoritative source for the checkability reading) and against the shared inception contracts named in the dispatch.
+
+### Summary
+
+The Major finding this pass was dispatched to re-verify (`business-logic-model.md:1345-1346`) is confirmed fixed with an honest, dated annotation. No live site asserts the superseded "G-09 remains unsigned" or "no code check/uncheckable" readings, no D-31 annotation overclaims what the gate actually grants, and no P0-undischarged item is misreported as discharged. Independent probes of the IRI/GIM import boundary, F10.7 trailing-mean property, driver release-status modelling, and the 3-hour carry-forward bound found no defect. One non-blocking Suggestion is noted for four historical changelog bullets that could be clearer in isolation.
 
 READY

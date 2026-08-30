@@ -2016,3 +2016,41 @@ matter of taste, and it would misdirect an implementer building the entity from
 The repair correctly reached and fixed all six sites named in iteration 1's finding, and cleanly resolved the counting-convention ambiguity flagged as Minor. It missed one further, genuine, live representation — the Mermaid entity-map diagram at `domain-entities.md:88` — which was never named in iteration 1's own grep-derived site list because that grep matched only word-form "four," not the numeral "4" the diagram uses. Given this is the same governance-critical entity, in the same document, under the same repair pass, and the diagram precedes the correction box that would otherwise warn a reader, this is graded Critical rather than accepted as a residual documentation nit. This is the final review iteration; the remaining gap and the one Minor historical-box question go to the human at the approval gate rather than a further automated repair cycle.
 
 NOT-READY
+
+## Review — 2026-08-30 fresh pass, iteration 1 (post-gate-rejection)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T11:35:06Z
+**Iteration:** 1
+
+### Scope and method
+
+Re-derived the site list from scratch rather than trusting either prior review's enumeration, per this project's own learned rule (`fd-2026-08-30-sweep-derive-sites`). Grepped all three PRIMARY artifacts (`business-logic-model.md`, `business-rules.md`, `domain-entities.md`) for **both** numeral and word forms in both directions — `4 members|four members|Four members|exactly four` and, separately, `RESTRICTED_LITERAL_EXEMPT_MODULES|four member|4 members|five member|5 members|six member|6 members|merge_coverage_year` — across headings, entity field tables, Mermaid node labels, rule bodies, § Assumptions, change-log/correction boxes, and Sources. Cross-checked `WS-18`/`TA-18`/`G-09`/`UNEXECUTED`/`discharged` occurrences in `domain-entities.md` against the dispatch's non-discharge caveats. Budget-bound: did not re-read every artifact line end-to-end; coverage is targeted at the defect class named in the dispatch plus a bounded adversarial hunt for two named failure modes (guard bypass, audit blockage).
+
+### Findings
+
+No Critical or Major findings survive verification.
+
+**Verification of the 2026-08-30 repair (the specific defect two prior iterations found):**
+
+- **The stale Mermaid node is fixed.** `domain-entities.md:88` now reads `(5 members, asserted exactly)`. Line 116 adds a forward/backward pointer (`⛔ the diagram node above read (4 members …) until 2026-08-30 and is corrected; see § 10's...`), which is exactly the "note under the diagram" iteration 2's Finding 1 recommended. The text fallback carries the corrected count.
+- **No live "four" survives elsewhere.** Every remaining `four`/`Four`/`4 members` hit resolves to one of two accepted categories: (a) inside a prior appended `## Review` section in this same file (lines 1867–2019) — per the dispatch contract, prior `## Review` sections are reviewer output, not content under review, so a reviewer quoting the old "four" while describing the historical defect is expected, not a live claim; (b) inside an explicitly dated, preserved historical box (`domain-entities.md:582`, `:753`) that this artifact's own convention marks as superseded-and-kept, each carrying a `(corrected 2026-08-29…, superseded figure preserved: "four…")` annotation immediately adjacent. Neither category is a live stale assertion a reader would take as current.
+- **No new 5-vs-6 contradiction.** Every site stating a count states it as one of the two reconciled conventions ("this entity: five, in addition to the chokepoint" / "R-28's box: six, chokepoint included"), consistently, including `business-rules.md`'s sixth-holder box (lines 888–914, "bringing the list to six: the chokepoint itself, four `tests/` modules, and this one production script") and `domain-entities.md`'s § 10 body/table/assumptions (lines 527, 629, 402, 643).
+- **Row 5 (`scripts/merge_coverage_year.py`) is described accurately** and consistently between `business-rules.md`'s box and `domain-entities.md` § 10: a production script (not a test), holding the restricted-root literal, that read six restricted sites with no `AccessRecord`, now routed through `src.data.locked_test.open_restricted` under D-31, with `On disk: Yes`.
+
+**Adversarial hunt beyond the defect class (dispatch-directed):**
+
+- **WS-18/TA-18 discharge:** not found implied-discharged anywhere checked. `domain-entities.md:557` states outright, in bold, "**WS-18 and TA-18 are NOT discharged**," and line 616 additionally notes `open_restricted` "does not exist (G-09 unsigned)" as of the point that sentence describes — reconciled at lines 772–783 with the later, separate fact that G-09 was subsequently signed under D-31 with its §18.3 preconditions explicitly disclosed as **unmet**. No site claims the guard test executed or that access was logged by a running system.
+- **December-record-reaches-model / audit-blockage paths:** found no constructed path. `domain-entities.md:303` explicitly keeps `RES-01` (permitted-read logging) open as **NOT [resolved]**, rather than overclaiming it closed, and the pre-G-05 coverage-audit references (lines 303, 418) describe it as a permitted, distinct read path rather than one the locked-test guard would block. This is consistent with — not merely silent on — the mandated rule that the pre-G-05 audit must remain unblocked.
+- **G-09/D-31 status:** correctly stated as signed-with-unmet-preconditions throughout the sites checked (lines 3–8, 782–783), not as a general discharge of stage 3.1 or of TA-15/`aws_ai_dlc_preflight_report`/`configs/`/the §18.3 zero-TBD preflight — none of those was found asserted as discharged anywhere in this pass.
+
+### Coverage limits
+
+This pass targeted the named defect class and the two named adversarial paths; it did not re-verify every cross-reference, entity cardinality, or business rule in the three PRIMARY artifacts end-to-end, and did not re-open sibling-unit content (none was read, per read-scope). Any defect outside that targeted scope would not have been caught here.
+
+### Summary
+
+The 2026-08-30 repair closes the specific gap that produced two consecutive NOT-READY verdicts: the Mermaid entity-map node is corrected, carries a forward pointer, and no other live site in the three artifacts still asserts the superseded "four" figure — the remaining occurrences are prior-review quotations or explicitly preserved, dated historical boxes, both outside the defect's scope. The 5-vs-6 dual convention remains internally consistent, row 5 is described accurately, and the targeted adversarial checks (WS-18/TA-18 discharge, guard-blocks-required-audit) found no new defect. No Critical or Major finding is raised.
+
+READY

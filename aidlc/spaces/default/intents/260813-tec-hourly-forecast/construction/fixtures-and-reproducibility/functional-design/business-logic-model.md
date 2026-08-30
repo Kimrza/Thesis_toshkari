@@ -1049,3 +1049,194 @@ Critical findings.
 > **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
 > discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
 > stage 3.1 remains **FAIL** with no board having passed it.
+
+## Review — 2026-08-30 adversarial pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T06:43:52Z
+**Iteration:** 1 of 2
+
+### Scope note
+
+This pass treats the file's existing `## Review — 2026-08-28 first adversarial
+pass` section as prior reviewer output, not as content under review, per the
+dispatch contract, and independently re-derives against the three artifacts
+under review (`business-logic-model.md`, `business-rules.md`,
+`domain-entities.md`) plus the passed upstream contracts. It does not rely on
+the prior pass's conclusions.
+
+### Verification performed
+
+1. **D-29 supersession sweep, counted rather than trusted.** The change note
+   at `functional-design-questions.md:740` claims the D-29 supersession
+   ("`write_release` is now implementable ... release-path block lifts") was
+   "applied at four sites." Grepped `SUPERSEDED 2026-08-28 by D-29` across all
+   three artifacts: it appears at 4 distinct **paragraph locations**
+   (`domain-entities.md` L456, L580; `business-logic-model.md` L902;
+   `business-rules.md` L954) — the "four sites" claim **holds** at the
+   paragraph-location granularity the note intends. However, two of those four
+   locations (`business-logic-model.md` L902 and `business-rules.md` L954)
+   contain the **identical SUPERSEDED annotation paragraph pasted twice**
+   verbatim inside the same Assumptions bullet, confirmed with `-o` occurrence
+   counts (2 hits each vs. 1 hit at the other two sites). See Finding 2.
+2. **TA-15 discharge sweep.** Grepped every site asserting or denying TA-15
+   coverage across all three artifacts (W-9/R-142/§6, all four Open-Questions
+   blocks, the change note). Every one of the ~8 occurrences found states TA-15
+   is **NOT** discharged/covered by D-29, consistently, including the terminal
+   2026-08-29 re-confirmation receipt in all three files. No site anywhere
+   collapses "release path implementable" into "release integrity evidenced."
+   **Sweep holds.**
+3. **WS-18/TA-18/`aws_ai_dlc_preflight_report`/§18.3 zero-TBD preflight
+   undischarged sweep.** Confirmed at the top-of-file box (all three
+   artifacts) and the terminal re-confirmation receipt: all four are stated
+   undischarged, consistently, with no site implying otherwise.
+4. **G-09 annotation consistency.** Every "G-09 is not signed" occurrence
+   across the three artifacts was located and read in full. `domain-entities.md`
+   L583 and the file's own header box read coherently (module creation
+   authorised; these *specific* shapes remain undesigned/uncreated as a
+   statement of the design stage's own status, not a prohibition).
+   `business-logic-model.md` L104 deliberately leaves the original sentence
+   unannotated, which is consistent with the file's own stated convention at
+   its top ("statements below ... left standing as the accurate record of the
+   constraint that applied when it was written"). **`business-rules.md` L97
+   does neither** — see Finding 1.
+5. **D-29's unspecified release-population dependency.** Checked whether this
+   unit's design (W-9/R-142/§6, the only places `write_release`/`dataset_version`
+   are discussed here) depends on enumerating an existing release population
+   for verify-on-write. It does not: this unit does not own or design
+   `write_release` (that is `foundation`'s, per R-12/R-13), and this unit's own
+   release-integrity concern is narrowly TA-15 coverage of
+   `test_release_hashes.py`, which is orthogonal to the read-back question
+   raised at `foundation`. The gap is correctly left undiscussed here rather
+   than assumed away, because it is not a dependency of this unit's design.
+6. **Reproducibility/integrity failure construction attempts** (per the
+   dispatch's item 5): tried to find a fixture assertion hardcoded in a test
+   body rather than the manifest (R-133/R-139 both explicitly place all
+   assertion data in the manifest and add only-copy/only-manifest negative
+   controls — none found); a completeness figure stated as invented rather
+   than measured (R-134 and every count in W-1/W-9 are explicitly derived from
+   source documents with the derivation shown, never asserted as measured
+   without provenance); a December-dated record reaching a fixture (R-136
+   consumes `acquisition` R-31's existing, green predicate rather than
+   duplicating it, and both fixtures are asserted December-free by
+   construction with a control proving the record-date, not folder-name,
+   reading); the seven-day fixture cited as scientific evidence (R-136's
+   `smoke_only` stamp travels with every plumbing artifact and every
+   evidence-bearing surface asserts its absence — structural, not
+   procedural); a release overwritten rather than versioned (out of this
+   unit's scope — `foundation`'s R-13, correctly not re-implemented here); a
+   GPU dependency on any result (R-138 explicitly asserts no-GPU-visible
+   completion as a control). None of these produced a defect this unit's
+   design permits.
+7. **Cross-reference spot-checks against passed contracts.** `services.md`'s
+   § Ordering contract, § Stage entry contract and § Execution platforms
+   sections were checked against this unit's claims about
+   `run_walking_skeleton.py` enforcing ordering, the six-step approved stage
+   entry surface, and the two-platform `ConfigSnapshot.platform` shape — all
+   consistent with what this unit claims about them. `unit-of-work-story-map.md`'s
+   line 127 (`FR-WS-7 | foundation | TA-23`) and line 239's per-unit coverage
+   row (`8 / 2 / WS-20, TA-09, TA-17, TA-21 / TA-03, TA-04, TA-23, TA-26,
+   TA-27`) were read directly and match every citation of them in all three
+   artifacts.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `business-rules.md` line 97 (§ "One owned blocker and four inherited exit conditions") | **A self-contradiction was spliced into the blocker-register paragraph, asserting in one sentence both that module creation is authorised and that no module may be created.** The paragraph reads (verbatim): "**G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and **module creation is authorised**. ... **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.: no module, manifest, receipt, emitter or fixture directory named here **may be created**." The trailing clause is the tail of the *original*, pre-D-31 sentence ("G-09 is not signed: no module ... may be created"), left in place after the ⚠ annotation was inserted mid-sentence — so the paragraph now asserts the opposite conclusions in its first and last clauses. This is a real cross-representation inconsistency, not a matter of interpretation: the identical sentence in `domain-entities.md` L583 was correctly reworked ("These shapes are design only: no module ... **is created**" — a statement about this design stage's own status, not a prohibition), and the parallel sentence in `business-logic-model.md` L104 was deliberately left unannotated per this same file's own stated top-of-file convention ("statements below ... left standing as the accurate record of the constraint that applied when it was written"). `business-rules.md` L97 does neither: it half-edits the sentence, producing a hybrid that is neither the old unswept statement nor a coherent new one. A developer reading this specific paragraph in isolation (a plausible read path, since it is the blocker-register summary near the top of the file, before § Sources) would receive contradictory guidance on whether module creation is currently permitted — the exact question G-09 governs. The file's authoritative top-of-file box (L3–28) states the correct answer, so the contradiction is locally confusing rather than globally misleading, which is why this is Major rather than Critical. | Repair the trailing clause to match either sibling treatment: either restore it verbatim as the unedited historical statement (per this file's own stated convention, matching `business-logic-model.md` L104), or rework it to the non-contradictory "design only, not yet created" framing already used at `domain-entities.md` L583. |
+| 2 | Minor | `business-logic-model.md` line 902 and `business-rules.md` line 954 (both inside their respective `## Assumptions & Open Questions` bullets on `dataset_version`'s encoding) | **The identical `⚠ SUPERSEDED 2026-08-28 by D-29 (...)` annotation paragraph is pasted twice, verbatim, back-to-back, inside the same bullet** — confirmed by `-o` grep occurrence counts (2 hits at each of these two locations vs. 1 hit at the two corresponding locations in `domain-entities.md`). In each duplicate, the second copy follows a restatement of the *original*, superseded claim ("`write_release` cannot be implemented until the encoding is a D-number decision") that is not struck through the second time (unlike the first occurrence in the same bullet, which does use `~~strikethrough~~`), so the stale claim stands unmarked immediately before its own correction is repeated. The substance is not wrong — both copies state the same correct, current fact — so this is an editing/formatting defect (duplicate paste, inconsistent strikethrough use) rather than a factual error. | Delete the duplicate paragraph at each of the two sites, keeping one copy, and apply `~~strikethrough~~` to the immediately-preceding superseded clause consistently, matching the first occurrence in the same bullet. |
+
+### Failed refutation attempts
+
+- **Attempted to find a fifth "site" the D-29 sweep missed** (a place still
+  asserting the release path is blocked without any supersession marker) by
+  grepping `release path is blocked` and `write_release` across all three
+  artifacts independently of the `SUPERSEDED` string. Every hit at every site
+  in `business-logic-model.md`, `business-rules.md`, and `domain-entities.md`
+  carries the D-29 annotation immediately adjacent — none left unswept.
+- **Attempted to show TA-23's two-preflight-report distinction (W-9/R-142/§6)
+  had regressed since the prior review's finding** — re-read all three
+  occurrences in full: each still correctly names `aws_ai_dlc_preflight_report`
+  as `foundation`'s artifact evidencing G-09/FR-WS-7/TA-23, distinct from this
+  unit's own `environment_and_cpu_preflight_report` evidencing G-07, with the
+  supporting-row figure (5) re-derived and printed, not carried. No
+  regression found; this remains correctly stated everywhere it appears.
+- **Attempted to construct a scenario where the D-29 release-population gap
+  (verify-on-write reading back "the existing release population" with no
+  stated home) forces a silent assumption inside this unit's own design** —
+  traced every mention of `write_release`/`dataset_version`/`verify-on-write`
+  in this unit's three artifacts back to their source: all are citations of
+  `foundation` R-12's status, never a mechanism this unit itself specifies or
+  depends on executing. No silent assumption found; the gap is genuinely
+  out of this unit's scope, not merely unaddressed.
+
+### Summary
+
+One genuine, checkable defect (Finding 1) undermines the blocker-register
+paragraph's internal consistency at a point the project's stated
+sweep-completeness discipline exists to catch, and a second, lower-severity
+duplication defect (Finding 2) affects the same D-29 remediation text. Neither
+rises to Critical: the file's own authoritative top-of-file box states the
+correct G-09 status unambiguously, and both findings are text-quality defects
+in redundant/summary passages rather than defects in the design's substance —
+the fixture-manifest schema, the measure-then-freeze workflow, the plumbing
+and scientific fixture lineages, the smoke quarantine, the clean-run sequence
+and comparison ledger, the ordering-contract receipts, the Kaggle in-session
+gate, and the three generated evidence artifacts all check out against the
+passed upstream contracts and the governing TE sections on independent
+re-derivation. TA-15, WS-18, TA-18 and `aws_ai_dlc_preflight_report` remain
+consistently and correctly disclosed as undischarged everywhere checked. One
+Major and one Minor finding, below the two-Major threshold that would force
+NOT-READY, and no Critical findings.
+
+READY
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T12:16:38Z
+**Iteration:** 1 (fresh budget after human gate rejection)
+
+### Scope of this pass
+
+Verified the Major repair to `business-rules.md`'s blocker-register paragraph;
+re-derived the D-31/G-09 and D-29 supersession sweeps independently rather
+than trusting the prior pass's tally; then hunted for defects on this unit's
+own subject matter (fixture manifests, record-date exclusion, plumbing vs.
+scientific fixture status, CPU/GPU, provisional Dst). Bound by the read-scope
+restriction to this unit's three artifacts and the passed contracts — no
+sibling `construction/<other-unit>/` content was read.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | — (verified fixed) | `business-rules.md` L97–111 | The prior Major — the self-contradicting "module creation is authorised" / "…may be created" sentence — is repaired. Read in full: L97 now states the lifted ground and preserves (rather than deletes) the original prohibition as a struck-through, explicitly-scoped-superseded tail; L99–111 adds a dated repair note stating what still governs (blockers, exit not entry conditions, untouched by D-31) and naming why the sibling files did not need the same repair (`domain-entities.md` was reworked coherently; `business-logic-model.md` was deliberately left unannotated per the file set's convention). No new contradiction is introduced by the repair text itself. | None — closed. |
+| 2 | Minor (confirmed, unresolved) | `business-logic-model.md` L902 and `business-rules.md` L967, both inside `## Assumptions & Open Questions` / `## Governance dependencies` bullets on `dataset_version`'s encoding | Independently re-grepped `SUPERSEDED 2026-08-28 by D-29` with `-o` (occurrence counts): 2 hits at each of these two sites, 1 hit at the corresponding site in `domain-entities.md` (L580) — confirms the prior pass's characterisation exactly. The identical `⚠ SUPERSEDED 2026-08-28 by D-29 (...)` paragraph is pasted twice, verbatim, inside the same bullet at both sites; in each duplicate the second copy follows a restatement of the original superseded claim that is left unmarked (no `~~strikethrough~~`) the second time, unlike the first occurrence in the same bullet. Substance is correct in both copies (not a factual defect) — this is a duplicate-paste/formatting defect, not resolved in this pass. | Delete the duplicate paragraph at each of the two sites, keeping one copy; apply `~~strikethrough~~` to the immediately-preceding superseded clause consistently with the first occurrence in the same bullet. |
+
+### Independent re-derivation (adversarial, not a repeat of the prior pass's grep)
+
+- **G-09 annotation sweep.** `grep -n` for `G-09 remains unsigned|is not signed|stays unsigned` across the three artifacts surfaces live (non-repair-note) occurrences at `business-logic-model.md:905`, `business-rules.md:967`, `domain-entities.md:580` and `domain-entities.md:71` — all read verbatim in context. None carries a local D-31 annotation, but all three files open with an identical top-of-file box (L3–20 in each) stating explicitly: *"Every statement below of the form 'G-09 is not signed' / 'G-09 stays unsigned' is superseded as to the gate's status, and is left standing as the accurate record of the constraint that applied when it was written."* That blanket disclaimer is this file set's stated convention (confirmed by the Major repair note itself, which names `business-logic-model.md`'s unannotated G-09 sentence as *deliberate*, not an oversight) and it covers all four live occurrences found, including the gate-status table entries ("G-09 Agent preflight (Open, Supervisor) — not signed") that the dispatch brief specifically flagged as a class of representation (gate-item lists) prone to going stale. Applied consistently across all three sibling files — not a new finding.
+- **Mermaid diagram check.** Both diagrams in this unit (`business-logic-model.md:132`, `domain-entities.md:99`) grepped for `G-09|D-29|signed|dataset_version` inside their fenced blocks: zero hits. No stale node label.
+- **D-29 sweep completeness.** All four sites the prior pass counted (`business-logic-model.md:800,902`; `business-rules.md:967`; `domain-entities.md:456,580` — five raw hits, four sites) carry the D-29 annotation; the duplication defect at finding #2 above is the only irregularity found, matching the prior pass exactly.
+
+### Reproducibility / release-integrity hunt (no new defects found)
+
+- Fixture assertion data: `business-rules.md` § Sources and the R-122/REQ-ENG-4 citations consistently place assertion data in `tests/fixtures/<fixture_id>/fixture_manifest.yaml`, never a test body; no contradicting hardcode claim found in these three artifacts.
+- Record-date exclusion: FR-WS-3 citation and `test_acquisition_window.py` are named together with the record-date (not folder-name) rule; consistent across the read files.
+- Plumbing-fixture-as-evidence: no statement found treating the seven-day fixture as scientific evidence; D-11's "not representative of the locked month" limitation is carried in the `business-rules.md` L85–91 Sources paragraph.
+- GPU dependency: no GPU reference found in these three artifacts; CPU-only sequencing is the only execution path named (§13.2 clean-run sequence, Kaggle/local platforms).
+- Provisional Dst: not mentioned in these three artifacts beyond the inherited D-11 citation context; no leakage into a frozen tolerance or G-05 regime count found here (that boundary is owned by D-11 itself, upstream of this unit).
+
+### Verdict rationale
+
+One Major (now fixed, verified with no new inconsistency introduced) and one
+Minor (confirmed still open, a duplicate-paste/formatting defect with no
+factual error) — below the two-Major NOT-READY threshold, zero Critical
+findings after an independent re-derivation that also checked Mermaid nodes,
+gate-status table rows, and the four D-29 sites the brief specifically named
+as a historically blind spot for this file set.
+
+READY

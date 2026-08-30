@@ -94,8 +94,21 @@ output no design path returns to TECU — and R-139 makes that dependence a **ch
 refusal** rather than a silent inheritance. All five are **exit conditions on stage 3.1,
 not entry conditions** (`GOV-2026-08-22-REM-01` Rec 2, extended 2026-08-23): this unit
 may enter, **may not complete or exit** 3.1 while any stands, and **no implementation may
-proceed**. **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.: no module, manifest, receipt, emitter or fixture
-directory named here may be created.
+proceed**. **G-09 is not signed** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.
+>
+> ⚠ **Sentence repaired 2026-08-30 on adversarial finding 1, Major.** The G-09 annotation was
+> spliced into the middle of this sentence and its **original tail was left standing**, so the
+> sentence asserted "module creation is authorised" in one clause and *"no module, manifest,
+> receipt, emitter or fixture directory named here **may be created**"* in the next — opposite
+> conclusions in one sentence. The parallel sentence in `domain-entities.md` was reworked
+> coherently and the one in `business-logic-model.md` was deliberately left unannotated per this
+> file set's stated convention; this file alone did neither. **What now governs, stated once:**
+> **G-09 no longer bars creating anything** — that ground is lifted. **What still bars it is the
+> blockers**, which are exit rather than entry conditions and are **untouched by D-31**: this
+> unit may enter 3.1 and **may not complete or exit it** while any blocker stands, and **no
+> implementation may proceed** on that ground. **Superseded tail preserved:** ~~": no module,
+> manifest, receipt, emitter or fixture directory named here may be created."~~ — superseded only
+> as to its G-09 ground; the blocker ground stated above continues to bar the same creations.
 
 ## Sources
 

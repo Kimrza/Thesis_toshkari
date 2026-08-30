@@ -914,3 +914,89 @@ one Major finding does not block readiness, but it should be fixed before the ne
 receipt so it does not compound.
 
 READY
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T00:00:00Z
+**Iteration:** 1 of 2 (fresh budget after human gate rejection)
+
+### Scope and method
+
+Adversarial re-verification of the single outstanding Major from the prior iteration's READY
+verdict (the `PartitionError` declaration-site fix), plus a fresh sweep of this unit's other
+project-specific honesty/leakage/prohibition surfaces. Re-derived the site list programmatically
+rather than trusting the fix description: grepped `PartitionError`, `src/models/`, `declared in`,
+`declaration site`, and `semantic owner` across all three primary artifacts (86 total matches
+inspected). Also swept for a Mermaid-diagram surface (0 fenced `mermaid` blocks exist in this
+unit's artifacts — that surface class does not apply here) and for PyTorch/GRU presence, Random
+Forest importance misuse, raw-longitude-as-predictor, GPU-as-dependency, and appendix-relegation
+of a beaten-baseline or difficulty control. Did not access any `construction/<other-unit>/` path.
+
+### Findings
+
+No Critical or Major findings survive this pass.
+
+**Verified: the prior Major (declaration-site sweep) is fixed.** `grep -n 'declared in
+`src/models/`` across the three artifacts returns 5 hits: 3 in `business-rules.md` (L265 boxed
+correction, L816 closure bullet, L880 the prior review's own finding-text quote — not live
+content) and 2 in `domain-entities.md` (L537 boxed correction, L666 closure bullet). Both closure
+bullets that were stale at the prior pass — `business-rules.md` L816 and `domain-entities.md`
+L666 — now read `~~declared in `src/models/`~~ ⚠ **RULED 2026-08-28: declared in
+`src/data/config.py`**`, each dated `annotation added 2026-08-30 on adversarial finding 1, Major`,
+each still stating the unit remains the exception's SEMANTIC OWNER but is no longer its
+DECLARATION SITE. No live sentence in `business-logic-model.md`, `business-rules.md`, or
+`domain-entities.md` asserts the superseded `src/models/` site unqualified. `business-logic-model.md`
+itself never asserted a declaration site for `PartitionError` in the first place (its own
+`PartitionError`/`src/models/` mentions are the W-1 match-function location and the L59/L540
+change-log rows, neither of which claims where the exception is *declared*), so it had no site of
+its own to sweep.
+
+**No new occurrence-class defect found.** This unit's artifacts carry no Mermaid diagrams (grep
+for a fenced ```mermaid``` block: 0 hits in all three files), so that hunt surface is inapplicable
+here rather than unswept. `component-dependency.md` itself was not re-read (out of the passed
+contract set for this dispatch), but the ruling's cited matrix cells (`src/features → src/models`
+and `src/data → src/models`, both `—`) are quoted identically in both boxed corrections and both
+closure-bullet fixes — internally consistent, not independently re-verified against the contract
+file, which is a coverage limit, not a defect.
+
+**Honesty/leakage/prohibition sweep, all clean:**
+- PyTorch/GRU: `business-rules.md` R-98 and `domain-entities.md` § 2 both state absence as a
+  negative control (TA-12 grep-evidenced), with no import or module found anywhere in the three
+  artifacts.
+- RF importance (R-100 / `ImportanceFigure` § 10): consistently diagnostic-only,
+  `authoritative = false`, with a stated negative control against reaching the production feature
+  path. No path found where it adds/removes/ranks a feature.
+- Raw longitude: zero occurrences in any of the three artifacts — not introduced as a predictor.
+- GPU dependency: zero occurrences; no result path conditioned on GPU.
+- Baseline-beats-LSTM / appendix relegation / difficulty-control demotion: zero occurrences of
+  "appendix" in any artifact; this unit (`models-and-baselines`) does not own the primary results
+  table (that is `evaluation-and-comparison`'s surface per the unit boundary), so no honesty-rule
+  violation is constructible from this unit's own text.
+- Seed selection: R-93's Rule states the seed is never selected on validation performance and
+  never after December is seen; three-seed element-wise mean is the confirmatory prediction per
+  W-1/§11. No contradicting text found.
+
+### Coverage limits
+
+Re-verification of the single named Major and a fresh grep-driven sweep of the honesty/leakage
+hunt list, not a full re-read of every prior-pass finding (the eight-plus prior passes' own
+re-derivations — rule/section counts, the amendment-ledger chain — were not re-run; no regression
+signal surfaced in the sections touched by this pass). `component-dependency.md` was not opened
+directly; the ruling's matrix claim is taken as internally consistent across both files rather
+than independently confirmed against that contract. G-09/BLK-03/undischarged-gate framing was not
+re-swept this pass (confirmed clean in the immediately prior iteration and unchanged by the one
+edit under review).
+
+### Summary
+
+The one Major carried into this iteration — the `PartitionError` declaration-site ruling unswept
+from the Assumptions & Open Questions closure bullets — is fixed at both named locations, with the
+superseded text struck through and dated rather than silently replaced, consistent with this
+project's "preserve superseded wording, annotate in place" convention. No new Critical or Major
+finding emerged from a fresh sweep of this unit's other project-mandated prohibitions (PyTorch/GRU
+absence, RF-importance non-authority, longitude, GPU, seed-selection timing) or from a Mermaid
+surface this unit's artifacts do not carry.
+
+READY

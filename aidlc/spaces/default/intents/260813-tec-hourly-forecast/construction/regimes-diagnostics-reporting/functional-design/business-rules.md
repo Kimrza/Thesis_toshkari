@@ -157,9 +157,15 @@ provisional-Dst-derived series offered as the count's input → **`RegimeError`*
 **Control that must *not* fire:** a GFZ Kp/Hp60 series with a recorded release grade →
 the count is computed and returned with its event intervals.
 
-**Acceptance.** ⚠ No row — FR-P1-05-18 is `UNTESTED`; a candidate Vision §15.2 row is
-proposed at the gate (R-126, R-132), pointing at `tests/test_regimes_and_reporting.py`'s
-evidence.
+**Acceptance.** ⛔ **CORRECTED 2026-08-30 — the row was APPROVED under D-32 (2026-08-28)**, board
+option 1, all eight Vision §15.2 rows, none deferred. **FR-P1-05-18's row is `Pending` —
+approved, never run, and NOT passed, satisfied or discharged.** It points at
+`tests/test_regimes_and_reporting.py`'s evidence (R-126, R-132). The approval was the **owner's
+act**; this stage minted no row. *(Superseded: ~~"⚠ No row — FR-P1-05-18 is `UNTESTED`; a
+candidate Vision §15.2 row is proposed at the gate"~~. One of five per-rule Acceptance sections
+that no prior iteration had checked — the coverage tables and routing paragraphs were swept while
+these were not.)* **Unchanged:** the advisory NOT-READY on FR-P1-05-18's source criterion is still
+**reported, not fixed**, and the row's approval does not touch it.
 
 ## R-124 — December-blind by signature, post-receipt by construction, and the two guards
 
@@ -252,8 +258,12 @@ regime audit read — legitimate, earlier, performance-blind, someone else's; an
 post-receipt DEC breakdown with the registered count at three or more → renders
 confirmatory regime rows without demotion.
 
-**Acceptance.** ⚠ No row — FR-P1-05-16 and FR-P1-05-18 are `UNTESTED`; candidate rows
-proposed at the gate.
+**Acceptance.** ⛔ **CORRECTED 2026-08-30 — both rows were APPROVED under D-32 (2026-08-28)**,
+board option 1, none deferred. **FR-P1-05-16's and FR-P1-05-18's rows are `Pending` — approved,
+never run, and NOT passed.** The approval was the **owner's act**; this stage minted no row.
+*(Superseded: ~~"⚠ No row — FR-P1-05-16 and FR-P1-05-18 are `UNTESTED`; candidate rows proposed
+at the gate."~~)* **Still owed upstream and unaffected:** the §5.5 metric-set re-citation
+(`TEC-14`, Open) and FR-P1-05-18's advisory NOT-READY on its source criterion.
 
 ## R-125 — The primary results table refuses, co-reports, prints, and checks its units
 
@@ -433,13 +443,21 @@ resume pass, which found it recorded as owed and never written)*:
    row fails, and this unit does not write a second version of it (§ Assumptions carries the
    dependency).
 
-**The acceptance-row routing.** `TST-CLAIMS-01` is named by Vision §11.2 with no §16/§19
-row; **adding a criterion is not adding an acceptance row**, and adding a row is a Vision
-§15.2 amendment this stage may not make. Candidate rows for **FR-P1-05-20, FR-P1-05-19**
-(both named candidates in `requirements.md`), **FR-P1-05-16, FR-P1-05-18 and
-`TST-CLAIMS-01`** are **proposed at the gate, never applied here**, each naming the
-checklist or test-module evidence it would point at — the owner and, where required, the
-supervisor rule on the rows.
+**The acceptance-row routing.** ⛔ **AMENDED 2026-08-30 — THE ROWS WERE APPROVED. D-32
+(2026-08-28) approved all eight Vision §15.2 rows**, board option 1, **none deferred**.
+*(Corrected on the second adversarial iteration's Critical finding: this paragraph is the exact
+"acceptance-row routing" text iteration 1's own remediation named, and the repair swept the
+coverage tables while leaving it standing — so the file's routing prose contradicted its own
+table a few hundred lines away.)* **FR-P1-05-20, FR-P1-05-19, FR-P1-05-16, FR-P1-05-18 and
+`TST-CLAIMS-01` now hold `Pending` rows — APPROVED, never run, and NOT passed.** The owner has
+ruled; nothing further is proposed here. **What is unchanged and still true:** adding a
+criterion is not adding an acceptance row; **this stage did not and may not mint a row itself** —
+the approval was the owner's act, not this stage's; each row still names the checklist or
+test-module evidence it points at; and an approved-but-unrun row is **not evidence**. *(Superseded
+text preserved: ~~"`TST-CLAIMS-01` is named by Vision §11.2 with no §16/§19 row … Candidate rows
+for **FR-P1-05-20, FR-P1-05-19** (both named candidates in `requirements.md`), **FR-P1-05-16,
+FR-P1-05-18 and `TST-CLAIMS-01`** are **proposed at the gate, never applied here** … the owner
+and, where required, the supervisor rule on the rows."~~)*
 
 **Negative controls.** (10) A `beats_model = true` baseline absent from the
 abstract-level conclusion **of the registered `ConclusionSurfaceArtifact`** → **fails**
@@ -466,8 +484,12 @@ Phase-2-not-independent sentence** → **fails** *(2026-08-28, Rec 43)*.
 > the three disclosures symmetrical; the negative-control count is re-derived and reprinted
 > in § Negative-control count below.
 
-**Acceptance.** ⚠ No row today — the five candidate rows above are gate items;
-FR-P1-05-14/FR-P1-05-15 remain rowless and covered by R-128's controls meanwhile.
+**Acceptance.** ⛔ **CORRECTED 2026-08-30 — the five rows above were APPROVED under D-32
+(2026-08-28)**, board option 1, all eight Vision §15.2 rows, none deferred. They are **`Pending` —
+approved, never run, and NOT passed**, no longer gate items awaiting a ruling. The approval was
+the **owner's act**; this stage minted no row. **FR-P1-05-14 and FR-P1-05-15 are genuinely
+rowless still** and remain covered by R-128's controls meanwhile — D-32 gave them nothing.
+*(Superseded: ~~"⚠ No row today — the five candidate rows above are gate items"~~.)*
 
 ## R-127 — The breakdown family: stamped producing functions, the D-17 bound, the inventory refusal
 
@@ -540,8 +562,12 @@ percentage-reduction field emitted without its explicit `derived: true` label �
 *(2026-08-28, Rec 20)*. **(38)** A per-station breakdown artifact emitted without the
 standing driver-identity / no-local-forcing caveat → **fails** *(2026-08-28, Rec 17)*.
 
-**Acceptance.** ⚠ No row — FR-P1-05-16 is `UNTESTED`; the candidate §15.2 row (R-126) is
-a gate item, pointing at these controls' evidence.
+**Acceptance.** ⛔ **CORRECTED 2026-08-30 — the row was APPROVED under D-32 (2026-08-28)**, board
+option 1, none deferred. **FR-P1-05-16's row is `Pending` — approved, never run, and NOT passed**,
+and it points at these controls' evidence (R-126). The approval was the **owner's act**; this
+stage minted no row. *(Superseded: ~~"⚠ No row — FR-P1-05-16 is `UNTESTED`; the candidate §15.2
+row (R-126) is a gate item"~~.)* **Still owed upstream:** the §5.5 metric-set re-citation
+(`TEC-14`, Open).
 
 ## R-128 — Practical relevance frozen and demoted honestly; post-access runs labelled
 
@@ -699,10 +725,13 @@ fixtures, planted-text fixtures), no full-year data needed, with:
   under test** (TC-03e);
 - fixture assertion data in `tests/fixtures/<fixture_id>/fixture_manifest.yaml` (§15.2),
   never hardcoded in test bodies;
-- **machine-readable evidence emitted**, named as what the candidate Vision §15.2 rows
-  would point at — FR-P1-05-20, FR-P1-05-19, FR-P1-05-16, FR-P1-05-18, `TST-CLAIMS-01` —
-  the proposals **routed to the gate, proposed not applied**; FR-P1-05-14 and
-  FR-P1-05-15 remain rowless and are covered by the module's controls meanwhile.
+- **machine-readable evidence emitted**, named as what the Vision §15.2 rows point at —
+  FR-P1-05-20, FR-P1-05-19, FR-P1-05-16, FR-P1-05-18, `TST-CLAIMS-01`. ⛔ **CORRECTED 2026-08-30 —
+  all five rows were APPROVED under D-32 (2026-08-28)**, board option 1, none deferred, and are
+  **`Pending`: approved, never run, NOT passed** *(superseded: ~~"the **candidate** Vision §15.2
+  rows would point at … the proposals **routed to the gate, proposed not applied**"~~)*. The
+  approval was the **owner's act**; this stage minted no row. FR-P1-05-14 and
+  FR-P1-05-15 remain **genuinely rowless** and are covered by the module's controls meanwhile.
 
 ### §12's `tests/` enumeration, derived and printed (2026-08-28, `GOV-2026-08-28-FD-01` Rec 27)
 
@@ -849,20 +878,26 @@ day range (Student + Supervisor).
 | FR-P1-05-11 | R-129 | WS-19 (primary) |
 | FR-P1-05-14 | R-128 (control 21) | ⚠ no row — rowless; contract-level control lands in R-128, hosted by R-132's module |
 | FR-P1-05-15 | R-128 (controls 19–20, **35**) | ⚠ no row — rowless; contract-level control lands in R-128, hosted by R-132's module |
-| FR-P1-05-16 | R-127 (including the §5.5 metric set, the driver-identity caveat and the tier-3 row); R-124 (the storm guard, the asserted day range) | ⚠ no row — contract-level controls land in R-127/R-124; candidate §15.2 row a gate item; **the §5.5 metric-set re-citation is owed upstream (`TEC-14`, Open)** |
-| FR-P1-05-18 | R-123 (clauses 3–4, the count); R-124 (clauses 1–2, controls **31**/**40**) | ⚠ no row — contract-level controls land in R-123/R-124; candidate §15.2 row a gate item; the advisory NOT-READY on the source criterion **reported, not fixed** |
-| FR-P1-05-19 | R-126 (control 11, the three-location check, resolved against § 6's registered surface) | ⚠ no row — contract-level control lands in R-126; named candidate in `requirements.md`, §15.2 row a gate item |
-| FR-P1-05-20 | R-125 (control 9, `beats_model` printed); R-126 (controls 10, **36**) | ⚠ no row — contract-level controls land in R-125/R-126; named candidate in `requirements.md`, §15.2 row a gate item |
-| REQ-CLAIM-01 | R-126 (controls 10–12, **36**, **37**, **39**, one row per prohibited class, plus the D-28 scored-set disclosure row) | ⚠ no row — contract-level control lands in R-126; `TST-CLAIMS-01` named by Vision §11.2 with no §16/§19 row; §15.2 row a gate item. **`REQ-CLAIM-01`'s own "tested on December 2022 only" text is a completed-stage artifact, not edited here** — owed an owner-approved annotate-in-place or a §15.2 amendment |
+| FR-P1-05-16 | R-127 (including the §5.5 metric set, the driver-identity caveat and the tier-3 row); R-124 (the storm guard, the asserted day range) | ⚠ **`Pending` — §15.2 row APPROVED under D-32 (2026-08-28), never run; NOT passed.** Contract-level controls still land in R-127/R-124. **Unchanged: the §5.5 metric-set re-citation is owed upstream (`TEC-14`, Open).** *(Corrected 2026-08-30, adversarial finding 1, Critical; superseded: "⚠ no row — … candidate §15.2 row a gate item".)* |
+| FR-P1-05-18 | R-123 (clauses 3–4, the count); R-124 (clauses 1–2, controls **31**/**40**) | ⚠ **`Pending` — §15.2 row APPROVED under D-32 (2026-08-28), never run; NOT passed.** Contract-level controls still land in R-123/R-124, and the advisory NOT-READY on the source criterion remains **reported, not fixed** — the row's approval does not touch it. *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — … candidate §15.2 row a gate item".)* |
+| FR-P1-05-19 | R-126 (control 11, the three-location check, resolved against § 6's registered surface) | ⚠ **`Pending` — §15.2 row APPROVED under D-32 (2026-08-28), never run; NOT passed.** Contract-level control still lands in R-126. *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — … §15.2 row a gate item".)* |
+| FR-P1-05-20 | R-125 (control 9, `beats_model` printed); R-126 (controls 10, **36**) | ⚠ **`Pending` — §15.2 row APPROVED under D-32 (2026-08-28), never run; NOT passed.** D-32 approved **all eight** §15.2 rows, board option 1, none deferred. Contract-level controls still land in R-125/R-126. *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — … §15.2 row a gate item".)* |
+| REQ-CLAIM-01 | R-126 (controls 10–12, **36**, **37**, **39**, one row per prohibited class, plus the D-28 scored-set disclosure row) | ⚠ **`Pending` — `TST-CLAIMS-01` row APPROVED under D-32 (2026-08-28), never run; NOT passed.** Contract-level control still lands in R-126. *(Corrected 2026-08-30, adversarial finding 1; superseded: "⚠ no row — … `TST-CLAIMS-01` named by Vision §11.2 with no §16/§19 row; §15.2 row a gate item".)* **Unchanged and still owed: `REQ-CLAIM-01`'s own "tested on December 2022 only" text is a completed-stage artifact, not edited here** — owed an owner-approved annotate-in-place or a §15.2 amendment |
 
 **11 requirements, 7 untested — derived from the story map's rows, the two upstream
 artifacts agreeing** (the table above has exactly **11** rows, one per requirement ID; the
 2026-08-28 remediation added no requirement and removed none). The 7 without acceptance
 rows, by ID: **FR-P1-05-14, FR-P1-05-15,
 FR-P1-05-16, FR-P1-05-18, FR-P1-05-19, FR-P1-05-20, REQ-CLAIM-01.** Each one's
-contract-level control lands in the rule the table names; **every §15.2 acceptance-row
-proposal is a gate item — proposed, never applied here**. The seven-untested figure is
-never silently narrowed: designed falsifiers now, acceptance rows by owner amendment.
+contract-level control lands in the rule the table names. ⛔ **AMENDED 2026-08-30 — five of the
+seven now HOLD rows** *(corrected on the second adversarial iteration's Critical finding;
+superseded: "**every §15.2 acceptance-row proposal is a gate item — proposed, never applied
+here**")*: **D-32 (2026-08-28) approved all eight Vision §15.2 rows**, none deferred, so
+**FR-P1-05-16, -18, -19, -20 and `REQ-CLAIM-01`/`TST-CLAIMS-01` are `Pending` — approved, never
+run, NOT passed** — and only **FR-P1-05-14 and FR-P1-05-15** remain genuinely rowless. **The
+seven figure is still seven and is still never silently narrowed**: an approved-but-unrun row is
+no more evidence than an absent one, so the count of requirements carrying no result is
+unchanged. Designed falsifiers now; the rows were approved by owner amendment, not minted here.
 
 **Non-requirement obligations newly guarded here (2026-08-28), listed separately so they
 never disturb the 11 / 7 count above:**
@@ -885,7 +920,7 @@ never disturb the 11 / 7 count above:**
 - **[assumption]** *(added 2026-08-28)* **D-28 is carried with its own disclosed limits.** D-28 records that Vision §8.2 and TE §7.1 both carry `—` in the Locked-test Embargo column, that a level-4 `requirements.md` paraphrase is the sole textual basis, that the conflict is **disclosed rather than resolved** and carried to G-05, that a revised split manifest is owed at G-05, and that **no supervisor signature exists or is claimed**. This unit encodes the 30-day value and reports those limits; it resolves no conflict and represents the owner ratification as nothing more than what D-28 says it is.
 - **[assumption]** *(added 2026-08-28)* The third declared comparison set `{M-04, M-05, M-06}` is the **owner's ruling** on `GOV-2026-08-28-FD-01` Rec 19. This unit adds only the tier-3 reported surface; membership, mask registration and the §8.9 matched-window assertion stay `evaluation-and-comparison`'s, and the **primary** comparison set is unchanged.
 - **Verification obligations owned here:** controls (1)–(40) — (31) appended 2026-08-27, (32)–(40) appended 2026-08-28, every append out of positional order — enumerated per rule and counted in § Negative-control count; the three must-not-fire controls; R-132's evidence emission.
-- **Governance dependencies owned outside this unit:** BLK-03's contract limbs (`models-and-baselines`); BLK-04's limbs and BLK-09's `train_start` resolution (`features-and-splits`); BLK-08's co-owner adoption of the R-103 joint contract — until then no design path returns model output to TECU, and the primary table, the practical-relevance comparison and every TECU-denominated claim inherit that bound (R-125/R-128 make it checked); the pre-G-05 audit's execution and registration (`inventory-and-registry`); FR-P1-05-18's missing source criterion (a `requirements.md` change); the exploratory label's writer (registry surface — `foundation`/`inventory-and-registry`; gate); the migrated coverage notebook's home (gate); the candidate Vision §15.2 rows (owner/supervisor; proposed, never applied here); the D-number-first freeze of the notebook's inline constants (`acquisition`/`foundation` scaffold territory); G-05's freeze of the evaluation code this stage designs (Supervisor). **Added 2026-08-28:** the pre-G-05 audit's **December day range** (`inventory-and-registry`, amended in parallel per Rec 15) and the range's value (**Student + Supervisor**, D-13 being a supervisor-countersigned demotion threshold); `feature_set_id`'s supply onto the comparison object (`evaluation-and-comparison`, Rec 16); the **Vision §15.2 amendment to FR-P1-05-16** re-citing §5.5's metric set (`TEC-14`, Open — owner/supervisor); **`REQ-CLAIM-01`'s boundary text**, owed an owner-approved annotate-in-place or a §15.2 amendment (Rec 16 follow-on); **which text surface is authoritative for the thesis** (Student, `domain-entities.md` § 6); and **placing `tests/test_regimes_and_reporting.py` inside §12's tree**, which R-132's corrected precedent shows is a §12 amendment (owner/supervisor). **Added on the 2026-08-28 resume pass (Rec 18 limb (3)):** the **emission** of NFR-TDEF-01's cross-phase target-lineage sentence on the target-writing path (`target-standardization`, Rec 18 limb (1), applied there 2026-08-28) — this unit's two new checklist rows assert that sentence's **presence** and never author it, so if the upstream path does not write it the row **fails** rather than this unit emitting a second version; and the **FR-P1-03-4 notebook-caption text** itself, which `target-standardization` R-69 routes here for review and whose `human_residue` stays a human check.
+- **Governance dependencies owned outside this unit:** BLK-03's contract limbs (`models-and-baselines`); BLK-04's limbs and BLK-09's `train_start` resolution (`features-and-splits`); BLK-08's co-owner adoption of the R-103 joint contract — until then no design path returns model output to TECU, and the primary table, the practical-relevance comparison and every TECU-denominated claim inherit that bound (R-125/R-128 make it checked); the pre-G-05 audit's execution and registration (`inventory-and-registry`); FR-P1-05-18's missing source criterion (a `requirements.md` change); the exploratory label's writer (registry surface — `foundation`/`inventory-and-registry`; gate); the migrated coverage notebook's home (gate); ~~the candidate Vision §15.2 rows (owner/supervisor; proposed, never applied here)~~ ⛔ **DISCHARGED — approved under D-32 (2026-08-28)**, all eight, none deferred; the five rows this unit carries are `Pending`, never run, and no longer a dependency owed *(corrected 2026-08-30)*; the D-number-first freeze of the notebook's inline constants (`acquisition`/`foundation` scaffold territory); G-05's freeze of the evaluation code this stage designs (Supervisor). **Added 2026-08-28:** the pre-G-05 audit's **December day range** (`inventory-and-registry`, amended in parallel per Rec 15) and the range's value (**Student + Supervisor**, D-13 being a supervisor-countersigned demotion threshold); `feature_set_id`'s supply onto the comparison object (`evaluation-and-comparison`, Rec 16); the **Vision §15.2 amendment to FR-P1-05-16** re-citing §5.5's metric set (`TEC-14`, Open — owner/supervisor); **`REQ-CLAIM-01`'s boundary text**, owed an owner-approved annotate-in-place or a §15.2 amendment (Rec 16 follow-on); **which text surface is authoritative for the thesis** (Student, `domain-entities.md` § 6); and **placing `tests/test_regimes_and_reporting.py` inside §12's tree**, which R-132's corrected precedent shows is a §12 amendment (owner/supervisor). **Added on the 2026-08-28 resume pass (Rec 18 limb (3)):** the **emission** of NFR-TDEF-01's cross-phase target-lineage sentence on the target-writing path (`target-standardization`, Rec 18 limb (1), applied there 2026-08-28) — this unit's two new checklist rows assert that sentence's **presence** and never author it, so if the upstream path does not write it the row **fails** rather than this unit emitting a second version; and the **FR-P1-03-4 notebook-caption text** itself, which `target-standardization` R-69 routes here for review and whose `human_residue` stays a human check.
 - **Open — all four inherited blockers are EXIT conditions on this stage.** BLK-03 ↓, BLK-04 ↓, BLK-08 ↓, BLK-09 ↓ remain open; nothing in this file closes any of them; this unit may not complete or exit 3.1 while any stands, and no implementation may proceed while they stand.
 - **Open — the FR-P1-05-18 advisory NOT-READY stays open**: its criterion still does not test the count's source; R-123 makes the source assertable, and writing the criterion is a `requirements.md` source-criterion change **reported here, not fixed here**.
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No rule here authorises creating `src/evaluation/regimes.py`, `diagnostics.py`, `plots.py`, any notebook, or `tests/test_regimes_and_reporting.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.

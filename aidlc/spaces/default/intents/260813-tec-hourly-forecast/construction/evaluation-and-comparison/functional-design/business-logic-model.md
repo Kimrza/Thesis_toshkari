@@ -63,7 +63,15 @@ below is design, and no module is created.
 > **Counts re-derived 2026-08-28, printed at § Assumptions and never carried:** workflows
 > **8** (W-1…W-8, unchanged); rules **10** (R-103…R-112, unchanged); entities **8**
 > (unchanged); negative controls **31** (was 29: −1 relocated to the co-owner, +3 new, number
-> (2) vacated); amendments owed **6 across 4 units** (total unchanged, content and status
+> (2) vacated); amendments owed ~~**6 across 4 units**~~ ⚠ **SUPERSEDED — the current figure is
+> `5 + 1 + 1 = 7 across 5 units`, corrected here 2026-08-30** *(adversarial finding 3, Major:
+> this summary carried a total that `business-rules.md` § Amendments owed — the later, detailed,
+> arithmetic-printed derivation this summary is drawn from — already labelled superseded. The
+> co-owner's **R-83** landed after 6-across-4 was written, and its `business-rules.md` § Amendments
+> owed was re-read on 2026-08-28 at `5 + 1 + 1 = 7 across 5`. The primary artifact's own summary
+> was left carrying the value its own source calls stale.)* **`business-rules.md` § Amendments
+> owed is authoritative**; the superseded totals are preserved in order there (6 across 4 →
+> 5 across 3 → 7 across 5). This unit still owes exactly **1**. (Total unchanged, content and status
 > changed). **No blocker closed, no gate signed, no scientific value decided.**
 >
 > **The `## Review` section below is the 2026-08-27 first adversarial pass and is preserved
@@ -455,11 +463,18 @@ the owner to route through Vision §15.2 **or decline**. Recorded, not resolved.
 | Requirement | Workflows | Acceptance |
 |---|---|---|
 | FR-P1-04-7 | W-1, W-8 | WS-16 (primary), TA-11 (supporting) |
-| FR-P1-05-7 | W-2, W-3 | `UNTESTED` — no acceptance row; W-2's controls are the bar until stage 3.2 proposes a row under Vision §15.2 |
+| FR-P1-05-7 | W-2, W-3 | ⚠ **`Pending` — row APPROVED under D-32 (2026-08-28), never run; NOT passed.** D-32 approved all eight Vision §15.2 rows, board option 1, none deferred, so stage 3.2 no longer proposes this one. W-2's controls remain contract-level obligations. *(Corrected 2026-08-30; superseded: "`UNTESTED` — no acceptance row; W-2's controls are the bar until stage 3.2 proposes a row under Vision §15.2". This was the site the 2026-08-30 repair pass missed while correcting both sibling artifacts, leaving the PRIMARY artifact contradicting them — the repair's own regression, caught at iteration 2.)* |
 | FR-P1-05-17 | W-1 (step 4's frozen bundle), W-5 (the freeze-precedes-access ordering) | `UNTESTED` — the ordering is the G-05 record's to produce; this design requires it and cannot manufacture it |
 | NFR-FAIR-01 | W-1, W-2, W-8 | WS-16, TA-11 |
 
-**4 requirements, 2 untested** (FR-P1-05-7, FR-P1-05-17) — derived from the story map's
+**4 requirements, 2 carrying no result** — of which **1 holds an approved-but-unrun row**
+(FR-P1-05-7, `Pending` under **D-32**) and **1 has no row at all** (FR-P1-05-17). ⚠ *(Corrected
+2026-08-30; superseded: "**4 requirements, 2 untested** (FR-P1-05-7, FR-P1-05-17)". The count of
+requirements without a result is unchanged at **2**; what changed is that the two are now in
+**different** states, and collapsing them hides that D-32 approved one of the rows. **Neither is
+passed** — an approved-but-unrun row and an absent row are both `Pending`, and neither is
+evidence. This line and the FR-P1-05-7 row above were the two sites the 2026-08-30 repair pass
+missed while correcting both sibling artifacts.)* Derived from the story map's
 rows, the two upstream artifacts agreeing. TA-18 supports W-5 ("prediction hash preceding
 any metric") without carrying a requirement of this unit's.
 
@@ -475,6 +490,48 @@ any metric") without carrying a requirement of this unit's.
 - **Open — four corrections land in other units' files and are raised at the gate, not made here** *(2026-08-28)*: `foundation`'s amendment of R-01 to fifteen exceptions; `statistical-inference`'s R-113 precondition 2; `regimes-diagnostics-reporting`'s printing of the mask's five reporting values and its tier-3 breakdown row; and the `project.md` § Mandated wording correction on the GIM disclosure trigger, owed at the human-gated §13 learnings ritual. **No memory file and no sibling unit's artifact is edited by this remediation.**
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating any module; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant: **D-27 and D-28 are cited, not made**, and the tier-3 membership is proposed to the gate.
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T11:43:18Z
+**Iteration:** 1 (fresh budget after human gate rejection)
+
+### Findings
+
+No Critical or Major findings survive independent re-derivation. Two Minor observations recorded below; neither blocks READY.
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `business-logic-model.md` §Assumptions line 490 | The "four corrections land in other units' files" bullet still lists `foundation`'s R-01 amendment to fifteen as an item raised at the gate, but that amendment is now confirmed live on disk (spot-checked directly at `foundation/functional-design/business-rules.md` R-01, which reads FIFTEEN with `PartitionError` promoted and `InverseTransformError` disposed) — it is discharged, not still owed. `business-rules.md`'s and `domain-entities.md`'s own "Governance dependencies owned outside" bullets already say so explicitly (`⚠ DISCHARGED, swept 2026-08-30`); this one paragraph in the PRIMARY artifact is the one representation not yet updated to match. | Strike the foundation-R-01 item from this bullet (or mark it discharged) so all three artifacts' outstanding-dependency lists agree; the other three items in the bullet (`statistical-inference` R-113, `regimes-diagnostics-reporting`'s printing obligation, the `project.md` §13 wording correction) remain genuinely open and correctly stated. |
+| 2 | Minor | `business-logic-model.md` line 470 vs `business-rules.md`/`domain-entities.md` phrasing | This artifact's own coverage-table summary now reads "4 requirements, 2 carrying no result" (of which 1 approved-but-unrun, 1 no-row) — this is internally correct and matches the D-32 fact, but the phrase differs slightly in wording from the sibling artifacts' "1 no acceptance row / 1 approved-but-unrun row" framing. Cosmetic only; the underlying facts (FR-P1-05-7 `Pending` under D-32, FR-P1-05-17 untouched with no row) agree across all three files. | No action required; noted for completeness. |
+
+### Re-derivation of the two corrected facts (adversarial, not taken on faith)
+
+**Fact A (`foundation` R-01 = fifteen, `PartitionError` promoted, `InverseTransformError` disposed).** `grep -n -i "fourteen\|not on disk yet\|still reads" business-rules.md domain-entities.md business-logic-model.md` was run and printed. Every hit found is either (a) inside a struck-through/marked "superseded text preserved" box explicitly labelled swept/discharged on 2026-08-30, or (b) inside a prior `## Review` section (historical reviewer output, out of scope per the dispatch contract), or (c) a verbatim quotation of R-01's own preserved superseded wording used to show what changed. No live, unmarked site in any of the three artifacts asserts "fourteen" as current fact. R-105's own dedicated correction box (`business-rules.md` ~lines 350–390) and `domain-entities.md` §8's own correction box — the two sites the 2026-08-28 sweep previously missed and that a prior iteration flagged Critical for an active internal contradiction — now both carry the "SWEPT 2026-08-30" marker and state the amendment as done, matching the three sites that were already correct. R-105 limb 2 raises `PartitionError` for a `partition_id` mismatch, matching `models-and-baselines` R-92 exactly; `domain-entities.md` §8's exception table lists `PartitionError` as the fifteenth. Spot-checked directly against the owning file at the one permitted integration point: `foundation/functional-design/business-rules.md` lines 171–312 read "the enumeration is FIFTEEN," name `PartitionError` as the fifteenth entry (declared in `src/data/config.py` per a later gate-owner wording amendment), and dispose `InverseTransformError` under the "any future integrity-related exception" clause with a printed derivation distinguishing it from a sixteenth promotion. The claim holds.
+
+**Fact B (D-32 approved FR-P1-05-7's row; FR-P1-05-17 untouched; row is `Pending`, not passed).** `grep -n -i "UNTESTED\|no acceptance row\|2 untested\|FR-P1-05-7\|FR-P1-05-17" business-rules.md domain-entities.md business-logic-model.md` was run and printed. Live coverage-table rows and summary lines in all three artifacts now read `Pending — row APPROVED under D-32 (2026-08-28), never run; NOT passed` for FR-P1-05-7, with the standing prohibition against claiming coverage/satisfaction/verification explicitly narrowed (not lifted) to state that an approved row is still not a passed one. `business-rules.md`'s and `domain-entities.md`'s "no acceptance row" table title and governance-dependency bullets are correctly narrowed to name only FR-P1-05-17 as still owed. No live site anywhere asserts FR-P1-05-7 is `covered`, `satisfied`, `verified`, or `passed`, and no site claims FR-P1-05-17 gained a row — `business-logic-model.md` line 467 and its sibling rows correctly leave it `UNTESTED`. The historical `## Review` sections already present in this file document a prior iteration where this exact fix had been applied to `business-rules.md`/`domain-entities.md` but not yet to `business-logic-model.md` itself (a self-inflicted regression caught and recorded at iteration 2 of that earlier pass); the live table at lines 461–479 today shows that regression is now fixed — line 466 reads `Pending — row APPROVED under D-32`, and line 470's summary matches.
+
+**Amendments-owed figure.** `business-logic-model.md` line 66 states the total as "5 + 1 + 1 = 7 across 5 units," explicitly marked superseded-from "6 across 4 units," matching `business-rules.md`'s § Amendments owed derivation (line 880: `5 + 1 + 1 = 7, across 5 units`, both sides independently derived and agreeing). No disagreement found.
+
+**NFR-FAIR-01 / comparison-wide mask.** No pairwise or per-model mask found live anywhere; W-1/R-106/R-107 raise `FairnessError` on any merge or per-pair attempt, with negative controls (14) and (27) both present in `business-rules.md`. Single comparison-wide intersection mask per set is stated consistently.
+
+**Binding honesty rule / baseline disclosure.** `business-logic-model.md`'s own "Attempted/Refuted" verification log (line 596) records that a per-model mask, a baseline-beats-LSTM disclosure gap, and a premature independence claim were each specifically hunted for and not found; the three difficulty controls' co-reporting is enforced via a completeness refusal (R-110 limb 1) rather than left to convention.
+
+**GIM independence / overlap audit.** `business-rules.md` lines 712–732 and 754 confirm disclosure is keyed to "the audit has run," with no independence claim permitted before it — matching TE §5.2 and the project's ALWAYS-disclose mandate.
+
+**G-06 hash-before-metrics.** R-109 (`business-rules.md` line 615) and the `PredictionHashReceipt` entity (`domain-entities.md` §5) implement hash-receipt-before-metrics as a consumable precondition, kept distinct from the required performance-blind pre-G-05 coverage audit — matching the project's mandated separation.
+
+### Coverage limits
+
+This pass re-derived Fact A and Fact B directly from the three artifacts (not taken on the dispatch's word), spot-checked the one explicitly named cross-unit integration point (`foundation` R-01) as the read-scope carve-out permits, and searched for mask/baseline/independence/hash-order defects. It did not re-verify every one of the ~2,000 lines across the three files line-by-line, and it relied on the artifacts' own prior "Attempted/Refuted" self-audit for the mask/baseline/independence hunt rather than re-deriving those three checks fully independently — that self-audit's reasoning was spot-checked against the cited rule text (R-106/R-107/R-110) and found consistent, but is noted as a scope limit. `models-and-baselines`, `features-and-splits`, `statistical-inference`, and `regimes-diagnostics-reporting` were not read at all this pass; `foundation` was read only at the single permitted spot-check point (R-01). Their internal correctness is out of this unit's review scope.
+
+### Summary
+
+Both corrected facts named in the dispatch — the `foundation` R-01 fifteen-exception amendment and D-32's approval of FR-P1-05-7's acceptance row — are now genuinely swept across all live representations in all three artifacts, including the two sites (R-105's and §8's own correction boxes) and the one artifact (`business-logic-model.md`'s own coverage table) that earlier iterations left standing in contradiction. The remaining Minor items are cosmetic staleness in one Assumptions bullet and a wording variance, neither creating a live factual contradiction. The fairness, estimand, honesty-disclosure, IRI/GIM evaluation-time-only, and locked-test-discipline core of this unit remains sound and consistent with the shared inception contracts and the project's Mandated/Forbidden rules.
+
+READY
 
 ## Review — 2026-08-27 first adversarial pass
 
@@ -515,6 +572,39 @@ No stage-declared validation tooling was listed for this dispatch; verification 
 
 This unit's three artifacts are unusually well cross-referenced against the shared inception contracts and sibling units' finalized designs — every count I re-derived matched, every quoted cross-unit rule matched its source, the BLK-08 mechanism choice is consistent with (not in conflict with) the prior application-design M6 approval once the full history is traced, and all four inherited/owned blockers (BLK-08, BLK-03 ↓, BLK-04 ↓, BLK-09 ↓) are correctly left open as exit conditions with no implementation authorized. One Major finding survives: R-105's claim to "mirror" `models-and-baselines` R-92 does not hold on the exception type raised for a `partition_id` mismatch (`LeakageError` here vs. `PartitionError` there), which is exactly the kind of claimed cross-unit agreement this project's own methodology (representation-sweep, count-derivation) exists to catch, and `PartitionError` is not declared anywhere in this unit's own exception hierarchy or in `foundation` R-01's fourteen-exception list. One Minor finding (an unquoted R-74 citation) is cosmetic. With one Major and zero Critical findings, this does not cross the NOT-READY threshold.
 
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T06:27:19Z
+**Iteration:** 2 (final)
+
+### Iteration-1 findings — verified against the repair claim
+
+- **Critical 1 (`foundation` R-01 "fourteen" claim).** Verified swept. All five named sites (`business-rules.md` Sources bullet ~103, R-105 correction box ~368-390, § Amendments owed box ~945; `domain-entities.md` Sources bullet ~63, § 8 correction box ~350-368) now state R-01 has been amended to **fifteen**, with the superseded "fourteen" text preserved verbatim inside marked/struck correction boxes rather than asserted as current fact. `domain-entities.md`'s own § 8 exception table and `business-rules.md` R-105 both correctly show `PartitionError` promoted. No live (non-quoted, non-superseded) site asserts "fourteen" as current. **RESOLVED.**
+- **Major 3 (7-across-5 vs 6-across-4).** Verified corrected. `business-logic-model.md` § Assumptions (lines 66-74) now states `5 + 1 + 1 = 7 across 5 units`, strikes the superseded `6 across 4 units`, and names `business-rules.md` § Amendments owed as authoritative — matching `business-rules.md`'s own derivation (`5 + 1 + 1 = 7 across 5`, lines 870-900). **RESOLVED.**
+- **Critical 2 (D-32's approved FR-P1-05-7 row).** **NOT resolved — reintroduced in the PRIMARY artifact.** `business-rules.md` (R-108 Acceptance box ~602-612, coverage-table row ~965, standing-prohibition box ~948-956) and `domain-entities.md` (coverage-table row ~383, summary line ~387-392) are correctly corrected: both now read `Pending — row APPROVED under D-32 (2026-08-28), never run; NOT passed`, with the "1 no-row / 1 approved-but-unrun" split replacing "2 untested". But **`business-logic-model.md` — the artifact this repair pass was dispatched to fix, and the one carrying this `## Review` section — was never touched**: its own live `## Requirement coverage` table still reads, unmodified from before the repair:
+  - line 466: `FR-P1-05-7 | W-2, W-3 | `UNTESTED` — no acceptance row; W-2's controls are the bar until stage 3.2 proposes a row under Vision §15.2`
+  - line 470: `**4 requirements, 2 untested** (FR-P1-05-7, FR-P1-05-17)`
+  These are live body content (the table sits at lines 461-472, well before the "## Review — 2026-08-27 first adversarial pass" section that starts at line 487 and is correctly out of scope as prior-reviewer output). The primary artifact's own coverage table and requirement-count summary therefore still assert exactly the pre-D-32 state — "no acceptance row" / "2 untested" — that `business-rules.md` and `domain-entities.md` now explicitly contradict with `Pending — APPROVED under D-32`. This is the sixth (and seventh, counting the summary line) site the dispatch brief asked me to hunt for, and it sits in the one artifact most readers will treat as the unit's authoritative requirement-coverage summary. It is also a fresh internal contradiction *introduced by this repair pass*: before the repair all three artifacts agreed (wrongly) that FR-P1-05-7 was untested; after the repair, two of three now say `Pending`/approved and the third — the primary — still says `UNTESTED`/"2 untested", so the unit's own artifact set now visibly disagrees with itself on a D-32-governed fact. **UNRESOLVED — this is the repair pass's own regression, not a pre-existing gap.**
+
+### Overclaim / narrowing check (repair-quality checks requested by the dispatch)
+
+- No repair reads as though D-32 **passed** rather than **approved** a row — every corrected site (`business-rules.md` R-108, coverage table, prohibition box; `domain-entities.md` coverage table, summary) uses `Pending`, "never run", "NOT passed" consistently.
+- `FR-P1-05-17` is correctly left untouched everywhere — no site claims it gained a row.
+- The standing prohibition (`business-rules.md` ~948-956) is narrowed on the correct ground only ("no row exists" ground removed; "covered/satisfied/verified" ground unchanged and restated) — not weakened in scope.
+- The `7 across 5` figure is independently verifiable from `business-rules.md` § Amendments owed's own printed derivation (external-products 5 + features-and-splits 1 + this unit 1 = 7; unit count 5: external-products, features-and-splits, models-and-baselines *(implicit 0, still a unit)*... — the file states unit count as 5 directly at line 882/898-900, and I did not find a competing total anywhere corrected or uncorrected). No defect found in the arithmetic itself.
+
+### Coverage note
+
+Per this pass's read-scope bound, verification was limited to this unit's three artifacts, the Q&A file, and grep sweeps across only this unit's `functional-design/` directory (no sibling-unit reads). The "still true, not newly discharged" list in the dispatch brief (TA-15, WS-18, G-09 preconditions, stage 3.1 FAIL, BLK-08/03/04/09) was spot-checked via the § Assumptions/G-09 boxes at lines 479, 484 and found consistent with that list — no new claim of discharge found.
+
+### Summary
+
+Two of the three iteration-1 findings (Critical 1, Major 3) are genuinely and correctly resolved, with superseded text preserved and marked rather than deleted — good practice. The third (Critical 2) is resolved in `business-rules.md` and `domain-entities.md` but was never applied to `business-logic-model.md`, the primary artifact, whose live Requirement-coverage table and requirement-count summary still assert the pre-D-32 "UNTESTED"/"2 untested" state for FR-P1-05-7. This is not a stale artifact left over from before the repair — it is a fresh cross-artifact contradiction the repair pass itself created by fixing two of three carriers and skipping the third. One Critical finding stands.
+
+NOT-READY
+
 READY
 
 ---
@@ -527,3 +617,35 @@ READY
 > **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
 > discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
 > stage 3.1 remains **FAIL** with no board having passed it.
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T06:21:12Z
+**Iteration:** 1
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-rules.md` Sources bullet (foundation R-01), R-105 correction box (lines ~368–369), § Amendments owed (line 945); `domain-entities.md` Sources bullet (foundation R-01), § 8 correction box (lines ~350–352) | The "`foundation` R-01 still reads 'all fourteen', the fifteenth-exception amendment is not on disk yet" claim is directly **self-contradicted within this unit's own artifact set**. Three sites (`business-logic-model.md` W-4 box; `business-rules.md` Sources bullet at line 107; `domain-entities.md` Sources bullet at line 65) carry a dated "⚠ SWEPT 2026-08-28 … `foundation` R-01 **has been amended** and now reads **fifteen**" correction. But `grep -n -i "fourteen\|not on disk yet\|still reads"` over all three artifacts (run and printed before asserting) turns up **five additional, unswept sites** asserting the opposite as current fact: `business-rules.md` line 103 ("that amendment is `foundation`'s to write"), `business-rules.md` lines 368–369 (R-105's own correction box: "not on disk yet … still reads 'All fourteen"), `business-rules.md` line 945 ("`foundation`'s artifacts still read 'all fourteen' on disk **today**"), `domain-entities.md` line 63 ("an amendment `foundation` owns and has not yet written"), and `domain-entities.md` lines 350–352 (§ 8's own correction box: "not on disk yet … still reads 'All fourteen"). Two of the five unswept sites are themselves labelled as the artifact's authoritative "correction box" for the exact rule (R-105, § 8) the swept sites also correct — so a reader of R-105 or § 8 in isolation is told the amendment is pending, while a reader of the W-4 box in the sibling file is told it is done. This is worse than an unmarked stale claim: it is an active, uncorrected contradiction inside the same governed document set, on a fact (whether `PartitionError` is declared in `foundation`'s exception hierarchy) that the artifact's own exception table (`domain-entities.md` § 8) and stage-entry catch depend on. | Sweep every representation, not just the three that happened to be corrected: fix `business-rules.md` lines 103, 368–369 and 945, and `domain-entities.md` lines 63 and 350–352, to match the "amended, now fifteen" state, or — if genuinely uncertain which is current — state the uncertainty once, in one place, rather than asserting both states as fact in different paragraphs of the same files. |
+| 2 | Critical | `business-logic-model.md` § Requirement coverage (FR-P1-05-7 row), § Assumptions; `business-rules.md` § Requirement coverage, "## The two requirements whose obligations exist but have no acceptance row" section, § Assumptions; `domain-entities.md` § Requirement coverage, § Assumptions | Per the dispatch brief's stated fact, D-32 approved acceptance rows for FR-P1-05-7 and FR-P1-05-20, so R-108 and R-110 gain the §16/§19 rows they previously lacked. None of this unit's three artifacts reflect that: all three still assert, in their Requirement coverage tables and dedicated sections, that FR-P1-05-7 is `UNTESTED — no acceptance row`, and `business-rules.md` carries the standing prohibition "**No artifact, manifest or report may state or imply that FR-P1-05-7 or FR-P1-05-17 is covered, satisfied or verified**" unqualified for FR-P1-05-7. The 2026-08-29 re-confirmation receipt at the foot of each file states explicitly "**No line above this marker was touched by this pass**" — so this artifact set self-certifies, as of the most recent confirmed state, a claim (FR-P1-05-7 has no acceptance row) that the record of what changed since the last review says is now false. This is exactly the failure pattern flagged in the dispatch: a stale claim sitting beneath a "not touched" receipt is self-certified as current and worse than an unmarked one. | Update the FR-P1-05-7 requirement-coverage row and the dedicated "no acceptance row" section in all three artifacts to cite D-32's approved §16/§19 row (or, if this unit's own text cannot be edited without a fresh redo-jump receipt, flag this explicitly as a known-stale representation owed at the next pass rather than silently carrying the prohibition forward as current). FR-P1-05-17 is not stated as covered by D-32 per the dispatch and can remain UNTESTED. |
+| 3 | Major | `business-logic-model.md` § Assumptions (line 468, "amendments owed **6 across 4 units**"); `business-rules.md` § Amendments owed (final total, "**7 across 5 units**") | The two count representations of the same fact disagree, both dated 2026-08-28 and both self-described as freshly re-derived. `business-logic-model.md`'s § Assumptions line states "amendments owed **6 across 4 units** (total unchanged, content and status changed)" as its printed-not-carried summary. `business-rules.md`'s § Amendments owed section — the more detailed derivation, re-read from `features-and-splits` after that unit's co-owner section changed mid-remediation — arrives at "**7 across 5 units**" and explicitly labels "6 across 4 units" as the **superseded** total ("The superseded totals from this unit's own artifacts, preserved in order: '6 across 4 units' … → '7 across 5 units'"). `business-logic-model.md`'s own summary line was therefore left carrying the value `business-rules.md` itself calls superseded, with no correction box of its own. | Update `business-logic-model.md` line 468 to state 7 across 5 units (or explicitly flag it as the pre-co-owner-landing figure, the way `business-rules.md` does), so the primary artifact's summary agrees with the detailed derivation it is supposed to be printed from. |
+
+### Failed refutation attempts (recorded for the audit trail)
+
+- **Attempted:** the fairness/estimand/honesty core (single comparison-wide intersection mask per declared set, never pairwise; the paired loss differential fixed as benchmark-minus-model with equal-station weighting; the three difficulty controls co-reported via a completeness refusal that blocks incomplete emission; IRI kept evaluation-time-only onto the frozen mask; the GIM overlap-audit disclosure re-keyed to "a comparison exists" rather than "the audit has run"; the spatial-representativeness sentence emitted by the producing path; G-06 hash-receipt-before-metrics with the pre-G-05 coverage audit correctly kept a separate, non-blocked event) — tried to construct a per-model mask surviving anywhere, a baseline-beats-LSTM disclosure gap, or an independence claim preceding the overlap audit. **No defect found**: W-1/R-106/R-107 raise `FairnessError` on any merge or per-pair attempt with a negative control for each; R-110 limb 1's completeness refusal is set-generic and covers the new tier-3 set; R-110 limb 3's re-keyed GIM disclosure closes exactly the gap the earlier conditional phrasing left open, and is a strengthening, not a regression, against `project.md` § Mandated's more permissive wording (itself flagged as owed a correction, correctly routed to the human-gated learnings ritual rather than edited directly).
+- **Attempted:** the D-32 gap (finding #2) might be explained by FR-P1-05-7 not actually being in D-32's approved scope, making the "still UNTESTED" claim correct rather than stale. **Not resolved either way from this unit's own artifacts** — none of the three files cite D-32's content at all (only the generic "D-29 through D-32" receipt phrase), so the unit cannot be checked against D-32 from its own text; the dispatch brief states the approval as fact, which the finding is grounded on. Recorded as the basis for the finding rather than independently re-derived from a source outside this unit's read scope.
+- **Attempted:** BLK-08's one-sided open state (co-owner's half B now authored as `features-and-splits` R-84, agreeing limb for limb, but the import edge and gate adoption still unauthorised) is mis-stated as closed anywhere in this unit's text. **Refuted**: every site (`business-rules.md` R-103's box, § Amendments owed, § Assumptions; `domain-entities.md` § 6; `business-logic-model.md` W-3's narrowed box and § Assumptions) consistently states BLK-08's mechanism limb as still open pending the gate's adoption ruling and the edge's authorisation, with the honest scope narrowing (premise limb closes for the primary path only, per D-27) stated correctly and not overclaimed as full closure.
+- **Attempted:** R-105's `PartitionError`/`LeakageError` split (the prior reviewer's fixed Major) might have regressed. **Refuted**: R-105 limb 2 now raises `PartitionError` for a `partition_id` mismatch, matching `models-and-baselines` R-92 exactly, and `domain-entities.md` § 8 declares `PartitionError` in its exception table — consistent with the fix recorded in the 2026-08-27 review section above.
+
+### Validation Tool Results
+
+No stage-declared validation tooling was listed for this dispatch. Verification was performed by direct grep over this unit's three artifacts (counts printed above before being asserted) and by cross-reading the three files against each other and against the dispatch brief's stated facts about what changed since the last review.
+
+### Summary
+
+Two Critical, cross-representation defects survive in this unit's artifact set. First, the "`foundation` R-01 still reads fourteen exceptions" claim was corrected ("SWEPT") at three sites but left standing, uncorrected and self-contradicting the swept sites, at five other sites — including two passages that are themselves labelled as the artifact's own correction box for the same rule. Second, all three artifacts still assert FR-P1-05-7 has no acceptance row, while the dispatch brief records that D-32 approved one; the 2026-08-29 re-confirmation receipt's "no line above this marker was touched" self-certifies that stale claim as current. A further Major finding is a numeric disagreement between `business-logic-model.md`'s summary (6 across 4 units) and `business-rules.md`'s detailed, more-recent derivation (7 across 5 units) of the same amendments-owed count, with `business-rules.md` itself naming 6-across-4 as superseded. The fairness, estimand, honesty-disclosure, IRI/GIM evaluation-time-only, and locked-test-discipline core of this unit is sound and well cross-referenced against the shared contracts, and BLK-08's one-sided open state is stated honestly throughout — but the sweep-completeness failures above are exactly the defect class this project's own methodology exists to catch, and they leave the artifact set internally contradictory on a matter (the exception hierarchy) and stale on a matter (acceptance-row coverage) that a `code-generation` implementer or a later gate reviewer would reasonably rely on without independently re-deriving.
+
+NOT-READY

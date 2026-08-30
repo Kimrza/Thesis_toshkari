@@ -2057,3 +2057,84 @@ place `team.md`'s change-record convention points a reader to for "what is curre
 in exactly the way F1 already established as Critical.
 
 NOT-READY
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T11:40:36Z
+**Iteration:** 1 (fresh budget after human gate rejection)
+
+### Re-derivation of the site list (printed)
+
+`grep -n "provenance_class"` across the three `produces[]` artifacts, filtered to
+occurrences of the single-unit phrases named in the dispatch (`all in this unit`,
+`all still confined`, `all still inside`, `0 in every other unit`, `reaches no other
+unit`, `crosses no unit boundary`, `confined to this unit`), gives eight live-prose
+hits outside `## Review` sections:
+
+| Site | Line(s) | Marker present |
+|---|---|---|
+| `business-rules.md` R-36 box | 367–405 | ⛔ REBASED 2026-08-29, plus F1's self-contradiction ("reaches no other unit" vs naming R-50) resolved |
+| `business-rules.md` R-36 Open item | 800 | ⛔ REBASED 2026-08-29 |
+| `business-rules.md` change-log paragraph | 873–898 | ⛔ REBASED 2026-08-30 (this iteration's repair) |
+| `domain-entities.md` § 4 box | 219–240 | ⛔ REBASED 2026-08-29 |
+| `domain-entities.md` § 4 Open item | 538 | ⛔ REBASED 2026-08-29 |
+| `domain-entities.md` change-log paragraph | 598–615 | ⛔ REBASED 2026-08-30 (this iteration's repair) |
+| `business-logic-model.md` W-4 box (§ "Why `provenance_class`...") | 298–342 | ⛔ THAT CLAUSE IS SUPERSEDED — REBASED 2026-08-29 |
+| `business-logic-model.md` § Assumptions bullet | (pre-existing, unchanged this pass) | already carried the 2026-08-28 rebase |
+
+That is the full site list — 8 live occurrences, 8 markers. Every remaining raw hit
+for `9`/`seven`/`3` near `provenance_class` sits either (a) inside the "Superseded
+figures preserved" clause that immediately follows one of the eight ⛔/marked boxes
+above (`business-rules.md:886`, `domain-entities.md:237,601`,
+`business-logic-model.md:336` — all correctly labelled as preserved history, not
+live fact), or (b) inside a `## Review` heading's own prior findings text
+(`business-logic-model.md:1826` onward), which is prior-reviewer output, not an
+artifact assertion, per this review's scope rule.
+
+**No live site asserts the single-unit state as current fact.** No surviving raw
+count (9 / 7 / 3, or 43 / 38 / 17) is stated as a live invariant anywhere I found —
+every occurrence of the current figures is bracketed by "a dated observation and
+never a live invariant" language, consistent across all seven repaired sites plus
+the pre-existing eighth.
+
+The prior NOT-READY (embedded in this same file, dated 2026-08-29 adversarial
+iteration 2) named exactly two unrepaired sites — the `business-rules.md` and
+`domain-entities.md` change-log paragraphs. Both now carry the ⛔ REBASED 2026-08-30
+marker with the same figures, the same two-stable-facts framing, and the same Open
+status as the other six sites. That finding is resolved.
+
+### Findings
+
+**Minor (does not block READY).** `business-logic-model.md`'s own W-4 box (line
+715, in the earlier "§ Open" bullet distinct from the 298–342 box) marks its
+superseded clause with ⚠ rather than the ⛔ used at the other seven sites. The
+content is correct — it states the clause is invalidated and gives the current
+figures — so no reader is misled, but the marker glyph is inconsistent across the
+artifact set, which is exactly the kind of surface inconsistency this defect class
+has repeatedly hidden a stale claim behind. Align the glyph to ⛔ at the next touch
+of that line for consistency, not correctness.
+
+**Not re-verified this pass (coverage limit, stated per the budget cap).** I did
+not re-walk the December-membership (D-2/ML-07/TEC-09), NaN-storage (R-37), or
+DATA-07-caveat-coverage threads end-to-end beyond confirming their rule text is
+present and unchanged (R-31 for membership, R-37 for NaN, the DATA-07 caveat
+cross-references at `business-rules.md:384,404` and `domain-entities.md:245`) — I
+found no contradiction in what I read, but this was a targeted grep, not an
+exhaustive sweep, and the dispatch's other listed hunts (directory-derived
+partition entry, DATA-07 caveat gaps, interpolated NaN) were not independently
+re-derived from scratch this iteration.
+
+### Summary
+
+The specific defect two prior iterations returned NOT-READY on — the
+`provenance_class` rebase left stale in the two change-log paragraphs — is fixed:
+both now carry the same ⛔ REBASED marker, the same current figures, and the same
+"dated observation, never a live invariant" framing as the other six previously-
+repaired sites. Re-deriving the full site list independently (8 live occurrences of
+the single-unit phrasing) found no ninth unrepaired site and no surviving raw count
+asserted as current. One cosmetic marker-glyph inconsistency (⚠ vs ⛔) is noted as a
+Minor, non-blocking suggestion.
+
+READY
