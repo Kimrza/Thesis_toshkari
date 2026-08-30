@@ -610,3 +610,14 @@ TA-36's primary test while it was sited in `features-and-splits`' module.
 > **Derived counts, re-checked after the edit and unchanged:** **10** rules (`R-64`…`R-73`),
 > **9** workflows (`W-1`…`W-9`), **9** numbered entity sections, **6** requirements with
 > **1** (`FR-P1-03-5`) carrying no acceptance row.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `target-standardization`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.

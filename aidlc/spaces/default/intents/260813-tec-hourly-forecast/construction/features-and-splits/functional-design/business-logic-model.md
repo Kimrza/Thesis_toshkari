@@ -2061,3 +2061,14 @@ The fourteenth-receipt pass's headline Critical (targeting the retired `apply_tr
 > limb** remain valid. **BLK-04 remains an open exit condition; BLK-08 and BLK-09 remain open
 > exit conditions; G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. Nothing here closes BLK-04, authorises implementation,
 > or authorises creating a module.**
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `features-and-splits`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.

@@ -1271,3 +1271,72 @@ tokens (`[Answer]:` and `Other` counts unchanged at 10/9; Recommendation markers
 > chosen here. **G-09 remains unsigned**; **BLK-07's authorization limb remains open** and no
 > run may touch calendar 2022-12 while it stands; membership stays derived from **record
 > timestamps**, never from a directory name. Every `## Review` section above is unchanged.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's content had already changed after that floor — the
+> `provenance_class` rebasing completed at the three sites the original remediation left stale,
+> its counts recorded as a dated observation rather than a live invariant, and G-09 signed under
+> D-31 with its §18.3 preconditions disclosed unmet — so the owner re-confirmed the unchanged
+> post-rebase content via the Consolidated Summary Confirmation at the foot of
+> `functional-design-questions.md`, receipted `2026-08-29`. No line above this marker was
+> touched by this pass.
+
+---
+
+## Review — 2026-08-29 post-rebase re-confirmation pass, iteration 1
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+
+**Class:** adversarial, iteration 1 of 2. Scope: the state re-confirmed 2026-08-29 —
+the `provenance_class` rebasing, the two December-read/day-range/caveat additions dated
+2026-08-28, and G-09/D-31's annotations — verified against `acquisition`'s own artifacts as
+the one named cross-unit integration point, and swept for the unswept-representation class
+this project's history repeatedly finds. No prior `## Review` section is altered.
+
+**Verdict: READY**
+
+### Derivations, printed before they are asserted
+
+| Claim | Derivation | Result |
+|---|---|---|
+| **7** requirements, **2** untested, **3** owned rows | `grep -o "FR-P1-02-[0-9]"` over all three artifact bodies = `{-1,-2,-3,-4,-5,-7,-8}` in every file; `unit-of-work.md` § 4 "Requirements carried (7)" = the same seven; story-map rows 64–70 agree; bold IDs = `{FR-P1-02-7, FR-P1-02-8}` in four independent locations. Owned rows `{WS-01, TA-04, TA-25}` match story-map line 231's primary cells. **Set difference empty in every direction** | ✅ unchanged |
+| `provenance_class` rebase figures, cross-checked against `acquisition` | `business-rules.md:782`, `domain-entities.md:336`, `domain-entities.md:528` all state **43** / **38** / **17**, split `acquisition` **25/21/11** and `inventory-and-registry` **18/17/6**, "reach exactly **2** units", `foundation` **zero** times. `acquisition/functional-design/business-rules.md:800` and `domain-entities.md:538` — the one named integration point, read as the permitted spot-check — carry the **identical** figures under their own 2026-08-29 rebase (finding F1, Critical, there), including the same arithmetic (25+18=43, 21+17=38, 11+6=17). **Cross-unit arithmetic and figures agree exactly** | ✅ consistent |
+| `data07_caveat` mapping | `derived_only → populated`, `full → absent`, stated identically in `business-rules.md` R-50/R-51 and `domain-entities.md` § 6/§ 7. Verified at source: `acquisition/functional-design/business-rules.md:339` (R-36) fixes `provenance_class = derived_only` for the twelve pre-TC-06 months, matching this unit's premise | ✅ sound |
+| R-50's six negative controls / R-51's caveat control | Counted directly in `business-rules.md`'s "Negative controls added 2026-08-28" block under R-50 (lines ~582–591): locked_evaluation refused; purpose-literal mismatch fails; December cell <31 days fails; wholly-outside-scored-window event fails toward the tally; day-range-less regime report fails; caveat-less `derived_only` figure fails = **6**. R-51's "added 2026-08-28" control = **1**. Matches the file's own claimed counts exactly | ✅ 6 and 1 |
+| G-09/D-31 disclosure, swept for overclaim | `grep -n "G-09 IS SIGNED"` across all three artifacts returns the **identical** blockquote at every occurrence (header box, all four Open-list restatements, all re-save boxes): signature authorises module creation only; §18.3 preflight never ran; critical tests unexecuted; `aws_ai_dlc_preflight_report` absent; "no scientific value becomes fillable." No occurrence claims a discharged TA-15/WS-18/TA-18 row, an existing `configs/`, or a passed critical test. **No overclaim found anywhere in the three artifacts** | ✅ disciplined |
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `business-rules.md` R-50's constraint box, lines 548–563 (the "⚠ THE SOURCE FIELD IS SEQUENCED BEHIND `acquisition`'s OPEN SEAM" box) | This box was the one the file's own Open-items bullet (line 782) credits as already correctly rebased — it frames the `provenance_class = 9 / derived_only = 7 / producing_interpreter = 3` figures as explicitly historical ("**As found at the opening of this remediation**… Those three figures are **pre-remediation**"), so it never asserts them as a live invariant. But unlike the three sibling representations of the same fact — this file's own Open bullet at line 782, and `domain-entities.md`'s two sites at lines 332–341 and 528 — it never adds the current "**the fields reach exactly 2 units**" fact that the 2026-08-29 rebase established. It states only the other stable fact (`foundation` carries all three zero times) and is silent on the fact that, post-remediation, the field now also reaches *this* unit's own rules (R-50, R-51, § 6, § 7 all cite `provenance_class`) rather than `acquisition` alone. A reader who reads only R-50 — the rule catalogue entry a builder implements from, not the appendix — comes away thinking the field is `acquisition`-only, which was true only "at the opening of this remediation" and is no longer the current picture the three sibling sites give. This is the unswept-representation class `project.md` § Way of Working names, though it does not misstate a number or change a buildable control, so it stays Minor | Add one clause to the box: "post-remediation, the field also reaches this unit's own R-50/R-51/§ 6/§ 7 — **the fields reach exactly 2 units**, the other of the two stable facts the 2026-08-29 rebase (`business-rules.md:782`) established" |
+
+### Failed refutation attempts
+
+- **Whether the `provenance_class`/`derived_only`/`producing_interpreter` counts stated in this unit's three rebased sites are internally consistent and match `acquisition`'s own rebase.** Recomputed the split arithmetic independently (25+18=43, 21+17=38, 11+6=17) and cross-read `acquisition/functional-design/business-rules.md:800` and `domain-entities.md:538` (the one named integration point, opened as the permitted spot-check): identical figures, identical "reach exactly 2 units" and "`foundation` zero times" stable facts, identical framing as a dated observation rather than a live invariant, and identical self-invalidation caveat (deriving the count adds new occurrences of the token). No drift. Not overturned.
+- **Whether a live `grep -c provenance_class` over this unit's own four files should reproduce 18.** It does not (25 raw hits found) — but the artifacts explicitly disclaim this: "writing the note itself adds occurrences of each token… recorded as a **dated observation, never as a live invariant**." A live re-grep is expected to disagree with the frozen count by design, and does. Not a finding.
+- **Whether the G-09/D-31 annotation ever licenses filling a TBD, discharging TA-15/WS-18/TA-18, or treating `aws_ai_dlc_preflight_report`/`configs/`/the ten critical tests as satisfied.** Every one of the roughly dozen occurrences across the three artifacts carries the identical disclosure clause verbatim ("no scientific value becomes fillable," preflight never ran, tests unexecuted, evidence artifact absent). No instance drifts toward overclaim. Not overturned.
+- **Whether the DATA-07 caveat is stated at every surface that relies on FULL's coverage figures within this unit.** W-6, W-7, R-50, R-51, § 6 and § 7 all carry it, each sourced identically from `provenance_class` with the identical `derived_only → populated / full → absent` mapping, and each negative-controlled. Verified `full` is not a fabricated enum value: `acquisition` R-36 fixes `derived_only` for the twelve pre-TC-06 months, and no artifact anywhere claims a `full`-classed month exists among them, so the complement is consistent rather than invented. Not overturned.
+- **Whether the requirement, acceptance-row and rule/entity-section counts moved as a side effect of the 2026-08-28/29 edits.** Re-derived by set difference against `unit-of-work.md` § 4 and the story map rather than by comparing totals, per `project.md` § Way of Working: 7 requirements, 2 untested, 3 owned rows, 10 rules (R-44…R-53), 9 entity sections (§ 1…§ 9) — all empty-set-difference against upstream and unchanged from the prior terminal READY. Not overturned.
+- **Whether NFR-AUD-01's registry-integrity rules (append-safe writes, visible failed runs, `code_commit`) apply to this unit's design and are unmet.** `unit-of-work.md` § 4 titles this unit "Inventory and Station Registry" and its `Owns` list is the source inventory, station registry, migration, schema validation and the coverage/G-P1A audit — not `src/data/release.py`'s experiment-registry write path, which `foundation` owns and which carries those NFR-AUD-01 obligations in its own artifacts. This unit's own access-logging mechanism (W-6/R-50's per-artifact row, written durable before the read, reconciled against a declared scope) is the audit-trail discipline that does apply here, and it is present, tested by three negative controls, and unchanged by this pass. Not a finding against this unit.
+
+### Summary
+
+The state re-confirmed 2026-08-29 holds up under an adversarial pass targeted at exactly the
+class this project's history most reliably finds defects in. The `provenance_class` rebase
+is now genuinely complete at the three sites the 2026-08-28 remediation left stale — verified
+not only by internal grep but by cross-reading `acquisition`'s own parallel 2026-08-29 rebase,
+whose figures, arithmetic and "reach exactly 2 units" stable fact match this unit's exactly,
+character for character. The DATA-07 caveat is coherent and reaches every surface this unit's
+output touches. G-09/D-31's disclosure is applied identically and without drift at every one
+of its roughly dozen occurrences across the three artifacts, with no instance treating any
+unmet §18.3 precondition as satisfied. Every count re-derives by set difference against
+upstream. One Minor defect survives: R-50's own constraint box — the rule catalogue entry, not
+an appendix — is the single site among four representations of the `provenance_class` reach
+that never states the current "reaches exactly 2 units" fact its three siblings all carry,
+leaving a reader of R-50 alone with the pre-remediation, single-unit picture. It does not
+misstate a number, does not affect a buildable negative control, and does not reopen a
+decision or a governed value — it is a one-clause completion of a sweep that reached three of
+four representations. **READY.**

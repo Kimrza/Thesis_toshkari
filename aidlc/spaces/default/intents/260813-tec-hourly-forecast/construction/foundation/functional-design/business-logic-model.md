@@ -932,10 +932,12 @@ matching the story map's designation.
 - **OPEN — `prediction_hash`'s producer is `models-and-baselines`', not this unit's.** *(Added 2026-08-28 per Recommendations 1 and 3.)* W-6 step 4 designs the registry row as the receipt's **destination** and refuses a hash presented by the metric-computing process; the **producer** is `scripts/06_train_and_predict.py`, which that unit owns and is being amended to specify (`PredictionHashReceipt`: `prediction_path`, `sha256`, `recorded_at_utc`, `run_id`, `partition_id`, durably flushed before `06` exits, with `06` refusing to exit holding a `DEC` prediction and no receipt). Until that lands the column has a home and no writer — **fail-closed**, since every `DEC` metric entry point already refuses without a verified receipt. The governance report's adoption vehicle is the **R-103/BLK-08 two-half contract** pattern registered as an exit condition on 3.1 for both owners; **this unit does not declare that pattern satisfied from one side.**
 - **OPEN — the `AccessRecord` half of W-6's reconciliation is `governance-guards`'.** *(Added 2026-08-28 per Recommendation 10.)* Both entities already carry `run_id`, so no contract change is needed on either side, but the reconciliation is a **joint** obligation and this document designs only the registry half. **Zero of the twelve units' 48 artifacts named both entities before 2026-08-28**; R-19 is the first statement of the relationship and `governance-guards` has not yet stated its side. Related and **not this unit's to close**: `GOV-2026-08-28-FD-01` **Recommendation 31** records five retrospectively logged December accesses and **one possible unauthorized access as expressly unresolved** — W-6's reconciliation reports them as known pre-guard orphans and never back-fills a registry row to clear them.
 - **OPEN — Kaggle's durability semantics are characterised nowhere in this design.** *(Added 2026-08-28 per Recommendation 39.)* W-6 step 8's durability confirmation reuses `governance-guards` R-25's accepted pattern, and platform durability behaviour differs between the two governed platforms. Kaggle's is unmeasured here, so step 8 needs its own measured evidence before rows written inside a Kaggle session are relied on at a freeze gate. A **measurement obligation on Bolt 1's in-Kaggle work** (W-10), not an implementation choice, and not this stage's to measure.
-- **OPEN — the `dataset_version` encoding is still the owner's D-number decision, and the board has now recommended one.** *(Added 2026-08-28 per Recommendation 42.)* The two OPEN items above on the encoding and its injectivity are **unchanged** — never-reuse remains **not established** and nothing this unit produces may claim otherwise. What is new is that the board **recommended** a fixed-length `content_hash` prefix plus a recorded collision bound and a verify-on-write uniqueness check (which would also discharge the `verify_release` amendment already listed as open), with the full 64-hex `content_hash` as the fallback and formal withdrawal of the never-reuse obligation as the third option. **No encoding is adopted here and none is invented.** `business-rules.md` § Assumptions carries the recommendation in full, including the trade-off that a verify-on-write check is a read back over existing releases — a light form of the release state the owner declined at Amendment C. **The decision must be taken before 3.5 touches `write_release`**, and per TE §18.3 stage 3.5 must stop and report rather than choose.
+- ⛔ **SUPERSEDED BY D-29 (2026-08-28) — the `dataset_version` encoding is RULED. The bullet below is the dated record of the pre-D-29 state, not the current one.** *(Marked 2026-08-29 on adversarial finding 1 of the re-confirmation pass, which found this bullet, `business-rules.md` § Assumptions and `domain-entities.md` § Assumptions all still asserting the encoding unruled while `R-12` and `W-7` twenty lines away already carried D-29's ruling — the "sweep every representation of a corrected fact" defect class `project.md` records.)* **What D-29 actually settles:** the encoding is the **first 12 hex characters of `content_hash`**, with a **verify-on-write** uniqueness check. Injectivity is thereby **established in substance** and `verify_release` is discharged, so the never-reuse obligation Q6=D′ retains is **no longer open on the encoding**. **What D-29 does NOT settle, now carried as its own open item below:** where the existing release population that verify-on-write must read back actually lives. Every "not established", "still unruled", "no encoding is adopted here" and "left unruled" statement in the superseded bullet is superseded **as to the encoding and its injectivity only**; the bullet is preserved because it records the constraint that governed this design when it was written.
+- **OPEN — D-29's verify-on-write has no specified release population to read back.** *(Added 2026-08-29 on adversarial finding 2 of the re-confirmation pass, Major.)* D-29 requires a read-back over "the existing release population" to check 12-hex prefix uniqueness, and **no artifact in this unit states where that population lives or how it is enumerated** — the release-history ledger that would have answered it was **declined as drafted at Amendment C (2026-08-25)**, and `ReleaseLedgerEntry` was withdrawn with it. The mechanism is therefore **specified but not yet implementable**: `write_release` cannot perform the check D-29 mandates without an enumeration surface. This is an **owner decision**, not an implementation choice this stage may make — the candidate surfaces (a release-root directory scan, the experiment registry's release columns, or a narrower re-proposal of the declined ledger) each carry a different durability and Amendment-C consequence. **Per TE §18.3, stage 3.5 must stop and report rather than choose one**, exactly as it must for any unresolved P0 decision on an affected component. Nothing in this unit claims the check is implementable today.
+- **OPEN — the `dataset_version` encoding is still the owner's D-number decision, and the board has now recommended one.** *(Added 2026-08-28 per Recommendation 42. ⛔ **Superseded 2026-08-29 — see the D-29 marker above.**)* The two OPEN items above on the encoding and its injectivity are **unchanged** — never-reuse remains **not established** and nothing this unit produces may claim otherwise. What is new is that the board **recommended** a fixed-length `content_hash` prefix plus a recorded collision bound and a verify-on-write uniqueness check (which would also discharge the `verify_release` amendment already listed as open), with the full 64-hex `content_hash` as the fallback and formal withdrawal of the never-reuse obligation as the third option. **No encoding is adopted here and none is invented.** `business-rules.md` § Assumptions carries the recommendation in full, including the trade-off that a verify-on-write check is a read back over existing releases — a light form of the release state the owner declined at Amendment C. **The decision must be taken before 3.5 touches `write_release`**, and per TE §18.3 stage 3.5 must stop and report rather than choose.
 - **OPEN — the exception-hierarchy obligations R-01's 2026-08-28 amendment creates.** *(Added 2026-08-28 per Recommendation 8.)* `PartitionError` is now a **fifteenth** named subclass, so the exceptions raised by other units are **nine** and `models-and-baselines` owes its declaration on the same terms as the other eight. Separately, **18** further project-defined subclasses ride R-01's any-future clause — derived, not counted from prose — and each raising unit still owes its own declaration, or the stage-entry catch lets one exit with **no `aborted` registry row**. And the **`PartitionError`/`LeakageError` taxonomy disagreement between `models-and-baselines` R-92 and `evaluation-and-comparison` R-105 is not closed by the promotion**: R-01 now states the discriminating rule those units must agree against, and whether R-105 changes its raise is their decision. `business-rules.md` § Assumptions carries all three items.
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating a module — including W-3's `aws_ai_dlc_preflight_report` and W-6's extended row, which specify contents and create nothing. Vision § 13.1 records **G-09 Agent preflight** as **Open**, owner **Supervisor**, evidence `aws_ai_dlc_preflight_report`, due *"Before any affected component is coded"*.
-- **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant. **This holds for the 2026-08-28 amendments specifically**: W-3's report contents, W-6's twenty columns and its four new refusals, the `exploratory` derivation, R-01's promotion, R-08's write mechanism, R-05's acceptance label, W-8's dated status clause, and the four mapping corrections (W-1, W-2 here; E-1, E-2 in `domain-entities.md`) are all schema, taxonomy, mechanism or citation decisions. **The one value that would be scientific — the `dataset_version` encoding — is explicitly left unruled.**
+- **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant. **This holds for the 2026-08-28 amendments specifically**: W-3's report contents, W-6's twenty columns and its four new refusals, the `exploratory` derivation, R-01's promotion, R-08's write mechanism, R-05's acceptance label, W-8's dated status clause, and the four mapping corrections (W-1, W-2 here; E-1, E-2 in `domain-entities.md`) are all schema, taxonomy, mechanism or citation decisions. **The one value that would be scientific — the `dataset_version` encoding — is explicitly left unruled.** *(⛔ **Superseded 2026-08-29**: D-29 ruled the encoding on 2026-08-28 — first 12 hex of `content_hash`, verify-on-write. The sentence is preserved as the accurate record of this section when it was written. What remains open is not the encoding but the **release population** verify-on-write must read back, which is its own item above and is likewise not decided here.)*
 
 ## Review history
 
@@ -4729,4 +4731,175 @@ three-line provenance blockquote to each of the three design artifacts and one w
 re-confirmation section to the question file; no mojibake, no content drift, no removed material.
 G-09 remains unsigned; nothing here authorises creating a module.
 
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor (see `construction/functional-design/memory.md` § Deviations,
+> 2026-08-26 entry). This unit's content had already changed after that floor — the G-09 pass
+> edited this file at 2026-08-27T22:19 (D-29 through D-32; G-09 signed under D-31 with its
+> §18.3 preconditions disclosed unmet) — so the owner re-confirmed the unchanged post-G-09-pass
+> content via the Consolidated Summary Confirmation at the foot of
+> `functional-design-questions.md`, receipted `2026-08-29`. No line above this marker was
+> touched by this pass. This paragraph is the native-tool re-save that receipt requires.
+
 READY
+
+---
+
+## Review — 2026-08-29 adversarial review, iteration 1
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T07:50:33Z
+**Iteration:** 1
+
+### Scope of this pass
+
+This is a fresh adversarial pass over the current, post-G-09-pass, 2026-08-29-re-confirmed
+state of the three `foundation` artifacts plus the six passed shared contracts. It does not
+re-litigate the extensive prior review history already recorded in this file (`## Review
+history` and the many dated `## Review — …` sections above) — those findings were checked
+against the state that existed when they were written. This pass hunted specifically for what
+the dispatch asked for: gate/precondition claims stated as discharged when they are not, G-09
+supersession-annotation consistency, stale counts, and consistency against the six upstream
+contracts. Every finding below is independently reproducible by `grep`/read against the current
+file content; line numbers are cited so they can be checked directly.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-logic-model.md:935`; `business-rules.md:1047` vs `business-rules.md:1764`; `domain-entities.md:988-989` | **All three artifacts' own `§ Assumptions` sections state the `dataset_version` encoding is still unresolved, directly contradicting `business-rules.md` R-12's own rule body (and the current, re-confirmed state of this unit).** `business-rules.md:1047` ("`✳ AMENDED 2026-08-28 — D-29 SETTLES THE ENCODING AND ESTABLISHES INJECTIVITY`") states plainly: "`dataset_version` is the first 12 hexadecimal characters of the release's `content_hash`, and `write_release` verifies on write that the prefix is not already in use" and "Two of this rule's three open items close. The encoding is specified; injectivity is established." This matches the dispatch brief's own framing of the current state ("R-12 amended by D-29 (12-hex `dataset_version`, verify-on-write)") and matches `business-logic-model.md`'s own W-7 mermaid diagram at line 559 ("Derive dataset_version = first 12 hex of content_hash (D-29); verify prefix unused or ReleaseError"). Yet the `§ Assumptions` section of the very same file, at `business-logic-model.md:935`, still reads: *"OPEN — the `dataset_version` encoding is still the owner's D-number decision… **No encoding is adopted here and none is invented.** … **The decision must be taken before 3.5 touches `write_release`**, and per TE §18.3 stage 3.5 must stop and report rather than choose."* `business-rules.md`'s own `§ Assumptions` box at line 1764 is headed *"THE BOARD'S RECOMMENDATION ON THE ENCODING, RECORDED 2026-08-28 — **AND STILL NOT RULED**"* and states *"No encoding is invented here, and none is adopted"* — with no `⚠ SUPERSEDED` marker, unlike the correctly-updated box at `business-rules.md:1240` twenty lines from R-12's own D-29 amendment, which this document elsewhere applies scrupulously to every other superseded claim. `domain-entities.md:988-989` carries the identical unswept pair ("OPEN — the `dataset_version` hash-to-label encoding… no approved artifact specifies the encoding" / "OPEN — injectivity of that encoding, and with it never-reuse"). This is exactly the defect class `project.md`'s own learned correction warns against ("sweep every REPRESENTATION of a corrected fact, not every instance of the entity that carries it") — R-12's rule body was updated for D-29, but all three `§ Assumptions` sections, which is where an implementer or stage 3.5 looks for the current open-item list, were not. A reader following `§ Assumptions` (as TE §18.3's stop-and-report discipline instructs) would conclude the encoding is still an unruled freeze-gate decision and either wrongly halt or ask the owner a question already answered by D-29; a reader following R-12 would proceed to implement the 12-hex/verify-on-write scheme. The artifacts disagree with themselves about whether a freeze-gate decision has been taken, which is precisely the ambiguity TE §18.3 exists to prevent. | Sweep all three `§ Assumptions` sections: replace or annotate the encoding/injectivity OPEN bullets with the same `⚠ SUPERSEDED 2026-08-28 by D-29` treatment already applied at `business-rules.md:1240`, so the open-item list a stage-3.5 implementer reads agrees with R-12's rule body. |
+| 2 | Major | `business-rules.md:1064` ("Verify-on-write. `write_release` reads back the existing release population…"); `business-logic-model.md:559` (W-7 step 5, "verify prefix unused or `ReleaseError`") | **D-29's verify-on-write mechanism never specifies how `write_release` discovers "the existing release population" to check the 12-hex prefix against.** Amendment C (a release ledger / `ReleaseLedgerEntry` / `artifacts/registry/release_history.jsonl`) was explicitly declined precisely to avoid maintaining an index of releases (`business-logic-model.md:930`). D-29's own text concedes the tension — "a verify-on-write check is a read back over existing releases — a light form of the release state the owner declined at Amendment C" (`business-logic-model.md:935`) — but no artifact says *where* that population lives or *how* it is enumerated: not a directory glob under a named releases root, not a scan of `experiment_registry.jsonl`'s `dataset_version` column (`domain-entities.md:401`, `RegistryEvent` column 8, which records the label per run but is never named as the read-back source), not any other index. W-7 step 5 (`business-logic-model.md:559`) says only "verify prefix unused or `ReleaseError`" with no named mechanism. Without this, a developer implementing `write_release` cannot satisfy TE §18.3's "must stop and report rather than choose a default" discipline this document otherwise insists on for every other unnamed mechanism (e.g. the `verify_release` amendment, deliberately left as an open item rather than invented) — this one *was* invented (the 12-hex encoding and the check's existence) without the read-back mechanism it depends on being specified. | Name the read-back mechanism for "the existing release population" (e.g. glob a named releases root, or scan `RegistryEvent.dataset_version`) as part of D-29, or record it as a fifth open item in the same class as the other `write_release`/`verify_release` amendment needs already listed. |
+
+### Validation Tool Results
+
+No stage-listed validation tool was available to run in this environment; findings above are
+derived directly from the artifact text via targeted `grep`/read against the cited line numbers,
+per the count-derivation and cross-reference discipline this project's own `project.md` mandates.
+
+### Summary
+
+The three artifacts are, cell for cell, internally sound on every count and cross-reference this
+pass checked against the six passed upstream contracts (the 16-requirement / 7-primary-acceptance-row
+table for `foundation`, the eight-vs-nine live entity count, the fourteen-vs-fifteen exception
+enumeration, and the exhaustive G-09-supersession annotation, which is consistent and never
+overclaims authority beyond D-31 everywhere this pass sampled it). The blocking defect is narrower
+but real: the `dataset_version` encoding decision (D-29) is asserted as both closed (R-12's rule
+body, the W-7 diagram, and the dispatch brief's own framing of "what changed") and still open and
+unruled (all three artifacts' `§ Assumptions` sections) in the same set of documents, and the
+mechanism D-29 depends on — enumerating "the existing release population" without the ledger
+Amendment C declined — is never named. A stage-3.5 implementer cannot resolve either without going
+back to the owner, which is the outcome `functional-design` exists to prevent.
+
+NOT-READY
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T07:56:37Z
+**Iteration:** 2 (final)
+
+### What the repair got right
+
+Both prior findings were genuinely addressed at the sites the dispatch brief named. Verified by
+reading each site directly:
+
+- `business-logic-model.md:935` — ⛔ supersession marker over the § Assumptions encoding/injectivity
+  bullets, dated 2026-08-29, naming D-29's actual ruling (first 12 hex of `content_hash`,
+  verify-on-write) and preserving the pre-D-29 text in place.
+- `business-logic-model.md:937` and `:940` — the board-recommendation bullet and the closing
+  "None of the above… is explicitly left unruled" bullet both carry inline ⛔/Superseded markers
+  pointing at the same D-29 marker.
+- `business-rules.md:1764` — the board-recommendation box carries the equivalent ⛔ marker.
+- `domain-entities.md:987`, `:988`, `:989` — the same treatment, consistently worded.
+- `business-logic-model.md:936` — Finding 2's new OPEN item ("D-29's verify-on-write has no
+  specified release population to read back") correctly scopes the gap: it names the declined
+  Amendment C ledger as the reason no enumeration surface exists, offers three candidate surfaces
+  without choosing one, and cites TE §18.3 stop-and-report. It neither overclaims (it does not
+  invent a surface) nor underclaims (it does not understate that `write_release` cannot perform
+  the D-29 check as specified). This item is *not* cross-referenced into `domain-entities.md`'s or
+  `business-rules.md`'s own § Assumptions sections, but neither of those files owns `write_release`'s
+  read-back mechanism, so the omission is not itself a new defect.
+
+No new inconsistency was introduced by the four repaired sites themselves, and none contradicts
+the finding-2 open item sitting beside it.
+
+### New finding — the sweep was incomplete (Critical, same defect class as iteration-1 finding 1)
+
+The repair swept the four `§ Assumptions` bullets the iteration-1 finding named, but the
+`dataset_version`-encoding-is-unruled claim has **at least four further live representations**,
+none of which carry the ⛔ marker or any other supersession note. These are not historical
+change-log boxes (which this project's convention exempts from editing) — they are the current,
+unqualified rule text and entity-schema definitions a stage-3.5 implementer reads *before* ever
+reaching § Assumptions:
+
+1. **`business-logic-model.md:640-643`**, the "**Label derivation (R-12, amended 2026-08-25).**"
+   paragraph — the design-body narrative sitting between "Which identifier is authoritative
+   (R-11)" and "Never overwritten (R-13)": *"`dataset_version` is derived from the release's
+   `content_hash`. **No exact hash-to-label encoding is specified here**, because no approved
+   artifact specifies one and this stage must not invent it — stage 3.5 must not choose one
+   either, and must stop and report instead."* No D-29 marker, no ⛔, nothing between this
+   paragraph and § Assumptions at line 917 references D-29's ruling. `grep -n "D-29"
+   business-logic-model.md` returns matches only at line 559 (the W-7 mermaid diagram) and lines
+   935-940+ (§ Assumptions) — confirmed by printing the full match list before writing this
+   finding — so this paragraph is untouched.
+
+2. **`business-rules.md:1010-1014`**, R-12's own **Rule** statement — the canonical definition of
+   the rule, positioned *before* the "✳ AMENDED 2026-08-28 — D-29 SETTLES THE ENCODING" box at
+   line 1047: *"**Rule (Q6 = D′…).** `dataset_version` is derived from the release's
+   `content_hash`. There is no release ledger… **The exact hash-to-label encoding is NOT specified
+   here**, because no approved artifact specifies one — and stage 3.5 must not choose one either:
+   per TE §18.3 it must stop and report rather than pick a default."* The AMENDED-2026-08-28 box
+   37 lines later only supersedes item 2 of the *later* "Constraint — what determinism does and
+   does not replace" numbered list (line 1037-1045, "Injectivity — NOT YET ESTABLISHED"); it never
+   touches the Rule statement itself. This is the single most authoritative sentence in the file
+   for what R-12 *is*, and it still says the opposite of D-29.
+
+3. **`domain-entities.md:402`**, `RegistryEvent` §13.4 field table, row 8: *"`dataset_version` |
+   `str` | The §13.3 release label. **Not authoritative** — identity is `content_hash` (R-11);
+   **its encoding is an open owner decision** (R-12)"* — a plain, unannotated table row.
+
+4. **`domain-entities.md:496`**, `ReleaseManifest` attribute table, the `dataset_version` row:
+   *"Human-readable, for review and citation. **Derived from `content_hash`, and NOT
+   authoritative.** The exact hash-to-label encoding is **not specified** by any approved
+   artifact; per TE §18.3 stage 3.5 must **stop and report** rather than choose one — see §
+   Assumptions."* This is the entity's own schema definition — the first place an implementer
+   building `write_release` or `src/data/release.py` would look for the field's contract — and it
+   still asserts the pre-D-29 state as current, sending the reader back to a § Assumptions section
+   that (correctly) no longer agrees with it.
+
+Three of these four sit *closer to the top of their files, and closer to where an implementer
+would actually look for the rule*, than the § Assumptions bullets the repair fixed. Site 2
+(`business-rules.md:1010-1014`) is the most severe: it is R-12's own **Rule** header, sitting 37
+lines *above* the box that was supposed to amend it, so the artifact now contradicts itself
+within the span of a single rule rather than only across sections. This is exactly the
+`project.md` "sweep every REPRESENTATION of a corrected fact, not every instance of the entity
+that carries it" defect class the iteration-1 finding invoked and the repair's own commentary
+claims to have discharged — the sweep found the four sites named in the finding text and stopped,
+rather than locating every representation of the fact. A stage-3.5 implementer who reads R-12's
+Rule statement, the `RegistryEvent`/`ReleaseManifest` tables, or the W-7 design-body paragraph
+(all four of which this document expects to be read before § Assumptions, not after) will still
+conclude the encoding is unruled and either wrongly halt or ask the owner a question D-29 already
+answered — the identical harm iteration-1 finding 1 described, now recurring at different
+coordinates.
+
+### Disposition of the change-log table row at line 48
+
+`business-logic-model.md:48`'s remediation table — *"The exception-hierarchy obligations and the
+still-unruled `dataset_version` encoding recorded as open items"* — was checked and is **not** a
+defect: it is a dated description of what Recommendations 8/42 changed in the 2026-08-28
+revision, consistent with this unit's annotate-in-place convention for change logs, and it does
+not itself assert a current-state claim about the encoding. Likewise `business-rules.md:1868`'s
+"Finalized 2026-08-24" section describing Amendment C's consequences ("`encoding unspecified
+here`") is a dated historical record of the 2026-08-24/25 state and is defensible under the same
+convention. Neither is counted as a new finding.
+
+### Verdict rationale
+
+One Critical finding (the incomplete sweep, four further unswept live sites) is sufficient on its
+own to block READY per this project's severity rules, and this is the final iteration. The
+finding-2 repair (the release-population open item) stands verified and is not itself a defect.
+
+NOT-READY

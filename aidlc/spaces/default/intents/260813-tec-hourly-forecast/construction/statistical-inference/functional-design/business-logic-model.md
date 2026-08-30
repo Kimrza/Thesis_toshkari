@@ -685,3 +685,14 @@ No stage-declared validation tooling was listed for this dispatch; verification 
 This unit's design is unusually well cross-referenced and, on adversarial inspection, holds up on nearly every load-bearing claim: the boundary signature is quoted byte-exact, TE §13.6/§13.7 are quoted and characterized accurately (including the genuinely absent interval-construction method that Q7 correctly routes to the gate rather than deciding), FU-7=A's December scoring window and its block arithmetic are correct, the cited open Major finding on R-105 vs. R-92 is real and accurately summarized, `BootstrapError`'s placement among `foundation` R-01's fourteen exceptions is correct, and every count I re-derived programmatically (10 rules, 8 workflows, 8 entities, 23 negative controls, 1/0 requirement coverage) matched the artifacts' own assertions exactly. Two findings survive: one Major — a "stated at the gate" claim (Q3's block-alignment reading) that, unlike its structural twin (Q9), never lands in the enumerated Gate items punch-list, which is exactly the representation-sweep gap this project's own learned rules exist to catch; and one Minor, noting (without laying it at this unit's door) that the "TE §9.3 10.0 GB envelope" this design measures CPU/memory cost against is actually a disk-storage capacity table, an error inherited unchanged from two already-approved upstream artifacts. All four inherited blockers (BLK-03 ↓, BLK-04 ↓, BLK-08 ↓, BLK-09 ↓) are correctly left open as stage-3.1 exit conditions with no implementation authorized, and G-09's unsigned status is correctly treated as blocking module creation throughout. With one Major and zero Critical findings, this does not cross the NOT-READY threshold.
 
 READY
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `statistical-inference`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.

@@ -891,3 +891,14 @@ never disturb the 11 / 7 count above:**
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No rule here authorises creating `src/evaluation/regimes.py`, `diagnostics.py`, `plots.py`, any notebook, or `tests/test_regimes_and_reporting.py`; TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved.
 - **Open — the 2026-08-28 remediation's residual obligations, recorded not fixed:** `functional-design-questions.md` retains **five** stale `seventeen` sites (lines 65, 357, 359, 362, 530) inside a receipted record this remediation may not edit; `team.md` § Testing Posture still states the superseded 17-module figure, affirmed 2026-08-16 before all four §12 amendments, which a sweep may not edit — a residual obligation on the practices gate; FR-P1-05-18's advisory NOT-READY on its source criterion remains a `requirements.md` change reported, not fixed.
 - **None** of the above decides a scientific value: the thresholds, window, D-13 count, D-8 boundary, D-28's 30-day scored window, §5.5's metric set, the third comparison set's membership and the disclosure sentences are already frozen, ruled by the owner, or routed; everything underdetermined is expressly routed to the gate. In particular, **no regime threshold, no December day range and no storm-count criterion is decided here**, and D-11's bar on any provisional-Dst figure entering a G-05 regime count stands unchanged.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `regimes-diagnostics-reporting`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.

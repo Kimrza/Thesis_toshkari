@@ -394,7 +394,7 @@ about that changes — **holding a string is not an access; reading bytes is.**
 
 **Mechanism (Q9 = D, as narrowed 2026-08-28).** A static check asserts that no module
 outside `locked_test.py` **and outside § 10's enumerated `tests/` exemption** contains the
-restricted-root literal, and that the exemption's membership is **exactly** its four members.
+restricted-root literal, and that the exemption's membership is **exactly** its five members *(corrected 2026-08-29 on adversarial finding 1 — superseded figure preserved: "its **four** members"; and the exemption is no longer `tests/`-only, member 5 being a production script. See § 10's correction box)*.
 A caller allow-list inside the guard (Q9's option C) was declined: it would couple this root
 unit to four downstream units and close a cycle. The residual run-time-path-assembly gap is
 left open deliberately.
@@ -519,7 +519,37 @@ the design's favour rather than weakening the test.
 Adding or removing a member fails that test until it is edited, so the set cannot drift
 silently in either direction.
 
-## 10. `RESTRICTED_LITERAL_EXEMPT_MODULES` — new, bounded, four members, membership asserted exactly
+## 10. `RESTRICTED_LITERAL_EXEMPT_MODULES` — new, bounded, five members, membership asserted exactly
+
+> ## ⛔ COUNT CORRECTED 2026-08-29 — **FIVE**, not four. Read this before any figure below.
+>
+> *(Corrected on adversarial finding 1 of the 2026-08-29 re-confirmation pass, Critical. The
+> **sixth-holder** discovery recorded in `business-rules.md` R-28 on 2026-08-28 — a full-repository
+> sweep that found `scripts/merge_coverage_year.py` holding the restricted-root literal and reading
+> six restricted sites with **no `AccessRecord`** — was written into R-28's own box and **not swept
+> into this entity's heading, its body sentence, its field table, or either file's `§ Assumptions`**.
+> That left this specification, which is what an implementer reads first, describing a membership
+> set that would **fail against the workspace on first run** — reproducing the exact failure the
+> discovery was raised to prevent. Superseded figures are preserved in place below, never deleted.)*
+>
+> **The two counting conventions, stated so they are never confused again:**
+> - **This entity counts members IN ADDITION TO the chokepoint** `src/data/locked_test.py`.
+>   Under that convention the corrected count is **FIVE** — the four `tests/` modules already
+>   listed, plus `scripts/merge_coverage_year.py`.
+> - **R-28's box counts the chokepoint as well**, which is why it says **six**. Six = the
+>   chokepoint + these five. The two figures describe the same set and neither is wrong; only
+>   the convention differs.
+>
+> **What the fifth member changes about the rule's shape.** Member 5 is **not a test**. R-28's
+> exemption was a `tests/` exemption, so a production script was outside it entirely — an
+> **unexempted** holder, not an exempted one. The exemption is therefore **no longer
+> `tests/`-only**: membership is an **exact enumerated list, never a directory predicate**, and a
+> substring or prefix exemption stays expressly refused. `tests/test_locked_test_guard.py` asserts
+> exact set membership, so a **seventh** holder fails rather than being silently admitted.
+>
+> ⚠ **Unchanged by this correction:** the guard test is written but **has NOT been executed** (no
+> Python interpreter in this environment), so every runtime claim is a claim about code as
+> written. **WS-18 and TA-18 are NOT discharged.**
 
 > ## ⚠ ADDED 2026-08-28 — THE ONE-DOOR RULE'S BOUNDED CARVE-OUT
 >
@@ -543,8 +573,10 @@ silently in either direction.
 > yields a readable path with no `AccessRecord`.
 
 The modules permitted to hold the restricted-root literal **in addition to**
-`src/data/locked_test.py`. **Four members**, derived and printed 2026-08-28; **3 of the 4 exist
-on disk today**, the fourth being unbuilt.
+`src/data/locked_test.py`. **Five members** *(corrected 2026-08-29 — see the box above; superseded
+figure preserved: "**Four members**, derived and printed 2026-08-28; **3 of the 4 exist on disk
+today**, the fourth being unbuilt")*, derived and printed 2026-08-29; **4 of the 5 exist on disk
+today**, the unbuilt one being member 1.
 
 | # | Member | Why it must hold the literal | Route for any CONTENT read beneath the root | On disk |
 |---|---|---|---|---|
@@ -552,6 +584,7 @@ on disk today**, the fourth being unbuilt.
 | 2 | `tests/test_acquisition_window.py` | `RESTRICTED_DIR` (`:46`) feeds `EVIDENCE_ROOTS` (`:50`) so the run-window invariant covers **both** roots; the custody helper (`:195`) filters restricted paths **by ancestry**, so renaming the root cannot silently widen the scan | `_observed_dates()` (`:117–122`) opens and `DictReader`-parses a month's raw-records CSV supplied from the restricted root by `_month_dirs()` (`:81`) — a content read, **owing a pre-read access row**. The `:195` helper reads nothing beneath the root | **Yes** |
 | 3 | `tests/test_phase_boundary.py` | `:259–261` asserts the produced-field collector **reaches inside** the root — *"a custody boundary is not a checking exemption"*. Removing the literal removes the assertion that D-15's relocation did not excuse December from boundary checking | `_phase1_artifacts()` (`:133–137`) rglobs across both roots and the field test reads each artifact's **CSV header** — a content read, **owing a pre-read access row**. The ancestry assertion itself reads no content | **Yes** |
 | 4 | `tests/test_release_hashes.py` | `:137` asserts a manifest was found **under** the root, because *"a collector that misses them silently stops verifying the locked month"* | `_declared_artifacts()` (`:84–91`) `read_text`s each manifest and the hash test **streams `_sha256()`** over each declared artifact beneath the root — content and byte reads, **owing pre-read access rows** on the precedent of access-log rows 6 and 11 (bytes-only, logged first, no value inspected) | **Yes** |
+| 5 | `scripts/merge_coverage_year.py` — ⚠ **NOT a test; a production script** *(added 2026-08-29, correcting the 2026-08-28 sweep's unswept discovery)* | It holds the literal at `:55`, defines `EVIDENCE_ROOTS = (EVIDENCE_DIR, RESTRICTED_DIR)` and **writes** the merged year into the restricted root. Its restricted access is legitimate under **D-18** (the year re-merge). It is listed **explicitly** because an exemption a reader cannot see is not an exemption but a hole — and because it is the member that proves membership is an enumerated list rather than a `tests/` predicate | **Six** restricted content sites — the per-month `sha256_manifest.json`, the raw-records CSV, two `request_manifest.json` reads and two `sha256_of_file` calls — **all six routed under D-31 through `src.data.locked_test.open_restricted`**, which writes a durable `AccessRecord` before returning the path and **aborts the read if the log write fails**. Before that correction all six read with **no `AccessRecord`**: the one-door property was broken by a production path, not merely by test scaffolding | **Yes** |
 
 **Membership is asserted exactly**, using the same enumerated-list technique § 5 applies to
 the driver exclusion — a technique this design already trusts. It fails in both directions: an
@@ -588,7 +621,7 @@ unit's static check, not a dependency edge on `features-and-splits`.
 **Lifecycle.** Static, declared alongside the static check, versioned with it, membership
 pinned by test. **The list is a test specification only** — the static check and the membership
 test do not exist, and **G-09 authorises no module**. What is true today is the observation
-that motivated the entity: **four modules hold the literal and no check exists to notice.**
+that motivated the entity: **five modules hold the literal and no check exists to notice** *(corrected 2026-08-29 on adversarial finding 1; superseded figure preserved: "**four** modules hold the literal". Four of the five exist on disk today — the three `tests/` modules and `scripts/merge_coverage_year.py`; member 1 is unbuilt)*.
 
 ---
 
@@ -636,7 +669,7 @@ how many requirements exist or which of them has a row. **Entities: 8 → 10.**
 
 - **OPEN — which disposition the three existing exempt test modules take** *(added 2026-08-28 under Recommendation 2)*: options (i) synthetic fixture roots or (ii) real-root reads with a standing access-row obligation, set out in § 10's boxed live consequence. **No option is chosen here.** Until ruled on, the three modules continue to read December content beneath the restricted root with no access row, and 3.5 must stop and report rather than pick a route (TE §18.3).
 - ~~**OPEN — the `.dst_summary.json` relocation is authorised in disposition but not performed**~~ *(added 2026-08-28 under Recommendation 44(b))*: the move to `evidence/audit_ec1_2026-08-15/kyoto_dst/` owes a **D-number and a change record** on the D-15 precedent, and neither exists. § 5's driver-exclusion **class 4 is conditional on the move having happened**, and this stage does not perform it. ⚠ **CLOSED 2026-08-28 — the relocation is PERFORMED.** The project owner authorised it on `GOV-2026-08-28-FD-01` Rec 44(b); it is recorded as **D-30** with change record `governance/CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`, and executed the same day: the file is now at `evidence/audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json`, byte-identical across the move (`sha256 410927a4ff620b6f7597b18e07746f74233cf5aa87bc84d6f5b0ec25b3e9c064`, 5,653 bytes), with **access-log row 12 written BEFORE the read**. The file is inside the scan root and **driver-exclusion class 4 is now unconditional**. The two things this item said were missing — the D-number and the change record — both exist.
-- **[assumption]** `RESTRICTED_LITERAL_EXEMPT_MODULES` has **exactly four** members — `test_locked_test_guard.py` plus the three holding the literal today, all three **retained** rather than refactored, because all three are green, all three are in `team.md`'s mandated 17-module set, and TC-06 directs pre-TC-06 evidence to be **re-verified under the new suite rather than re-acquired**, which is what those three perform. If the owner prefers refactoring any out, the list shrinks with the membership test.
+- **[assumption]** `RESTRICTED_LITERAL_EXEMPT_MODULES` has **exactly five** members *(corrected 2026-08-29 on adversarial finding 1, Critical; superseded figure preserved: "**exactly four**")* — `test_locked_test_guard.py`, the three `tests/` modules holding the literal today, **and `scripts/merge_coverage_year.py`, a production script found by the 2026-08-28 full-repository sweep**. The three existing test modules are **retained** rather than refactored, because all three are green, all three are in `team.md`'s mandated 17-module set, and TC-06 directs pre-TC-06 evidence to be **re-verified under the new suite rather than re-acquired**, which is what those three perform. The fifth member makes the exemption **no longer `tests/`-only**: membership is an exact enumerated list, never a directory predicate. If the owner prefers refactoring any member out, the list shrinks with the membership test.
 - **[assumption]** § 10 is a **narrowing of D-15's framing**, not a relocation of D-15's requirement: "exactly one path" is read as governing routes through which restricted **content** is read, so holding the literal without reading content falls outside it. If the owner reads D-15 as governing the **literal**, board option 2 is the only remaining route and its circularity must be accepted with it.
 - **[assumption]** `PHASE1_EXCLUDED_FIELDS` enumerates **D-17's** eight exclusions, not TE §7.0's five classes, and cites both as authority. D-17 is frozen, so the wider set invents no value; a reader must not take it for the design over-reaching its authority.
 - **OPEN — an amendment need on `build_transition_manifest`** *(added 2026-08-25 on adversarial finding 2 of the post-reset pass)*: the approved signature carries no mode parameter, three artifact statements correctly say the mode is not a build-time argument, yet the builder must be told which mode to build. The reconciliation (W-5) records an amendment need — a keyword `mode: Literal["draft","freeze"]` — for the owner, following `foundation`'s `write_release` precedent. Until ruled on, 3.5 must stop and report rather than invent the channel (TE §18.3).
@@ -736,3 +769,12 @@ how many requirements exist or which of them has a row. **Entities: 8 → 10.**
 > scientific constant is decided, no supervisor-owned value is read into, and no acceptance row
 > is created. The three documentation-class findings riding the terminal READY remain **gate
 > input**, unchanged and unapplied.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's content had already changed after that floor under the
+> G-09 pass (D-29 through D-32; G-09 signed under D-31 with its §18.3 preconditions disclosed
+> unmet), so the owner re-confirmed the unchanged post-G-09-pass content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> No line above this marker was touched by this pass.

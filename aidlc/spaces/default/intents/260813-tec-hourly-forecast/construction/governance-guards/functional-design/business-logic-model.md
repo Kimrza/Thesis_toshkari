@@ -1012,7 +1012,7 @@ paths cross-checked and in agreement.
 
 - **OPEN — which disposition the three existing exempt test modules take** *(added 2026-08-28 under Recommendation 2)*: options (i) synthetic fixture roots or (ii) real-root reads with a standing access-row obligation, set out in W-10's boxed live consequence. **No option is chosen here.** Until ruled on, the three modules continue to read December content beneath the restricted root with no access row, and 3.5 must stop and report rather than pick a route (TE §18.3).
 - ~~**OPEN — the `.dst_summary.json` relocation is authorised in disposition but not performed**~~ *(added 2026-08-28 under Recommendation 44(b))*: the move to `evidence/audit_ec1_2026-08-15/kyoto_dst/` owes a **D-number and a change record** on the D-15 precedent, and neither exists. **This workflow does not perform the move.** Until it happens the file is outside W-8a's scan root, and driver-exclusion class 4 is conditional on the move. ⚠ **CLOSED 2026-08-28 — the relocation is PERFORMED.** The project owner authorised it on `GOV-2026-08-28-FD-01` Rec 44(b); it is recorded as **D-30** with change record `governance/CHANGE_RECORD_2026-08-28_dst_summary_relocation.md`, and executed the same day: the file is now at `evidence/audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json`, byte-identical across the move (`sha256 410927a4ff620b6f7597b18e07746f74233cf5aa87bc84d6f5b0ec25b3e9c064`, 5,653 bytes), with **access-log row 12 written BEFORE the read**. The file is inside the scan root and **driver-exclusion class 4 is now unconditional**. The two things this item said were missing — the D-number and the change record — both exist.
-- **[assumption]** The exemption list is **exactly four** modules — `test_locked_test_guard.py` plus the three holding the literal today, all three **retained** rather than refactored, because all three are green, all three are in `team.md`'s mandated 17-module set, and TC-06 directs pre-TC-06 evidence to be **re-verified under the new suite rather than re-acquired**, which is what those three perform. If the owner prefers refactoring any out, the list shrinks with the membership test.
+- **[assumption]** The exemption list is **exactly five** modules *(corrected 2026-08-29 on adversarial finding 1, Critical; superseded figure preserved: "**exactly four** modules". `business-rules.md` R-28's box states the same set as **six**, counting the chokepoint `src/data/locked_test.py`; this list counts members **in addition to** it.)* — `test_locked_test_guard.py`, the three `tests/` modules holding the literal today, **and `scripts/merge_coverage_year.py`**, the production script the 2026-08-28 full-repository sweep found holding the literal and reading six restricted sites with no `AccessRecord`. The three existing test modules are **retained** rather than refactored, because all three are green, all three are in `team.md`'s mandated 17-module set, and TC-06 directs pre-TC-06 evidence to be **re-verified under the new suite rather than re-acquired**, which is what those three perform. The fifth member makes the exemption **no longer `tests/`-only** and membership an **exact enumerated list, never a directory predicate**. If the owner prefers refactoring any out, the list shrinks with the membership test.
 - **[assumption]** W-10's exemption is a **narrowing of D-15's framing**, not a relocation of D-15's requirement: "exactly one path" is read as governing routes through which restricted **content** is read. If the owner reads D-15 as governing the **literal** itself, board option 2 is the only remaining route and its circularity must be accepted with it.
 - **[assumption]** R-23's produced-field enumeration is **D-17's**, not TE §7.0's. §7.0 names five classes; D-17 enumerates eight exclusions and is the frozen authority, so the cross-cutting guard is designed to the wider frozen set and cites both. No scientific value is created by the widening.
 - **OPEN — an amendment need on `build_transition_manifest`** *(added 2026-08-25 on adversarial finding 2 of the post-reset pass)*: the approved signature carries no mode parameter, three artifact statements correctly say the mode is not a build-time argument, yet the builder must be told which mode to build. The reconciliation (W-5) records an amendment need — a keyword `mode: Literal["draft","freeze"]` — for the owner, following `foundation`'s `write_release` precedent. Until ruled on, 3.5 must stop and report rather than invent the channel (TE §18.3).
@@ -1851,4 +1851,168 @@ receipt (2026-08-26T08:18:34Z, taken for `external-products`; floor reset mechan
 No regression found. This is a narrow confirming pass only — the underlying content was not
 re-litigated, and G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.
 
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's content had already changed after that floor under the
+> G-09 pass (D-29 through D-32; G-09 signed under D-31 with its §18.3 preconditions disclosed
+> unmet), so the owner re-confirmed the unchanged post-G-09-pass content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> No line above this marker was touched by this pass.
+
 READY
+
+---
+
+## Review — 2026-08-29 re-confirmation pass, iteration 1
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T00:00:00Z
+**Iteration:** 1 of 2 (adversarial)
+
+The trailing `READY` immediately above this section belongs to the 2026-08-22 iteration-2
+pass and predates every G-09-pass edit (D-29 through D-31) and today's re-confirmation. This
+pass reviews the unit as it stands after that pass, per the dispatch brief.
+
+### Finding 1 — Critical. `RESTRICTED_LITERAL_EXEMPT_MODULES` is stated as **four** members in every representation except the one that records the correction to **five/six**
+
+**Claim under test.** Under D-31 (2026-08-28, the G-09 pass), `business-rules.md` R-28 records
+a **sixth holder** of the restricted-root literal, found by a full-repository sweep:
+`scripts/merge_coverage_year.py`, a **production script**, outside the `tests/` exemption
+entirely. R-28's own text states the consequence explicitly: *"The exemption is therefore no
+longer `tests/`-only... bringing the list to **six**: the chokepoint itself, four `tests/`
+modules, and this one production script"* and *"R-28's rule text above is narrowed
+accordingly: membership is an **exact enumerated list**, not a directory predicate."*
+(`business-rules.md` lines 907–920). This correction is dated the same day as, and is part
+of, the D-31 G-09 pass this unit's own re-confirmation receipt (line 1856 above) says the
+2026-08-29 re-confirmation covers.
+
+**Derivation — every representation of the exemption count, grepped and printed:**
+
+```
+grep -rn "exactly four\|four modules hold the literal\|Four members\|four members" \
+  business-logic-model.md business-rules.md domain-entities.md
+```
+
+Result (5 hits, 1 heading not matched by the pattern but asserting the same number):
+
+- `business-logic-model.md:1015` — `§ Assumptions`: *"The exemption list is **exactly four**
+  modules"* — **stale**.
+- `business-rules.md:1148` — `§ Assumptions & Open Questions`: *"The exemption list is
+  **exactly four** modules"* — **stale, and this is inside the SAME FILE as R-28's own
+  six-member correction**, roughly 250 lines below it.
+- `domain-entities.md:397` — § 7 `RESTRICTED_ROOT` body: *"the exemption's membership is
+  **exactly** its four members"* — **stale**.
+- `domain-entities.md:522` — the § 10 **heading itself**: *"`RESTRICTED_LITERAL_EXEMPT_MODULES`
+  — new, bounded, **four members**, membership asserted exactly"* — **stale**.
+- `domain-entities.md:546` — § 10 body: *"**Four members**, derived and printed 2026-08-28;
+  3 of the 4 exist on disk today"* — **stale**, and the table immediately beneath it
+  (lines 551–554) lists only the original four `tests/`-exemption rows; `scripts/
+  merge_coverage_year.py` has no row.
+- `domain-entities.md:591` — § 10 close: *"four modules hold the literal and no check exists
+  to notice"* — **stale**.
+
+**Why this is Critical, not Minor.** `RESTRICTED_LITERAL_EXEMPT_MODULES` is not incidental
+prose — it is the entity whose exact membership *is* the one-door locked-test guard this unit
+exists to build (W-10 / R-28's stated purpose: "membership is asserted exactly... an unlisted
+module holding the literal fails the static check"). `domain-entities.md` is this unit's own
+entity-shape artifact — the file a builder reads to know what constant to write and what the
+membership test asserts against. As it stands, `domain-entities.md` § 10's heading, body, and
+field table all specify a 4-member allow-list that omits `scripts/merge_coverage_year.py`. A
+static check for "no module outside the enumerated exemption holds the restricted-root
+literal," built against this specification, would **fail against the workspace on first run**
+(`scripts/merge_coverage_year.py` does hold the literal, per R-28's own finding) — reproducing
+exactly the failure mode `business-rules.md` R-28's own box says the sixth-holder discovery was
+raised to prevent: *"The one-door property was broken by a production path, not only by test
+scaffolding."* This is the sweep-completeness defect class the dispatch brief named by name:
+a corrected fact updated in one representation (R-28's narrative box in `business-rules.md`)
+and left standing in its pre-correction form in the entity's own field table, its own heading,
+and — separately — in `business-logic-model.md`'s workflow narrative and both files' own
+`§ Assumptions` sections, which exist specifically to carry forward the current open state.
+
+**Not resolved by the day's later boxes.** The `⚠ THE READING IS RULED` box
+(`business-rules.md` lines 928–934) and the re-confirmation receipts at the foot of all three
+files post-date the sixth-holder finding and reference nothing about it; none narrows or
+retracts R-28's "six" statement. The 2026-08-29 re-confirmation receipt on this file (line
+1856) asserts the unit's content "had already changed after that floor under the G-09 pass
+(D-29 through D-32...)" — i.e., claims to already carry the D-31 pass's content — while
+`domain-entities.md` § 10, part of that same pass's edited surface, was not brought into
+agreement with `business-rules.md`'s own correction from the same pass.
+
+**Consequence for review class.** This is a within-unit cross-artifact inconsistency on a
+governance-critical enumeration (the exact scope of the only sanctioned exception to the
+locked-test one-door rule), verified by direct grep against the three PRIMARY produces[]
+artifacts of this unit — not a sibling-unit or upstream-contract question, so it sits squarely
+inside this review's bound.
+
+### Finding 2 — Minor / documentation-debt, disclosed but worth flagging alongside Finding 1
+
+R-28's own in-file arithmetic is ambiguous about whether the corrected figure is **five** or
+**six**: the sixth-holder box counts *"the chokepoint itself, four `tests/` modules, and this
+one production script"* as six, while `domain-entities.md` § 10's own framing ("members ...
+in addition to `locked_test.py`") would put the corrected `RESTRICTED_LITERAL_EXEMPT_MODULES`
+entity at **five** (four `tests/` modules + the one script), with the chokepoint counted
+separately as before. Neither business-rules.md nor domain-entities.md states the corrected
+entity-level count explicitly under either convention — the fix for Finding 1 needs to settle
+this, not just add a sixth row under the ambiguous "six" label. Not blocking on its own, but
+noted so the fix for Finding 1 doesn't introduce a second inconsistency between "five" and
+"six" while resolving the first.
+
+### What was checked and held
+
+- The G-09-signed banner and its "preconditions UNMET" disclosure is consistent, verbatim or
+  near-verbatim, across all three artifacts and every dated re-save box — no discharge is
+  falsely claimed for TA-27, TA-28, WS-18, TA-18, the §18.3 preflight, or
+  `aws_ai_dlc_preflight_report`.
+- R-26's driver-exclusion class 4 (`.dst_summary.json`) "now unconditional" (D-30) is
+  consistently represented across `business-logic-model.md` W-8, `business-rules.md` R-26, and
+  `domain-entities.md` § 5 — all three read the same corrected figures (12 month keys, `storm30`
+  15 days, `daily_min` 31 entries) and all three mark the relocation performed. No stale
+  "conditional" language survives on this fact.
+- R-28's "exact enumerated list, not a directory predicate" reading is internally coherent
+  within `business-rules.md` itself (the ruling box, the narrowing box, and the per-member
+  route table agree with each other), and nothing in the design still relies on the superseded
+  substring/prefix reading — the defect is the stale headline number, not the mechanism.
+- The pre-G-05 December coverage-and-regime audit is correctly modelled as permitted and
+  performance-blind (W-7/R-25's box distinguishes it from the one-shot post-G-05 read), and
+  W-8/R-26's December-hit definition correctly includes target aggregates, not only target
+  values — no path was found by which a December record could reach a model while looking like
+  a driver read.
+
+### Summary
+
+One Critical finding: the exemption entity that defines the locked-test guard's one-door
+boundary is stated as four members in five of its six textual representations across this
+unit's three PRIMARY artifacts, while the sixth representation (`business-rules.md` R-28's own
+narrative) records the corrected count of five or six following the same-day discovery that a
+production script, not only test modules, held the restricted-root literal. This is a
+governance-critical, machine-checkable inconsistency inside the unit under review, not a
+matter of taste, and it would misdirect an implementer building the entity from
+`domain-entities.md` as written. NOT-READY.
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T08:06:00Z
+**Iteration:** 2 (final)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `domain-entities.md:88` | The § "Entity map" Mermaid diagram still labels the `RESTRICTED_LITERAL_EXEMPT_MODULES` node `(4 members, asserted exactly)`. This is an eighth representation of the exemption count, not named in iteration 1's dispatch site list and not touched by the 2026-08-29 repair (verified: `grep -n "4 members\|four members" domain-entities.md` returns only this line and the intentionally-preserved historical box at `:577`/`:753`). It reproduces the exact defect class iteration 1 found Critical: a corrected fact (five members counting from the chokepoint, six counting the chokepoint, per R-28's reconciled convention) left standing in its pre-correction form in a representation a reader encounters. It is materially worse than a stray prose mention because the entity map sits at the top of `domain-entities.md`, ahead of § 10's corrected heading/body/table/box (line 522+) and ahead of the ⛔ correction box's own instruction "read this before any figure below" (line 524) — a reader who stops at the diagram, or who reads top-to-bottom, sees the stale "4" first and with no forward pointer to the correction. The immediately adjacent text fallback (lines 104–117) does not restate the number, so it does not contradict the diagram, but it also does not correct it. | Update the node label to `(5 members, asserted exactly)` (or state both conventions as § 10 now does) and, ideally, add a one-line note under the diagram or in the text fallback pointing to § 10's corrected count, so the entity map does not read the two counting conventions as a third, wrong one. |
+| 2 | Minor | `domain-entities.md:753` | The dated 2026-08-28 remediation-log box ("Recommendation 2 … carries the **4 members**") still states the pre-correction figure. This is judged non-blocking: unlike Finding 1, it is explicitly a dated, preserved historical change-log entry describing what changed *on that day* (consistent with this artifact's own "superseded figures are preserved in place, never deleted" convention used throughout the 2026-08-29 correction boxes), not a live current-state claim, and it sits inside a box already marked "every earlier dated box above is preserved unchanged" (line 748). Flagged only so the human confirms this reading is intended rather than another missed site. | No change required if the historical-record reading is confirmed; otherwise append a forward-pointer to the 2026-08-29 correction the way the other dated boxes in this file do. |
+
+### Verification of the iteration-1 repair (Critical + Minor)
+
+- **Critical (iteration 1) — sweep completeness.** Re-grepped all three PRIMARY artifacts for every numeral/word form of the exemption count. All six originally-named sites (`business-rules.md:1148`, `business-logic-model.md:1015`, `domain-entities.md:397`, `:522` heading, `:546`→now `:576` body, § 10 field table) are corrected, each preserving the superseded "four" figure inline per this project's own learned correction-sweep convention, and the new field-table row 5 for `scripts/merge_coverage_year.py` accurately reflects R-28's box: six restricted content sites, all routed under D-31 through `open_restricted`, `On disk: Yes`. One site was missed — see Finding 1 above — because it uses the numeral `4` rather than the word `four`/`Four`, which is exactly the pattern iteration 1's own grep (`"exactly four\|four modules hold the literal\|Four members\|four members"`) would not have caught either; the repair inherited the same blind spot rather than introducing a new one.
+- **Minor (iteration 1) — dual counting convention.** Resolved cleanly. Every corrected site now states both conventions explicitly and consistently: "this entity counts members **in addition to** the chokepoint" → five; "R-28's box counts the chokepoint as well" → six; "six = the chokepoint + these five." Checked for a *new* 5-vs-6 contradiction by grepping every remaining `\bsix\b`/`\bfive\b` occurrence across all three files — no other site conflates the two conventions or states an unreconciled figure for this specific entity.
+- **Adjacent breakage.** No adjacent breakage found. The § 10 table's five rows are internally consistent (four `tests/` modules + the one production script), the "4 of the 5 exist on disk today" body sentence agrees with the table's per-row "On disk" column, and § Assumptions in both `domain-entities.md` and `business-rules.md` restate the same reconciled five/six pair without drift.
+
+### Summary
+
+The repair correctly reached and fixed all six sites named in iteration 1's finding, and cleanly resolved the counting-convention ambiguity flagged as Minor. It missed one further, genuine, live representation — the Mermaid entity-map diagram at `domain-entities.md:88` — which was never named in iteration 1's own grep-derived site list because that grep matched only word-form "four," not the numeral "4" the diagram uses. Given this is the same governance-critical entity, in the same document, under the same repair pass, and the diagram precedes the correction box that would otherwise warn a reader, this is graded Critical rather than accepted as a residual documentation nit. This is the final review iteration; the remaining gap and the one Minor historical-box question go to the human at the approval gate rather than a further automated repair cycle.
+
+NOT-READY

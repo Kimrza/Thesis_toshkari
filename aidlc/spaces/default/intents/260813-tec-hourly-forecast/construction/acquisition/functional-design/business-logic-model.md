@@ -318,7 +318,20 @@ rules about one fact.
 > ⚠ **THE RELEASE-SIDE REFUSAL THIS WORKFLOW PROMISES HAS NO FIELD TO READ** *(added
 > 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1)*. The justification two
 > paragraphs above is that a release or freeze gate *"can then refuse a derived-only month"* —
-> and `provenance_class` crosses **no unit boundary**. Derived 2026-08-28 across all **48**
+> and `provenance_class` crosses **no unit boundary**. ⛔ **THAT CLAUSE IS SUPERSEDED —
+> REBASED 2026-08-29. The field crosses into a second unit.** *(Corrected on adversarial
+> finding F1 of the 2026-08-29 re-confirmation pass, Critical. The rebase was written into this
+> file's § Assumptions on 2026-08-28 and never swept back to this box **380 lines above it**,
+> nor into either sibling artifact.)* **Current figures, a dated observation and never a live
+> invariant** (derived over the 48 stage artifacts immediately before the rebase note was
+> written; writing such a note adds occurrences of each token): `provenance_class` **43**,
+> `derived_only` **38**, `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11**
+> and `inventory-and-registry` **18 / 17 / 6** — that unit acquired the field under
+> `GOV-2026-08-28-FD-01` **Recommendation 29**, which gave it a `data07_caveat` sourced from
+> it. **The two stable facts to rely on: the fields reach exactly 2 units, and `foundation`
+> carries all three ZERO times.** The second is what W-4's argument rests on and is
+> **unchanged**, so nothing here is discharged. Superseded figures preserved:
+> Derived 2026-08-28 across all **48**
 > artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**,
 > `producing_interpreter` = **3**, all in this unit; **0 in `foundation`**, which owns
 > `write_release` and the §13.3 contract and enumerates its fourteen fields without this one.
@@ -1787,3 +1800,260 @@ READY
 > **No scientific value was decided.** **G-09 remains unsigned**; **BLK-07's authorization limb
 > remains open**; membership stays derived from **record timestamps**, never from a directory
 > name. Every `## Review` section above is unchanged.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's content had already changed after that floor — provenance_class
+> figures rebased with basis stated, G-09 signed under D-31 with its §18.3 preconditions
+> disclosed unmet — so the owner re-confirmed the unchanged post-rebase content via the
+> Consolidated Summary Confirmation at the foot of `functional-design-questions.md`, receipted
+> `2026-08-29`. No line above this marker was touched by this pass.
+
+## Review — 2026-08-29 adversarial pass, iteration 1
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+
+**Verdict: NOT-READY**
+
+**Class** adversarial · **Iteration** 1 of 2 · **Date** 2026-08-29
+
+**Scope.** Full adversarial pass over the three `produces[]` artifacts as re-confirmed
+2026-08-29, with the sweep-completeness defect class named as the priority hunt. One
+Critical finding, confirmed at every site by direct grep against all three files; no
+other defect survived refutation.
+
+### F1 — Critical, would mislead a G-P1A / stage-3.2 reader and self-contradicts within `business-rules.md`. The `provenance_class` rebase (43/38/17, "reaches exactly 2 units") landed in exactly one of the three `produces[]` artifacts; the other two — and this file's own earlier W-4 box — still assert the pre-remediation "confined to this unit" claim as live fact
+
+**Location** `business-logic-model.md` § W-4 (lines 318–324) and § Assumptions (line 702,
+where the rebase actually lives); `business-rules.md` R-36's box (lines 368–386) and its
+§ Corrections/Open item (line 781) and its 2026-08-28 remediation box (lines 863–867);
+`domain-entities.md` § 4's box (lines 218–224) and its Open item (line 525) and its
+2026-08-28 remediation box (lines 586–588). All three artifacts' 2026-08-29
+re-confirmation receipts (this file's line 1793–1798; `business-rules.md`'s matching
+receipt; `domain-entities.md`'s matching receipt) assert, in identical wording,
+*"provenance_class figures rebased with basis stated."*
+
+**Derived — the rebase text and numbers, by file:**
+
+```
+$ grep -n '\b43\b\|\b38\b' business-logic-model.md
+702:  ... provenance_class 43, derived_only 38, producing_interpreter 17,
+      split acquisition 25/21/11 and inventory-and-registry 18/17/6 ...
+      "the fields reach exactly 2 units, and foundation carries all three zero times"
+
+$ grep -n '43\|38\|17' business-rules.md | grep -i 'provenance\|derived_only\|producing_interp'
+(no output)
+
+$ grep -n '43\|38\|17' domain-entities.md | grep -i 'provenance\|derived_only\|producing_interp'
+(no output)
+```
+
+Only `business-logic-model.md`'s § Assumptions bullet carries the rebased 43/38/17
+figures, the "2 units" stable fact, and the explicit self-invalidation basis
+("the figures below were derived over the 48 stage artifacts immediately before this
+note was written... recorded as a dated observation, never as a live invariant").
+**Neither `business-rules.md` nor `domain-entities.md` contains that rebase, those
+numbers, or that basis anywhere.** Both still assert, verbatim, the pre-remediation
+9/7/3 figures as the *current* fact:
+
+- `business-rules.md` line 371–373 (R-36's box, the rule a developer reads to
+  implement `provenance_class`): *"the field reaches **no other unit**... every one of
+  them in this unit; **0 in `foundation`**"*.
+- `business-rules.md` line 781 (§ Corrections/Open item): *"**all in this unit; 0 in
+  every other unit, `foundation` included**"*.
+- `business-rules.md` line 866–867 (2026-08-28 remediation summary): *"In-unit field
+  counts... **all still confined to this unit**"*.
+- `domain-entities.md` line 223–224 (§ 4's box): *"`provenance_class` = 9,
+  `derived_only` = 7, `producing_interpreter` = 3, all in this unit; **0 in
+  `foundation`**"*.
+- `domain-entities.md` line 525 (Open item): *"all in this unit; 0 in every other unit
+  including `foundation`"*.
+- `domain-entities.md` line 587–588 (2026-08-28 remediation summary): *"across this
+  stage's 48 artifacts, **all still inside this unit**"*.
+
+**`business-rules.md` R-36's box is additionally self-contradictory within its own
+paragraph.** Line 371 states *"the field reaches no other unit"* and line 373 states
+*"every one of them in this unit"*, and the same paragraph closes at line 385–386 with
+*"`inventory-and-registry`'s R-50 DATA-07 caveat field reads this same
+`provenance_class`"* — naming a second unit's rule as a consumer of the field two
+sentences after asserting no other unit is reached.
+
+**This file's own W-4 box (lines 318–324) is a fourth stale representation, inside the
+artifact under review.** It states the same pre-remediation *"all in this unit; 0 in
+`foundation`"* claim with no forward reference to, or caveat about, the § Assumptions
+correction that appears 380 lines later in the same file. A developer reading W-4 in
+document order — the workflow section, not the tail-end Assumptions list — sees only
+the superseded claim.
+
+**Why this is Critical rather than Major.** The rebase itself is not cosmetic: it
+changes the answer to the question every one of these boxes exists to answer — *which
+units does `provenance_class` reach, and can `foundation`'s `write_release` keep
+ignoring it?* `business-logic-model.md`'s own corrected text establishes the field now
+reaches **`inventory-and-registry`** too (18/17/6), which is exactly why that unit's
+R-50 was given a `data07_caveat` sourced from this field (Recommendation 29,
+acknowledged in the same paragraph that still says "no other unit"). A reader of
+`business-rules.md` or `domain-entities.md` alone — either could be the only one of the
+three a downstream consumer opens — is told the seam is single-unit and confined, which
+is stale by the rebasing unit's own admission. A G-P1A reviewer or `code-generation`
+deciding whether `foundation`'s `write_release` amendment is scoped to one unit or two
+gets a different, wrong answer depending which of the three files they read.
+
+**It also falsifies each sibling artifact's own 2026-08-29 receipt.** Both
+`business-rules.md`'s and `domain-entities.md`'s re-confirmation receipts assert
+*"provenance_class figures rebased with basis stated"* as a description of that
+artifact's own content — a claim neither artifact's body supports, since the rebase and
+its basis exist only in `business-logic-model.md`.
+
+**Should be** propagate the rebased figures (43/38/17, the two-units fact, the
+self-invalidation basis) — or a pointer to where they live — into `business-rules.md`
+R-36's box, its Open item, and its 2026-08-28 remediation box; into
+`domain-entities.md` § 4's box, its Open item, and its 2026-08-28 remediation box; and
+into this file's own W-4 box. Until then, neither sibling artifact's 2026-08-29 receipt
+should claim the rebase as its own content, and R-36's box should not assert "reaches no
+other unit" in the same paragraph that names a second unit's rule reading the field.
+
+### Failed refutation attempts
+
+- **DATA-07 caveat.** Checked every site where `audit_evidence_2022-FULL` or FULL's
+  coverage figures are relied on, in all three files — `business-logic-model.md` W-4,
+  W-5, § Assumptions; `business-rules.md` R-36, R-42, § Open; `domain-entities.md` § 2,
+  § Open. Every site states the caveat (unverifiable in principle; no provider byte
+  stream; 2022-04/2022-07/2022-12 have no `raw_isprint_cache/`); D-18 is consistently
+  scoped to the superseded-hash limb only. No site relies on FULL's figures without it.
+- **December-entry paths.** R-31 / W-1 / W-2 / W-11 all derive membership from record
+  timestamps and explicitly forbid a directory-name or filename-derived predicate,
+  matching `project.md` § Forbidden and `tests/test_acquisition_window.py`'s existing
+  green negative control. No path in this unit's design accepts a directory- or
+  filename-derived predicate for fold or partition membership.
+- **Requirement/acceptance-row counts.** Re-derived programmatically: 15 requirement
+  rows and 7 `NO ACCEPTANCE ROW`/`NO ROW` rows, counted directly inside the actual
+  tables (not from surrounding prose) in both `business-logic-model.md` § Requirement-
+  to-workflow map and `domain-entities.md` § Requirement coverage — both tables agree,
+  7/7 identical ID sets.
+- **Rule and entity counts.** 14 `## R-3x`/`## R-4x` headings in `business-rules.md`
+  (R-30–R-43), matching every "Rules 14" claim; 10 numbered `## N.` sections in
+  `domain-entities.md` (§1–§10), matching every "10 numbered entities" claim.
+- **TA-08 and TA-31 ownership.** Both previously-corrected rows (TA-08's
+  primary/supporting split; FR-P1-00-1/TA-31's "no Table 2 owner row") remain correctly
+  stated in both `business-logic-model.md` and `domain-entities.md`'s tables and in
+  `business-rules.md` R-40's Acceptance line — no regression on either prior finding.
+- **G-09 disclosure.** Checked every site claiming G-09's status: all consistently state
+  it as signed under D-31 with the §18.3 preconditions (zero-TBD preflight, ten critical
+  tests, `aws_ai_dlc_preflight_report`) disclosed unmet, and consistently state that no
+  scientific value becomes fillable as a result. No site overstates the signature as
+  discharging its evidentiary preconditions.
+- **Mermaid diagrams.** The one diagram in `business-logic-model.md` (W-2) and the one
+  in `domain-entities.md` (entity graph) were checked for stale numerals in node labels
+  specifically, per this pass's flagged hunt — neither carries a `provenance_class` count
+  or any other figure touched by the rebase; both are unaffected.
+
+### Summary
+
+The arithmetic this unit reports elsewhere is sound and unchanged: 15 requirements, 7
+unrowed, 14 rules, 10 entities, the DATA-07 caveat stated everywhere FULL's coverage is
+relied on, and no December-entry path via directory or filename anywhere in the design.
+The single defect found is exactly the class this pass was told to hunt hardest for: a
+fact corrected in one representation — `business-logic-model.md`'s § Assumptions bullet
+— was left standing in its stale, and in one case self-contradictory, form in every
+other representation across the same three-artifact set, including this file's own
+earlier W-4 box, and two of the three artifacts' own 2026-08-29 receipts now claim a
+rebase their bodies do not carry. This is Critical because the stale claim
+("`provenance_class` reaches no other unit") is precisely the fact a G-P1A reviewer or
+`code-generation` needs correct to scope `foundation`'s pending amendment, and the
+answer differs by which of the three files is read. **NOT-READY.**
+
+## Review — 2026-08-29 adversarial pass, iteration 2 (final)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T08:15:58Z
+**Iteration:** 2
+
+### F1 status: the five claimed repair sites — verified, consistent, correctly resolved
+
+Re-read all five sites named in the repair summary:
+
+- `business-rules.md` R-36 box (lines 369–392) — ⛔ REBASED marker present; states "the field
+  reaches TWO units"; explicitly names the R-36 self-contradiction ("stating the field reaches
+  no other unit while naming `inventory-and-registry`'s R-50 as reading it") as the reason for
+  the correction — **the self-contradiction is now resolved, not merely relabelled**, because
+  the live clause above the marker is superseded and the ⛔ box states the corrected fact as
+  the one to rely on.
+- `business-rules.md` Open item (line 800) — same ⛔ marker, same figures, superseded 9/7/3
+  preserved below it and explicitly labelled superseded.
+- `domain-entities.md` § 4 box (lines 217–240) — same marker, same figures.
+- `domain-entities.md` Open item (line 538) — same marker, same figures.
+- `business-logic-model.md` W-4 box (lines 318–344, this file, 380 lines above its own §
+  Assumptions site) — same marker, same figures.
+
+All five state the figures identically: `provenance_class` **43**, `derived_only` **38**,
+`producing_interpreter` **17**, split `acquisition` **25/21/11** and `inventory-and-registry`
+**18/17/6**; all five state the same two stable facts (reaches exactly 2 units; `foundation`
+carries all three zero times); all five keep their Open item open on the unchanged
+`foundation`-zero clause. No internal inconsistency between the five, and all five agree with
+this file's pre-existing § Assumptions bullet (line 715 area, under `## Assumptions & Open
+Questions`) that iteration 1 had already found correct. Nothing is wrongly implied as
+discharged — every marker restates that the Open item stays open. **F1, as scoped to the five
+named sites, is fixed.**
+
+### F2 — Critical, NEW (missed by the repair): two more representations of the stale
+9/7/3 "confined to this unit" claim, unmarked, in the two files' own change-log receipts
+
+The repair swept the five sites F1 named, but not every representation of the corrected fact —
+contrary to this project's own mandated rule (`project.md` § Corrections, cid
+`units-generation:re-1`): *"ALWAYS sweep every REPRESENTATION of a corrected fact, not every
+instance of the entity that carries it."* Two more representations survive, in a location F1's
+list did not cover — each file's own "Counts derived 2026-08-28" change-log paragraph, dated
+the same day as the pre-remediation count and never touched by the 2026-08-29 rebase:
+
+- `business-rules.md` line 884–887: *"In-unit field counts across this stage's 48 artifacts:
+  `provenance_class` **9**, `derived_only` **7**, `producing_interpreter` **3**,
+  `reanalysed-value check` **3** — **all still confined to this unit**, which is precisely
+  what Recommendation 28's Open item records."* No supersession marker. No pointer to the
+  rebase.
+- `domain-entities.md` line 600–601: *"`provenance_class` **9**, `derived_only` **7**,
+  `producing_interpreter` **3** across this stage's **48** artifacts, **all still inside this
+  unit**."* Same defect: unmarked, unqualified.
+
+(`business-logic-model.md`'s own "Counts derived 2026-08-28" paragraph, line 1797, does not
+carry a `provenance_class` count at all — this file is not a third site.)
+
+Both stale lines sit immediately above a **"Re-confirmation receipt, 2026-08-29"** paragraph
+that reads, verbatim in both files: *"This unit's content had already changed after that floor
+— provenance_class figures rebased with basis stated ... No line above this marker was touched
+by this pass."* That sentence names the rebase as a fact of the file's history but does not
+correct, flag, or even cross-reference the "all still confined to this unit" / "all still
+inside this unit" line sitting directly above it in the same receipt trail — so a reader who
+scans only the change-log trail at the foot of either file (the natural place to check "what is
+current") sees the 9/7/3/confined-to-this-unit claim self-certified as untouched-and-therefore-
+current on 2026-08-29, one day *after* the two-units rebase these same files' bodies now assert,
+with no marker distinguishing the two. This is the identical failure mode iteration 1 found at
+Critical severity — a stale count-and-scope claim standing as apparent live fact next to a
+correct one, in an artifact a G-P1A reviewer or `code-generation` reads to scope `foundation`'s
+pending TE amendment — recurring in a location the iteration-1 finding did not name and the
+iteration-2 repair therefore did not sweep.
+
+**Verdict: NOT-READY.** One Critical finding (F2) survives repair. Per this stage's own
+practice, applying this fix is gate input to quote at approval, not something a subsequent
+advisory or unreviewed pass may apply on the strength of a reviewer finding alone.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-rules.md:884-887`, `domain-entities.md:600-601` | The five sites F1 named are correctly rebased and mutually consistent, but each file's own "Counts derived 2026-08-28" change-log paragraph still asserts the pre-remediation `provenance_class`=9/`derived_only`=7/`producing_interpreter`=3 "all still confined to / inside this unit" as unmarked fact, immediately beneath a 2026-08-29 receipt that certifies the content above it as untouched — which reads as re-confirming the stale claim rather than flagging it. | Add the same ⛔ REBASED marker (or an explicit cross-reference to the rebased §4/R-36/W-4 boxes) to both change-log lines, stating the field reaches two units and citing the 43/38/17 split, before the next gate reads either file's receipt trail. |
+
+### Summary
+
+The repair correctly fixed every site the iteration-1 finding named, and did so consistently —
+figures, the two stable facts, and the Open-item status all agree across the five sites and the
+pre-existing § Assumptions bullet, and the R-36 self-contradiction is resolved rather than
+merely re-labelled. But the sweep was scoped to F1's named list rather than to every
+representation of the corrected fact, and two more instances of the exact same stale claim
+survive in `business-rules.md` and `domain-entities.md`'s own change-log receipts, unmarked,
+sitting directly beneath a 2026-08-29 receipt line that names the rebase as history without
+applying it to the line just above. A reader who trusts either file's own receipt trail — the
+place `team.md`'s change-record convention points a reader to for "what is current" — is misled
+in exactly the way F1 already established as Critical.
+
+NOT-READY

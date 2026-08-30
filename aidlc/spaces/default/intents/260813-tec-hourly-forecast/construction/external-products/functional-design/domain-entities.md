@@ -344,9 +344,18 @@ compared** (FR-P1-04-9, TC-08).
 >   not invented there. A wording correction to that memory file is **owed at the §13 learnings
 >   ritual** and is **reported, not applied** — no stage edits a memory file directly.
 
-**The comparator is never tuned and then claimed independent** — carried as a
-reporting-discipline rule with **no code check**, and named uncheckable rather than given a
-check that would not test it. No injected value proves a negation of that kind.
+**The comparator is never tuned and then claimed independent** — ⛔ *(corrected 2026-08-29 on
+adversarial finding 2, Major. Superseded text preserved: "carried as a reporting-discipline rule
+with **no code check**, and named uncheckable rather than given a check that would not test it."
+That was the pre-2026-08-23 reading; `business-rules.md` R-60 was corrected on 2026-08-23 and the
+correction was never swept into this file or `business-logic-model.md`.)* — a **partial control
+plus a named residual**, per **R-60**, which is authoritative. **Checkable:** a **grep-class
+check** that no fitting, tuning, optimiser or parameter-search call appears in `gim.py`, and the
+requirement that the **report state no tuning occurred** with the independence claim **citing the
+overlap audit**. **⚠ Uncovered residual:** tuning performed **outside** `gim.py` and pasted in as
+a constant — reached by no check, and remaining a **reporting-discipline obligation**. No
+injected value proves a negation of that kind, which is why the residual cannot be closed by a
+test.
 
 > **FR-P1-04-18 has NO acceptance row**, and its interpolation limb is blocked on Q-15.
 
@@ -498,7 +507,7 @@ the **primary acceptance test** (`tests/test_feature_leakage_guards.py`) — see
 - **Open — four requirements with no acceptance row**: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18.
 - **Open — TA-36 is `Pending`**: approved, never run.
 - **Closed 2026-08-26 (finding 8): the § 6 conflict no longer exists — the file was swept 2026-08-24; kept as the dated record.** *(Superseded bullet:)*  — `unit-of-work.md` § 6 carries stale text**, reported not edited.
-- **Open — FR-P1-04-18 obligation 4 has no code check**, and is named uncheckable rather than given one that would not test it.
+- **Open — FR-P1-04-18 obligation 4 has a PARTIAL code check and one uncovered residual.** ⛔ *(Corrected 2026-08-29 on adversarial finding 2, Major; superseded bullet preserved: "**has no code check**, and is named uncheckable rather than given one that would not test it." That was the pre-2026-08-23 reading, superseded by `business-rules.md` R-60's 2026-08-23 correction and never swept here.)* Per **R-60**: a **grep-class check** over `gim.py` and the report's own **no-tuning statement citing the overlap audit** are both checkable; the **⚠ residual** — tuning outside `gim.py`, pasted in as a constant — is reached by no check and stays a reporting-discipline obligation. **The item stays Open on that residual, not on the whole obligation.**
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No entity here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`, `src/external/gim.py` or `scripts/04_build_external_products.py`.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
@@ -571,6 +580,26 @@ the **primary acceptance test** (`tests/test_feature_leakage_guards.py`) — see
 > **Mermaid re-validated** after the entity-map edit; text fallback updated to match.
 >
 > **IRI and CODE GIM remain evaluation-time-only comparators; Dst remains diagnostic-only; D-11
-> continues to bar provisional Dst from any G-05 regime count. G-09 remains unsigned** — no entity
+> continues to bar provisional Dst from any G-05 regime count. G-09 remains unsigned** ⚠ **G-09
+> IS SIGNED as of 2026-08-28 (D-31)** *(annotation added 2026-08-29 on adversarial finding 1,
+> Critical: this was the ONE live "G-09 remains unsigned" statement in this file the 2026-08-28
+> annotation pass missed — the closing line of this same governance-remediation box — while the
+> 2026-08-29 receipt below it certified that only the G-09 banner and its operative-clause
+> annotations had changed. The other three comparator clauses in this sentence are untouched and
+> remain in force.)* — module creation is authorised, **and nothing else changes**. D-31's
+> disclosure travels with the signature: the TE §18.3 zero-TBD preflight **never ran**, `configs/`
+> does not exist, the ten critical tests are **unexecuted in this environment**, and
+> `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE
+> §18.2 and §18.3's stop-and-report rule are unchanged. Nothing
 > here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`,
-> `src/external/gim.py` or `scripts/04_build_external_products.py`.
+> `src/external/gim.py` or `scripts/04_build_external_products.py` **as a design decision of this
+> entity**; that is now a G-09-authorised implementation act for stage 3.5, still bound by §18.3.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's only change after that floor was the **G-09 (D-31)
+> supersession banner and its operative-clause annotations** — no design content moved, and
+> Recs 13, 14, 38, 41 and 46 stand as remediated. The owner re-confirmed that content via the
+> Consolidated Summary Confirmation at the foot of `functional-design-questions.md`, receipted
+> `2026-08-29`. No line above this marker was touched by this pass.

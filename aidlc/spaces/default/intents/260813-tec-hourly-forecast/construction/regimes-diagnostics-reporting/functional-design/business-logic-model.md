@@ -987,3 +987,14 @@ The three edited regions (W-1 point 3 / R-123's corrected paragraph; W-2's and R
 The iteration-1 Critical is genuinely fixed, not merely reworded: the single-classifier claim now correctly excludes `inventory-and-registry` as a caller, the corrected direction is verified against `external-products` R-56, `inventory-and-registry`'s own design, and the unit DAG (all three independently confirming the fix rather than merely failing to contradict it), and the new audit-count consistency control (31) is executable, reads a field that genuinely exists on the registered audit artifact, is gated to the same post-receipt path as the rest of December reporting, raises without adjudicating, and is represented identically at all four locations that describe it. Counts (31 controls, 10 workflows, 10 rules, 5 entities, 7 amendments across 5 units) all re-derive correctly. The only new observation — the question file's stale wording surviving in two receipted locations rather than the one the remediation described — is a documentation-completeness note against a frozen historical record, not a defect in the three live design artifacts, and does not block readiness.
 
 **READY**
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `regimes-diagnostics-reporting`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.

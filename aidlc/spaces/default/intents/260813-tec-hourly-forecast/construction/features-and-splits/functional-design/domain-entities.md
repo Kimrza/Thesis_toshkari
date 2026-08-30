@@ -927,3 +927,14 @@ TA-36.
 > unchanged; every prior dated box is preserved as history.** **BLK-04, BLK-08 and BLK-09 all
 > remain open exit conditions and G-09 remains unsigned; nothing here authorises implementation
 > or the creation of a module.**
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `features-and-splits`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.

@@ -219,7 +219,20 @@ be two rules about one fact.
 > ⚠ **THE RELEASE-SIDE REFUSAL THIS ENTITY EXISTS FOR HAS NO FIELD TO READ** *(added
 > 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1)*. This entity's stated
 > purpose is that *"a downstream consumer — G-P1A, a release, a freeze gate — can **refuse** a
-> `derived_only` month"*, and the field crosses **no unit boundary**. Derived 2026-08-28 across
+> `derived_only` month"*, and the field crosses **no unit boundary**. ⛔ **THAT CLAUSE IS
+> SUPERSEDED — REBASED 2026-08-29. The field crosses into a second unit.** *(Corrected on
+> adversarial finding F1 of the 2026-08-29 re-confirmation pass, Critical: the rebase was
+> written into `business-logic-model.md` § Assumptions on 2026-08-28 and never swept into this
+> box, this file's Open item, or `business-rules.md`.)* **Current figures, a dated observation
+> and never a live invariant** (derived over the 48 stage artifacts immediately before the
+> rebase note was written; writing such a note adds occurrences of each token):
+> `provenance_class` **43**, `derived_only` **38**, `producing_interpreter` **17**, split
+> `acquisition` **25 / 21 / 11** and `inventory-and-registry` **18 / 17 / 6** — that unit
+> acquired the field under `GOV-2026-08-28-FD-01` **Recommendation 29**, which gave it a
+> `data07_caveat` sourced from it. **The two stable facts to rely on: the fields reach exactly
+> 2 units, and `foundation` carries all three ZERO times.** The second is what this entity's
+> argument rests on and is **unchanged**, so nothing here is discharged and the Open item
+> below stays open. Superseded figures preserved: Derived 2026-08-28 across
 > all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**,
 > `producing_interpreter` = **3**, all in this unit; **0 in `foundation`**, whose
 > `domain-entities.md` enumerates the fourteen §13.3 release fields without it. `write_release`
@@ -522,7 +535,7 @@ correct numeral is exactly the failure `project.md` § Corrections records. **Ow
 - **Open — BLK-07's authorization limb.** § 9 fixes the mechanism only.
 - **Open — THREE amendments owed to approved stage-2.6 contracts**: **the named accessors** (`open_d9_input` and the restricted writer, absent from the approved `locked_test.py` block), the `AccessRecord.purpose` extension plus a restricted-write function, and `write_release`'s `identity_fields` parameter. Stated, not applied; all three need change records. The first is BLK-07's central mechanism, so BLK-07's contract is **proposed, not approved**, until it clears change control.
 - **Open — noted for stage 3.2:** `suffix_mismatch` is not among FR-P1-04-11's fourteen release fields, which § 1's refusal reads.
-- **Open — noted for stage 3.2:** **`provenance_class` (§ 4)** is not among FR-P1-04-11's fourteen release fields, which **§ 4's release-side refusal reads** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1 — the same form as the `suffix_mismatch` bullet above)*. § 4 states the field exists so *"a downstream consumer — G-P1A, a release, a freeze gate — can **refuse** a `derived_only` month"*, and § 3 establishes that **no provider byte stream exists anywhere in the workspace** for the twelve pre-TC-06 months. Derived 2026-08-28 across all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` = **3**, **all in this unit; 0 in every other unit including `foundation`**, whose `domain-entities.md` enumerates all fourteen §13.3 release fields without it. `write_release` therefore faces a choice **§18.3 forbids an agent to make** — no writable Phase 1 release, or `source_files` accepted with placeholder provider terms. **No fifteenth field is added here**: §13.3's set and FR-P1-04-11's fourteen are approved artifacts, and `foundation` declined the analogous unilateral change for D-24's protected set. Routed to **G-P1A / stage 3.2**; `code-generation` must **stop and report**. `foundation`'s half is **gate input**, not an edit to a sibling's files.
+- **Open — noted for stage 3.2:** **`provenance_class` (§ 4)** is not among FR-P1-04-11's fourteen release fields, which **§ 4's release-side refusal reads** *(added 2026-08-28, `GOV-2026-08-28-FD-01` Recommendation 28, option 1 — the same form as the `suffix_mismatch` bullet above)*. § 4 states the field exists so *"a downstream consumer — G-P1A, a release, a freeze gate — can **refuse** a `derived_only` month"*, and § 3 establishes that **no provider byte stream exists anywhere in the workspace** for the twelve pre-TC-06 months. ⛔ **REBASED 2026-08-29 — the "all in this unit" clause is superseded; the field reaches TWO units.** *(Corrected on adversarial finding F1, Critical — the 2026-08-28 rebase reached only `business-logic-model.md` § Assumptions and was never swept here.)* **Current figures, a dated observation and never a live invariant** (derived over the 48 stage artifacts immediately before the rebase note was written; writing such a note adds occurrences of each token): `provenance_class` **43**, `derived_only` **38**, `producing_interpreter` **17**, split `acquisition` **25 / 21 / 11** and `inventory-and-registry` **18 / 17 / 6** — that unit acquired the field under `GOV-2026-08-28-FD-01` **Recommendation 29**, which gave it a `data07_caveat` sourced from it. **The two stable facts: the fields reach exactly 2 units, and `foundation` carries all three ZERO times.** The second is what this item's argument rests on and is **unchanged**, which is why it stays Open. Superseded figures preserved: Derived 2026-08-28 across all **48** artifacts of this stage: `provenance_class` = **9**, `derived_only` = **7**, `producing_interpreter` = **3**, **all in this unit; 0 in every other unit including `foundation`**, whose `domain-entities.md` enumerates all fourteen §13.3 release fields without it. `write_release` therefore faces a choice **§18.3 forbids an agent to make** — no writable Phase 1 release, or `source_files` accepted with placeholder provider terms. **No fifteenth field is added here**: §13.3's set and FR-P1-04-11's fourteen are approved artifacts, and `foundation` declined the analogous unilateral change for D-24's protected set. Routed to **G-P1A / stage 3.2**; `code-generation` must **stop and report**. `foundation`'s half is **gate input**, not an edit to a sibling's files.
 - **Open — raised for `governance-guards`:** an enum-membership test pinning `AccessRecord.purpose`.
 - **Open — `RES-04`**, not started and deliberately not attempted. § 2's real-artifact test defers to it.
 - **Open — `RES-01`**, permitted-read access logging is NOT TESTED, owned by stage 3.2.
@@ -588,3 +601,14 @@ correct numeral is exactly the failure `project.md` § Corrections records. **Ow
 > `producing_interpreter` **3** across this stage's **48** artifacts, all still inside this unit.
 > **No scientific value was decided.** **G-09 remains unsigned**; **BLK-07's authorization limb
 > remains open**; membership stays derived from **record timestamps**, never a directory name.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's content had already changed after that floor — provenance_class
+> figures rebased with basis stated, G-09 signed under D-31 with its §18.3 preconditions
+> disclosed unmet — so the owner re-confirmed the unchanged post-rebase content via the
+> Consolidated Summary Confirmation at the foot of `functional-design-questions.md`, receipted
+> `2026-08-29`. No line above this marker was touched by this pass. **The `provenance_class` 9 /
+> `derived_only` 7 / `producing_interpreter` 3 counts above remain the dated observation their own
+> basis line describes, not a live invariant re-derived by this pass.**

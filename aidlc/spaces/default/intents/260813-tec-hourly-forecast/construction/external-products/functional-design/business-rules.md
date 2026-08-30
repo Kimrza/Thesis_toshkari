@@ -1011,6 +1011,26 @@ by stage 3.2 and change control.
 > GIM phrasing counts **7** across the two sibling units, **not 5**.
 >
 > **IRI and CODE GIM remain evaluation-time-only comparators; Dst remains diagnostic-only; D-11
-> continues to bar provisional Dst from any G-05 regime count. G-09 remains unsigned** — no rule
+> continues to bar provisional Dst from any G-05 regime count. G-09 remains unsigned** ⚠ **G-09
+> IS SIGNED as of 2026-08-28 (D-31)** *(annotation added 2026-08-29 on adversarial finding 1,
+> Critical: this was the ONE live "G-09 remains unsigned" statement in this file the 2026-08-28
+> annotation pass missed — the closing line of this same governance-remediation box — while the
+> 2026-08-29 receipt below it certified that only the G-09 banner and its operative-clause
+> annotations had changed. The other three comparator clauses in this sentence are untouched and
+> remain in force.)* — module creation is authorised, **and nothing else changes**. D-31's
+> disclosure travels with the signature: the TE §18.3 zero-TBD preflight **never ran**, `configs/`
+> does not exist, the ten critical tests are **unexecuted in this environment**, and
+> `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE
+> §18.2 and §18.3's stop-and-report rule are unchanged. Nothing
 > here authorises creating `src/external/spaceweather.py`, `src/external/iri.py`,
-> `src/external/gim.py` or `scripts/04_build_external_products.py`.
+> `src/external/gim.py` or `scripts/04_build_external_products.py` **as a design decision of this
+> rule**; that is now a G-09-authorised implementation act for stage 3.5, still bound by §18.3.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's only change after that floor was the **G-09 (D-31)
+> supersession banner and its operative-clause annotations** — no design content moved, and
+> Recs 13, 14, 38, 41 and 46 stand as remediated. The owner re-confirmed that content via the
+> Consolidated Summary Confirmation at the foot of `functional-design-questions.md`, receipted
+> `2026-08-29`. No line above this marker was touched by this pass.

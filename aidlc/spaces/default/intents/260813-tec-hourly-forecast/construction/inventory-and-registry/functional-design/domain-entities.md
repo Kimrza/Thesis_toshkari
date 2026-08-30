@@ -587,3 +587,14 @@ cross-checked and in agreement.
 > unchanged. **No scientific value was decided.** **G-09 remains unsigned**, **BLK-07's
 > authorization limb remains open**, and membership stays derived from **record timestamps**,
 > never from a directory name.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's content had already changed after that floor — the
+> `provenance_class` rebasing completed at the three sites the original remediation left stale,
+> its counts recorded as a dated observation rather than a live invariant, and G-09 signed under
+> D-31 with its §18.3 preconditions disclosed unmet — so the owner re-confirmed the unchanged
+> post-rebase content via the Consolidated Summary Confirmation at the foot of
+> `functional-design-questions.md`, receipted `2026-08-29`. No line above this marker was
+> touched by this pass.

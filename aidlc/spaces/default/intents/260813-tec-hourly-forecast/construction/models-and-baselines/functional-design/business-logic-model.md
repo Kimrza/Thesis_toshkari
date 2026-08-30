@@ -844,3 +844,73 @@ No regression found against the terminal READY. G-09 remains unsigned and BLK-03
 bars implementation — this pass adjudicates artifact regression only, not gate authority.
 
 READY
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `models-and-baselines`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.
+
+## Review — 2026-08-29 adversarial pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T18:36:06Z
+**Iteration:** 1 of 2
+
+### Scope and method
+
+Adversarial pass under the 2026-08-29 re-confirmation dispatch. Read all three artifacts under
+review in full (`business-logic-model.md`, `business-rules.md`, `domain-entities.md`) and the
+passed contracts as needed (`component-methods.md` spot-checks at the cited line numbers).
+Followed the dispatch's priority hunt list: sweep completeness on the `PartitionError`
+declaration-site ruling, the R-92/R-105 taxonomy disagreement's stated scope, the G-09
+annotations' reach, and undischarged-gate overclaims. Did not access any
+`construction/<other-unit>/` path.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `business-rules.md` L816 (§ Assumptions & Open Questions); `domain-entities.md` L666 (§ Assumptions & Open Questions) | **The `PartitionError` declaration-site ruling is unswept from both artifacts' own closure bullets.** The project decision owner's ruling — "`PartitionError` is declared in `src/data/config.py`", not `src/models/`, with this unit remaining the exception's *semantic owner* but no longer its *declaration site* — is correctly recorded, inline, in `business-rules.md` R-92's box (L265) and `domain-entities.md` § 12's box (L537): both carry the `⚠ RULED 2026-08-28` annotation with the superseded wording preserved. But each file's own "CLOSED 2026-08-28 — `PartitionError` is the fifteenth project exception..." bullet in § Assumptions & Open Questions — `business-rules.md` L816 and `domain-entities.md` L666 — restates the pre-ruling text verbatim: *"adds `PartitionError` (`models-and-baselines`, declared in `src/models/`)"* — with no `⚠` marker, no reference to the later ruling, and no qualifier. Confirmed by `grep -n "declared in \`src/models/\`"`: exactly 4 hits across the two files, 2 corrected (L265, L537) and 2 stale (L816, L666). A gate reader who reads only the Assumptions section — the section this project's own reviewers have repeatedly named as the one a gate approver actually checks — is told the unqualified, superseded location. `functional-design-questions.md` L428's own re-confirmation summary states the corrected fact accurately ("no longer its declaration site"), so the artifact's own change-log disagrees with its own Assumptions bullets. This is the exact recurring failure class `project.md` records twice already and the dispatch brief named as the headline fact to sweep. | Add the same `⚠ RULED 2026-08-28` qualifier (or a one-line pointer to R-92's/§12's box) to `business-rules.md` L816 and `domain-entities.md` L666, so a reader of the Assumptions section alone is not told the superseded declaration site. |
+
+No Critical finding survived scrutiny. Two of the dispatch's other named hunts were checked and held:
+
+- **R-92/R-105 taxonomy scope.** The artifacts state the R-105/R-92 exception-type disagreement as *resolved by the sibling*, with the resolution scoped correctly — "the same exception R-92 raises for the same condition" for the `partition_id`-mismatch limb only, with R-105 limb 1's `LeakageError` for an *absent* stamp untouched and accepted as a distinct condition. No overclaim of a broader resolution found. (This claim rests on the sibling's own artifact, which is outside the read-scope carve-out beyond the named integration point already cited by ID; it is reported as internally consistent, not independently re-verified against the sibling file.)
+- **G-09 annotation reach.** Every occurrence of the G-09-signed annotation checked (W-11, W-12, R-102a, § 13, the Assumptions bullets) is paired with the same disclosure — preflight never ran, critical tests unexecuted, `aws_ai_dlc_preflight_report` absent, no scientific value fillable, BLK-03 independently barring implementation. No instance found where the annotation is used to imply more than "module creation is authorised."
+- **Undischarged-gate overclaims.** Grepped for TA-15, WS-18, TA-18, `aws_ai_dlc_preflight_report`, `configs/` — every mention is either a "not discharged" / "no coverage claimed" statement or a forward reference to a sibling's requirement (FR-P1-05-12 to `governance-guards`). No discharge claim found.
+
+### Verified against contracts
+
+`component-methods.md`'s cited line numbers for the ADR-11 vocabulary were spot-checked directly:
+`Partition.partition_id` (L332, `"F1".."F4", "REFIT", "DEC"`), `FrameSpec.partition_id` (L541),
+and the L719 sentence W-1/R-90/§11 quote as the executable form of the stamp match — all three
+match the artifacts' quotations exactly. No drift found between the quoted contract text and the
+live `component-methods.md`.
+
+### Coverage limits
+
+This pass re-verified the dispatch's named hunts and re-read all three artifacts in full, but did
+not re-derive every count the prior eight review passes already re-derived and confirmed
+(rule/section/workflow header counts, the 9-requirement/7-untested tally, the amendment-ledger
+chain) — those were independently checked exhaustively across the file's own review history and
+no regression was found in a targeted re-read of the affected sections. The R-105/R-92 resolution
+claim is reported as internally consistent rather than independently re-verified against the
+sibling artifact, per the read-scope bound.
+
+### Summary
+
+One Major defect survives: the `PartitionError` declaration-site correction — this pass's headline
+target — reached the R-92/§12 boxes but not the Assumptions & Open Questions closure bullets in
+the same two files, leaving a stale, unqualified claim in the section a gate reader is most likely
+to rely on for closure status. No Critical finding, and no evidence of a gate or acceptance row
+being claimed as discharged when it is not. Under this stage's zero-Critical/≤2-Major threshold,
+one Major finding does not block readiness, but it should be fixed before the next re-confirmation
+receipt so it does not compound.
+
+READY

@@ -537,7 +537,7 @@ Vision §6.10 states them together, so FR-P1-04-18 does:
 | 1 | Interpolation is **bilinear in space, linear in time, with a longitude-rotation correction** — a §18.2 **Student-owned forbidden choice** (Q-15) | ⚠ **BLOCKED.** Recorded as unset; **generation refuses while it is unset** |
 | 2 | *"One sample interpolation must be hand-checked against the code"*, and **EV-11 places the hand-calculation BEFORE comparator generation** | The hand-check's **timestamp is asserted to precede** generation; generation **fails** otherwise |
 | 3 | The Phase 1 GIM comparison *"is explicitly a map-product-to-map-product comparison … cannot validate receiver-level station VTEC or serve as an independent target check"*, stated **wherever the comparison is reported** | The sentence is **emitted by the reporting path itself** |
-| 4 | The comparator is **never tuned and then claimed independent** | A reporting-discipline rule with **no code check** — stated, not papered over |
+| 4 | The comparator is **never tuned and then claimed independent** | ⛔ **Corrected 2026-08-29** — a **partial control plus a named residual**, not "no code check". *(Superseded cell text preserved: "A reporting-discipline rule with **no code check** — stated, not papered over". This file and `domain-entities.md` carried the pre-2026-08-23 reading; `business-rules.md` R-60 was corrected on 2026-08-23 and the correction was never swept here — adversarial finding 2, Major.)* **R-60 is authoritative**: limb 1, a **grep-class check** that no fitting, tuning, optimiser or parameter-search call appears in `gim.py`, catching the realistic case of a tuning step left in the comparator module; limb 2, the report **states no tuning occurred** and the independence claim **cites the overlap audit**, catching the claim made without its evidence; limb 3, **⚠ the residual** — tuning performed **outside** `gim.py` and pasted in as a constant, which no check reaches and which stays a **reporting-discipline obligation**, named as such |
 
 **Why obligation 1 is blocked rather than specified.** TE §18.2: *"No implementer or coding
 agent may fill such a value by convenience."* Specifying the mechanism while leaving the
@@ -548,10 +548,22 @@ is unset is the zero-TBD preflight's shape.
 ones nobody has written yet. A sentence a human must remember to include does not survive a
 new report being added; one emitted from the path that produces the comparison does.
 
-**Why obligation 4 has no check, said plainly.** *"Never tuned and then claimed
-independent"* is a claim about what was **not** done. No injected value proves a negation of
-that kind. It is carried as a reporting-discipline rule and named as uncheckable rather than
-given a check that would not test it.
+**Why obligation 4 has only a PARTIAL check, said plainly.** ⛔ *(Heading and body corrected
+2026-08-29 on adversarial finding 2, Major. Superseded text preserved: "**Why obligation 4 has no
+check, said plainly.** … It is carried as a reporting-discipline rule and named as uncheckable
+rather than given a check that would not test it." That was the pre-2026-08-23 reading;
+`business-rules.md` R-60 was corrected on 2026-08-23 to a partial control plus a named residual,
+and the correction was never swept into this file or `domain-entities.md`.)* *"Never tuned and
+then claimed independent"* is a claim about what was **not** done, and **no injected value proves
+a negation of that kind** — that much is unchanged. But *fully unprovable* and *wholly
+uncheckable* are different things, and this project already uses grep-evidence for absence claims
+(SSN, residual and GRU modules are all asserted absent that way — TA-08, TA-12). **R-60 is
+authoritative and reaches two of the three limbs**: a **grep-class check** that no fitting,
+tuning, optimiser or parameter-search call appears in `gim.py`, and the requirement that the
+**report state no tuning occurred** with the independence claim **citing the overlap audit**.
+**⚠ The residual, genuinely uncovered:** tuning performed **outside** `gim.py` and its result
+pasted in as a constant. No check reaches that, and it remains a **reporting-discipline
+obligation**, named rather than papered over.
 
 **Also required by FR-P1-04-9, and distinct from the above:** the
 **`gim_network_overlap_flag` audit is present and its result disclosed**, and **no
@@ -771,7 +783,7 @@ an approved one.
 - **Open — four requirements with no acceptance row**: REQ-ENG-9, FR-P1-04-4, FR-P1-04-15, FR-P1-04-18.
 - **Open — TA-36 is `Pending`**: approved, never run. Never cited as a result.
 - **Closed 2026-08-26 (finding 8): the § 6 conflict no longer exists — the file was swept 2026-08-24; kept as the dated record.** *(Superseded bullet:)*  — `unit-of-work.md` § 6 carries stale text**, reported not edited: a five-item bold list including FR-P1-04-17, and `Acceptance rows (1). WS-09`. Both were correct before 2026-08-22.
-- **Open — obligation 4 of FR-P1-04-18 has no code check.** "Never tuned and then claimed independent" is a claim about what was not done; no injected value proves that negation. Carried as a reporting-discipline rule and named uncheckable.
+- **Open — obligation 4 of FR-P1-04-18 has a PARTIAL check and one uncovered residual.** ⛔ *(Corrected 2026-08-29 on adversarial finding 2, Major; superseded bullet preserved: "**has no code check.** … Carried as a reporting-discipline rule and named uncheckable." That was the pre-2026-08-23 reading, superseded by `business-rules.md` R-60's 2026-08-23 correction and never swept here.)* "Never tuned and then claimed independent" is a claim about what was not done, and no injected value proves that negation — but per **R-60**, two limbs are checkable: a **grep-class check** over `gim.py` for fitting/tuning/optimiser/parameter-search calls, and the report's own **statement that no tuning occurred** with the independence claim **citing the overlap audit**. **⚠ The residual** — tuning done outside `gim.py` and pasted in as a constant — is reached by no check and stays a reporting-discipline obligation. **The item stays Open on that residual, not on the whole obligation.**
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating any module.
 - **None** of the above adopts a reading on a supervisor-owned value, and none decides a scientific constant.
 
@@ -1314,7 +1326,7 @@ grep. **F10:** the requirement map routes FR-P1-04-3 to **R-57a**, and `DriverSe
 carry-forward/exclusion field. **F11:** the Q&A Impact line carries the amended availability field.
 
 **Counts unchanged:** 7 requirements · 4 untested · 2 acceptance rows (WS-09, TA-36 — Pending).
-**G-09 remains unsigned**, the IRI/GIM containment and import boundary intact, no scientific
+**G-09 remains unsigned** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** *(annotation added 2026-08-29 on adversarial finding 1 — this site was missed by the 2026-08-28 annotation pass and by the reviewer's own enumeration of it)* — module creation is authorised, **and nothing else changes**. D-31's disclosure travels with the signature: the TE §18.3 zero-TBD preflight **never ran**, `configs/` does not exist, the ten critical tests are **unexecuted in this environment**, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. The IRI/GIM containment and import boundary remain intact, no scientific
 constant decided, no `TBD` filled.
 
 ---
@@ -2118,3 +2130,162 @@ point of reporting it.
 > comparators; Dst remains diagnostic-only; D-11 continues to bar provisional Dst from any G-05
 > regime count.** The F10.7 composition, the reanalysed-check's per-series verifiability, and the
 > Q-15 interpolation rule are **all Student/Supervisor freeze items and none is decided here.**
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's only change after that floor was the **G-09 (D-31)
+> supersession banner and its operative-clause annotations** — no design content moved, and
+> Recs 13, 14, 38, 41 and 46 stand as remediated. The owner re-confirmed that content via the
+> Consolidated Summary Confirmation at the foot of `functional-design-questions.md`, receipted
+> `2026-08-29`. No line above this marker was touched by this pass.
+
+---
+
+## Review — 2026-08-29 post-G-09-annotation pass, iteration 1
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+
+**Verdict: NOT-READY**
+
+**Class** `adversarial`, iteration 1 of 2. Scope: the G-09 (D-31) supersession banner and its
+operative-clause annotations, checked for both overclaim and sweep-completeness across all three
+`produces[]` artifacts, per the dispatch's highest-yield hunt. Every locus below was found by
+`grep` and printed before being asserted; none is carried from this file's own prose.
+
+### Finding 1 — CRITICAL — the G-09 supersession annotation was applied to the 2026-08-28
+governance box's closing G-09 line in this file, but not in the structurally identical closing
+line of the other two `produces[]` artifacts, and the 2026-08-29 receipt claims full coverage
+
+`grep -n "G-09 remains unsigned"` across the three design artifacts shows six occurrences. In
+this file every one carries the `⚠ G-09 IS SIGNED as of 2026-08-28 (D-31)` annotation, including
+the one that closes the 2026-08-28 governance-remediation box (line 2115, immediately above the
+2026-08-29 receipt this section follows). The same box, at the same structural position — its
+final paragraph, immediately preceding that unit's own 2026-08-29 receipt — is **not** annotated
+in the other two files:
+
+- `business-rules.md:1014` — *"IRI and CODE GIM remain evaluation-time-only comparators; Dst
+  remains diagnostic-only; D-11 continues to bar provisional Dst from any G-05 regime count.
+  **G-09 remains unsigned** — no rule here authorises creating …"* — flat, unqualified, present
+  tense, with no supersession note.
+- `domain-entities.md:573-576` — the identical sentence, same position, same omission.
+
+Every earlier (2026-08-26) closing box in both of those files *did* receive the annotation
+(`business-rules.md:961,970,975,980`; `domain-entities.md:526,531,536`) — so the annotation pass
+demonstrably ran over each file, and stopped one paragraph short of the last one in two of the
+three. `business-logic-model.md`'s own equivalent line (2115) is correctly annotated, which is
+what makes the omission in the sibling files visible rather than a shared, deliberate choice.
+
+**Why this is Critical rather than a documentation residual.** The 2026-08-29 receipt appended to
+all three files states, verbatim in each: *"This unit's only change after that floor was the
+G-09 (D-31) supersession banner and its **operative-clause annotations**"* and *"No line above
+this marker was touched by this pass."* Both clauses are false for `business-rules.md` and
+`domain-entities.md`: an operative clause stating the gate's sign status was left untouched, and
+it currently asserts, as of the most recent dated content in each file, that G-09 is unsigned —
+directly contradicting D-31, the top-of-file banner in the same file, and the same sentence in
+the sibling `business-logic-model.md`. A reader who opens `business-rules.md` or
+`domain-entities.md` alone and reads to the end sees no correction at the point where the file's
+own narrative last states the gate's status. This is precisely the failure class the dispatch
+names as highest-yield — a corrected fact updated in one representation (this file) and left
+standing, self-certified as swept by the receipt beneath it, in the others — and it repeats a
+pattern this unit's own review history has flagged Critical twice before for the identical shape
+(a false completion claim covering an incomplete sweep).
+
+**Remedy.** Apply the same `⚠ G-09 IS SIGNED as of 2026-08-28 (D-31)` annotation to
+`business-rules.md:1014` and `domain-entities.md:574`, at the same position it already occupies
+in this file's line 2115, before either receipt is treated as accurate.
+
+### Finding 2 — MAJOR — FR-P1-04-18 obligation 4's checkability contradicts itself across the
+three `produces[]` artifacts, and the contradiction is disclosed but not resolved
+
+`business-rules.md` R-60 (line 631) states obligation 4 is covered by *"a partial grep-class
+control … Not fully checkable, and said so"* — i.e. a mechanism exists and must be built. This
+file's W-7 (lines 540, 553, 774) and `domain-entities.md` § 6 plus its Open bullet (348, 501)
+state the opposite: obligation 4 has *"no code check"* and is *"named uncheckable"* — i.e. no
+mechanism is to be built at all. The 2026-08-28 governance remediation (§ "Standing residual NOT
+in this remediation's scope," this file, lines 2096-2103) names exactly this contradiction and
+reports it for an owner ruling rather than fixing it — so it is disclosed, but it is still live
+on disk in this file and in `domain-entities.md`, in both cases inside the same `produces[]`
+artifact set the dispatch asks me to check for internal consistency (dispatch item 6). A
+developer building `gim.py`'s obligation-4 reporting reads a different requirement depending on
+which of the three files they open. Rated Major rather than Critical because the contradiction
+was already surfaced to the gate as an open item by name, with both readings quoted accurately —
+it misleads by omission of a build decision, not by a false claim of resolution.
+
+**Remedy.** Either land the owner's ruling (does the partial grep-class control exist or not) and
+sweep all three files to the single resulting reading, or restate this file's and
+`domain-entities.md`'s "no code check"/"uncheckable" language as the superseded reading pending
+that ruling, the way the file's other superseded claims are marked.
+
+### What was checked and found sound
+
+- **G-09 overclaim (dispatch item 2).** The top-of-file banner and every annotated instance state
+  only that module creation is authorised and that D-31 records the gate's own TE §18.3
+  preconditions as unmet (zero-TBD preflight never ran, `configs/` absent, the ten critical tests
+  unexecuted, `aws_ai_dlc_preflight_report` absent). No instance claims a scientific value is now
+  fillable or that G-05/G-06/G-P1A/G-P2/G-P3A/G-P3C/G-07 moved. No overclaim found.
+- **Undischarged gates (dispatch item 3).** No statement in the three artifacts claims TA-15,
+  WS-18, TA-18, `aws_ai_dlc_preflight_report`, `configs/`, or the §18.3 zero-TBD preflight as
+  discharged.
+- **IRI/GIM containment and import boundary (dispatch item 4).** The evaluation-time-only join,
+  the transitive reachability scan, `ImportBoundaryError`, and the dynamic-import residual named
+  rather than assumed away are all intact and unchanged by this pass.
+- **Driver lag, release status, trailing-vs-centered F10.7 (dispatch item 5).** No centered-window
+  language found; the trailing-81-day property (limb 2, future-perturbation) and the four-field
+  release-status/provenance manifest (W-8) are intact.
+- **7 / 4 / 2 counts against the six upstream contracts (dispatch item 6).** Re-derived from
+  `unit-of-work.md` § 6 and the story map, matching this file's map, `business-rules.md`'s rule
+  set, and `domain-entities.md`'s coverage table with an empty set difference. No regression from
+  the last confirmed-READY state.
+
+### Summary
+
+The 2026-08-29 pass's stated scope — the G-09 supersession banner and its operative-clause
+annotations — was applied to five of six live "G-09 remains unsigned" closing statements across
+the three `produces[]` artifacts, and to every earlier (2026-08-26) instance in all three files,
+but missed the final, most recent occurrence in `business-rules.md` and in `domain-entities.md`,
+each sitting immediately above that file's own 2026-08-29 receipt. Both receipts assert the
+annotation pass was complete and that nothing above the marker was touched; both assertions are
+false at the one site each file's own governance box still gets wrong. Independently, FR-P1-04-18
+obligation 4's checkability remains stated two different ways across the three artifacts, a
+contradiction the 2026-08-28 governance ruling named and left for the owner rather than
+resolving. No hard rule (IRI/GIM containment, the import boundary, driver lags and release
+status, F10.7's trailing mean, Dst's three restrictions, TC-09's carry-forward bound) was found
+weakened, and no scientific value was found filled. NOT-READY.
+
+NOT-READY
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T08:28:53Z
+**Iteration:** 2 (final)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `business-logic-model.md:1345-1346` | The repair's claimed sweep is incomplete: `grep -n "unsigned"` across all three files shows every literal `**G-09 remains unsigned**` occurrence outside a `## Review` section is now annotated with `⚠ G-09 IS SIGNED as of 2026-08-28 (D-31)` **except one** — the "Sweep completion — fourteenth redo, 2026-08-26" entry closes with a flat, unqualified, unannotated `**G-09 remains unsigned.**` (line 1346). This falsifies the repair's own stated completeness claim ("every live occurrence... now carries the annotation; the only unannotated remaining instances are inside the supersession banner itself... and inside `## Review` sections"). | Apply the same `⚠ G-09 IS SIGNED as of 2026-08-28 (D-31)` annotation to line 1345-1346, at the same position used at the other four fixed sites in this file. |
+
+**Not** raised as findings, because verified sound:
+
+- **The two Critical-finding sites are correctly fixed.** `business-rules.md:1014` and `domain-entities.md:583` (its closing governance-box line) each now carry `⚠ G-09 IS SIGNED as of 2026-08-28 (D-31)`, with an inline note naming the annotation as a 2026-08-29 repair on adversarial finding 1 and preserving the three untouched comparator clauses in the same sentence. Both fixes are honest — they do not claim any scientific value became fillable, and they do not claim G-05/G-06/G-P1A/G-P2/G-P3A/G-P3C/G-07 moved.
+- **The third stale site the repair itself found** (`business-logic-model.md:1329`, the "Counts unchanged... G-09 remains unsigned" line inside the thirteenth-redo remediation entry) is correctly annotated, dated 2026-08-29, and honestly labelled as a site missed by both the 2026-08-28 annotation pass and the iteration-1 reviewer's own enumeration.
+- **The line the repair left unannotated at 1345 is not the file's final live word on the subject.** Body-only (non-`## Review`-section) occurrences of "G-09 remains unsigned" in this file, in document order, are 844 (annotated) → 1329 (annotated) → 1345 (unannotated) → 2127 (annotated, inside the "Remediation — governance ruling ... 2026-08-28" section immediately above the file's own 2026-08-29 receipt). The occurrence at 1972 sits inside the "## Review — 2026-08-26 fourteenth-redo confirming pass" heading span and is out of scope per the dispatch's own rule against treating Review-section content as live. Because the file's last live statement (2127) is correctly fixed, a reader reading the whole document to its end is not left with an uncorrected final claim — unlike the pattern the iteration-1 Critical finding described. This is why finding 1 above is rated Major rather than Critical: the miss is real and falsifies the repair's stated scope claim, but no artifact-embedded receipt certifies it as swept, and no reader is left with a false "gate is unsigned" impression at the point where the file's own narrative last speaks on the topic.
+- **Obligation-4 (FR-P1-04-18) checkability is now consistent across all three `produces[]` artifacts.** `business-rules.md` R-60 (the authoritative source, lines 622-654) states "a partial grep-class control ... plus a reporting-discipline rule. Not fully checkable, and said so." `business-logic-model.md` W-7 (lines 540, 551-560, 786) and `domain-entities.md` § 6 and its Open bullet (349-352, 510) now state the identical reading — a partial grep-class control (no fitting/tuning/optimiser/parameter-search call in `gim.py`, plus the report's own no-tuning statement citing the overlap audit) covering two of three limbs, with the third (tuning done outside `gim.py` and pasted in as a constant) named as an uncovered reporting-discipline residual. Each of the five corrected sites preserves the superseded pre-2026-08-23 wording inline, labelled as superseded, dated 2026-08-29, and attributed to adversarial finding 2. No remaining live "no code check"/"uncheckable" statement was found describing the obligation itself in either file.
+- **The four review-history mentions deliberately left unannotated** (`business-logic-model.md` around 1252, 1469, 1678-1679, 1897) are dated "carried unchanged from [pass]" changelog-style list items inside historical remediation/residual sections, not restatements of the rule itself — the rule's actual definition lives only at the five corrected sites. Leaving these as historical record, consistent with how this file already treats its other superseded claims (e.g. the D-25/D-26 residual bullets nearby), was the right call; rewriting a chronological log of what was disclosed at each past pass to read the corrected present-tense fact would misrepresent the log's own purpose.
+- **No overclaim found in any D-31 annotation.** Every instance states only that module creation is authorised and that D-31 records the gate's own TE §18.3 preconditions as unmet (zero-TBD preflight never ran, `configs/` absent, the ten critical tests unexecuted in this environment, `aws_ai_dlc_preflight_report` absent). None claims a scientific value is now fillable.
+- **No undischarged item claimed discharged.** TA-15, WS-18, TA-18, `aws_ai_dlc_preflight_report`, `configs/`, and the §18.3 zero-TBD preflight are still stated as outstanding everywhere they are mentioned.
+- **IRI/GIM containment, the import boundary, driver lags, F10.7's trailing-mean property, Dst's diagnostic-only restriction, and TC-09's carry-forward bound** are all unchanged by this repair pass and were not touched by any of the edits reviewed.
+- **No adjacent breakage.** The repaired sentences at `business-rules.md:1014-1016`, `domain-entities.md:583-585`, and `business-logic-model.md:1329` render as valid Markdown (the doubled `**...**` nesting is pre-existing to this artifact's established annotation style at every other fixed site, not introduced by this repair) and do not disturb the surrounding blockquote structure.
+
+### Validation Tool Results
+
+No stage-listed validation tooling was available for this stage/scope; all checks in this pass were performed by direct `grep`-derived enumeration, printed above, cross-checked file-by-file against the shared inception contracts named in the dispatch. No tool output to report.
+
+### Summary
+
+Both iteration-1 findings are correctly repaired: the two missed Critical-finding annotation sites are fixed and honestly labelled, and obligation-4's checkability is now stated identically across all three `produces[]` artifacts, each corrected site preserving its superseded wording inline. A programmatic sweep for iteration 2 surfaced one further live, unannotated `**G-09 remains unsigned.**` occurrence the repair's own completeness claim missed (`business-logic-model.md:1345-1346`) — rated Major, not Critical, because it is not the file's last live word on the subject and no artifact-embedded receipt certifies it as swept. With one Major and zero Critical findings, this does not cross the NOT-READY threshold.
+
+READY

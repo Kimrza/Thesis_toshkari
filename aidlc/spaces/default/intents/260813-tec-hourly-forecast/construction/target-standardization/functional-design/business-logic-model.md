@@ -625,3 +625,130 @@ READY
 > **Derived counts, re-checked after the edit and unchanged:** **9** workflows (`W-1`…`W-9`),
 > **10** rules (`R-64`…`R-73`), **9** numbered entity sections, **6** requirements with
 > **1** (`FR-P1-03-5`) carrying no acceptance row.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `target-standardization`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-29T18:30:37Z
+**Iteration:** 1 (adversarial, this dispatch)
+
+### Scope of this pass
+
+Full read of all three `produces[]` artifacts (`business-logic-model.md`, `business-rules.md`,
+`domain-entities.md`). One carved-out spot-check into
+`construction/regimes-diagnostics-reporting/functional-design/domain-entities.md`, permitted
+under the read-scope rule because this unit's own text explicitly names that file and section
+(`§ 2`) as the destination of a closed cross-unit dependency (Recommendation 18 limb (3)). No
+other sibling content was read. Did not independently re-verify `governance-guards` R-20/R-23
+or `inventory-and-registry` R-49 by re-reading those files — the prior iteration-1/2 passes on
+this same content (preserved above, 2026-08-23) already did that verification directly and
+nothing in this unit's text of those citations has changed since; I re-confirmed only that the
+citation text is unchanged. Did not read `functional-design-questions.md` in full — sampled the
+Recommendation 18 closure and the Consolidated Summary Confirmation only.
+
+### Hunt 1 — sweep completeness ("six sites swept")
+
+Verified programmatically. The Recommendation 18 remediation touches exactly two
+representations per artifact: the stated-gap box inside W-5 / R-69 / § 8, and the matching
+`## Assumptions & Open Questions` bullet. Grepping all three artifacts for `no destination`
+returns exactly the same two hits per file, and all six carry the identical `⚠ As-found, and
+correct when written — SUPERSEDED 2026-08-28 on the resume pass` annotation with the same
+closure text (the sibling's `domain-entities.md § 2` and `business-rules.md R-126 addition 4`).
+No stale, unmarked "no destination" claim survives in any of the three artifacts. The "six
+sites" figure in the questions file's Consolidated Summary Confirmation is accurate for this
+unit's own artifacts.
+
+### Hunt 2 — Recommendation 18 limb (3) closure claim
+
+This unit claims a cross-unit dependency closed because `regimes-diagnostics-reporting` wrote
+two rows (`NFR-TDEF-01`, `FR-P1-03-4`) into its claims-checklist. The claim is stated with
+correct epistemic scope throughout — every occurrence explicitly labels this a **closed
+dependency, not a discharged obligation** ("those artifacts carry no review receipt yet"),
+which is the right level of claim for a unit that may not itself verify a sibling's review
+status. Spot-checking the single named sibling file directly: both rows exist
+(`regimes-diagnostics-reporting/functional-design/domain-entities.md` lines 255–284), each
+correctly scoped (`NFR-TDEF-01` as the cross-phase target-lineage row, distinct from and not
+collapsed into the TEC-06 comparison-geometry row; `FR-P1-03-4` as the notebook-caption row with
+`human_residue` recorded), and — critically for the flagged risk — the sibling's row explicitly
+states it **asserts presence** of a sentence **emitted by `target-standardization`'s
+target-writing path** ("Emitted on the target-writing path by `target-standardization` (Rec 18
+limb (1), applied there 2026-08-28); presence asserted here"). Checking this unit's own R-69
+(business-rules.md) and § 8 (domain-entities.md) confirms that emission obligation is in fact
+present here: limb 3 / the lineage-statement row states the grid-cell-versus-IPP statement is
+emitted by the target-writing path, beside the label, with its own negative control ("Write a
+target artifact without the grid-cell-versus-IPP lineage statement → fails, because the writing
+path emits it"). The sibling's presence-check therefore checks a sentence this unit does in fact
+commit to emit — the "fails closed on a sentence nobody writes" risk flagged in the dispatch
+brief does not materialize; the two artifacts are consistent with each other.
+
+### Hunt 3/4 — G-09 annotation and gate-discharge claims
+
+D-31's disclosure block (TE §18.3 preconditions UNMET: no `configs/`, no Python interpreter
+installed, ten critical tests unexecuted, `aws_ai_dlc_preflight_report` does not exist) is
+repeated verbatim at the top of all three artifacts and is not softened anywhere. Checked every
+other place a reader might infer a broader discharge: W-9 / § "Barred until G-09 is signed"
+explicitly states "No scientific value becomes fillable"; TA-15, WS-18, TA-18 are never claimed
+discharged (searched — no occurrence of any of those IDs paired with "PASS", "discharged",
+"complete", or similar); the closing 2026-08-29 receipt explicitly disclaims discharging TA-15,
+WS-18, TA-18 or creating `aws_ai_dlc_preflight_report`. BLK-05's two open limbs (test
+implementation, execution evidence) are stated PENDING consistently in all three files with no
+optimistic drift. No overclaim found.
+
+### Hunt 5 — leakage / fold-boundary construction
+
+This unit's only fitted statistics are D-19's four support thresholds, explicitly measured from
+"January–November distributions, December excluded by construction" (R-68 / § 3), and D-16's
+median aggregation, which is a fixed per-row statistic (not a fold-conditioned fit) applied
+identically regardless of partition. No standardization/scaling transform is owned by this unit
+— NFR-LEAK-01's train-only-fit obligation belongs to feature/model units, not target definition.
+No leak constructed here.
+
+### Cross-checks performed
+
+- Re-derived and confirmed: 9 `## W-` headings in `business-logic-model.md`, 10 `## R-` headings
+  in `business-rules.md`, 9 numbered `## <n>.` entity sections in `domain-entities.md` — all
+  match every count asserted in the text and in the 2026-08-28 remediation boxes.
+- The Phase 1 target label ("location-sampled gridded VTEC," never "receiver-specific
+  station-observed VTEC") is stated consistently in all three files and in every place the
+  target is described; the two mismatch disclosures (comparison-geometry vs. cross-phase
+  lineage) are kept distinct throughout, with no site re-merging them post-2026-08-28.
+- No claim of numerical equivalence between Phase 1 and Phase 2 targets found anywhere;
+  `target_definition_id` and the lineage statement are both stamped/emitted per R-70/R-69.
+
+### Findings
+
+None survived as defects. This pass found no Critical or Major issue: the sweep is complete for
+the two representations this unit's own text changed, the cross-unit closure claim is
+appropriately scoped and verifies correctly against the single named sibling file, the G-09
+disclosure is not overclaimed anywhere, and no leakage risk was constructed by this unit's
+content.
+
+**SUGGESTION (non-blocking):** W-9's list of not-yet-existing files omits `configs/data.yaml`'s
+QC-operations enumeration as a named artifact still to be created, even though the "documented
+QC" gap (W-2/R-64/§4) is the single largest open design item carried to the gate. Naming it
+explicitly alongside the four listed non-existent files would make the open-item inventory
+self-contained in one place rather than requiring a reader to cross-reference W-2 separately.
+Does not block READY.
+
+### Coverage limits, stated
+
+Did not read `functional-design-questions.md` end-to-end (sampled only the Rec-18 closure and
+the final confirmation). Did not re-verify `governance-guards` R-20/R-23 or
+`inventory-and-registry` R-49/R-45 directly in this pass — relied on the prior iteration's
+direct verification (preserved above) plus confirming the citation text is byte-identical since.
+Did not check `evaluation-and-comparison` R-110 limb 3 (out of read scope; not the unit named as
+the carve-out target for this pass — the carve-out used was `regimes-diagnostics-reporting`).
+
+READY

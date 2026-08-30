@@ -1761,6 +1761,21 @@ enforcement rides §18.3's gate-test list and TA-11 rather than a row of their o
 - **OPEN — the `dataset_version` hash-to-label encoding.** *(Added 2026-08-25 on adversarial reviewer finding M-4, which was Major: this decision was stated as unspecified in all three artifacts while appearing as an open item in none of them, and the Q&A simultaneously asserted "Nothing carried to the stage gate as an open item.")* Q6=D′ requires `dataset_version` to be **derived from the release `content_hash`** and human-readable, and **no approved artifact specifies the encoding**. Per TE §18.3 stage 3.5 must **stop and report** rather than choose one. **This blocks concrete work**, which is why it belongs here rather than in a narrative: `dataset_version` is a §13.3 manifest field, W-7 step 5 must produce it, and `src/data/release.py` plus the §18.3-critical `tests/test_release_hashes.py` cannot be completed without it. **The encoding also carries the never-reuse obligation** below. Resolution is a freeze-gate decision, not an implementation choice.
 - **OPEN — injectivity of that encoding, and with it the never-reuse property.** Never-reuse is *different content → different label*. The derivation gives idempotence, not injectivity, and a human-readable label is a lossy encoding of a 256-bit hash. Whoever specifies the encoding must make it **injective over the release population in scope**, or state and have accepted its collision bound. Until then `dataset_version` carries **correspondence and determinism guarantees only**, and nothing this unit produces may claim labels are never reused.
 
+  > ⛔ **SUPERSEDED 2026-08-29 — D-29 RULED THE ENCODING ON 2026-08-28. The heading and body below
+  > are the dated record of the pre-D-29 state, preserved, not the current one.** *(Marked on
+  > adversarial finding 1 of the re-confirmation pass: this box and the OPEN injectivity bullet
+  > immediately above it still asserted the encoding unruled while `R-12` — in this same file —
+  > already carried D-29's ruling. The `project.md` "sweep every representation of a corrected
+  > fact" defect class.)* **D-29 adopts the board's option 2**: `dataset_version` = the **first 12
+  > hex characters of `content_hash`**, with a **verify-on-write** uniqueness check. **Injectivity
+  > is thereby established in substance and `verify_release` is discharged**, so the OPEN
+  > injectivity bullet above and the never-reuse obligation it carries are **CLOSED as to the
+  > encoding**. What is **NOT** closed, and is now its own item: **where the existing release
+  > population that verify-on-write reads back actually lives** — the ledger that would have
+  > answered it was declined at Amendment C and `ReleaseLedgerEntry` withdrawn with it. That
+  > remains an **owner decision**, and per TE §18.3 stage 3.5 must stop and report rather than
+  > choose an enumeration surface.
+  >
   > **✳ THE BOARD'S RECOMMENDATION ON THE ENCODING, RECORDED 2026-08-28 — AND STILL NOT RULED.**
   >
   > *(Added per `GOV-2026-08-28-FD-01` **Recommendation 42**. **The two OPEN items above are left
@@ -2201,3 +2216,13 @@ no scientific value is decided here.
 > **Re-saved unchanged 2026-08-26 under the fourteenth-redo re-confirmation receipt** (redo taken
 > for `external-products`; floor reset mechanical). **No content of this unit changed.**
 > **G-09 remains unsigned. ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged.**
+
+---
+
+> **Re-confirmation receipt, 2026-08-29.** The 2026-08-27T21:49:36Z REDO jump reset every
+> unit's receipt floor. This unit's content had already changed after that floor — the G-09
+> pass edited `business-logic-model.md` at 2026-08-27T22:19 (D-29 through D-32; G-09 signed
+> under D-31 with its §18.3 preconditions disclosed unmet) — so the owner re-confirmed the
+> unchanged post-G-09-pass content via the Consolidated Summary Confirmation at the foot of
+> `functional-design-questions.md`, receipted `2026-08-29`. No line above this marker was
+> touched by this pass.

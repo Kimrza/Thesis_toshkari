@@ -582,3 +582,14 @@ so the *claim* is corrected, not the count.
 - **Open — BLK-03 ↓, BLK-04 ↓, BLK-08 ↓, BLK-09 ↓ are exit conditions on this stage.** Nothing in this file closes any of them; **no implementation may proceed while any stands**.
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. These shapes are design only: no module, manifest, receipt, gate result, evidence emitter, test module or `tests/fixtures/` directory is created. **TE §18.3's stop-and-report rule binds** while any P0 decision is unresolved.
 - **None** of the above decides a scientific value, and **no measured number appears in any of these three artifacts**; the enumerations encoded here — §15.2's twelve areas, §15.4's twenty/nineteen outputs, §13.7's five exact classes, §13.1's eight lock items, FR-WS-4's thirteen WS rows, R-80's six partition ids, **§13.2's seven Phase 1 stage-script invocations against its Phase 2 segment's two exclusive scripts, and the nine *distinct* scripts §12 counts across both** — are frozen upstream and merely carried.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `fixtures-and-reproducibility`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.

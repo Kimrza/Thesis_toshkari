@@ -956,3 +956,14 @@ count.
 - **Open — the four inherited blockers are EXIT conditions on this stage.** **BLK-03 ↓, BLK-04 ↓, BLK-08 ↓, BLK-09 ↓** remain open; nothing in this file closes any of them; this unit **may not complete or exit 3.1** while any stands, and **no implementation may proceed** while they stand.
 - **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No rule here authorises creating `scripts/run_walking_skeleton.py`, either `fixture_manifest.yaml`, `tests/test_clean_run.py`, any receipt or evidence emitter, or a `tests/fixtures/` directory. Workspace inspection 2026-08-28: `tests/` holds three modules, none this unit's; no `tests/fixtures/` directory; `src/`, `configs/` and `pyproject.toml` absent. **TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved** — and where a required value is unfrozen, this design stops and reports rather than choosing a default.
 - **None** of the above decides a scientific value. Window, station, month, seeds, partitions, folds and grids are frozen elsewhere (D-11, D-20, D-14, `seeds.yaml`, R-80) or **measured under §15.1 and frozen by the Q-31 authority**; **nothing in these three artifacts states a measured number**, and everything underdetermined is expressly routed to the gate.
+
+---
+
+> **Re-confirmation receipt, 2026-08-29 — `fixtures-and-reproducibility`.** The 2026-08-27T21:49:36Z REDO jump reset every unit's
+> receipt floor, and this unit's content had already changed after that floor under the 2026-08-28
+> post-execution pass (D-29 through D-32; **G-09 signed under D-31 with its TE §18.3 preconditions
+> disclosed unmet**). The owner re-confirmed that post-execution content via the Consolidated
+> Summary Confirmation at the foot of `functional-design-questions.md`, receipted `2026-08-29`.
+> **No line above this marker was touched by this pass**, no count was re-derived, and nothing here
+> discharges TA-15, WS-18 or TA-18, creates `aws_ai_dlc_preflight_report`, or alters the fact that
+> stage 3.1 remains **FAIL** with no board having passed it.
