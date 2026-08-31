@@ -842,3 +842,55 @@ directly this pass — scope-blocked per the dispatch brief for this specific hu
 consistent, honestly-scoped claim language.
 
 READY
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T17:15:46Z
+**Iteration:** 1 (confirming pass on unchanged content, per dispatch)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | — (confirmed, no defect) | business-logic-model.md l.56-60, 281-282, 370, 618, 723-793; business-rules.md l.281-282, 309-311, 360-398, 603; domain-entities.md l.310-390, 507-520 | Independently re-derived the target-identity sweep rather than trusting the artifact's own "Hunt 2" box: grepped all three artifacts for `receiver-specific` and `numerical equivalence`/`equivalent` independently. Every one of the ~20 live hits across the three files is a prohibition or a correctly-labelled positive statement (`location-sampled gridded VTEC`, "never receiver-specific station-observed VTEC," "No numerical equivalence may be claimed"). No live site slips into station-observed language or implies Phase 1≈Phase 2 equivalence. This confirms, rather than merely repeats, the prior finding. | None — hold this pattern on any future edit. |
+| 2 | — (confirmed, no defect) | business-rules.md R-68 (l.244-260); business-logic-model.md Hunt 5 (l.709-735, 813-819) | Adversarial leakage hunt: verified R-68's four support thresholds are frozen (D-19) from **measured January–November distributions with December excluded by construction** — a real, printed derivation (e.g. `valid_observation_count >= 3` keeps 95.24% of 23,709 Jan–Nov cell-hours), not an assertion. This unit owns target-definition/support-threshold rules, not a train/test scaling fit; NFR-LEAK-01's train-only-fit obligation is correctly disclaimed as belonging to feature/model units rather than silently assumed satisfied. No path found by which December informs a threshold, transform, or fitted parameter through this unit's rules. | None. |
+| 3 | — (confirmed, no defect) | business-logic-model.md l.5-27, 463, 470, 520-524, 574, 616-644, 698-699; business-rules.md l.14-27, 268, 552 | Checked against the dispatch's do-not-report list: the artifact correctly and repeatedly discloses G-09 as signed (D-31) **with its TE §18.3 preconditions UNMET** (preflight never ran, critical tests unexecuted, `aws_ai_dlc_preflight_report` does not exist), states no scientific value becomes fillable, and states no module-creation authorisation follows. TA-15/WS-18/TA-18 are not claimed discharged anywhere found. No overclaim of TBD-fill or freeze-gate discharge detected. | None. |
+
+No Critical or Major defects found on independent verification. Coverage limits: within the ~8-call budget, verification concentrated on the three Focus areas (target identity, overclaim, leakage/December-blindness) via targeted grep-and-read rather than a line-by-line reread of all 2,007 lines across the three artifacts; the pre-existing correction apparatus (Hunt 2, Hunt 5, D-19/D-31 disclosure boxes) was independently re-derived rather than trusted, and held up under that re-derivation.
+
+### Validation Tool Results
+
+No stage-listed validation tooling was specified for re-run beyond targeted grep verification described above; no tool was invoked.
+
+### Summary
+
+Re-derived, rather than trusted, the three highest-risk claims in this unit — target-identity discipline, the "no fillable TBD" / G-09-precondition disclosure, and the December-blind leakage boundary — and found each holds up against the primary source text, not merely against the artifact's own prior review boxes. No new defect surfaced on this confirming pass.
+
+READY
+
+## Review — 2026-08-31 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-31T00:00:00Z
+**Iteration:** 1 of 2 (fresh budget after human gate rejection; this unit's artifacts unchanged since last READY)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | — (confirmed, no defect) | business-logic-model.md l.56-60, 281-282, 370, 618, 723-793; business-rules.md l.281-282, 309-311, 360-398, 603; domain-entities.md l.310-390, 507-520 | Re-ran an independent grep across all three artifacts for the target-identity/equivalence claim family (`station-observed`, `receiver-specific`, `numerical equivalence`, `equivalent target`, `target_definition_id`, `gridded VTEC`, `location-sampled`). Every live hit (~30 across the three files) either states the mandated label ("location-sampled gridded VTEC") or is a prohibition ("never receiver-specific station-observed VTEC," "NEVER claim numerical equivalence…", "No numerical equivalence may be claimed…"). No hit asserts or implies Phase 1 is receiver-specific station-observed VTEC, and none implies Phase 1≈Phase 2 numerical equivalence. Consistent across `business-logic-model.md`, `business-rules.md`, `domain-entities.md`, and the questions file. | None. |
+| 2 | — (confirmed, no defect) | business-rules.md R-68 (l.244-268); business-logic-model.md l.5-27, 150-152, 463, 470, 520-524, 709-735, 813-819; functional-design-questions.md l.251-277, 419, 440, 674 | Re-checked the leakage/December-blindness and overclaim hunt: R-68's four support thresholds are frozen (D-19) from measured January-November distributions, explicitly "December excluded by construction" — a printed derivation, not an assertion. This unit's own NFR-LEAK-01 train-only-fit disclaimer stands (this unit does no full-dataset scaling/standardization fit). The zero-TBD preflight, `aws_ai_dlc_preflight_report`, `configs/`, TA-15/WS-18/TA-18, and G-09/D-31's unmet §18.3 preconditions are all still stated as undischarged, consistently, at l.14, 261, 277, 419, 674 (functional-design-questions.md) and the equivalent business-logic-model.md/business-rules.md boxes — none reads as discharged. No path found by which December informs a threshold/transform/fitted parameter, no interpolated/filled gap, and no directory-name-derived fold membership in this unit's rules. | None. |
+| 3 | — (confirmed, no defect) | business-logic-model.md l.527-871 (prior Review entries) | Verified no equivalent-dated 2026-08-31 entry existed before this one (last prior entry was 2026-08-30); this is a genuinely new confirming entry, not a duplicate. | None. |
+
+### Validation Tool Results
+
+No stage-listed validation tooling specified; verification was targeted grep-and-read against the required Focus areas, within the 6-call budget.
+
+### Summary
+
+Independent re-verification of the three Focus areas (target identity/equivalence, overclaim/TBD-discharge, leakage/December-blindness) found nothing that contradicts the prior READY verdicts. This is a confirming pass on unchanged artifacts: no new defect surfaced.
+
+READY

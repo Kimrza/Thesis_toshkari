@@ -1000,3 +1000,125 @@ absence, RF-importance non-authority, longitude, GPU, seed-selection timing) or 
 surface this unit's artifacts do not carry.
 
 READY
+
+## Review — 2026-08-30 confirming pass (adversarial, iteration 1)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T17:21:35Z
+**Iteration:** 1
+
+### Scope and posture
+
+Dispatched as a confirming pass — this unit's artifacts are unchanged since the last READY
+verdict (the "2026-08-29 adversarial pass" section immediately above). Per instruction, findings
+were re-derived independently rather than trusted from that prior section, then checked against
+it; no discrepancy was found. Read scope: this unit's three PRIMARY files plus the named
+consumed-contract paths — no sibling `construction/<other-unit>/` content was opened.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| — | — | — | No Critical or Major defect found on independent re-derivation. | — |
+
+### Focus 1 — declaration-site correction, independently re-verified
+
+Ran `grep -n "declared in \`src/models/\`"` across all three primary artifacts myself (not copied
+from the prior pass): **4 hits total** — `business-rules.md` L265 (R-92's boxed correction) and
+L816 (§ Assumptions closure bullet), `domain-entities.md` L537 (§ 12's boxed correction) and L666
+(§ Assumptions closure bullet). All four carry the struck-through superseded text plus a live
+`⚠ RULED 2026-08-28 … declared in \`src/data/config.py\`` annotation (L816/L666 additionally
+dated `annotation added 2026-08-30 on adversarial finding 1, Major`), and all four state this unit
+remains the exception's semantic owner but not its declaration site. No unqualified assertion of
+`src/models/` as the declaration site survives anywhere in the three files. `business-logic-model.md`
+itself (this PRIMARY artifact) never asserted a declaration site for `PartitionError` at all — its
+own `PartitionError`/`src/models/` references (L59, L540, W-1's match-function location) name where
+the match function lives, not where the exception is declared — so it carried nothing to correct
+and conflates neither ownership with declaration.
+
+### Focus 2 — difficulty controls / honesty rule, independently re-verified
+
+`business-logic-model.md` L362–370 states plainly: the primary results table is owned by
+`regimes-diagnostics-reporting`, not this unit; the three mandatory difficulty controls
+(persistence, 24-hour seasonal persistence, training-partition-only climatology) are *produced*
+here and *co-reported there*; the binding honesty rule (a baseline beating the LSTM must appear in
+the primary table and the abstract-level conclusion) is likewise the reporting unit's to honour.
+Grepped all three artifacts for "appendix" — zero hits, so no relegation path is constructible from
+this unit's own text. This is a correct unit-boundary handoff, not a weakening: this unit cannot
+itself violate a rule that governs an artifact it does not own, and it does not claim to discharge
+that obligation.
+
+### Focus 3 — adversarial hunt, independently re-verified
+
+- **Seed selection (a):** R-93 (business-rules.md) states the seed is never selected on validation
+  performance nor after December is seen; `three_seed_mean` takes `expected_seeds` from
+  `ConfigSnapshot.seeds` (never inlined), matching D-122. No contradicting path found.
+- **December informing tuning (b):** W-5 (L271–284) restricts tuning to January–November,
+  ties the trigger to December being *seen* rather than the lock being opened, and routes the
+  residual (a December figure carried only in a human's head) through the audit-access
+  precondition rather than eliminating it — correctly recorded as still-open (L552), not
+  silently closed.
+- **Grid range after December (c):** W-6 (L291–307) states the grid is frozen once in
+  `experiment.yaml`, hash-compared, with an explicit "no grid range changes after December is
+  seen; no second 2022 test period selected after results are observed" statement.
+- **Ablations invented after results seen (d):** W-7 (L309–327) names five predeclared ablations
+  (four Phase-1-reachable), cites `domain-entities.md` § 8 and R-97, states `ABL-DIFF`
+  inverse-transforms to absolute TECU before any metric and `ABL-HIST48` runs only after the
+  primary configuration is frozen — matching the mandated rule verbatim.
+- **IRI reaching training/inference (e):** grepped for `iri_` and `IRI` — the only hits are the
+  import-boundary rule (business-rules.md L570–576) barring import of `src/external/iri.py` from
+  `src/models`, no data-flow path admitting an `iri_*` field.
+- **GRU / residual module / SSN (f):** business-rules.md L570–576 states "Residual and GRU modules
+  are absent from the tree" as a rule with a stated negative control (TA-12 grep evidence); no
+  module of either kind is named anywhere in the three artifacts; SSN does not appear as a feature.
+- **PyTorch (g):** same block states "PyTorch is prohibited (TE §8.3)" with an explicit negative
+  control ("A PyTorch import → fails"). No import referenced.
+
+### Coverage limits
+
+This is a re-derivation of the focus areas named in the dispatch brief plus a targeted grep sweep,
+not a full re-read of the artifacts' eight-plus prior review iterations or of `component-dependency.md`
+(out of the passed contract set). The G-09/BLK-03/undischarged-gate framing (§18.3 preflight,
+`aws_ai_dlc_preflight_report`, TA-15/WS-18/TA-18) was checked for presence, not re-litigated —
+`business-rules.md` L814 already states G-09 is signed (D-31) while the preflight never ran, the
+critical tests are unexecuted, and `aws_ai_dlc_preflight_report` does not exist, consistent with
+the dispatch brief's "never report as newly discharged" instruction; nothing in this unit's text
+claims otherwise.
+
+### Summary
+
+Independent re-derivation confirms the prior pass's conclusion: the `PartitionError`
+declaration-site correction is fully swept across all four live sites in the two sibling files,
+and this PRIMARY artifact never carried the stale claim. The difficulty-control/honesty-rule
+handoff is correctly scoped to this unit's boundary. The seven-item adversarial hunt (seed
+selection, December leakage, grid freeze, ablation predeclaration, IRI denial, GRU/residual/SSN
+absence, PyTorch prohibition) surfaced no live violation. No new Critical or Major finding.
+
+READY
+
+## Review — 2026-08-31 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-31T00:00:00Z
+**Iteration:** 1 (adversarial, fresh budget after gate rejection reset the review floor; artifacts unchanged since last READY)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| — | — | — | No new finding. Independent verification below found no defect. | — |
+
+### Independent verification (this pass)
+
+1. **Declaration-site correction (Focus 1).** Grepped `src/models`, `declaration site`, `src/data/config.py` across all three artifacts. `business-rules.md` L47 and L216, `domain-entities.md` L48/L126, and `business-logic-model.md` §src/models references all cite `component-methods.md § src/models` for **quoted signatures** (an inception boundary contract), never as the `PartitionError` declaration site. `business-logic-model.md` L947–L951 and L1031–L1035 confirm the `⚠ RULED 2026-08-28 … declared in src/data/config.py` annotation is present at the relevant sites in the two sibling files, that this PRIMARY artifact itself never asserted a declaration site for `PartitionError` (nothing to correct here), and that no unqualified `src/models/`-as-declaration-site claim survives anywhere in the three files. Ownership (`business-rules.md` R-92, unchanged) is kept distinct from declaration site throughout — no conflation found.
+2. **Difficulty controls / honesty rule (Focus 2).** `business-logic-model.md` L362–370 states plainly and unhedged: the primary results table is owned by `regimes-diagnostics-reporting`; this unit **produces** the three controls (persistence M-01, 24-hour seasonal persistence M-02, training-partition-only climatology M-03 — confirmed in `domain-entities.md` L64–65) and they are **co-reported there**, never appendix-relegated by this unit's design. Grep for "appendix" across all three artifacts returns zero hits (confirmed independently, matching the prior pass's L1047 claim). The baseline-beats-LSTM disclosure obligation is likewise explicitly handed to the reporting unit (L365–370), not assumed silently — the handoff is stated, not implicit.
+3. **Adversarial hunt (Focus 3, a–i).** (a) seed: grids/seeds restated from upstream freeze, never chosen here (`functional-design-questions.md` L280, L330); no validation- or December-time seed-selection path found. (b) December leakage: `business-rules.md` L417 and `business-logic-model.md` L306 state grid ranges do not change after December is seen, mechanised by hash comparison. (c) grid freeze: same citation, hash-gated against `experiment.yaml`/G-05. (d) ablations: `business-rules.md` L477–494 and `domain-entities.md` L325–327 predeclare the 5-run registry (`ABL-NODOY/DIFF/NOSW/HIST48/ZENITH`, `ZENITH` deferred to Phase 2), with `ABL-DIFF` inverse-transforming before any metric and `ABL-HIST48` gated to run only after the primary-configuration freeze — a negative control at L493–494 fails a post-hoc-registered ablation. (e) IRI: `business-rules.md` L570–577 bars `src/external/iri.py`/`gim.py` imports with a static import-boundary check and negative control. (f) GRU/residual/SSN: `domain-entities.md` L70–77 and `business-rules.md` L570–576 state the M-01…M-06 set is closed, residual/GRU modules absent by design with a grep-evidenced negative control (TA-12), SSN absent as a feature. (g) PyTorch: same block, explicit prohibition with an import negative control. (h) GPU: `business-logic-model.md` L972 — zero occurrences, no result path conditioned on GPU. (i) Phase 1 weights into Phase 2 / result-motivated Phase 2 change: no carry-forward path or motivation clause found in any of the three artifacts.
+4. **Undischarged items correctly not claimed discharged.** No occurrence of TA-15, WS-18, TA-18, `aws_ai_dlc_preflight_report`, or a completed §18.3 preflight being asserted as satisfied; G-09/stage-3.1 status not overstated anywhere in the swept text.
+
+### Summary
+
+A fresh, independently-derived sweep (not a re-read of the prior reviewer's conclusions) reaches the same result: the declaration-site correction is fully and consistently applied, the difficulty-control/honesty-rule obligation is correctly scoped and handed off rather than assumed, and all nine adversarial-hunt vectors are closed by an explicit rule with a stated negative control. No Critical or Major finding. Artifacts unchanged since the last READY verdict — this is a corroborating, independent confirmation, not a rubber stamp.
+
+READY

@@ -533,6 +533,35 @@ Both corrected facts named in the dispatch — the `foundation` R-01 fifteen-exc
 
 READY
 
+## Review — 2026-08-30 confirming pass (iteration 1, post-gate-rejection reset)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T17:24:43Z
+**Iteration:** 1 of 2 (fresh floor after the human gate rejection; content unchanged since the last READY at 2026-08-30T11:43:18Z above)
+
+### Findings
+
+No Critical or Major findings survive independent re-derivation this pass. The two Minor items already recorded in the 2026-08-30T11:43:18Z entry above stand unchanged (cosmetic staleness in one Assumptions bullet's phrasing, a wording variance in the coverage-table summary); neither blocks READY and neither is re-litigated here.
+
+### Independent re-verification (tight budget: ~7 tool calls, targeted)
+
+**Fact A — `foundation` R-01 = fifteen.** `grep -in fourteen` over all three of this unit's artifacts, filtered for anything NOT inside a `~~struck-through~~` preserved-supersession box: zero live hits. The one line that survived the filter mechanically (`business-rules.md:385`, "R-01 still reads … fourteen") is bounded top and bottom by `~~` markers at lines 384 and 390 — read in context it is the preserved historical text of a since-corrected footnote, immediately followed at 375-382 by the live, unstruck statement that R-01 "has been amended and now reads FIFTEEN." `domain-entities.md` and `business-rules.md`'s own governance-dependency bullets both carry `⚠ DISCHARGED, swept 2026-08-30` against the foundation-R-01 item. No live representation in any of the three files asserts fourteen as current fact.
+
+**Fact B — D-32 / FR-P1-05-7.** Grepped `FR-P1-05-7` across all three artifacts. Every live row and summary line — `business-logic-model.md:466,470-476`, `business-rules.md:602-610,945,948-965,980,983`, `domain-entities.md:383,388-390,402` — reads `Pending — row APPROVED under D-32 (2026-08-28), never run; NOT passed`, consistently. The standing prohibition against claiming coverage/satisfaction (`business-rules.md:948-953`) is correctly narrowed rather than lifted: it now states the changed ground (a row exists) while still forbidding a "passed" claim. FR-P1-05-17 is consistently left with no row in all three files. No site anywhere claims FR-P1-05-7 is covered, satisfied, verified, or passed.
+
+**Adversarial hunt (focus item 3), spot-checked against live text, not re-litigated in full given budget:** the comparison-wide mask rule (R-106/R-107, `FairnessError` on any pairwise/per-model attempt), the estimand's benchmark-minus-model / equal-station-weighting convention (R-108, FR-P1-05-7's rule statement), the vector time-block bootstrap parameters (delegated to `statistical-inference` per this unit's own scope note and consumed, not redesigned, here), IRI evaluation-time-only join, and the Phase-2-is-not-independent / no-numerical-equivalence disclosures are all present and textually consistent with the Mandated/Forbidden rules on re-read of the sections cited by the prior 2026-08-30T11:43:18Z pass (lines 440-445, 518, 520, 522, 524). No new defect found in this focus area this pass.
+
+### Coverage limits
+
+This confirming pass leaned on the prior same-day READY pass's detailed re-derivation (lines 494-535 above) for the full adversarial-hunt breadth and re-verified only the two named corrected facts end-to-end via fresh, independently-run greps plus a direct context read at the one ambiguous line (`business-rules.md:385`). It did not re-read `models-and-baselines`, `features-and-splits`, `statistical-inference`, or `regimes-diagnostics-reporting`, and made no fresh sibling-unit spot-check this pass (the prior pass's `foundation` R-01 spot-check is treated as still valid given the content is confirmed unchanged since that pass). No artifact edits were made beyond appending this review.
+
+### Summary
+
+Content unchanged since the last READY verdict; both focus facts (foundation R-01 = fifteen, D-32's approval of FR-P1-05-7 as `Pending`/not-passed) remain fully and consistently swept across all live representations in all three artifacts on independent re-derivation. No Critical or Major finding.
+
+READY
+
 ## Review — 2026-08-27 first adversarial pass
 
 **Reviewer:** aidlc-architecture-reviewer-agent
@@ -649,3 +678,29 @@ No stage-declared validation tooling was listed for this dispatch. Verification 
 Two Critical, cross-representation defects survive in this unit's artifact set. First, the "`foundation` R-01 still reads fourteen exceptions" claim was corrected ("SWEPT") at three sites but left standing, uncorrected and self-contradicting the swept sites, at five other sites — including two passages that are themselves labelled as the artifact's own correction box for the same rule. Second, all three artifacts still assert FR-P1-05-7 has no acceptance row, while the dispatch brief records that D-32 approved one; the 2026-08-29 re-confirmation receipt's "no line above this marker was touched" self-certifies that stale claim as current. A further Major finding is a numeric disagreement between `business-logic-model.md`'s summary (6 across 4 units) and `business-rules.md`'s detailed, more-recent derivation (7 across 5 units) of the same amendments-owed count, with `business-rules.md` itself naming 6-across-4 as superseded. The fairness, estimand, honesty-disclosure, IRI/GIM evaluation-time-only, and locked-test-discipline core of this unit is sound and well cross-referenced against the shared contracts, and BLK-08's one-sided open state is stated honestly throughout — but the sweep-completeness failures above are exactly the defect class this project's own methodology exists to catch, and they leave the artifact set internally contradictory on a matter (the exception hierarchy) and stale on a matter (acceptance-row coverage) that a `code-generation` implementer or a later gate reviewer would reasonably rely on without independently re-deriving.
 
 NOT-READY
+
+## Review — 2026-08-31 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-31T16:13:54Z
+**Iteration:** 1 of max 2 (fresh budget after human gate rejection; this unit's artifacts unchanged since the 2026-08-30 confirming-pass READY verdict)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | — | `business-logic-model.md`:290-291, `business-rules.md` R-01 reference (line 94) | Independently re-derived: `foundation` R-01 reads **fifteen** exceptions on disk (`PartitionError` promoted in, `InverseTransformError` explicitly disposed as covered by the existing "any future integrity-related exception" clause rather than a sixteenth). No live site in this unit's three artifacts asserts "fourteen." Focus item 1 confirmed clean — no finding. | None. |
+| 2 | — | `business-logic-model.md`:466,470-476; `business-rules.md`:602-612,945,948-965; `domain-entities.md`:383,388-390,402 | Independently grepped `FR-P1-05-7\|FR-P1-05-17\|Pending\|D-32` across all three artifacts. Every live coverage-table row and summary line in all three files reads `Pending — row APPROVED under D-32 (2026-08-28), never run; NOT passed`, consistently narrowing (not lifting) the standing prohibition. `FR-P1-05-17` is consistently left rowless everywhere. No site claims FR-P1-05-7 is covered/satisfied/verified/passed. Focus item 2 confirmed clean — no finding. | None. |
+| 3 | — | `business-logic-model.md`:66-74 vs `business-rules.md`:873-882 | The amendments-owed total agrees on both sides: `5 + 1 + 1 = 7 across 5 units`, with the superseded `6 across 4 units` preserved-and-struck rather than silently dropped. Matches the dispatch's stated figure. No finding. | None. |
+| 4 | — | `business-logic-model.md`:111,171-172,518,553; `business-rules.md`:558-562,571,812-815; `domain-entities.md`:207,305 | Adversarial hunt on the unit's own core (comparison-wide intersection mask/`FairnessError`; benchmark-minus-model estimand with equal-station weighting; IRI evaluation-time-only join onto the frozen mask; GIM evaluation-time-only plus overlap-audit disclosure; spatial-representativeness sentence emitted by the producing path) found no pairwise/per-model mask, no independence claim preceding the overlap audit, no numerical-equivalence claim between Phase 1/Phase 2 targets, and no post-lock threshold change. Text is consistent with the Mandated/Forbidden rules on independent spot-check. The vector time-block bootstrap's exact parameters (10,000 replicates, seed 20221201, 24h all-three-station blocks) are owned and stated by `statistical-inference`, not duplicated here — correctly scoped as delegated, not redesigned, in this unit. No finding. | None. |
+
+### Validation Tool Results
+
+No validation tooling was named for this stage/unit pass; findings are grounded in direct grep-based re-derivation of the claim (not string-literal matching) across all three PRIMARY artifacts, printed above.
+
+### Summary
+
+Independent re-verification (not a rubber-stamp) finds this unit's three functional-design artifacts unchanged since the prior 2026-08-30 confirming-pass READY verdict, and both facts named in this pass's dispatch — `foundation` R-01 = fifteen, and D-32's approval of FR-P1-05-7 as `Pending`/not-passed — remain fully and consistently swept across every live representation in all three artifacts (coverage tables, summary lines, standing-prohibition boxes, Assumptions), with no fresh contradiction introduced. The unit's fairness/estimand/honesty-disclosure/IRI-GIM-evaluation-time-only/locked-test-discipline core remains sound. Standing project-level facts outside this unit's authority — TA-15/WS-18/TA-18/`aws_ai_dlc_preflight_report`/`configs/`/§18.3 preflight undischarged, G-09 signed under D-31 with its §18.3 preconditions unmet, stage 3.1 FAIL — are unaffected by and not claimed as resolved by this unit's artifacts.
+
+READY

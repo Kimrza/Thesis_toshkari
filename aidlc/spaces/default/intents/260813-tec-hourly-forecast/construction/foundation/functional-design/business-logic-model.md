@@ -5160,3 +5160,30 @@ grep passes surfaced incidentally; that ground was covered by the prior iteratio
 and is not re-litigated here absent a reason to doubt it.
 
 READY
+
+## Review — 2026-08-30 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T18:25:40Z
+**Iteration:** 1 (fresh budget after gate rejection reset every unit's review floor; artifacts unchanged since last READY)
+
+### Independent re-derivation (not a rubber-stamp)
+
+**Focus 1 — D-29 encoding sweep.** Grepped all three artifacts for `content_hash|dataset_version|unspecified|not specified|unruled|no approved artifact|verify-on-write|D-29|read-back` across R-11, R-12, the birthday-bound paragraph, Amendment C narrative, `ReleaseManifest`'s attribute table (`domain-entities.md:432,530`), the withdrawn `ReleaseLedgerEntry` section (`domain-entities.md:585-600,1045-1051`), and `§ Assumptions` (`business-rules.md:1819-1894`). Every live (unmarked-superseded) occurrence states the encoding as **settled by D-29** — first 12 hex of `content_hash`, verify-on-write. Every occurrence still reading "unspecified"/"not specified"/"unruled" sits inside an explicit `⛔ SUPERSEDED` block preserved as dated history (e.g. `business-rules.md:1822-1832`, `domain-entities.md:1048-1050`). Conversely, no live site claims the read-back-population question is settled — all three files' D-29 banners (`business-rules.md:32-52`, `domain-entities.md:32-53`, `business-logic-model.md:32-51`) and R-12's own body (`business-rules.md:1052`) state it as the surviving §18.3 stop-and-report point. No unswept representation found.
+
+**Focus 2 — R-01 count.** `business-rules.md:171` states "**Fifteen are named in the enumeration below**" with a printed re-derivation (12 units × 48 artifacts, distinct `*Error` tokens counted, 15 named + 18 riding the any-future clause = 33 project-defined subclasses). The superseded "fourteen" reading is preserved only inside the dated `✳ AMENDED 2026-08-28` block (`business-rules.md:181-195`) as an explicit quoted supersession. Confirmed correct.
+
+**Focus 3 — TA-15 overclaim check.** Grepped for `TA-15` across all three artifacts: every hit (`business-rules.md:1141,1323,1761`; `domain-entities.md:585`) reads NOT covered / NOT discharged — `tests/test_release_hashes.py`'s name-match is explicitly distinguished from actual coverage of §13.3's manifest fields or the overwrite refusal. No overclaim found.
+
+**Adversarial hunt (overwrite, silent integrity failure, silent registry mutation, missing stamps).** R-13's directory-level overwrite refusal and R-11's identity-equals-`content_hash` are stated as untouched by the D-29 change (`business-rules.md:1137-1138`); the verify-on-write check adds a write-path refusal rather than relaxing one. No path found by which a release is overwritten, an integrity failure passes silently, a registry entry is deleted/overwritten/silently re-run, or a required stamp is dropped — none of the three artifacts' live text authorizes any of these, and R-13/NFR-AUD-01 obligations are asserted unchanged throughout.
+
+### Carried forward from the prior `## Review` above (not re-litigated, not resolved by this pass)
+
+The one standing **Major** finding in the prior entry — `services.md:304-306` and `unit-of-work.md:121` (Inception contracts, outside this unit's read scope) still assert the pre-D-29 "never-reuse is OPEN" fact with no D-29 cross-reference or owed-correction note in any of the three artifacts under review — was not independently re-verified this pass (out of read scope per the per-unit reviewer bound) and is carried forward unresolved. It does not by itself move this stage's verdict off READY per the stated review contract (a single Major finding, no Critical), but it remains an open item for the human to weigh at the gate.
+
+### Verdict rationale
+
+Zero Critical findings. One Major finding, carried forward, not newly discharged. No new defects of the recurring "corrected fact swept into some representations but not all" class were found on this independent re-derivation across all three focus areas and the adversarial hunt.
+
+READY

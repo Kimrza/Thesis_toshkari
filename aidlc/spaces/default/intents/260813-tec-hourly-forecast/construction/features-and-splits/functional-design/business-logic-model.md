@@ -2121,4 +2121,61 @@ This pass verified: the `PartitionError` declaration-site repair (own grep again
 
 The one Major finding this stage carried into iteration 2 — the `PartitionError` declaration-site ruling asserted as open in `business-rules.md` and `domain-entities.md` while already ruled in the same files — is verified repaired: both bullets now read `⛔ CLOSED — RULED 2026-08-28: src/data/config.py` with the semantic-owner/declaration-site distinction stated correctly, and no dangling markup or new inconsistency was introduced. Every other item this pass re-checked (the nine-site-sweep honest treatment, the R-01=fifteen figure, the 7-across-5 ledger, the G-09/BLK-04/TA-3x status claims, and the leakage-guard mechanics) re-verified clean. One item remains legitimately open as gate input, not as a design defect: the signed Consolidated Summary Confirmation's "nine-site sweep" line is still unedited pending the human's annotate-in-place-or-not ruling — this is correctly routed to the gate rather than fixed by an agent, per this project's own rule against editing a signed record.
 
+---
+
+### Confirming pass, 2026-08-30 — post-gate-reset (content unchanged since last READY)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T17:18:40Z
+**Iteration:** 1 of this reset (re-derived independently; prior `## Review` content above trusted as history, not as evidence)
+
+**Scope note.** This unit's artifacts are unchanged since the prior READY. Re-derived the two focus items from scratch rather than trusting the standing text, then ran a targeted adversarial sweep of the leakage-surface rules this unit owns.
+
+**Focus 1 — the "nine-site sweep" open item.** Independently re-ran `grep -no "all fourteen" business-logic-model.md business-rules.md domain-entities.md functional-design-questions.md`: **4** matches — one live, uncorrected claim at `functional-design-questions.md:918` (the signed Consolidated Summary Confirmation itself, untouched, as required) and one `SWEPT`-marked correction site in each of the three `produces[]` artifacts. **Actual sites: 3. Signed record claims: 9.** The Open item at `business-logic-model.md:1408` states this derivation correctly, states the underlying corrected fact (R-01 = fifteen, `PartitionError` promoted, `InverseTransformError` disposed) is right at all three sites, and routes exactly one ruling to the gate (annotate-in-place with owner approval, or carry the correction in the gate record alone) without touching the signed text — consistent with `governance/CHANGE_RECORD_PROCEDURE.md` and the project's `NEVER edit a human-signed record` correction. Intact.
+
+**Focus 2 — `PartitionError`'s declaration site.** `grep -n "^- \*\*Open — \`PartitionError\`"` (unstruck form) across all three artifacts: **zero** matches. The prior stale bullets in `business-rules.md:1187` and `domain-entities.md:855` both now read struck-through `~~**Open — ...**~~ ⛔ **CLOSED — RULED 2026-08-28: \`src/data/config.py\`**`, consistent with the `[assumption]` ruling boxes in all three files (`business-logic-model.md:1407`, `business-rules.md:1180`, `domain-entities.md:780/848`). No live bullet asserting this open survives.
+
+**Focus 3 — adversarial leakage hunt.** Targeted grep verification against this unit's rule bodies (`business-rules.md`) found each guard stated and enforced, with a negative control:
+- (c) F10.7 lag: R-?? at line ~402–430 asserts `f107_81_trailing` must not be centered, with an explicit negative control ("Inject a centered mean → fails").
+- (e) Carry-forward: R-77 — external drivers carry forward ≤3h then exclude the row; `vtec_lag_*` carry-forward is prohibited outright (stricter, not weaker).
+- (f) Longitude: FR-P1-04-10 constraint states raw longitude is never a predictor, enters only via `lst_sin`/`lst_cos`, with a negative control ("Introduce a raw-longitude column → raises"). Noted as an **Open** item that the underlying station registry blocking `station_lat`/`lst_sin`/`lst_cos` is unresolved (consumed from `inventory-and-registry`, not decided here) — correctly flagged as open rather than silently assumed.
+- (h) Dst: stated diagnostic/hindcast-only, never a confirmatory feature, consistent with its glossary role.
+- (b)/(d) Fold/embargo: 24-hour embargo excluded and counted, "No random or shuffled cross-validation" stated verbatim; fold/partition membership keyed to `Partition.train_start/train_end` and record timestamps, with a negative control ("Derive membership from a directory name → fails").
+- (a) Train-only transforms: this unit's contract states transforms are fit per-partition, applied only inside `build_features`, consistent with NFR-LEAK-01.
+- (g) RF importance: no mention found in this unit's rule set. Not a defect — RF importance governs feature-selection authority, which belongs to `models-and-baselines`/feature-selection units, not this unit's split/feature-construction contract; this unit's silence is scope-appropriate, not an omission of an obligation it owns.
+
+No constructible bypass of the leakage guards this unit owns was found in this pass, and no stale representation of either focus item survives.
+
+**Coverage limits.** Budget-constrained pass (~5 grep/read calls): did not re-read the full negative-control tables (R-77/R-78/R-79) end-to-end, did not re-walk the embedded historical review sections, and did not independently re-derive the 7-across-5 amendments ledger or the TA-33..36/G-09/BLK-04 status claims this pass (prior iteration's derivation of those stands unchallenged and was not contradicted by anything read here). Cross-unit checks limited to the shared inception contracts named in the dispatch; no sibling `construction/` unit was read.
+
+**Summary.** Both named focus items — the nine-site-sweep open item and the `PartitionError` declaration-site closure — are independently re-verified intact and correctly stated, with no stale representation surviving. The adversarial leakage-surface sweep of the rules this unit owns (train-only transform scope, embargo/fold, F10.7 trailing mean, carry-forward bound, longitude exclusion, Dst diagnostic-only role, fold-membership-from-timestamp) found every guard present with a negative control and no defect. Confirming READY.
+
+READY
+
+---
+
+## Review — 2026-08-31 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-31T16:09:30Z
+**Iteration:** 1 of 2 (max), fresh budget after a human gate rejection that reset every unit's review floor — this unit's artifacts are unchanged since the prior READY; independently re-derived rather than trusting the standing text above.
+
+**Scope note.** Budget-constrained (6-call) confirming pass. Re-ran the two named focus greps directly against current file contents rather than reusing the 2026-08-30 pass's printed output, then re-read the leakage-rule bodies in `business-rules.md`.
+
+**Focus 1 — the "nine-site sweep" open item.** `grep -n "nine-site|sweep|PartitionError" business-logic-model.md` (this pass) still shows the Open item at line 1408: `- **Open — \`unit-of-work.md\`... functional-design-questions.md:918`'s "nine-site sweep" line remains, verbatim, the live text of a signed record. The routed ruling ... is still pending action by the human` (line 2114). The signed `functional-design-questions.md:918` text is untouched — consistent with `project.md`'s `NEVER edit a human-signed record` correction and `governance/CHANGE_RECORD_PROCEDURE.md`. Intact, not re-edited.
+
+**Focus 2 — `PartitionError`'s declaration site.** No unstruck `- **Open — \`PartitionError\`'s declaration site**` bullet found in this pass's re-grep of `business-logic-model.md` (matches at 2087, 2097, 2100 are all discussion/verification text quoting the already-CLOSED, struck-through form, not a live open bullet). Consistent with the prior pass's finding that all three artifacts read `⛔ CLOSED — RULED 2026-08-28: src/data/config.py`.
+
+**Focus 3 — adversarial leakage hunt (re-run against `business-rules.md`).** Re-grepped `embargo|centered|trailing 81|carry-forward|3 h|Dst|longitude|lst_sin|Random Forest|December|directory name` and confirmed each guard still present with its negative control: (a) train-only transforms fit per-partition inside `build_features`; (b) fixed calendar folds F1–F4 plus locked December, 24-hour embargo excluded-and-counted, "No random or shuffled cross-validation" (R-?? near line 655); (c) F10.7 trailing-only 81-day mean, negative control "Inject a centered mean → fails" (~line 402-430); (d) fold membership keyed to `Partition.train_start/train_end` and record timestamps, negative control "Derive membership from a directory name → fails" (line 766); (e) R-77's two carry-forward rules — external drivers ≤3h then exclude the row, `vtec_lag_*` carry-forward prohibited outright (line 530-564); (f) FR-P1-04-10 raw longitude never a predictor, enters only via `lst_sin`/`lst_cos`, negative control "Introduce a raw-longitude column → raises" (line 515-527); (h) Dst stated diagnostic/hindcast-only (line 405). (g) RF importance: still no mention in this unit's rule set — scope-appropriate silence, as this unit does not own feature-selection authority (`models-and-baselines` does). (i) December-informing-selection: no mechanism in this unit's rules touches feature/threshold selection from December; out of this unit's scope. No new bypass or stale guard text found.
+
+No stale representation of either focus item, and no leakage-guard regression, found in this independent re-derivation.
+
+**Coverage limits.** 6-call budget: verified the two named focus items and the leakage-rule bodies in `business-rules.md` only; did not re-open `domain-entities.md` this pass (its `PartitionError` closure was independently verified in the 2026-08-30 pass immediately above and is corroborated, not re-derived, here), did not re-derive the 7-across-5 ledger or R-01=15 count, and read no sibling `construction/` unit.
+
+**Corroboration note.** This pass's findings match the confirming pass dated 2026-08-30T17:18:40Z immediately above in substance and conclusion; both focus items and the leakage surface are independently re-verified clean on this reset.
+
+**Summary.** Both focus items remain correctly resolved (nine-site sweep routed to the gate without editing the signed record; `PartitionError` declaration site closed with no live unstruck bullet), and the leakage-surface guards this unit owns show no constructible bypass. Confirming READY.
+
 READY

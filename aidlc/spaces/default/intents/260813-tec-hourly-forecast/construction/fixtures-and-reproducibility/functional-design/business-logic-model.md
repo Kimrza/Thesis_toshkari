@@ -19,8 +19,8 @@
 > This is the owner **opening the gate by authority**, not a record that its evidentiary
 > conditions were satisfied, and no reader may infer the second from the first.
 >
-> **What the signature changes here:** module creation is authorised, and any defect this
-> unit deferred *solely* because G-09 barred editing a file is now correctable.
+> **What the signature changes here:** the **G-09 ground** for the creation bar is lifted — G-09 is no longer among the grounds. **Creation remains barred on the blocker ground**: BLK-03/BLK-04/BLK-08/BLK-09 are exit conditions untouched by D-31, so nothing here authorises creating a module, manifest, receipt, evidence emitter or `tests/fixtures/` directory.
+> What the signature **does** make correctable is any defect this unit deferred *solely* because G-09 barred **editing an existing file**. (Swept 2026-08-30 to all three lead boxes, on the terminal-pass Critical finding that the body sweep had not reached this box.)
 > **What it does NOT change:** G-05 and G-06 remain `Blocked`; G-P1A, G-P2, G-P3A, G-P3C
 > and G-07 are unaffected; **TE §18.2's absolute rule stands** — every scientific value this
 > unit routed to G-04/G-05 **stays routed**, and no agent may fill a freeze-gate value by
@@ -903,7 +903,7 @@ the count.
 - **Open — BLK-02 is not closed by this design.** The manifests' design is specified here; **the manifests do not exist, neither fixture has ever run, and no measured value exists or is claimed.** BLK-02 closes only when the authoritative manifests exist, are hash-verifiable, and the fixtures have actually run under the frozen identities — acts gated by **G-09**, stage 3.5 and the **Q-31** freeze authority. **ARUC's one-bin shortfall stays dormant, not discharged**, with its reactivation condition intact.
 - **Open — the four inherited blockers are EXIT conditions on this stage.** **BLK-03 ↓, BLK-04 ↓, BLK-08 ↓, BLK-09 ↓** remain open; nothing here closes any of them; this unit may not complete or exit 3.1 while any stands, and no implementation may proceed. **BLK-08 ↓ bounds the units of every tolerance compared here** — W-6's ledger refusal makes that checked rather than silent.
 - **Open — the two manifest freeze acts are the project owner's under Q-31** (TE §18.2 assigns fixture station, dates and acceptance tolerances to the Student), and **nothing in this design performs them**. **G-07 Reproducibility (Blocked, Supervisor)** is the gate that actually accepts WS-20/TA-17's evidence, due before thesis submission; **G-09 Agent preflight (Open, Supervisor)** is **not signed** and is the gate before which no affected component may be coded — its evidence artifact is `aws_ai_dlc_preflight_report`, **`foundation`'s, not this unit's**; **G-05** and **G-06** are the freeze events the receipts and evidence records reference — **D-28** (2026-08-28) records the G-06 locked-test scored set as **2–31 December 2022 (30 days)**, approved by the project owner under the recorded authority equivalence, with the Vision §8.2 / TE §7.1 embargo-column conflict **recorded, not resolved**, a revised split manifest owed at G-05, and **no supervisor signature existing or claimed**; **G-P3A** accepts WS-02–WS-08 and **G-P2/G-P3C** TA-27's second limb; the **`raw_isprint_cache/` re-acquisition** (FU-1 = B) alone discharges the DATA-07 caveat.
-- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and module creation is authorised. **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating `scripts/run_walking_skeleton.py`, either `fixture_manifest.yaml`, `tests/test_clean_run.py`, any receipt or evidence emitter, or a `tests/fixtures/` directory. **TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved**, and where a required value is unfrozen this design stops and reports rather than choosing a default.
+- **G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated **G-09 ground** no longer holds. **Creation remains barred — on the blocker ground**, the blockers being exit conditions untouched by D-31; G-09 is simply no longer among the grounds, and nothing here authorises a creation the blockers still bar. (Swept 2026-08-30 to every occurrence in these three artifacts, on the terminal-pass Critical finding that the 2026-08-30 line-97 repair reached one occurrence of four.) **The other grounds stated alongside it, if any, are untouched**, and D-31's disclosure travels with the signature: the §18.3 preflight never ran, the critical tests are unexecuted in this environment, and `aws_ai_dlc_preflight_report` does not exist. **No scientific value becomes fillable** — TE §18.2 and §18.3's stop-and-report rule are unchanged. No workflow here authorises creating `scripts/run_walking_skeleton.py`, either `fixture_manifest.yaml`, `tests/test_clean_run.py`, any receipt or evidence emitter, or a `tests/fixtures/` directory. **TE §18.3's stop-and-report rule binds every affected component while any P0 decision is unresolved**, and where a required value is unfrozen this design stops and reports rather than choosing a default.
 - **None** of the above decides a scientific value, and **nothing in these three artifacts states a measured number**.
 
 ## Review — 2026-08-28 first adversarial pass
@@ -1238,5 +1238,123 @@ factual error) — below the two-Major NOT-READY threshold, zero Critical
 findings after an independent re-derivation that also checked Mermaid nodes,
 gate-status table rows, and the four D-29 sites the brief specifically named
 as a historically blind spot for this file set.
+
+READY
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T18:13:02Z (see Bash `date -u` above; re-run confirms same UTC date)
+**Iteration:** 2
+
+### Findings
+
+The prior confirming pass (immediately above) verified the G-09/blocker
+contradiction repair only at its four counted D-29 sites and at
+`business-rules.md:97` (per the dispatch brief's Focus 1), and concluded
+READY. This pass re-derived the sweep for the **G-09-vs-blocker
+self-contradiction** itself (the sentence pattern "module creation is
+authorised" immediately followed by "no rule here authorises creating
+[the same files]") across all three artifacts, independently of the D-29
+sweep, and found it is NOT fully repaired.
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-rules.md:970` | The identical self-contradiction the 2026-08-30 repair fixed at line 97 recurs verbatim, unrepaired, three lines below its own § Governance-dependencies/§ Open block: "**G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — this prohibition's stated ground no longer holds, and **module creation is authorised**. ... **No rule here authorises creating** `scripts/run_walking_skeleton.py`, either `fixture_manifest.yaml`, `tests/test_clean_run.py`, any receipt or evidence emitter, or a `tests/fixtures/` directory." This asserts, in one paragraph, both that module creation is authorised and that no rule authorises creating those exact modules — the same opposite-conclusions defect adversarial finding 1 (Major) already found and the line-97 repair note says was fixed. It was not swept to this site. | Apply the same repair used at line 97 (state once: G-09 lifts its own ground; the blockers, not G-09, still bar creation) to line 970, and delete or rewrite the flat "module creation is authorised" / "no rule authorises creating" collision so only one conclusion stands. |
+| 2 | Major | `business-logic-model.md:906` (same file under review) | Same unrepaired collision: "**G-09 is not signed.** ⚠ **G-09 IS SIGNED as of 2026-08-28 (D-31)** — ... **module creation is authorised**. ... **No workflow here authorises creating** `scripts/run_walking_skeleton.py`, either `fixture_manifest.yaml`, `tests/test_clean_run.py`, any receipt or evidence emitter, or a `tests/fixtures/` directory." This is the PRIMARY artifact under review — the prior confirming pass's own file — and its own § Open block was not corrected even though the sibling sentence in `business-rules.md:97` (a non-primary artifact) was. | Same repair as #1, applied here. |
+| 3 | Minor | `business-rules.md:967` | "**G-09 Agent preflight (Open, Supervisor) — not signed**, and the gate before which no affected component may be coded" is stated as a flat, uncorrected governance-dependency line, contradicting D-31 elsewhere in the same file. Lower severity than #1/#2 because it is a single clause rather than a full authorise/prohibit collision, but it is a third site asserting "G-09 not signed" without the D-31 correction attached. | Append the same D-31 pointer/correction used elsewhere, or cross-reference the box at the top of the file. |
+
+Confirmed intact and NOT re-flagged: the `## ✳ G-09 IS SIGNED` box at the top of both `business-rules.md` and `business-logic-model.md`; the repaired sentence at `business-rules.md:97-111`; TA-09's bounded scope stated correctly as "WS-01 and WS-09…WS-20" (`business-rules.md:116`, `772`, `919`; `business-logic-model.md:110`, `758`); D-14 correctly stated as March 2022 (not "open under Q-31") at every site grepped; no site found asserting the seven-day fixture as scientific evidence, no site found overclaiming test execution (WS-20/TA-17/`test_clean_run.py`/`test_bootstrap.py` are consistently stated as unexecuted/undischarged), no GPU dependency claim found, no December-record-in-fixture path found.
+
+### Coverage limits
+
+Budget-constrained pass: grep-driven, not a full read of either 1000+ line
+file. Verified via grep + targeted line reads: all "G-09"/"module creation"/
+"authorised"/"authorized" hits in the three functional-design artifacts (a
+finite, enumerated set — 3 self-contradiction sites found, 2 unrepaired), the
+TA-09/WS-01 bounded-scope citations, and the D-14 date. Did not re-verify
+every control/rule cross-reference, the negative-control count, or the
+fixture-manifest field enumeration independently — those were the prior
+pass's stated scope and are not re-derived here since no fix touched them.
+
+### Verdict rationale
+
+Two Major-or-above findings (one Critical, one Major) on the exact defect
+class the immediately-preceding confirming pass declared closed: the
+repair applied at one site (`business-rules.md:97`) was not swept to the
+other two sites carrying the identical sentence pattern, including the
+PRIMARY artifact's own occurrence at `business-logic-model.md:906`. This is
+the sweep-derive-sites failure mode `project.md` records twice
+(`fd-2026-08-30-sweep-derive-sites`, `fd-2026-08-30-sweep-numerals-and-surfaces`)
+as this stage's recurring defect pattern, reproduced a third time. Exceeds
+the NOT-READY threshold (>0 Critical).
+
+NOT-READY
+
+## Review — 2026-08-30 iteration 2 (terminal)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T18:17:00Z
+**Iteration:** 2 (terminal)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `business-logic-model.md` line 22, inside the `✳ G-09 IS SIGNED` box at the top of the file | The four-site sweep is verified complete and internally coherent (`business-rules.md:97`, `business-rules.md:970`, `domain-entities.md`, and `business-logic-model.md`'s own body all now read "Creation remains barred — on the blocker ground"). But a **fifth, unswept site of the same defect class** stands in the file's own lead box, the text every reader meets first per this file's stated convention: "**What the signature changes here:** module creation is authorised, and any defect this unit deferred *solely* because G-09 barred editing a file is now correctable." This sentence was never part of the four-occurrence set (it doesn't match the old template clause verbatim), so the sweep correctly missed it as a literal-string match — but it asserts, unqualified, exactly the claim the sweep just spent four repairs refuting: that G-09's signature authorises creation. It directly contradicts the corrected text ~85 lines below in the same file ("G-09 is not signed [historic] ... no module ... is created" read together with the swept sites' "nothing here authorises a creation the blockers still bar"). A reader who stops at the top box — which is written and positioned to be read first — comes away believing creation is now authorised; a reader who continues to the blocker paragraph or to `business-rules.md` learns the opposite. | Rewrite line 22 to state the same qualification the swept sites now carry: creation is authorised only as to the **G-09 ground**; the blocker ground (BLK-03/BLK-04/BLK-08/BLK-09, exit conditions on stage 3.1) is untouched by D-31 and still bars creation. This is the same defect class the dispatch brief warned is this project's recurring failure mode (`project.md` learnings fd-2026-08-30-sweep-derive-sites / -sweep-numerals-and-surfaces) — a corrected fact's least-obvious representation (a lead summary box, not a prose bullet) surviving a sweep keyed to the literal old clause. |
+
+No other live occurrence of the old contradictory clause, and no other site asserting G-09 unsigned or creation unqualifiedly authorised, was found across the three artifacts (grep sweep of `authoris`/`G-09` across all three files, cross-checked against the four `Swept 2026-08-30` markers).
+
+### Spot-checks of iteration 1's other conclusions (all still hold)
+
+- TA-09 bounded scope: confirmed at line 758, **"WS-01 plus WS-09…WS-20"**.
+- D-14: confirmed as **March 2022** (lines 62, 318, 468, 479 etc.), consistently, not December or another month.
+- No test-execution overclaim: the top-of-file box (lines 12–18) states critical tests **"cannot be executed in this environment (no Python interpreter is installed...)"** and "unproven, not proven" — matches the required "written but UNEXECUTED" posture.
+- No plumbing-fixture-as-scientific-evidence claim found in the grepped regions.
+- No GPU dependency claim: lines 521–526, 566–567 state runs happen with "no GPU visible" and a GPU-only-dependent completion is explicitly barred.
+- Iteration 1's Minor (G-09 signed-but-unmet-preconditions wording in `business-rules.md`) remains correctly stated per the dispatch brief's summary and is visible in the swept text itself (D-31's UNMET §18.3 preconditions disclosure is carried in both `business-rules.md` sweep sites).
+
+### Summary
+
+The four-occurrence sweep of the self-contradictory G-09/creation clause is complete and every repaired site now reads coherently against its own tail. However, a fifth, prominent site — the file's own lead summary box, the first thing any reader of the PRIMARY artifact sees — still asserts unqualified "module creation is authorised," contradicting the just-repaired body text in the same document. This is the identical recurring failure mode (partial sweep of a corrected fact's representations) the dispatch brief was raised to catch, now found in the artifact's most prominent surface rather than a body paragraph. Not implementable as-is: an implementer who reads only the lead box is told the opposite of what the corrected body and `business-rules.md` say.
+
+NOT-READY
+
+## Review — 2026-08-30 re-verification after gate rejection
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T18:22:19Z
+**Iteration:** 1 (fresh budget after human gate rejection)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| — | — | — | No live occurrence of the G-09/creation self-contradiction survives. All five previously-named sites checked and confirmed coherent: (1) `business-logic-model.md:22-23` lead box, (2) `business-rules.md:22` lead box, (3) `domain-entities.md:22` lead box — all three now read identically "the **G-09 ground** for the creation bar is lifted ... **Creation remains barred on the blocker ground** ... nothing here authorises creating a module, manifest, receipt, evidence emitter or `tests/fixtures/` directory," matching the four repaired body occurrences (`business-logic-model.md:906`, `business-rules.md:97`, `business-rules.md:970`, `domain-entities.md:583`), each of which reads "Creation remains barred — on the blocker ground ... nothing here authorises a creation the blockers still bar" followed by a tail ("No workflow/rule here authorises creating…", "These shapes are design only … is created") that agrees with, rather than contradicts, its own head. No fresh contradiction was introduced by either repair pass. | None — closed. |
+
+No new findings raised this pass. `business-logic-model.md:1097` ("module creation authorised…") and the surrounding derivation text at lines 1080-1097 sit inside the `## Review — 2026-08-28 first adversarial pass` section (opens at line 909, closes before line 1195) and are historical review narrative, not live claims, per the dispatch note — correctly excluded from the live-occurrence count. `business-rules.md:101-111`'s struck-through tail is the preserved-supersession quotation named in the dispatch note and is likewise excluded.
+
+### Sweep method
+
+Derived the site list independently rather than trusting the enumerated five: `grep -n "G-09"` across all three artifacts (33/16/12 raw hits), narrowed with a second pass for `authoris|creation is|no longer bar|G-09 ground|G-09 lifted` to catch paraphrase, not only the literal old clause. Every live "authorises creating" / "authoris… creation" hit outside a `## Review` section is negated ("nothing/no rule/no workflow here authorises creating…") — no unqualified, live claim that creation, implementation, or module/manifest/receipt/evidence-emitter/`tests/fixtures/` creation is currently permitted was found anywhere in the three artifacts.
+
+### Standing conclusions spot-checked (not re-derived)
+
+| Item | Status |
+|---|---|
+| TA-09 bounded scope (WS-01 + WS-09…WS-20) | Consistent references found; no contradicting occurrence surfaced |
+| D-14 = March 2022, all three cells | Confirmed (`business-logic-model.md:78,121` and cross-reference at line 115) |
+| D-11 = 2022-11-01..07, smoke-test only, never scientific evidence | Confirmed, ARUC/BSHM/NICO completeness figures and "not representative of the locked month" caveat present |
+| No test-execution overclaim | Confirmed — top-of-file box states "cannot be executed in this environment (no Python interpreter is installed…)"; "written but UNEXECUTED" posture matches |
+| No GPU dependency claim | Confirmed — all GPU references describe "no GPU visible" as an environment condition, none claim a GPU dependency |
+| Fixture assertion data in `tests/fixtures/<fixture_id>/fixture_manifest.yaml`, never hardcoded | Confirmed at `business-logic-model.md:117` and cross-unit reference at line 122 |
+| TA-15, WS-18, TA-18, `aws_ai_dlc_preflight_report`, `configs/`, §18.3 zero-TBD preflight remain undischarged; stage 3.1 FAIL; BLK-03/04/08/09 open; G-09 signed (D-31) with its own §18.3 preconditions unmet | Confirmed as still stated — no site claims these are now discharged |
+
+### Summary
+
+Both sweeps (the four body occurrences and the three lead boxes) are complete, mutually consistent, and free of the recurring self-contradiction that produced the prior Critical finding. No unswept site or fresh contradiction was found on an independently-derived site list. All required standing conclusions hold. The unit is implementable as designed, subject to the still-open blockers (BLK-03/04/08/09) and undischarged gate items already stated throughout the artifact.
 
 READY

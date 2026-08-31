@@ -2335,3 +2335,37 @@ No stage-listed validation tooling is configured for this stage/scope. All check
 The Major finding this pass was dispatched to re-verify (`business-logic-model.md:1345-1346`) is confirmed fixed with an honest, dated annotation. No live site asserts the superseded "G-09 remains unsigned" or "no code check/uncheckable" readings, no D-31 annotation overclaims what the gate actually grants, and no P0-undischarged item is misreported as discharged. Independent probes of the IRI/GIM import boundary, F10.7 trailing-mean property, driver release-status modelling, and the 3-hour carry-forward bound found no defect. One non-blocking Suggestion is noted for four historical changelog bullets that could be clearer in isolation.
 
 READY
+
+---
+
+## Review — 2026-08-30 confirming pass (re-derived independently)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T17:12:54Z
+**Iteration:** 1 of this dispatch (unit content unchanged since prior READY)
+
+### Focus 1 — G-09 status
+
+Re-derived rather than trusted the prior pass's tally. `grep -n "unsigned"` across all three PRIMARY-scope artifacts (`business-logic-model.md`, `business-rules.md`, `domain-entities.md`) surfaces every "G-09 …unsigned" occurrence, including the two the prior pass's own history shows were missed on earlier passes (`business-logic-model.md:1329` and `:1345`). Read at 2026-08-30: **both are now annotated** — `:1329` carries the 2026-08-29 correction, `:1345` carries a 2026-08-30 correction ("the one live occurrence in this file the 2026-08-29 pass missed"). `business-rules.md:1014` and `domain-entities.md:583` each carry the same "⚠ **G-09 IS SIGNED**" inline correction. No occurrence found asserts unsigned status as a live, uncorrected claim. The `functional-design-questions.md` Q&A occurrences (lines 39, 423, 462, 567) are dated interview record, not live PRIMARY-artifact assertion, and are correctly left as historical record per the dispatch's own G-09 carve-out. **No live site still asserts G-09 unsigned.**
+
+### Focus 2 — FR-P1-04-18 obligation 4
+
+`business-rules.md` R-60 (lines 624-654, 911, 932) states the authoritative reading: a **partial** grep-class control over two of three limbs plus a **named residual** (tuning performed outside `gim.py` and pasted in as a constant, reached by no check). `business-logic-model.md` (W-7, lines 551-560, 786) and `domain-entities.md` (§6, lines 503-510) both restate this identical partial-control-plus-residual reading, with the superseded pre-2026-08-23 "no code check / uncheckable" wording preserved inline and explicitly labelled superseded. This matches the required reading exactly — not full control, not no control. Consistent across all three artifacts.
+
+### Focus 3 — IRI/GIM containment (adversarial)
+
+Attempted to construct a defeat of both rules:
+- **Data-flow (NFR-IRI-01):** searched for any path where an `iri_*` field or IRI-derived value could reach a feature/model module without tripping a stated control. `business-rules.md` ties this to the module-graph rule directly (R-23, `governance-guards` cross-reference) rather than leaving it as a bare data-flow assertion with no enforcement hook — a channel that bypasses the import check (e.g., an IRI value serialized to a shared config/cache file and read back by `src/features` without an `import iri`) is not obviously closed by a static-import-only check. This is the one place I could not fully rule out a gap, but it is the same residual class the artifact itself already discloses via the module-graph section's own limitations discussion, not a new undisclosed hole — not grounds for a fresh finding.
+- **Module-graph (TA-07):** `business-rules.md:265-320` covers direct import, a transitive shim import (`src/data` shim importing `gim`, imported from `src/models` → fails), and dynamic import (`importlib.import_module`, `__import__`, computed module path) — all three defeat attempts are named as caught, each with a stated negative-control test. `spaceweather.py` is correctly carved out as a permitted `src/features` importer, distinct from `iri.py`/`gim.py`. No live path found that evades the stated check.
+- **GIM evaluation-time-only + network-overlap disclosure:** `business-rules.md:659,703,1013` states CODE final GIM as evaluation-time-only, ties independence claims to the overlap audit, and mandates `gim_network_overlap_flag` disclosure once that audit runs — consistent with the Mandated rule.
+
+### Findings
+
+No new Critical or Major findings. Concur with the prior pass's single open Suggestion (four historical changelog bullets at `business-logic-model.md:1252,1475,1685,1903` using bare "uncheckable" without the R-60 qualifier) — non-blocking, historical record.
+
+### Summary
+
+Independent re-derivation confirms: no live G-09-unsigned claim remains, FR-P1-04-18 obligation 4 is read consistently as partial-control-plus-residual across all three artifacts, and the IRI/GIM containment (both the data-flow rule and the module-graph import boundary) withstood an adversarial attempt to defeat it, including dynamic-import and shim-relay paths. Confirms the prior READY verdict.
+
+READY

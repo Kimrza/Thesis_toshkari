@@ -2138,3 +2138,134 @@ asserted as current. One cosmetic marker-glyph inconsistency (⚠ vs ⛔) is not
 Minor, non-blocking suggestion.
 
 READY
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T17:08:19Z
+**Iteration:** 1 of 2 (confirming pass, human-gate reset; content unchanged since the prior READY)
+
+### Scope and method
+
+Content has not changed since the prior READY (2026-08-30T11:40:36Z, embedded above).
+This pass does not rubber-stamp that verdict — it independently re-derives the three
+focus areas by grepping and reading the live artifact text directly, not by trusting the
+prior `## Review` block's claims.
+
+### 1. `provenance_class` rebase figures — independently re-checked
+
+Grepped `provenance_class|derived_only\b|producing_interpreter` across all three
+`produces[]` files and read every hit in context (not just the prior review's cited
+line numbers):
+
+- `business-logic-model.md` W-4 box (298–342), Open item (715), § Assumptions bullet
+  (703–725); `business-rules.md` R-36 box (367–405), Open item (800), change-log
+  paragraph (873–898); `domain-entities.md` § 4 box (219–240), Open item (538),
+  change-log paragraph (598–615) — all nine live sites state the current figures
+  identically: `provenance_class` **43**, `derived_only` **38**, `producing_interpreter`
+  **17**, split `acquisition` **25/21/11**, `inventory-and-registry` **18/17/6**, and
+  the two stable facts (fields reach exactly **2** units; `foundation` carries all
+  three **zero** times) — matching the dispatch brief's stated current figures exactly.
+- Every surviving occurrence of the superseded `9`/`7`/`3` count sits inside a
+  "Superseded figures preserved" clause immediately following one of the ⛔/⚠-marked
+  boxes above (`business-rules.md:886`, `domain-entities.md:237,601`,
+  `business-logic-model.md:336`), explicitly labelled historical, not live fact. The
+  two change-log paragraphs a prior NOT-READY iteration flagged as still asserting
+  the stale "all confined to this unit" claim unmarked (`business-rules.md:873–898`,
+  `domain-entities.md:598–615`) now both carry the ⛔ REBASED 2026-08-30 marker with
+  the correct figures — I read both blocks in full and confirm the repair holds.
+- No live site restates the rebase as a permanent invariant; all state it as "a dated
+  observation, never a live invariant," consistent with the dispatch instruction.
+- **Minor, unresolved, carried forward from the prior pass:** the W-4 Open item at
+  line 715 still uses a ⚠ glyph where the other eight sites use ⛔. Cosmetic only —
+  the content at that site is correct and unambiguous.
+
+### 2. No overclaim — independently re-checked
+
+Grepped `unverifiable in principle` and `discharged`. All four occurrences
+(`business-logic-model.md:719`, `business-rules.md:726,804`, `domain-entities.md:542`,
+plus `functional-design-questions.md:418,453`) consistently state: D-18 discharged
+only the **superseded-hash** limb (2026-08-21); the **provenance** limb of FULL
+remains Open and unverifiable in principle, owned by FR-P1-01-11/R-42. No site implies
+the twelve-month provenance gap is discharged. The version-suffix requirement
+(`g.002` vs `g.003`) is present in `domain-entities.md:134,298` (`provider_filename`,
+`provider_product_identity` field definitions) and `business-rules.md:576,590,643`,
+paired with retrieval-date and SHA-256 fields — matches the DATA-07 obligation as
+stated in the brief.
+
+### 3. Adversarial hunt — independently re-checked
+
+- **Directory/filename-derived partition membership:** every rule-bearing occurrence
+  (`business-rules.md:145–146`, `business-logic-model.md:1067,1352,1925,1928,1955`,
+  `domain-entities.md:614`) states membership is derived from **record timestamps**
+  and explicitly forbids a directory-name or filename-derived predicate, citing
+  D-2/ML-07/TEC-09. No path found by which a directory or filename could substitute
+  for a record timestamp in this unit's design.
+- **Interpolation/fill at acquisition:** `business-logic-model.md:474,1065,1350` and
+  `business-rules.md:412,702` state the hard rule (explicit NaN at acquisition; no
+  interpolation, smoothing, or fill) and the negative control ("an imputed value
+  before the gap is recorded → fails"). No path found by which a gap could be
+  silently filled at acquisition time.
+
+### Coverage limits
+
+This pass re-derived the three focus areas directly from the artifact text (not from
+the embedded prior review's assertions) but did not re-walk the full artifact set
+line-by-line, and per the read-scope bound did not open any `construction/<other
+unit>/` file — cross-unit claims (the `inventory-and-registry` 18/17/6 split, the
+`foundation` zero-count) are taken from this unit's own consistent restatement of
+them, not independently verified against the sibling files.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `business-logic-model.md:715` | Open-item box uses ⚠ instead of the ⛔ glyph used at the other eight rebase sites. Content is correct; purely a visual-consistency gap. | Align the glyph at the next touch of this line. Non-blocking. |
+
+No Critical or Major findings. Zero Critical, zero Major, one Minor — below the
+NOT-READY threshold.
+
+### Summary
+
+Independent re-derivation of all three focus areas confirms the prior pass's
+conclusion rather than merely repeating it: the `provenance_class` rebase (43/38/17,
+25/21/11, 18/17/6) is live and consistent across all nine sites in the three
+`produces[]` artifacts, no site overclaims discharge of the unverifiable-in-principle
+provenance gap, and no path exists in the current text for directory/filename-derived
+partition membership or for interpolation/fill at acquisition. Confirming READY.
+
+READY
+
+## Review — 2026-08-30 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T00:00:00Z
+**Iteration:** 1 (fresh budget after gate rejection reset every unit's review floor; this unit's artifacts are unchanged since its last READY)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | business-logic-model.md, domain-entities.md, business-rules.md | Confirmed (not new): the `9/7/3` figure is preserved in-place, labelled "dated observation" / "Superseded" at every site (`business-logic-model.md:2010,2014,2019`; `domain-entities.md:600-601,623-624`; `business-rules.md:391-392,885-886`) — appropriate per team.md's "learnings ritual appends, never replaces" convention, but a reader skimming only § headings without the inline ⛔/superseded markers could still misread it as current. No live site asserts it as current; carried forward as a documentation-hygiene note only. | No action required; optional: add a top-of-file banner pointing to the current 43/38/17 figures. |
+
+No Critical or Major findings.
+
+### Validation Tool Results
+
+No stage-declared validation tooling was run beyond grep-based cross-referencing (no `validate-*` tool listed for this stage in the dispatch brief).
+
+| Check | Result | Interpretation |
+|---|---|---|
+| `provenance_class`/`derived_only`/`producing_interpreter` figure consistency (grep, both numeral forms) | 43/38/17, split 25/21/11 and 18/17/6, "reaches exactly 2 units", "`foundation` carries 0" — identical across all nine occurrences in the three `produces[]` artifacts (`business-rules.md`, `domain-entities.md`, `business-logic-model.md`) | No stale site found; the superseded 9/7/3 figure is explicitly marked superseded everywhere it survives, never restated as a live invariant |
+| Provenance-unverifiable-in-principle caveat | `business-rules.md:804` ("Open — FULL's provenance limb, unverifiable in principle. D-18 discharged only the superseded-hash limb"); `:726` restates "unverifiable in principle — not merely unverified — until the re-acquisition" | Caveat correctly left open; no site implies discharge |
+| `provider_product_identity` re-acquisition field (version suffix + retrieval date + SHA-256) | `business-rules.md:271,576,590,643` require the full provider filename **including version suffix**, retrieval date, SHA-256, with an explicit failure mode for a suffix recorded without version | Matches team.md's DATA-07 obligation exactly |
+| Directory/filename-derived fold membership | `business-rules.md` R-31 (line 142-145, 900-902): "membership... derives from record timestamps... never from an acquisition directory name" (D-2/ML-07/TEC-09 cited) | No path found in this unit's text for directory/filename-derived membership |
+| Dst release-grade mixing / backfill | `business-rules.md:523,532,600,612,652`: single recorded release grade for all of 2022, constraint that grades are never mixed and no value is backfilled, with a test limb that detects backfill rather than merely asserting it | Matches D-10.1/D-10.2 obligations; no mixing or backfill path found |
+
+### Summary
+
+Independent re-check of a design already at READY, run against a fresh adversarial budget rather than as a rubber stamp: the `provenance_class` rebase figures (43/38/17, 25/21/11, 18/17/6) are consistent at every site across all three `produces[]` artifacts, the superseded 9/7/3 figure is never restated as current, the provenance-unverifiable-in-principle caveat is nowhere implied discharged, and no path exists in this unit's text for directory/filename-derived partition membership, acquisition-time fill, undisclosed backfill, or Dst grade mixing. No new Critical or Major finding. Confirming READY.
+
+READY

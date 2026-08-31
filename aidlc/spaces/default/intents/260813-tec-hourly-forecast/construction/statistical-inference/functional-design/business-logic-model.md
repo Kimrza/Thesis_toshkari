@@ -76,7 +76,7 @@ every workflow below is design, and no module is created.
 - `../../../inception/units-generation/unit-of-work.md` § 10 — the `Owns` list (2 files), the boundary (runs inside `07`, seed a required parameter read from `seeds.yaml`, never defaulted and never inlined), the 1 requirement, the acceptance rows, the three implementation notes (Q-27 rejection; **quoted as written** — "heaviest CPU cost inside TE §9.3's 10.0 GB hard planning envelope", `:453`, the sentence Recommendation 40 identifies as the upstream storage-versus-memory conflation and against which a change record is owed, **not repeated as this design's own claim**; the ADR-05 seed carve-out as a design decision); **BLK-03/BLK-04/BLK-08/BLK-09** with the exit-condition ruling and BLK-08's TECU reach into this unit's interval — **narrowed to `ABL-DIFF` alone by D-27** (2026-08-24), which post-dates that paragraph.
 - `../../../inception/units-generation/unit-of-work-story-map.md` — Table 1's FR-P1-05-8 → WS-17, TA-14 row; Table 2's WS-17 row (evidence: `tests/test_bootstrap.py`, replicate hash from seed 20221201) and TA-14 row (reproducible 24-hour output, a 48-hour sensitivity, cross-station correlation, verified on synthetic correlated data); § Per-unit coverage summary (1 / 0 / WS-17, TA-14 / —).
 - `../../../inception/requirements-analysis/requirements.md` FR-P1-05-8 — the eight enumerated mechanical checks, and check 8's stated reason ("why the other seven are not enough").
-- `../../../inception/application-design/component-methods.md` — § `src/evaluation`'s approved `vector_block_bootstrap` boundary call, quoted verbatim in W-1; § Open (`BootstrapResult` referenced as a type and left unspecified, an intra-package shape under § Depth); § Assumptions (the fourteen project exceptions in a shared base, declared where raised until 3.1 places them).
+- `../../../inception/application-design/component-methods.md` — § `src/evaluation`'s approved `vector_block_bootstrap` boundary call, quoted verbatim in W-1; § Open (`BootstrapResult` referenced as a type and left unspecified, an intra-package shape under § Depth); § Assumptions (**as written**: the fourteen project exceptions in a shared base, declared where raised until 3.1 places them — the figure Recommendation 8's ruling amends to **fifteen**; cited as that artifact's own text, not as the live enumeration).
 - `../../../inception/application-design/services.md` — `07_evaluate_and_report.py`'s row (reads predictions carrying `partition_id`/`transform_id`, benchmark, mask; writes metrics, **bootstrap intervals**, breakdowns, figures) and the resource-envelope note at `:258-259`/`:264`, **quoted as written**: "`07` carries the heaviest CPU cost", and "peak memory, not cumulative runtime, is the binding quantity against TE §9.3's 10.0 GB hard planning envelope". **That second clause is the conflation Recommendation 40 rules on** — TE §9.3 is a **storage** budget and no numeric memory ceiling exists in the authorities — so this design cites the sentence as its upstream's text and **does not adopt it**; a change record against `services.md` is owed and that file is not edited from here.
 - `../evaluation-and-comparison/functional-design/` — R-104 (inverse-before-metric refused at the boundary every caller crosses), R-105 (`07`'s stamp refusal; absent or mismatched stamps raise `LeakageError`, a wrong-partition mask raises `FairnessError`), R-107 (mask identity, once-only registration, G-05 freeze), R-108 (the estimand as an ordered executable contract, and its step-1 path), R-109 (hash-receipt before metrics; the scored range exactly 2–31 December), R-110 (the emit-from-the-producing-path disclosure pattern), R-112 (`src/evaluation/` is a path grant owned by three units; `vector_block_bootstrap` expressly recorded as belonging to this unit); `domain-entities.md` § 5 (`PredictionHashReceipt`) and § 8 (the exception-placement table).
 - `../features-and-splits/functional-design/` — **FU-7 = A**: the G-06 locked test scores **2–31 December 2022, 30 days**, first 24 h excluded and counted.
@@ -737,5 +737,68 @@ No stage-declared validation tooling was listed for this dispatch. Verification 
 ### Summary
 
 Both Major findings from the prior pass were re-verified. Finding 2 (unqualified "fourteen" in this unit's own Sources sections) is fixed, dated, and correct on re-read, with no other unqualified "fourteen" surviving anywhere in the three reviewed artifacts, including diagram labels and change-log boxes. Finding 1 (the signed questions-file's false "three sites" self-certification) is unfixed but correctly so — editing a receipted human-signed record is exactly what this project's own learned rule and `CHANGE_RECORD_PROCEDURE.md` forbid absent explicit owner approval — and is carried forward as gate input rather than charged against this design. R-113 precondition 2 independently re-verified against the spot-checked `foundation` sibling to raise `PartitionError` for a `partition_id` mismatch, matching R-92. The vector time-block bootstrap construction, seed/replicate/CI pinning, and paired-loss-differential estimand hold under adversarial re-derivation with no within-station or naive substitution reachable, and all three genuinely-proposed items (interval method, correlation series, block scheme) remain correctly routed to the gate rather than silently decided. Zero Critical, zero surviving Major.
+
+READY
+
+## Review (2026-08-30, re-confirming pass, iteration 1)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T17:32:21Z
+**Iteration:** 1
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `business-logic-model.md:79` | `grep -n -i fourteen` across the three reviewed artifacts turns up a fourth, previously-unexamined live site: this file's own Sources line 79 — `` `../../../inception/application-design/component-methods.md` — … § Assumptions (**as written**: the fourteen project exceptions in a shared base, declared where raised until 3.1 places them — the figure Recommendation 8's ruling amends to **fifteen**; cited as that artifact's own text, not as the live enumeration). `` — cites the identical component-methods.md § Assumptions text that `business-rules.md:92` and `domain-entities.md:58` also cite, but omits the "**as written** … the figure Recommendation 8's ruling amends to fifteen; cited as that artifact's own text, not as the live enumeration" disambiguator those two carry. The prior pass's Summary (line 739, dated verification list at line 735) asserts "no other unqualified 'fourteen' surviving anywhere in the three reviewed artifacts" and its verification list names `business-rules.md:92,98` and (elsewhere) `domain-entities.md:58` as the qualified sites, but never names this file's own line 79 — the sweep that certified completeness did not check this artifact's own second "fourteen" citation against the standard it applied to its siblings. The fact cited (component-methods.md's un-amended text) is not itself wrong, and no reader is told a false live count, but the citation is inconsistent with this unit's own established convention for the same source and is exactly the class of gap `project.md`'s `fd-2026-08-30-sweep-numerals-and-surfaces` learned rule (Sources citation lines named explicitly) exists to catch. | Add the same "as written … not the live enumeration" qualifier used at `business-rules.md:92` / `domain-entities.md:58` to `business-logic-model.md:79`, or strike the redundant citation in favor of pointing to the already-corrected R-01 citation two lines below (line 84). |
+
+No other finding survived adversarial re-derivation this pass:
+- **R-01 fifteen-exception count**: `business-logic-model.md:84` and `domain-entities.md:67` both correctly read `~~fourteen~~ ⚠ FIFTEEN`, dated and reasoned; no unstruck numeral or spelled-out "fourteen" found in any table cell, rule statement, or Mermaid label across the three artifacts.
+- **Signed questions-file "three sites" self-certification** (Focus 2): confirmed still unedited (`functional-design-questions.md:57,551,592` unchanged), and correctly left unedited per the human-signed-record rule — this remains gate input only, not charged against this design.
+- **No overclaim / no TBD-fill** (Focus 3): stage 3.1/G-09-precondition status, the four inherited blockers, and the "stop and report" posture are all still stated as open, matching the dispatch brief's carry-forward list; nothing scanned implies a freeze-gate TBD was filled.
+- **Bootstrap mechanics** (Focus 4a–c): vector time-block construction (24 h blocks, all three stations together), 10,000 replicates, seed 20221201, the rejected Q-27 within-station 2,000-replicate variant, and the benchmark-minus-model / equal-station-weighting estimand orientation are all correctly and consistently stated in `business-rules.md` (R-113–R-122); no within-station or naive-bootstrap substitution is reachable in the rule text.
+- **Scope/claim boundaries** (Focus 4d–f): no post-lock threshold change, no "second independent blind test" implication, and no claim outside the frozen ARUC/BSHM/NICO, 2022, December-only scope was found in the sections read.
+
+### Coverage limits
+
+Tight budget (~6 tool calls). Verified via targeted `grep` across all three artifacts (both "fourteen" and numeral "14" forms) plus direct reads of the cited R-113–R-122 bootstrap rules and the prior review's own verification/summary lines. Did not independently re-derive the rule/workflow/entity counts the prior pass reports (10 rules, 8 workflows, 8 entities, 23 negative controls) — those are unchanged from a confirming pass on unedited content and were not the focus items for this dispatch. Did not open any sibling unit beyond the one prior, already-cited spot-check into `foundation`.
+
+### Summary
+
+One new Major finding: this file's own Sources line 79 carries an unqualified "fourteen" citation of component-methods.md's Assumptions text that the prior pass's completeness certification (line 739) missed — a gap in the sweep, not a live wrong count, since the cited source text itself genuinely reads "fourteen" and is unamended. With one Major and zero Critical, this stays under the NOT-READY threshold (which requires >2 Major or any Critical); the finding is real but does not on its own overturn the prior READY.
+
+READY
+
+## Review — 2026-08-31 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-31T00:00:00Z
+**Iteration:** 1 (fresh budget after human gate rejection; artifacts unchanged since last verdict except the repair below)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| — | — | — | No Critical or Major finding survives adversarial re-derivation this pass. | — |
+
+### Prior finding disposition
+
+**2026-08-30 pass's Finding 1 (Major, `business-logic-model.md:79` missing the "as written … not the live enumeration" disambiguator) — CONFIRMED FIXED.** Re-read line 79 directly: it now reads "§ Assumptions (**as written**: the fourteen project exceptions in a shared base, declared where raised until 3.1 places them — the figure Recommendation 8's ruling amends to **fifteen**; cited as that artifact's own text, not as the live enumeration)" — the identical disambiguator carried at `business-rules.md:92` and `domain-entities.md:58`. `grep -n -i "fourteen|fifteen"` across all three reviewed artifacts (business-logic-model.md, business-rules.md, domain-entities.md) was re-run and turns up zero unqualified live "fourteen": every occurrence is either struck through with a dated `~~fourteen~~ ⚠ FIFTEEN` correction (`business-logic-model.md:84`, `domain-entities.md:67`), carries the "as written … not the live enumeration" qualifier (`business-logic-model.md:79`, `business-rules.md:92`, `domain-entities.md:58`), or sits inside an already-dated `⚠ SWEPT … SUPERSEDED` box (`business-logic-model.md:639`, `business-rules.md:98,758`, `domain-entities.md:323`). No unstruck, unqualified "fourteen" remains anywhere in the three artifacts under review.
+
+### Focus items re-verified this pass
+
+1. **`foundation` R-01 = fifteen, no fresh contradiction.** All three artifacts read consistently: `PartitionError` promoted as the fifteenth (2026-08-28, Rec 8), count derived-and-printed rather than carried in prose, `InverseTransformError` explicitly disposed under R-01's any-future-exception clause (not a sixteenth), `BootstrapError` still correctly named among those raised by other units. No representation found asserting a stale count.
+2. **Signed questions-file "three sites" self-certification** — confirmed carried forward as gate input only in the prior review's Finding 1 disposition (`functional-design-questions.md` not read or edited this pass, per the human-signed-record rule and this dispatch's instruction). Not charged against this design.
+3. **Adversarial hunt on the bootstrap/estimand/determinism/scope claims (Focus 4a–f):** re-grepped `business-rules.md` for the vector time-block construction, replicate count, seed, and weighting terms — 24h blocks carrying all three stations together, 10,000 replicates, seed **20221201** (pinned in `seeds.yaml`, separately frozen from the generator name), percentile interval on the 10,000-replicate distribution, equal-station weighting matching the confirmatory estimand, and an explicit `§ Forbidden` citation of "NEVER substitute a within-station or naive bootstrap" backed by dedicated negative control (19) that raises on a deliberately within-station-resampled primary. No within-station or naive substitution is reachable in the rule text; no post-lock threshold change, no "second independent blind test" implication, and no claim outside the frozen ARUC/BSHM/NICO / calendar-2022 / December-only scope was found in the sections read. Consistent with the 2026-08-30 pass's findings on the same focus items — nothing here has changed since that pass, and no new break was found on independent re-derivation.
+
+### Coverage limits
+
+Hard 6-tool-call budget. Verified via targeted `grep` for "fourteen"/"fifteen" across all three artifacts, direct read of the tail of `business-logic-model.md` (the existing Review chain) to establish the artifact's current state and avoid treating the 2026-08-30 section's stale Major as live, and a targeted `grep` of `business-rules.md` for the bootstrap/estimand/determinism terms. Did not re-open `functional-design-questions.md`, did not re-derive the rule/workflow/entity counts (unchanged from the 2026-08-30 confirming pass), and did not spot-check `foundation` independently this pass (the 2026-08-30 pass's spot-check of `foundation/functional-design/business-rules.md` lines 72,178-274 already confirmed the amendment on disk; nothing in this unit's citations of it changed).
+
+### Summary
+
+The one outstanding Major from the 2026-08-30 pass (line 79's missing disambiguator) is fixed and verified by direct re-read and a fresh full-artifact sweep; no other unqualified "fourteen" or fresh contradiction was found. The bootstrap, estimand, determinism, and scope-boundary claims this unit owns hold up unchanged under a second adversarial pass. The signed questions-file discrepancy remains open gate input only, correctly outside this design's edit scope. Zero Critical, zero Major.
 
 READY

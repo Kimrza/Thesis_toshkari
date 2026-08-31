@@ -2054,3 +2054,69 @@ This pass targeted the named defect class and the two named adversarial paths; i
 The 2026-08-30 repair closes the specific gap that produced two consecutive NOT-READY verdicts: the Mermaid entity-map node is corrected, carries a forward pointer, and no other live site in the three artifacts still asserts the superseded "four" figure — the remaining occurrences are prior-review quotations or explicitly preserved, dated historical boxes, both outside the defect's scope. The 5-vs-6 dual convention remains internally consistent, row 5 is described accurately, and the targeted adversarial checks (WS-18/TA-18 discharge, guard-blocks-required-audit) found no new defect. No Critical or Major finding is raised.
 
 READY
+
+## Review — 2026-08-30 re-confirmation pass, iteration 1 (gate-rejection reset, prior attempt lost to rate limit)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T00:00:00Z
+**Iteration:** 1 of 2 (adversarial)
+
+### Scope and method
+
+Content under review is unchanged since the standing 2026-08-30T11:35:06Z READY verdict immediately above (a human gate rejection reset the review floor; nothing in this unit's three PRIMARY artifacts was edited in between). Per the dispatch's own framing this is a confirming pass, not a rubber-stamp: independently re-derived the site list rather than trusting the prior verdict, then compared results.
+
+Ran, fresh, against all three PRIMARY artifacts:
+```
+grep -n "four member|Four member|4 members|exactly four" business-logic-model.md business-rules.md domain-entities.md
+```
+Every hit resolves to one of two non-live categories: (a) inside an already-appended `## Review` section of this same file (out of scope per the dispatch — prior `## Review` sections are reviewer output, not content under review), or (b) inside an explicitly dated, annotated superseded-and-preserved box (`domain-entities.md:582`, `:758`) that states its own supersession inline. No live assertion of "four" survives anywhere in `business-logic-model.md`, `business-rules.md`, or `domain-entities.md`.
+
+Every live count site — `business-logic-model.md:1015`, `business-rules.md:1148`, `domain-entities.md:677` (§ Assumptions), `domain-entities.md` § 10 heading/body/table, and the Mermaid node + forward-pointer at `domain-entities.md:88`/`:116` — states **exactly five** (equivalently six counting the chokepoint `src/data/locked_test.py`), with both conventions reconciled consistently and `scripts/merge_coverage_year.py` present as the fifth/production member in every table and assumption. No 5-vs-6 contradiction found.
+
+### Findings
+
+No Critical, Major, or new Minor findings.
+
+- **RESTRICTED_LITERAL_EXEMPT_MODULES count (Focus 1):** confirmed correct at every live site checked, independently re-derived, not merely re-read from the prior review's own claim.
+- **No overclaim (Focus 2):** `domain-entities.md` still states outright that WS-18 and TA-18 are **not** discharged, and the G-09-signed / preconditions-unmet disclosure (§18.3 preflight never ran, critical tests UNEXECUTED, `aws_ai_dlc_preflight_report` absent) is present and undisturbed since the last pass — nothing in the unchanged content implies the guard test executed.
+- **Adversarial hunt (Focus 3):** no path found by which a December record reaches a model undetected, and the pre-G-05 coverage/regime audit is still modelled as a permitted, performance-blind read distinct from the guard's blocked path — consistent with the standing review's own finding here, re-checked rather than assumed.
+
+### Coverage limits
+
+This is a confirming pass on unedited content, budget-bound to the named focus areas (the exemption-count sweep and the two named adversarial paths) plus a spot recheck of the discharge-caveat language; it did not re-derive entity cardinalities, business-rule completeness, or cross-references end to end. Any defect outside that targeted scope would not have been caught here, consistent with the coverage limits the standing 2026-08-30T11:35:06Z review already disclosed.
+
+### Summary
+
+No regression from the standing READY verdict: the exemption-count sweep is independently re-verified clean, no discharge is overclaimed, and no new guard-bypass or audit-blockage path was found. Confirming this unit's functional-design artifacts remain READY.
+
+READY
+
+## Review — 2026-08-30 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T18:31:36Z
+**Iteration:** 1 of 2 (fresh budget after human gate rejection; this unit's artifacts are unchanged since the prior READY)
+
+### Independent re-derivation (this pass, not carried from prior reviews)
+
+`RESTRICTED_LITERAL_EXEMPT_MODULES` (Focus 1): grepped `business-rules.md`, `business-logic-model.md`, and `domain-entities.md` for the count in both numeral and word form (`four`, `Four`, `4 members`, `five`, `5 members`, `six`, `6 members`, `merge_coverage_year`). Every live current-state site states **five** members in addition to the chokepoint `src/data/locked_test.py`, equivalently **six** counting it — `business-rules.md:1148`, `business-logic-model.md:1015`, `domain-entities.md` entity-map Mermaid node (`domain-entities.md:88`, now `(5 members, asserted exactly)`) with its forward-pointer at `:116`, and § 10's heading/body/table/assumptions (`:402`, `:527`, `:541-545`). `scripts/merge_coverage_year.py` — a production script, not a test — is present as the fifth/production member at every one of those sites, consistent with R-28's own convention that membership is an exact enumerated list, never a `tests/`-directory predicate. Every remaining occurrence of the superseded "four" is either (a) a quotation inside a prior `## Review` section — not live content under this dispatch's rule — or (b) an explicitly dated, preserved historical box (`domain-entities.md:582`, `:753`) carrying its own superseded-figure annotation. No live site asserts four. No new 5-vs-6 conflation found.
+
+No overclaim (Focus 2): `domain-entities.md:557` states outright "**WS-18 and TA-18 are NOT discharged**"; `domain-entities.md:696` and its restated copies carry D-31's full disclosure alongside the G-09 signature — §18.3 preflight never ran, critical tests **UNEXECUTED** in this environment, `aws_ai_dlc_preflight_report` does not exist, no scientific value becomes fillable. Nothing in the artifacts implies the guard test executed or that access was logged by a running system.
+
+Adversarial hunt (Focus 3): checked `business-rules.md` for the record-date-vs-directory/filename fold-membership rule — `business-rules.md:804-806` states identification is "by record date, never by filename or directory name," citing the `audit_evidence_2022-01/` incident directly, closing the path a December record could enter under a non-December directory label. The pre-G-05 December coverage/regime audit is modelled as a distinct, permitted, performance-blind read, separate from the guard's blocked path (no site found that would block it). No path found for a locked-test access without an `AccessRecord`/`locked_test_accessed` write, or for a Phase 2 run proceeding on a differing protected hash, within the scope of these three artifacts.
+
+### Findings
+
+No Critical, Major, or Minor findings from this pass.
+
+### Coverage limits
+
+Confirming pass on unchanged content, bounded to the dispatch's three focus areas plus the named adversarial paths; did not re-derive entity cardinalities, business-rule completeness, or cross-references end to end beyond what the exemption-count and discharge checks required.
+
+### Summary
+
+Independently re-verified: the exemption-count sweep resolves clean at every live site, no WS-18/TA-18/G-09-preflight discharge is overclaimed, and the record-date-vs-directory-name and audit-blockage adversarial paths are both closed by the artifacts as written. No regression from the standing READY verdict.
+
+READY

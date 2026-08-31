@@ -1202,3 +1202,35 @@ This pass grepped the three live artifacts for the D-32-defect-class terms plus 
 The single defect class this cycle was dispatched to verify — D-32's approved acceptance rows corrected in some representations and stale in others — is now fully and consistently repaired across all three artifacts: every representation found by an independent re-derivation of the site list (coverage tables, routing/roll-up paragraphs, per-rule Acceptance mini-sections, and the previously-outstanding `domain-entities.md` governance-dependency bullet) states the corrected fact, with superseded text preserved and dated. No new contradiction was introduced by the repair, the 11/7/5/2 arithmetic is internally consistent across all three files, and no dangling markup was found in live content. A budget-bounded sample of five other project-critical hunt items (baseline-to-appendix, VAL-05 disclosure, geometry caveat, regime-threshold routing, provisional-Dst-into-G-05) turned up nothing further. Two non-blocking wording SUGGESTIONS remain, carried forward from prior iterations, neither of which misstates a fact.
 
 READY
+
+## Review — 2026-08-30 confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-08-30T18:29:02Z
+**Iteration:** 1 (fresh budget; adversarial; prior gate rejection was for a sibling unit re-verification, this unit's artifacts unchanged since last READY)
+
+### Independent verification performed
+
+Ran fresh greps (not scoped to any prior finding's named sites) across all three artifacts for: `D-32`, `no row`, `No row`, `UNTESTED`, `proposed at the gate`, `never applied`, `gate item`, `Pending`, each of FR-P1-05-14/-15/-16/-18/-19/-20, `REQ-CLAIM-01`, `TST-CLAIMS-01`, plus `appendix`, `RF importance`/`Random Forest`, `spatial-representativeness`, `fixed-protocol replication`/VAL-05 language, and the G-09/`UNEXECUTED`/interpreter disclosures.
+
+- **D-32 propagation confirmed complete.** All five approved rows (FR-P1-05-16, -18, -19, -20, `REQ-CLAIM-01`/`TST-CLAIMS-01`) read `Pending — row APPROVED under D-32 (2026-08-28), never run; NOT passed` consistently in: the three Requirement-coverage tables, `business-logic-model.md`'s and `business-rules.md`'s roll-up/routing paragraphs, `business-rules.md`'s five per-rule Acceptance mini-sections (R-123, R-124, R-126, R-127, R-132 — the site class two prior iterations missed), and the governance-dependency bullets in all three files. No live (non-struck-through, non-`## Review`) occurrence found asserting "no row" or "proposed at the gate" for these five IDs.
+- **FR-P1-05-14 / FR-P1-05-15 correctly remain rowless** everywhere checked (`business-logic-model.md` 895–896, `business-rules.md` 490/623/879–880, `domain-entities.md` 488–489) — no site credits them with a D-32 row.
+- **"Approved ≠ passed" is never blurred.** No site anywhere claims a `Pending` row is executed, passed, or discharged; every occurrence explicitly states "never run, NOT passed," and the G-09/§18.3 disclosure (no Python interpreter in this environment; every test written but UNEXECUTED; `aws_ai_dlc_preflight_report` does not exist) is repeated intact at all three of its sites in `business-logic-model.md` and both of its sites in `business-rules.md`.
+- **11/7/5/2 arithmetic is internally consistent** across all three coverage tables and their summary lines — no file states a different total or split.
+- **Honesty-rule and scope-boundary hunt items**: no baseline-to-appendix relegation (R-125 states appendix relegation is structurally unrepresentable — one primary-table artifact only); VAL-05's Phase-2-not-independent disclosure present at its stated abstract-level site; the IRI/GIM spatial-representativeness caveat asserted present on every serialized comparison; RF importance is confined to a `authoritative = false` diagnostic figure with the production-path negative control owned by `models-and-baselines` (R-100) — no site in this unit lets it add/remove/rank a feature; no regime threshold or December day-range is decided in this unit rather than routed to the gate; provisional Dst remains barred from any G-05 storm-count via `RegimeError`'s raise condition (R-62/D-11).
+- **TA-15, WS-18, TA-18, `aws_ai_dlc_preflight_report`, `configs/`, the §18.3 zero-TBD preflight are consistently stated as undischarged**; G-09's signature is stated as carrying its own unmet §18.3 preconditions everywhere it is referenced; stage 3.1 status is not overstated anywhere found.
+
+### Findings
+
+None at Critical or Major severity. No newly discovered defect and no unresolved prior finding — the three-iteration D-32 propagation defect chain documented earlier in this file's own `## Review` history is confirmed, on independent re-derivation, to be fully closed with no remaining stale representation.
+
+### Validation Tool Results
+
+No stage-declared validation tools are configured for `functional-design` beyond sensors; none apply here.
+
+### Summary
+
+Independent re-verification (fresh grep scope, not keyed to any prior finding's site list) finds the D-32 acceptance-row fact propagated consistently across every representation in all three artifacts, the approved-vs-passed distinction preserved everywhere, and no violation of the honesty-rule / scope-boundary hunt items. The unit is implementable as designed with no architectural guidance owed beyond this document.
+
+READY
