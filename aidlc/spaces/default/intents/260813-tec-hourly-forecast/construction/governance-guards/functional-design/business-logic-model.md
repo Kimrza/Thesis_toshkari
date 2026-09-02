@@ -864,8 +864,15 @@ this project does not settle.**
 
 **Mechanism (Q9 = D, as narrowed 2026-08-28).** A **static check asserts that no module
 outside `locked_test.py` and outside an enumerated `tests/` exemption contains the
-restricted-root literal**, and that the exemption list's membership is **exactly** the four
-modules named. This generalises `foundation`'s R-15 — the same grep-class assertion, applied
+restricted-root literal**, and that the exemption list's membership is **exactly** the ~~four~~
+⛔ **five** modules named *(corrected 2026-08-31 on owner approval to annotate in place; superseded
+figure preserved. `RESTRICTED_LITERAL_EXEMPT_MODULES` carries **five** members in addition to the
+chokepoint — equivalently **six** counting `locked_test.py`, the convention R-28's box uses. The
+fifth is `scripts/merge_coverage_year.py`, a **production script, not a test**, which is why
+membership is an exact enumerated list and never a `tests/` directory predicate. This site and
+three others were missed by the 2026-08-29 repair because that repair swept only the five sites
+its finding enumerated — the failure `project.md` records as `fd-2026-08-30-sweep-derive-sites`)*.
+This generalises `foundation`'s R-15 — the same grep-class assertion, applied
 across the whole tree, now with one bounded carve-out.
 
 > ## ⚠ AMENDED 2026-08-28 — THE ONE-DOOR MECHANISM NOW HAS A BOUNDED `tests/` EXEMPTION
@@ -892,7 +899,9 @@ changes — an exempt module may **name** the root, but any read of content bene
 through `open_restricted` or against a synthetic fixture root. **Holding a string is not an
 access; reading bytes is.**
 
-**The exemption, four modules, membership asserted exactly** — the same enumerated-list
+**The exemption, ~~four~~ ⛔ five modules, membership asserted exactly** *(corrected 2026-08-31,
+same sweep as the mechanism sentence above; five members in addition to the chokepoint, six
+counting it)* — the same enumerated-list
 technique R-26 uses for the driver exclusion, and it fails in the direction that matters: an
 unlisted module holding the literal fails the static check, and a listed module that no longer
 needs it fails the membership test until the list is edited. Full table with per-module

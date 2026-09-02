@@ -865,9 +865,15 @@ call site.
 
 **Rule (Q9 = D, as narrowed 2026-08-28).** A **static check asserts that no module
 outside `locked_test.py` and outside the enumerated `tests/` exemption below contains the
-restricted-root literal**, and that the exemption list's membership is **exactly** the four
-modules named. `open_restricted` remains the **only** path through which restricted
-**content** is read from `evidence/locked_test_restricted/`.
+restricted-root literal**, and that the exemption list's membership is **exactly** the ~~four~~
+⛔ **five** modules named *(corrected 2026-08-31 on owner approval to annotate in place; superseded
+figure preserved. **Five** members in addition to the chokepoint — **six** counting
+`locked_test.py`, the convention this rule's own 2026-08-29 box below already uses. The fifth is
+`scripts/merge_coverage_year.py`, a **production script, not a test**. This Rule statement was
+missed by the 2026-08-29 repair, which swept only the five sites its finding enumerated while
+this rule's own box twenty lines below already carried the corrected six — `project.md`
+`fd-2026-08-30-sweep-derive-sites`)*. `open_restricted` remains the **only** path through which
+restricted **content** is read from `evidence/locked_test_restricted/`.
 
 **Authority, and how the narrowing is reconciled with it.**
 `component-dependency.md` § Shared resources states the rule **without qualification**:
@@ -929,7 +935,7 @@ gate on those terms.
 >
 > The project decision owner ruled at the `functional-design` gate that **"a path into it" means a route by which restricted CONTENT is obtained**, which is the reading this rule stated as its load-bearing assumption and raised rather than assumed. **The enumerated `tests/` exemption is therefore available and is now the rules settled form**, and board option 2 — refactoring every test to obtain the root from `locked_test.py`, with the row-1 circularity that entails — is **not** taken.
 >
-> **What the ruling does NOT relax.** The exemption is **exhaustive and exact**: the three named modules and `locked_test.py`, no fourth. Any *content* read beneath the restricted root by an exempt module still runs through **`open_restricted`** or against a **synthetic fixture root** — the exemption covers holding the **literal**, never obtaining the **content**. A substring or prefix exemption is expressly refused; the static check asserts **exact list membership**, so a new module holding the literal **fails** rather than being silently admitted.
+> **What the ruling does NOT relax.** The exemption is **exhaustive and exact**: ~~the three named modules and `locked_test.py`, no fourth~~ ⛔ **SUPERSEDED 2026-08-31 as to the membership only — the 2026-08-29 full-repository sweep found a fifth member, `scripts/merge_coverage_year.py`, so the list is the four `tests/` modules plus that production script, with `locked_test.py` the chokepoint: six counting it. The ruling's substance is untouched — the list stays exhaustive and exact, and "no fourth" becomes "no seventh"** *(annotated in place on owner approval; the dated ruling text is preserved because it records what was ruled on 2026-08-28, before the fifth member was known)*. Any *content* read beneath the restricted root by an exempt module still runs through **`open_restricted`** or against a **synthetic fixture root** — the exemption covers holding the **literal**, never obtaining the **content**. A substring or prefix exemption is expressly refused; the static check asserts **exact list membership**, so a new module holding the literal **fails** rather than being silently admitted.
 >
 > **The live breach this leaves, stated and not smoothed over.** Two of the three exempt modules read content beneath the root **today** with **no `AccessRecord`** — `tests/test_release_hashes.py:137` and `tests/test_acquisition_window.py:195`. That is `evidence/experiment_registry.md:79-83`s recorded RES-04 hazard *"occurring in fact rather than in principle"*. **The ruling does not cure it**; it fixes which mechanism must cure it. Routing those two reads through `open_restricted` is **owed at stage 3.5** and is a precondition of this rules negative control passing honestly, and G-09 is unsigned so neither module may be edited yet.
 
