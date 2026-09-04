@@ -2900,8 +2900,27 @@ export function checkSummaryConfirmationEvidence(
     // opposite case. Fold the drive letter on both sides for comparison only.
     const foldDrive = (p: string): string =>
       /^[A-Za-z]:[\\/]/.test(p) ? p[0].toLowerCase() + p.slice(1) : p;
+    // Folding the drive letter is not enough when the receipt was recorded by
+    // ANOTHER CLONE of this repository. The recorded File value is already
+    // absolute under that clone's root, so `resolvePath(projectDir, file)`
+    // returns it verbatim and can never equal artifactAbs however the drive
+    // letter is normalised — the write sits in the audit trail and the gate is
+    // blind to it, which strands the stage on every cross-machine resume.
+    // Compare workspace-relative paths as well. That is what makes the gate
+    // clone-independent, and it is the same shape producesArtifactUnit() already
+    // uses to scope review invalidation: match on the path suffix, not on
+    // absolute equality. The relative key is long and fully qualified
+    // (aidlc/spaces/<space>/intents/<intent>/…/<stage>/<artifact>.md), so a
+    // suffix hit is specific rather than incidental. Artifacts resolving OUTSIDE
+    // projectDir are excluded: `relative` yields a `../` prefix for those, and
+    // suffix-matching an escaping path would be unsound.
+    const relKey = (p: string): string =>
+      relative(projectDir, p).replace(/\\/g, "/");
     for (const artifact of summaryArtifactPaths(stage, question)) {
       const artifactAbs = foldDrive(resolvePath(artifact));
+      const artifactRel = relKey(resolvePath(artifact));
+      const relComparable =
+        artifactRel.length > 0 && !artifactRel.startsWith("../");
       let lastWrite = -1;
       for (let i = floor + 1; i < events.length; i++) {
         const entry = events[i];
@@ -2914,7 +2933,15 @@ export function checkSummaryConfirmationEvidence(
         const file = auditBlockField(entry.block, "File");
         if (!file) continue;
         const resolved = foldDrive(resolvePath(projectDir, file));
-        if (resolved === artifactAbs) lastWrite = i;
+        if (resolved === artifactAbs) {
+          lastWrite = i;
+          continue;
+        }
+        if (!relComparable) continue;
+        const norm = file.replace(/\\/g, "/");
+        if (norm === artifactRel || norm.endsWith(`/${artifactRel}`)) {
+          lastWrite = i;
+        }
       }
       if (lastWrite <= receiptIndex) {
         return {
