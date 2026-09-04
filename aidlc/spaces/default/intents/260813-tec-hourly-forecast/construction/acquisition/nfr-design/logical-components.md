@@ -2,6 +2,19 @@
 
 **Unit** `acquisition` (Bolt 3) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-02, content unchanged.** A `STAGE_JUMPED` redo of `nfr-design` — ordered
+> by the project decision owner to repair a Critical finding in the sibling unit
+> `external-products` — cleared this stage's per-unit checkpoint and review receipts for every
+> unit. This unit's decomposition was **not** revised; the summary was re-confirmed and the
+> artifact re-saved so the required receipts exist again. **No component, boundary or status
+> claim is altered by this note.**
+>
+> **Repeated once more the same day**, after a second owner-directed redo, **and a third
+> time** after the seventh reviewer pass on `external-products`.
+>
+> **And a fourth redo 2026-09-04**, to repair two Majors in `target-standardization`. **This
+> unit was untouched by all four.**
+
 > ## ⚠ ALL THREE COMPONENTS ARE UNBUILT
 >
 > Written against the **workspace as it is on 2026-09-01**, per the owner's ruling, with

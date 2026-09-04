@@ -2,6 +2,33 @@
 
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Revised 2026-09-02 — the two open Majors are now FIXED.** Under the owner's instruction
+> to fix all findings until clean, the two Majors carried from the 2026-09-01 terminal pass
+> are repaired here rather than carried to the gate:
+>
+> 1. **§ SD-I-04 Check 3 no longer drops December.** It is now **two reconciliations over
+>    different questions**: **3a** access rows against the declared scope, per `run_id`, over
+>    the December-bearing class; **3b** declared months against the coverage report's
+>    per-month output, over **all twelve months, December included**. The superseded split
+>    scoped 3b to "the other eleven", leaving December in **neither** report check — so a
+>    December read that logged correctly but whose count was dropped passed both, defeating
+>    FR-P1-02-3's *"the coverage report covers all twelve months"*.
+> 2. **The routing no longer rests on `assert_no_december_outside_restricted`.** That guard
+>    iterates `root.rglob("*.json")` (`src/data/locked_test.py:213`) while its docstring
+>    claims it walks *every* December-bearing artifact, and `evidence/` outside the restricted
+>    root holds **359 files, of which only 24 are `.json`** — 283 `.txt`, 33 `.csv`, 24 `.json`, 14 `.html`, 4 `.md`, 1 `.jsonl` (`find`-derived 2026-09-03; the superseded figure read "33 `.csv`, 23 `.json`, 1 `.jsonl`, 4 `.md`", understating the blind spot as 38 files). The audit now **derives the
+>    class itself by record date across every file type in its declared scope**, and a
+>    disagreement with the guard is a **stop-and-report**. Widening the guard's scan is
+>    `governance-guards`' change to make.
+>
+> **`SchemaError`'s declaration site remains ROUTED TO THE GATE.** A blanket instruction to
+> fix findings is not a ruling on a decision explicitly reserved to the owner, and Q2 was
+> answered on a two-item scope that did not include it.
+>
+> The summary was re-confirmed against these repairs before this save, and again after a
+> **third** redo of the stage — that one for `external-products`, leaving this unit's design
+> untouched.
+
 > ## ⚠ THIS UNIT'S TWO MODULES DO NOT EXIST, AND NOTHING BELOW IS CLAIMED BUILT
 >
 > Written against the **workspace as it is on 2026-09-01**, per the owner's ruling that a
@@ -23,7 +50,7 @@
 > **BLK-07's authorization limb is open.** No run may touch calendar 2022-12 while it stands,
 > and **no December access occurs in this Bolt** — verified: `evidence/merge_run_access_log.jsonl`
 > does not exist, and the only access log present is `evidence/test_run_access_log.jsonl`
-> (158 rows, every one `purpose: coverage_audit`, from `test_release_hashes` and
+> (**232** rows on 2026-09-03, every one `purpose: coverage_audit`, from `test_release_hashes` and
 > `test_acquisition_window`).
 >
 > **The IGRF version stays `TBD — freeze gate`.** No scientific value is decided here, and
@@ -56,7 +83,7 @@
 | **Scalability** | Bounded and known — twelve months, three cells, named artifact classes. No growth projection exists and none is invented. | — |
 | **Reliability** | **Fail-closed at three separate points**: a short scope declaration fails before the first artifact is opened; a log-write failure aborts the read; a reconciliation mismatch fails after the counts. An interrupted audit yields **no report**. | § SD-I-04, § SD-I-05 |
 | **Security** | This artifact. | — |
-| **Observability** | One access row per **December-bearing** artifact read, carrying `run_id`, `purpose`, `performance_inspected` and a guard-stamped `logged_at_utc`. The other eleven months are ordinary paths and produce no access row; they are reconciled against the coverage report's own per-month output instead. | § SD-I-04, § SD-I-05 |
+| **Observability** | One access row per **December-bearing** artifact read, carrying `run_id`, `purpose`, `performance_inspected` and a guard-stamped `logged_at_utc`. Non-December-bearing artifacts are ordinary paths and produce no access row. **Reconciliation 3b covers all twelve declared months, December included**, against the coverage report's per-month output. *(Corrected 2026-09-03 on the post-repair pass's finding 12, Major: this row still read "the other eleven months", the superseded scope the Check 3 repair had already withdrawn two sections below — the repair landed where the rule is defined and not in this summary row.)* | § SD-I-04, § SD-I-05 |
 
 ---
 
@@ -339,8 +366,20 @@ raise rather than protect."*
 
 | Artifact class | Route | Logged? |
 |---|---|---|
-| **December-bearing** — anything under `evidence/locked_test_restricted/`, which after D-15's relocation of 21 files is where every December-bearing artifact lives | `acquisition`'s named accessor → `open_restricted` | **Yes** — one durable row per artifact, before the read |
-| **The other eleven months** — `audit_evidence_2022-01` … `-11`, ordinary paths | Read directly. `open_restricted` **refuses** them by contract | **No access row.** FR-P1-02-3's obligation is scoped to *"any operation that reads a **December 2022 record**"* |
+| **December-bearing** — **any artifact carrying a December 2022 record, decided by RECORD DATE**, which after D-15's relocation of 21 files should coincide with residency under `evidence/locked_test_restricted/` | `acquisition`'s named accessor → `open_restricted` | **Yes** — one durable row per artifact, before the read |
+| **Not December-bearing** — an artifact carrying **no** December 2022 record, again decided by **record date** rather than by the directory it sits in | Read directly. `open_restricted` **refuses** an ordinary path by contract | **No access row.** FR-P1-02-3's obligation is scoped to *"any operation that reads a **December 2022 record**"* |
+
+> **⚠ THE CLASS TEST IN THIS TABLE IS RECORD DATE, NOT PATH** *(corrected 2026-09-03 on the
+> post-repair pass's finding 13, Major)*. The superseded rows defined the two classes as
+> *"anything under `evidence/locked_test_restricted/`"* and *"the other eleven months —
+> `audit_evidence_2022-01` … `-11`"* — **a path test and a directory-name test**, which is
+> exactly what `project.md` § Forbidden prohibits: *"NEVER derive fold or partition
+> membership from an acquisition directory name or a filename."* It is also the test that
+> misses **a December-bearing CSV under `audit_evidence_2022-01/`** — the realized TEC-09
+> failure. The prose two paragraphs below already said the class test is by record date; the
+> **table** did not, and the table is what an implementer reads. **Residency under the
+> restricted root is the expected CONSEQUENCE of the class, never its definition**, and a
+> divergence between the two is the stop-and-report below.
 
 **The chokepoint half is built.** `_append_and_flush` writes the row, stamps `logged_at_utc`
 itself, flushes, and `os.fsync`s before `open_restricted` returns the path the caller then
@@ -359,14 +398,56 @@ predicate already filed locked-month records under `audit_evidence_2022-01/` in 
 the location still agree; **if it ever fails, the routing table above is wrong before the
 audit is**, because an unrelocated December artifact would be read as an ordinary path.
 
-**Check 3 — reconcile the rows actually written against the December portion of the declared
-scope, per `run_id`.** A mismatch fails. This is narrower than the first issue implied, and
-the narrowing is forced by Check 2's correction: **access rows exist only for the
-December-bearing class**, so they can only reconcile that class. **The other eleven months
-are reconciled against the coverage report's own per-month output** — each declared month
-must appear in the report with a count, and a declared month absent from the report fails.
-Two reconciliations, over two artifact classes, because there is only one class the access
-log can speak for. The reconciler is this unit's and does not exist.
+> **⚠ THAT GUARD IS NARROWER THAN ITS OWN DOCSTRING, SO THE ROUTING MUST NOT REST ON IT
+> ALONE** *(corrected 2026-09-02 on the 2026-09-01 terminal pass's finding 9, Major)*.
+> `src/data/locked_test.py:213` iterates **`root.rglob("*.json")`** while the function's
+> docstring claims it *"walks `evidence/` recursively and returns **every** December-bearing
+> artifact"*. Outside the restricted root `evidence/` holds **359 files, of which the guard
+> sees 24** — 283 `.txt`, 33 `.csv`, **24 `.json`**, 14 `.html`, 4 `.md`, 1 `.jsonl`
+> (`find`-derived 2026-09-03; the superseded figure read "33 `.csv`, 23 `.json`, 1 `.jsonl`,
+> 4 `.md`", which understated the blind spot as 38 files when it is 359) — so a
+> **December-bearing CSV** under `audit_evidence_2022-01/`,
+> which is the exact TEC-09 failure this project already had, would be classed ordinary, read
+> **unlogged**, and reported clean.
+>
+> **This is a defect in `governance-guards`' existing code, not this unit's to fix** — and
+> the superseded text leaned on it as though it were sound, which is this unit's defect. Two
+> consequences are designed here instead:
+>
+> 1. **The audit derives the class itself, over every artifact it is about to read**, by
+>    **record date**, across **all file types in its declared scope** — not `.json` alone,
+>    and not by asking the guard. The guard remains a **standing regression check on the
+>    workspace**; it is **not** the audit's classifier.
+> 2. **A disagreement between the two is a stop-and-report**, not a silent preference: if the
+>    audit's own record-date classification finds a December-bearing artifact outside the
+>    restricted root, the run **fails** naming the file, because either D-15's relocation is
+>    incomplete or the guard missed it — and both are findings a human must see.
+>
+> **The guard's scan bound is recorded here so a reader of this design does not inherit the
+> assurance the superseded text gave.** Widening it is `governance-guards`' change to make.
+
+**Check 3 — two reconciliations over DIFFERENT questions, and every declared month is in the
+second one.**
+
+> **⚠ CORRECTED 2026-09-02 on the 2026-09-01 terminal pass's finding 8, Major.** The
+> superseded text read *"the December portion… **The other eleven months** are reconciled
+> against the coverage report's own per-month output"*. That left **December in neither
+> limb's report check**: limb 1 reconciled access rows against the **declared scope** and
+> never against the report, and limb 2 was scoped to the eleven. A December read that logged
+> correctly but whose count was **dropped from the coverage report** passed both — which is
+> I-2's own stated failure mode, on the one month that matters, and it defeats
+> FR-P1-02-3's criterion that *"the coverage report covers all twelve months"*. **The gap did
+> not exist before the repair that introduced it.**
+
+| Limb | Domain | Question it answers |
+|---|---|---|
+| **3a — access rows vs declared scope, per `run_id`** | the **December-bearing class only**, because that is the only class with access rows | *Did the audit read exactly the restricted artifacts it declared, and can one attempt be told from another?* |
+| **3b — declared months vs the coverage report's per-month output** | **all twelve declared months, December included** | *Did every month the audit declared actually produce a count?* |
+
+**A mismatch in either fails.** The domains differ because only one class has an access log
+to speak for it — but **report presence is checkable for every month**, so 3b has no reason
+to stop at eleven. December is therefore covered twice over, by different evidence: its reads
+by 3a, its count by 3b. **The reconciler is this unit's and does not exist.**
 
 **The two limbs are two typed reads.** The coverage limb binds
 `purpose="coverage_audit"`, the regime limb `purpose="regime_audit"`; both carry
@@ -400,8 +481,12 @@ artifact is a real check rather than a restatement of the caller's intent.
 **Owed — the convention, not the field.** Nothing today makes two attempts carry **different**
 `run_id` values. `scripts/merge_coverage_year.py` hard-codes `run_id='merge_coverage_year'`
 for every row of every run; `tests/test_release_hashes.py` and `test_acquisition_window.py`
-account for all 158 rows of `evidence/test_run_access_log.jsonl` under two constant ids. A
-second attempt under a constant id is **indistinguishable in the log from the first**.
+account for all **232** rows of `evidence/test_run_access_log.jsonl` under two constant ids
+(`test_release_hashes` 220, `test_acquisition_window` 12, re-derived 2026-09-03; the
+superseded figure of 158 was carried rather than re-derived, and a further suite run has
+appended since). **A second attempt under a constant id is indistinguishable in the log from
+the first** — and the growth from 158 to 232 under the same two ids is that fact
+demonstrating itself.
 
 **Design.** Each audit attempt binds a **distinct** `run_id`, and R-50's reconciliation is
 performed **per `run_id`**, not over the whole log. The convention is stated at the level the
@@ -602,7 +687,7 @@ silent omission.
 - **[DISC-I-2]** `merge_coverage_year.py`'s `retrieved_at_utc` placeholder migrates into this unit's stage script unless replaced. **A migration obligation, not fixed here.**
 - **[DISC-I-3]** `components.md:64` puts two **`acquisition`-owned** requirements — **FR-P1-01-6** and **FR-P1-01-2** — into `inventory.py`, this unit's module. FR-P1-01-2's suffix-mismatch half is **⚠ PROPOSED**, because `acquisition` R-34 holds the release-manifest carriage of `suffix_mismatch` **Open for stage 3.2**. Neither appears in this unit's coverage table, correctly; the seam is the module, not the requirement.
 - **[SD-I-04 — OPEN, routed to the gate]** **W-6's approved mechanism carries the same defect this section corrects.** Its text reads *"for each artifact: `acquisition`'s named accessor"*, with no restricted/ordinary distinction, and eleven of the twelve declared months are ordinary paths `open_restricted` refuses. **The correction is stated here and NOT applied upstream**; the ruling owed at the gate is whether W-6's wording is amended by change record or whether this stage's narrowing stands recorded in the gate record alone.
-- **[SD-I-04 — the routing correction's own dependency]** The two-class routing table rests on **`assert_no_december_outside_restricted` continuing to pass**: it is what keeps "December-bearing" and "under the restricted root" the same set after D-15's relocation of 21 files. **If that guard ever fails, the routing table is wrong before the audit is**, because an unrelocated December artifact would be read as an ordinary path and never logged.
+- **[SD-I-04 — the guard this routing must NOT rest on]** `assert_no_december_outside_restricted` scans **`*.json` only** (`src/data/locked_test.py:213`) while its docstring claims it walks *every* December-bearing artifact; `evidence/` outside the restricted root holds **359 files, of which only 24 are `.json`** — 283 `.txt`, 33 `.csv`, 24 `.json`, 14 `.html`, 4 `.md`, 1 `.jsonl` (`find`-derived 2026-09-03; the superseded figure read "33 `.csv`, 23 `.json`, 1 `.jsonl`, 4 `.md`", understating the blind spot as 38 files). So the audit **derives the class itself by record date over every file type in its declared scope**, and a disagreement with the guard is a **stop-and-report**. The guard stays a standing workspace regression check, not the classifier. Widening its scan is `governance-guards`' change. *(Corrected 2026-09-02 on terminal finding 9, Major — the superseded bullet leaned on the guard as sound.)*
 - **[TS-I-01]** The **IGRF version stays `TBD — freeze gate`.** The station registry cannot be built until it is frozen under a D-number.
 - **Carried — D-1's site-log validation limitation** is open; W-2a and SD-I-07 both turn on it and neither closes it.
 - **Carried — BLK-07's authorization limb is open.** No run may touch calendar 2022-12 while it stands.
@@ -744,7 +829,7 @@ Each was re-verified against the files on disk, not against the remediation tabl
 | # | Severity | Location | Finding | Recommendation |
 |---|---|---|---|---|
 | 8 | Major | `security-design.md` § SD-I-04 Check 3; § Scope note Observability row; `logical-components.md` § I-2 guard table row 3 | **The split reconciliation leaves December without the report-presence check it just gave the other eleven months.** Limb 1 reconciles *"the rows actually written against the **December portion of the declared scope**, per `run_id`"* — rows against **scope**, never against the report. Limb 2 is scoped to *"the other eleven months … each declared month must appear in the report with a count."* December is therefore in neither: a December read that logs correctly but whose count is **dropped from the coverage report** passes limb 1 (rows match the declared scope) and is out of limb 2's domain. That is exactly I-2's stated failure mode — *"a silently skipped month produces a wrong figure that looks right"* — on the one month it matters most, and it defeats FR-P1-02-3's own acceptance criterion, which reads verbatim *"The coverage report covers all twelve months"* (`requirements.md:349`). The gap did not exist in the first issue (Check 3 then spanned all twelve); it was **introduced by the repair**, and it is represented consistently in all three sites, so it is a design gap rather than a contradiction. | Restate limb 2's domain as **all twelve declared months** (report-presence is orthogonal to how the read was routed), leaving limb 1 as the December-only access-row reconciliation. One sentence in each of the three sites. |
-| 9 | Major | `security-design.md` § SD-I-04 (routing table class cell + *"The class test is by record date, not by path"* + the Assumptions bullet naming the guard); `logical-components.md` § Assumptions `[I-2 — the routing correction's own dependency]` | **The routing correction's load-bearing guard cannot see 37 of the 61 files it is claimed to police.** The design carries two definitions of "December-bearing": the routing **table** says *"anything under `evidence/locked_test_restricted/`"* (a **path** test), while the prose two paragraphs later says *"A December-bearing artifact is one containing a December 2022 record"* (a **record-date** test), with `assert_no_december_outside_restricted` named as what keeps the two the same set — *"if it ever fails, the routing table above is wrong before the audit is."* **That guard scans `*.json` only**: `src/data/locked_test.py:213` is `for candidate in sorted(root.rglob("*.json"))`, while its own docstring claims it *"walks `evidence/` recursively and returns every December-bearing artifact."* Outside the restricted root `evidence/` holds **33 `.csv`, 23 `.json`, 1 `.jsonl`, 4 `.md`** (derived by `find … ! -path "*locked_test_restricted*"`), and the coverage artifacts are predominantly CSV. A December-bearing CSV filed under `audit_evidence_2022-01/` — **the exact historical failure TEC-09 records** — would be classed ordinary by the table, read **unlogged**, and reported clean by the guard. This is a residual unlogged-December-read path in a design whose whole purpose is to close them, and the artifact asserts the guard's assurance without stating its scan bound. Also brushes `project.md` § Forbidden (*"NEVER derive fold or partition membership from an acquisition directory name"*), which the table's path test does and the prose test does not. | Make the routing table's class cell state the **record-date** test as the operative one, with the restricted root as its post-D-15 location rather than its definition; and state the guard's `*.json` scan bound where the guard is relied on, as an obligation on `governance-guards` (or on this unit's own pre-read classification) rather than as assurance already in hand. |
+| 9 | Major | `security-design.md` § SD-I-04 (routing table class cell + *"The class test is by record date, not by path"* + the Assumptions bullet naming the guard); `logical-components.md` § Assumptions `[I-2 — the routing correction's own dependency]` | **The routing correction's load-bearing guard cannot see 37 of the 61 files it is claimed to police.** The design carries two definitions of "December-bearing": the routing **table** says *"anything under `evidence/locked_test_restricted/`"* (a **path** test), while the prose two paragraphs later says *"A December-bearing artifact is one containing a December 2022 record"* (a **record-date** test), with `assert_no_december_outside_restricted` named as what keeps the two the same set — *"if it ever fails, the routing table above is wrong before the audit is."* **That guard scans `*.json` only**: `src/data/locked_test.py:213` is `for candidate in sorted(root.rglob("*.json"))`, while its own docstring claims it *"walks `evidence/` recursively and returns every December-bearing artifact."* Outside the restricted root `evidence/` holds **359 files, of which only 24 are `.json`** — 283 `.txt`, 33 `.csv`, 24 `.json`, 14 `.html`, 4 `.md`, 1 `.jsonl` (`find`-derived 2026-09-03; the superseded figure read "33 `.csv`, 23 `.json`, 1 `.jsonl`, 4 `.md`", understating the blind spot as 38 files) (derived by `find … ! -path "*locked_test_restricted*"`), and the coverage artifacts are predominantly CSV. A December-bearing CSV filed under `audit_evidence_2022-01/` — **the exact historical failure TEC-09 records** — would be classed ordinary by the table, read **unlogged**, and reported clean by the guard. This is a residual unlogged-December-read path in a design whose whole purpose is to close them, and the artifact asserts the guard's assurance without stating its scan bound. Also brushes `project.md` § Forbidden (*"NEVER derive fold or partition membership from an acquisition directory name"*), which the table's path test does and the prose test does not. | Make the routing table's class cell state the **record-date** test as the operative one, with the restricted root as its post-D-15 location rather than its definition; and state the guard's `*.json` scan bound where the guard is relied on, as an obligation on `governance-guards` (or on this unit's own pre-read classification) rather than as assurance already in hand. |
 | 10 | Minor | `logical-components.md` § The asymmetry paragraph | **The "four things that do not exist" enumeration under-describes guard 3, in the same shape iteration-1 finding 3 was raised for.** The guard table's own Built? cell for row 3 reads *"`run_id` exists as a required field, but the **uniqueness convention** does not, and **neither reconciler exists**"* — three absent items. The asymmetry list carries only *"the `run_id` uniqueness convention"* and drops both reconcilers, which are the parts that actually do the containing. The count of **four** is defensible (one item per guard) and is not disputed; the enumeration beneath it is not the table's. | Add *"and neither reconciler"* to the third item, or re-derive the list per-item rather than per-guard and reprint the count. |
 | 11 | Minor | `security-design.md` § SD-I-04, second correction box; `logical-components.md` § Assumptions `[I-2 — OPEN, routed to the gate]` | **The upstream-narrowing route is the correct call and is verified — but option 2 leaves a live contradiction the gate should be told is live.** W-6's wording is confirmed verbatim: `business-logic-model.md:379` (Mermaid node `A["for each artifact:<br/>acquisition's named accessor"]`) and `:396` (text fallback *"opens each artifact through `acquisition`'s named accessor"*), with no restricted/ordinary distinction. Routing rather than narrowing matches `project.md` § Corrections (*"NEVER edit a human-signed record … route ONE explicit ruling"*) exactly and is **not** an evasion. The residual: if the gate picks *"the narrowing stands in the gate record alone,"* an implementer at 3.5 reading only the approved `business-logic-model.md` still gets the unbuildable instruction — the artifact says the design *"is written either way,"* which is true of this artifact and not of W-6. | State, in the same box, that option 2 leaves W-6's text unbuildable-as-read for a builder who does not also read this stage, so the human chooses between two known costs rather than one. |
 
@@ -842,3 +927,173 @@ acceptance row is claimed, the IGRF version stays `TBD — freeze gate`, BLK-07'
 limb is stated open in both artifacts, and no run may touch calendar 2022-12 while it stands.
 **READY** on 0 Critical and 2 Major — with findings 8 and 9 put to the human at the approval
 gate as corrections owed before 3.5 implements § SD-I-04.
+
+---
+
+## Review — 2026-09-02 post-repair pass
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-03T10:17:08Z
+**Iteration:** 1 of 2 (fresh receipt; three `STAGE_JUMPED` redos cleared the prior ones)
+
+### Are the two repaired Majors genuinely closed?
+
+| Repaired Major | Closed? | Evidence |
+|---|---|---|
+| **Terminal finding 8 — the split reconciliation dropped December** | **Closed in the two sites that define the rule; NOT swept into the third** | § SD-I-04 Check 3's limb table now reads **3b … all twelve declared months, December included** ✓, and `logical-components.md` guard-table row 3 carries the identical wording plus its own `(3b widened from "the other eleven months" 2026-09-02 …)` note ✓ — the two artifacts state the same split, membership-identical. **But § Scope note's Observability row (`:86`) still reads *"The other eleven months … are reconciled against the coverage report's own per-month output instead"*** — the superseded 3b domain, at a reader-first surface, outside any correction box. The 2026-09-01 terminal pass named that row explicitly as one of finding 8's **three** sites (its check 16 says so in terms); two of three were repaired → **finding 12** |
+| **Terminal finding 9 — the routing rested on `assert_no_december_outside_restricted`** | **Closed in substance; the operative-class definition was not moved** | The derive-it-yourself repair is real and present in both artifacts: *"the audit derives the class itself … by **record date**, across **all file types in its declared scope** — not `.json` alone, and not by asking the guard"*, with a disagreement a **stop-and-report** ✓, the guard demoted to a standing workspace regression check ✓, and widening it named as `governance-guards`' change ✓. Nothing in either artifact now leans on the guard as sound. **But the routing table's own class cell (`:369`) still defines the class as *"anything under `evidence/locked_test_restricted/`"* — a path test** — which is exactly what finding 9's recommendation asked to be restated as record-date-operative → **finding 13**. Guard scan bound re-verified on disk: `src/data/locked_test.py:213` is `for candidate in sorted(root.rglob("*.json")):` ✓ |
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 12 | **Major** | `security-design.md` § Scope note, Observability row (`:86`) | **A surviving representation of the superseded eleven-month reconciliation scope.** The row states the reconciliation domain as *"The other eleven months … they are reconciled against the coverage report's own per-month output instead"*, while § SD-I-04 Check 3's repaired limb 3b covers **all twelve, December included**. The repair's own header box claims the fix, and the table of sites the 2026-09-01 remediation used for the *first* Critical explicitly included this row — so the sweep pattern was known and was not applied to finding 8. A reader who meets the Scope note first gets the exact gap finding 8 raised. This is `project.md`'s recorded failure verbatim: the corrected fact lands in the section that argues it, and a summary surface a few hundred lines above keeps asserting the superseded version. | Rewrite the Observability row's second clause: the eleven produce no **access row**; **all twelve** declared months are reconciled against the coverage report's per-month output (3b), December additionally by 3a. One sentence. |
+| 13 | **Major** | `security-design.md` § SD-I-04 routing table, class cell (`:369`) | **The routing table still defines "December-bearing" by path while the repair makes record date operative.** The cell reads *"anything under `evidence/locked_test_restricted/`"*; the correction box two paragraphs below says the audit **derives the class by record date across every file type**, and § SD-I-04's prose says *"A December-bearing artifact is one containing a December 2022 record (FR-P1-02-6's own definition)"*. The table is the surface an implementer routes from, and it encodes the **path** test — the one that misclassifies a December-bearing CSV filed under `audit_evidence_2022-01/`, which is the TEC-09 failure this project actually had. It also brushes `project.md` § Forbidden (*"NEVER derive fold or partition membership from an acquisition directory name or a filename"*), which the record-date test satisfies and the path test does not. The repair was made where the guard was discussed and not where the class is defined. | Make the class cell read: *December-bearing = contains a December 2022 record (derived by record date, all file types); after D-15 these are expected under `evidence/locked_test_restricted/`, and any disagreement is a stop-and-report.* Location becomes an expectation, not the definition. |
+| 14 | **Major** | `security-design.md` header box (`:19`), § SD-I-04 guard box (`:393`), § Assumptions (`:671`); `logical-components.md` header box (`:12-15`) | **The `evidence/` file-type census printed at four sites does not reproduce, and understates the guard's blind spot by two orders of magnitude.** The artifacts print *"33 `.csv`, 23 `.json`, 1 `.jsonl`, 4 `.md`"* outside the restricted root. Re-derived today with `find evidence -type f ! -path "*locked_test_restricted*"` → **33 csv, 24 json, 1 jsonl, 4 md, 14 html, 283 txt**. Two defects: the `.json` figure is **24, not 23**, and the census omits **297 non-JSON files** (283 `.txt` — the isprint text extractions, i.e. record-bearing data — plus 14 `.html`). The number the argument needs is the count of files the `*.json` guard **cannot see**: that is **321**, not the 38 the four types imply. The count was carried from the 2026-09-01 terminal pass rather than re-derived at the 2026-09-02 repair, which is the precise practice `project.md` § Way of Working forbids (*"ALWAYS derive a count programmatically … never carry a count from a finding's text or from an earlier revision"*). The design conclusion is unharmed — it is strengthened — but a printed inventory that does not reproduce is a finding in an artifact whose § SD-I-00 method is to print before asserting. | Re-derive and reprint at all four sites, naming `.txt` explicitly (it is the largest and the most record-bearing class), or state the census as "types sampled" and give the total non-JSON count the guard misses. |
+| 15 | Minor | `security-design.md` header box (`:51-54`); `logical-components.md` (`:36-38`) | **The access-log row count is stale.** Both artifacts state, as **verified** present-tense fact, *"`evidence/test_run_access_log.jsonl` (**232** rows on 2026-09-03, every one `purpose: coverage_audit`, from `test_release_hashes` and `test_acquisition_window`)"*. On disk today: **232 rows**, **232/232** `coverage_audit`, `test_release_hashes` **220** + `test_acquisition_window` **12** = 232. The load-bearing conclusions all still hold — no `merge_run_access_log.jsonl` ✓, no `locked_evaluation` or `regime_audit` purpose ✓, two constant `run_id`s ✓, so *"no December access occurs in this Bolt"* and SD-I-05's constant-id problem are both re-confirmed. Only the number is wrong, and it was carried across the repair rather than re-derived. | Reprint as 232 / 232 / 220 + 12 with the read date, or date-stamp the figure (*"as read 2026-09-01"*) so drift from test execution is not mistaken for a claim about today. |
+
+**Not re-raised.** Terminal findings 10 and 11 (both Minor) are untouched by this pass's scope — the owner's instruction was addressed to the two Majors — and `project.md` records that unaddressed Minors are not re-raised.
+
+### Checks run this pass, with results
+
+| # | Check | Method | Result |
+|---|---|---|---|
+| 1 | 3b's domain reaches December, in **both** artifacts | Read § SD-I-04 Check 3 limb table and `logical-components.md` guard row 3 | **Confirmed identical.** Both read *"all twelve months, December included"*; the two artifacts state the same split |
+| 2 | Any surviving *"other eleven"* reconciliation scope outside a correction box | `grep -n "eleven"` over both artifacts, each hit read in context | **One survivor** → finding 12 (`security-design.md:86`). The other survivors are the routing table's class row (correct — routing, not reconciliation) and quotations inside correction boxes |
+| 3 | The guard's actual scan bound | `sed -n '210,216p' src/data/locked_test.py` | **Confirmed.** `:213` = `for candidate in sorted(root.rglob("*.json")):`, restricted subtree skipped at `:214-215`. The artifacts' characterisation is exact |
+| 4 | Does anything still lean on the guard as sound? | Read every mention of `assert_no_december_outside_restricted` in both files | **No.** Every mention demotes it to a standing regression check with the audit deriving the class itself; disagreement = stop-and-report. Repair (b) is sound in substance → residual is finding 13 only |
+| 5 | The `evidence/` file-type census | `find evidence -type f ! -path "*locked_test_restricted*"`, extensions counted | **Refuted** → finding 14. 33 csv / **24** json / 1 jsonl / 4 md / **14 html** / **283 txt** |
+| 6 | `open_restricted` at `src/data/locked_test.py:147` | `sed -n '145,149p'` | **Confirmed.** `def open_restricted(path, *, record, registry) -> Path` begins at `:147` |
+| 7 | `AccessRecord.performance_inspected`; `PURPOSES` frozenset; `run_id` required non-empty | `sed -n '85,112p'`, `grep -n "PURPOSES\|performance_inspected\|run_id"` | **Confirmed all three.** `performance_inspected: bool` at `:81`; `PURPOSES: Final[frozenset[str]]` at `:68` with membership enforced at `:99`; `__post_init__` raises `LockedTestError` on an empty `run_id` (`:87`), and `locked_test_accessed` must be `True` |
+| 8 | `configs/` and this unit's four named files absent | `ls` of `configs`, `src/data`, `scripts`, `tests` | **Confirmed.** No `configs/`; `src/data` = `__init__.py`, `config.py`, `locked_test.py`, `release.py`; `scripts` = `audit_ec1_drivers.py`, `merge_coverage_year.py`; no `inventory.py`, `registry.py`, `01_inventory_and_registry.py`, `test_station_registry.py` |
+| 9 | `tests/` module set = six | `ls tests` | **Confirmed: 6.** `test_acquisition_window`, `test_locked_test_guard`, `test_merge_script_restricted_reads`, `test_phase_boundary`, `test_release_contract`, `test_release_hashes` |
+| 10 | `evidence/merge_run_access_log.jsonl` absent | `ls evidence \| grep jsonl` | **Confirmed absent.** Only `test_run_access_log.jsonl` |
+| 11 | Access-log row/purpose/run_id counts | `grep -c ""`, `grep -o … \| wc -l` | **232 / 232 coverage_audit / 220 + 12** → finding 15. Substance holds; the printed 158 does not |
+| 12 | `SchemaError` stays **routed, not decided**, with the reasoning stated | Read § SD-I-02's box, § Assumptions `[Q2 …]`, both header boxes, `logical-components.md` § Shared resources row 1 and § Assumptions | **Confirmed at five sites.** Both artifacts state that the blanket fix-until-clean instruction is **not** a ruling on it and that Q2 was answered on a two-item scope; the disposition is proposed for an explicit yes/no and nothing is written to `config.py`. This is the correct call, not ceremony |
+| 13 | No satisfaction or discharge claim | Read every `Status` cell in both coverage tables; `grep -ni igrf` | **Confirmed.** **0** rows satisfied; every row `Pending` or `untested`; IGRF version stays `TBD — freeze gate` at every occurrence; BLK-07's authorization limb stated open in both; no module write authorised; no scientific value decided |
+| 14 | Cross-artifact coverage tables identical in membership | Enumerated both tables and set-differenced **in both directions** | **Confirmed empty both ways.** Both = `{FR-P1-02-1,-7,-2,-3,-4,-5,-8, NFR-AUD-01, NFR-DQ-01, NFR-SEC-01}` = **10**, with **2** blank acceptance cells (FR-P1-02-7, -8) in each |
+| 15 | Printed count — **8** design sections; **3** components; **7 / 1 / 2** decomposition | Counted `## SD-I-` headings (9, minus the SD-I-00 state record); re-derived the per-component mapping | **Confirmed.** 8; I-1/I-2/I-3; 7 singly-assigned + SD-I-02 shared = 8 ✓ |
+| 16 | Printed count — the change record's **3** edits, stated identically everywhere | Four sites across both artifacts | **Confirmed consistent** (two `src/data` cells `—`→`X`, plus the `scripts/*` carve-out named as the larger deviation) |
+| 17 | Fresh-defect sweep for the two repairs' new text | Read every paragraph the 2026-09-02 header boxes claim to have changed, in both artifacts, plus every surface mentioning the reconciliation or the class test | **Two representation defects** (findings 12, 13) and **one carried count** (14). No new Critical; no contradiction between the two artifacts on the repaired rules themselves |
+
+### Validation tool results
+
+No stage-specific validator exists for `nfr-design`; the declared sensors were exercised by proxy.
+
+| Sensor | Method | Result | Interpretation |
+|---|---|---|---|
+| `required-sections` | `grep -c "^## "` | 16 H2 in `security-design.md` (this section included), 7 in `logical-components.md` | **PASS** — registry default ≥2; no team template under `memory/templates/` |
+| `upstream-coverage` | Each of the six `consumes` names grepped in both files | All six named in both; the three absent-by-design categories named in § Sources and § Scope note | **PASS** |
+| `linter` / `type-check` | Fenced-block scan | 0 fenced blocks in either artifact | **N/A** |
+
+### Coverage limits — what I did not check, and why
+
+- **No sibling unit's `construction/` content was opened** (read-scope bound, enforced by the harness hook — three attempts this pass were refused and not retried by another route). Every cross-unit claim remains this unit's own characterization, unverified: `acquisition`'s R-32/R-33/R-34/R-36 and SEC-A-03 limb 1; `foundation`'s R-01 any-future clause and the 2026-08-28 `PartitionError` declaration-site ruling; `governance-guards`' R-23/R-25/R-27/R-50 and its ownership of the guard's scan width; `evaluation-and-comparison` R-109; `features-and-splits`' frozen-hash artifact; `target-standardization`'s mislabel injection. `logical-components.md` § Sources cites two sibling `nfr-design/logical-components.md` files; **neither was opened**, so § The boundary criterion's sibling comparison is unverified.
+- **Finding 14 is derived from the workspace**, not from `governance-guards`' prose: I establish what `evidence/` contains and what `rglob("*.json")` reaches, not what any sibling unit intends.
+- **`evidence/DECISIONS.md` was not read.** D-1, D-2, D-9, D-11, D-12, D-15, D-24, D-31 and the G-09 signature are taken as stated.
+- **No test was executed.** `pytest` was not run; `open_restricted`, `AccessRecord.__post_init__` and `assert_no_december_outside_restricted` were established by reading source.
+- **The 232-row access log's individual rows were not audited** beyond purpose and `run_id` frequency; I did not verify that no row targets a December artifact by path.
+
+### Summary
+
+Both repairs are real where they were made. 3b now reaches December in **both** artifacts with identical wording, and nothing anywhere still leans on `assert_no_december_outside_restricted` as sound — the audit derives the class by record date over every file type and stops on disagreement, which is the right design and is stated the same way twice. What did not happen is the sweep: the corrected 3b domain reached § SD-I-04 and the guard table but not § Scope note's Observability row, which still prints the eleven-month scope finding 8 was raised against and which the previous pass named as one of that finding's three sites; and the record-date class test reached the correction box but not the routing table cell it corrects, which still defines December-bearing by **path** — the definition that misclassifies a December-bearing CSV under `audit_evidence_2022-01/`, the failure TEC-09 records and the one `project.md` § Forbidden names outright. Both are the exact pattern this project has recorded three times: the fix lands where the argument is made, not on the surface the implementer reads first. Alongside them, the `evidence/` census printed at four sites and the 158-row access-log figure were both carried across the repair rather than re-derived, and neither reproduces today (24 json not 23, with 297 non-JSON files unnamed; 232 log rows not 158) — in an artifact whose own method is to print a count before relying on it.
+
+Nothing is unbuildable, no coverage row is claimed satisfied, the IGRF version stays `TBD — freeze gate`, BLK-07's authorization limb is stated open in both artifacts, and `SchemaError`'s declaration site is correctly held at the gate rather than swept in under a blanket instruction. **NOT-READY** on **0 Critical and 3 Major** — three one-to-three-sentence edits and two recounts away from clean.
+
+---
+
+## Remediation of the post-repair pass — 2026-09-03
+
+Four findings, all repaired. The pass confirmed both earlier Majors closed **where the rules
+are defined** — Check 3's 3a/3b split and the record-date class derivation — and found every
+one of these four in a **summary surface** that the repair had not reached.
+
+| # | Sev | Repair |
+|---|---|---|
+| 12 | Major | **§ Scope note's Observability row still stated the superseded eleven-month scope**, two sections above the Check 3 repair that withdrew it. Now: non-December-bearing artifacts produce no access row, and **3b covers all twelve declared months**. |
+| 13 | Major | **The routing table defined the two classes by PATH and by DIRECTORY NAME** — *"anything under `evidence/locked_test_restricted/`"* and *"the other eleven months — `audit_evidence_2022-01` … `-11`"* — while the prose two paragraphs below made **record date** operative. `project.md` § Forbidden prohibits exactly that: *"NEVER derive fold or partition membership from an acquisition directory name or a filename."* It is also the test that misses a December-bearing CSV under `audit_evidence_2022-01/`, the realized TEC-09 failure. **Both rows now define the class by record date, with restricted-root residency stated as the expected consequence rather than the definition.** |
+| 14 | Major | **The `evidence/` census did not reproduce.** Printed: 33 `.csv`, 23 `.json`, 1 `.jsonl`, 4 `.md` — 38 files. Actual, `find`-derived 2026-09-03: **359 files** — 283 `.txt`, 33 `.csv`, **24** `.json`, 14 `.html`, 4 `.md`, 1 `.jsonl`. The error was not cosmetic: it **understated the `*.json` guard's blind spot by an order of magnitude**, describing a guard that sees 23 of 38 when it sees **24 of 359**. Corrected at all four sites across both artifacts. |
+| 15 | Minor | **The access log is 232 rows, not 158** — 220 `test_release_hashes`, 12 `test_acquisition_window`, all `coverage_audit`. The figure was carried rather than re-derived, and a further suite run appended since. § SD-I-05 now uses the growth from 158 to 232 **under the same two constant `run_id`s** as a live demonstration of the very indistinguishability that section exists to fix. |
+
+**The pattern this unit shares with its sibling, stated because it is now measurable.** Both
+earlier Majors were closed in the paragraph that defines the rule and left standing in the
+table or summary row that restates it. **Every one of these four findings was in a restatement,
+not in a rule** — a Scope-note row, a routing table, a census, a count. The rules themselves
+survived every pass. What a repair has to sweep is not the rule it changed but **each surface
+that summarises it**, and those surfaces are the ones an implementer reads first.
+
+*(Section authored with the file-writing tools, per `project.md`'s rule that every
+`produces[]` artifact carries a native write event.)*
+
+---
+
+## Review — 2026-09-03 post-repair iteration 2 (terminal)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-03T10:26:49Z
+**Iteration:** 2 (terminal, advisory)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| — | — | — | **None.** All four iteration-1 findings (12 Major, 13 Major, 14 Major, 15 Minor) are closed, and the four repairs introduced no fresh defect. | — |
+
+### The five checks
+
+| # | Check | Method | Result |
+|---|---|---|---|
+| 1 | **Finding 12 — § Scope note Observability row** | Read `:86` against § SD-I-04 Check 3's limb table (`:445`) | **Closed.** The row now reads *"Non-December-bearing artifacts are ordinary paths and produce no access row. **Reconciliation 3b covers all twelve declared months, December included**, against the coverage report's per-month output"*, with a dated correction note naming finding 12. Membership-identical to Check 3's limb 3b (*"all twelve declared months, December included"*) and to `logical-components.md` guard row 3 (`:182`). The superseded *"other eleven"* reconciliation scope survives nowhere outside a correction box or an explicit quotation |
+| 2 | **Finding 13 — the two routing-table class cells** | Read the routing table (`:369-370`) plus a `grep -n` sweep for `locked_test_restricted` / `audit_evidence_2022-0` used as a class definition, each hit read in context | **Closed.** Both cells now define the class by **record date** — *"any artifact carrying a December 2022 record, decided by RECORD DATE, which after D-15's relocation of 21 files **should coincide** with residency under `evidence/locked_test_restricted/`"* and *"an artifact carrying **no** December 2022 record, again decided by **record date** rather than by the directory it sits in"* — with a correction box directly beneath stating residency as **consequence, never definition** and citing `project.md` § Forbidden and the TEC-09 failure. No other cell or sentence in either artifact defines the class by path or directory name outside a correction box. Two path-shaped survivors were read and are **not** definitions: `:174` in `logical-components.md` states where the eleven months physically sit (a fact, used to argue the chokepoint refuses them), and `:785` sits inside the **2026-09-01 review's own remediation table**, a dated historical record of what that repair did — `project.md` § Corrections forbids editing a completed review record to match a later derivation, so leaving it is correct |
+| 3 | **Finding 14 — the `evidence/` census** | Re-derived independently: `find evidence -type f ! -path "*locked_test_restricted*"`, extensions counted | **Closed and reproduces exactly.** **359 files — 283 `.txt`, 33 `.csv`, 24 `.json`, 14 `.html`, 4 `.md`, 1 `.jsonl`.** (Whole `evidence/` tree including the restricted root is 388 files / 35 `.json`; the artifacts' figure is correctly and explicitly scoped *"outside the restricted root"* at every site.) Present at all four sites the prior pass enumerated: `security-design.md` header box `:19`, § SD-I-04 guard box `:405-408`, § Assumptions `:690`; `logical-components.md` header box `:14`. Every surviving *"23 `.json`"* string is an explicit quotation of the superseded figure inside a correction box or the review history |
+| 4 | **Finding 15 — the access-log count** | `wc -l` and `grep -c` on `evidence/test_run_access_log.jsonl` | **Closed and reproduces exactly.** **232 rows; `test_release_hashes` 220 + `test_acquisition_window` 12 = 232.** Both header boxes agree (`security-design.md:52-54`, `logical-components.md:47`), and § SD-I-05 (`:484-488`) prints the same split and turns the 158→232 growth **under two unchanged constant `run_id`s** into a live demonstration of the indistinguishability that section exists to fix — a stronger use of the corrected figure than a bare reprint |
+| 5 | **Fresh defects from these four repairs only** | Read every repaired site in full context; compared the two artifacts' header boxes and the new § Remediation against the body and the two earlier remediation sections | **Clean.** No severed sentence, no broken blockquote — the finding-13 correction box is a well-formed `>` block sitting immediately under its table, and the census insertions are parenthetical clauses inside intact sentences. **No one-artifact-only defect**: finding 12's site exists only in `security-design.md` (there is no Scope note in the sibling) and the sibling's own restatement at `:182` already carried the corrected 3b domain; finding 13's site is likewise `security-design.md`-only, with `logical-components.md` carrying no path-based class definition to correct; findings 14 and 15 landed in **both** artifacts with consistent figures. The new § Remediation contradicts neither the body nor the 2026-09-02 and 2026-09-01 sections: it is additive, correctly labels 12/13/14 Major and 15 Minor, and its self-diagnosis (*"every one of these four findings was in a restatement, not in a rule"*) matches what I found. `logical-components.md`'s header box cross-references it by name |
+
+### Are the iteration-1 findings genuinely closed?
+
+Yes — all four, at every site, verified against disk rather than against the artifacts' own
+claims for the two that are counts. Findings 14 and 15 were **re-derived independently** and
+reproduce to the file. Findings 12 and 13 were verified by reading the corrected surface and
+sweeping for surviving representations of the superseded wording; the only survivors are
+quotations inside correction boxes and one entry in a dated prior-review record that must not
+be edited.
+
+### Coverage limits
+
+- Everything outside these five checks was verified in **iteration 1** and was **not
+  re-checked** here on the orchestrator's instruction: the two earlier Majors closed where the
+  rules are defined; `SchemaError` still routed to the gate with its reasoning at five sites;
+  all workspace-state claims; all other counts; both requirement-coverage tables
+  (set-differencing empty in both directions).
+- The 232 access-log rows were checked for count, `purpose` and `run_id` frequency only; I did
+  not audit individual rows for a December-targeting path.
+- Cross-unit claims were checked against the passed shared contracts. The two upstream items
+  this design narrows — `functional-design` **W-6**'s *"for each artifact: `acquisition`'s
+  named accessor"* and `acquisition` **R-32**'s ⚠ PROPOSED accessors — remain correctly
+  **routed to the gate as open rulings**, not silently applied upstream. Widening
+  `assert_no_december_outside_restricted`'s `*.json` scan stays `governance-guards`' change.
+
+### Summary
+
+The design is now complete enough to build from and accurate about its own workspace. The
+routing rule, its two-limb reconciliation and its class test are stated identically in the
+rule, in the table an implementer reads first, and in the sibling artifact's restatement, and
+the class is derived by record date everywhere it is operative — which is what closes the
+TEC-09 failure mode this section exists to prevent. Both re-derivable counts reproduce to the
+file. What remains open is openly open and correctly routed: `SchemaError`'s declaration site,
+W-6's wording, R-32's proposed accessors, the `run_id` uniqueness convention, the IGRF freeze,
+and BLK-07's authorization limb — each carried as a named gate ruling or a dependency rather
+than as an assumption a developer would have to guess at. **READY.**
+
+---
+
+## Re-save note — 2026-09-04
+
+A **fourth** owner-directed redo of `nfr-design` cleared every unit's checkpoint and review
+receipts again. It was ordered to repair two Majors in **`target-standardization`**, not here.
+**This unit was untouched by it**; the summary was re-confirmed and the artifact re-saved so
+the receipts exist. **No claim in this document is altered by this note** — the two repaired
+Majors, the four post-repair findings, the 232-row access log, the 359-file census and
+`SchemaError`'s routing to the gate all stand exactly as recorded above.

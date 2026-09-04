@@ -2,6 +2,23 @@
 
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-02, content unchanged.** A `STAGE_JUMPED` redo of `nfr-design` — ordered
+> by the project decision owner to repair a Critical finding in the sibling unit
+> `external-products` — cleared this stage's per-unit checkpoint and review receipts for every
+> unit. This unit's decomposition was **not** revised; the summary was re-confirmed and the
+> artifact re-saved so the required receipts exist again. **G-1/G-2/G-3, the 121 access rows
+> and every status claim stand exactly as recorded.**
+>
+> **Repeated once more the same day**, after a second owner-directed redo. This unit was
+> untouched by both. **G-2 now carries a second recorded narrowing** beside DISC-2:
+> `assert_no_december_outside_restricted` scans `*.json` only, recorded by
+> `inventory-and-registry`. Widening it is G-2's change to make.
+>
+> **Repeated a third time**, after the seventh reviewer pass on `external-products`. **This
+> unit was untouched by all three redos.**
+>
+> **And a fourth redo 2026-09-04**, to repair two Majors in `target-standardization`. **This unit was untouched by all four.**
+
 > ## ⚠ COMPONENT STATE IS MIXED — some of this is built, most is not
 >
 > Written against the **workspace as it is on 2026-09-01**, per the owner's ruling, not

@@ -84,7 +84,7 @@ X. Other (please specify)
 > check unmet"* — and that reading should be stated in the design rather than assumed, because
 > it is the load-bearing half of the option.
 
-[Answer]:
+[Answer]: A
 
 ---
 
@@ -134,7 +134,7 @@ X. Other (please specify)
 > **all** existing declarations migrating together — not as a side effect of placing two new
 > ones.
 
-[Answer]:
+[Answer]: A
 
 ---
 
@@ -185,7 +185,7 @@ X. Other (please specify)
 > — a correlation test against a benchmark the data is supposed to resemble is a threshold this
 > project has no basis to set.
 
-[Answer]:
+[Answer]: A
 
 ---
 
@@ -231,4 +231,57 @@ X. Other (please specify)
 > against. D's precedent is real, and it would break the one rule this unit most needs kept
 > whole.
 
-[Answer]:
+[Answer]: A
+
+---
+
+## Consolidated Summary Confirmation
+
+All four answered with the recommended option, on the owner's instruction of 2026-09-02
+("apply your recommendations"). Recorded as a **one-time instruction for this unit's question
+set**, not a standing autonomy grant.
+
+**Q1 — the vacuous import-allowlist pass**: **A. Skip with a stated reason in the ordinary
+suite; the §18.3 preflight treats a skipped critical check as UNMET.** The run record says
+`skipped`, never `passed`, while `src/external/iri.py` and `gim.py` are absent. **This stage
+fixes a §18.3 reading** — *"no failing critical test"* is read as *"no critical check
+unmet"* — and that reading is stated in the design rather than assumed, because it is the
+load-bearing half of the option. Risk carried: a normalised skip is how a control quietly
+stops being one; the preflight coupling is what stops that.
+
+**Q2 — `ImportBoundaryError` and `FeatureAvailabilityError`**: **A. Declared in
+`src/data/config.py`**, deriving from `IntegrityError`, riding R-01's *"any future
+integrity-related exception"* clause; neither claimed as an enumeration entry. Consistent
+with the owner's `inventory-and-registry` Q2 = A ruling and with the 2026-08-28 ruling that
+moved `PartitionError`'s declaration site into `config.py`. **The `src/data/exceptions.py`
+§12 amendment is not taken** and is named as the better end state to raise on its own merits,
+with all existing declarations migrating together.
+
+**Q3 — the residual surviving both IRI limbs**: **A. Flip the provenance default — absent
+provenance FAILS.** The feature-matrix assertion admits a column only if its provenance is
+**present and not IRI**, rather than rejecting only columns whose provenance says IRI. This
+closes the **stripping** act; **it does not close the residual** — a value renamed and
+recomputed from scratch still survives, and no artifact may describe NFR-IRI-01 as fully
+enforced. **Option B (a numeric fingerprint against the IRI benchmark) is declined
+explicitly**, because the data is supposed to resemble the benchmark and the threshold would
+be a number this project has no basis to set. Cost accepted: every feature-matrix column now
+needs a provenance value, which **adds to the `features-and-splits` half of the two-half
+contract that is already owed rather than agreed**.
+
+**Q4 — the component boundary criterion**: **A. What the component keeps out.** Three
+components — **E-1 containment** (IRI/GIM out of training and inference), **E-2 forecast
+safety** (the future out of a forecast origin), **E-3 benchmark and comparator integrity**
+(an unvalidated benchmark or an unaudited-independence comparator out of the comparison).
+W-8's exit-code work and W-10's build boundary cross all three and are placed explicitly.
+
+**Unchanged by these answers.** No scientific value is decided. The `iricore` pin with its
+switch set, topside option and 2000 km ceiling, and the CODE final GIM product version, both
+stay `TBD — freeze gate`. IRI generation stays blocked on R-59's validation. The
+`gim_network_overlap_flag` audit has not run and no independence claim precedes it.
+**`tests/test_iri_denial.py` does not exist**, and nothing here claims otherwise. No module is
+written by this stage.
+
+- Looks correct
+- Request changes
+
+[Answer]: Looks correct

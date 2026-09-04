@@ -2,6 +2,33 @@
 
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Revised 2026-09-02 — the two open Majors are now FIXED.** Under the owner's instruction
+> to fix all findings until clean, the two Majors carried from the 2026-09-01 terminal pass
+> are repaired here rather than left for the gate:
+>
+> 1. **The split reconciliation no longer drops December.** Limb **3b** — declared months
+>    against the coverage report's per-month output — now covers **all twelve months**, not
+>    "the other eleven". December is covered twice over: its reads by 3a, its count by 3b.
+> 2. **The routing no longer rests on `assert_no_december_outside_restricted`.** That guard
+>    scans `*.json` only while claiming to walk every December-bearing artifact — it sees
+>    **24 of the 359 files** outside the restricted root (283 `.txt`, 33 `.csv`, 24 `.json`,
+>    14 `.html`, 4 `.md`, 1 `.jsonl`, `find`-derived 2026-09-03) — so I-2
+>    **derives the class itself by record date across every file type in its declared
+>    scope**, and a disagreement with the guard **stops the run**.
+>
+> **Four further findings repaired 2026-09-03** on the post-repair pass, all in **summary
+> surfaces the earlier repairs had not reached**: § Scope note's Observability row still
+> carried the superseded eleven-month scope; the routing table defined the December class by
+> **path and directory name** where `project.md` § Forbidden requires record date; the
+> `evidence/` census understated the `*.json` guard's blind spot as 23-of-38 when it is
+> **24 of 359**; and the access log is **232** rows, not 158. See `security-design.md`
+> § Remediation of the post-repair pass.
+>
+> Everything else in this decomposition is unchanged. The summary was re-confirmed against
+> these repairs before this save, and again after a **third** redo of the stage — that one for
+> `external-products`, leaving this unit untouched. **`SchemaError`'s declaration site stays
+> routed to the gate.**
+
 > ## ⚠ NONE OF THESE COMPONENTS EXISTS
 >
 > Unlike `governance-guards`, whose decomposition described a mixed state, **every component
@@ -17,7 +44,7 @@
 > one process.
 >
 > **No December access occurs in this Bolt.** `evidence/merge_run_access_log.jsonl` does not
-> exist; the only access log present is `evidence/test_run_access_log.jsonl` (158 rows, all
+> exist; the only access log present is `evidence/test_run_access_log.jsonl` (**232** rows on 2026-09-03, all
 > `purpose: coverage_audit`). **BLK-07's authorization limb is open**; **G-09 is signed
 > (D-31) with preconditions UNMET**; the §18.3 preflight has never run.
 
@@ -152,7 +179,7 @@ does not announce itself. It is a component of its own for exactly that reason.
 |---|---|---|
 | Declared **versus required**, against a governed reference set derived from the release inventory | The audit **declared everything required** — the only check that proves completeness | **No.** Entirely this unit's to build |
 | A durable access row **before** each read of a **December-bearing** artifact, through `acquisition`'s named accessor | **Every read of a locked-month artifact was logged**, in an order a later artifact can be compared against | **Half.** The **chokepoint** is built — `open_restricted`, `_append_and_flush`, `os.fsync`, guard-stamped `logged_at_utc`. The **R-32 accessor routing layer is not**: it is absent from `component-methods.md`'s approved block and is amendment (1) of `acquisition`'s three |
-| Rows reconciled against the **December portion** of the declared scope, **per `run_id`**; the other eleven months reconciled against the **coverage report's own per-month output** | The audit **read what it declared**, and an honest re-run is legible as one | **No.** `run_id` exists as a required field, but the **uniqueness convention** does not, and neither reconciler exists |
+| **Two reconciliations over different questions**: **3a** access rows vs declared scope, **per `run_id`**, over the December-bearing class only; **3b** declared months vs the coverage report's per-month output, over **all twelve months, December included** | 3a: the audit **read what it declared**, and an honest re-run is legible as one. 3b: **every declared month produced a count** | **No.** `run_id` exists as a required field, but the **uniqueness convention** does not, and neither reconciler exists. *(3b widened from "the other eleven months" 2026-09-02 on terminal finding 8, Major — the superseded split left December in neither report check.)* |
 | The **import boundary** — Limb A's forbidden edge and Limb B's reachability closure | The audit **could not have seen a performance figure**, rather than merely declaring it did not | **No.** `_imported_modules` is the primitive; the closure does not exist |
 
 **Why the fourth guard is in this component and not a cross-cutting concern.** The
@@ -308,7 +335,7 @@ enforced by `tests/test_acquisition_window.py` and `assert_no_december_outside_r
 - **[SD-I-01 — owed]** **One change record carrying three edits**: two `component-dependency.md` cells promoted `—` → `X`, **plus a named carve-out withdrawing the `scripts/*` row's affirmative `yes` grant for `01_inventory_and_registry.py`**. The carve-out is the larger deviation — it withdraws a permission the matrix explicitly gives, where the other two record an obligation it did not have. *(Scope corrected 2026-09-01 on adversarial finding 3, Major; the first issue said "two cells".)*
 - **[DISC-I-3]** `components.md:64` puts two **`acquisition`-owned** requirements — **FR-P1-01-6** and **FR-P1-01-2** — into `inventory.py`, which is I-1's module. FR-P1-01-2's suffix-mismatch half is **⚠ PROPOSED**: `acquisition` R-34 holds the release-manifest carriage of `suffix_mismatch` **Open for stage 3.2**. Neither appears in this unit's coverage table, correctly; the seam is the module, not the requirement.
 - **[I-2 — OPEN, routed to the gate]** **W-6's approved mechanism carries the routing defect too** — *"for each artifact: `acquisition`'s named accessor"*, with no restricted/ordinary distinction. Corrected in this stage's artifacts and **not applied upstream**; the ruling owed at the gate is whether W-6 is amended by change record or whether the narrowing stands in the gate record alone.
-- **[I-2 — the routing correction's own dependency]** The two-class routing in `security-design.md` § SD-I-04 rests on **`assert_no_december_outside_restricted` continuing to pass**: it is what keeps "December-bearing" and "under the restricted root" the same set after D-15's relocation of 21 files. **If that guard fails, the routing is wrong before the audit is** — an unrelocated December artifact would be read as an ordinary path and never logged.
+- **[I-2 — the guard this routing must NOT rest on]** `assert_no_december_outside_restricted` scans **`*.json` only** while its docstring claims it walks *every* December-bearing artifact. I-2 therefore **derives the class itself by record date across every file type in its declared scope**, and a disagreement with the guard **stops the run**. The guard remains a standing workspace regression check. *(Corrected 2026-09-02 on terminal finding 9, Major.)*
 - **[SD-I-05 — owed]** The **`run_id` uniqueness convention**; the field exists, nothing today makes two attempts carry different values. Format is 3.5's.
 - **[SD-I-06 — hard dependency]** **`acquisition`'s redaction serializer does not exist**, and I-1's inventory entries depend on it.
 - **[DISC-I-2]** `merge_coverage_year.py`'s `retrieved_at_utc` placeholder migrates into I-2's stage script unless replaced. **A migration obligation.**
@@ -319,3 +346,12 @@ enforced by `tests/test_acquisition_window.py` and `assert_no_december_outside_r
 - **Carried — Kaggle's durability semantics are unmeasured**, and I-2's before-the-read guarantee depends on them.
 - **Carried — FR-P1-02-8's replacement acceptance row** after `TA-29`'s withdrawal.
 - **None** of the above decides a scientific value, fills a `TBD — freeze gate` field, authorises writing a module, or claims a gate, acceptance row or test as discharged.
+
+---
+
+## Re-save note — 2026-09-04
+
+A **fourth** owner-directed redo of `nfr-design`, ordered to repair two Majors in
+**`target-standardization`**, cleared every unit's receipts again. **This unit was untouched
+by it**; the summary was re-confirmed and the artifact re-saved. **No component, boundary or
+status claim above is altered by this note.**

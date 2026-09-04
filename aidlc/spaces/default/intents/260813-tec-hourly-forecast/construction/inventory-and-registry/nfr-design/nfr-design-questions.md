@@ -279,3 +279,16 @@ No module is written by this stage.
 - Request changes
 
 [Answer]: Looks correct
+
+---
+
+## Requested Changes Feedback
+
+What should change?
+
+[Answer]: Fix all findings until all are clean. (Owner instruction, 2026-09-02.) This unit's two
+open Majors from the 2026-09-01 terminal pass are in scope: the split reconciliation leaving
+December in neither limb, and `assert_no_december_outside_restricted` scanning `*.json` only
+while the routing depends on it. `SchemaError`'s declaration site stays **routed to the gate**
+— a blanket instruction to fix findings is not a ruling on a decision explicitly reserved to
+the owner, and Q2 was answered on a two-item scope.

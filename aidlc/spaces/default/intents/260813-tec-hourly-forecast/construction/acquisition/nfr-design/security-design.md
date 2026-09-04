@@ -2,6 +2,21 @@
 
 **Unit** `acquisition` (Bolt 3) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-02, content unchanged.** A `STAGE_JUMPED` redo of `nfr-design` — ordered
+> by the project decision owner to repair a Critical finding in the sibling unit
+> `external-products` — cleared this stage's per-unit checkpoint and review receipts for every
+> unit. This unit's answers, artifacts and prior reviewer verdict were **not** revised; the
+> summary was re-confirmed and the artifact re-saved so the required receipts exist again.
+> **No status claim is altered by this note** — the redaction serializer is still unbuilt and
+> BLK-07's authorization limb is still open.
+>
+> **Repeated once more the same day**, after a second owner-directed redo of the same stage,
+> **and a third time** after the seventh reviewer pass on `external-products`. **This unit was
+> untouched by all three redos** — the redaction serializer is still unbuilt and BLK-07's
+>
+> **And a fourth redo 2026-09-04**, to repair two Majors in `target-standardization`. **This unit was untouched by all four.**
+> authorization limb is still open.
+
 > ## ⚠ WRITTEN AGAINST THE WORKSPACE ON 2026-09-01 — NOTHING HERE IS BUILT
 >
 > Per the owner's 2026-09-01 ruling, this design is written against **current workspace
@@ -288,3 +303,46 @@ lesson is recorded in this stage's diary and this is the first unit where it was
 - **[carried]** The **NFR-SEC-01 / Madrigal-identity conflict is the supervisor's**; **no reading is adopted**.
 - **[carried]** **`configs/`, `pyproject.toml`, `requirements.txt` absent** — TC-06's scaffold precondition unmet. The suite is **off-pin** and **not governed evidence**.
 - **None** of the above decides a scientific value, fills a `TBD — freeze gate` field, or claims a gate, acceptance row, install or test as discharged.
+
+## Review — 2026-09-02 post-redo confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-03T10:13:45Z
+**Iteration:** 1 (of 2) — confirming pass after three `STAGE_JUMPED` redos of `nfr-design` ordered against the sibling unit `external-products`
+**Prior verdict still holds:** Yes. No regression found; every present-tense workspace claim re-verified against disk today. Two Minor findings, neither blocking.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `security-design.md` (whole file) | The dispatch brief states the prior verdict is recorded in this file's own `## Review` section; `grep -n "^## Review"` returned no match (exit 1) before this section was appended. The earlier verdict is therefore not recoverable from the artifact — the re-save preserved the design text but not the review receipt. | No action on the design. This section restores the record; if the earlier verdict text is held elsewhere, quote it here at the next pass. |
+| 2 | Minor | `security-design.md` § SD-A-02 ⚠ box; `logical-components.md` § A-2 | Q3's limb-2 rationale is prospective, not remedial, and the artifacts do not say so. `notebooks/madrigal_phase1_coverage_audit.ipynb` carries **14 code cells, all with `"outputs": []` and `"execution_count": null`** — zero saved output cells today. The design never claims otherwise (it says only that the notebook "is in the workspace today", which is true, and the live identity exposure is `USER_EMAIL` in cell **source**, 4 hits, not in outputs), but the juxtaposition invites a reader to treat the pre-commit hook as clearing an existing leak. | Add one measured clause: the hook is preventive — the notebook holds no saved outputs as of this date — and the `USER_EMAIL` exposure sits in cell source, which limb 2 does not reach either. |
+
+### Checks run
+
+| Check | Command / method | Result | Interpretation |
+|---|---|---|---|
+| Redaction serializer absent | `grep -rn "CredentialEgressError\|redact" src/ scripts/ tests/` | 0 hits | Claim **holds**. `SD-A-00` row 3, both ⚠ boxes and both Assumptions lists are current. |
+| `write_restricted` absent | `grep -rn "write_restricted" src/ scripts/ tests/` | 0 hits | Claim **holds**. R-33 contract genuinely unbuilt. |
+| `open_restricted` present | same grep | `src/data/locked_test.py:147` (def); `scripts/merge_coverage_year.py:76,107` routes via `guarded()`; exercised by `tests/test_locked_test_guard.py`, `tests/test_acquisition_window.py`, `tests/test_merge_script_restricted_reads.py` | `SD-A-00`'s "half stale" characterisation of SEC-A-04 is **exactly right** — read side exists, write side does not. |
+| FULL artifact set | `ls evidence/locked_test_restricted/audit_evidence_2022-FULL/` | `request_manifest.json`, `sha256_manifest.json`, 3 CSVs, `PROVENANCE_NOTICE.md` | `SD-A-00` row 2 **holds**, including the `PROVENANCE_NOTICE.md` claim at § SD-A-04. |
+| Notebook saved outputs | `grep -c '"output_type"'` = **0**; `"outputs": []` = 14; `"execution_count": null` = 14 | No saved outputs | See finding 2. No artifact claim is falsified; the framing is what is thin. |
+| TC-06 scaffold | `ls configs/ pyproject.toml requirements.txt` | all three absent | "TC-06's scaffold precondition unmet" **holds**; the off-pin/not-governed-evidence caveat stands. |
+| Coverage-table count, this file | rows enumerated by hand from the table | **17** (REQ-ENG-13, FR-P1-00-1/2, FR-P1-01-1…11, NFR-SEC-01, NFR-AUD-01, NFR-DQ-01) | Printed **17** is **correct**; the preserved superseded **14** is correctly labelled. |
+| Rows with no acceptance row | `grep -c "NO ACCEPTANCE ROW"` = 3 → FR-P1-01-5, -7, -9 | **3** | Printed **3** is **correct** (superseded **2** correctly preserved). |
+| Section count | `## SD-A-00` … `## SD-A-04` | **5** | Printed **5** correct. |
+| Sibling table + set difference | `logical-components.md`: 7 rows enumerated; shared set = FR-P1-01-1, -2, -6, -10, NFR-SEC-01, NFR-AUD-01, NFR-DQ-01; SD-only list enumerated = REQ-ENG-13, FR-P1-00-1, FR-P1-00-2, FR-P1-01-3, -4, -5, -7, -8, -9, -11 | 7 shared, **10** SD-only, **0** LC-only, 7 + 10 = **17** | Every printed figure re-derived and **correct**; the ID lists were set-differenced, not the totals. |
+| Cross-artifact consistency | both artifacts compared on: 17/14 correction, serializer status, `write_restricted` status, exempt list at **seven**, G-09 signed / stage 3.1 FAIL, DATA-07 three-month caveat, redo note | **No divergence** | The repeated defect of this stage — a repair landing in one artifact and not its sibling — **did not recur here**; both carry the corrected 17 in prose, table and heading, and both carry the third-redo note. |
+| No satisfaction/discharge claim | read both `## Assumptions & Open Questions` closers and every `Status` cell | 0 rows satisfied, 0 acceptance rows discharged, BLK-07 authorization limb open, no freeze-gate value filled, no module write authorised beyond G-09/D-31 | **Holds** in both artifacts. |
+| Q1–Q4 implemented as answered | § SD-A-02 (Q1: unconditional refusal for signed URL / auth header, blocking heuristic elsewhere naming its match, allowlist trap stated as a review surface never grown to silence a failure); § SD-A-03 (Q2: sibling function in `governance-guards`' module, shares `_append_and_flush`, exempt list stays at seven, ownership stated as caller-not-owner); § SD-A-02 limb 2 (Q3: pre-commit refusal, not auto-strip, with the tagged-history argument); `logical-components.md` § boundary criterion (Q4: egress direction, with both rejected alternatives argued) | All four implemented with costs and residuals stated | No answered question is under-designed or silently softened. |
+
+### Coverage limits of this pass
+
+- Read-scope bound honoured: no sibling unit's `construction/<other-unit>/` file was opened, grepped or globbed. The claims about `governance-guards`' module ownership, its DISC-1 exempt list of seven, and `foundation` § SD-01/SEC-F-02 are **this unit's own characterisation** and were not verified against those units' artifacts. The one workspace fact I could check without crossing that bound — that `open_restricted` lives in `src/data/locked_test.py` — is confirmed.
+- The suite was **not executed**; the "277 passed / 2 skipped, off-pin under Python 3.14.7 / pytest 9.1.1" figure is quoted from the artifact, not re-measured. It is labelled *not governed evidence* in the artifact itself, so nothing rests on it.
+- Component and boundary soundness was re-read but not re-litigated; the prior pass's assessment stands.
+
+### Summary
+
+Nothing in this unit regressed across the three redos, and nothing has gone stale: all four disk-checkable claims — no redaction serializer and no `CredentialEgressError`, `open_restricted` present with R-33's write contract absent, the FULL manifest set complete, and the TC-06 scaffold missing — verify against the workspace today, and every printed count (17 rows, 3 without an acceptance row, 5 sections, 3 components, 7 shared / 10 SD-only / 0 LC-only) re-derives correctly from the current files. The two artifacts agree on every corrected figure and status, so the one-artifact-repaired-and-not-its-sibling defect that recurred four times in this stage did not recur here. The two Minor findings are a missing prior-review receipt in the file and one prospective-versus-remedial framing around the notebook; neither changes a design decision.

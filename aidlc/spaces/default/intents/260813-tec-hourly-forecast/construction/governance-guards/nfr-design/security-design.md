@@ -2,6 +2,26 @@
 
 **Unit** `governance-guards` (Bolt 2) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-02, content unchanged.** A `STAGE_JUMPED` redo of `nfr-design` — ordered
+> by the project decision owner to repair a Critical finding in the sibling unit
+> `external-products` — cleared this stage's per-unit checkpoint and review receipts for every
+> unit. This unit's answers, artifacts and prior reviewer verdict were **not** revised; the
+> summary was re-confirmed and the artifact re-saved so the required receipts exist again.
+> **DISC-1 and DISC-2 stand exactly as recorded, and no status claim is altered by this
+> note.**
+>
+> **Repeated once more the same day**, after a second owner-directed redo of the same stage.
+> This unit was untouched by both. One item worth flagging to a reader of DISC-2:
+> `inventory-and-registry` has now recorded that **`assert_no_december_outside_restricted`
+> scans `*.json` only** while its docstring claims it walks every December-bearing artifact —
+> a **second** narrowing in this unit's G-2 scans, alongside DISC-2's textual literal scan.
+> Widening it is this unit's change to make; it is not made here.
+>
+> **Repeated a third time**, after the seventh reviewer pass on `external-products`. **This
+> unit was untouched by all three redos.**
+>
+> **And a fourth redo 2026-09-04**, to repair two Majors in `target-standardization`. **This unit was untouched by all four.**
+
 > ## ⚠ WRITTEN AGAINST THE WORKSPACE AS IT IS ON 2026-09-01, NOT AGAINST UPSTREAM'S STATUS CLAIMS
 >
 > The owner ruled on 2026-09-01 that this design be written against **current workspace
@@ -417,5 +437,53 @@ No new findings. The redo-jump's re-recorded confirmation and the two added para
 ### Summary
 
 This confirming pass independently re-derived every figure and re-read every code location the added paragraphs and the standing checks depend on (the seven-entry exempt set, the textual DISC-2 scan, `open_restricted`'s five enforced properties, the two absent symbols, `_read_guarded` at both sites, and the 37→158/121-insertion evidence-log arithmetic via two independent methods) rather than trusting the prior passes' record of them, per this project's count-derivation and independent-verification practices. Every check matches the artifacts exactly. The scope-bound and component-attribution paragraphs added for this redo are both accurate and add no unverified claim. No Critical or Major findings; READY stands.
+
+READY
+
+---
+
+## Review — 2026-09-02 post-redo confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-03T10:10:37Z
+**Iteration:** 1 (of 2) — confirming pass after the third `STAGE_JUMPED` redo of `nfr-design`
+**Prior verdict:** holds. Zero Critical, one Major (a stale re-derivation *instruction*, not a wrong design claim), two Minor.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `security-design.md` banner (~lines 58–62) and `logical-components.md` banner (~lines 42–45) | The access-log figures are stated as a **live git derivation** — "`git show HEAD:evidence/test_run_access_log.jsonl` = 37 … working tree 158 … `git diff --stat` reports 121 insertions(+), 0 deletions" — and that derivation **no longer reproduces**. On disk today: `wc -l evidence/test_run_access_log.jsonl` = **232**; `git show HEAD:…` = **158**; `git diff --stat` = **74 insertions(+), 0 deletions**. The 37→158/121 transition has since been **committed** (`fb080ed`, `34e8136` both touch this file), and a **further, undocumented run appended 74 more rows** — the last row is stamped `logged_at_utc: 2026-09-02T19:47:27…`, `run_id: test_release_hashes`. The historical event the banner describes did happen; what is stale is the check a reader is told to re-run to confirm it, and the implication that 121 is the total off-pin exhaust now in the log. | Restate the figures as an event fixed to a commit ("the 2026-09-01 run appended 121 rows, now committed; the log has since grown to 232 rows from a later 2026-09-02 run") rather than as a working-tree diff. The append-only property still holds under the new numbers (0 deletions), so the governance conclusion is unchanged — only the arithmetic and its method need restating. |
+| 2 | Minor | `security-design.md` § SD-G-04 table; `logical-components.md` ~line 129 | The literal scan is cited as `tests/test_locked_test_guard.py:277`. Line 275 is `def test_restricted_literal_holders_are_exactly_the_enumerated_exemption`, 277 its docstring; the `exempt = {…}` set is at **287** and the substring check `if "locked_test_restricted" in text:` at **308**. The citation points at the function, not at the mechanism DISC-2 is about. | Cite `:308` for the textual check and `:287` for the exempt set, or drop the line number and name the function. |
+| 3 | Minor | `security-design.md` banner (~line 41) | "277 passed, 2 skipped in 4.39s on 2026-09-01" was **not re-verified** this pass (no suite run, per the tool budget), and the 74 new log rows are evidence the suite has been run at least once since. The count may have drifted. | Acceptable as a dated historical record; if any later text leans on it as current, re-run and restamp. |
+
+### Checks run
+
+| Check | Method | Result |
+|---|---|---|
+| `open_restricted` at line 147 | `grep -n` on `src/data/locked_test.py` | **CONFIRMED** — `def open_restricted(...)` at **147** exactly. |
+| `os.fsync` durability, guard-stamped `logged_at_utc` | same grep | **CONFIRMED** — `row["logged_at_utc"] = …now(utc)…` at **138**, `os.fsync(handle.fileno())` at **143**; the stamp precedes the fsync and the caller supplies neither. Docstring lines 119–127 state the ordering rule as the artifact quotes it. |
+| `assert_no_december_outside_restricted` exists | same grep | **CONFIRMED** — defined at **193**. |
+| DISC-1 — exempt list has **seven** members | `sed -n '285,300p' tests/test_locked_test_guard.py`, enumerated and printed | **CONFIRMED, unchanged, not softened.** Seven entries: `src/data/locked_test.py`, `scripts/merge_coverage_year.py`, `tests/test_acquisition_window.py`, `tests/test_phase_boundary.py`, `tests/test_release_hashes.py`, `tests/test_locked_test_guard.py`, `tests/test_merge_script_restricted_reads.py` — the seventh still carrying its 2026-08-28 inline rationale and the "an exemption a reader cannot see is not an exemption, it is a hole" comment quoted in both artifacts. Upstream's six stands contradicted, exactly as recorded. |
+| DISC-2 — scan is **textual**, not AST | `grep -n` on `tests/test_locked_test_guard.py` | **CONFIRMED, unchanged, not softened.** Line **308**: `if "locked_test_restricted" in text:` — a substring test over source text. A concatenated literal is still not caught; no AST/constant-folding code has been introduced. |
+| Third narrowing (`rglob("*.json")` vs docstring) | `sed -n '193,215p' src/data/locked_test.py` | **CONFIRMED and accurately stated — neither overstated nor understated.** Line **213** iterates `sorted(root.rglob("*.json"))`, while the docstring (194–197) claims it "Walks `evidence/` **recursively** and returns **every** December-bearing artifact found outside the restricted root." The banner's wording — `*.json` only, docstring claims every artifact, a **second** narrowing beside DISC-2, **this unit's G-2 change to make and not made here** — matches the code. The docstring's own "recursive by construction / DATA-01" rationale is about depth, not extension, so the extension gap is genuinely unclosed and correctly owned. |
+| `assert_no_raw_fields` / `diff_protected_hashes` absent | `grep -rn` across `src/`, `tests/`, `scripts/` | **CONFIRMED** — zero matches for either symbol. R-23's produced-field limb and TA-27's hash-diff half remain unbuilt, as both artifacts state. |
+| Access-log row counts | `wc -l`, `git show HEAD:…`, `git diff --stat` | **STALE** — see Finding 1. 232 / 158 / 74 today against the artifacts' 158 / 37 / 121. The append-only property (0 deletions) still holds. |
+| Q4 = A boundary criterion (enforcement timing, mirroring R-24) | read of the boundary section and the G-1/G-2/G-3 attribution paragraphs in both artifacts | **CONSISTENT; the run-time/static distinction is preserved, not blurred.** The 121-row evidence is attributed to **G-1's run-time chokepoint only**; G-2's static scans (DISC-2, plus the `*.json` narrowing) and G-3 (no `src/data/reuse_registry.py`, no `tests/test_reuse_registry.py` — confirmed absent from `tests/`, which holds six modules) are explicitly excluded from it. Nowhere is a run-time result read as discharging a static check, or the reverse. |
+| No satisfaction / discharge claim | scan of both `## Assumptions & Open Questions` sections and the coverage table | **CONFIRMED.** The 121 rows are labelled off-pin and "not governed evidence" at every site that cites them. WS-18, TA-18, TA-27, TA-28 remain `Pending`; `NFR-AUD-01` remains `Pending — one half unbuilt`; G-09-signed-with-preconditions-unmet and stage 3.1 `FAIL` are still carried as open. Nothing authorises a module write beyond G-09/D-31. |
+| Cross-artifact consistency | targeted grep of `logical-components.md` for every figure and discrepancy claim | **NO ASYMMETRY.** Both banners carry the same 37/158/121 figures (both equally stale, so Finding 1 splits neither way), the same seven-member DISC-1, the same textual DISC-2, the same `*.json` third narrowing, the same off-pin 3.14.7 caveat. The recurring one-artifact-repaired defect did **not** recur here. |
+| Python pin | banner claim vs governed 3.11 | Off-pin disclosure present and unaltered; no `requirements.txt` exists to pin pytest. |
+
+### Coverage limits
+
+- The suite was **not re-run** (Finding 3); `277 passed / 2 skipped` is taken as a dated historical record, not re-derived.
+- Of the 74 new log rows, only the tail row was sampled; the producing run is inferred from that row's `run_id: test_release_hashes` and `logged_at_utc: 2026-09-02T19:47:27`.
+- Read-scope bound honoured: no `construction/<other-unit>/` file was opened, grepped or globbed. The `inventory-and-registry` recording of the `*.json` narrowing was verified **against the code itself**, never against that unit's artifact.
+- No governance gate, acceptance row, or supervisor signature was evaluated; those are the human's at the approval gate.
+
+### Summary
+
+The prior READY verdict holds. Every design-bearing claim this unit makes about built code was re-verified against disk and matches exactly — `open_restricted` at line 147, the stamp-then-fsync ordering, the two absent symbols, and both self-reported discrepancies, neither of which has been quietly softened. The third narrowing (`rglob("*.json")` against a docstring promising every artifact) is stated accurately and correctly owned as G-2's unmade change. The single Major is staleness of a **verification instruction**, not of a design decision: the access log has been committed and appended to since these artifacts were written, so the 37/158/121 derivation a reader is told to re-run now yields 158/232/74. The append-only conclusion drawn from it survives intact under the new numbers; the sentence stating it does not.
 
 READY

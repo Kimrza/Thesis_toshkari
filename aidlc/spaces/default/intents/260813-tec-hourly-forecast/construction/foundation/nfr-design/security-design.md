@@ -2,6 +2,25 @@
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-02, content unchanged.** A `STAGE_JUMPED` redo of `nfr-design` — ordered
+> by the project decision owner to repair a Critical finding in the sibling unit
+> `external-products` — cleared this stage's per-unit checkpoint and review receipts for every
+> unit, not only the one being repaired. This unit's answers, artifacts and prior reviewer
+> verdict were **not** revised; the consolidated summary was re-confirmed and the artifact
+> re-saved so the receipts the engine requires exist again. **Nothing in the design below
+> changed, and no status claim is altered by this note.**
+>
+> **Repeated once more the same day**, after a second owner-directed redo of the same stage —
+> this time to replace an enumeration with a complement in `external-products` and to repair
+> two Majors in `inventory-and-registry`. This unit was untouched by both.
+>
+> **And a third time**, after the seventh reviewer pass on `external-products` found its
+> workspace claim inherited rather than derived.
+>
+> **And a fourth**, to repair two Majors in `target-standardization`. **This unit was
+> untouched by all four redos**; its answers, artifacts and prior verdict are as first
+> written.
+
 > ## ⚠ THIS IS A DESIGN. NOTHING HERE IS BUILT, RUN, OR DISCHARGED
 >
 > **Module inventory, re-derived against the workspace on 2026-09-01.**
@@ -632,5 +651,62 @@ READY
 **Findings this pass:** none — no Critical, no Major, no drifted status, no broken cross-reference.
 
 **Summary:** both newly added paragraphs are accurate against the workspace (module existence/absence verified directly) and against the artifacts' own coverage tables (no row status drifted toward satisfied). This is a confirming pass over a procedural redo, not new content review.
+
+READY
+
+## Review — 2026-09-02 post-redo confirming pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-03T10:05:03Z (real UTC, taken by shell this pass; the dispatch labels this the "2026-09-02" pass and the heading preserves that label)
+**Iteration:** 1 of 2 (advisory)
+
+**Nature of this pass.** A confirming pass over content the prior entries already passed. Three `STAGE_JUMPED` redos of `nfr-design`, all ordered to repair the sibling unit `external-products`, cleared this stage's receipts for every unit; this unit's design was untouched. The prior verdict was not accepted on trust — every fact-shaped claim below was re-derived from the current workspace, not carried from a previous review entry.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `security-design.md` re-save banner (line ~5) vs. `logical-components.md` banner (lines 5–14) | **The two artifacts disagree on how many redos occurred.** This file's banner says "A `STAGE_JUMPED` redo of `nfr-design`" — singular. Its sibling says the same note was "Repeated once more the same day … **and a third time** after the seventh reviewer pass on `external-products`", and the dispatch states three. The sibling's provenance note was extended on each redo; this one's was not. This is the sibling-drift class the dispatch flags as having recurred four times in this stage — it landed in a provenance note rather than a coverage row, so no design claim, component boundary, or status cell is wrong as a result. | Extend this banner to record all three redos, matching the sibling's wording, or state once in both that the count is recorded in `logical-components.md` alone. |
+| 2 | Minor | `security-design.md` re-save banner, final sentence | **Malformed sentence: "Nothing in the design below `TBD — freeze gate`."** The verb is missing; the intended assertion is presumably "…fills a value marked `TBD — freeze gate`". As written the sentence asserts nothing. It sits in a banner whose purpose is the TE §18.2 / Vision §1.2 guarantee that no freeze-gate value was filled by convenience — the one sentence in the banner that most needs to parse. The guarantee is in fact honoured (verified below), so this is an editorial defect, not a false claim. | Restore the verb. |
+| 3 | Minor | `security-design.md` § "Review — 2026-09-01 final confirming pass" | That entry's `Date` reads `2026-09-01T00:00:00Z (system clock; no shell timestamp taken this pass)`. The reviewing protocol requires a real `date -u` timestamp. The entry discloses the substitution rather than passing it off, so this is a transparency-preserving lapse, not a fabrication; recorded so it is not repeated. | No action on the standing entry (it is a completed record); take a shell timestamp on future passes. |
+
+No Critical. No Major. Zero regressions and zero newly-stale claims found.
+
+### Checks run this pass, with results
+
+| Check | Method | Result |
+|---|---|---|
+| `produces_kinds` yields exactly these two artifacts for a `library` unit | Read the stage definition's frontmatter, lines 14–24 | **PASS.** `performance-design: [service, ui]`, `scalability-design: [service]`, `reliability-design: [service]` all exclude `library`; `logical-components: [service, ui, library]` includes it; `security-design` carries **no** `produces_kinds` entry, so it applies to all kinds. Exactly two. The § Scope note's reasoning is correct as written. |
+| Module inventory vs. current disk | `ls -R src/`, `ls tests/`, existence checks on `configs/` and `pyproject.toml` | **PASS, no staleness.** `src/data/config.py`, `release.py`, `locked_test.py` **EXIST**. `src/data/registry.py`, `src/data/reuse_registry.py`, `tests/test_determinism.py` **ABSENT**. `configs/`, `pyproject.toml`, `requirements.txt` **ABSENT** — TC-06's scaffold precondition genuinely still unmet. All nine claims match disk in **both** artifacts. |
+| Python interpreter claim | `python --version` | **PASS.** 3.14.7 present. Both artifacts already carry the corrected statement — an interpreter **does** exist and is **off** the governed 3.11 pin (TE §8.1, TC-03d) — with the caveat at the point of the test-result claim, not deferred to Assumptions. The superseded "No Python interpreter exists" text is struck through inside a correction box, not standing as current fact. The dispatch's specific staleness hypothesis is **refuted**. |
+| "six test modules" | `ls tests/` | **PASS.** Exactly six: `test_acquisition_window.py`, `test_locked_test_guard.py`, `test_merge_script_restricted_reads.py`, `test_phase_boundary.py`, `test_release_contract.py`, `test_release_hashes.py`. None of the six is `test_determinism.py`, consistent with SD-06's ⚠ block. |
+| `tests/test_release_hashes.py` exists but TA-15 not covered | `ls tests/` plus SD-04's ⚠ block | **PASS.** The file exists and the design explicitly refuses to read its existence as coverage. Name-matching is correctly not treated as satisfaction. |
+| Coverage set-difference, re-derived from the current tables rather than from printed arithmetic | Row extraction from both coverage tables | **PASS.** `security-design.md` = **9** rows (REQ-ENG-6, FR-P1-01-10, NFR-SEC-01, FR-P1-05-13, NFR-AUD-01, NFR-LIC-01, REQ-ENG-10, NFR-DET-01, NFR-REP-01); `logical-components.md` = **6** (FR-P1-05-13, NFR-AUD-01, REQ-ENG-6, REQ-ENG-10, NFR-DET-01, NFR-REP-01). Set difference: **6 shared / 3 security-only / 0 logical-only**, exactly as both artifacts print. `NFR-AUD-01` carries **both** TA-10 and TA-21 at every citation site in both files. |
+| Q1=B implemented | SD-01 | **PASS.** Two modes tabulated with distinct scope, trigger and evidentiary weight: incremental on the staged diff per commit, labelled "**A preventive net. Not evidence.**"; history-inclusive over history, configurations, logs and artifacts before each governed run and freeze gate, labelled TA-22's evidence "with tool version and commit range". The cost is stated honestly, not minimised. |
+| Q2=A implemented | SD-04 § "The enumeration surface" | **PASS.** `write_release` enumerates the release root, reading each release directory's recorded `content_hash`, for D-29's verify-on-write uniqueness check. The registry-columns and ledger alternatives are rejected on named failure modes. Two residuals stated as binding, not softened: enumeration is over **one** authoritative root, and an unreachable root **REFUSES** rather than treating an empty population as unique. The owner-decision framing at a §18.3 stop-and-report point is correct, and the artifact records that a D-number is **owed and not performed here**. |
+| Q3=B implemented | SD-03 § "The durability stamp" | **PASS.** The write proceeds and stamps its durability status; the freeze gate refuses a so-stamped row as evidence. `logical-components.md` C-2 independently records the same split and calls the boundary crossing deliberate — the sibling agrees rather than merely not contradicting. |
+| Q4=A implemented | C-1/C-2/C-3 boundary rationale | **PASS.** The boundary is drawn on failure consequence and stated as such: C-1 fails within the current run with no persisted state altered; C-2's unit of damage is a row; C-3's is a release directory and every downstream claim citing it. Both the "why C-1 is one component and not four" and "why C-3 is separate from C-2" passages argue from consequence, not convenience. |
+| No satisfaction or discharge claim anywhere | Sweep of both coverage tables and every status-bearing banner | **PASS.** Every row reads `Pending`, `NOT MET`, `unclaimed`, or `untested`. No synonym of "satisfied" appears in any status cell. The three now-existing modules are explicitly stated not to move any row ("A written module is not a tested one…"). No freeze-gate value is filled: seeds are carried as D-122 with its "supervisor sign-off pending" status intact, the TensorFlow pin stays `TBD`, `CredentialNameMap` stays empty pending `configs/`, and the single authoritative release root is deliberately unnamed. |
+| Scanner named as NOT yet selected | SD-01 ⚠ block plus Assumptions | **PASS.** "`gitleaks`, `trufflehog` or equivalent, **pinned**" with the explicit statement that SEC-F-01 is left open and that pinning belongs with the `pyproject.toml` scaffold. Stated twice, in the rule body and under Assumptions. |
+| Nothing authorising a module write beyond G-09/D-31 | Sweep for imperative build language | **PASS.** Both artifacts state repeatedly that no component here exists and that naming a module is not authority to have written one. No instruction to create a module appears. |
+| 7-versus-8 environment-lock item count | SD-06 | **PASS.** The discrepancy (TE §13.1 renders seven bullets; REQ-ENG-10 says eight items) is carried explicitly with its resolution — bullet 1 carries two separately capturable artifacts — rather than silently picked. |
+| Cross-artifact consistency, the recurring defect | Compared component IDs, coverage rows, status cells, module-inventory tables and off-pin caveats between the two files | **PASS on every substantive surface.** C-1/C-2/C-3 and their acceptance-row assignments agree; the six shared coverage rows carry identical acceptance rows and identical statuses in both; both module-inventory correction boxes are independently worded and both correct; both carry the off-pin caveat at the point of the test-result claim. The **only** divergence found is the redo count in the provenance banners (finding 1) — non-substantive. |
+
+### Does the prior verdict still hold?
+
+**Yes.** The three redos were procedural and touched nothing in this unit. Every fact this design asserts about the workspace re-verifies against the current disk state, including the two claims most likely to have gone stale — module existence and the Python interpreter. Both had already been corrected, and the corrections are still true today. No coverage-set drift, no status upgraded, no broken cross-reference, and no repair landed in one artifact and not its sibling on any surface carrying a design claim.
+
+Attempted refutations that **failed**, recorded so this pass is not mistaken for a rubber stamp: the "no Python interpreter" claim is not stale (already corrected); the "no module exists" claim is not stale (already corrected, and corrected to a true inventory rather than a different false one); the coverage decomposition is not carried arithmetic (re-derived, matched); `test_release_hashes.py` existing is not silently read as TA-15 coverage (explicitly refused); `produces_kinds` does not in fact require three more artifacts for a `library` unit; and the six-test-module figure is exact.
+
+### Coverage limits of this pass
+
+- **Cross-unit claims are unverified by construction.** This design names `governance-guards` as owner of TA-29 and of `tests/test_locked_test_guard.py`, and `fixtures-and-reproducibility` as owner of WS-20/TA-17 and of the clean run. The read-scope bound forbids opening those units, and the shared contracts passed with this dispatch do not adjudicate acceptance-row ownership. These are **this unit's own characterization** of the boundary and should be read as such. This is a weakness of the review, not of the design — the design labels each such row with its owning unit, which is the best it can do from inside the bound.
+- The test suite was not executed; the `277 passed, 2 skipped` figure is a recorded historical result that both artifacts already refuse to treat as governed evidence, so re-running it would not change any status.
+- Advisory pass: these findings are input to the human approval gate, not a repair loop.
+
+### Summary
+
+This unit's design is unchanged, and it survives a hostile re-check against the current workspace intact: all nine module existence/absence claims, the interpreter claim, the six-test-module count, the 9/6 coverage decomposition with its 6/3/0 set difference, and all four answered questions verify exactly. Nothing is claimed as satisfied, no freeze-gate value is filled, and the scanner is correctly left unselected. The three findings are all Minor and all cosmetic or procedural — a redo count that drifted between the two provenance banners, a verb missing from one banner sentence, and a placeholder timestamp in a standing prior entry. None would cost a developer a question. The prior verdict holds.
 
 READY
