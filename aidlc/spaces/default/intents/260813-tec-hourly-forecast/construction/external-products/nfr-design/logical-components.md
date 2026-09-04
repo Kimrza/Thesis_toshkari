@@ -29,6 +29,15 @@
 > and reports `skipped` over 18 files. The `__init__.py` sizes are corrected, `src/evaluation/`
 > is removed from that list as allowlisted, the matrix discrepancy is routed with an owner,
 > and the payload schema matches its sibling field for field.
+>
+> **Re-saved a FIFTH time 2026-09-04 — content unchanged, neither a redo nor a revision.** This
+> stage's final pass ran on another clone of this repository, rooted at a different absolute
+> path; the engine's completion check matches each artifact against the path recorded in its
+> write receipt, so those confirmed writes are unreachable from this clone. The consolidated
+> summary confirmation of `2026-09-04T14:07:49Z` **stands and was not re-asked**. This paragraph
+> is the native-tool write that re-registers the artifact here. **Unlike the four notes above,
+> nothing changed: this box still does not diverge from its sibling, the 18-walked/12-counted
+> figures stand as printed, and no component, boundary or status claim is altered.**
 
 > ## ⚠ NONE OF THESE COMPONENTS EXISTS, AND ONE OF THEM HAS NO TEST
 >

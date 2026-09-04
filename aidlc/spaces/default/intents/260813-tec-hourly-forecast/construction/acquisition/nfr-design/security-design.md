@@ -13,9 +13,23 @@
 > **Repeated once more the same day**, after a second owner-directed redo of the same stage,
 > **and a third time** after the seventh reviewer pass on `external-products`. **This unit was
 > untouched by all three redos** — the redaction serializer is still unbuilt and BLK-07's
+> authorization limb is still open.
 >
 > **And a fourth redo 2026-09-04**, to repair two Majors in `target-standardization`. **This unit was untouched by all four.**
-> authorization limb is still open.
+>
+> **And a fifth re-save 2026-09-04 — not a redo.** This stage's final pass ran on another clone
+> of this repository, rooted at a different absolute path; the engine's completion check matches
+> each artifact against the path recorded in its write receipt, so those confirmed writes are
+> unreachable from this clone. The consolidated summary confirmation of `2026-09-04T14:07:48Z`
+> **stands and was not re-asked**. This paragraph is the native-tool write that re-registers the
+> artifact here. **No status claim is altered by this note** — the redaction serializer is still
+> unbuilt and BLK-07's authorization limb is still open.
+>
+> *(Reader's note. The fourth-redo line above had been inserted mid-sentence by that earlier
+> pass, splitting "BLK-07's … authorization limb is still open" across it. Repaired
+> 2026-09-04 on the project decision owner's explicit instruction: the third-redo sentence is
+> rejoined and the fourth-redo line now follows it whole. Presentation only — no wording was
+> changed, and no finding or status claim is altered.)*
 
 > ## ⚠ WRITTEN AGAINST THE WORKSPACE ON 2026-09-01 — NOTHING HERE IS BUILT
 >

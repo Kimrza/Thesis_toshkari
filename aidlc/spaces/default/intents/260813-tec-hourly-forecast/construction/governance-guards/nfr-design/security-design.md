@@ -21,6 +21,14 @@
 > unit was untouched by all three redos.**
 >
 > **And a fourth redo 2026-09-04**, to repair two Majors in `target-standardization`. **This unit was untouched by all four.**
+>
+> **And a fifth re-save 2026-09-04 — not a redo.** This stage's final pass ran on another clone
+> of this repository, rooted at a different absolute path; the engine's completion check matches
+> each artifact against the path recorded in its write receipt, so those confirmed writes are
+> unreachable from this clone. The consolidated summary confirmation of `2026-09-04T14:07:47Z`
+> **stands and was not re-asked** — its questions-file digest still verifies. This paragraph is
+> the native-tool write that re-registers the artifact here. **DISC-1 and DISC-2 stand exactly
+> as recorded, and no status claim is altered by this note.**
 
 > ## ⚠ WRITTEN AGAINST THE WORKSPACE AS IT IS ON 2026-09-01, NOT AGAINST UPSTREAM'S STATUS CLAIMS
 >

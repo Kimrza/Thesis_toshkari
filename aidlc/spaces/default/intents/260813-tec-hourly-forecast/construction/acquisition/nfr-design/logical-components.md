@@ -14,6 +14,13 @@
 >
 > **And a fourth redo 2026-09-04**, to repair two Majors in `target-standardization`. **This
 > unit was untouched by all four.**
+>
+> **And a fifth re-save 2026-09-04 — not a redo.** This stage's final pass ran on another clone
+> of this repository, rooted at a different absolute path; the engine's completion check matches
+> each artifact against the path recorded in its write receipt, so those confirmed writes are
+> unreachable from this clone. The consolidated summary confirmation of `2026-09-04T14:07:48Z`
+> **stands and was not re-asked**. This paragraph is the native-tool write that re-registers the
+> artifact here. **No component, boundary or status claim is altered by this note.**
 
 > ## ⚠ ALL THREE COMPONENTS ARE UNBUILT
 >

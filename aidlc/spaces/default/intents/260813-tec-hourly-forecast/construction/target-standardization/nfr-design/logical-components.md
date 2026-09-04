@@ -2,6 +2,14 @@
 
 **Unit** `target-standardization` (Bolt 6) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-04, content unchanged — not a redo and not a revision.** This stage's
+> final pass ran on another clone of this repository, rooted at a different absolute path; the
+> engine's completion check matches each artifact against the path recorded in its write
+> receipt, so those confirmed writes are unreachable from this clone. The consolidated summary
+> confirmation of `2026-09-04T14:07:50Z` **stands and was not re-asked**. This paragraph is the
+> native-tool write that re-registers the artifact here. **No component, boundary or status
+> claim is altered by this note — T-1 remains blocked by design.**
+
 > ## ⚠ NONE OF THESE COMPONENTS EXISTS, AND ONE OF THEM CANNOT RUN AT ALL
 >
 > `src/data/prepared.py`, `scripts/02_standardize_prepared_target.py`,

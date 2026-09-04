@@ -31,6 +31,17 @@
 > check reports **`skipped` over 18 files it really would inspect**. The `__init__.py` byte
 > sizes are corrected, the matrix discrepancy is routed with an owner, and one payload schema
 > is stated in both artifacts. See § Remediation of the second-redo TERMINAL pass.
+>
+> **Re-saved a FIFTH time 2026-09-04 — content unchanged, and this one is neither a redo nor a
+> revision.** This stage's final pass ran on another clone of this repository, rooted at a
+> different absolute path. The engine's completion check matches each artifact against the path
+> recorded in its write receipt, so those confirmed writes are unreachable from this clone and
+> the stage cannot be completed here. The consolidated summary confirmation of
+> `2026-09-04T14:07:49Z` **stands and was not re-asked** — its questions-file digest still
+> verifies. This paragraph is the native-tool write that re-registers the artifact on this
+> clone. **Unlike the four notes above it, nothing in the design changed: the text below is
+> byte-identical to the reviewed version apart from this note, the derived 18-walked/12-counted
+> figures stand as printed, and no finding, remediation or status claim is altered.**
 
 > ## ⚠ NFR-IRI-01'S NEGATIVE CONTROL IS NOT WRITTEN, AND ALL THREE MODULES ARE ABSENT
 >

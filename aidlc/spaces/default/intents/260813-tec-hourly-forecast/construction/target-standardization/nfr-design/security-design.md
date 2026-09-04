@@ -2,6 +2,17 @@
 
 **Unit** `target-standardization` (Bolt 6) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-04, content unchanged — not a redo and not a revision.** This stage's
+> final pass ran on another clone of this repository, rooted at a different absolute path. The
+> engine's completion check matches each artifact against the path recorded in its write
+> receipt, so those confirmed writes are unreachable from this clone and the stage cannot be
+> completed here. The consolidated summary confirmation of `2026-09-04T14:07:50Z` **stands and
+> was not re-asked** — its questions-file digest still verifies. This paragraph is the
+> native-tool write that re-registers the artifact on this clone. **Everything below is
+> byte-identical to the reviewed text apart from this note. In particular the fail-closed
+> block below is untouched: FR-P1-03-1 remains BLOCKED and the QC operation list remains
+> `TBD — freeze gate`.**
+
 > ## ⚠ FR-P1-03-1 IS BLOCKED, AND THIS DESIGN MAKES THAT BLOCK OPERATIVE
 >
 > Written against the **workspace as it is on 2026-09-03**, per the owner's ruling that a

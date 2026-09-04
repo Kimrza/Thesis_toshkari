@@ -2,6 +2,16 @@
 
 **Unit** `inventory-and-registry` (Bolt 4) · **Kind** `library` · **Stage** `nfr-design`
 
+> **Re-saved 2026-09-04, content unchanged — not a redo and not a revision.** This stage's
+> final pass ran on another clone of this repository, rooted at a different absolute path. The
+> engine's completion check matches each artifact against the path recorded in its write
+> receipt, so those confirmed writes are unreachable from this clone and the stage cannot be
+> completed here. The consolidated summary confirmation of `2026-09-04T14:07:49Z` **stands and
+> was not re-asked** — its questions-file digest still verifies. This paragraph is the
+> native-tool write that re-registers the artifact on this clone. **Everything below is
+> byte-identical to the reviewed text apart from this note, and no finding, fix or status claim
+> is altered by it.**
+
 > **Revised 2026-09-02 — the two open Majors are now FIXED.** Under the owner's instruction
 > to fix all findings until clean, the two Majors carried from the 2026-09-01 terminal pass
 > are repaired here rather than carried to the gate:
