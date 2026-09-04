@@ -74,6 +74,8 @@
 - **Revision Count**: 22
 
 - **Skeleton Stance**: off
+- **Parked**: 2026-09-04T14:44:35Z
+- **Parked At Stage**: nfr-design
 ## Phase Progress
 <!-- Status values: Pending, Active, Verified, Skipped -->
 
@@ -134,7 +136,7 @@ Per unit: [TBD]
 - **Current Stage**: nfr-design
 - **Next Stage**: code-generation
 - **Status**: Running
-- **Last Updated**: 2026-09-04T14:03:27Z
+- **Last Updated**: 2026-09-04T14:44:35Z
 
 ## Session Resume Point
 - **Last Completed Stage**: nfr-requirements

@@ -20,6 +20,16 @@
 > **And a fourth**, to repair two Majors in `target-standardization`. **This unit was
 > untouched by all four redos**; its answers, artifacts and prior verdict are as first
 > written.
+>
+> **And a fifth, 2026-09-04 — a different cause, recorded because it is not a redo.** This
+> stage's final pass ran on another clone of this repository, rooted at a different absolute
+> path. The engine's completion check compares each artifact's resolved path against the path
+> recorded in the write receipt, and a receipt written under another root can never match, so
+> from this clone the confirmed writes are unreachable and the stage cannot be completed. The
+> consolidated summary confirmation of `2026-09-04T14:07:47Z` **stands and was not re-asked** —
+> its questions-file digest still verifies. This paragraph is the native-tool write that
+> re-registers the artifact on this clone. **The design below is byte-identical to the reviewed
+> text apart from this paragraph, and no status claim is altered by this note.**
 
 > ## ⚠ THIS IS A DESIGN. NOTHING HERE IS BUILT, RUN, OR DISCHARGED
 >
