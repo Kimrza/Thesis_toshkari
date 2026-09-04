@@ -1463,10 +1463,24 @@ function resolveConsumes(
 //     check against; everything stays in `consumes`, exactly as before.
 //   - a path still carrying the {unit-name} placeholder → existence is
 //     unknowable pre-Bolt; it stays in `consumes`.
+// `unitKind` gates the producer test by unit kind. A producer counts as "on the
+// path" only if it would ACTUALLY produce the artifact for this unit's kind:
+// produces_kinds can exclude an artifact for a whole kind, in which case the
+// producer runs, emits nothing for it, and the absence is by design rather than
+// a gap. Testing scope membership alone made every kind-excluded input report
+// `expected: false` — a permanent false gap the conductor is told to surface,
+// with no upstream re-run able to clear it, because the producer is configured
+// never to emit it for that kind. nfr-design consumes performance-,
+// scalability- and reliability-requirements as required with no kind axis,
+// while nfr-requirements gates all three to [service]/[service,ui]; on a
+// library-kind unit that pairing is unsatisfiable by construction. null
+// unitKind (untagged unit, or a non-per-unit stage) keeps the full produce list
+// via filterProducesByKind, so behaviour off the kind path is unchanged.
 function splitConsumesByPresence(
   consumes: ResolvedConsume[],
   scope: string,
   codekbCtx?: CodekbCtx,
+  unitKind: string | null = null,
 ): { present: string[]; absent: Array<{ path: string; expected: boolean }> } {
   if (!codekbCtx) return { present: consumes.map((c) => c.path), absent: [] };
   const onPath = new Set(subgraphForScope(scope).map((s) => s.slug));
@@ -1484,7 +1498,11 @@ function splitConsumesByPresence(
     }
     if (!c.required) continue; // optional + missing → not an input, not a gap
     const producers = producersOf(c.artifact);
-    const producerOnPath = producers.some((p) => onPath.has(p.slug));
+    const producerOnPath = producers.some(
+      (p) =>
+        onPath.has(p.slug) &&
+        applicableProduceNames(p, unitKind, true).includes(c.artifact),
+    );
     absent.push({ path: c.path, expected: !producerOnPath });
   }
   return { present, absent };
@@ -1818,7 +1836,9 @@ function buildRunStageDirective(
   const resolvedConsumes = resolveConsumes(
     node.consumes ?? [], node, projectType, unit, recordPrefix, codekbCtx,
   );
-  const { present, absent } = splitConsumesByPresence(resolvedConsumes, scope, codekbCtx);
+  const { present, absent } = splitConsumesByPresence(
+    resolvedConsumes, scope, codekbCtx, unitKind,
+  );
   const inlineContext = inlineContextRoster(node, codekbCtx);
   const ruleEntries = codekbCtx
     ? rulesContentEntries(node, codekbCtx.projectDir, codekbCtx.space)
