@@ -34,6 +34,7 @@ from __future__ import annotations
 import ast
 import dataclasses
 import datetime as dt
+import hashlib
 import importlib.util
 import itertools
 import json
@@ -1219,3 +1220,143 @@ def test_the_dec_path_is_unreachable_without_the_g05_guard_and_the_three_argumen
     assert "prior_period_exposure" not in text.replace(
         "`prior_period_exposure` is NOT written here", ""
     ), "06 writes no prior_period_exposure value (R-102a deviation box)"
+
+
+# =======================================================================================
+# 13. The DEC iteration scores the frame the one door RETURNED (R-102a; SD-M-04; W-12)
+# =======================================================================================
+
+SYNTH_SIGNATURE = "synthetic-g05-signature-for-the-fixture-year"
+SYNTH_LOCKED_OFFSET = 1000.0  # marks values that exist ONLY in the loader's frame
+
+
+def _signed_snapshot():
+    """A synthetic `gates.G-05` record that a SYNTHETIC signature verifies against — over the
+    fixture year only; the real `configs/data.yaml` carries no G-05 record."""
+    digest = hashlib.sha256(SYNTH_SIGNATURE.encode("utf-8")).hexdigest()
+    gates = {"G-05": {"status": "signed", "signature_sha256": digest, "decision": "D-synthetic"}}
+    snapshot = synthetic_snapshot(
+        data={"gates": gates},
+        experiment={
+            "horizons": [SYNTH_HORIZON],
+            "grids": SYNTH_GRIDS,
+            "models": {"lstm_fixed_settings": SYNTH_SETTINGS},
+            "ablations": {"entries": _ablation_entries()},
+        },
+    )
+    return dataclasses.replace(snapshot, seeds=dict(SYNTH_SEEDS))
+
+
+def _locked_month_frame() -> RecordFrame:
+    """What the fake one-door loader returns: two days of the fixture year's locked month with
+    values offset so they cannot be mistaken for the released January–November target's."""
+    locked = _p(LOCKED_ID)
+    start, _ = validation_month_range(locked)
+    rows = []
+    stamp = start
+    while stamp < start + dt.timedelta(hours=48):
+        for station in STATIONS:
+            rows.append(
+                {
+                    "interval_start_utc": stamp.isoformat(),
+                    "station_id": station,
+                    "vtec_tecu": _value(station, stamp) + SYNTH_LOCKED_OFFSET,
+                }
+            )
+        stamp += dt.timedelta(hours=1)
+    return RecordFrame(rows)
+
+
+def test_the_dec_iteration_scores_the_frame_the_one_door_returned_not_the_released_target(
+) -> None:
+    """The frame `materialise_locked_partition` returns (loader output, embargo excluded and
+    counted) is what reaches `fit_predict` on the DEC branch; the pre-loop released target —
+    January–November, no locked-month rows — is not consulted."""
+    script = _load_script()
+    snapshot = _signed_snapshot()
+    locked = _p(LOCKED_ID)
+    released_target = _target(_ts(1, 1), _ts(12, 1))  # January–November only, as 06 loads it
+    loader_calls: list[str] = []
+
+    def fake_loader(partition) -> RecordFrame:
+        loader_calls.append(partition.partition_id)
+        return _locked_month_frame()
+
+    loaded = script._locked_target(
+        snapshot,
+        g05_signature=SYNTH_SIGNATURE,
+        loader=fake_loader,
+        partitions=PARTITIONS,
+        released_target=released_target,
+    )
+    assert loader_calls == [LOCKED_ID], "the loader is called once, for the locked partition"
+    assert loaded is not released_target
+    assert loaded.attrs["partition_id"] == LOCKED_ID
+    assert loaded.attrs["excluded_embargo_rows"] == locked.embargo_hours * len(STATIONS)
+    from src.models.train import target_series
+
+    series = target_series(loaded)
+    assert series and all(v > SYNTH_LOCKED_OFFSET for v in series.values())
+    assert not any(key in target_series(released_target) for key in series), (
+        "the released target carries no locked-month row; the loaded frame is a different frame"
+    )
+    # Score the DEC bundle with the LOADED frame: persistence reads the loader's offset values.
+    start, _ = validation_month_range(locked)
+    dec_score = _bundle(
+        _score_spec(LOCKED_ID),
+        transform_id=expected_transform_id(locked),
+        start=start + dt.timedelta(hours=locked.embargo_hours + 12),
+        hours=2,
+    )
+    assert_stamp_match(dec_score, locked)
+    prediction = fit_predict(
+        "M-01", bundle=dec_score, partition=locked, snapshot=snapshot, target=loaded
+    )
+    row = records_of(prediction.frame)[0]
+    origin = dt.datetime.fromisoformat(row["interval_start_utc"]) - dt.timedelta(
+        hours=SYNTH_HORIZON
+    )
+    assert row["y_hat"] == _value("S1", origin) + SYNTH_LOCKED_OFFSET
+    assert frame_attrs(prediction.frame)["missing_source_values"] == 0
+    # The same scoring with the pre-loop target would have had NOTHING to read for the month.
+    with_released = fit_predict(
+        "M-01", bundle=dec_score, partition=locked, snapshot=snapshot, target=released_target
+    )
+    assert all(r["y_hat"] is None for r in records_of(with_released.frame))
+
+
+def test_a_dec_iteration_handed_the_pre_loop_target_is_refused() -> None:
+    """The negative control: a loader that hands back the released target object itself is
+    refused by identity, as is a loader returning nothing and an unverified signature."""
+    script = _load_script()
+    snapshot = _signed_snapshot()
+    released_target = _target(_ts(1, 1), _ts(12, 1))
+    with pytest.raises(LockedTestError) as excinfo:
+        script._locked_target(
+            snapshot,
+            g05_signature=SYNTH_SIGNATURE,
+            loader=lambda partition: released_target,
+            partitions=PARTITIONS,
+            released_target=released_target,
+        )
+    assert "pre-loop released target" in str(excinfo.value)
+    with pytest.raises(LockedTestError):  # the guard refuses BEFORE the loader runs
+        script._locked_target(
+            snapshot,
+            g05_signature="not-the-signature",
+            loader=lambda partition: _locked_month_frame(),
+            partitions=PARTITIONS,
+            released_target=released_target,
+        )
+    with pytest.raises(LockedTestError):
+        script._locked_target(
+            snapshot,
+            g05_signature=None,
+            loader=lambda partition: _locked_month_frame(),
+            partitions=PARTITIONS,
+            released_target=released_target,
+        )
+    text = SCRIPT_PATH.read_text(encoding="utf-8")
+    assert "target=partition_target" in text and "target=target" not in text, (
+        "no scoring call in 06 consumes the pre-loop object directly"
+    )

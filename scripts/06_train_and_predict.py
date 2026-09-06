@@ -31,7 +31,10 @@ What this script can and cannot run today
   additionally requires `--g05-signature`, `--locked-input` and `--locked-authorization`. No
   December content is read by any path this script can reach today, and this script never
   names the restricted root -- the loader routes the human-supplied path through
-  `governance-guards`' `open_restricted`, the one door.
+  `governance-guards`' `open_restricted`, the one door. The frame the door RETURNS is the
+  `DEC` iteration's target (`_locked_target`); the released January–November target loaded
+  before the partition loop is refused on that branch by identity, so the access-logged
+  read is the data the receipt's prediction was computed from (R-102a; SD-M-04; W-12).
 * M-06's Keras path refuses at the TensorFlow pin guard (FU-1 = C); M-04/M-05 refuse by name
   without `scikit-learn` installed.
 
@@ -544,6 +547,63 @@ def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
     return loader
 
 
+def _locked_target(
+    snapshot: Any,
+    *,
+    g05_signature: str | None,
+    loader,
+    partitions: Sequence[Partition],
+    released_target: Any,
+) -> Any:
+    """The `DEC` iteration's target: the frame the one door RETURNS, and nothing else.
+
+    `materialise_locked_partition` refuses without a verifying G-05 signature (R-82), then
+    calls `loader` (which routes through `open_restricted`, writing the `AccessRecord`) and
+    returns the locked month with its embargo excluded and counted. That returned frame is
+    the ONLY target the locked scoring may consume: the `AccessRecord` asserts a
+    `locked_evaluation` read, so the prediction the receipt hashes must be computed from
+    exactly what that read produced (R-102a; SD-M-04; W-12). The released January–November
+    target loaded before the partition loop is refused here by IDENTITY, so nothing from it
+    can reach `DEC` scoring.
+
+    Raises
+    ------
+    LockedTestError
+        the guard's own refusals; a loader returning nothing; a loader returning the
+        pre-loop released target object.
+    """
+    def _guarded_loader(partition: Partition) -> Any:
+        frame = loader(partition)
+        if frame is released_target:
+            raise LockedTestError(
+                f"partition {LOCKED_ID}",
+                "the locked loader handed back the pre-loop released target object; the DEC "
+                "iteration scores ONLY the frame the one door returns, and the access-logged "
+                "read must be the data the receipt's prediction was computed from "
+                "(R-102a; SD-M-04; W-12)",
+            )
+        return frame
+
+    loaded = materialise_locked_partition(
+        snapshot, g05_signature=g05_signature, loader=_guarded_loader, partitions=partitions
+    )
+    if loaded is None:
+        raise LockedTestError(
+            f"partition {LOCKED_ID}",
+            "the locked loader returned no frame; the DEC prediction is computed from the frame "
+            "the one door returned, never from an absent or substituted target (W-12)",
+        )
+    if loaded is released_target:
+        raise LockedTestError(
+            f"partition {LOCKED_ID}",
+            "the DEC target IS the pre-loop released target object; the locked iteration scores "
+            "the frame open_restricted returned through materialise_locked_partition, and the "
+            "access-logged read must be the data the receipt's prediction was computed from "
+            "(R-102a; SD-M-04)",
+        )
+    return loaded
+
+
 def _finish_locked_write(
     *,
     prediction_path: Path,
@@ -597,20 +657,25 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     # 2. Inputs by manifest -- refuse honestly while none exists.
     partitions = build_partitions(snapshot)
     bundle_root = _bundle_root(snapshot, args)
-    target = _load_target_by_manifest(snapshot)
+    released_target = _load_target_by_manifest(snapshot)  # January–November; never DEC's
     out_root = workspace / args.predictions_out / run_id
 
     written: list[str] = []
     for pid in args.partitions:
         partition = partition_by_id(partitions, pid)
         if pid == LOCKED_ID:
-            # The ONE door: refuses without a verifying G-05 signature (R-82) before any read.
-            materialise_locked_partition(
+            # The ONE door: refuses without a verifying G-05 signature (R-82) before any read,
+            # and the frame it RETURNS is the DEC iteration's target -- the pre-loop released
+            # target is refused by identity (R-102a; SD-M-04; W-12).
+            partition_target = _locked_target(
                 snapshot,
                 g05_signature=args.g05_signature,
                 loader=_locked_loader(args, run_id=run_id, access_log=access_log),
                 partitions=partitions,
+                released_target=released_target,
             )
+        else:
+            partition_target = released_target
         train_bundle, score_bundle = _bundle_pair(bundle_root, partition, partitions)
         if score_bundle is None:
             continue  # the final refit is scored nowhere (FR-P1-04-14)
@@ -628,7 +693,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
                     bundle=train_bundle,
                     partition=partition,
                     snapshot=snapshot,
-                    target=target,
+                    target=partition_target,
                     score_bundle=score_bundle,
                     seed=seed,
                     params=params,
