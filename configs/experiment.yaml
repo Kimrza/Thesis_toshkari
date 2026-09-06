@@ -89,8 +89,70 @@ models:
   # 06_train_and_predict.py REFUSES naming this field while it is unset. Shape only (W-9).
   selected: "TBD — freeze gate"
 
-estimand: "TBD — freeze gate"
-bootstrap: "TBD — freeze gate"
+# --- estimand (Vision §2.3; TE §1.3) -------------------------------------------------------
+# Transcribed VERBATIM from the frozen orientation/weighting by statistical-inference
+# code-generation Q4=A (2026-09-06), recorded in
+# governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md. This is a COPY of an
+# approved decision under citation, exactly as seeds.yaml copies D-122; no value was chosen
+# here. The sibling's code (src/evaluation/metrics.py EstimandResult) already refuses any
+# other orientation/weighting/sentence, so config-versus-code drift is caught by test.
+estimand:
+  decision: "CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS (proposed D-number pending owner adoption)"
+  source: "Vision §2.3; TE §1.3"
+  orientation: "benchmark_minus_model" # Vision §2.3: mean within-station difference of squared errors, benchmark minus model
+  weighting: "equal_station" # Vision §2.3 / TE §1.3: unweighted mean of the per-station values
+  sign_convention_sentence: "positive values favour the model: the differential is benchmark minus model"
+
+# --- bootstrap (TE §13.6; TC-19 binding: hard; D-122; D-28's 720-h scored-set arithmetic) ---
+# Frozen values transcribed and the three gate confirmations recorded by
+# statistical-inference code-generation Q1=A/Q2=A/Q3=A/Q4=A (2026-09-06), per
+# governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md. NEVER substitute a
+# within-station or naive bootstrap (project.md § Forbidden; the Q-27 rejection): the
+# within-station variant exists in code ONLY as the quarantined widening comparator, never
+# a reported interval. The seed is NOT here: 20221201 lives in seeds.yaml (seed_key below;
+# D-122; ADR-05 carve-out — seed_everything never touches it). TE §15.3's reduced fixture
+# replicate count is an apparatus constant of the fixture manifest, NOT a field here
+# (GOV-2026-08-28-FD-01 Recommendation 24). The 48-hour sensitivity's run_id is the owner's
+# TE §7.2 registration act and is not transcribed here.
+bootstrap:
+  decision: "CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS (proposed D-number pending owner adoption)"
+  source: "TE §13.6; TC-19; D-122; D-28"
+  block_hours: 24 # TE §13.6: 24-hour blocks carrying all three stations together; 30 blocks on DEC
+  replicates: 10000 # TE §13.6 / TC-19: 10,000 replicates (the rejected variant's 2,000 never resurrected)
+  confidence_level: 0.95 # TE §13.6: report 95% confidence intervals
+  sensitivity_block_hours: 48 # TE §13.6 / TA-14: the predeclared 48-hour sensitivity; 15 blocks on DEC
+  seed_key: "seeds.bootstrap" # D-122: 20221201 in seeds.yaml; ADR-05 carve-out
+  interval_method: "percentile" # Q1=A: 2.5th/97.5th percentiles of the replicate set (R-119)
+  block_scheme: "fixed_nonoverlapping" # Q2=A: contiguous non-overlapping partition aligned to the scored range (R-115; Rec 26)
+  correlation_series: "paired_error_pearson_all_pairs" # Q3=A: Pearson on d_s(t), all three station pairs (R-121)
+
+# --- comparison sets (R-106; NFR-FAIR-01/TC-16: one comparison-wide mask per declared set) --
+# Memberships CONFIRMED by the project decision owner at the evaluation-and-comparison
+# code-generation gate (Q1=A, 2026-09-06), recorded in
+# governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md with a proposed D-number for
+# evidence/DECISIONS.md (owner adopts or edits; no agent writes the register). Grounding:
+# Vision §2.4 tiers 1–3 (primary + difficulty controls; GIM; ridge/RF learned-model tier),
+# §8.4's model table (M-04 ridge, M-05 direct RF, M-06 LSTM), §8.9's matched-window and
+# matched-learned-model clauses. Separate sets, separate masks, NEVER merged silently — a
+# secondary comparator's availability must not shrink the primary scored set
+# (GOV-2026-08-28-FD-01 Recommendation 19). The mask builder checks passed predictions
+# against the declared set EXACTLY (missing/extra/duplicate/merged all refuse); tests
+# re-read the member counts 5 / 2 / 3 from this block, never from a source literal.
+comparison_sets:
+  decision: "CR-2026-09-06-R106-COMPARISON-SETS (proposed D-number pending owner adoption)"
+  source: "Vision §2.4 tiers 1–3; Vision §8.4 model table; Vision §8.9 matched-window clause"
+  primary:
+    member_ids: ["M-01", "M-02", "M-03", "M-06", "B-01"] # 5 members, one mask
+    model_id: "M-06"
+    benchmark_ids: ["B-01", "M-01", "M-02", "M-03"] # B-01 plus the three difficulty controls
+  gim:
+    member_ids: ["M-06", "C-01"] # 2 members, its own mask (Vision §6.10; TE §5.2)
+    model_id: "M-06"
+    benchmark_ids: ["C-01"] # evaluation-time-only comparator, never presumed independent
+  tier3:
+    member_ids: ["M-04", "M-05", "M-06"] # 3 members, its own mask (Vision §2.4 tier 3, §8.9)
+    model_id: "M-06"
+    benchmark_ids: ["M-04", "M-05"] # ridge and direct RF, matched causal window (§8.9)
 
 # --- ablation registry (TE §7.2 "Ablation registry (Q-18, Q-17, Q-11)") -------------------
 # TE §7.2: "Ablations are named, predeclared runs, not exploratory experiments invented after
@@ -146,5 +208,40 @@ ablations:
       phase_deferral: "Phase 2 — varies the hourly aggregation of the target, a choice that does not exist on the Phase 1 location-sampled gridded target (domain-entities § 8; R-97)"
       run_id: "TBD — freeze gate"
       registered_at: "TBD — freeze gate"
+
+# --- regimes (Vision §9.3; D-13; D-11) -----------------------------------------------------
+# Transcribed VERBATIM from Vision §9.3's frozen thresholds and storm-event rule and D-13's
+# demotion threshold by regimes-diagnostics-reporting code-generation Q1=A (2026-09-06),
+# recorded in governance/CHANGE_RECORD_2026-09-06_R123_regimes_and_reporting.md. This is a
+# COPY of frozen decisions under citation, exactly as the grids block copies D-121; no value
+# was chosen here, and a test asserts the copy's exactness (the only new claim Q1=A makes).
+# The classifier and count_storm_events in src/evaluation/regimes.py read ONLY this block via
+# ConfigSnapshot — no threshold literal exists in source (TC-03e; FR-P1-05-18 clause 3 by
+# construction). D-11 bars any provisional-Dst-derived figure from a G-05 regime count; the
+# count source is GFZ Kp/Hp60 at a recorded release grade (D-13 "Source of the count").
+regimes:
+  decision: "CR-2026-09-06-R123-REGIMES-AND-REPORTING (proposed D-number pending owner adoption)"
+  source: "Vision §9.3; D-13; D-11"
+  thresholds:
+    quiet_kp_below: 4 # Vision §9.3: Quiet: Kp < 4
+    disturbed_kp_min: 4 # Vision §9.3: Disturbed: Kp >= 4
+    storm_kp_min: 5 # Vision §9.3: Storm: Kp >= 5
+  event_window:
+    pre_hours: 12 # Vision §9.3: reporting window −12 h …
+    post_hours: 24 # … to +24 h around each event
+  event_definition: "contiguous interval of Kp>=5" # Vision §9.3 storm event rule; D-13
+  independence_min_quiet_hours: 24 # Vision §9.3 / D-13: independent if separated by >=24 h of Kp<4
+  independent_storm_event_threshold: 3 # D-13: >=3 independent December storm events, else demotion
+  count_source: "GFZ Kp/Hp60 at a recorded release grade; provisional Dst barred (D-11)" # D-13
+  # WHICH December day range governs D-13's comparison count is a Student + Supervisor gate
+  # item (GOV-2026-08-28-FD-01 Rec 15; R-124/W-2 point 5: mechanism written, value routed).
+  # While the sentinel stands, the audit-count consistency path REFUSES naming this field.
+  december_day_range: "TBD — freeze gate"
+  # D-17's observation-quality strata fields — referenced by their decision (D-17
+  # § Observation-quality strata), not re-enumerated as new content; the sixteen-field
+  # target-row contract itself stays in D-17. An enumerated set, never free strings (R-127).
+  d17_quality_strata:
+    decision: "D-17"
+    fields: ["valid_observation_count", "within_hour_spread_tecu", "provider_dtec_summary"]
 
 practical_relevance_threshold: "TBD — freeze gate"
