@@ -38,7 +38,18 @@ Governance
   this module. D-31 records that G-09's own TE 18.3 preconditions were **unmet** when
   signed; nothing in this module claims otherwise.
 * This module is the **only** one permitted to contain the restricted-root literal outside
-  R-28's enumerated `tests/` exemption.
+  R-28's enumerated exemption, whose membership is the `RESTRICTED_LITERAL_EXEMPT_MODULES`
+  constant below (SD-G-03: a source constant in the guard, never a config — TC-03e governs
+  scientific constants, and a security allowlist is not one).
+* **Q1 = A (SD-G-01), added at stage 3.5:** `open_restricted` fails CLOSED on a platform
+  whose write-durability semantics are uncharacterised. `fsync`'s guarantee is a property
+  of the filesystem beneath it, and Kaggle's is characterised nowhere in this project, so
+  with `CHARACTERISED_DURABILITY_PLATFORMS` empty the guard refuses on Kaggle — no read,
+  no access row consumed — until W-6 step 8's durability measurement is done. The stated
+  cost is blocking the pre-G-05 December coverage audit on Kaggle; `local` keeps its
+  existing behaviour per the design's scheduling note (the refusal targets the governed
+  audit host, and foundation SD-03's unverified-durability stamp already qualifies local
+  rows at every freeze gate).
 """
 
 from __future__ import annotations
@@ -46,27 +57,104 @@ from __future__ import annotations
 import datetime as _dt
 import json
 import os
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Final, Sequence
+from typing import Final
 
-from src.data.config import LockedTestError
+from src.data.config import (
+    CHARACTERISED_DURABILITY_PLATFORMS,
+    IntegrityError,
+    LockedTestError,
+    resolve_platform_roots,
+)
 
 __all__ = [
     "RESTRICTED_ROOT",
+    "RESTRICTED_LITERAL_EXEMPT_MODULES",
     "AccessRecord",
     "PURPOSES",
+    "EvidenceScanError",
+    "fail_unparseable",
     "open_restricted",
+    "write_restricted",
     "assert_no_december_outside_restricted",
 ]
 
 RESTRICTED_ROOT: Final[str] = "evidence/locked_test_restricted"
 
-#: The three purposes Vision 8.3 distinguishes. `coverage_audit` and `regime_audit` are
-#: performance-blind and permitted before G-05; `locked_evaluation` is the one-shot,
-#: hash-before-metrics event G-06 gates.
+#: R-28's enumerated exemption: the ONLY modules permitted to hold the restricted-root
+#: literal, INCLUDING the chokepoint itself (the design's prose counts "five members in
+#: addition to the chokepoint", i.e. six; the seventh on-disk member,
+#: `tests/test_merge_script_restricted_reads.py`, was caught by the membership assertion
+#: on first run — DISC-1 records the mechanism working and the prose count lagging).
+#: Membership is an EXACT enumerated list, never a directory or substring predicate; the
+#: exemption covers holding the LITERAL, never obtaining the CONTENT — any content read
+#: beneath the root still goes through `open_restricted` or a synthetic fixture root.
+#: `tests/test_locked_test_guard.py` re-derives this set exactly, so an addition or a
+#: removal fails there until the list is edited under review (SD-G-03, board BLOCKER
+#: VAL-02 closure control).
+RESTRICTED_LITERAL_EXEMPT_MODULES: Final[frozenset[str]] = frozenset(
+    {
+        "src/data/locked_test.py",
+        "scripts/merge_coverage_year.py",
+        "tests/test_acquisition_window.py",
+        "tests/test_phase_boundary.py",
+        "tests/test_release_hashes.py",
+        "tests/test_locked_test_guard.py",
+        "tests/test_merge_script_restricted_reads.py",
+    }
+)
+
+
+class EvidenceScanError(IntegrityError):
+    """R-27's fail-closed scan limb: a file a custody scan cannot read or parse.
+
+    Rides foundation R-01's "any future integrity-related exception" clause: declared
+    here because the residency scan below and the literal scan in
+    `tests/test_locked_test_guard.py` are the only raisers, and both call the ONE
+    shared helper `fail_unparseable` so the two scans cannot drift apart on the rule
+    (SD-G-04).
+    """
+
+
+def fail_unparseable(artifact: object, reason: str) -> None:
+    """R-27's shared rule, one home: an unparseable artifact is a FAILURE, never a pass.
+
+    A file the guard cannot read is exactly where a December record would hide, so
+    treating it as clean is the one answer that cannot be defended. Getting past a
+    genuinely irrelevant unparseable file requires an explicit recorded exclusion,
+    never silence. Both custody scans — the residency scan in this module and the
+    literal scan in `tests/test_locked_test_guard.py` — call this helper (SD-G-04:
+    the one place the rule lives, without coupling the scans themselves).
+    """
+    raise EvidenceScanError(
+        artifact,
+        f"cannot be read or parsed ({reason}); an unparseable artifact is a failure, "
+        f"not a pass (R-27) — a file the guard cannot read is exactly where a December "
+        f"record would hide, and passing it requires an explicit recorded exclusion, "
+        f"never silence",
+    )
+
+#: The three purposes Vision 8.3 distinguishes — `coverage_audit` and `regime_audit`
+#: are performance-blind and permitted before G-05; `locked_evaluation` is the
+#: one-shot, hash-before-metrics event G-06 gates — PLUS the two Q2 = C acquisition
+#: purposes the R-33 interface amendment adds (`acquisition` unit, accepted by owner
+#: ruling 2026-09-05, Q1 = A; change record
+#: `governance/CHANGE_RECORD_2026-09-05_R33_write_restricted.md`): `acquisition_read`
+#: for a named-accessor read of a restricted input, `acquisition_write` for
+#: `write_restricted`. Reusing a knowingly wrong value (`coverage_audit` for an
+#: acquisition write) was REJECTED because the access log's whole value is that a
+#: G-05 reviewer can read its rows as meaning what they say. `authorization` widens
+#: accordingly: for the acquisition purposes it names a D-number.
 PURPOSES: Final[frozenset[str]] = frozenset(
-    {"coverage_audit", "regime_audit", "locked_evaluation"}
+    {
+        "coverage_audit",
+        "regime_audit",
+        "locked_evaluation",
+        "acquisition_read",
+        "acquisition_write",
+    }
 )
 
 
@@ -109,6 +197,19 @@ class AccessRecord:
             )
 
 
+def _repo_root() -> Path:
+    """The repository root, derived from this module's OWN location.
+
+    One home for the boundary derivation both directions share (read and write), so
+    a caller cannot relocate the boundary by passing a different root. This function
+    is also the module's SUPPORTED TEST SEAM: tests that must exercise the guard
+    against a synthetic root monkeypatch THIS function (never the boundary constant,
+    and never a real December artifact) — the R-33 negative controls run against
+    `tmp_path` roots exactly this way.
+    """
+    return Path(__file__).resolve().parent.parent.parent
+
+
 def _restricted_root(repo_root: Path) -> Path:
     return (repo_root / RESTRICTED_ROOT).resolve()
 
@@ -135,7 +236,7 @@ def _append_and_flush(registry: Path, record: AccessRecord) -> str:
     """
     registry.parent.mkdir(parents=True, exist_ok=True)
     row = asdict(record)
-    row["logged_at_utc"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
+    row["logged_at_utc"] = _dt.datetime.now(_dt.UTC).isoformat()
     line = json.dumps(row, sort_keys=True, ensure_ascii=False)
     with registry.open("a", encoding="utf-8") as handle:
         handle.write(line + "\n")
@@ -163,12 +264,33 @@ def open_restricted(path: Path, *, record: AccessRecord, registry: Path) -> Path
         The same path, resolved. The caller reads it *after* this function returns, which
         is what makes the log-then-read ordering hold by construction.
     """
+    # Q1 = A (SD-G-01): refuse FIRST, before any row is appended and before the path is
+    # resolved for reading, on a platform whose write-durability semantics are
+    # uncharacterised. An AccessRecord is the only evidence the locked test was opened
+    # at all; on a platform where fsync's guarantee is unmeasured, a "durable" row is a
+    # row that might not exist — the failure this guard exists to prevent. `local` is
+    # exempt per the design's scheduling note: the refusal targets the governed audit
+    # host (Kaggle today), whose measurement W-6 step 8 owes, and foundation SD-03's
+    # unverified-durability stamp already disqualifies local rows as gate evidence.
+    # The characterised set is imported from `src/data/config.py` so the two sibling
+    # postures (foundation's stamp, this refusal) can never disagree about which
+    # platforms are measured.
+    platform_label, _ = resolve_platform_roots(os.environ)
+    if platform_label != "local" and platform_label not in CHARACTERISED_DURABILITY_PLATFORMS:
+        raise LockedTestError(
+            path,
+            f"restricted read refused on platform {platform_label!r}: its write-"
+            f"durability semantics are uncharacterised, so a pre-read access row "
+            f"cannot be known durable (Q1=A, SD-G-01; fail-closed) — no read occurs "
+            f"and no access row is consumed until W-6 step 8's durability measurement "
+            f"characterises the platform",
+        )
+
     resolved = Path(path).resolve()
 
     # Derive the repository root from this module's own location rather than from the
     # caller, so a caller cannot relocate the boundary by passing a different root.
-    repo_root = Path(__file__).resolve().parent.parent.parent
-    root = _restricted_root(repo_root)
+    root = _restricted_root(_repo_root())
 
     if not resolved.is_relative_to(root):
         raise LockedTestError(
@@ -190,6 +312,109 @@ def open_restricted(path: Path, *, record: AccessRecord, registry: Path) -> Path
     return resolved
 
 
+def write_restricted(
+    path: Path, payload: bytes, *, record: AccessRecord, registry: Path
+) -> Path:
+    """Log durably FIRST, then write `payload` under the restricted root (R-33, Q2 = C).
+
+    The write-side sibling of `open_restricted`, added under the R-33/BLK-07 interface
+    amendment accepted by owner ruling 2026-09-05 (Q1 = A;
+    `governance/CHANGE_RECORD_2026-09-05_R33_write_restricted.md`). It lives HERE,
+    in `governance-guards`' module, because a separate write path in `acquisition`
+    would make a second module name the restricted-root literal, taking R-28's exempt
+    list from seven to eight — one module, one door, one durability implementation
+    for both directions (SD-A-03). `acquisition` is this function's CALLER, not the
+    boundary's co-owner.
+
+    Ordering: **log-before-WRITE.** A write that logged afterwards would leave a
+    mutation with no record if it failed between the two operations; a partially
+    written December artifact with no access row creates December bytes nobody
+    recorded creating, which is worse than a blocked read (W-2a). The shared
+    `_append_and_flush` owns the append, the guard-stamped `logged_at_utc` and the
+    fsync — one log-then-proceed code path, not two behaviourally identical ones.
+
+    Raises
+    ------
+    LockedTestError
+        * on a platform whose write-durability semantics are uncharacterised — the
+          same Q1 = A fail-closed refusal as the read side, before any row is
+          appended and before any byte is written (a durability-unknown WRITE is
+          strictly worse than a durability-unknown read);
+        * when `record.purpose` is not `acquisition_write` — a write recorded under
+          a read purpose describes an event that did not happen, and the access
+          log's value is that a G-05 reviewer reads its rows as meaning what they say;
+        * when `path` is not under `RESTRICTED_ROOT` — ordinary writes must not
+          route through the guard (the boundary is derived from `_repo_root()`,
+          this module's own location, never from the caller);
+        * when the target already exists — a restricted artifact is never
+          overwritten; re-acquired bytes go under a new name or behind a recorded
+          decision (SEC-A-02's refuse-to-overwrite posture, applied at the boundary);
+        * when the access-log append or its durability confirmation fails — **no
+          byte is written**: a failed log aborts the write BEFORE any mutation.
+
+    NOTHING here grants December access: BLK-07's authorization limb — which units
+    may reach the locked month, and when — is the project decision owner's, and this
+    function is mechanism only. No acquisition run may touch calendar 2022-12 while
+    BLK-07 stands.
+    """
+    platform_label, _ = resolve_platform_roots(os.environ)
+    if platform_label != "local" and platform_label not in CHARACTERISED_DURABILITY_PLATFORMS:
+        raise LockedTestError(
+            path,
+            f"restricted write refused on platform {platform_label!r}: its write-"
+            f"durability semantics are uncharacterised, so neither the pre-write "
+            f"access row nor the written bytes can be known durable (Q1=A, SD-G-01 "
+            f"applied to the write side; fail-closed) — no row is appended and no "
+            f"byte is written",
+        )
+
+    if record.purpose != "acquisition_write":
+        raise LockedTestError(
+            path,
+            f"restricted write refused: purpose {record.purpose!r} is not "
+            f"'acquisition_write' (R-33, Q2=C); a write recorded under a read purpose "
+            f"describes an event that did not happen, and a G-05 reviewer must be able "
+            f"to read the access log's rows as meaning what they say",
+        )
+
+    resolved = Path(path).resolve()
+    root = _restricted_root(_repo_root())
+    if not resolved.is_relative_to(root):
+        raise LockedTestError(
+            resolved,
+            f"path is not under {RESTRICTED_ROOT}; write_restricted is the chokepoint "
+            f"for restricted writes only, and routing an ordinary write through it "
+            f"would make the access log unable to distinguish the two",
+        )
+
+    if resolved.exists():
+        raise LockedTestError(
+            resolved,
+            "restricted target already exists; a restricted artifact is never "
+            "overwritten -- write under a new name or record the superseding decision "
+            "first (SEC-A-02's refuse-to-overwrite posture; NFR-AUD-01's no-silent-"
+            "replacement rule applied at the boundary)",
+        )
+
+    try:
+        _append_and_flush(Path(registry), record)
+    except OSError as exc:
+        raise LockedTestError(
+            registry,
+            f"access-log write failed ({exc}); the WRITE is aborted BEFORE any byte "
+            f"is written -- R-33's ordering exists so a change cannot happen "
+            f"unrecorded, and a mutation with no record is the failure this guard "
+            f"prevents",
+        ) from exc
+
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    with resolved.open("wb") as handle:
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
+    return resolved
+
+
 def assert_no_december_outside_restricted(evidence_root: Path) -> Sequence[Path]:
     """FR-P1-02-6's regression guard: December-bearing artifacts outside the restricted root.
 
@@ -203,6 +428,18 @@ def assert_no_december_outside_restricted(evidence_root: Path) -> Sequence[Path]
     Membership is decided by **record date**, never by directory name -- `project.md`
     forbids deriving partition membership from a path, after a year-blind acquisition
     predicate filed locked-month records into `audit_evidence_2022-01/`.
+
+    An unreadable file is a **failure**, not a pass (R-27, via the shared
+    `fail_unparseable` helper): a file this scan cannot read is exactly where a
+    December record would hide. Known narrowing, disclosed not closed: the scan reads
+    `*.json` only, while R-27 specifies a per-class walk of every file -- widening it
+    is this unit's change to make and is not made at this step (recorded by
+    `inventory-and-registry` and in `nfr-design/security-design.md`'s banner).
+
+    Raises
+    ------
+    EvidenceScanError
+        when a candidate file cannot be read or decoded.
     """
     root = Path(evidence_root).resolve()
     if not root.is_dir():
@@ -215,8 +452,9 @@ def assert_no_december_outside_restricted(evidence_root: Path) -> Sequence[Path]
             continue
         try:
             text = candidate.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
-            continue
+        except (OSError, UnicodeDecodeError) as exc:
+            fail_unparseable(candidate, str(exc))
+            raise AssertionError("unreachable: fail_unparseable always raises") from exc
         if '"2022-12' in text or "'2022-12" in text:
             offenders.append(candidate)
     return offenders

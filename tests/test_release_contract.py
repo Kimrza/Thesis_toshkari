@@ -60,7 +60,6 @@ from src.data.release import (  # noqa: E402
     write_release,
 )
 
-
 # --- helpers --------------------------------------------------------------------------
 
 
@@ -187,12 +186,22 @@ def test_dataset_version_is_the_first_twelve_hex_of_content_hash(tmp_path: Path)
 
 
 def test_a_supplied_wrong_dataset_version_is_refused(tmp_path: Path) -> None:
-    """Negative control: the label is derived, never chosen."""
+    """Negative control: the label is derived, never chosen (W-7 step 1)."""
     manifest = _manifest_for(tmp_path)
     manifest["dataset_version"] = "deadbeefcafe"
     with pytest.raises(ReleaseError) as excinfo:
         write_release(tmp_path, manifest)
-    assert "not the first" in str(excinfo.value)
+    assert "supplied by the caller" in str(excinfo.value)
+
+
+def test_a_supplied_correct_dataset_version_is_also_refused(tmp_path: Path) -> None:
+    """W-7 step 1 rejects a call that SUPPLIES dataset_version even when correct:
+    a caller-supplied value could only duplicate the derivation or disagree with it."""
+    manifest = _manifest_for(tmp_path)
+    manifest["dataset_version"] = dataset_version_for(content_hash_of(manifest))
+    with pytest.raises(ReleaseError) as excinfo:
+        write_release(tmp_path, manifest)
+    assert "supplied by the caller" in str(excinfo.value)
 
 
 def test_identical_content_yields_an_identical_label(tmp_path: Path) -> None:
@@ -223,7 +232,7 @@ def test_prefix_collision_on_different_content_is_refused(tmp_path: Path) -> Non
     """
     new_dir = tmp_path / "new"
     manifest = _manifest_for(new_dir)
-    derived = dataset_version_for(content_hash_of(manifest["output_files"]))
+    derived = dataset_version_for(content_hash_of(manifest))
 
     planted = tmp_path / "planted"
     planted.mkdir()
@@ -241,7 +250,7 @@ def test_same_prefix_with_same_content_is_not_a_collision(tmp_path: Path) -> Non
     """Must-not-fire: idempotence is not a collision, and R-13 is what guards re-writes."""
     new_dir = tmp_path / "new"
     manifest = _manifest_for(new_dir)
-    content = content_hash_of(manifest["output_files"])
+    content = content_hash_of(manifest)
 
     planted = tmp_path / "planted"
     planted.mkdir()

@@ -9,10 +9,18 @@ overwrite an existing release.
 Inputs
 ------
 * `directory` -- where the release is written. Must not already contain a release (R-13).
-* `manifest` -- a mapping supplying the 13.3 fields other than the two this module derives
-  (`dataset_version` and `content_hash`).
-* `existing_releases` -- the release population read back for D-29's prefix-uniqueness
-  check. Reading it is **not** a ledger: nothing is allocated and no index is stored.
+* `manifest` -- a mapping supplying the THIRTEEN caller-supplied 13.3 fields. Supplying
+  `dataset_version` is refused (W-7 step 1, resolved 2026-08-25): the label is a function
+  of a `content_hash` that does not exist until the manifest is canonicalized, so a
+  caller-supplied value could only duplicate the derivation or disagree with it.
+* `release_root` -- the SINGLE authoritative release root (SD-04, Q2=A owner decision at
+  a TE 18.3 stop-and-report point). D-29's verify-on-write check enumerates each release
+  directory under it. A root that CANNOT BE REACHED refuses the write -- an unreachable
+  population is never treated as an empty one, because an empty population makes every
+  hash unique and converts the guard into a rubber stamp exactly when it is most needed.
+* `existing_releases` -- additional explicit release directories for the same check
+  (kept for callers that assemble the population themselves, e.g. tests). Reading either
+  surface is **not** a ledger: nothing is allocated and no index is stored.
 
 Re-run behaviour
 ----------------
@@ -47,16 +55,20 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Any, Final, Iterable, Mapping
+from typing import Any, Final
 
 from src.data.config import ReleaseError
 
 __all__ = [
     "REQUIRED_MANIFEST_FIELDS",
+    "INCLUDED_CONTENT_FIELDS",
+    "EXCLUDED_CONTENT_FIELDS",
     "DATASET_VERSION_HEX_LENGTH",
     "MANIFEST_NAME",
     "sha256_of_file",
+    "canonical_content_json",
     "content_hash_of",
     "dataset_version_for",
     "collision_probability",
@@ -89,6 +101,33 @@ DATASET_VERSION_HEX_LENGTH: Final[int] = 12
 
 MANIFEST_NAME: Final[str] = "release_manifest.json"
 
+#: R-11's canonical representation (decided 2026-08-25; array clause F-1): the TWELVE of
+#: the thirteen caller-supplied 13.3 fields that enter the authoritative identity.
+INCLUDED_CONTENT_FIELDS: Final[tuple[str, ...]] = (
+    "source_manifest_id",
+    "source_files",
+    "processing",
+    "schema_version",
+    "units",
+    "row_counts",
+    "exclusions_qc_summary",
+    "fold_ids",
+    "mask_ids",
+    "feature_set_ids",
+    "output_files",
+    "change_record_id",
+)
+
+#: Excluded -- exactly the three categories Q6's answer named, bound to fields (R-11):
+#: the label (derived FROM the hash, so including it would be circular), the volatile
+#: metadata (identical content re-released later MUST reproduce the same identity), and
+#: the self-referential hash field.
+EXCLUDED_CONTENT_FIELDS: Final[tuple[str, ...]] = (
+    "dataset_version",
+    "created_at_utc",
+    "content_hash",
+)
+
 
 def sha256_of_file(path: Path) -> str:
     """SHA-256 of a file's bytes, streamed so a large artifact does not load into memory."""
@@ -99,15 +138,80 @@ def sha256_of_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def content_hash_of(output_files: Mapping[str, str]) -> str:
-    """Release identity (R-11): a hash over the sorted `path -> sha256` mapping.
+def _canonical(value: Any, trail: str) -> Any:
+    """Normalise a value for RFC 8785-profile serialization; refuse what it cannot carry.
 
-    Sorted and canonically separated so the same set of files yields the same hash
-    regardless of insertion order -- otherwise the "same content, same label" property
-    D-29 rests on would depend on dictionary ordering.
+    Floats are refused rather than approximated: no identity-bearing 13.3 field is
+    float-valued (row counts are integers), and a float that serialises differently
+    across platforms would silently break the two-platform byte-identity WS-20/TA-17
+    requires of the authoritative identity.
     """
-    canonical = json.dumps(dict(sorted(output_files.items())), separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    if isinstance(value, bool) or value is None or isinstance(value, int | str):
+        return value
+    if isinstance(value, float):
+        raise ReleaseError(
+            trail,
+            "float values are refused in the canonical content representation (R-11): "
+            "platform-dependent float serialization would break the byte-identical "
+            "two-platform requirement",
+        )
+    if isinstance(value, Mapping):
+        return {str(k): _canonical(v, f"{trail}.{k}") for k, v in sorted(value.items())}
+    if isinstance(value, list | tuple):
+        return [_canonical(v, f"{trail}[{i}]") for i, v in enumerate(value)]
+    raise ReleaseError(
+        trail,
+        f"value of type {type(value).__name__} has no canonical JSON form (R-11)",
+    )
+
+
+def canonical_content_json(manifest: Mapping[str, Any]) -> bytes:
+    """R-11's canonical representation: the twelve included fields, canonical JSON.
+
+    UTF-8, lexicographically sorted keys at every level, no insignificant whitespace
+    (RFC 8785 profile). Before serialization, every ARRAY-VALUED included field is
+    sorted lexicographically by the serialization of its elements (F-1, 2026-08-25:
+    JCS canonicalizes object keys and numbers but does NOT reorder arrays, and a
+    directory listing on Kaggle versus local would otherwise yield two canonical
+    documents for byte-identical content). The excluded fields -- `dataset_version`,
+    `created_at_utc`, `content_hash` -- never enter.
+
+    Raises `ReleaseError` naming any included field that is absent.
+    """
+    missing = [f for f in INCLUDED_CONTENT_FIELDS if f not in manifest]
+    if missing:
+        raise ReleaseError(
+            "manifest",
+            "canonical content representation requires every included TE 13.3 field; "
+            "absent: " + ", ".join(missing),
+        )
+    payload: dict[str, Any] = {}
+    for field in INCLUDED_CONTENT_FIELDS:
+        value = _canonical(manifest[field], field)
+        if isinstance(value, list):
+            value = sorted(
+                value,
+                key=lambda item: json.dumps(
+                    item, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+                ),
+            )
+        payload[field] = value
+    return json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+
+
+def content_hash_of(manifest: Mapping[str, Any]) -> str:
+    """Release identity (R-11): SHA-256 over the canonical content representation.
+
+    A pure function of the twelve included caller-supplied fields, so identical content
+    yields an identical identity regardless of insertion order, platform, or the time
+    of release -- the idempotence D-29 rests on. (Before 2026-09-05 this hashed only
+    `output_files`; R-11's decided canonical representation covers all twelve included
+    fields, so two releases with identical bytes but different processing provenance no
+    longer share an identity.)
+    """
+    return hashlib.sha256(canonical_content_json(manifest)).hexdigest()
 
 
 def dataset_version_for(content_hash: str) -> str:
@@ -158,10 +262,39 @@ def _existing_prefixes(existing_releases: Iterable[Path]) -> dict[str, str]:
     return prefixes
 
 
+def _enumerate_release_root(release_root: Path) -> list[Path]:
+    """SD-04: enumerate the single authoritative release root, or REFUSE.
+
+    An unreachable root is never treated as an empty population -- an empty population
+    makes every hash unique, which turns D-29's guard into a rubber stamp at exactly the
+    moment it is most needed (Q2=A, the owner decision at the TE 18.3 stop-and-report
+    point).
+    """
+    root = Path(release_root)
+    if not root.is_dir():
+        raise ReleaseError(
+            root,
+            "the single authoritative release root is unreachable; write_release "
+            "REFUSES rather than treating an unreachable population as empty (SD-04): "
+            "an empty population makes every hash unique and converts D-29's "
+            "verify-on-write guard into a rubber stamp",
+        )
+    try:
+        return sorted(child for child in root.iterdir() if child.is_dir())
+    except OSError as exc:
+        raise ReleaseError(
+            root,
+            f"the single authoritative release root could not be enumerated ({exc}); "
+            f"write_release refuses rather than proceeding on a partial population "
+            f"(SD-04)",
+        ) from exc
+
+
 def write_release(
     directory: Path,
     manifest: Mapping[str, Any],
     *,
+    release_root: Path | None = None,
     existing_releases: Iterable[Path] = (),
 ) -> dict[str, Any]:
     """Write an immutable release, or raise.
@@ -169,14 +302,22 @@ def write_release(
     Order of checks is deliberate: R-13's refusal fires **before** anything is computed or
     written, so a rejected write leaves the target directory exactly as it was.
 
+    `release_root` is the single authoritative release root D-29's verify-on-write check
+    enumerates (SD-04; resolved from `configs/data.yaml` `roots.release_root` against the
+    platform workspace root). Governed callers MUST pass it; it is optional only so a
+    caller may assemble the population explicitly via `existing_releases` (tests). When
+    passed and unreachable, the write REFUSES -- never an empty-population pass.
+
     Raises
     ------
     ReleaseError
         * the directory already contains a release (**R-13**);
+        * the caller supplied `dataset_version` (**W-7 step 1**: the label is derived,
+          never chosen -- a supplied value could only duplicate the derivation or
+          disagree with it);
         * a TE 13.3 field is missing or empty;
         * `output_files` is empty, or an entry's recorded hash does not match the file;
-        * the supplied `dataset_version` is not the first 12 hex of the release's own
-          `content_hash`;
+        * the release root is unreachable (**SD-04**);
         * the 12-hex prefix already names a **different** `content_hash` (**D-29**).
     """
     target = Path(directory)
@@ -189,6 +330,16 @@ def write_release(
             "a release already exists in this directory; TE 13.3 requires the final "
             "dataset to be write-protected or stored under a NEW version rather than "
             "overwritten, so this write is refused and the existing bytes are untouched",
+        )
+
+    # --- W-7 step 1: the caller supplies thirteen fields and never the label -----------
+    if "dataset_version" in manifest:
+        raise ReleaseError(
+            target,
+            "dataset_version was supplied by the caller; write_release DERIVES it from "
+            "the release's own content_hash (W-7, D-29) and a caller-supplied value "
+            "could only duplicate the derivation or disagree with it -- it is not the "
+            "caller's to choose",
         )
 
     payload: dict[str, Any] = dict(manifest)
@@ -207,7 +358,7 @@ def write_release(
         if not artifact.is_file():
             raise ReleaseError(
                 artifact,
-                f"declared in output_files but absent from the release directory",
+                "declared in output_files but absent from the release directory",
             )
         actual = sha256_of_file(artifact)
         if actual != recorded:
@@ -217,23 +368,16 @@ def write_release(
             )
 
     # --- identity and D-29's derived label --------------------------------------------
-    content_hash = content_hash_of(output_files)
+    content_hash = content_hash_of(payload)
     derived_version = dataset_version_for(content_hash)
     payload["content_hash"] = content_hash
-
-    supplied = payload.get("dataset_version")
-    if supplied is None:
-        payload["dataset_version"] = derived_version
-    elif supplied != derived_version:
-        raise ReleaseError(
-            target,
-            f"dataset_version {supplied!r} is not the first {DATASET_VERSION_HEX_LENGTH} "
-            f"hex of this release's content_hash ({derived_version!r}); D-29 makes the "
-            f"label derived, never chosen",
-        )
+    payload["dataset_version"] = derived_version
 
     # --- D-29 verify-on-write: the prefix must not already name different content -----
-    for known_version, known_hash in _existing_prefixes(existing_releases).items():
+    population: list[Path] = list(existing_releases)
+    if release_root is not None:
+        population.extend(_enumerate_release_root(release_root))
+    for known_version, known_hash in _existing_prefixes(population).items():
         if known_version == derived_version and known_hash != content_hash:
             raise ReleaseError(
                 target,
@@ -288,12 +432,20 @@ def verify_release(manifest_path: Path) -> list[str]:
                 problems.append(f"{artifact}: declared in output_files but absent")
             elif sha256_of_file(artifact) != recorded:
                 problems.append(f"{artifact}: bytes do not match the recorded SHA-256")
-        expected = content_hash_of(output_files)
-        if data.get("content_hash") != expected:
-            problems.append(f"{path}: content_hash does not match output_files")
-        if data.get("dataset_version") != expected[:DATASET_VERSION_HEX_LENGTH]:
-            problems.append(
-                f"{path}: dataset_version is not the first {DATASET_VERSION_HEX_LENGTH} "
-                f"hex of content_hash (D-29)"
-            )
+        try:
+            expected = content_hash_of(data)
+        except ReleaseError as exc:
+            problems.append(f"{path}: canonical content representation failed ({exc})")
+        else:
+            if data.get("content_hash") != expected:
+                problems.append(
+                    f"{path}: content_hash does not match the canonical content "
+                    f"representation (R-11) — a label/hash mismatch is an integrity "
+                    f"violation, not a discrepancy to reconcile"
+                )
+            if data.get("dataset_version") != expected[:DATASET_VERSION_HEX_LENGTH]:
+                problems.append(
+                    f"{path}: dataset_version is not the first {DATASET_VERSION_HEX_LENGTH} "
+                    f"hex of content_hash (D-29)"
+                )
     return problems

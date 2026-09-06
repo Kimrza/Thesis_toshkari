@@ -25,7 +25,9 @@
 > ## ⚠ THIS IS A COMPONENT DESIGN. NO COMPONENT HERE EXISTS
 >
 > **Not one module named below is written.** `src/data/config.py`,
-> `src/data/registry.py`, `src/data/release.py`, `src/data/reuse_registry.py` and
+> `src/data/registry.py` *(**not this unit's** — `inventory-and-registry` owns it; listed here
+> only as a disk-state fact, see the Critical correction below)*, `src/data/release.py`,
+> `src/data/reuse_registry.py` and
 > `tests/test_determinism.py` are **named, not built** — BLK-01 granted **authority to
 > name a module, which is not authority to have written one**. `configs/` does not exist.
 > **No Python interpreter exists in this environment.**
@@ -44,9 +46,32 @@
 > **The correction moves no component from "unbuilt" to "built" in any way that matters
 > here.** `src/data/config.py`, `release.py` and `locked_test.py` existing means **C-1 and
 > C-3 have partial implementations**; it does not mean either component's obligations are
-> met. **C-2's registry writer has no module at all** (`src/data/registry.py` absent), so
-> the boundary this document draws between the resolve path and the two writers is still a
-> boundary between **one partly-built component and one that does not exist**.
+> met. **C-2's registry writer has no module at all**, so the boundary this document draws
+> between the resolve path and the two writers is still a boundary between **one partly-built
+> component and one that does not exist**.
+>
+> ⚠ **CORRECTED 2026-09-04 on adversarial finding 1, Critical.** The sentence above previously
+> read *"**C-2's registry writer has no module at all** (`src/data/registry.py` absent)"*,
+> equating C-2's twenty-column experiment registry with **`src/data/registry.py`**. **That
+> module is not this unit's, and it holds an unrelated entity.**
+> `inception/units-generation/unit-of-work.md` gives `src/data/inventory.py` and
+> `src/data/registry.py` to **`inventory-and-registry`**, and `component-methods.md` defines
+> `src/data/registry.py`'s contents as a **`Station`** dataclass — GNSS station metadata, with
+> no `run_id`, no `exploratory`, and none of C-2's twenty §13.4 columns. **This unit's own
+> upstream artifacts already carried the disclaimer** (`domain-entities.md`:
+> *"`src/data/registry.py` and its `Station` entity are **not** part of this unit"*;
+> `business-logic-model.md`: `RegistryEvent`'s raise in that module is *"outside this unit"*),
+> and this stage failed to carry it forward — the sweep defect `project.md` records as landing
+> at the boundary between a stage and its own upstream.
+>
+> **What the experiment-registry writer's module actually is: an open item.**
+> `business-logic-model.md` names *"the experiment-registry writer this unit owns"* and gives
+> **no path**. Placement is unresolved and is **not** `src/data/registry.py`. A developer who
+> read the superseded sentence literally would have built this unit's security-critical
+> append-only registry inside a module reserved for another unit's station coordinates.
+>
+> **`src/data/registry.py` is still absent on disk** — that fact was never wrong; its
+> attribution to this unit was.
 >
 > **This is a logical decomposition, not an infrastructure deployment.** There are no
 > services, no processes, no network boundaries and no deployable units here.
@@ -262,3 +287,20 @@ it decomposes is complete**, which is the lesson worth keeping from this correct
 - **[C-1]** **`CredentialNameMap` is empty** until `configs/` exists, so C-1's credential responsibility is a **shape without contents**.
 - **[assumption]** The eleven downstream units need **only** C-1's read-only resolved state and the two writers' entry points — no downstream unit needs a `foundation` internal. **Unverified**: no downstream unit is built, so nothing has yet tried to import one.
 - **None** of the above decides a scientific value, fills a `TBD — freeze gate` field, or claims a gate, acceptance row, install or test as discharged.
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched by any of it.*
+
+A **redo jump** on `nfr-design` reset this stage's receipt floor, invalidating this unit's
+summary-confirmation and review receipts. **No design content changed and no claim above is
+altered by this note.** The stored confirmation was re-affirmed by the owner on 2026-09-04 (its
+value was already `Looks correct`), and this artifact is re-saved unchanged so the engine's
+write-after-confirmation precondition is satisfied honestly rather than bypassed.
+
+*Third reset, 2026-09-04, on the owner's "fix all findings until all units are ready"
+direction — this unit had no open findings and is untouched; summary re-affirmed, this line is
+the re-registering write. No claim above is altered.*

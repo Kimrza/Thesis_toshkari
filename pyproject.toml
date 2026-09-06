@@ -1,0 +1,63 @@
+# pyproject.toml — repository tooling configuration (TE §12; TA-01; TC-06).
+#
+# Purpose: project metadata, the governed Python pin, and the ruff + pytest
+# configuration affirmed at practices-discovery (team.md § Code Style, Q10=A).
+# Inputs: none at runtime — read by pip, ruff and pytest.
+# Re-run behaviour: declarative; editing this file changes tooling behaviour
+# only. No scientific constant lives here (TC-03e).
+
+[project]
+name = "tec-hourly-forecast"
+version = "0.1.0"
+description = "Governed research pipeline: hourly VTEC forecasting at ARUC/BSHM/NICO, calendar 2022 (Phase 1). Thesis codebase, single author."
+# TS-01 / TC-03d: Python 3.11 exactly is the governed pin. A different
+# interpreter may run the suite as smoke evidence only, never governed evidence.
+requires-python = "==3.11.*"
+authors = [{ name = "Kimia Rezaei" }]
+
+# Runtime dependencies are pinned in requirements.txt (TE §13.1 requires the
+# requirements hash in every run's environment lock). This table is not the
+# governed pin surface and deliberately stays empty so there is exactly one.
+dependencies = []
+
+[tool.ruff]
+# Q10=A: ruff for BOTH linting and formatting, adopted before the nine stage
+# scripts are written.
+target-version = "py311"
+line-length = 99
+src = ["src", "scripts", "tests"]
+extend-exclude = [
+    "aidlc",       # AI-DLC workflow records, not project code
+    "notebooks",
+    "evidence",    # governed evidence bytes — never rewritten by a formatter
+    "artifacts",
+    "PreFlight",
+    "graphify-out",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import order
+    "B",   # bugbear
+    "UP",  # pyupgrade (PEP 604 hints are the affirmed convention)
+    "S",   # bandit security checks (NFR-SEC-01 support; the scanner is gitleaks)
+]
+ignore = [
+    "E501",  # long lines in docstrings citing governance records
+]
+
+[tool.ruff.lint.per-file-ignores]
+# assert is the test mechanism; subprocess use in tests is deliberate.
+"tests/*" = ["S101", "S603", "S607"]
+"scripts/*" = ["S603", "S607"]
+
+[tool.ruff.format]
+quote-style = "double"   # affirmed convention: double quotes, f-strings
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# The suite must be runnable without manual setup beyond documented
+# prerequisites (phases/construction.md § Testing Standards).

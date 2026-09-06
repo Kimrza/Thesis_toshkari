@@ -246,4 +246,11 @@ exists in this environment**, so every test is written-but-unexecuted or unwritt
 
 Reply `Looks correct` to proceed, or state what to change.
 
+<!-- Re-collected 2026-09-04: the redo jump on `nfr-design` reset this stage's receipt floor,
+     invalidating this unit's summary-confirmation receipt. The stored value was `Looks correct`
+     and is being re-affirmed on the fresh floor, not changed. -->
+
+- Looks correct
+- Request changes
+
 [Answer]: Looks correct

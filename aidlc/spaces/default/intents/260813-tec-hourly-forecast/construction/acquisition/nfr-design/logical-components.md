@@ -141,6 +141,13 @@ derivation, **logging durably before it writes**.
 >
 > **A-3 is therefore a caller, not an owner.** Its component boundary encloses **the calls
 > and their contracts**, not the chokepoint.
+>
+> ⚠ **And the amendment A-3 calls is UNAPPROVED, not merely unbuilt** *(added 2026-09-04 on
+> adversarial finding 3, Major)*. `component-methods.md`'s approved block for that module
+> carries no `write_restricted` and no `_append_and_flush`, and R-33 states the writer and the
+> `AccessRecord.purpose` extension *"need change records"*. Q2 = A is a proposal to that
+> change-control gate; `governance-guards` must accept the interface amendment before anything
+> exists to build.
 
 ---
 
@@ -183,33 +190,51 @@ appear downstream of it.
 
 | Requirement | Component | Acceptance row | Status |
 |---|---|---|---|
-| FR-P1-01-1 | A-1 | TA-25 | `Pending` |
-| FR-P1-01-2 | A-1, A-2 | TA-25 | `Pending` |
+| FR-P1-01-1 | A-1 | **TA-32** | `Pending` |
+| FR-P1-01-2 | A-1, A-2 | **TA-15** | `Pending` |
 | FR-P1-01-6 | A-3 | TA-08 | `Pending` |
-| **FR-P1-01-10** | A-2 | TA-22 | `Pending` — **NOT MET** |
-| **NFR-SEC-01** | A-2 | TA-22 | `Pending` — **unclaimed** |
-| **NFR-AUD-01** | A-3 | **TA-10, TA-21** — both rows, owned elsewhere | `Pending` |
-| **NFR-DQ-01** | A-2 | **TA-19** | `Pending` |
+| **FR-P1-01-10** | A-2 | TA-22 — **row owned by `foundation`, this unit supporting** | `Pending` — **NOT MET** |
+| **NFR-SEC-01** | A-2 | TA-22 — **row owned by `foundation`, this unit supporting** | `Pending` — **unclaimed** |
+| **NFR-AUD-01** | A-3 | **TA-10** (owned by `foundation`), **TA-21** (owned by **`fixtures-and-reproducibility`**) — this unit supporting both | `Pending` *(owner corrected 2026-09-04, mirroring `security-design.md`'s dated correction; superseded: "`foundation`/`inventory-and-registry`")* |
+| **NFR-DQ-01** | A-2 | **TA-19** — **row owned by `target-standardization`, this unit supporting** | `Pending` |
 
 **Derived and printed**: 3 components (A-1…A-3); **7** coverage rows — counted directly
 from the table above. **0** rows claimed satisfied; **0** components built.
 
-**Relation to `security-design.md`'s 17 rows, printed as a decomposition** *(figure corrected
-2026-09-01 in the same self-sweep; superseded: **14**. This heading is exactly the kind of
-site a correction keyed to the table alone would have missed — the count also lives in the
-sentence introducing it)* — the two tables
+> ⚠ **CORRECTED 2026-09-04 on adversarial findings 1 and 2, both Critical.** FR-P1-01-1's and
+> FR-P1-01-2's acceptance cells both read **TA-25** — FR-P1-00-2's real row, not theirs;
+> `requirements.md`'s own rows give **TA-32** and **TA-15** respectively (the same shifted-row
+> defect corrected across eight cells in `security-design.md`, whose correction box carries the
+> full derivation). And four of this table's seven rows are **owned by other units** per
+> `unit-of-work.md` — kept because A-2/A-3 genuinely contribute to each, now labelled with
+> their owners instead of implying this unit's coverage. This unit's own **REQ-NFR-A1 and
+> REQ-NFR-A2** (previously absent from both artifacts) are carried in `security-design.md`'s
+> table; they raise **no component-boundary question** — both are SD-A-04 data-integrity
+> obligations inside A-2's existing boundary — so they are decomposition-irrelevant here by the
+> same rule the § Relation paragraph below applies to the other SD-only rows.
+
+**Relation to `security-design.md`'s 19 rows, printed as a decomposition** *(figure corrected
+2026-09-04 on adversarial finding 2; superseded: **14**, then **17**. This heading is exactly
+the kind of site a correction keyed to the table alone would have missed — the count also
+lives in the sentence introducing it, which is precisely where it went stale a second time)*
+— the two tables
 are **not nested**, so no single "N fewer" subtraction describes them; a subtraction of that
 form went stale three times running on `models-and-baselines` at the previous stage:
 
 - **7 rows shared** — FR-P1-01-1, FR-P1-01-2, FR-P1-01-6, FR-P1-01-10, NFR-SEC-01, NFR-AUD-01, NFR-DQ-01.
-- **10 rows in `security-design.md` only** *(re-derived 2026-09-01 on a pre-dispatch self-sweep; superseded: **7**)* — REQ-ENG-13, FR-P1-00-1, FR-P1-00-2, FR-P1-01-3, FR-P1-01-4, FR-P1-01-5, FR-P1-01-7, and the three added by that sweep: **FR-P1-01-8** (driver release grade), **FR-P1-01-9** (NaN at acquisition), **FR-P1-01-11** (derived-release re-point). Each is an obligation on **what a component does** rather than on **where a boundary sits** — the three new ones all land inside **A-2**'s emit responsibilities without moving a boundary.
+- **12 rows in `security-design.md` only** *(superseded: **7**, then **10**)* — REQ-ENG-13, FR-P1-00-1, FR-P1-00-2, FR-P1-01-3, FR-P1-01-4, FR-P1-01-5, FR-P1-01-7, the three added by the 2026-09-01 sweep (**FR-P1-01-8**, **FR-P1-01-9**, **FR-P1-01-11**), and the two added by adversarial finding 2 (**REQ-NFR-A1**, **REQ-NFR-A2** — this unit's own carried requirements, previously absent from both artifacts). Each is an obligation on **what a component does** rather than on **where a boundary sits** — the five late additions all land inside **A-2**'s emit responsibilities without moving a boundary.
 - **0 rows here only.**
-- **7 + 10 = 17**, matching `security-design.md`'s corrected total *(superseded: 7 + 7 = 14)*.
+- **7 + 12 = 19**, matching `security-design.md`'s corrected total *(superseded: 7 + 7 = 14, then 7 + 10 = 17)*.
 
 > **A decomposition that verifies is not evidence the decomposed set is complete.** That
 > lesson came from `foundation` at this stage, where a sound 3/3/0 split sat over a row set
 > missing three requirements. **The ID set here was set-differenced against
-> `requirements.md` before either table was written.**
+> `requirements.md` before either table was written** — and that sweep was still incomplete,
+> because it ranged over `FR-P1-01-*` only and missed this unit's own **REQ-NFR-A1/A2**
+> (adversarial finding 2). The correct range is the unit's full "Requirements carried" list,
+> not one prefix family. The lesson compounds rather than replaces: a verified decomposition
+> proves neither completeness of the set nor correctness of each cell's **value** — the eight
+> wrong acceptance rows survived every set-level check ever run on this stage.
 
 ## Assumptions & Open Questions
 
@@ -221,3 +246,18 @@ form went stale three times running on `models-and-baselines` at the previous st
 - **[carried — DATA-07]** The twelve pre-TC-06 months are **unverifiable in principle**; **2022-04, 2022-07 and 2022-12** hold no `raw_isprint_cache/`. No component below changes that.
 - **[carried]** The **NFR-SEC-01 / Madrigal-identity conflict is the supervisor's**; **no reading is adopted**.
 - **None** of the above decides a scientific value, fills a `TBD — freeze gate` field, or claims a gate, acceptance row, install or test as discharged.
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched by any of it.*
+
+A **redo jump** on `nfr-design` reset this stage's receipt floor, invalidating this unit's
+summary-confirmation and review receipts. **No design content changed and no claim above is
+altered by this note**, including DATA-07's unverifiable-in-principle finding and the
+supervisor-owned NFR-SEC-01 conflict, on which no reading is adopted. The stored confirmation
+was re-affirmed by the owner on 2026-09-04 (its value was already `Looks correct`), and this
+artifact is re-saved unchanged so the engine's write-after-confirmation precondition is
+satisfied honestly rather than bypassed.

@@ -635,7 +635,7 @@ misread as covered than one that never had a row.
 | FR-P1-02-4 | SD-I-08 | TA-25 | **`inventory-and-registry`** | `Pending` |
 | FR-P1-02-5 | SD-I-08 | TA-25 | **`inventory-and-registry`** | `Pending` |
 | **FR-P1-02-8** | SD-I-08 | ⚠ **NO ACCEPTANCE ROW** — `TA-29` **withdrawn** | — | untested |
-| NFR-AUD-01 | SD-I-04, SD-I-05 | TA-10, TA-21 | `foundation` | `Pending` |
+| NFR-AUD-01 | SD-I-04, SD-I-05 | TA-10, TA-21 | `foundation` (TA-10); **`fixtures-and-reproducibility`** (TA-21) | `Pending` *(owner cell corrected 2026-09-04 on adversarial finding 16, Major; superseded: `foundation` for both. `unit-of-work.md`'s per-unit Acceptance-rows lines give TA-21 to `fixtures-and-reproducibility` — `foundation`'s own list excludes it. The un-split label was an inconsistency in this table's own method, which already splits per acceptance-row token on the FR-P1-02-3 row above)* |
 | NFR-DQ-01 | SD-I-07 | **TA-19** *(row filled in at this stage — see note below)* | — | `Pending` |
 | **NFR-SEC-01** *(added at this stage)* | SD-I-06 | TA-22 | — | `Pending` |
 
@@ -1107,3 +1107,211 @@ receipts again. It was ordered to repair two Majors in **`target-standardization
 the receipts exist. **No claim in this document is altered by this note** — the two repaired
 Majors, the four post-repair findings, the 232-row access log, the 359-file census and
 `SchemaError`'s routing to the gate all stand exactly as recorded above.
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched by any of it.*
+
+A **redo jump** on `nfr-design` reset this stage's receipt floor, invalidating this unit's
+summary-confirmation and review receipts. The jump was taken to lift the review-freeze on two
+*other* units whose adversarial findings the project decision owner directed be fixed; the
+reset is stage-wide.
+
+**No design content changed and no claim above is altered by this note** — the two repaired
+Majors, the four post-repair findings, the 232-row access log, the 359-file census and
+`SchemaError`'s routing to the gate all still stand as recorded. The stored confirmation was
+re-affirmed by the owner on 2026-09-04 (its value was already `Looks correct`), and this
+artifact is re-saved unchanged so the engine's write-after-confirmation precondition is
+satisfied honestly rather than bypassed.
+
+---
+
+## Review — 2026-09-04 fresh-receipt-floor adversarial pass
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T21:13:20Z
+**Iteration:** 1 (fresh receipt floor; treated per dispatch as a new adversarial pass, not a
+continuation of the terminal READY above)
+
+This pass re-derived every disk-state and cross-reference claim independently rather than
+trusting the four prior review sections, per this dispatch's instruction to treat the
+receipt-floor notes as claims to verify, not context to trust.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 16 | **Major** | `security-design.md` § Requirement coverage, NFR-AUD-01 row; `logical-components.md` § Requirement coverage, NFR-AUD-01 row (identical) | **The NFR-AUD-01 row's "Row primary owner" cell mislabels one of its two acceptance rows.** The cell reads `TA-10, TA-21 \| `foundation``, attributing both tests to `foundation` as a single owner. Verified against `unit-of-work.md`: `foundation`'s own **Acceptance rows (7)** line (§1, line 133) is `TA-01, TA-02, TA-03, TA-10, TA-15, TA-22, TA-23` — **TA-21 is not in it**. TA-21 belongs to `fixtures-and-reproducibility`'s own **Acceptance rows (4)** line (§12, line 527): `WS-20, TA-09, TA-17, TA-21`. `requirements.md:488` cites both `TA-10, TA-21` for NFR-AUD-01 without asserting an owner, so the test-ID citation itself is right; only the owner attribution is wrong, and it is wrong by merging two rows with different true owners under one label. The artifact already knows how to split ownership per acceptance-row token when they differ — it does exactly that for FR-P1-02-3 two rows above (`` `features-and-splits` (WS-18); **this unit** (TA-25) ``) — which makes the un-split `foundation` label on this row an inconsistency in the artifact's own method, not an ambiguous case. This is the same defect class the dispatch brief flags as the sweep's recurring failure mode (a citation correct in substance, an ownership attribution wrong), here landing on a requirement this unit does not own and has not marked satisfied, so it does not discharge anything falsely — but a reader taking the cell at face value would look to `foundation` rather than `fixtures-and-reproducibility` for TA-21's evidence. | Split the cell as done for FR-P1-02-3: `` `foundation` (TA-10); `fixtures-and-reproducibility` (TA-21) ``, at both sites. |
+
+### Checks performed (this pass, independent of prior sections)
+
+| # | Check | Method | Result |
+|---|---|---|---|
+| 1 | Disk state: `configs/`, `src/data/inventory.py`, `src/data/registry.py`, `scripts/01_inventory_and_registry.py`, `tests/test_station_registry.py` all absent | `ls` of `configs`, `src/data`, `scripts`, `tests` | **Confirmed absent**, all four plus `configs/` |
+| 2 | `src/data/config.py` `__all__` — 17 names, no `SchemaError`/`InventoryError`/`AuditScopeError` | Read `config.py:42-59` | **Confirmed.** 17 names exactly as listed in the artifact; none of the three missing exceptions present |
+| 3 | `src/data/locked_test.py:213` scans `*.json` only | `grep -n rglob` | **Confirmed.** `for candidate in sorted(root.rglob("*.json")):` at `:213` |
+| 4 | `evidence/` file-type census outside the restricted root | `find evidence -type f ! -path "*locked_test_restricted*"` + extension count | **Confirmed exactly: 359 files — 283 .txt, 33 .csv, 24 .json, 14 .html, 4 .md, 1 .jsonl** |
+| 5 | Access log row/purpose/run_id counts | `wc -l`, `grep -o` on `evidence/test_run_access_log.jsonl` | **Confirmed exactly: 232 rows, 232/232 `coverage_audit`, `test_release_hashes` 220 + `test_acquisition_window` 12 = 232**; no `merge_run_access_log.jsonl` |
+| 6 | Per-ID citations, FR-P1-02-1/-7/-2/-3/-4/-5/-8, NFR-AUD-01/-DQ-01, NFR-SEC-01 against `requirements.md`'s own rows | Read `requirements.md:346-354, 487-489` | **Confirmed for every ID.** FR-P1-02-1→WS-01,TA-04; -7→`UNTESTED`; -2→TA-04; -3→WS-18,TA-25; -4→TA-25; -5→TA-25; -8→`UNTESTED` (TA-29 withdrawn, verified at `requirements.md:352`); NFR-AUD-01→TA-10,TA-21; NFR-DQ-01→TA-19; NFR-SEC-01→TA-22 — all match the artifact's coverage tables exactly |
+| 7 | Per-ID **ownership** of every cited acceptance row against `unit-of-work.md`'s per-unit `Acceptance rows` lines | Located `inventory-and-registry` (§4, lines 215-245), `foundation` (§1, lines 108-146), `features-and-splits` (§7, line 329), `fixtures-and-reproducibility` (§12, line 527) | **One mismatch found** → finding 16. All others confirmed: WS-01/TA-04/TA-25 are `inventory-and-registry`'s own (line 233); WS-18 is `features-and-splits`' (line 329); TA-19 is `target-standardization`'s (line 265, unasserted by this artifact so not a defect); TA-22 is `foundation`'s (line 133, unasserted by this artifact so not a defect) |
+| 8 | `component-dependency.md` Q1 claims — `src/data`→`models`/`evaluation` = `—`; `scripts/*` (all others) = `yes`/`yes` | Read `component-dependency.md:24-33` | **Confirmed exactly**, both rows |
+| 9 | `services.md` DISC-I-1 claim — `01_inventory_and_registry.py`'s outputs cell names neither the coverage nor the regime-count report | Read `services.md:47` | **Confirmed verbatim**: "source inventory (§5.1 nine fields), station registry" — nothing else |
+| 10 | `components.md:64` / `:169` DISC-I-3 citation | Read both lines | **Confirmed exactly.** `:64` = `inventory.py` / `FR-P1-01-6, FR-P1-01-2`; `:169` is the unrelated SSN/residual/GRU absence grep |
+| 11 | `component-methods.md`'s `Station` dataclass and `src/data/registry.py` block, against SD-I-07/SD-I-03's claims | Read `component-methods.md:449-478` | **Confirmed.** All named §6.2 fields present including `igrf_version` (pinned, never defaulted, per its own comment); `assert_registry_resolved` raises on the conditions the artifact states |
+| 12 | `src/data/locked_test.py`'s ownership — confirm this unit does not claim the module or the experiment registry | `unit-of-work.md:156, 593` ownership table | **Confirmed `governance-guards` owns it**, matching the artifact's § Shared resources attribution exactly; this unit is correctly stated as a downstream consumer only |
+| 13 | `evidence/DECISIONS.md` ends at D-32; G-09/D-31 as cited | `grep "^## D-"` tail; read D-31 | **Confirmed.** Last decision is D-32; D-31 confirms G-09 signed with §18.3 preconditions recorded UNMET, matching the artifact's header-box claim verbatim |
+| 14 | Mermaid presence / `required-sections` sensor | Fenced-block scan; H2 count | **0 fenced blocks in either artifact (no Mermaid to validate); 21 H2 in `security-design.md`, 9 in `logical-components.md`** — both clear the ≥2 default |
+| 15 | Overclaim sweep — no `Pending`/`untested`/`TBD` row silently flipped to satisfied, no D-number decided, BLK-07 still open | Read every `Status` cell in both coverage tables; `grep -ni "igrf\|BLK-07"` | **Confirmed.** 0 rows satisfied; IGRF stays `TBD — freeze gate` at every occurrence; BLK-07's authorization limb stated open in both artifacts |
+
+### Verified — did not break
+
+Every disk-state, count, and per-ID citation claim carried forward from the four prior review
+sections was independently re-derived on this pass rather than trusted, and all reproduced
+exactly: the 359-file / six-extension census, the 232-row access log split 220+12, the
+17-name `__all__` with the three missing exceptions, the `*.json`-only guard scan bound, the
+`component-dependency.md` matrix cells underlying § SD-I-01's two limbs, the empty
+bidirectional set difference between the two artifacts' ten-row coverage tables, and the
+absence of `configs/` and all four of this unit's named modules. Nothing in this pass
+contradicts the terminal READY verdict's substance; finding 16 is new, not a reopening of any
+earlier finding.
+
+### Coverage limits — what I did not check, and why
+
+- **Sibling units' `construction/` content was not opened** (read-scope bound). `acquisition`'s
+  R-32/R-33/R-34/R-36 and SEC-A-03 limb 1, `foundation`'s R-01 any-future clause, and
+  `governance-guards`'/`features-and-splits`'/`target-standardization`'s cited mechanisms
+  remain this unit's own characterization, unverified beyond the shared inception contracts
+  (`component-methods.md`, `services.md`, `component-dependency.md`, `unit-of-work.md`) used
+  above.
+- **`evidence/DECISIONS.md` was read only for D-31/D-32 and the tail-end enumeration**, not for
+  every D-number the artifact cites in body text (D-1, D-2, D-11, D-12, D-15, D-24 etc.); those
+  were spot-checked in prior review passes and not re-derived here.
+- **No test was executed.** `pytest` was not run; all code claims were established by reading
+  source.
+- **`SchemaError`'s declaration-site question, W-6's wording, R-32's proposed-accessor status,
+  the `run_id` uniqueness convention, and BLK-07's authorization limb** are unchanged open items
+  correctly routed to the gate; this pass did not re-litigate them, only confirmed they remain
+  stated as open rather than quietly resolved.
+
+### Summary
+
+One new Major surfaced on a fresh, independent re-derivation of every disk-state and
+cross-reference claim in both artifacts: the NFR-AUD-01 coverage row's "Row primary owner"
+cell attributes both `TA-10` and `TA-21` to `foundation`, but `unit-of-work.md`'s own per-unit
+Acceptance-rows lines give `TA-21` to `fixtures-and-reproducibility`, not `foundation` — the
+same citation-versus-ownership split this artifact itself already performs correctly on the
+FR-P1-02-3 row two lines above, just not applied here. Every other per-ID citation and
+per-ID ownership check across both coverage tables reproduced exactly, every printed count and
+census reproduced exactly, the module-boundary and `Station`-dataclass claims against
+`component-methods.md` and `component-dependency.md` all hold, and no overclaim (satisfied row,
+decided scientific value, filled `TBD`, closed blocker) was found anywhere in either artifact.
+**READY** on 0 Critical and 1 Major — one one-clause edit away from clean, put to the human at
+the gate alongside the two open rulings already carried (`SchemaError`'s declaration site, and
+whether W-6's wording is amended by change record or the narrowing stands in the gate record
+alone).
+
+---
+
+## Review — 2026-09-04 confirming pass (fourth floor)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Verdict:** READY
+**Date:** 2026-09-04T22:08:37Z
+**Iteration:** 1 (confirming pass over the fresh receipt floor's finding-16 fix; treated
+adversarially — the fix was re-derived against `unit-of-work.md`, not trusted from the prior
+review's text)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `nfr-requirements/security-requirements.md:200` | **A third, unswept representation of finding 16's exact defect survives one file upstream of the two that were fixed.** That file's own `Requirement coverage` table still reads `NFR-AUD-01 \| SEC-I-02, SEC-I-03 \| TA-10, TA-21 \| `foundation` \| `Pending``, attributing both TA-10 and TA-21 to `foundation` with no split — the identical misattribution finding 16 caught and this floor corrected in `security-design.md` and `logical-components.md`. This is an `nfr-requirements`-stage artifact, a different (already-gated) stage's produced output, so `nfr-design` cannot rewrite it as part of this stage's own repair; it is named here as an open representation rather than fixed, per `project.md`'s "sweep every REPRESENTATION of a corrected fact" rule, which does not distinguish same-stage from cross-stage representations of the same fact. It does not create an overclaim and does not contradict the corrected `nfr-design` tables, which a reader consults for this unit's authoritative ownership split. | Route to the gate alongside the two open rulings already carried: either `nfr-requirements/security-requirements.md:200` is corrected by change record to match the split, or the residual is accepted and recorded as a known stale representation in an upstream, already-gated artifact. |
+
+### Checks performed
+
+| # | Check | Method | Result |
+|---|---|---|---|
+| 1 | Fix verified against `unit-of-work.md`'s per-unit Acceptance-rows lines, both files | `foundation` §1 line 133 = `TA-01, TA-02, TA-03, TA-10, TA-15, TA-22, TA-23` (no TA-21); `fixtures-and-reproducibility` §12 line 527 = `WS-20, TA-09, TA-17, TA-21` | **Confirmed.** Both `security-design.md:638` and `logical-components.md:307` now read `` `foundation` (TA-10); `fixtures-and-reproducibility` (TA-21) ``, each with a dated correction citing finding 16 and preserving the superseded label |
+| 2 | FR-P1-02-3 split-owner row still stands, both files | Read both coverage tables | **Confirmed.** `` `features-and-splits` (WS-18); **this unit** (TA-25) ``, `Pending — authorization limb of BLK-07 open`, in both |
+| 3 | FR-P1-02-8 "TA-29 withdrawn" no-row status, both files | Read both coverage tables | **Confirmed.** `⚠ NO ACCEPTANCE ROW — TA-29 withdrawn` in both |
+| 4 | 10-row coverage-table count, both files | Counted rows in both tables | **Confirmed: 10 in each**, identical membership as stated in both artifacts' derivation lines |
+| 5 | `*.json`-only `rglob` disclosure on `assert_no_december_outside_restricted` | Read § SD-I-04's guard-scan-bound box and `logical-components.md`'s mirrored note | **Confirmed present, unchanged**, in both artifacts |
+| 6 | Regression grep for `TA-21` across the unit's in-scope files | `grep -rn "TA-21"` under `construction/inventory-and-registry/` | Three hits: the two corrected rows (`security-design.md:638`, `logical-components.md:307`) and one uncorrected row (`nfr-requirements/security-requirements.md:200`) → finding 1. No stray pairing inside a `## Review` section or unlabelled prose |
+| 7 | Overclaim sweep | Read every `Status` cell in both `nfr-design` coverage tables; grepped `igrf`, `BLK-07`, `satisfied`, `discharged` | **Confirmed.** 0 rows satisfied or discharged; IGRF version stays `TBD — freeze gate` at every occurrence; BLK-07's authorization limb stated open in both artifacts |
+| 8 | Receipt-floor notes carry no new design claim | Read both artifacts' Re-save/Receipt-floor notes | **Confirmed.** Each states the repaired content stands unaltered; `logical-components.md` carries a second-and-third-occurrence note, `security-design.md` carries two — neither contradicts the other nor introduces new substance |
+
+### Verified — did not break
+
+The finding-16 fix landed correctly and consistently in both `security-design.md` and
+`logical-components.md`, each carrying its own dated correction note rather than a silent
+edit. FR-P1-02-3's split-owner row, FR-P1-02-8's withdrawn-`TA-29` no-row status, the 10-row
+coverage-table count and membership, and the `*.json`-only `rglob` disclosure all stand
+exactly as the prior floor left them. No `Pending`/`untested`/`TBD` cell was flipped to
+satisfied, no D-number decided, no blocker closed, and BLK-07's authorization limb remains
+open in both files.
+
+### Coverage limits — what I did not check, and why
+
+- Sibling units' `construction/` content was not opened (read-scope bound).
+- `pytest` was not run; no test executed.
+- `evidence/DECISIONS.md`, `component-methods.md`, `component-dependency.md` and `services.md`
+  claims already re-derived on the prior floor's pass were not re-derived a second time; only
+  the finding-16 fix and its immediate surroundings were re-verified from source.
+- `SchemaError`'s declaration site, W-6's wording ruling, and the `run_id` uniqueness
+  convention remain open items correctly routed to the gate; this pass did not re-litigate
+  them.
+
+### Summary
+
+The single Major carried into this floor (finding 16) is fixed correctly and identically in
+both `nfr-design` artifacts, verified independently against `unit-of-work.md`'s per-unit
+Acceptance-rows lines. One new Minor surfaced: the identical misattribution still stands,
+unswept, in this unit's own upstream `nfr-requirements/security-requirements.md`, a
+different stage's artifact that `nfr-design` cannot rewrite as part of this repair. **READY**
+on 0 Critical, 0 Major, 1 Minor — routed to the gate alongside the pre-existing open rulings.
+
+## Review — 2026-09-05 re-affirmation (post-gate receipt refresh)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T08:10:19Z
+**Iteration:** re-affirmation (fresh receipt after a stage-gate rejection that revised four
+other units — `evaluation-and-comparison`, `statistical-inference`,
+`regimes-diagnostics-reporting`, `fixtures-and-reproducibility` — not this one)
+
+**Prior terminal verdict, quoted:** the last `## Review` block in this file
+("Review — 2026-09-04 confirming pass (fourth floor)") reads **Verdict: READY**,
+**Date: 2026-09-04T22:08:37Z**, **Iteration: 1 (confirming pass over the fresh receipt
+floor's finding-16 fix...)**, closing on **0 Critical, 0 Major, 1 Minor**.
+
+**No-edit confirmation.** `git log` against both `security-design.md` and
+`logical-components.md` shows their last touching commit is `7ec1feb`
+(2026-09-04T19:04:47+04:00) — before the 2026-09-04T22:08:37Z review. The three commits made
+since (`7c1da41`, `4146ecc`, `092f1ef`, all 2026-09-04 19:16–19:29+04:00) predate that review
+timestamp and, per the gate-rejection scope stated for this pass, touched only
+`evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting` and
+`fixtures-and-reproducibility` — not this unit. This artifact is byte-identical to the text
+the fourth-floor pass reviewed.
+
+**Spot-checks re-verified from source, this pass:**
+- Line 634 — FR-P1-02-3's split-owner row still reads `` `features-and-splits` (WS-18);
+  **this unit** (TA-25) `` with status `Pending — authorization limb of BLK-07 open`. Matches
+  the fourth-floor pass's check #2.
+- Line 638 — the NFR-AUD-01 split still reads `` `foundation` (TA-10);
+  `fixtures-and-reproducibility` (TA-21) ``, the finding-16 fix verified against
+  `unit-of-work.md`'s per-unit Acceptance-rows lines in the fourth-floor pass's check #1.
+- IGRF and BLK-07 status — every occurrence of the IGRF version (lines 66, 553, 557, 648,
+  701, 757) still reads `TBD — freeze gate`; BLK-07's authorization limb (lines 60, 634, 703)
+  still reads open. Matches the fourth-floor pass's overclaim sweep (its check #7). No row
+  claims satisfaction or discharge.
+
+The one carried Minor (finding 1 in the fourth-floor pass — the unswept `TA-21`
+misattribution in the upstream, already-gated `nfr-requirements/security-requirements.md`)
+remains open and unaddressed by this unit, exactly as that pass routed it to the gate; it is
+not this unit's to fix and is not re-litigated here.
+
+**READY** — standing verdict re-affirmed, 0 Critical, 0 Major, 1 Minor (carried, gate-routed).

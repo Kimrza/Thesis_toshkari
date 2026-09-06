@@ -1,0 +1,49 @@
+# configs/data.yaml — one of the four governed configs (TE §12; TC-03e).
+#
+# Only values frozen under an approved D-number are transcribed here, citing
+# that D-number. Every unfrozen scientific field carries the literal sentinel
+# `TBD — freeze gate` — writing a sentinel is not choosing a value (W-9), and
+# no implementer may fill one by convenience (Vision §1.2; TE §1.1). The
+# owning unit's Bolt transcribes its own frozen values (station coordinates,
+# cell bounds, target contract, support thresholds) with their D-numbers;
+# foundation does not transcribe values it does not own.
+#
+# No machine path may appear in this file (R-16, ADR-07): all roots below are
+# RELATIVE and are resolved against the platform workspace root at run time by
+# resolve_platform_roots (W-8). Relocating the workspace never changes this
+# file's hash.
+
+schema_version: "1.0.0"
+
+# --- repository-layout roots (engineering values, not scientific constants) -----------
+roots:
+  # The SINGLE authoritative release root D-29's verify-on-write check
+  # enumerates (SD-04, Q2=A — owner decision at a §18.3 stop-and-report point).
+  # Relative to the platform workspace root; a write_release that cannot reach
+  # the resolved root REFUSES rather than treating it as empty.
+  release_root: "artifacts/releases"
+  # Where per-run config snapshots are written (W-2 step 3).
+  snapshot_root: "artifacts/run_snapshots"
+  # The experiment registry directory (TE §13.4).
+  registry_root: "artifacts/registry"
+
+# --- release identity (mechanism frozen by D-29, 2026-08-28) ---------------------------
+release:
+  # dataset_version = first 12 hex characters of content_hash, verify-on-write
+  # uniqueness over the single authoritative release root. D-29.
+  version_encoding: "sha256-prefix-12hex" # D-29
+  decision: "D-29"
+
+# --- scientific fields owned by downstream units (unfrozen HERE by design) -------------
+# Station registry, coordinate-to-cell rule and cell bounds: frozen by D-1/D-8
+# in evidence/DECISIONS.md, but their config transcription is
+# inventory-and-registry's migration obligation (team.md § Code Style, Q11=B)
+# and is validated against the official IGS site logs before being treated as
+# final. They are NOT transcribed by foundation.
+stations: "TBD — freeze gate"
+cell_rule: "TBD — freeze gate"
+
+# Declared input sources with hashes (assert_declared_sources_exist walks these;
+# a declared hash that does not resolve is a failure, never a warning). Empty:
+# nothing is declared yet; acquisition declares its inputs when it lands.
+declared_sources: []

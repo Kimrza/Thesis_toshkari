@@ -69,7 +69,7 @@
 - `functional-design/business-logic-model.md` — **W-8**/**W-8a**, **W-10**, **W-11**; **R-23** (both limbs), **R-24** (the enforcement hierarchy), **R-25**, **R-26**, **R-27**, **R-28**.
 - **The workspace, read 2026-09-01** — `src/data/locked_test.py`, the six test modules, `scripts/` (two scripts only), and the pytest run.
 - `../../foundation/nfr-design/logical-components.md` — the sibling decomposition; the same criterion class (failure consequence, not module listing) is applied here.
-- `../../../inception/requirements-analysis/requirements.md` — **FR-P1-02-3**, **FR-P1-02-6**, **FR-P1-03-2**, **FR-P1-06-1** … **FR-P1-06-4**, **REQ-ENG-5**, **NFR-AUD-01**, **NFR-PHASE-01**, **NFR-LIC-01**.
+- `../../../inception/requirements-analysis/requirements.md` — **FR-P1-05-12** *(added 2026-09-04 on iteration-2 Minor: `security-design.md`'s § Sources gained it at the Critical repair and this file's did not — an asymmetric repair)*, **FR-P1-02-3**, **FR-P1-02-6**, **FR-P1-03-2**, **FR-P1-06-1** … **FR-P1-06-4**, **REQ-ENG-5**, **NFR-AUD-01**, **NFR-PHASE-01**, **NFR-LIC-01**.
 - `nfr-design-questions.md` — Q4 = A, and the receipted Consolidated Summary Confirmation.
 
 ---
@@ -218,25 +218,45 @@ security allowlist changes who may name a boundary, not what any number comes ou
 
 | Requirement | Component | Acceptance row | Status |
 |---|---|---|---|
-| **FR-P1-02-3** | G-1 | **WS-18, TA-18** | `Pending` — built, passes **off-pin only** |
+| **FR-P1-05-12** | G-1 | **WS-18, TA-18** | `Pending` — built, passes **off-pin only**; **row owned by `features-and-splits`, this unit supporting** |
+| **FR-P1-02-3** | G-1 | **WS-18, TA-25** — **row owned by `inventory-and-registry`** (TA-25), WS-18 `features-and-splits`'; **this unit supporting via `open_restricted`** | `Pending` — G-1's log-then-read ordering is what makes this requirement verifiable; built, passes **off-pin only** *(owner label added 2026-09-04, mirroring `security-design.md`)* |
 | **FR-P1-02-6** | G-2 | ⚠ **NO ACCEPTANCE ROW** | untested by any §16/§19 row |
 | FR-P1-03-2 | G-1, G-2 | TA-27 | `Pending` — **import limb only; produced-field limb unbuilt** |
 | **NFR-PHASE-01** | G-1, G-2 | TA-27 | `Pending` |
 | **NFR-AUD-01** | G-1 | **TA-10, TA-21** — both rows | `Pending` — **`RegistryEvent` producer missing** |
 | **NFR-LIC-01** | G-3 | TA-28 | `Pending` — **unbuilt** |
 
-**Derived and printed**: 3 components (G-1…G-3); **6** coverage rows — counted directly
+**Derived and printed**: 3 components (G-1…G-3); **7** coverage rows — counted directly
 from the table above. **0** rows claimed satisfied; **0** components complete.
 
-**Relation to `security-design.md`'s 11 rows, printed as a decomposition** — the two tables
+> ⚠ **CORRECTED 2026-09-04 on adversarial finding 1, Critical — 6 → 7 rows.** The superseded
+> row read `| **FR-P1-02-3** | G-1 | **WS-18, TA-18** |`. `requirements.md` gives
+> `FR-P1-02-3` the rows **`WS-18, TA-25`**, while **`TA-18` belongs to `FR-P1-05-12`** — the
+> locked-test guard requirement G-1 actually implements, which was **absent from both
+> coverage tables**. This unit's own `domain-entities.md` and `nfr-requirements` already
+> carried the correct mapping (`FR-P1-05-12` → `WS-18, TA-18`, owner `features-and-splits`,
+> this unit *supporting*); this stage failed to carry it forward. Both rows are kept:
+> `FR-P1-05-12` is what G-1 serves, and `FR-P1-02-3` genuinely depends on the same
+> log-then-read ordering. See `security-design.md`'s correction box for the full derivation
+> and for why five prior ID-set-completeness checks could not see this.
+
+**Relation to `security-design.md`'s 12 rows, printed as a decomposition** — the two tables
 are **not nested**, so no single "N fewer" subtraction can describe them, and a subtraction
 of that form went stale three times running on `models-and-baselines` at the previous
 stage:
 
-- **6 rows shared** — FR-P1-02-3, FR-P1-02-6, FR-P1-03-2, NFR-PHASE-01, NFR-AUD-01, NFR-LIC-01.
+- **7 rows shared** — **FR-P1-05-12**, FR-P1-02-3, FR-P1-02-6, FR-P1-03-2, NFR-PHASE-01, NFR-AUD-01, NFR-LIC-01.
 - **5 rows in `security-design.md` only** — REQ-ENG-5, FR-P1-06-1, FR-P1-06-2, FR-P1-06-3, FR-P1-06-4. All four `FR-P1-06-*` and REQ-ENG-5 are **obligations on the reuse register's contents and the phase-boundary rule text**; none of them changes **where a component boundary sits**.
 - **0 rows here only.**
-- **6 + 5 = 11**, matching `security-design.md`'s printed total.
+- **7 + 5 = 12**, matching `security-design.md`'s printed total.
+
+> ⚠ **This paragraph was itself a stale representation, corrected 2026-09-04.** It read
+> *"`security-design.md`'s **11** rows"* with a **6**-row shared set and **6 + 5 = 11**, all
+> carried from before `FR-P1-05-12` was added. **The dependent cross-reference went stale
+> exactly as the two tables were corrected** — which is the defect `project.md` records as
+> `units-generation:re-1` and `functional-design:fd-2026-08-30-sweep-derive-sites`: correcting
+> a fact where it is stated and leaving the paragraph that consumes it asserting the
+> superseded version. Found by grepping for the numeral rather than by re-reading the prose.
 
 > **A decomposition that verifies is not evidence the decomposed set is complete.** That
 > lesson came from `foundation` at this stage, where a sound 3/3/0 decomposition sat over a
@@ -254,3 +274,17 @@ stage:
 - **[assumption]** The other ten units need only G-1's and G-2's entry points, never a guard internal. **Unverified** — most of those units are unbuilt, so nothing has yet tried.
 - **[banner]** **The suite is off-pin** — Python **3.14.7** against the governed **3.11**, pytest unpinned for want of a `requirements.txt`. **Not governed evidence.**
 - **None** of the above decides a scientific value, fills a `TBD — freeze gate` field, or claims a gate, acceptance row, install or test as discharged.
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched by any of it.*
+
+A **redo jump** on `nfr-design` reset this stage's receipt floor, invalidating this unit's
+summary-confirmation and review receipts. **No design content changed and no claim above is
+altered by this note**, including the two open self-reported discrepancies carried in
+`security-design.md`. The stored confirmation was re-affirmed by the owner on 2026-09-04 (its
+value was already `Looks correct`), and this artifact is re-saved unchanged so the engine's
+write-after-confirmation precondition is satisfied honestly rather than bypassed.

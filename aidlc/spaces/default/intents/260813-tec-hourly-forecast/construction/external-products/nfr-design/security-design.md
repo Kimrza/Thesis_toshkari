@@ -1637,3 +1637,198 @@ the receipts exist. **No claim in this document is altered by this note** — th
 definition, the four-clause switch, the 18-walked / 12-counted derivation, the withdrawn
 `tests/*` grant and every routed open item stand exactly as recorded above, on the ninth
 reviewer pass's READY verdict.
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched.*
+
+Another **redo jump** on `nfr-design` — taken to lift the review-freeze on
+`features-and-splits` and `models-and-baselines` so their adversarial findings could be fixed
+on the project decision owner's direction — cleared every unit's receipts again. **This unit
+was untouched by it.** The summary was re-affirmed on 2026-09-04 (its stored value was already
+`Looks correct`) and this artifact is re-saved unchanged.
+
+**No claim above is altered by this note.**
+
+> ⚠ **CORRECTED 2026-09-04 on adversarial finding 1, Critical — this note previously
+> re-opened two findings that were already CLOSED.** As first written it asserted this unit's
+> *"open Critical: the containment check's risk-surface limb is scoped to two package trees…
+> It remains open, unfixed"* together with *"the Major sweep miss on the un-narrowed 'every
+> component here fails silently' sentences."* **Both claims were stale when written.** The
+> risk-surface limb was redefined as **the allowlist's complement** under the second
+> owner-directed redo (§ SD-E-01's live text), the failure-domains language was narrowed at
+> the same repair, and the **`## Review — 2026-09-02 third-redo iteration 2 (terminal)`** pass
+> above re-verified both — *"Check 1 … (was Critical) — CLOSED"* — and returned **READY**.
+> The note's author carried the "open" status from memory of the original run instead of
+> deriving it from this file's own body: the same carried-not-derived defect this stage has
+> now recorded three times, here landing in a **recovery note** rather than a design
+> paragraph. **What actually remains gate-routed for this unit**, with each item's source
+> stated *(provenance sentence corrected 2026-09-04 on the fourth-floor confirming pass,
+> Major: the previous wording claimed all six were "derived from the terminal review's
+> Coverage-limits enumeration", but that enumeration names only FIVE — the sixth was sourced
+> from this document's own open-item bullets, and saying otherwise was the same
+> carried-not-derived defect one level up, in the citation of a source. The list's CONTENT was
+> and is correct. Earlier still, the first version of this list omitted `IMPL-13` by re-typing
+> a five-item example — also caught adversarially)*:
+> **five items from the terminal review's own "Coverage limits" enumeration** — D-25/EV-12;
+> the `tests/*` allowlist discrepancy; `IMPL-13`'s unowned check; the two-half
+> `features-and-splits` contract; `DriverError`'s placement — **plus one from this document's
+> own § Assumptions open-item bullets** — the `foundation`/FR-WS-7 dependency — and not the
+> two closed items this note wrongly resurrected.
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T21:37:43Z
+**Iteration:** 1 (fresh receipt floor)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `security-design.md`:1652–1657 (Receipt-floor note, 2026-09-04) and `logical-components.md`:539, :546–547 (parallel note) | **The artifact's own trailing notes assert as currently open, unfixed a Critical and a Major that the artifact's own design body already repaired and that the artifact's own terminal reviewer pass already closed.** The note claims *"the containment check's risk-surface limb is scoped to two package trees... a detected violation from `src/data/` would report `skipped` rather than fail. It remains open, unfixed."* But SD-E-01's live design (`security-design.md`:179–190, corrected under "the second owner-directed redo") defines the risk-surface limb as **the allowlist's complement** — everything outside the two allowlisted paths — not as `src/features/`/`src/models/`; a live text search of both files (`grep -n "src/features/.*src/models/"`) finds that two-tree wording only inside quoted, explicitly-superseded correction boxes and historical `## Review`/remediation sections, never as a current, unqualified design statement. `logical-components.md`'s own DISC-E-1 box states plainly: *"Both halves now stand in both artifacts"* (line 241), confirming the fix landed in both files. The **`## Review — 2026-09-02 third-redo iteration 2 (terminal)`** section (`security-design.md`:1557–1628, dated 2026-09-03T10:01:55Z) explicitly re-verifies this exact defect under "Check 1 — ... (was Critical) — **CLOSED**" with a four-term sweep (`grep -n "cannot fail\|two independent causes\|inert\|vacuous pass today"`) and concludes *"No present-tense assertion that the check cannot fail, is inert, or passes vacuously survives anywhere in either artifact,"* returning verdict **READY**. Likewise the paired "Major sweep miss" the note names (`:62`/`:375`, "every component here fails silently") is, in the live text, already in the narrowed form — `logical-components.md`'s boundary-criterion paragraph (present lines ~101–110) and its decomposition paragraph (present lines ~486–490) both read *"every component's BOUNDARY failure is silent"* / *"no component's CHARACTERISTIC failure announces itself"*, each explicitly marked `(corrected 2026-09-02 on terminal finding 2, Major …)` / `(narrowed form, 2026-09-02, terminal finding 2)`. The trailing note (dated 2026-09-04, i.e. written *after* both fixes and the READY verdict) was never swept to match — it is the exact "correction landed where the finding pointed and not where a later note re-asserts the old fact" failure `project.md`'s learnings already name twice (`fd-2026-08-30-sweep-derive-sites`, `fd-2026-08-30-sweep-numerals-and-surfaces`), now recurring in a **receipt-floor note** rather than in a design paragraph. This is exactly the class of defect the dispatch brief asked this pass to catch ("not silently softened or silently fixed — either would be a finding"); what I found is the mirror case — silently *un*-fixed by a stale trailing claim, after having been genuinely fixed and reviewer-confirmed in the body. Left standing, this either (a) sends the human gate chasing two items that are already closed, wasting a review cycle on work already done, or (b) — if some external signal disagrees with my reading — masks that a real regression occurred between the 2026-09-03 READY verdict and the 2026-09-04 re-save, which the note's own text ("nothing in the design changed") explicitly denies. Either way the artifact currently makes two contradictory, unreconciled claims about its own completion state. | Reconcile the trailing notes with the body before this reaches the gate: either (i) correct the 2026-09-04 notes in both files to state that the Critical and the Major named were closed by the third-redo terminal review (citing that review by name and date), and that this unit's remaining gate-routed items are only the ones actually still open (the `foundation`/FR-WS-7 dependency, the `tests/*` allowlist discrepancy, `DriverError`'s placement, D-25/EV-12, and the two-half `features-and-splits` contract) — or (ii) if some fact I could not see from this read-scope shows the fix did *not* actually hold, restate the Critical against the *current* design text (which no longer reads "two package trees") rather than against the superseded wording, and explain what regressed it. Whichever is true, do not leave both the "CLOSED" review and the "unfixed" note standing unreconciled. |
+
+### Verified — did not break
+
+- **Disk-state claims**, re-derived independently on the live filesystem rather than trusted: `src/external/` holds only `__init__.py` (24 bytes); `src/features/`, `src/models/`, `src/gnss/` each hold only `__init__.py`; `src/evaluation/__init__.py` exists and is correctly excluded as allowlisted; `src/data/` holds `__init__.py`, `config.py`, `locked_test.py`, `release.py`; `scripts/` holds exactly `audit_ec1_drivers.py` and `merge_coverage_year.py`; `tests/` holds exactly the six named modules and **not** `test_iri_denial.py`; `notebooks/` holds exactly the one named notebook; `configs/` does not exist. The artifact's 18-walked/12-counted derivation reproduces exactly against this live tree (18 = 1 notebook + 2 scripts + 4 `src/data/*` + `src/__init__.py` + 4 package `__init__.py` (`external/features/gnss/models`) + 6 tests; 12 = 18 − 6 `__init__.py` files subtracted), confirming the count has not drifted since the 2026-09-02 workspace read this design is written against.
+- **Per-ID citation check**, cell by cell, of both artifacts' Requirement-coverage tables against `requirements.md`'s own acceptance-row text for FR-P1-04-1, -3, -4, -9, -15, -17, -18, REQ-ENG-9, NFR-IRI-01 and NFR-LEAK-01: every citation (WS-10/TA-07, WS-11, TA-36 "approved, never run", the four "no acceptance row" IDs) matches `requirements.md` verbatim, with no shifted row and no `Pending` fabricated over `UNTESTED`.
+- **Ownership check** against `unit-of-work.md` § 6 (`external-products`): the seven "Requirements carried" IDs (REQ-ENG-9, FR-P1-04-3/-4/-9/-15/-17/-18) match this artifact's coverage table exactly; the three additional shared IDs (FR-P1-04-1, NFR-IRI-01, NFR-LEAK-01) are carried with a blank "Row primary owner" cell in both `security-design.md` and `logical-components.md`, consistent with — not contradicting — the already-approved upstream `nfr-requirements/security-requirements.md` coverage table, which established the identical 10-row, blank-owner pattern before this stage (verified by direct comparison, not carried on faith).
+- **D-number and TE/§ citations spot-checked against `evidence/DECISIONS.md`** (which ends at D-32, as stated): D-25's quoted text at `evidence/DECISIONS.md`:1854 and the `:1648` precondition-table reference both match verbatim; D-31 (G-09 signed with preconditions unmet) matches `evidence/DECISIONS.md`'s own D-31 heading and content.
+- **`component-dependency.md`'s routed discrepancy**: `:34`'s `tests/*` row does read `yes` in all seven columns, and `:38` does state "Exactly two importers... Everything else is forbidden" four lines below it — the contradiction the artifact routes to the gate is real, not invented.
+- **`component-methods.md`/`components.md` cross-check**: no boundary-contract block exists for `iri.py`, `gim.py` or `spaceweather.py` in either file, confirming R-55's "amendment owed" claim rather than an unstated gap.
+- **`nfr-design-questions.md`**: all four `[Answer]:` tags read `A`; the Consolidated Summary Confirmation's Q1 wording matches the dispatch's stated "skip-with-stated-reason, §18.3 reads a skipped critical check as UNMET" exactly.
+- No Mermaid diagrams are present in either artifact (n/a for syntax/fallback check). Both files carry well over the required 2 H2 headings for the `required-sections` sensor.
+- **Environment note, not a defect**: this session's live interpreter resolves to the Windows App-execution-alias stub ("Python was not found") rather than the artifact's recorded Python 3.14.7. The artifact's own conclusion — that nothing run here is governed evidence, because the interpreter is off the 3.11 pin — is unaffected either way (an absent interpreter is at least as far off-pin as a present 3.14.7 one), and the design was explicitly written against the 2026-09-02 workspace read per the owner's current-state ruling, so this is recorded as environment drift rather than a finding.
+
+### Coverage limits
+
+This pass is bounded by the stated read-scope: it did not open any sibling unit's `construction/<other-unit>/` content beyond the single spot-checks already licensed by the dispatch (`unit-of-work.md`, `component-dependency.md`, `components.md`, `component-methods.md`, `requirements.md`, `evidence/DECISIONS.md`). It did not execute `pytest` (the live interpreter is the WindowsApps stub, consistent with the artifact's own point about governed evidence), so the "277 passed / 2 skipped" local-suite figure quoted at `security-design.md`:342 was not independently re-run — only the static file-listing claims underlying the 18/12 derivation were. Whether the Critical the trailing note calls "open" is genuinely closed rests on the artifact's own visible text and its own terminal review section; this pass did not have access to whatever process state (if any) outside these two files determined the dispatch brief's framing of it as still open, and finding 1 above is written to be actionable regardless of which side of that gap is correct.
+
+### Disclosure of the two items named in the dispatch brief
+
+Per instruction, both dispatch-named items are recorded here for the gate's visibility, together with what this pass found about their current status:
+
+1. **"Open Critical" — containment risk-surface limb scoped to `src/features/`/`src/models/`.** Per the live design text in both artifacts, this was corrected to the allowlist-complement definition (no longer scoped to two trees) across the "second owner-directed redo" and reconfirmed closed at the third-redo terminal review. See finding 1 above for why this pass could not treat "still present" as the safe default reading and is not silently applying either conclusion.
+2. **"Open Major" — sweep miss on the un-narrowed 'every component here fails silently.'"** Per the live text at `logical-components.md`'s boundary-criterion and decomposition paragraphs, both cited sites already carry the narrowed form, each explicitly dated to the terminal-finding-2 correction. Same caveat as above applies.
+
+### Summary
+
+The substantive engineering content of both artifacts is disciplined and internally consistent everywhere this pass could check it: every per-ID citation against `requirements.md` and `unit-of-work.md` resolves cleanly, the 18/12 candidate-set derivation reproduces exactly against the live filesystem, the routed cross-unit discrepancies (`component-dependency.md`'s `tests/*` row, R-55's missing boundary block, the `features-and-splits` two-half contract) are all real and accurately characterized, and no `TBD — freeze gate` value is filled. The one defect this pass found — and the reason for NOT-READY — is procedural rather than architectural: the artifact's own most-recently-dated notes assert, about the artifact itself, a completion status its own body and its own terminal reviewer verdict contradict. An architecture review exists in part to catch exactly this shape of drift between a document's claims about itself and what the document actually contains; leaving it unreconciled hands the human gate two mutually exclusive signals about whether this unit's known issues are done.
+
+---
+
+## Review — 2026-09-04 iteration 2 (repair verification, final)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T21:43:38Z
+**Iteration:** 2 (final — repair budget exhausted; remaining item goes to the gate)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `security-design.md`:1667 (correction blockquote, "What actually remains gate-routed for this unit") and `logical-components.md`:556–557 (the parallel correction, which defers to this list) | **The repair's "genuinely still open" list omits `IMPL-13`'s unowned check, which the artifact's own cited authority — the `## Review — 2026-09-02 third-redo iteration 2 (terminal)` pass — explicitly lists as still gate-routed and unclosed.** The correction names five items as the genuine remainder: the `foundation`/FR-WS-7 dependency, the `tests/*` allowlist discrepancy, `DriverError`'s placement, D-25/EV-12, and the two-half `features-and-splits` contract. But that same terminal review's own "Coverage limits of this pass" paragraph (`security-design.md`:1623) states verbatim: *"Also unre-checked, and unchanged by this round: the items routed to the gate (D-25/EV-12, the `tests/*` allowlist discrepancy, **`IMPL-13`'s unowned check**, the `features-and-splits` two-half contract, `DriverError`'s placement). Those remain gate input, not review findings."* `IMPL-13` — "no §12 module owns the import-boundary check," first raised as a Major at the second-redo terminal pass (`:1350`, *"the gap it actually records — that this check has no owning module — is carried nowhere"*) — is not merely absent from the correction's five-item list; it has no live entry anywhere in either artifact's `## Assumptions & Open Questions` section (confirmed by direct read of both sections: `security-design.md`:744–767, `logical-components.md`:503–524 name the `foundation`/FR-WS-7, `tests/*`, `DriverError`, D-25/EV-12 and `features-and-splits` items but no `IMPL-13` ownership bullet). The recommendation this same iteration-1 review issued asked for the corrected note to list "this unit's remaining gate-routed items" — plural, complete — and the repair produced a five-item list that reads as complete but is short one item the review's own cited source names as open. This is the same sweep-completeness failure `project.md` already names twice (`fd-2026-08-30-sweep-derive-sites`, `fd-2026-08-30-sweep-numerals-and-surfaces`): the correction was built by re-typing the recommendation's own worked example rather than by re-deriving the terminal review's full routed-items list. | Add a sixth item to both corrections' "genuinely still open" list: `IMPL-13`'s unowned check (no §12 module is assigned the import-boundary scan; `requirements.md`:1020 records it Open). Either add a live `## Assumptions & Open Questions` bullet for it on the same footing as the other five routed items, or state explicitly why it is excluded from this unit's routed set (e.g. if ownership was assigned elsewhere since the terminal pass) — silence is not a resolution, since the terminal review's own text still calls it open. |
+
+### Verified — did not break
+
+- **The repair itself, at both sites, is otherwise sound.** The stale "and its open Critical stands" clause and the "both stand" closing sentences are gone from live prose in both files; the superseded wording (*"open Critical: the containment check's risk-surface limb is scoped to two package trees… It remains open, unfixed"* / *"this unit's open Critical and its Major sweep miss both stand"*) survives only inside the dated `> ⚠ CORRECTED 2026-09-04` blockquotes, explicitly framed as withdrawn — never as a live claim.
+- **The correction's citation of the terminal review is accurate for the two items it discusses in detail.** Re-read of `## Review — 2026-09-02 third-redo iteration 2 (terminal)` confirms Check 1 (Critical, risk-surface limb) is stated CLOSED with a four-term sweep and Check 2 (Major, third-party imports / "fails silently" narrowing) is stated CLOSED, exactly as the correction describes; the correction does not overstate what the terminal pass found for those two items.
+- **The other four named-open items check out** against the terminal review's own Coverage-limits list and the live text: `foundation`/FR-WS-7 (open — routed and owed, not satisfied, per `security-design.md`:1066–1067, :1237, :1401, and a live Assumptions bullet at `:749`); the `tests/*` allowlist discrepancy (open — live bullet at `:1353`'s companion Assumptions entry and `logical-components.md`:509); `DriverError`'s placement (open — live bullet `logical-components.md`:512, `:515`); D-25/EV-12 (open — live bullet `logical-components.md`:511, `security-design.md`:578); the `features-and-splits` two-half contract (open — live bullet `logical-components.md`:514).
+- **Full sweep for stale live-text assertions**: `grep -n "open Critical|fails silently|it stands|both stand|remains open, unfixed"` across both files — every hit outside the dated correction blockquotes and historical `## Review` sections is either a design principle (§ SD-E-01's title), an unrelated use of "stands" (the FR-P1-04-18/D-25 refusal-in-force sentences, which are accurate and unrelated to this repair), or the correction blockquotes' own accurate paraphrase of what they are withdrawing. No live, unqualified re-assertion of either closed item survives.
+- **Spot-checks for repair-scope drift, all clean**: § SD-E-01's candidate-importer-set complement definition (`security-design.md`:179–190) is unchanged from what both the terminal review and the correction cite. `logical-components.md`'s DISC-E-1 box still reads *"Both halves now stand in both artifacts"* verbatim at the same lines (240–241) the iteration-1 finding cited. Both Requirement-coverage tables (`security-design.md`:699, `logical-components.md`:445) are unchanged.
+- **Overclaim sweep, re-run independently**: `iricore` pin and the CODE GIM product version remain `TBD — freeze gate`, unnamed, at every cited site; `tests/test_iri_denial.py` is confirmed absent both on the live filesystem (`ls tests/` today: six modules, no `test_iri_denial.py`) and in every artifact citation; no row is claimed satisfied or discharged anywhere the repair touched.
+
+### Coverage limits
+
+This pass is bounded to the repair verification scoped by dispatch: the two trailing notes and the terminal review's own determinations they cite. It re-read `## Review — 2026-09-02 third-redo iteration 2 (terminal)` in full to check the correction's citations, and did the Assumptions-section grep needed to confirm `IMPL-13` has no live entry, but did not re-verify every other claim in the body untouched by this repair (those were verified independently at the 2026-09-04T21:37:43Z iteration-1 pass and are not re-derived here). It did not open any sibling unit's `construction/<other-unit>/` content. With the repair budget for this stage exhausted at this iteration, finding 1 above is gate input rather than a further repair request.
+
+### Summary
+
+The repair correctly reconciles the two items iteration 1 flagged as wrongly re-opened, cites the terminal review accurately for those two items, and introduces no fresh contradiction anywhere the sweep checked. It falls short on completeness in exactly the dimension this project's own recorded learnings warn about: the "genuinely still open" list was built from the recommendation's five named examples rather than re-derived from the terminal review's own routed-items enumeration, and one item present in that enumeration — `IMPL-13`'s unowned check — did not make the cut into either artifact's live text. That is a real, checkable gap rather than a stylistic one: a reader who trusts the corrected note as the complete remainder will not know this check still has no assigned owner. Verdict is NOT-READY on that one Major; everything else this pass could check is sound.
+
+---
+
+## Review — 2026-09-04 confirming pass (fourth floor)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T00:00:00Z
+**Iteration:** 1 (confirming pass, fresh receipt floor)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `security-design.md`:1667–1673 (correction blockquote) and `logical-components.md`:556–560 (parallel note) | **The six-item list's own self-description of its derivation is inaccurate: the `foundation`/FR-WS-7 dependency it lists sixth is not in the source it names.** Both notes state the list was "derived 2026-09-04 from the terminal review's own [Coverage limits] enumeration." Re-read of that exact source — `## Review — 2026-09-02 third-redo iteration 2 (terminal)`, "### Coverage limits of this pass" (`security-design.md`:1623) — shows its routed-items sentence names **five** items, verbatim: *"the items routed to the gate (D-25/EV-12, the `tests/*` allowlist discrepancy, `IMPL-13`'s unowned check, the `features-and-splits` two-half contract, `DriverError`'s placement)."* No occurrence of `foundation` or `FR-WS-7` appears anywhere inside that terminal review's own section (`:1557`–`:1628`); a targeted search confirms it. The sixth item in the corrected list — the `foundation`/FR-WS-7 dependency — is genuinely open (confirmed independently at `security-design.md`:1067, :1237, :1401, :749, and cross-checked at the prior iteration-2 pass, `:1734`), so the list's **content** is not wrong to include it. What is wrong is the **claim of provenance**: the note asserts a single-source derivation from "that review's own enumeration" when the sixth item in fact had to come from elsewhere in the document (the FR-WS-7 dependency paragraphs cited above, none of which is the terminal review's Coverage-limits section). This is the same class of defect this correction was written to retire — a count or list asserted without deriving it from the source actually named — now recurring one level up: the *list* is complete, but the *citation of where it came from* is not accurate to the file. | State the derivation honestly: the five items come from the terminal review's Coverage-limits enumeration; the sixth (`foundation`/FR-WS-7) is added from this unit's separately-tracked routed dependency (cited at the paragraphs above), not from that same enumeration. A one-clause edit to both blockquotes resolves it without changing the list's membership. |
+
+### Verified — did not break
+
+- **No live, unqualified re-assertion of either closed item** (the two-package-tree risk-surface scoping; the un-narrowed "every component here fails silently") survives outside the dated correction blockquotes and historical `## Review`/remediation sections in either file — confirmed by a fresh grep sweep of both files for `two package trees`, `remains open, unfixed`, and `Major sweep miss`; every hit is confined to the `> ⚠ CORRECTED 2026-09-04` blockquote or prior review text.
+- **`IMPL-13`'s unowned check is present** in the six-item list at `security-design.md`:1671 and `logical-components.md`:557–559, in both files, with the omission-and-correction history stated accurately (first version omitted it; caught at iteration 2 as a Major).
+- **§ SD-E-01's candidate-importer-set complement definition** (`security-design.md`:179–190) is unchanged: domain = `.py` files + `.ipynb` code cells; allowlist = the two TE §12 paths; candidate set = domain minus allowlist, defined by subtraction and never enumerated by directory.
+- **DISC-E-1's "Both halves now stand in both artifacts"** is present verbatim at `logical-components.md`:240–241, inside the live (not superseded) design text, and the receipt-floor note's citation of it (`:554`) matches.
+- **`iricore` pin and CODE final GIM product version remain `TBD — freeze gate`, unnamed**, at every site checked (`security-design.md`:75, :590, :721, :1214, :1302, :1737). No satisfaction or discharge claim found anywhere in the corrected notes or the sections they cite.
+- **`tests/test_iri_denial.py`** is stated absent, consistently, everywhere checked (`logical-components.md`:48, `security-design.md`:1214, :1302, :1737); this pass did not re-open the live filesystem (out of this unit's read-scope, and the reviewer-scope hook actively refuses a path outside the unit), so this rests on the artifact's own prior-verified claim, not a fresh disk read.
+- **Overclaim sweep on the corrected notes themselves**: neither blockquote claims a gate, acceptance row, D-number decision, or scientific value as satisfied or discharged; both correctly frame all six items as open and gate-routed.
+
+### Coverage limits
+
+Bound to this unit's artifacts, `nfr-requirements/`, `functional-design/`, and the shared inception contracts already cited by earlier passes; no sibling `construction/<other-unit>/` path was opened (one attempted directory listing outside this unit's tree was refused by the reviewer-scope hook, confirming the boundary rather than working around it). Did not re-verify the substantive engineering content (the 18-walked/12-counted derivation, the four-clause switch, the payload schema, byte sizes) — those were independently re-derived and confirmed at the 2026-09-04T21:37:43Z and third-redo passes and are unchanged by this floor's re-save. Did not independently re-run `pytest` or re-list the live `tests/` directory.
+
+### Summary
+
+The prior floor's fix is real and mostly sound: both trailing notes now correctly state the two previously-reopened items (risk-surface scoping, the un-narrowed silent-failure sentence) are closed, and both now carry all six genuinely-open items including the previously-omitted `IMPL-13`. But the notes overclaim their own method — they say the six-item list was derived from "the terminal review's own enumeration," and that enumeration, read directly, names only five of the six. The sixth item is correct and genuinely open; the citation is not accurate to the source it names. This is a narrow, one-clause fix, but it is exactly the kind of self-referential accuracy failure this stage's own repeated corrections exist to prevent, so it is reported as a finding rather than waived.
+
+---
+
+## Review — 2026-09-04 iteration 2 (provenance repair verification, final)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T00:00:00Z
+**Iteration:** 2 (final — repair budget exhausted)
+
+### Findings
+
+None.
+
+### Verified — did not break
+
+- **Provenance corrected accurately.** Re-read `## Review — 2026-09-02 third-redo iteration 2 (terminal)` § "Coverage limits of this pass" (`security-design.md`:1623) directly: its routed-items sentence names exactly **five** items — D-25/EV-12, `tests/*` allowlist discrepancy, `IMPL-13`'s unowned check, `features-and-splits` two-half contract, `DriverError`'s placement. A targeted search of that section's full span (`:1557`–`:1628`) finds no occurrence of `foundation` or `FR-WS-7`. Both files' corrected blockquotes (`security-design.md`:1667–1678; `logical-components.md`:556–560) now state this split explicitly: "five items from the terminal review's own ... enumeration ... plus one ... from this document's own § Assumptions open-item bullets," and cite the sixth as `foundation`/FR-WS-7 — matching what the source actually supports.
+- **FR-WS-7 genuinely open, sourced correctly.** Confirmed live at `security-design.md`:749 (`[Q1 / SD-E-01 — OPEN, routed to the gate]`), and consistently at `:1067`, `:1237`, `:1401` — all state the dependency as owed, not satisfied, none inside the terminal review's Coverage-limits section. This is a real § Assumptions bullet, not a fabricated source.
+- **List content unchanged and consistent across both files.** Both files' notes describe the same six items (D-25/EV-12, `tests/*` allowlist, `IMPL-13`, `features-and-splits` two-half contract, `DriverError`'s placement, `foundation`/FR-WS-7) with matching membership; `logical-components.md`'s note defers to `security-design.md`'s enumeration by name rather than re-listing, which is consistent, not a divergence. `IMPL-13` remains present (was the iteration-2 fix); no item was dropped in this provenance re-wording.
+- **Regression check — both previously-closed items stay closed.** `grep -n "two package trees\|remains open, unfixed\|both stand"` across both files: every hit is confined to the quoted `> ⚠ CORRECTED 2026-09-04` blockquotes (explicitly framed as withdrawn) or historical `## Review`/remediation prose; no live, unqualified re-assertion that the risk-surface-limb Critical or the un-narrowed silent-failure Major is still open.
+- **Overclaim sweep on the reworded notes.** Neither blockquote claims a gate, D-number, acceptance row, or scientific value as satisfied/discharged; both still correctly frame all six items as open and gate-routed, and the parenthetical honestly narrates the correction history (first list omitted `IMPL-13`; second list overclaimed single-source derivation) rather than erasing it.
+
+### Coverage limits
+
+Bound to the two corrected blockquotes and the terminal review's Coverage-limits section they now cite; did not re-verify the substantive engineering content (four-clause switch, 18/12 derivation, payload schema) already confirmed at prior passes and unchanged here. No sibling `construction/<other-unit>/` path opened.
+
+### Summary
+
+The provenance repair is accurate: the terminal review's own text names five routed items, FR-WS-7 is a genuinely open, correctly-sourced sixth from this document's own Assumptions bullets, list content and both files agree, and neither previously-closed item is resurrected. With the repair budget for this stage exhausted, this unit's remaining status is READY — the six-item gate-routed list stands as the accurate remainder for the human gate.
+
+---
+
+## Review — 2026-09-05 re-affirmation (post-gate receipt refresh)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T08:13:14Z
+**Iteration:** 1 (re-affirmation, fresh receipt after a stage-gate rejection that revised four other units; this unit's artifacts were not part of that revision)
+
+**Latest terminal review quoted verbatim:** `## Review — 2026-09-04 iteration 2 (provenance repair verification, final)`, **Verdict: READY**, **Date: 2026-09-05T00:00:00Z**, **Iteration: 2 (final — repair budget exhausted)**. Its Summary: *"The provenance repair is accurate: the terminal review's own text names five routed items, FR-WS-7 is a genuinely open, correctly-sourced sixth from this document's own Assumptions bullets, list content and both files agree, and neither previously-closed item is resurrected. With the repair budget for this stage exhausted, this unit's remaining status is READY — the six-item gate-routed list stands as the accurate remainder for the human gate."*
+
+**No edits after it.** `git log` on `security-design.md` and `logical-components.md` shows no commit since 2026-09-04; the rejected gate cycle's revision scope was stated as `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`, and `fixtures-and-reproducibility` — not `external-products`. The working-tree `M` flags on both files predate this session and reflect the already-present review history read above, not a new edit; the content read at this pass is identical to what the 2026-09-04T21:37:43Z through 2026-09-05T00:00:00Z passes describe.
+
+**Spot-checks of the terminal pass's verified claims (3 of 3 confirmed):**
+1. `security-design.md`'s `## Review — 2026-09-02 third-redo iteration 2 (terminal)` § "Coverage limits of this pass" (line 1623) names exactly **five** routed items — D-25/EV-12, the `tests/*` allowlist discrepancy, `IMPL-13`'s unowned check, the `features-and-splits` two-half contract, `DriverError`'s placement — with no occurrence of `foundation` or `FR-WS-7` anywhere in that section. Confirmed by direct read.
+2. The `foundation`/FR-WS-7 dependency is a live, open `## Assumptions & Open Questions` bullet at line 749: `[Q1 / SD-E-01 — OPEN, routed to the gate]`, stating the dependency as owed, not satisfied. Confirmed by direct read — a genuine sixth item sourced from this document's own bullets, exactly as the corrected provenance sentence claims.
+3. The corrected blockquote (lines 1655–1678) states the six-item derivation split honestly — five from the terminal review's Coverage-limits enumeration, one (`foundation`/FR-WS-7) from this document's own Assumptions bullets — and confines every prior stale claim ("open Critical… two package trees," "Major sweep miss") to quoted, explicitly-withdrawn text. Confirmed by direct read; no live unqualified re-assertion of either closed item survives.
+
+**Re-affirmation.** The standing verdict is READY, and it is re-affirmed as it stands: the terminal repair cycle closed the risk-surface-limb Critical and the silent-failure-narrowing Major, closed the `IMPL-13` omission, and closed the provenance-citation Major, with every closure verified against source rather than trusted. This unit's genuine remainder for the human gate is the six-item gate-routed list (D-25/EV-12; `tests/*` allowlist discrepancy; `IMPL-13`'s unowned check; `features-and-splits` two-half contract; `DriverError`'s placement; `foundation`/FR-WS-7 dependency) — none of which is a defect in this design, all of which are correctly disclosed as owed. Nothing in this unit was touched by the four-unit revision that triggered this re-affirmation pass, and nothing found here disturbs the standing verdict.
+
+READY

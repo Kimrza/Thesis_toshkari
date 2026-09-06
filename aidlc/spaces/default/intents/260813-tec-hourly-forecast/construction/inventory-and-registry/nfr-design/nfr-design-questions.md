@@ -275,6 +275,10 @@ components — build-time integrity that **raises and stops**; the December audi
 `TBD — freeze gate`. BLK-07's authorization limb stays open and no December access occurs.
 No module is written by this stage.
 
+<!-- Re-collected 2026-09-04: the redo jump on `nfr-design` reset this stage's receipt floor,
+     invalidating this unit's summary-confirmation receipt. The stored value was `Looks correct`
+     and is being re-affirmed on the fresh floor, not changed. -->
+
 - Looks correct
 - Request changes
 

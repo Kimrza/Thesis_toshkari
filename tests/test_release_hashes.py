@@ -50,6 +50,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
+
 EVIDENCE_DIR = REPO_ROOT / "evidence"
 RESTRICTED_DIR = EVIDENCE_DIR / "locked_test_restricted"
 GITATTRIBUTES = REPO_ROOT / ".gitattributes"
@@ -318,3 +319,136 @@ def test_mutation_is_detected(tmp_path: Path) -> None:
         "a mutated artifact hashed to its recorded value -- the verification path is "
         "not actually comparing content"
     )
+
+
+# --- TA-15: the release contract over the SINGLE authoritative release root (SD-04) ----
+#
+# Extended 2026-09-05 per the code-generation plan step 8. The full 13.3 field matrix
+# and the R-13/D-29 controls live in tests/test_release_contract.py (created under
+# D-31); this section adds the SD-04 enumeration-surface controls (Q2=A, the owner
+# decision at the TE 18.3 stop-and-report point) plus the field-presence and mutation
+# belts the plan names for THIS module, so TA-15's named module exercises the contract
+# directly.
+
+from src.data.config import ReleaseError  # noqa: E402
+from src.data.release import (  # noqa: E402
+    MANIFEST_NAME,
+    REQUIRED_MANIFEST_FIELDS,
+    content_hash_of,
+    dataset_version_for,
+    verify_release,
+    write_release,
+)
+
+
+def _release_manifest(directory: Path, body: bytes = b"row,value\n1,2\n") -> dict:
+    """A complete, valid TE 13.3 manifest with its one output file on disk."""
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "prepared.csv").write_bytes(body)
+    return {
+        "created_at_utc": "2026-09-05T00:00:00Z",
+        "source_manifest_id": "src-manifest-0001",
+        "source_files": [
+            {
+                "provider": "Madrigal / OpenMadrigal",
+                "citation": "experiments4/2022/gps",
+                "filename": "gps220301g.003.hdf5",
+                "retrieved_at_utc": "2026-08-12T00:00:00Z",
+                "sha256": "0" * 64,
+            }
+        ],
+        "processing": {
+            "phase_id": "P1",
+            "target_definition_id": "P1-GRID-MEDIAN",
+            "cell_rule": "floor(lat), floor(lon), half-open",
+            "hourly_aggregation": "median",
+        },
+        "schema_version": "1.0.0",
+        "units": {"vtec": "TECU"},
+        "row_counts": {"ARUC": 8760, "BSHM": 8760, "NICO": 8760},
+        "exclusions_qc_summary": {"below_support_threshold": 12},
+        "fold_ids": ["F1", "F2", "F3", "F4"],
+        "mask_ids": ["DEC-COMPARISON-WIDE"],
+        "feature_set_ids": ["FS-24H"],
+        "output_files": {"prepared.csv": _sha256(directory / "prepared.csv")},
+        "change_record_id": "CR-2026-09-05-CODEGEN",
+    }
+
+
+def test_written_release_carries_every_te_13_3_field(tmp_path: Path) -> None:
+    """Plan step 8: all 13.3 manifest fields present -- asserted over the enumeration."""
+    root = tmp_path / "releases"
+    root.mkdir()
+    target = root / "rel-a"
+    payload = write_release(target, _release_manifest(target), release_root=root)
+    on_disk = json.loads((target / MANIFEST_NAME).read_text(encoding="utf-8"))
+    for field in REQUIRED_MANIFEST_FIELDS:
+        assert field in on_disk and on_disk[field] not in (None, "", [], {}), (
+            f"TE 13.3 field {field!r} missing or empty in the written release"
+        )
+    assert payload["dataset_version"] == payload["content_hash"][:12]
+
+
+def test_overwrite_of_an_existing_release_is_refused_bytes_unchanged(tmp_path: Path) -> None:
+    """R-13 negative control (plan step 8): refused, and the original bytes untouched."""
+    root = tmp_path / "releases"
+    root.mkdir()
+    target = root / "rel-a"
+    write_release(target, _release_manifest(target), release_root=root)
+    original = (target / MANIFEST_NAME).read_bytes()
+    with pytest.raises(ReleaseError) as excinfo:
+        write_release(
+            target, _release_manifest(target, body=b"row,value\n9,9\n"), release_root=root
+        )
+    assert "already exists" in str(excinfo.value)
+    assert (target / MANIFEST_NAME).read_bytes() == original
+
+
+def test_unreachable_release_root_refuses_never_an_empty_population_pass(
+    tmp_path: Path,
+) -> None:
+    """SD-04 negative control: an unreachable root REFUSES -- an empty population makes
+    every hash unique and would turn D-29's guard into a rubber stamp."""
+    target = tmp_path / "rel-a"
+    manifest = _release_manifest(target)
+    with pytest.raises(ReleaseError) as excinfo:
+        write_release(target, manifest, release_root=tmp_path / "no-such-root")
+    assert "unreachable" in str(excinfo.value)
+    assert not (target / MANIFEST_NAME).exists(), "a refused write leaves no manifest"
+
+    # A root that exists but is a FILE is equally unreachable as a population.
+    not_a_dir = tmp_path / "root-file"
+    not_a_dir.write_text("occupied", encoding="utf-8")
+    with pytest.raises(ReleaseError):
+        write_release(target, manifest, release_root=not_a_dir)
+
+
+def test_prefix_collision_within_the_release_root_is_refused(tmp_path: Path) -> None:
+    """D-29 verify-on-write over the SD-04 enumeration surface: a planted release under
+    the root whose label equals the new derivation with a DIFFERENT content_hash."""
+    root = tmp_path / "releases"
+    root.mkdir()
+    target = root / "rel-new"
+    manifest = _release_manifest(target)
+    derived = dataset_version_for(content_hash_of(manifest))
+
+    planted = root / "rel-planted"
+    planted.mkdir()
+    (planted / MANIFEST_NAME).write_text(
+        json.dumps({"dataset_version": derived, "content_hash": "f" * 64}),
+        encoding="utf-8",
+    )
+    with pytest.raises(ReleaseError) as excinfo:
+        write_release(target, manifest, release_root=root)
+    assert "already names a different release" in str(excinfo.value)
+
+
+def test_mutation_of_a_written_release_is_detected(tmp_path: Path) -> None:
+    """Plan step 8: post-write mutation of a release artifact is reported."""
+    root = tmp_path / "releases"
+    root.mkdir()
+    target = root / "rel-a"
+    write_release(target, _release_manifest(target), release_root=root)
+    (target / "prepared.csv").write_bytes(b"row,value\n1,2\n#tampered")
+    problems = verify_release(target / MANIFEST_NAME)
+    assert any("do not match" in p for p in problems)

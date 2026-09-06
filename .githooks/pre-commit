@@ -1,0 +1,95 @@
+#!/bin/sh
+# .githooks/pre-commit — the incremental secret scan + critical test set (SD-01; Q7=D).
+#
+# Purpose: the preventive net. Runs on every `git commit`:
+#   1. gitleaks (pinned 8.18.4) over the STAGED DIFF only — this mode is a net,
+#      never TA-22 evidence (SD-01: the gate scan via scripts/gate_secret_scan.py
+#      is the only evidence-producing mode);
+#   2. the critical test set (team.md § Testing Posture, Q7=D: a pre-commit hook
+#      runs the critical set on every commit once git exists).
+# Inputs: the staged index; .gitleaks.toml; the tests/ tree.
+# Re-run behaviour: pure check — writes nothing, mutates nothing. A failure
+#   blocks the commit; fixing the cause and re-committing is the re-run path.
+#
+# Enable with:  git config core.hooksPath .githooks
+
+set -e
+
+PINNED_GITLEAKS="8.18.4"
+
+# --- 1. incremental secret scan (staged diff; preventive, not evidence) ---------------
+if command -v gitleaks >/dev/null 2>&1; then
+    ACTUAL=$(gitleaks version 2>/dev/null | tr -d 'v \r\n' || true)
+    if [ "$ACTUAL" != "$PINNED_GITLEAKS" ]; then
+        echo "pre-commit: gitleaks $ACTUAL found but $PINNED_GITLEAKS is pinned" >&2
+        echo "pre-commit: refusing to scan with an unpinned tool (SD-01)" >&2
+        exit 1
+    fi
+    gitleaks protect --staged --config .gitleaks.toml --redact --exit-code 1 || {
+        echo "pre-commit: gitleaks found a candidate secret in the staged diff." >&2
+        echo "pre-commit: a credential that reaches history needs a history rewrite" >&2
+        echo "pre-commit: that would break freeze-gate tags (SD-01). Commit blocked." >&2
+        exit 1
+    }
+else
+    # Fail CLOSED on the scan being unavailable: an unscanned commit is exactly
+    # the event the deny-list + scan pair exists to prevent (NFR-SEC-01).
+    echo "pre-commit: gitleaks $PINNED_GITLEAKS is not installed; commit blocked." >&2
+    echo "pre-commit: install it (see README.md § Tooling) or run with --no-verify" >&2
+    echo "pre-commit: ONLY under an explicit, recorded human decision." >&2
+    exit 1
+fi
+
+# --- 1b. notebook saved-output refusal (SD-A-02 limb 2, Q3=A; R-39) --------------------
+# A staged .ipynb carrying saved outputs or execution counts fails CLOSED: the
+# author clears outputs and re-commits. NOTHING is auto-stripped -- a silent
+# rewrite of staged content defeats the D-number citation rule (team.md § Way of
+# Working), and a credential in committed history needs a history rewrite that
+# would rewrite freeze-gate tags. The check reads the STAGED blob (git show :path),
+# not the working tree, so what is checked is what would be committed. The logic
+# lives in src/data/acquisition.py (notebook_output_violations) so it is testable;
+# this hook is its caller.
+STAGED_NOTEBOOKS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.ipynb$' || true)
+if [ -n "$STAGED_NOTEBOOKS" ]; then
+    if ! command -v python >/dev/null 2>&1; then
+        echo "pre-commit: python unavailable; staged notebook outputs NOT checked; commit blocked." >&2
+        echo "pre-commit: the output check fails closed (SD-A-02, Q3=A)." >&2
+        exit 1
+    fi
+    for nb in $STAGED_NOTEBOOKS; do
+        git show ":$nb" | python -m src.data.acquisition check-notebook-outputs --name "$nb" || {
+            echo "pre-commit: staged notebook '$nb' carries saved outputs or execution counts" >&2
+            echo "pre-commit: (or could not be parsed -- an unparseable notebook fails closed)." >&2
+            echo "pre-commit: clear all outputs, restage, and re-commit. Outputs are never" >&2
+            echo "pre-commit: auto-stripped (SD-A-02 limb 2, Q3=A). Commit blocked." >&2
+            exit 1
+        }
+    done
+fi
+
+# --- 2. critical test set (Q7=D) -------------------------------------------------------
+# The §18.3 critical set grows as its modules land; every module listed here
+# must exist. Phase 1-reachable modules only.
+CRITICAL_TESTS="
+tests/test_determinism.py
+tests/test_experiment_registry.py
+tests/test_release_hashes.py
+tests/test_release_contract.py
+tests/test_locked_test_guard.py
+tests/test_acquisition_window.py
+tests/test_phase_boundary.py
+tests/test_merge_script_restricted_reads.py
+"
+
+if command -v python >/dev/null 2>&1 && python -c "import pytest" >/dev/null 2>&1; then
+    # shellcheck disable=SC2086
+    python -m pytest -q $CRITICAL_TESTS || {
+        echo "pre-commit: critical test set failed; commit blocked (Q7=D)." >&2
+        exit 1
+    }
+else
+    echo "pre-commit: no python+pytest on PATH; critical test set NOT run; commit blocked." >&2
+    exit 1
+fi
+
+exit 0

@@ -1,0 +1,23 @@
+# configs/experiment.yaml — one of the four governed configs (TE §12; TC-03e).
+#
+# Foundation owns no experiment science. Every scientific field carries the
+# literal `TBD — freeze gate` sentinel until its owning unit transcribes the
+# frozen value under its D-number (folds/embargo: features-and-splits; grids and
+# model configuration: models-and-baselines; estimand and bootstrap parameters:
+# statistical-inference/evaluation-and-comparison; ablations: TE §7.2 named
+# runs). No implementer may fill a sentinel by convenience (Vision §1.2;
+# TE §1.1); grids are exact and committed before G-05 and never change after
+# December is seen (project.md § Forbidden).
+#
+# No machine path may appear in this file (R-16, ADR-07).
+
+schema_version: "1.0.0"
+
+folds: "TBD — freeze gate"
+embargo_hours: "TBD — freeze gate"
+grids: "TBD — freeze gate"
+models: "TBD — freeze gate"
+estimand: "TBD — freeze gate"
+bootstrap: "TBD — freeze gate"
+ablations: "TBD — freeze gate"
+practical_relevance_threshold: "TBD — freeze gate"

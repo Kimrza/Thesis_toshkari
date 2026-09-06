@@ -1,0 +1,31 @@
+# requirements.txt — the pinned environment (TE §8.1, §13.1; TC-06; TA-02).
+#
+# Purpose: the single governed pin surface. Every run's environment lock records
+#   the SHA-256 of this file plus a per-run `pip freeze` (TE §13.1, REQ-ENG-10).
+# Inputs: none — consumed by `pip install -r requirements.txt` on Python 3.11
+#   (the governed interpreter pin, TS-01/TC-03d).
+# Re-run behaviour: installing from these pins on a clean Python 3.11 must be
+#   reproducible on both governed platforms (Kaggle and local, TE §9.1).
+#
+# TensorFlow is EXCLUDED from these pins (code-generation Q3=A, receipted):
+# its pin is `TBD — freeze gate` and no implementer may fill it by convenience
+# (Vision §1.2; TE §1.1). It is added here only under an approved D-number.
+# PyTorch is prohibited outright (TE §8.3). No GPU package: CPU is a complete
+# execution path (TC-01), never a dependency of any result.
+
+# --- scientific base (CPU only) -------------------------------------------------------
+numpy==1.26.4
+pandas==2.1.4
+pyyaml==6.0.1
+
+# --- test suite (a first-class deliverable, TC-06) ------------------------------------
+pytest==8.2.2
+
+# --- lint + format (team.md § Code Style, Q10=A) --------------------------------------
+ruff==0.4.8
+
+# --- secret scanning ------------------------------------------------------------------
+# gitleaks is a Go binary, not a pip package; its pin lives here as a comment so
+# the environment lock's requirements hash covers it, and is asserted by
+# scripts/gate_secret_scan.py and .githooks/pre-commit (SD-01, Q2=A):
+#   gitleaks 8.18.4 (pinned; upgrade requires a reviewed change, not a drift)

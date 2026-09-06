@@ -531,3 +531,33 @@ A **fourth** owner-directed redo of `nfr-design`, ordered to repair two Majors i
 **`target-standardization`**, cleared every unit's receipts again. **This unit was untouched
 by it**; the summary was re-confirmed and the artifact re-saved. **No component, boundary or
 status claim above is altered by this note.**
+
+## Receipt-floor note — 2026-09-04 (second and third occurrence)
+
+*Re-saved after a **third** floor reset: the second recovery ran confirm/write/review out of
+order, so a further jump was taken and the steps re-run in the terminating order. This unit's
+design is untouched.*
+
+A **redo jump** on `nfr-design`, taken to lift the review-freeze on `features-and-splits` and
+`models-and-baselines` so their adversarial findings could be fixed on the project decision
+owner's direction, cleared every unit's receipts a second time. **This unit was untouched by
+it**; the summary was re-affirmed on 2026-09-04 (stored value already `Looks correct`) and
+this artifact re-saved unchanged. **No component, boundary or status claim above is altered by
+this note.**
+
+> ⚠ **CORRECTED 2026-09-04 on adversarial finding 1, Critical.** This note previously ended
+> *"this unit's **open Critical** and its Major sweep miss both stand and still reach the
+> human at the gate"* — **both claims were stale when written**. The containment check's
+> risk-surface limb was redefined as the allowlist's complement and the failure-domains
+> language narrowed under the second owner-directed redo, and this unit's
+> `## Review — 2026-09-02 third-redo iteration 2 (terminal)` pass re-verified both **CLOSED**
+> (DISC-E-1's own box here reads *"Both halves now stand in both artifacts"*) and returned
+> READY. The note's author carried the "open" status from memory of the original run instead
+> of deriving it from the artifacts' own bodies. The genuinely gate-routed remainder is listed
+> in `security-design.md`'s matching correction — **six items: five from the terminal review's
+> own "Coverage limits" enumeration, plus the `foundation`/FR-WS-7 dependency from the
+> document's own open-item bullets** *(provenance restated 2026-09-04 on the fourth-floor
+> confirming pass, Major — the previous wording claimed all six came from the terminal
+> enumeration, which names only five; earlier still the list had omitted `IMPL-13` entirely.
+> The content of the list has been stable since that first repair; both provenance defects
+> were in how its sources were described)*.

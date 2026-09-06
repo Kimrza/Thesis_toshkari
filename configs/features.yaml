@@ -1,0 +1,24 @@
+# configs/features.yaml — one of the four governed configs (TE §12; TC-03e).
+#
+# Foundation owns no feature science. Every scientific field here carries the
+# literal `TBD — freeze gate` sentinel until the owning unit
+# (features-and-splits) transcribes its frozen values under their D-numbers.
+# Writing a sentinel is not choosing a value (W-9); assert_no_tbd (§18.3)
+# refuses a run whose stage requires an unresolved field.
+#
+# The binding feature rules that will govern this file when filled (recorded so
+# the sentinel is not mistaken for an open question): availability lags
+# Kp/ap3 >= 3h, Hp60/ap60 >= 1h, F10.7 previous-day observed with a TRAILING
+# (never centered) 81-day mean (D-10.3, TC-10); Dst diagnostic/hindcast-only,
+# never a confirmatory feature (TC-11); no iri_* field ever (NFR-IRI-01); no
+# SSN; carry-forward of missing drivers bounded at 3 hours then exclude (TC-09);
+# longitude only through lst_sin/lst_cos (TE §7.2).
+#
+# No machine path may appear in this file (R-16, ADR-07).
+
+schema_version: "1.0.0"
+
+feature_set_id: "TBD — freeze gate"
+feature_dictionary: "TBD — freeze gate"
+availability_lags: "TBD — freeze gate"
+normalization: "TBD — freeze gate"

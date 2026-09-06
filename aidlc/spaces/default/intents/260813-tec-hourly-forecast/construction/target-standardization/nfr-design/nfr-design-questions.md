@@ -241,6 +241,10 @@ collision stays a **recorded §12 defect**; no `02a`/`02b` convention is invente
 stays **one half of a cross-unit contract** this unit does not declare satisfied. No module is
 written by this stage.
 
+<!-- Re-collected 2026-09-04: the redo jump on `nfr-design` reset this stage's receipt floor,
+     invalidating this unit's summary-confirmation receipt. The stored value was `Looks correct`
+     and is being re-affirmed on the fresh floor, not changed. -->
+
 - Looks correct
 - Request changes
 

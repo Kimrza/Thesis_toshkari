@@ -31,6 +31,16 @@ when `src/` is built (REQ-ENG-1).
 
 Origin: GOV-2026-08-20-RA-01 finding IMPL-2 (both limbs narrowed); decisions D-16, D-17.
 
+SUBORDINATE STATUS (R-24, the Q7 rider — recorded where the code lives, on purpose).
+This static AST scan is the early-warning limb ONLY. It fires before anything executes,
+which is earlier than run time and worth keeping — and it does not discharge FR-P1-03-2's
+run-time requirement. The AUTHORITATIVE limb is `src/data/phase_contract.py`
+(`assert_phase_boundary`, `assert_no_raw_fields`), called at step 4 of every stage
+script's entry contract inside the session, because a static scan of a local checkout
+constrains nothing about a Kaggle session. A future maintainer must not read this
+module's presence as sufficient; `tests/test_phase_contract.py` carries a documentation
+test that fails the day this paragraph is removed.
+
 Run: pytest tests/test_phase_boundary.py -rs
 """
 

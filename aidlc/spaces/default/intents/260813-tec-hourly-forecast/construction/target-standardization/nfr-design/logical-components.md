@@ -31,7 +31,9 @@
 > implementation and execution limbs are open.** The **`02` ordinal collision** is a recorded
 > §12 defect; **no `02a`/`02b` convention** is invented. **G-09 is signed (D-31) with
 > preconditions UNMET**; stage 3.1 remains **FAIL**; the Python interpreter present is
-> **3.14.7, off the governed 3.11 pin**.
+> **3.14.7, off the governed 3.11 pin** *(⚠ stale in turn on this clone as of 2026-09-04 —
+> no interpreter resolves at all; either way nothing run here is governed evidence, per
+> `security-design.md`'s dated correction)*.
 
 ## Sources
 
@@ -298,9 +300,13 @@ acceptance row"* limb is correct and is what this table also prints.
 
 **A decomposition that verifies is not evidence the decomposed set is complete.** The 4/1/1
 split is arithmetically sound against `security-design.md` as written; it says nothing about
-whether that artifact covers everything it should. The completeness check is the FR-P1-03 set
-difference recorded in `security-design.md` § Requirement coverage — **empty, because this
-unit carries all five** — and the two answer different questions.
+whether that artifact covers everything it should. The completeness check is the FR-P1-03
+reconciliation recorded in `security-design.md` § Requirement coverage — **all five IDs cited,
+of which this unit CARRIES four** *(corrected 2026-09-04 on adversarial finding 6, Critical;
+the superseded clause read "empty, because this unit carries all five". `unit-of-work.md` § 5
+gives this unit FR-P1-03-1, -3, -4, -5, and § 2 assigns **FR-P1-03-2 and its TA-27 row to
+`governance-guards`** — its row here is a cited external obligation, the footing NFR-LEAK-01
+and NFR-PHASE-01 already stand on)* — and the two answer different questions.
 
 ## Assumptions & Open Questions
 
@@ -314,5 +320,24 @@ unit carries all five** — and the two answer different questions.
 - **Carried — BLK-05's implementation and execution limbs are open**; approving this stage discharges neither.
 - **Carried — the floating-point diff tolerance is unset**, belonging with the fixture manifest's permitted tolerances.
 - **Carried — `unit-of-work.md` § 5's stale "19"** against the §12 tree's **21** test modules; reported, not edited.
-- **Carried — the Python interpreter present is 3.14.7, off the governed 3.11 pin.** Nothing it runs is governed evidence.
+- **Carried, and re-dated — interpreter reachability.** 3.14.7 was reachable on 2026-09-03, off the governed 3.11 pin; **no interpreter resolves on this clone as of 2026-09-04**. Either way, nothing run here is governed evidence.
 - **None** of the above decides a scientific value, fills a `TBD — freeze gate` field, authorises writing a module, or claims a gate, acceptance row or test as discharged.
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched by any of it.*
+
+A **redo jump** on `nfr-design`, taken to lift the review-freeze on `features-and-splits` and
+`models-and-baselines` so their adversarial findings could be fixed on the project decision
+owner's direction, reset this stage's receipt floor. **This unit was untouched by it**; the
+summary was re-affirmed on 2026-09-04 (stored value already `Looks correct`) and this artifact
+re-saved unchanged. **No component, boundary or status claim above is altered by this note** —
+the stale `unit-of-work.md` § 5 figure and the off-pin interpreter both stand as recorded.
+
+*Third reset, 2026-09-04, on the owner's "fix all findings until all units are ready"
+direction — this unit's remaining Minor (the § SD-T-00 table cell's interpreter claim) is fixed
+in `security-design.md` on this floor; this file's own banner and Carried bullet were already
+corrected. Summary re-affirmed; this line is the re-registering write.*

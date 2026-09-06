@@ -281,6 +281,10 @@ stay `TBD — freeze gate`. IRI generation stays blocked on R-59's validation. T
 **`tests/test_iri_denial.py` does not exist**, and nothing here claims otherwise. No module is
 written by this stage.
 
+<!-- Re-collected 2026-09-04: the redo jump on `nfr-design` reset this stage's receipt floor,
+     invalidating this unit's summary-confirmation receipt. The stored value was `Looks correct`
+     and is being re-affirmed on the fresh floor, not changed. -->
+
 - Looks correct
 - Request changes
 

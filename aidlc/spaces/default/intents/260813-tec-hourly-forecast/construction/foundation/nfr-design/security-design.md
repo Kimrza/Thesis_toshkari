@@ -49,9 +49,24 @@
 > | `src/data/config.py` | **EXISTS** |
 > | `src/data/release.py` | **EXISTS** |
 > | `src/data/locked_test.py` | **EXISTS** — `open_restricted` at line 147 |
-> | `src/data/registry.py` | **absent** |
+> | `src/data/registry.py` | **absent** — and ⚠ **NOT this unit's module** (see below) |
 > | `src/data/reuse_registry.py` | **absent** |
 > | `tests/test_determinism.py` | **absent** |
+>
+> ⚠ **CORRECTED 2026-09-04 on adversarial finding 1, Critical.** This inventory listed
+> `src/data/registry.py` among the modules this document's design discusses, which — together
+> with `logical-components.md` equating it with **C-2's twenty-column experiment registry** —
+> implied it is `foundation`-owned. **It is not.**
+> `inception/units-generation/unit-of-work.md` gives it to **`inventory-and-registry`**, and
+> `component-methods.md` defines its contents as a **`Station`** dataclass of GNSS metadata —
+> no `run_id`, no `exploratory`, none of C-2's twenty §13.4 columns. **This unit's own
+> `domain-entities.md` and `business-logic-model.md` already state that disclaimer**, and this
+> stage failed to carry it forward.
+>
+> **The experiment-registry writer's module placement is an OPEN ITEM** —
+> `business-logic-model.md` names *"the experiment-registry writer this unit owns"* with **no
+> path**, and it is **not** `src/data/registry.py`. The row stays in this table because its
+> absence-on-disk is a true fact; the attribution was the defect.
 >
 > **What has not changed.** **`configs/`, `pyproject.toml` and `requirements.txt` are all
 > absent** — all three §12-mandated, so **TC-06's scaffold precondition remains unmet**.
@@ -413,7 +428,7 @@ path** — the rest of NFR-REP-01 is discharged elsewhere and is **not claimed h
 | **NFR-SEC-01** | SD-01, SD-02 | TA-22 | `Pending` — **unclaimed** |
 | FR-P1-05-13 | SD-03 | TA-10, TA-21 | `Pending` |
 | **NFR-AUD-01** | SD-03 | **TA-10, TA-21** — both rows | `Pending` |
-| **NFR-LIC-01** | SD-05 | TA-29 — row owned by `governance-guards` | `Pending` |
+| **NFR-LIC-01** | SD-05 | **TA-28** — row owned by `governance-guards` | `Pending` *(corrected 2026-09-04 on adversarial finding 2, Major; superseded citation preserved: **TA-29**. `requirements.md` fixes NFR-LIC-01 → **TA-28** — "every adapted fragment has a complete §10.1 register row before use" — consistent with its FR-P1-06-1…4 mapping. **TA-29 is "Phase 2 target acceptance", explicitly "Not applicable in Phase 1"**, which is the phase this unit is scoped to, so the superseded citation named a Phase-2-only gate item with no relation to licensing.)* |
 | **REQ-ENG-10** | SD-06 | ⚠ **NO ACCEPTANCE ROW** — `UNTESTED`; candidate row declined at Amendment A, 2026-08-24 | untested |
 | **NFR-DET-01** | SD-06 | WS-17, TA-13 | `Pending` |
 | **NFR-REP-01** | SD-06 | WS-20, TA-17 — rows owned by `fixtures-and-reproducibility` | `Pending` |
@@ -718,5 +733,177 @@ Attempted refutations that **failed**, recorded so this pass is not mistaken for
 ### Summary
 
 This unit's design is unchanged, and it survives a hostile re-check against the current workspace intact: all nine module existence/absence claims, the interpreter claim, the six-test-module count, the 9/6 coverage decomposition with its 6/3/0 set difference, and all four answered questions verify exactly. Nothing is claimed as satisfied, no freeze-gate value is filled, and the scanner is correctly left unselected. The three findings are all Minor and all cosmetic or procedural — a redo count that drifted between the two provenance banners, a verb missing from one banner sentence, and a placeholder timestamp in a standing prior entry. None would cost a developer a question. The prior verdict holds.
+
+READY
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran its steps out of order —
+artifacts written before the confirmations, which wedged the engine against its own
+write-freeze. The steps were re-run as confirm → write → review. This unit's design is
+untouched by any of it.*
+
+A **redo jump** on `nfr-design` reset this stage's receipt floor, invalidating this unit's
+summary-confirmation and review receipts. The jump was taken to lift the review-freeze on two
+*other* units (`features-and-splits`, `models-and-baselines`), whose adversarial findings the
+project decision owner directed be fixed; the floor reset is stage-wide, so it reached this
+unit too.
+
+**No design content changed and no claim above is altered by this note.** The stored
+consolidated summary confirmation was re-affirmed by the owner on 2026-09-04 — its value was
+already `Looks correct` and was not changed — and this artifact is re-saved unchanged so the
+engine's write-after-confirmation precondition is satisfied honestly rather than bypassed.
+Every status claim, count and verdict above stands as originally recorded and reviewed.
+
+---
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T17:28:31Z
+**Iteration:** 1 (adversarial, fresh receipt floor)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `logical-components.md` banner (lines 44–49) and § C-2 ("Registry writer"); `security-design.md` module-inventory box (lines 36–54) | **C-2's "twenty-column experiment registry" is mapped to `src/data/registry.py`, but that exact module belongs to a different unit and holds an unrelated entity.** `logical-components.md`'s banner states verbatim: *"**C-2's registry writer has no module at all** (`src/data/registry.py` absent)"* — equating C-2 (the append-only, twenty-column audit registry this design builds SD-03 around) with `src/data/registry.py`. That module is not `foundation`'s. Per the shared inception contract `inception/units-generation/unit-of-work.md` line 223, `inventory-and-registry` **Owns** `src/data/inventory.py, src/data/registry.py`. Per `component-methods.md` lines 449–464, `src/data/registry.py` defines a **`Station`** dataclass (`station_id`, `lat`, `lon`, `ellipsoidal_height_m`, `domes`, receiver/antenna/firmware intervals) — GNSS station metadata, with no field or method resembling `RegistryEvent`, `run_id`, `exploratory`, or any of C-2's twenty §13.4 columns. This unit's own upstream `functional-design` artifacts state the disclaimer explicitly: `domain-entities.md` line 1036 — *"`src/data/registry.py` and its `Station` entity are **not** part of this unit... the station registry belongs to `inventory-and-registry`"* — and `business-logic-model.md` line 3316 — *"`RegistryEvent` is additionally raised by `assert_registry_resolved` in `src/data/registry.py`, which the artifacts correctly place **outside** this unit."* The same source also states the actual experiment-registry writer's module is unnamed and its placement unresolved (line 3313: *"the experiment-registry writer this unit owns"*, no path given). Neither `logical-components.md` nor `security-design.md` states this disclaimer anywhere, and `security-design.md`'s "Module inventory" box lists `src/data/registry.py` among the modules its own corrected banner discusses as belonging to this document's design, carrying the same conflation. A developer following `logical-components.md`'s literal instruction would implement the security-critical, append-only run registry inside a module reserved for and (per the approved cross-unit contract) destined to hold unrelated GNSS station coordinates owned by `inventory-and-registry` — corrupting that unit's module or silently building on the wrong file. This is exactly the "mechanism that cannot run against approved interfaces" failure class this sweep was dispatched to hunt for. | In both artifacts, remove the equation of C-2 with `src/data/registry.py`. State instead that the experiment-registry writer's module placement is an open item per `business-logic-model.md`'s own analysis (not `src/data/registry.py`, which `unit-of-work.md` and this unit's own `domain-entities.md`/`business-logic-model.md` place outside `foundation`), and adjust `security-design.md`'s module-inventory framing so it does not imply `registry.py` is a `foundation`-owned module. |
+| 2 | Major | `security-design.md` § Requirement coverage, `NFR-LIC-01` row | **Wrong acceptance-row citation, to a row that does not even apply in this unit's phase.** The table reads: `\| **NFR-LIC-01** \| SD-05 \| TA-29 — row owned by `governance-guards` \| `Pending` \|`. Per `inception/requirements-analysis/requirements.md` line 492, `NFR-LIC-01`'s actual acceptance row is **TA-28** ("Every adapted fragment has a complete §10.1 register row before use \| TA-28"), consistent with line 915's `FR-P1-06-1…4` mapping (`NFR-LIC-01` → "TA-27, TA-28"). `TA-29` is defined at `requirements.md` line 602 as **"Phase 2 target acceptance"** and is explicitly listed as **"Not applicable in Phase 1"** — the exact phase `foundation` (Bolt 1) is scoped to. The cited row is not merely off-by-one; it names a Phase-2-only, target-acceptance gate item with no relationship to licensing or the §10.1 reuse register. | Correct the citation from `TA-29` to `TA-28`. |
+
+### Verified — did not break
+
+- **D-29** (`security-design.md` § SD-04, `logical-components.md` C-3): matches `evidence/DECISIONS.md` lines 1490–1529 exactly — 12-hex `content_hash` prefix, verify-on-write refusal, `ReleaseError` on collision. Correctly *not* attributed to a DECISIONS.md entry that doesn't exist.
+- **D-31** (G-09 signed, preconditions unmet): matches `evidence/DECISIONS.md` line 1626 heading and its precondition table (line 1648, "Partially met").
+- **D-122** (frozen seeds, "Approved — supervisor sign-off pending"): both artifacts correctly attribute this to **Vision §14.2**, not to `evidence/DECISIONS.md` (which does not carry a D-122 entry) — the exact sibling-review defect class this dispatch warned of is *not* repeated here.
+- `resolve_platform_roots(env) -> tuple[str, Mapping[str, Path]]` (`component-methods.md` line 82): matches SD-02/C-1's "returns a label and roots, no credential value" claim exactly.
+- `write_release(manifest, *, files, out_dir) -> Path`, raising `ReleaseError` "when `out_dir` already holds a release" (`component-methods.md` lines 429–440): matches SD-04/C-3's overwrite-refusal claim.
+- Disk state re-verified directly: `src/data/config.py`, `src/data/release.py`, `src/data/locked_test.py` **EXIST**; `src/data/registry.py`, `src/data/reuse_registry.py`, `tests/test_determinism.py`, `configs/`, `pyproject.toml`, `requirements.txt` **ABSENT**. Exactly six files under `tests/`, matching both artifacts' claims. All disk-existence claims (as distinct from the ownership claim in Finding 1) are accurate.
+- §10.1, §13.1, §13.3, §13.4, §13.7, §16, §18.2, §18.3 all resolve to real sections in the cited Technical Environment document — no fabricated § reference found.
+- WS-18, TA-18, TA-10, TA-21, TA-22, TA-13, TA-17, WS-17, WS-20, TA-03 all resolve to real, correctly-described rows in `requirements.md`.
+- Counts re-derived directly from each table, not carried: `security-design.md` — 6 design sections (SD-01…SD-06), 9 coverage rows; `logical-components.md` — 3 components, 6 coverage rows; the 6-shared/3-security-only/0-logical-only decomposition is arithmetically exact (6+3=9) against the current row sets.
+- Overclaim sweep: every coverage-table cell reads `Pending`, `NOT MET`, `unclaimed`, or `untested`; no sentence found asserting a mechanism as built, run, or a gate/acceptance row as discharged. `TBD — freeze gate` fields (TensorFlow pin, `CredentialNameMap`, release root, D-number for the enumeration-surface decision) are all stated as still open, not filled.
+- The receipt-floor notes at the end of both files introduce no new design claim and contradict nothing above them; their "no design content changed" assertion holds — the only material added by the 2026-09-04 re-save is the note itself.
+- Mermaid diagram in `logical-components.md` parses; all five referenced nodes (`C1`, `C2`, `C3`, `UNITS`, `RESTRICTED`) are declared; the text fallback matches the drawn edges including the `NEVER` edge to `RESTRICTED`.
+
+### Coverage limits
+
+- Python-interpreter and test-execution claims ("Python 3.14.7", "277 passed, 2 skipped") were not independently re-run this pass — no `python`/`python3`/`py` interpreter was reachable from this review's shell (only Windows Store aliases resolved). Compiled `__pycache__/*.cpython-314*.pyc` artifacts on disk are consistent with a 3.14 interpreter having run there previously, which corroborates but does not itself re-prove the claim. This does not affect either finding above.
+- Per the read-scope bound, `inventory-and-registry`'s and `governance-guards`' own artifacts were not opened; Finding 1's cross-unit ownership claim is established from the shared `unit-of-work.md` contract and from this unit's own `domain-entities.md`/`business-logic-model.md` disclaimers, not from reading either sibling unit's construction directory.
+- This pass did not re-audit every citation in `nfr-design-questions.md`; spot checks (Q1–Q4 receipted answers) were taken as given per the dispatch's framing of that file as answered and receipted.
+
+### Summary
+
+Finding 1 is a genuine, cross-contract-verified interface mismatch: the design instructs an implementer to place the unit's most audit-critical component inside a module a shared, already-approved contract assigns to a different unit for an unrelated purpose, and this unit's own upstream functional-design artifacts already say so in as many words — a disclaimer neither `nfr-design` artifact carries forward. Finding 2 is a citation to an acceptance row that is not merely mislabeled but inapplicable to this unit's phase. Both survived at least six prior reviewer passes on this content (2026-09-01 through 2026-09-03) without being caught, none of which checked the coverage-table ID citations against `requirements.md`'s exact row text for every ID, or checked `logical-components.md`'s module attribution against `unit-of-work.md`'s `Owns` lists. Everything else checked — decision citations, method signatures, disk-state claims, counts, the overclaim sweep, and the Mermaid diagram — holds up.
+
+NOT-READY
+
+---
+
+## Review — 2026-09-04 iteration 2 (repair verification)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T17:33:41Z
+**Iteration:** 2 (adversarial, final)
+
+### Findings
+
+None at Critical or Major severity. Both iteration-1 findings are resolved.
+
+| # | Severity | Location | Finding |
+|---|---|---|---|
+| — | — | — | No new findings raised. |
+
+### Verified — did not break
+
+- **Finding 1 repair, verified against the shared contracts, not against the correction boxes' own account.** `inception/units-generation/unit-of-work.md` line 223 confirms `inventory-and-registry` **Owns** `src/data/inventory.py, src/data/registry.py`. `inception/application-design/component-methods.md` lines 449–459 confirm `src/data/registry.py` defines a **`Station`** dataclass (`station_id`, `lat`, `lon`, `ellipsoidal_height_m`, `domes`, `receiver_intervals`) — GNSS station metadata, no `run_id`, no `exploratory`, none of C-2's twenty §13.4 columns. Both facts match the repaired text exactly.
+- **No surviving site still equates C-2 with `src/data/registry.py` or implies foundation-ownership.** A full sweep of every `registry.py` occurrence in both `security-design.md` and `logical-components.md` was run: each is now either "absent — NOT this unit's module," part of the correction narrative explaining the fix, or a plain disk-existence statement. No live re-assertion of the superseded equation exists outside the quoted-and-labelled superseded text inside the correction boxes themselves.
+- **`business-logic-model.md`'s "open item, no path" framing for the experiment-registry writer is stated once in each artifact and not contradicted anywhere else** in either file.
+- **Banner annotations parse correctly.** "absent — and ⚠ **NOT this unit's module** (see below)" (`security-design.md` line 52) and "**not this unit's** — `inventory-and-registry` owns it" (`logical-components.md` line 28) both read grammatically and preserve the surrounding sentence's meaning.
+- **Finding 2 repair, verified against `requirements.md` directly.** Line 492: `NFR-LIC-01` → **TA-28**, "Every adapted fragment has a complete §10.1 register row before use" — matches the repaired coverage-table row exactly. Line 915's `FR-P1-06-1…4` mapping lists `TA-27, TA-28`, consistent. Line 601–602 confirms `TA-29` = "Phase 2 target acceptance," explicitly listed under "Not applicable in Phase 1" — the repaired text's characterization is accurate.
+- **`TA-29` does not survive as a live citation.** It appears only inside the preserved superseded-citation parenthetical at the repaired coverage row (line 431), inside the iteration-1 Finding 2 text itself, and inside one prior `## Review` entry's "Coverage limits" section (predating the finding's discovery) — all three are correctly left standing per this project's preserve-superseded-text convention, and none asserts `TA-29` as NFR-LIC-01's row in present tense.
+- **Coverage-table counts and their set-difference decomposition, recounted directly from the current row sets, not carried from any artifact's printed arithmetic.** `security-design.md` § Requirement coverage = **9** rows (REQ-ENG-6, FR-P1-01-10, NFR-SEC-01, FR-P1-05-13, NFR-AUD-01, NFR-LIC-01, REQ-ENG-10, NFR-DET-01, NFR-REP-01). `logical-components.md` § Requirement coverage = **6** rows (FR-P1-05-13, NFR-AUD-01, REQ-ENG-6, REQ-ENG-10, NFR-DET-01, NFR-REP-01). Set difference: shared = **6**, security-only = **3** (FR-P1-01-10, NFR-SEC-01, NFR-LIC-01), logical-only = **0**, 6 + 3 = 9 — exact.
+- **No other mechanism-vs-approved-interface defect found.** `resolve_platform_roots(env: Mapping[str, str]) -> tuple[str, Mapping[str, Path]]` (`component-methods.md` line 82) matches both artifacts' claim exactly. `write_release(manifest, *, files, out_dir) -> Path`, raising `ReleaseError` when `out_dir` already holds a release (`component-methods.md` lines 429–440), matches both artifacts' claim exactly. No other module path, field, method or call in either artifact was found to diverge from `component-methods.md` or this unit's own `domain-entities.md`.
+- **No other citation defect found.** D-29, D-31 and D-122 all resolve correctly to `evidence/DECISIONS.md` or Vision §14.2 as attributed (re-checked against iteration-1's own citations, which were themselves already verified against source). §10.1/§13.1/§13.3/§13.4/§13.7/§16/§18.2/§18.3 all resolve to real Technical Environment sections. WS-18, TA-18, TA-10, TA-21, TA-22, TA-13, TA-17, WS-17, WS-20, TA-03 all resolve to real, correctly-described `requirements.md` rows.
+- **Overclaim sweep: clean.** Every coverage-table cell in both artifacts still reads `Pending`, `NOT MET`, `unclaimed`, or `untested`. No cell reads a synonym of "satisfied" or "discharged." No `TBD — freeze gate` field (TensorFlow pin, `CredentialNameMap`, the single authoritative release root, the enumeration-surface D-number) is filled. No blocker is closed. No scientific value is decided.
+
+### Coverage limits
+
+- Cross-unit ownership facts (the `inventory-and-registry` `Owns` line, the `Station` dataclass fields) were verified only against the shared contracts named in the dispatch — `unit-of-work.md` and `component-methods.md` — not by opening `inventory-and-registry`'s own `construction/` directory, per the read-scope bound.
+- Python-interpreter and test-execution claims ("Python 3.14.7," "277 passed, 2 skipped") were not re-run this pass; they are unaffected by either repair and were already verified in an earlier pass on this content.
+- This pass did not re-audit every citation in `nfr-design-questions.md`; the receipted Q1–Q4 answers were taken as given, consistent with how prior passes on this content have treated that file.
+
+### Summary
+
+Both repairs verify independently against the shared inception contracts and `requirements.md` rather than against the correction boxes' own account. No repair-introduced defect was found: no surviving site re-asserts the superseded module attribution, no site contradicts the "open item, no path" framing, no banner annotation breaks its sentence, and `TA-29` survives only inside correctly-preserved historical text. The 9-row/6-row coverage decomposition and its 6/3/0 set difference recount exactly. No other mechanism-vs-approved-interface or citation defect was found on a full sweep of both artifacts' module paths, method signatures, and D-number/WS/TA/§ citations. No overclaim.
+
+READY
+
+---
+
+## Receipt-floor note — 2026-09-04 (third reset)
+
+*A third floor reset was taken on the owner's "fix all findings until all units are ready"
+direction, so that findings held under terminal receipts on six sibling units could be
+repaired. This unit had no open findings — its Critical and Major were already fixed and
+re-verified READY above — and **its design is untouched by this reset**. The summary was
+re-affirmed (stored value already `Looks correct`) and this note is the re-registering write.
+No claim above is altered.*
+
+---
+
+## Review — 2026-09-04 confirming pass (fourth floor)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T00:00:00Z
+**Iteration:** 1 (confirming pass, fresh receipt floor)
+
+### Findings
+
+None.
+
+### Verified — did not break
+
+- **The "third reset" note (both files) carries no new design claim and contradicts nothing above it.** It states a floor reset for procedural reasons, that this unit had no open findings, and that the design is untouched — all true against the artifact's own history: iteration 1 (2026-09-04T17:28:31Z) found one Critical and one Major; iteration 2 (2026-09-04T17:33:41Z) verified both repaired and returned READY with zero new findings. The note asserts nothing beyond that.
+- **Repair 1 (registry-ownership correction) re-verified directly against the shared contract, not against the correction box's own account.** `inception/units-generation/unit-of-work.md` lines 221–223: unit 4, `inventory-and-registry`, **Owns** `src/data/inventory.py, src/data/registry.py`. `foundation`'s two artifacts each now state the module is "**not this unit's**" and attribute it to `inventory-and-registry` — matches. Regression grep of every `registry.py` occurrence in `logical-components.md` (10 hits) and `security-design.md`: every live occurrence is either a disclaimer, a disk-existence statement, or part of the correction narrative quoting the superseded text as superseded; no site re-asserts or implies foundation-ownership.
+- **Repair 2 (NFR-LIC-01 → TA-28) re-verified directly against `requirements.md`.** Line 492: `NFR-LIC-01 | ... | TA-28`. Line 602: `TA-29` = "Phase 2 target acceptance," listed under "Not applicable in Phase 1." The coverage-table row (line 431) cites `TA-28` with the superseded `TA-29` preserved only in a labelled parenthetical. Regression grep of `TA-29` across `security-design.md`: 3 hits, all inside the preserved-superseded-text parenthetical, the historical Finding-2 quote, or a prior review's "Coverage limits" section predating the finding — no live citation of `TA-29` as NFR-LIC-01's row.
+- **Coverage-table recount, done directly against the current tables, not against any artifact's printed arithmetic.** `security-design.md` § Requirement coverage = **9** rows (REQ-ENG-6, FR-P1-01-10, NFR-SEC-01, FR-P1-05-13, NFR-AUD-01, NFR-LIC-01, REQ-ENG-10, NFR-DET-01, NFR-REP-01). `logical-components.md` § Requirement coverage = **6** rows (FR-P1-05-13, NFR-AUD-01, REQ-ENG-6, REQ-ENG-10, NFR-DET-01, NFR-REP-01). Set difference: shared = 6, security-only = 3 (FR-P1-01-10, NFR-SEC-01, NFR-LIC-01), logical-only = 0, 6 + 3 = 9 — exact, matching both artifacts' printed decomposition.
+- **Overclaim sweep, clean.** Every cell in both coverage tables reads `Pending`, `NOT MET`, `unclaimed`, or `untested`; no cell reads a synonym of "satisfied" or "discharged." No `TBD — freeze gate` field (TensorFlow pin, `CredentialNameMap`, the single authoritative release root, the enumeration-surface D-number) is filled anywhere in either file.
+
+### Coverage limits
+
+- Per the read-scope bound, `inventory-and-registry`'s own `construction/` artifacts were not opened; the ownership fact was verified against the shared `unit-of-work.md` contract only, consistent with how the iteration-2 pass on this content verified the same repair.
+- Python-interpreter and test-execution claims were not re-run this pass; they are unaffected by the two verified repairs and were already independently verified on prior passes.
+- `nfr-design-questions.md`'s receipted Q1–Q4 answers were taken as given, per this dispatch's framing and consistent with every prior pass on this content.
+
+### Summary
+
+This is a confirming pass, not a new review: the only change since the unit's last READY (iteration 2, 2026-09-04T17:33:41Z) is the appended "third reset" note in each file, which introduces no new claim. Both prior repairs — the registry-ownership correction and the NFR-LIC-01 → TA-28 citation fix — were re-verified directly against `unit-of-work.md` and `requirements.md` rather than accepted from the artifacts' own account, and both hold. The 9-row/6-row coverage decomposition recounts exactly, and a fresh regression grep for both superseded claims (`TA-29` live, `registry.py` implying foundation-ownership) found no surviving instance outside correctly-preserved historical text. No overclaim.
+
+READY
+
+---
+
+## Review — 2026-09-05 re-affirmation (post-gate receipt refresh)
+
+**Verdict:** READY (re-affirmation)
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T08:03:30Z
+**Iteration:** 1 (re-affirmation, fresh receipt after a stage-gate rejection that revised four other units)
+
+### What was confirmed
+
+1. **Prior terminal review located and its verdict is READY.** The immediately preceding section, "## Review — 2026-09-04 confirming pass (fourth floor)" (Date `2026-09-05T00:00:00Z`, Iteration 1, confirming pass on a fresh receipt floor), ends with the token `READY` and sits at the file's last lines (858–887 of 887 total at the time it was written) — no content followed it before this section was appended.
+2. **No edits to this unit's artifacts post-date that verdict.** The stage-gate rejection that triggered this re-affirmation pass revised `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`, and `fixtures-and-reproducibility` only. Nothing in `security-design.md` or `logical-components.md` carries a dated correction box, banner, or note newer than 2026-09-05T00:00:00Z; the terminal review's own text was the last content in the file before this section.
+3. **Spot-checks of the terminal review's verified claims, re-run independently against current file content:**
+   - Coverage-table row counts: `security-design.md` § Requirement coverage = **9** rows; `logical-components.md` § Requirement coverage = **6** rows — matches the terminal review's printed 9/6/6-shared/3-security-only/0-logical-only decomposition exactly.
+   - `TA-29` regression: every live occurrence in `security-design.md` is inside the preserved-superseded-citation parenthetical (line 431), the historical Finding-2 quote (line 774), or a prior review's "Coverage limits"/narrative text (lines 729, 826–827, 841, 873, 885) — no site asserts `TA-29` as `NFR-LIC-01`'s current acceptance row; the live cited row is `TA-28`.
+   - `registry.py` ownership: every occurrence in both files is either a disclaimer ("NOT this unit's module" / "not this unit's — `inventory-and-registry` owns it"), a disk-existence statement ("absent"), or part of the correction narrative quoting the superseded equation as superseded — no site re-asserts or implies `foundation`-ownership.
+
+All three checks hold. No edit found post-dating the terminal verdict.
 
 READY

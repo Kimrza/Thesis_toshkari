@@ -1,0 +1,34 @@
+# .gitleaks.toml — secret-scan configuration and REVIEWED allowlist (SD-01; Q2=A).
+#
+# Purpose: configuration for both scan modes of SD-01 —
+#   incremental (pre-commit, staged diff, preventive net, NOT evidence) and
+#   history-inclusive (gate scan, TA-22's evidence, run via
+#   scripts/gate_secret_scan.py which records tool version + commit range).
+# Inputs: none at runtime; read by the pinned gitleaks binary (8.18.4).
+# Re-run behaviour: declarative. Every allowlist entry below must name why it is
+#   safe; the allowlist is itself reviewed (SD-01: "an allowlist that is itself
+#   reviewed, never ... disabling the hook").
+
+title = "TEC hourly-forecast secret scan (gitleaks 8.18.4, pinned)"
+
+[extend]
+# Default gitleaks rules apply in full; this file only ADDS an allowlist.
+useDefault = true
+
+[allowlist]
+description = "Reviewed allowlist — every entry states its justification"
+paths = [
+    # Governed evidence bytes: provider HTML/text snapshots whose hashes are
+    # frozen. They contain no credentials (verified by the 2026-08-28 five-pattern
+    # scan over all tracked files, R-14 dated clause) and must never be edited
+    # to appease a scanner.
+    '''evidence/audit_ec1_2026-08-15/kyoto_dst/.*''',
+    # Synthetic canary secrets used by R-14's negative-control tests. They are
+    # planted in tmp_path at test run time, but the test SOURCE names the canary
+    # pattern prefix, which is not a real credential.
+    '''tests/test_determinism\.py''',
+]
+regexes = [
+    # The literal sentinel used across governed configs; matches nothing secret.
+    '''TBD — freeze gate''',
+]

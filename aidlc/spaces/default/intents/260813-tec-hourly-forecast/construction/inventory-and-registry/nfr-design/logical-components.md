@@ -304,7 +304,7 @@ human cannot see. That is where this unit's build risk concentrates.
 | FR-P1-02-4 | I-3 | TA-25 | **`inventory-and-registry`** | `Pending` |
 | FR-P1-02-5 | I-3 | TA-25 | **`inventory-and-registry`** | `Pending` |
 | **FR-P1-02-8** | I-3 | ⚠ **NO ACCEPTANCE ROW** — `TA-29` **withdrawn** | — | untested |
-| NFR-AUD-01 | I-2 | TA-10, TA-21 | `foundation` | `Pending` |
+| NFR-AUD-01 | I-2 | TA-10, TA-21 | `foundation` (TA-10); **`fixtures-and-reproducibility`** (TA-21) | `Pending` *(owner cell corrected 2026-09-04, mirroring `security-design.md`'s dated finding-16 correction; superseded: `foundation` for both)* |
 | NFR-DQ-01 | I-1 | **TA-19** *(row filled in at this stage from `requirements.md:487`; `—` upstream — disclosed in `security-design.md` § Requirement coverage)* | — | `Pending` |
 | **NFR-SEC-01** *(added at this stage)* | I-1 | TA-22 | — | `Pending` |
 
@@ -363,3 +363,21 @@ A **fourth** owner-directed redo of `nfr-design`, ordered to repair two Majors i
 **`target-standardization`**, cleared every unit's receipts again. **This unit was untouched
 by it**; the summary was re-confirmed and the artifact re-saved. **No component, boundary or
 status claim above is altered by this note.**
+
+## Receipt-floor note — 2026-09-04 (second and third occurrence)
+
+*Re-saved after a **third** floor reset: the second recovery ran confirm/write/review out of
+order, wedging the engine against its own write-freeze, so a further jump was taken and the
+steps re-run in the terminating order. This unit's design is untouched by any of it.*
+
+The same thing has happened again, from a different unit. A **redo jump** on `nfr-design`,
+taken to lift the review-freeze on `features-and-splits` and `models-and-baselines` so their
+adversarial findings could be fixed on the project decision owner's direction, cleared every
+unit's receipts a second time. **This unit was untouched by it**; the summary was re-affirmed
+on 2026-09-04 (its stored value was already `Looks correct`) and the artifact re-saved
+unchanged. **No component, boundary or status claim above is altered by this note.**
+
+*Recorded rather than folded into the note above, because two independent floor resets are two
+facts. That this is the second one is itself the observation worth carrying: a stage-wide
+receipt reset is the standing cost of fixing one unit's artifact after its review receipt is
+terminal, and it has now been paid twice on this stage.*

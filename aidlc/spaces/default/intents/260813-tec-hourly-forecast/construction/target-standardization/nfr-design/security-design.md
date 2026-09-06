@@ -32,6 +32,14 @@
 > `nfr-requirements` says none exists; that is stale, and the conclusion it supported —
 > nothing here is governed evidence — survives on the pin instead.
 >
+> ⚠ *(Stale in turn on this clone, corrected 2026-09-04 on adversarial finding 7, Major:
+> `python --version` now resolves to the zero-byte WindowsApps stub — **no interpreter is
+> reachable at all**. The sentence above was true when written on 2026-09-03 and is preserved;
+> the conclusion survives a second ground-shift — nothing here is governed evidence because
+> nothing runs at all. The lesson the reviewer attached: a re-save that asserts "content
+> unchanged" re-asserts the artifact's checked-and-printed disk facts, so interpreter
+> reachability should be re-run at every re-save, not only at the original write.)*
+>
 > **`FR-P1-03-5` carries no acceptance row.** WS-05, the only field-contract row, is deferred
 > to **G-P3A**. **BLK-05's implementation and execution limbs are open**; **the `02` ordinal
 > collision is a recorded §12 defect**, and no `02a`/`02b` convention is invented. **G-09 is
@@ -76,7 +84,7 @@ Derived by direct inspection on 2026-09-03, printed before it is relied on.
 
 | Upstream claim | State on disk | Direction |
 |---|---|---|
-| Banner: *"**No Python interpreter exists** in this environment, so every test is written-but-unexecuted or unwritten"* | **Stale.** `python --version` → **Python 3.14.7**. The suite runs. But **3.14.7 is not the governed pin** — TE §8.1 and TC-03d fix **3.11 exactly** — so nothing it produces is governed evidence. | **Neutral.** The conclusion survives on a different ground; the stated reason is false |
+| Banner: *"**No Python interpreter exists** in this environment, so every test is written-but-unexecuted or unwritten"* | **Stale.** `python --version` → **Python 3.14.7**. The suite runs. But **3.14.7 is not the governed pin** — TE §8.1 and TC-03d fix **3.11 exactly** — so nothing it produces is governed evidence. *(⚠ This cell was true on 2026-09-03 and is itself stale in turn on this clone as of 2026-09-04 — `python` now resolves to the WindowsApps stub and **nothing runs at all**; recorded per iteration-2 Minor 8, matching the banner's dated correction. The conclusion survives both ground-shifts.)* | **Neutral.** The conclusion survives on a different ground; the stated reason is false |
 | `configs/` absent | **Holds.** | — |
 | The `02` ordinal collision | **Holds, and is still only on paper**: neither `02_standardize_prepared_target.py` nor `02_build_vtec_target.py` exists. `scripts/` holds `audit_ec1_drivers.py` and `merge_coverage_year.py`. | — |
 | This unit's modules | **None exists** — `src/data/prepared.py`, `tests/test_prepared_target_schema.py`, the stage script. | — |
@@ -398,10 +406,22 @@ both of which are dependencies in every sense but the packaging one)*. **0** ame
 intra-package and its shape is this stage's to specify, so the running total stays **five
 across three units**.
 
-**The FR-P1-03 set difference is empty.** `requirements.md`'s FR-P1-03 space is `{1,2,3,4,5}`,
-five IDs, and this unit carries **all five**. Unlike its siblings there is no complement to
-explain: nothing in the family belongs to another unit's design, though three of the five have
-their **acceptance rows** owned elsewhere, which is a different thing and is stated per row.
+**The FR-P1-03 family is cited in full; it is NOT carried in full.** *(Corrected 2026-09-04 on
+adversarial finding 6, Critical. The superseded paragraph, preserved: "…this unit carries
+**all five**. Unlike its siblings there is no complement to explain: nothing in the family
+belongs to another unit's design…")* `requirements.md`'s FR-P1-03 space is `{1,2,3,4,5}`, five
+IDs, and all five appear in the table above — but `unit-of-work.md` § 5 gives this unit's
+"Requirements carried" as **FR-P1-03-1, -3, -4, -5** (four of five), and § 2 assigns
+**FR-P1-03-2 — the requirement AND its TA-27 acceptance row — to `governance-guards`**.
+FR-P1-03-2's row above is therefore a **cited external obligation**, present because § SD-T-06
+states obligations against it (this unit *raises* `PhaseBoundaryError`; it does not define the
+boundary), exactly the footing NFR-LEAK-01 and NFR-PHASE-01 already stand on — and the table's
+own owner column said so all along, which makes the superseded sentence a contradiction of the
+table it summarised. The unqualified "carries all five" was an overclaim **not present in this
+unit's own upstream** (`business-logic-model.md`'s map already routes FR-P1-03-2's row to
+`governance-guards`); it was introduced at this stage. So: **carried = 4 of 5**; **cited = 5 of
+5**; three of the four carried have their acceptance rows owned elsewhere, which is a third
+distinct thing and is stated per row.
 
 **Where this table differs from the `functional-design` map, and why.** That map's table
 carries **seven** rows while the sentence beneath it reads *"6 requirements"* (§ DISC-T-2).
@@ -422,52 +442,209 @@ coverage claims**, which is why both carry an explicit *binds elsewhere* / *row 
 - **Carried — BLK-05's implementation and execution limbs are open.** The module does not exist and has never been run; **approving this stage discharges neither**.
 - **Carried — `unit-of-work.md` § 5's stale "19"** against the §12 tree's **21** test modules, reported for an annotate-in-place decision, not edited.
 - **Carried — the floating-point diff tolerance is unset** and belongs with the fixture manifest's permitted tolerances (TE §15.2).
-- **Carried — the Python interpreter present is 3.14.7, off the governed 3.11 pin.** Nothing it runs is governed evidence.
+- **Carried, and re-dated — interpreter reachability.** On 2026-09-03 a Python 3.14.7 was reachable, off the governed 3.11 pin; **on 2026-09-04 no interpreter resolves at all** (WindowsApps stub). Under either state, **nothing run here is governed evidence** — the conclusion is ground-independent and that is the point of carrying it.
 - **None** of the above decides a scientific value, fills a `TBD — freeze gate` field, authorises writing a module, or claims a gate, acceptance row or test as discharged.
+
+## Review
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T21:20:32Z
+**Iteration:** 2 (fresh receipt floor after redo jump; both "Receipt-floor note" sections treated as claims to verify, not as trusted context)
+
+### Prior finding status
+
+| # | Severity | Finding | Status |
+|---|---|---|---|
+| 1 | Major | §18.3 cited for a runtime stop it does not require; refuse-to-release option never weighed; block scope overstated | **Still open, unsoftened, routed to the gate** — confirmed present verbatim under the "⚠ THE §18.3 CITATION IS CORRECTED, AND A THIRD OPTION IS ROUTED" box in § SD-T-01 and under the equivalent box in `logical-components.md` § T-1. Both Receipt-floor notes (2026-09-04) correctly state it is unaltered. |
+| 2 | Major | Column choice answers detectability, not TS-T-03's survival criterion; enforcing half unbuilt | **Still open, unsoftened, routed to the gate** — confirmed present under the "⚠ WHAT THE COLUMN ACTUALLY BUYS" box in § SD-T-02 and the equivalent box in `logical-components.md` § T-3. Both Receipt-floor notes correctly state it is unaltered. |
+| 3 | Minor | DISC-T-2 missing from `logical-components.md` | **Resolved** — now present under `logical-components.md` § Requirement coverage, "DISC-T-2 applies to this table too (added 2026-09-03 …)". |
+| 4 | Minor | "0 new dependencies" printed unqualified | **Resolved** — now reads "0 new **package** dependencies", with the cross-unit dependencies named separately in the same sentence. |
+| 5 | Minor | Clean-run-assertion author unnamed | **Resolved** — § SD-T-05 and `logical-components.md` § T-1 now name `fixtures-and-reproducibility` as the assertion's author, with `foundation` and this unit named as the other two parties. |
+
+### New findings (this pass)
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 6 | Critical | `security-design.md` § Requirement coverage, "The FR-P1-03 set difference is empty" paragraph; `logical-components.md` § Requirement coverage (same 9-row table) | The claim **"this unit carries all five [FR-P1-03] … nothing in the family belongs to another unit's design"** is false against the authoritative per-unit ownership ledger. `inception/units-generation/unit-of-work.md` § 5 (`target-standardization`) states **"Requirements carried (6). FR-P1-03-1, FR-P1-03-3, FR-P1-03-4, FR-P1-03-5, NFR-TDEF-01, NFR-DQ-01"** — four of the five FR-P1-03 IDs, explicitly omitting **FR-P1-03-2**. `unit-of-work.md` § 2 (`governance-guards`) states **"Requirements carried (10). REQ-ENG-5, FR-P1-02-6, FR-P1-03-2, …, NFR-PHASE-01, NFR-LIC-01"** — `governance-guards` carries FR-P1-03-2, not this unit. This is not merely an acceptance-row split (which the artifact does correctly disclose for FR-P1-03-3/-4/NFR-TDEF-01, all routed to `foundation`'s TA-15): for FR-P1-03-2, `unit-of-work.md` assigns **both** the requirement and its acceptance row (TA-27) to `governance-guards`. The artifact's own § SD-T-06 elsewhere states the substance correctly ("NFR-PHASE-01's row is `governance-guards`'… this unit raises `PhaseBoundaryError` rather than defines it"), which makes the unqualified "carries all five / nothing belongs to another unit's design" sentence in § Requirement coverage a direct, checkable contradiction of its own § SD-T-06 as well as of `unit-of-work.md`. This is the same defect class the dispatch brief names as Critical in two sibling units (a requirement folded into a unit's completeness claim that the authoritative unit-of-work.md assigns elsewhere), and it inflates this unit's printed "9 coverage rows … matching `nfr-requirements`' own corrected 9-row set" into an implicit ownership claim that `unit-of-work.md` does not support for FR-P1-03-2. | Correct the sentence to state that FR-P1-03-2 is carried by `governance-guards` per `unit-of-work.md` §2, not by this unit, and that this unit's own FR-P1-03 carry-set is `{1,3,4,5}` (4 of 5), with FR-P1-03-2 appearing in the coverage table only as a cited external obligation (the `PhaseBoundaryError` raise), exactly as NFR-LEAK-01 and NFR-PHASE-01 are already labelled. Re-derive and re-print the "9 rows" figure with that distinction stated, the way § SD-T-06 already models for the two NFR rows. |
+| 7 | Major | `security-design.md` § SD-T-00, banner, and `nfr-design-questions.md` banner | The claim **"A Python interpreter DOES exist — 3.14.7"**, printed as a disk-state fact and carried unchanged through two Receipt-floor re-saves (2026-09-04), does **not** hold on this clone today: `python --version` now resolves to the WindowsApps execution-alias stub (exit code 49, "Python was not found; run without arguments to install from the Microsoft Store"), not a working 3.14.7 interpreter. The artifact's own stated conclusion — "nothing it runs is governed evidence" — is not undermined by this (it holds more strongly: nothing runs at all), but the premise it argues from is now stale, and neither Receipt-floor note re-verified workspace state before re-asserting "content unchanged" and "everything below is byte-identical." | Re-run `python --version` at the next touch of this artifact and either reconfirm 3.14.7 or record the WindowsApps-stub state explicitly, since the artifact already treats interpreter reachability as a checked-and-printed fact rather than an assumption, and that discipline should extend to re-saves, not only to the original write. |
+
+### Checks run (this pass)
+
+| Check | Result | Interpretation |
+|---|---|---|
+| `unit-of-work.md` § 5 "Requirements carried" for `target-standardization` | `FR-P1-03-1, FR-P1-03-3, FR-P1-03-4, FR-P1-03-5, NFR-TDEF-01, NFR-DQ-01` (6, no FR-P1-03-2) | Finding 6 — the "carries all five" claim is false. |
+| `unit-of-work.md` § 2 "Requirements carried" for `governance-guards` | includes `FR-P1-03-2`, and "Acceptance rows (2). TA-27, TA-28" | Confirms FR-P1-03-2 (requirement **and** its TA-27 row) belongs to `governance-guards`, not this unit. |
+| `unit-of-work.md` § 1 "Acceptance rows" for `foundation` | `TA-01, TA-02, TA-03, TA-10, TA-15, TA-22, TA-23` | Confirms TA-15's owner is `foundation`, as both artifacts state for FR-P1-03-3/-4/NFR-TDEF-01 — this limb of the ownership claim **holds**. |
+| `unit-of-work.md` § 7 "Acceptance rows" for `features-and-splits` | includes `TA-11` | Confirms NFR-LEAK-01 → TA-11 → `features-and-splits` **holds**. |
+| `unit-of-work.md` § 4 "Acceptance rows" for `inventory-and-registry` | includes `TA-04` | Confirms FR-P1-03-1 → TA-04 → `inventory-and-registry` **holds**. |
+| `requirements.md` lines 360–364, FR-P1-03 family text and per-row `Test` column | FR-P1-03-1→TA-04, -2→TA-27, -3→TA-15, -4→TA-15, -5→`UNTESTED`/WS-05 deferred to G-P3A | Matches both artifacts' per-row citations exactly; the defect is the completeness sentence, not the per-row table. |
+| `functional-design/business-logic-model.md` § Requirement-to-workflow map (lines 483–494) | 7 rows including FR-P1-03-2 (`W-1, through the stage entry contract` → TA-27 → `governance-guards`), text reads "6 requirements, 1 without an acceptance row" | Reconfirms DISC-T-2 (7 vs. "6"); also shows the upstream `functional-design` artifact already correctly attributes FR-P1-03-2's row ownership to `governance-guards` — the nfr-design artifacts' new "carries all five" sentence is an overclaim not present in their own upstream source. |
+| `src/data/config.py` `__all__`, re-derived | 17 names, `PhaseBoundaryError` present, `StandardizationError` absent | DISC-T-1 reconfirmed accurate. |
+| `evidence/DECISIONS.md` — D-1, D-16, D-17, D-19 | all four exist with matching content (D-16 median statistic, D-17 sixteen-field contract, D-19 four thresholds, D-1 half-open floor rule) | All four D-number citations verified accurate. |
+| `domain-entities.md` 16-row field table | row 16 = `target_definition_id`, rows 14–16 tagged FR-P1-03-3 | Confirms the sixteen-field claim and the mechanism-vs-entity alignment for T-2. |
+| `domain-entities.md` § 8 `TargetLabel` | label + lineage statement emitted by "the target-writing path", `target_definition_id` "already on every row" | Consistent with the column design in § SD-T-02/T-3; no contradiction found. |
+| `component-methods.md`, grep for run-manifest / executed-scripts contract | no match | Confirms § SD-T-05's "dependency stated as owed, not assumed" is accurate — no such contract exists yet to cite. |
+| Live filesystem: `scripts/`, `src/gnss/`, `configs/` | `scripts/` = `audit_ec1_drivers.py`, `merge_coverage_year.py` (+ `__pycache__`); `src/gnss/` = `__init__.py` only; `configs/` absent | All three disk-state claims **hold** as of this review. |
+| Live filesystem: `python --version` | resolves to WindowsApps stub, exit 49, no interpreter | Finding 7 — stale against the artifact's printed "3.14.7" claim. |
+
+### Coverage limits
+
+- **Read-scope bound.** No sibling unit's `construction/<other-unit>/` content was opened; ownership facts for `foundation`, `governance-guards`, `inventory-and-registry` and `features-and-splits` were resolved only through the shared `inception/units-generation/unit-of-work.md` contract, per the dispatch's spot-check carve-out, not by reading any sibling's `construction/` directory.
+- The four sibling boundary criteria (Q4's "fifth axis" claim) were again assessed for internal soundness only, not against sibling text.
+- `unit-of-work.md` § 5's stale "19" test-module count (against the §12 tree's 21) is carried, not re-derived here; already recorded under `team.md` § Corrections as an owner ruling.
+- `business-rules.md` R-64…R-73 content was taken on the citing artifacts' own quotations, consistent with the prior pass's coverage limits; not independently re-read line-by-line this pass given the budget spent on the ownership cross-check that surfaced Finding 6.
+
+### Summary
+
+The two Majors routed to the gate at the prior iteration (§18.3 misused for a runtime rule; the column decision answering detectability rather than TS-T-03's survival criterion) are confirmed **still present, unsoftened, and correctly disclosed as unresolved** by both Receipt-floor notes. All three prior Minors are resolved. This pass's per-ID ownership sweep against `unit-of-work.md` — the authoritative unit-carries-requirement ledger, not merely the acceptance-row crosswalk — found a new Critical: the printed claim that "this unit carries all five" FR-P1-03 requirements with "nothing in the family belonging to another unit's design" is false, since `unit-of-work.md` assigns FR-P1-03-2 (both the requirement and its TA-27 acceptance row) to `governance-guards`, and the artifact's own § SD-T-06 already says as much for the substance of that same requirement without the coverage table reflecting it. A live filesystem check also found the artifact's "Python 3.14.7 exists" disk-state claim stale on this clone (Major) — the interpreter now fails to resolve at all — though the artifact's own governed-evidence conclusion is not disturbed by that. One Critical finding is sufficient on its own to block READY under this project's verdict rule; the verdict is **NOT-READY** pending the ownership-sentence correction (Finding 6) and, ideally, a disk-state refresh (Finding 7) before the next re-save.
+
+---
 
 ## Review
 
 **Verdict:** READY
 **Reviewer:** aidlc-architecture-reviewer-agent
-**Date:** 2026-09-04T13:58:38Z
-**Iteration:** 1
+**Date:** 2026-09-04T21:27:30Z
+**Iteration:** 2 (repair verification — final iteration, budget is 2)
 
-### Findings
+### Repair verification
+
+| Prior finding | Repair claimed | Independently verified | Result |
+|---|---|---|---|
+| 6 (Critical) — "carries all five [FR-P1-03] … nothing in the family belongs to another unit's design" | Rewritten to state **cited = 5 of 5, carried = 4 of 5** (`{1,3,4,5}`), with FR-P1-03-2 stated as a cited external obligation on `governance-guards`, on the same footing as NFR-LEAK-01/NFR-PHASE-01; superseded text preserved as a quotation. Same repair applied to `logical-components.md` § Requirement coverage. | Re-derived independently from `unit-of-work.md` (not from the correction text): § 5 `target-standardization` — `**Requirements carried (6).** FR-P1-03-1, FR-P1-03-3, FR-P1-03-4, FR-P1-03-5, NFR-TDEF-01, NFR-DQ-01` (line 261, no FR-P1-03-2). § 2 `governance-guards` — `**Requirements carried (10).** … FR-P1-03-2 …` and `**Acceptance rows (2).** TA-27, TA-28` (lines 162, 166). This independently confirms carried = `{1,3,4,5}` and cited = 5/5 with FR-P1-03-2's requirement **and** its TA-27 row both belonging to `governance-guards`. The corrected text in both artifacts matches this exactly. | **Confirmed accurate. Resolved.** |
+| 7 (Major) — "A Python interpreter DOES exist — 3.14.7" | Dated correction added under the banner (both files), the § Assumptions "Carried" bullet re-dated in both files, and the `logical-components.md` banner line updated — all stating the WindowsApps-stub / no-interpreter state as of 2026-09-04, with the ground-independent conclusion ("nothing run here is governed evidence") preserved. | Ran `python --version` live on this clone: exit code 49, `"Python was not found; run without arguments to install from the Microsoft Store…"` — confirms **no interpreter is reachable**, exactly as the correction states. Checked all five claimed sites: SD banner (lines 35–41) ✅ corrected; SD § Assumptions Carried bullet (line 445) ✅ corrected; LC banner (lines 33–36) ✅ corrected; LC § Assumptions Carried bullet (line 323) ✅ corrected; **SD-T-00's own discrepancy table, row 1 (line 87), was NOT touched** — it still reads *"python --version → Python 3.14.7. The suite runs… Neutral"* with no pointer to the 2026-09-04 re-correction, even though the banner six lines above it in the same file now says otherwise. | **Substance confirmed and independently reproduced. One representation missed — see new Minor finding below.** |
+
+### New findings (this pass)
 
 | # | Severity | Location | Finding | Recommendation |
 |---|---|---|---|---|
-| 1 | Major | `security-design.md` § SD-T-01; `logical-components.md` § T-1 | The fail-closed rule is justified by TE §18.3, but §18.3's quoted text governs **implementation** ("must not implement an affected component while its P0 decision is unresolved, and must stop and report rather than choose a default"), not the **runtime** behaviour of an already-written module. It cannot be cited as requiring that a written module raise at run time. Separately, only two options were weighed — fail-closed run vs. `external-products`' skip-not-pass — and the narrower failure point of **refusing to release rather than refusing to run** (produce the artifact, refuse to hash/register/promote it, mark it non-governed) was never considered. As written the blockage extends to work the QC list has no bearing on: T-2's sixteen-field schema contract, T-3's caveat column, and any exercise of the two TE §9.2 fixtures through this stage. | Re-state the fail-closed rule on its own merits — the artifact's own "a target on disk is a fact about the project" argument is sufficient and is not §18.3 — and explicitly weigh and dispose of refuse-to-release as the narrower alternative, including whether the plumbing fixture may run under it. |
-| 2 | Major | `security-design.md` § SD-T-02; `logical-components.md` § T-3 | TS-T-03's stated constraint is that the chosen carrier must **"survive the pipeline's actual operations, not merely a direct read-back"** (verified, `tech-stack-decisions.md` lines 85–87). SD-T-02 answers a different question — which carrier's *loss is detectable* — and never addresses survival. A column is dropped by an ordinary column-subset or groupby rebuild exactly as metadata is; its only advantage is that a **schema check** would catch the loss, and the artifact concedes that check is the consuming unit's code and is not stated. Neither half then delivers SEC-T-02's "a consumer that reports a comparison without it **fails**", and this unit places no preservation obligation on its own write path either. | Either state the preservation obligation this unit does own (which of its own operations must carry the column forward, asserted in `tests/test_prepared_target_schema.py`), or record explicitly that TS-T-03's survival criterion is **not** met by the column and is being converted into a detectability criterion — as a stated substitution, not a silent one. |
-| 3 | Minor | `logical-components.md` § Requirement coverage | DISC-T-2 (the `functional-design` map's seven rows against its printed *"6 requirements"*) is stated twice in `security-design.md` but appears nowhere in `logical-components.md`, whose own 9-row table is where a reader meets the disagreement; it is deferred only by a § Sources pointer. | Restate DISC-T-2 in one line under `logical-components.md` § Requirement coverage, as the sibling artifact does. |
-| 4 | Minor | `security-design.md` § Requirement coverage ("Derived and printed") | **"0 new dependencies"** is printed unqualified in the same artifact that states an owed cross-unit dependency on `foundation`'s run manifest (§ SD-T-05) and an unresolved authority dependency (§ SD-T-04). The intended sense is package dependencies; the word is used in the cross-unit sense a few lines away. | Qualify as "0 new **package** dependencies", and note the one cross-unit dependency owed. |
-| 5 | Minor | `security-design.md` § SD-T-05 | The one-`02`-per-run assertion is placed in "the clean-run contract" (`test_clean_run.py`) without naming which unit writes it. The manifest dependency is routed as owed; the assertion's author is not. | Name the owner of the assertion alongside the manifest dependency, or state it as a second owed item. |
+| 8 | Minor | `security-design.md` § SD-T-00, table row 1 (line 87) | The interpreter-state correction (finding 7) was applied to the banner, both files' § Assumptions "Carried" bullets, and the `logical-components.md` banner, but **not** to § SD-T-00's own discrepancy table, which still asserts unqualified *"python --version → Python 3.14.7. The suite runs"* with a `Neutral` direction — a stale, unqualified disk-state claim sitting a few lines below the corrected banner in the same document. This is the same defect class `project.md`'s sweep-representations corrections warn against (a corrected fact left standing in one of its representations while others are fixed), though here the ground-independent conclusion ("nothing run here is governed evidence") is not disturbed by it. | Add the same dated parenthetical used in the banner/Assumptions bullet to this table row, or add a one-line pointer to the correction, so a reader consulting only § SD-T-00's table is not given the stale claim as current fact. |
 
-### Checks run
+### Prior findings re-confirmed unsoftened
 
-| Check | Result | Interpretation |
-|---|---|---|
-| `__all__` in `src/data/config.py`, regex-derived and printed | **17 names**; `PhaseBoundaryError` present, `StandardizationError` absent | **DISC-T-1 CONFIRMED.** The `__all__` = 17 figure is exact. |
-| `RAISES` grep across `functional-design/business-logic-model.md` | one line (88): `StandardizationError; PhaseBoundaryError` | Confirms it is the unit's **only** `RAISES` declaration; the set difference against `__all__` is exactly `{StandardizationError}`. |
-| Row count of `business-logic-model.md` § Requirement-to-workflow map (lines 485–491) vs. its printed total (line 493) | table **7 rows**; sentence **"6 requirements, 1 without an acceptance row"** | **DISC-T-2 CONFIRMED**, including that the "1 without an acceptance row" limb (FR-P1-03-5) is correct. |
-| Coverage-row membership, both artifacts, set-differenced both directions | 9 rows each: FR-P1-03-1…-5, NFR-TDEF-01, NFR-DQ-01, NFR-LEAK-01, NFR-PHASE-01 — **empty both ways** | The printed "9 … identical in membership" claim holds. |
-| Against `nfr-requirements/security-requirements.md` § Requirement coverage | same 9 IDs | The "matching `nfr-requirements`' own corrected 9-row set" claim holds. |
-| FR-P1-03 ID space in `inception/requirements-analysis/requirements.md` | `{1,2,3,4,5}` | The "set difference is empty; this unit carries all five" claim holds. |
-| Rows with a blank acceptance cell | **1** (FR-P1-03-5) | Holds in both artifacts. |
-| Design-section count | headings SD-T-00…SD-T-06 = 7; minus SD-T-00 (a state record) = **6** | Holds, with the qualifier stated. |
-| 4/1/1 decomposition of those 6 sections | SD-T-01, -03, -05 → T-1 and SD-T-02 → T-3 (**4** single-component); SD-T-04 shared (**1**); SD-T-06 no component (**1**); 4+1+1=6 | Arithmetically sound. |
-| Component count | T-1, T-2, T-3 = **3** | Holds. |
-| Workspace state: `scripts/`, `tests/`, `configs/`, `python --version` | `scripts/` = `audit_ec1_drivers.py`, `merge_coverage_year.py`; `tests/` = 6 modules; `configs/` **absent**; **Python 3.14.7** | All four § SD-T-00 disk claims hold, including the 3.14.7-off-the-3.11-pin correction. |
-| TS-T-03 quotation | lines 81–87 verified: *"easy to drop through an intermediate `pandas` operation that rebuilds the frame"*, *"owed at 3.5"*, and the **survival** constraint | Quotes accurate; the survival clause is the one SD-T-02 does not answer — finding 2. |
-| SEC-T-02 strength claim | line 89: *"a consumer that reports a comparison without it fails"* | Quoted accurately; the "does not ask that the caveat be *present*" reading is fair. |
-| Cross-artifact consistency: fail-closed rule, column decision, DISC-T-1, DISC-T-2 | fail-closed ✓ both; column ✓ both; DISC-T-1 ✓ both; **DISC-T-2 in `security-design.md` only** | Finding 3. |
-| Satisfaction / discharge claims | both artifacts print "0 rows claimed satisfied" and close with the "None of the above decides a scientific value, fills a `TBD — freeze gate` field, authorises writing a module, or claims a gate, acceptance row or test as discharged" bullet; QC list and diff tolerance both recorded unset; FR-P1-03-5 marked untested; BLK-05 carried open; no `02a`/`02b` invented | **No improper claim found.** |
+- **Finding 1 (Major, §18.3 misused for a runtime-stop rule; refuse-to-release option unweighed)** — still present verbatim under the "⚠ THE §18.3 CITATION IS CORRECTED, AND A THIRD OPTION IS ROUTED" box in § SD-T-01 and the equivalent box in `logical-components.md` § T-1. Correctly disclosed as routed to the gate, not resolved by this unit.
+- **Finding 2 (Major, column choice answers detectability not TS-T-03's survival criterion)** — still present verbatim under the "⚠ WHAT THE COLUMN ACTUALLY BUYS" box in § SD-T-02 and the equivalent box in `logical-components.md` § T-3. Correctly disclosed as routed to the gate, not resolved by this unit.
+- **DISC-T-1 (`StandardizationError` gate item)** — still open, still routed to the project decision owner for an explicit yes/no, unchanged from the prior pass.
+- **Overclaim sweep** — QC operation list still `TBD — freeze gate` (line 21); floating-point diff tolerance still unset; FR-P1-03-1 still `BLOCKED` (line 384); "0 rows claimed satisfied" (line 399) still holds; no scientific value is filled and no gate/acceptance row is claimed discharged anywhere in the artifact.
+
+### Recount and drift check (this pass)
+
+| Item | Recounted value | Source | Drift? |
+|---|---|---|---|
+| Coverage rows | 9 (FR-P1-03-1…5 + NFR-TDEF-01, NFR-DQ-01, NFR-LEAK-01, NFR-PHASE-01), counted from the table at lines 382–392 | this artifact | None |
+| FR-P1-03-1 → TA-04 → owner | `inventory-and-registry` | `unit-of-work.md` § 4, `Acceptance rows (3). WS-01, TA-04, TA-25` (line 233) | None |
+| FR-P1-03-2 → TA-27 → owner | `governance-guards` | `unit-of-work.md` § 2, `Acceptance rows (2). TA-27, TA-28` (line 166) | None |
+| FR-P1-03-3, -4 → TA-15 → owner | `foundation` | `unit-of-work.md` § 1, `Acceptance rows (7). TA-01, TA-02, TA-03, TA-10, TA-15, TA-22, TA-23` (line 133) | None |
+| NFR-DQ-01 → TA-19 → owner | `target-standardization` (production half) | `unit-of-work.md` § 5, `Acceptance rows (1). TA-19` (line 265) | None |
+| NFR-LEAK-01 → TA-11 → owner | `features-and-splits` | `unit-of-work.md` § 7, `Acceptance rows (12). WS-10 … TA-11 …` (line 329) | None |
+| NFR-PHASE-01 → TA-27 → owner | `governance-guards` | same as FR-P1-03-2's row (line 166) | None |
+| "1 row with no acceptance row" (FR-P1-03-5) | Still 1, blank acceptance cell at line 388 | this artifact | None |
+
+No drift found against the iteration-1 verified figures; the finding-6 rewrite did not disturb the "9 rows" figure, the "1 row with no acceptance row" figure, the 4/1/1 section-decomposition split in `logical-components.md`, or the DISC-T-2 seven-vs-six disagreement note (still stated identically in both files, lines 111–117 here and lines 294–299 in `logical-components.md`).
+
+### Verified — did not break
+
+- No live text outside preserved-superseded quotations or `## Review` sections still asserts "carries all five" or an empty FR-P1-03 set difference in either file (grep-swept both files for the phrase and its variants; every hit is inside a quoted correction or the Review discussion).
+- The two files' 9-row coverage tables and owner columns still agree with each other (`security-design.md` lines 382–392 vs `logical-components.md` lines 266–276) and with `unit-of-work.md`, cell for cell.
+- The rewritten Finding-6 paragraph did not alter any adjacent claim: the "6 design sections" count, the "0 new package dependencies" qualification, and the "5 across three units" amendments-owed figure are all unchanged and internally consistent.
+- `logical-components.md`'s own finding-6 paragraph (lines 301–309) is worded consistently with `security-design.md`'s (carried = 4, cited = 5/5), not merely cross-referencing it.
 
 ### Coverage limits
 
-- **Read-scope bound.** No sibling unit's `construction/<other-unit>/` content was opened. The characterizations of `external-products` § SD-E-01's skip-not-pass, `governance-guards` R-20/R-23/R-28, `foundation`'s run-record contract and TA-15 ownership, `inventory-and-registry`'s scope check, and the four sibling boundary criteria are therefore **unverified** and treated as this unit's own claims. Finding 1 attacks the *argument* the `external-products` comparison carries, not the sibling's actual text.
-- **`unit-of-work.md` § 5's stale "19" against 21** is carried, not re-derived here; it is already recorded as an owner ruling under `team.md` § Corrections.
-- Q4's boundary criterion was assessed for internal soundness only — the three-axis split and its 4/1/1 decomposition verify — not against the sibling criteria it claims a fifth axis distinct from.
+- Read-scope bound respected: ownership facts were re-derived only from the shared `inception/units-generation/unit-of-work.md` contract (the file this dispatch names as authoritative), never from any sibling unit's `construction/<other-unit>/` content.
+- The live `python --version` check reflects this clone's current state only; the artifact's own dated-correction discipline (re-check at every re-save) is the right posture given interpreter reachability has now changed twice across two saves.
+- `business-rules.md` R-64…R-73 and `functional-design`'s DISC-T-2 figures were taken as already-verified from the prior pass and not re-read line-by-line this pass, consistent with that pass's stated coverage limits.
 
 ### Summary
 
-Every machine-checkable claim in both artifacts was re-derived and **all of them hold**: `__all__` = 17 with the set difference exactly `{StandardizationError}`, the seven-rows-against-"6 requirements" map defect, the 9-row identical membership across both artifacts and against `nfr-requirements`, the empty FR-P1-03 set difference, the 6 / 3 / 4-1-1 counts, and the four disk-state facts — and nothing is claimed satisfied or discharged. The two Majors are argumentative rather than arithmetic: § SD-T-01 leans on a TE §18.3 clause that governs implementation to justify a **runtime** stop and never weighs the narrower refuse-to-release alternative, even though its own rule blocks the schema and label work the QC list has no bearing on; and § SD-T-02 answers TS-T-03's *survival* question with a *detectability* answer while conceding the detecting half is not built. Neither blocks a developer once the QC list is frozen, so the verdict is READY with both Majors routed to the approval gate.
+Both repairs verified independently and hold: the FR-P1-03 ownership correction (Finding 6, Critical) matches `unit-of-work.md` exactly — carried = `{FR-P1-03-1,3,4,5}`, cited = 5/5, with FR-P1-03-2's requirement and its TA-27 row both on `governance-guards` — and no live text outside preserved quotations still makes the false "carries all five" claim. The interpreter correction (Finding 7, Major) is independently reproduced (`python --version` exits 49, no interpreter reachable) and applied at four of five claimed sites; one representation, § SD-T-00's own table row, was missed and is raised as a new Minor (finding 8) rather than a blocker, since the ground-independent conclusion it supports is unaffected. The two Majors routed to the gate at iteration 1 (§18.3 misused for a runtime rule; column choice answering detectability rather than TS-T-03's survival criterion) stand unsoftened, exactly as intended — they are gate input, not defects owed to this stage. With the Critical resolved and confirmed, and two pre-existing, already-disclosed Majors plus one new Minor remaining, this artifact meets the stated verdict rule (zero Critical, ≤2 Major). **Verdict: READY**, with finding 8 and the two gate-routed Majors carried forward as the human's decision material at approval.
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched, and its two Majors stay routed to the gate.*
+
+A **redo jump** on `nfr-design` — taken to lift the review-freeze on `features-and-splits` and
+`models-and-baselines` so their adversarial findings could be fixed on the project decision
+owner's direction — reset this stage's receipt floor and invalidated this unit's
+summary-confirmation and review receipts. **This unit's design was untouched by it.**
+
+**No claim above is altered by this note** — including the two Majors routed to the approval
+gate (§ SD-T-01's use of a TE §18.3 implementation clause to justify a runtime stop without
+weighing the narrower refuse-to-release alternative, and § SD-T-02 answering TS-T-03's
+*survival* question with a *detectability* answer while conceding the detecting half is
+unbuilt). Both still reach the human. The stored confirmation was re-affirmed on 2026-09-04
+(its value was already `Looks correct`), and this artifact is re-saved unchanged so the
+engine's write-after-confirmation precondition is satisfied honestly rather than bypassed.
+
+---
+
+## Review — 2026-09-04 confirming pass (fourth floor)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+
+**Verdict:** READY
+**Date:** 2026-09-04T21:34:00Z
+**Iteration:** 1 (adversarial confirming pass, fresh receipt floor after a third stage-wide reset)
+
+### Targeted checks (this pass)
+
+| # | Check | Result |
+|---|---|---|
+| 1 | § SD-T-00 table row 1 (line 87) gained the dated stale-note fix (finding 8, Minor) | **Confirmed.** The row now reads: *"⚠ This cell was true on 2026-09-03 and is itself stale in turn on this clone as of 2026-09-04 — `python` now resolves to the WindowsApps stub and nothing runs at all; recorded per iteration-2 Minor 8, matching the banner's dated correction. The conclusion survives both ground-shifts."* Consistent with the banner (lines 35–41) and the § Assumptions "Carried, and re-dated" bullet (line 445) — all three sites now agree. Live-verified: `python --version` on this clone resolves to the WindowsApps execution-alias stub ("Python was not found; run without arguments to install from the Microsoft Store…"), confirming no interpreter is reachable, exactly as the note states. Finding 8 is resolved. |
+| 2 | Critical repair (finding 6) still stands | **Confirmed independently against `unit-of-work.md`.** § 5 (`target-standardization`, line 261): `**Requirements carried (6).** FR-P1-03-1, FR-P1-03-3, FR-P1-03-4, FR-P1-03-5, NFR-TDEF-01, NFR-DQ-01` — no FR-P1-03-2. § 2 (`governance-guards`, lines 162, 166): `**Requirements carried (10).** … FR-P1-03-2 …` and `**Acceptance rows (2).** TA-27, TA-28`. This matches the artifact's stated carried = `{1,3,4,5}` (4/5), cited = 5/5, with FR-P1-03-2's requirement **and** its TA-27 row both on `governance-guards`. The 9-row § Requirement coverage table (lines 382–392) still shows the `FR-P1-03-2 \| SD-T-06 \| TA-27 \| governance-guards \| Pending` row with the correct owner cell. `logical-components.md`'s equivalent table (lines 266–276) and its own finding-6 paragraph (lines 301–309) agree cell-for-cell. |
+| 3 | The two gate-routed Majors and `StandardizationError` open item stand unsoftened | **Confirmed.** § SD-T-01's "⚠ THE §18.3 CITATION IS CORRECTED, AND A THIRD OPTION IS ROUTED" box (lines 152–171) and § SD-T-02's "⚠ WHAT THE COLUMN ACTUALLY BUYS" box (lines 206–221) are present verbatim, matched by the equivalent boxes in `logical-components.md` § T-1/T-3 and its Assumptions bullets (lines 314–315). DISC-T-1 (`StandardizationError`, lines 94–109 and Assumptions line 437) is still open and routed to the project decision owner; `logical-components.md` line 316 carries the same. None of the three has been softened, resolved, or silently answered by this or the prior floor. |
+| 4 | Regression grep — no live "carries all five" / unqualified interpreter claim outside preserved quotes and `## Review` | **Confirmed clean.** Grepped both files for `carries all five` and `nothing in the family belongs to another`. Every hit in `security-design.md` (lines 420, 469, 476, 482, 500, 515, 548, 561) sits inside the finding-6 discussion, a `## Review` table, or an explicitly labelled "superseded" quotation. `logical-components.md`'s one hit (line 306) is explicitly framed as a quoted superseded clause ("the superseded clause read …"). No live assertion of the false claim survives outside those contexts. |
+| 5 | Overclaim sweep | **Confirmed unchanged.** QC operation list still `TBD — freeze gate` (line 21, and § SD-T-01 table row 4, line 130). Floating-point diff tolerance still unset (§ SD-T-03, lines 279–282). FR-P1-03-1 still `⛔ BLOCKED` (line 384). "0 rows claimed satisfied" (line 399) still holds. No scientific value is filled, no `TBD` field is closed, and no gate/acceptance row is claimed discharged anywhere in the artifact. |
+
+### Verified — did not break
+
+- The 9-row coverage tables in both files remain identical in membership and owner columns to each other and to `unit-of-work.md`, cell for cell.
+- The "6 design sections" / "3 components, 4+1+1 decomposition" figures are unchanged and internally consistent across both files.
+- The interpreter-state correction now agrees at all four prior sites plus the newly fixed § SD-T-00 table row — five of five representations now consistent, closing out finding 8.
+- Both Receipt-floor notes (the re-registration note at the top of this file and its `logical-components.md` counterpart, plus the second-redo-jump notes) correctly state that no component, boundary, or status claim is altered by the re-save, and this is accurate against the content below them.
+
+### Coverage limits
+
+- Read-scope bound respected: this unit's own artifacts, its own `nfr-requirements/` and `functional-design/`, and the shared `inception/units-generation/unit-of-work.md` contract only. No sibling `construction/<other-unit>/` content was read; no `memory.md` was read.
+- `unit-of-work.md` § 5's stale "19" test-module count (against the §12 tree's 21) is carried as an existing, already-recorded discrepancy and was not re-derived this pass.
+- `business-rules.md` R-64…R-73 content was taken on the citing artifacts' own quotations, consistent with prior passes; not independently re-read line-by-line this pass.
+- The live `python --version` check reflects this clone's current state at review time only.
+
+### Summary
+
+All five targeted checks pass. The § SD-T-00 discrepancy-table cell (the sole outstanding Minor from iteration 2) now carries the same dated stale-note as the banner and the Assumptions bullet, verified live against `python --version` on this clone. The Critical repair (FR-P1-03 carried=4/cited=5) is independently reconfirmed against `unit-of-work.md` §§ 2 and 5 with no drift. The two gate-routed Majors and the `StandardizationError` open item remain present, unsoftened, and correctly routed to the human rather than resolved unilaterally. No regression of the corrected overclaims was found. **Verdict: READY**, with the two Majors and the `StandardizationError` question carried forward as gate input.
+
+---
+
+## Review — 2026-09-05 re-affirmation (post-gate receipt refresh)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T08:15:17Z
+
+### Prior terminal review quoted
+
+`## Review — 2026-09-04 confirming pass (fourth floor)` — **Verdict: READY**, **Date:** 2026-09-04T21:34:00Z, **Iteration:** 1 (adversarial confirming pass, fresh receipt floor after a third stage-wide reset). Summary: "All five targeted checks pass... **Verdict: READY**, with the two Majors and the `StandardizationError` question carried forward as gate input."
+
+### No edits since that review
+
+The gate-rejection revision cycle touched `evaluation-and-comparison`, `statistical-inference`, `regimes-diagnostics-reporting`, and `fixtures-and-reproducibility` only. This unit's `security-design.md` and `logical-components.md` were not part of that revision scope; the file's content ends at the "2026-09-04 confirming pass (fourth floor)" review block with no subsequent edits, confirmed by direct read of the full file (no content follows that review section apart from this re-affirmation).
+
+### Spot-checks performed (verified still holding)
+
+| # | Claim re-verified | Result |
+|---|---|---|
+| 1 | `unit-of-work.md` § 5 (`target-standardization`), line 261: "Requirements carried (6). FR-P1-03-1, FR-P1-03-3, FR-P1-03-4, FR-P1-03-5, NFR-TDEF-01, NFR-DQ-01" (no FR-P1-03-2) | **Confirmed unchanged** — grep re-run against the live file, matches exactly. |
+| 2 | `unit-of-work.md` § 2 (`governance-guards`), line 162: FR-P1-03-2 carried there, not by this unit | **Confirmed unchanged** — grep re-run against the live file, matches exactly. |
+| 3 | Interpreter state — no Python interpreter reachable on this clone (WindowsApps stub) | **Confirmed unchanged** — `python --version` re-run live, exit code 49, "Python was not found; run without arguments to install from the Microsoft Store...", matching the artifact's carried claim. |
+| 4 | QC operation list still `TBD — freeze gate`; FR-P1-03-1 still `⛔ BLOCKED` | **Confirmed unchanged** — both still read as stated at lines 21 and 384 of the live file. |
+
+### Re-affirmed verdict
+
+No repair was performed and none was needed. The standing verdict from the 2026-09-04 terminal review holds unchanged: the Critical (FR-P1-03 ownership) and prior Minor (interpreter-state table cell) remain resolved and unregressed; the two gate-routed Majors (§18.3 misuse; column-choice detectability-vs-survival) and the `StandardizationError` open item remain correctly routed to the human as unresolved gate input, not defects owed to this stage.
+
+**READY**

@@ -88,7 +88,7 @@
 - `functional-design/business-logic-model.md` — **W-8**/**W-8a** (December-hit definition; scanning outside the restricted root), **W-10** (one path in, and who may use it), **W-11**.
 - **The workspace itself, read on 2026-09-01** — `src/data/locked_test.py`, `tests/test_locked_test_guard.py`, `tests/test_release_hashes.py`, `tests/test_acquisition_window.py`, and the pytest run recorded above. Primary evidence for every status claim in this document.
 - `../../foundation/nfr-design/security-design.md` — **§ SD-03**, whose durability posture this design deliberately diverges from at § SD-G-01.
-- `../../../inception/requirements-analysis/requirements.md` — **FR-P1-02-3**, **FR-P1-02-6**, **FR-P1-03-2**, **FR-P1-06-1** … **FR-P1-06-4**, **REQ-ENG-5**, **NFR-AUD-01**, **NFR-PHASE-01**, **NFR-LIC-01**.
+- `../../../inception/requirements-analysis/requirements.md` — **FR-P1-05-12** *(added 2026-09-04 on adversarial finding 1, Critical: this is SD-G-01's actual requirement, carrying `WS-18, TA-18`, and it was absent from this artifact entirely)*, **FR-P1-02-3** *(rows corrected to `WS-18, TA-25`)*, **FR-P1-02-6**, **FR-P1-03-2**, **FR-P1-06-1** … **FR-P1-06-4**, **REQ-ENG-5**, **NFR-AUD-01**, **NFR-PHASE-01**, **NFR-LIC-01**.
 - `../../../../../../../../PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md` — **§7.0** (the Phase 1 hard prohibition), **§7.0B** (the phase transition), **§10.1** (the code-reuse register), **§12**, **§18.2–18.3**, **§19** (TA-18, TA-27, TA-28), **§16** (WS-18).
 - `evidence/DECISIONS.md` — **D-15** (the restricted relocation), **D-18**, **D-31**.
 - `nfr-design-questions.md` — Q1 = A, Q2 = A, Q3 = A, Q4 = A, and the receipted Consolidated Summary Confirmation.
@@ -310,7 +310,8 @@ its own**.
 
 | Requirement | Section here | Acceptance row | Status |
 |---|---|---|---|
-| **FR-P1-02-3** | SD-G-01 | **WS-18, TA-18** | `Pending` — guard built, passes **off-pin only** |
+| **FR-P1-05-12** | SD-G-01 | **WS-18, TA-18** | `Pending` — guard built, passes **off-pin only**; **row owned by `features-and-splits`, this unit supporting** |
+| **FR-P1-02-3** | SD-G-01 | **WS-18, TA-25** — **row owned by `inventory-and-registry`** (`unit-of-work-story-map.md`; TA-25 is that unit's), WS-18 `features-and-splits`'; **this unit supporting via `open_restricted`** | `Pending` — SD-G-01's log-then-read ordering is what makes this requirement's ordering **verifiable**; the guard is built and passes **off-pin only** *(owner label added 2026-09-04 on iteration-2 Major: the corrected row had stated no cross-unit ownership while its sibling rows did, though the story map gives it the identical split shape)* |
 | **FR-P1-02-6** | SD-G-04 | ⚠ **NO ACCEPTANCE ROW** | untested by any §16/§19 row |
 | FR-P1-03-2 | SD-G-05 | TA-27 | `Pending` — **import limb only** |
 | REQ-ENG-5 | SD-G-05 | WS-10, TA-07, TA-08, TA-12, TA-27 | `Pending` |
@@ -322,10 +323,48 @@ its own**.
 | **NFR-LIC-01** | SD-G-06 | TA-28 | `Pending` |
 | **NFR-AUD-01** | SD-G-02 | **TA-10, TA-21** — both rows, owned by `foundation`/`inventory-and-registry` | `Pending` — **one half unbuilt** |
 
-**Derived and printed**: 7 design sections (SD-G-00…SD-G-06); **11** coverage rows —
+**Derived and printed**: 7 design sections (SD-G-00…SD-G-06); **12** coverage rows —
 counted directly from the table above, **not** read off `nfr-requirements`' table or this
 unit's `functional-design` map. **0** rows claimed satisfied; **0** acceptance rows
 discharged; **1** requirement with **no acceptance row at all** (FR-P1-02-6).
+
+> ### ⚠ CORRECTED 2026-09-04 on adversarial finding 1, **Critical** — 11 → 12 rows
+>
+> **SD-G-01's requirement was mis-cited, on the design's own centerpiece section.** The
+> superseded row read `| **FR-P1-02-3** | SD-G-01 | **WS-18, TA-18** |`, and **both halves were
+> wrong**:
+>
+> - `requirements.md` gives **`FR-P1-02-3`** the rows **`WS-18, TA-25`**. `TA-18` never appears
+>   against it.
+> - **`TA-18` belongs to `FR-P1-05-12`** — *"the locked-test guard blocks December performance
+>   execution before G-05 is signed, records every access… predictions hashed before any
+>   metric"* — which is SD-G-01's subject matter word for word, and which was **absent from
+>   both coverage tables entirely** (zero grep hits).
+>
+> **This unit's own upstream already had it right**, which is what makes this a carry-forward
+> failure rather than a fresh error: `domain-entities.md` traces `AccessRecord` /
+> `RESTRICTED_LITERAL_EXEMPT_MODULES` to `FR-P1-05-12` (`WS-18, TA-18`, owner
+> `features-and-splits`, this unit *supporting*), and `nfr-requirements`'
+> `security-requirements.md` independently states the same mapping. This stage failed to carry
+> it forward.
+>
+> **Both rows are kept rather than one dropped.** `FR-P1-05-12` is the row SD-G-01 actually
+> serves, and **`FR-P1-02-3` genuinely depends on the same mechanism** — SD-G-01's
+> durable-log-before-read ordering is what makes FR-P1-02-3's ordering requirement verifiable
+> from the log at all, which this document already stated in § SD-G-01. Dropping it would
+> lose a real dependency; leaving it mis-rowed would keep a false citation. So it stays with
+> its **correct** rows, `WS-18, TA-25`.
+>
+> **`FR-P1-05-12` is not claimed as discharged from this side** — the row is
+> `features-and-splits`', and this unit supports it.
+>
+> **What five prior passes missed, stated so the check can be fixed rather than repeated.**
+> Every earlier re-derivation verified the coverage table's **ID-set completeness** — does the
+> union of cited IDs cover `requirements.md`'s relevant ID space — and **never checked that
+> each ID's cited acceptance row matches that ID's own row in `requirements.md`**. A set-union
+> check cannot see a correctly-listed ID carrying another requirement's row. The passages in
+> the prior `## Review` sections that report this pairing as independently re-verified are left
+> standing as the reviewers' own record; they were true about the check they ran.
 
 **The ID set was set-differenced against `requirements.md` before this table was written**,
 not after — the omission of that step is what produced a Critical on `foundation`'s
@@ -493,5 +532,170 @@ READY
 ### Summary
 
 The prior READY verdict holds. Every design-bearing claim this unit makes about built code was re-verified against disk and matches exactly — `open_restricted` at line 147, the stamp-then-fsync ordering, the two absent symbols, and both self-reported discrepancies, neither of which has been quietly softened. The third narrowing (`rglob("*.json")` against a docstring promising every artifact) is stated accurately and correctly owned as G-2's unmade change. The single Major is staleness of a **verification instruction**, not of a design decision: the access log has been committed and appended to since these artifacts were written, so the 37/158/121 derivation a reader is told to re-run now yields 158/232/74. The append-only conclusion drawn from it survives intact under the new numbers; the sentence stating it does not.
+
+READY
+
+---
+
+## Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation)
+
+*A second redo jump was taken because the first recovery ran confirm/write/review out of
+order. This unit's design is untouched, and its two self-reported discrepancies stay open.*
+
+A **redo jump** on `nfr-design` reset this stage's receipt floor, invalidating this unit's
+summary-confirmation and review receipts. The jump was taken to lift the review-freeze on two
+*other* units whose adversarial findings the project decision owner directed be fixed; the
+reset is stage-wide, so it reached this unit too.
+
+**No design content changed and no claim above is altered by this note** — including this
+unit's two self-reported discrepancies (the exempt list's **seven** members on disk against the
+**six** every upstream artifact states, and the literal scan being **textual rather than
+AST-based**, so `"locked_test" + "_restricted"` is not caught). Both remain open and both still
+reach the human at the gate. The stored confirmation was re-affirmed by the owner on 2026-09-04
+(its value was already `Looks correct`), and this artifact is re-saved unchanged so the
+engine's write-after-confirmation precondition is satisfied honestly rather than bypassed.
+
+## Review — 2026-09-04 adversarial pass (fresh receipt floor)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T00:00:00Z
+**Iteration:** 1
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `security-design.md` § Requirement coverage (line 313), § Sources (line 91), § SD-G-01 (line 167); mirrored in `logical-components.md` line 221, 72, 236 | **SD-G-01's requirement is mis-cited.** SD-G-01 designs `open_restricted`/`AccessRecord` — the "one door, records every access, blocks pre-G-05 execution" mechanism. The coverage table attributes this to **`FR-P1-02-3`** with acceptance rows **`WS-18, TA-18`**. Both are wrong. (a) `requirements.md` line 349's own row for `FR-P1-02-3` gives acceptance rows **`WS-18, TA-25`**, not `TA-18` — `TA-18` never appears against `FR-P1-02-3` anywhere in `requirements.md`. (b) `TA-18` is the acceptance row `requirements.md` line 407 assigns to **`FR-P1-05-12`** ("The locked-test guard blocks December performance execution before G-05 is signed, records every access... predictions... hashed before any metric") — the requirement that actually matches SD-G-01's subject matter, word for word. This unit's own upstream artifacts get it right: `domain-entities.md` line 643 traces `AccessRecord`/`RESTRICTED_LITERAL_EXEMPT_MODULES` to `FR-P1-05-12` (`WS-18, TA-18`, owner `features-and-splits`, this unit "supporting"), and `nfr-requirements/security-requirements.md` line 232 independently confirms the same mapping (`FR-P1-05-12 → SEC-G-01, SEC-G-02, SEC-G-03 → WS-18, TA-18 → features-and-splits`). `FR-P1-02-3` is a *different* requirement (the pre-G-05 December coverage-audit ordering rule) that SD-G-01 never actually addresses. **`FR-P1-05-12` is entirely absent from both nfr-design coverage tables** — confirmed by grep, zero hits in either file. This is the exact "sibling cited TA-29 where requirements.md fixes TA-28" defect class the dispatch brief names, and it lands on the design's own centerpiece section. | Re-point the coverage-table row to `FR-P1-05-12` with acceptance rows `WS-18, TA-18` and owner `features-and-splits` (this unit supporting, matching `domain-entities.md` and `security-requirements.md`); either drop `FR-P1-02-3` from this unit's cited-and-covered set or add it as its own row with its own correct acceptance rows (`WS-18, TA-25`) and state which section, if any, actually addresses it — SD-G-01 does not. Sweep both artifacts' banners, Assumptions, and every prior "Review" pass's re-derivation claims that repeat `FR-P1-02-3`/`WS-18, TA-18` as confirmed (both files' § Requirement coverage set-difference passages treat this pairing as independently re-verified when it was checked only against the union of the ID space, never against `requirements.md`'s per-ID rows). |
+
+### Verified — did not break
+
+- **Every line-number citation into built code, re-checked against disk**: `open_restricted` at `src/data/locked_test.py:147` — exact; `logged_at_utc` stamp at `:138`; `os.fsync` at `:143`; `assert_no_december_outside_restricted` at `:193`; `root.rglob("*.json")` at `:213`. All five match exactly.
+- **DISC-1 (exempt list has seven members, not six)** — re-enumerated directly from `tests/test_locked_test_guard.py:287`'s `exempt = {...}` literal: `src/data/locked_test.py`, `scripts/merge_coverage_year.py`, `tests/test_acquisition_window.py`, `tests/test_phase_boundary.py`, `tests/test_release_hashes.py`, `tests/test_locked_test_guard.py`, `tests/test_merge_script_restricted_reads.py` — seven, confirmed, matching both artifacts exactly. Still open, still owed at the gate, not softened.
+- **DISC-2 (literal scan is textual, not AST-based)** — `tests/test_locked_test_guard.py:308` reads `if "locked_test_restricted" in text:`, confirmed a substring check, not AST/constant-folding. Matches the artifact's claim exactly. Still open, still owed at 3.5, not softened.
+- **`_read_guarded` at both formerly-breached sites** — confirmed present and used at `tests/test_release_hashes.py:96` (used at 140, 284, 312) and `tests/test_acquisition_window.py:88` (used at 163).
+- **`assert_no_raw_fields` / `diff_protected_hashes` absence** — `grep -rn` across `src/`, `tests/`, `scripts/` returns zero matches for either symbol; matches the artifact's claim that R-23's produced-field limb is unbuilt.
+- **Every other cited acceptance row against `requirements.md`'s individual rows** — `REQ-ENG-5` → `WS-10, TA-07, TA-08, TA-12, TA-27` (matches); `FR-P1-03-2` → `TA-27` (matches); `FR-P1-06-1` → `TA-27` (matches); `FR-P1-06-2` → `TA-27` (matches); `FR-P1-06-3` → `TA-28` (matches); `FR-P1-06-4` → `TA-28` (matches); `NFR-PHASE-01` → `TA-27` (matches); `NFR-LIC-01` → `TA-28` (matches); `NFR-AUD-01` → `TA-10, TA-21` (matches, both rows carried); `FR-P1-02-6` → no acceptance row in `requirements.md` (matches "NO ACCEPTANCE ROW" claim exactly). Finding #1 is isolated to the single `FR-P1-02-3`/`TA-18` pairing, not a wider pattern.
+- **D-15, D-18, D-31 citations** — all three exist in `evidence/DECISIONS.md` with the substance the artifact attributes to them (D-15 custody relocation, D-18 merge determinism, D-31 G-09 signed with preconditions unmet).
+- **Business rules R-23 through R-28** — all six exist in `functional-design/business-rules.md` under exactly the headings cited.
+- **Test-module inventory** — the six modules named in the "What is built" banner (`test_acquisition_window.py`, `test_locked_test_guard.py`, `test_merge_script_restricted_reads.py`, `test_phase_boundary.py`, `test_release_contract.py`, `test_release_hashes.py`) match `ls tests/` exactly (six files, excluding `__pycache__`).
+- **Ownership boundary** — `unit-of-work.md` § `governance-guards` Owns lists `src/data/phase_contract.py`, `src/data/locked_test.py`, `src/data/reuse_registry.py`, `tests/test_phase_boundary.py`, `tests/test_reuse_registry.py`. The design correctly attributes `tests/test_locked_test_guard.py` to `features-and-splits` (never claimed as this unit's own), and cites other units' test files only as workspace evidence for the cross-cutting `RESTRICTED_LITERAL_EXEMPT_MODULES` list, never as owned components. No mechanism-vs-approved-interface defect of the class found on sibling units this sweep.
+- **No overclaim** — no coverage row is marked satisfied, no acceptance row discharged, no scientific value decided, no `TBD — freeze gate` field filled. The banner's "0 rows claimed satisfied" / "0 acceptance rows discharged" holds on recount of the table (11 rows, all `Pending` or `untested`/no-row).
+- **Cross-artifact consistency** — `security-design.md` and `logical-components.md` carry the identical (and identically wrong) `FR-P1-02-3`/`WS-18, TA-18` pairing; the defect is symmetric, not a one-file-repaired-the-other-didn't case.
+- **Mermaid** in `logical-components.md` — valid `graph TD` syntax, all six referenced nodes declared, text fallback matches the edges including the dotted "names only, never reads content" edge.
+
+### Coverage limits
+
+- This pass is bounded to `governance-guards`' own `nfr-design`, `nfr-requirements` and `functional-design` artifacts plus the shared inception contracts named in the dispatch; no sibling unit's `construction/<other-unit>/` content was read. `foundation/nfr-design/security-design.md` § SD-03 was not opened — Q1's cited divergence is taken on this artifact's own paraphrase, since no entity ID or method signature in `foundation` needed resolution to check the finding above.
+- The 232/158/74 access-log arithmetic reported in the prior 2026-09-02 review pass was not independently re-run this pass (the working tree may have moved again since); this pass takes no position on it as it does not bear on the Critical finding above.
+- The full pytest suite was not re-executed this pass; "277 passed, 2 skipped" is treated as a dated historical record per the artifact's own caveat, unchanged from prior passes.
+
+### Summary
+
+The artifact is meticulous about line-number citations into built code and about not overclaiming discharge — five prior review passes correctly re-verified `open_restricted`'s contract, the two self-reported discrepancies, and the absent symbols, and none of that verification was wrong. But every one of those passes verified the requirement-coverage table's **ID set** (is every relevant ID present, does 6+5 add to 11) without ever checking that each ID's **cited acceptance row matches that ID's own row in `requirements.md`**. That gap let a substituted requirement — `FR-P1-02-3` standing in for `FR-P1-05-12` — survive five confirming passes and both artifacts, on the design's own centerpiece mechanism (SD-G-01/G-1, the chokepoint). `FR-P1-05-12` is the requirement this section actually satisfies, per this unit's own `domain-entities.md` and per `nfr-requirements/security-requirements.md`'s independent mapping; it does not appear anywhere in either nfr-design coverage table. One Critical finding blocks READY under this review's own severity rule; everything else checked holds.
+
+NOT-READY
+
+---
+
+## Review — 2026-09-04 repair verification (iteration 2, final)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-04T17:56:46Z
+**Iteration:** 2 (of 2)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `security-design.md` § Requirement coverage, `FR-P1-02-3` row (line 314); mirrored `logical-components.md` § Requirement coverage, `FR-P1-02-3` row (line 222) | The repaired `FR-P1-02-3` row states no cross-unit ownership, unlike its two siblings in the same table. `FR-P1-05-12`'s row (added by this repair) reads "row owned by `features-and-splits`, this unit supporting," and `NFR-AUD-01`'s pre-existing row reads "owned by `foundation`/`inventory-and-registry`." `FR-P1-02-3`'s row carries neither. Per the shared contract `inception/units-generation/unit-of-work-story-map.md` line 285, `FR-P1-02-3`'s split is exactly the same shape as `FR-P1-05-12`'s: primary owner `inventory-and-registry` ("performs the audit"), with `governance-guards` named as a **supporting** unit ("`open_restricted`, which writes the access-log row") — a role, not ownership. `unit-of-work.md` line 229 confirms `FR-P1-02-3` sits in `inventory-and-registry`'s own "Requirements carried (7)" list, not in `governance-guards`' 10-item carried list (`unit-of-work.md` line 162). Left as written, a reader of this table alone — which is exactly what stage 3.2 reads to size the G-05 freeze manifest — has no way to tell `FR-P1-02-3`'s evidence is `inventory-and-registry`'s to produce, the same distinction the table already draws correctly for the row two lines above it. The correction box (lines 351–359) explains *why* `FR-P1-02-3` is kept, but not *whose* row it is. | Add the same attribution pattern to both files' `FR-P1-02-3` row: e.g. "row owned by `inventory-and-registry`, this unit supporting via `open_restricted`" — mirroring the language already used for `FR-P1-05-12` and `NFR-AUD-01` in the same tables. |
+| 2 | Minor | `logical-components.md` § Sources (line 72) | `FR-P1-05-12` was added to `security-design.md`'s § Sources with a dated addition note (line 91: *"added 2026-09-04 on adversarial finding 1, Critical"*), but the parallel bullet in `logical-components.md` (line 72) was not updated — it still lists only `FR-P1-02-3`, `FR-P1-02-6`, `FR-P1-03-2`, `FR-P1-06-1…4`, `REQ-ENG-5`, `NFR-AUD-01`, `NFR-PHASE-01`, `NFR-LIC-01`, omitting `FR-P1-05-12` even though it is now the first row of this same file's own coverage table (line 221) and the subject of the correction box at lines 232–241. An asymmetric one-file-fixed/one-file-not repair, the same defect class `project.md`'s `fd-2026-08-30-sweep-numerals-and-surfaces` learning names. | Add `FR-P1-05-12` to `logical-components.md`'s § Sources requirements.md bullet. |
+
+### Verified — did not break
+
+- **`FR-P1-02-3`'s corrected acceptance row is right.** `requirements.md` line 349 gives `FR-P1-02-3` exactly `WS-18, TA-25` — re-derived directly from the requirements table, not accepted from the correction box's own account. `TA-18` does not appear against it anywhere in `requirements.md`.
+- **`FR-P1-05-12`'s row and rows are right.** `requirements.md` line 407 gives `FR-P1-05-12` exactly `WS-18, TA-18`. Both artifacts now cite this correctly, in both the coverage table and § Sources of `security-design.md`.
+- **Ownership of `FR-P1-05-12` re-derived independently, not accepted from the correction box.** Three independent sources agree, cross-checked without relying on each other: (1) this unit's own `functional-design/domain-entities.md` line 643 ("`FR-P1-05-12` | ... | WS-18, TA-18 | `features-and-splits`") and its line 682 prose ("Table 2 confirms `features-and-splits` owns WS-18 and TA-18 with this unit supporting"); (2) `nfr-requirements/security-requirements.md` line 232 ("`FR-P1-05-12` | SEC-G-01, SEC-G-02, SEC-G-03 | WS-18, TA-18 | `features-and-splits`"); (3) the shared contract `inception/units-generation/unit-of-work-story-map.md` line 284, which states the ADR-03 split explicitly: test+execution limb to `features-and-splits`, access-log limb (`locked_test.py`) to `governance-guards`. All three agree with the repair's "row owned by `features-and-splits`, this unit supporting" language verbatim.
+- **Recount of both coverage tables, by direct enumeration of the ID column, not by trusting the printed arithmetic.** `security-design.md`'s table (lines 313–324) has exactly **12** rows: `FR-P1-05-12`, `FR-P1-02-3`, `FR-P1-02-6`, `FR-P1-03-2`, `REQ-ENG-5`, `FR-P1-06-1`, `FR-P1-06-2`, `FR-P1-06-3`, `FR-P1-06-4`, `NFR-PHASE-01`, `NFR-LIC-01`, `NFR-AUD-01`. `logical-components.md`'s table (lines 221–227) has exactly **7** rows: `FR-P1-05-12`, `FR-P1-02-3`, `FR-P1-02-6`, `FR-P1-03-2`, `NFR-PHASE-01`, `NFR-AUD-01`, `NFR-LIC-01`. Set-differencing the two ID lists directly (not comparing totals) confirms: all 7 of `logical-components.md`'s rows appear in `security-design.md`'s 12; the 5 remaining in `security-design.md` only are `REQ-ENG-5`, `FR-P1-06-1..4`; 0 rows are unique to `logical-components.md`. `7 + 5 = 12` holds by direct enumeration, matching both files' printed decomposition (`logical-components.md` lines 248–251) exactly.
+- **"1 requirement with no acceptance row" (`FR-P1-02-6`) still holds** — unaffected by the split, confirmed present with `⚠ NO ACCEPTANCE ROW` in both tables, and `requirements.md` carries no acceptance-row citation for `FR-P1-02-6` either.
+- **No surviving `FR-P1-02-3`/`TA-18` pairing anywhere.** Grepped this unit's full artifact set (`nfr-design`, `nfr-requirements`, `functional-design`) for `FR-P1-02-3` and `FR-P1-05-12`; the only remaining `WS-18, TA-18` citations against `FR-P1-02-3` are inside the two preserved prior `## Review` sections above (2026-09-04 iteration 1, quoting the pre-repair defect for the record) — correctly left standing, not live claims.
+- **No stale "11"/"6" current-fact claim survives outside a preserved context.** The one remaining "11 rows" occurrence in `security-design.md` (line 583) sits inside the iteration-1 `## Review` section itself — a prior reviewer's own dated record of the pre-repair state, correctly left standing per this contract, not a live claim in the artifact body. `logical-components.md` carries no live "11" or "6-shared" claim; its one superseded-figure quotation (lines 253–259) is explicitly boxed as a correction with the old figure quoted and dated, not asserted as current.
+- **The keep-both-rows decision is defensible on the text, not a rationalisation.** `requirements.md` line 349's own criterion text for `FR-P1-02-3` requires *"An access-log row with `locked_test_accessed = true` is written BEFORE any operation that reads a December 2022 record"* — the identical log-then-read ordering `SD-G-01`/`open_restricted` implements (lines 149–168). `FR-P1-02-3`'s own acceptance set already includes `WS-18` (shared with `FR-P1-05-12`), independently corroborating that `SD-G-01`'s mechanism is genuinely relevant to both requirements rather than merely re-cited for convenience. The shared contract (`unit-of-work-story-map.md` line 285) independently names `governance-guards` (`open_restricted`, "which writes the access-log row") as a support unit for `FR-P1-02-3`, confirming the dependency the correction box claims is real and not invented to justify keeping a stale citation.
+- **DISC-1 (seven-member exempt list, against upstream's six) stands unsoftened** in both artifacts' current (non-Review) text — `security-design.md` lines 113–128, 375; `logical-components.md` lines 208–213, 268. Still flagged "owed to the human at the gate," `nfr-requirements` still explicitly not edited.
+- **DISC-2 (textual, not AST-based, literal scan) stands unsoftened** in both artifacts' current text — `security-design.md` lines 130–143, 376; `logical-components.md` lines 155–161, 269. Still flagged "owed at 3.5," still states no artifact may describe the scan as AST-based until it is.
+- **Upstream functional-design artifacts were never wrong and needed no sweep.** `functional-design/business-logic-model.md` line 1009 and `functional-design/business-rules.md` line 616 already correctly state `FR-P1-05-12 → WS-18, TA-18 → features-and-splits` — confirming the Critical was isolated to the two `nfr-design` files, exactly as finding #1's original text claimed, and that no further correction was owed outside `nfr-design`.
+- **`NFR-AUD-01`'s row is unaffected and unchanged** by the split — `TA-10, TA-21`, "owned by `foundation`/`inventory-and-registry`," `Pending — one half unbuilt` in both files, matching the pre-repair state exactly.
+
+### Coverage limits
+
+- This pass re-derived `FR-P1-02-3` and `FR-P1-05-12`'s acceptance rows directly from `inception/requirements-analysis/requirements.md` (not accepted from the correction boxes), and re-derived ownership from three independent sources including the shared `inception/units-generation/unit-of-work-story-map.md` and `unit-of-work.md` contracts — the one sanctioned spot-check into a resolvable cross-unit reference, not a sweep of any sibling unit's `construction/<other-unit>/` content. No sibling unit directory was opened, globbed, or grepped.
+- The recount of both coverage tables was by direct enumeration of each table's ID column, not by trusting the printed "12"/"7"/"7+5=12" arithmetic.
+- This pass did not re-verify the code-level claims already confirmed by five prior passes (`open_restricted`'s five properties, DISC-1's seven-member enumeration, DISC-2's textual scan, the two absent symbols, `_read_guarded` at both sites) — those hold unchanged since the repair touched only the coverage tables, § Sources, and the correction boxes, and iteration-1's "Verified — did not break" list already covers them.
+- The full pytest suite was not re-executed this pass; the 277/2-skip figure and the 232/158/74 access-log arithmetic are unchanged by this repair and were not re-derived here.
+- One new gap was found by extending the sweep past what the repair itself touched: `logical-components.md` § Sources' incompleteness (finding #2) and the `FR-P1-02-3` ownership-attribution asymmetry (finding #1) were found by comparing the repaired rows against their siblings in the same tables, not named in the repair's own account of itself.
+
+### Summary
+
+The repair correctly re-derives both acceptance rows from `requirements.md` (`FR-P1-02-3` → `WS-18, TA-25`; `FR-P1-05-12` → `WS-18, TA-18`), correctly re-derives `FR-P1-05-12`'s ownership as `features-and-splits`-owned/this-unit-supporting against three independent sources including the shared units-generation contract, and correctly recounts both tables to 12 and 7 rows with a set-difference-verified 7-shared/5-security-only/0-here-only decomposition. The keep-both-rows decision is grounded in `FR-P1-02-3`'s own requirement text and in the shared contract's explicit support-role assignment, not a rationalisation. Both open items (DISC-1's seven-vs-six, DISC-2's textual scan) stand exactly as before, unsoftened. Two gaps survive the repair: `FR-P1-02-3`'s row states no cross-unit ownership where its two sibling rows in the same tables do (Major), and `logical-components.md`'s § Sources was not updated to add `FR-P1-05-12` the way `security-design.md`'s was (Minor). Zero Critical, one Major, one Minor — within this review's own READY threshold (≤2 Major).
+
+READY
+
+---
+
+## Review — 2026-09-04 confirming pass (fourth floor)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+
+**Verdict:** READY
+**Date:** 2026-09-04T22:03:51Z
+**Iteration:** 1 (adversarial confirming pass over the two fixes applied for iteration-2's residual gaps)
+
+### Findings
+
+None.
+
+### Verified — did not break
+
+- **Fix 1 (FR-P1-02-3 ownership label) is correct, re-derived from the shared contracts, not accepted from the correction box.** `inception/units-generation/unit-of-work.md` line 229 lists `FR-P1-02-3` in `inventory-and-registry`'s own "Requirements carried (7)" list, and line 233 confirms `TA-25` in that unit's own "Acceptance rows (3)" — `WS-01, TA-04, TA-25`. `governance-guards`' own carried list at line 162 (`REQ-ENG-5, FR-P1-02-6, FR-P1-03-2, FR-P1-05-12, FR-P1-06-1..4, NFR-PHASE-01, NFR-LIC-01`) does **not** carry `FR-P1-02-3`, confirming this unit never owned it. `unit-of-work-story-map.md` line 67 independently agrees (`FR-P1-02-3 | inventory-and-registry | WS-18, TA-25`). Both `security-design.md` line 314 and `logical-components.md` line 222 now read "row owned by `inventory-and-registry`" — present, worded consistently, and matching in both tables.
+- **A residual inconsistency was found in the shared contract itself, outside this unit's fix scope.** `unit-of-work-story-map.md` line 285's cross-unit item header reads *"FR-P1-02-3, WS-18, TA-18 (the permitted G-05 December coverage audit)"* — the header's own acceptance-row citation says `TA-18`, contradicting that same file's line 67 (`WS-18, TA-25`) and `requirements.md` line 349 (`WS-18, TA-25`). This is a labelling defect internal to `unit-of-work-story-map.md`, not something either fix here needed to match: the fix cites `requirements.md` (the authoritative source) and `unit-of-work.md`'s per-unit carried/acceptance lists (the more granular contract), both of which agree with each other and with the repair, and the ownership claim itself — `inventory-and-registry` performs the audit, `governance-guards` supports via `open_restricted` — is what line 285's own body text states regardless of its header's stale acceptance-row label. Not a defect in this artifact; owed to `units-generation`, not to this unit, and outside this stage's read-write authority to correct.
+- **Fix 2 (`logical-components.md` § Sources gained `FR-P1-05-12`) is present and accurately dated.** Line 72 now reads `**FR-P1-05-12** *(added 2026-09-04 on iteration-2 Minor: `security-design.md`'s § Sources gained it at the Critical repair and this file's did not — an asymmetric repair)*`, immediately followed by the rest of the pre-existing ID list. Matches `security-design.md`'s own Sources note (line 91) in substance and dating.
+- **The Critical repair (iteration 1) still stands, re-verified against `requirements.md` directly.** Line 349: `FR-P1-02-3 | ... | WS-18, TA-25`. Line 407: `FR-P1-05-12 | ... | WS-18, TA-18`. Both artifacts' coverage tables cite these exactly (`security-design.md` lines 313–314; `logical-components.md` lines 221–222).
+- **Counts re-derived by direct enumeration, not trusted on printed arithmetic.** `security-design.md`'s table (lines 313–324): 12 rows — `FR-P1-05-12, FR-P1-02-3, FR-P1-02-6, FR-P1-03-2, REQ-ENG-5, FR-P1-06-1..4, NFR-PHASE-01, NFR-LIC-01, NFR-AUD-01`. `logical-components.md`'s table (lines 221–227): 7 rows — `FR-P1-05-12, FR-P1-02-3, FR-P1-02-6, FR-P1-03-2, NFR-PHASE-01, NFR-AUD-01, NFR-LIC-01`. Set-differencing (not comparing totals): all 7 of the smaller table appear in the 12-row table; the 5 remaining (`REQ-ENG-5, FR-P1-06-1..4`) are `security-design.md`-only; 0 rows unique to `logical-components.md`. 7 + 5 = 12, matching both files' printed decomposition.
+- **The two self-reported open items stand unsoftened.** DISC-1 (exempt list has seven members on disk against six upstream) — present verbatim at `security-design.md` lines 113–128, 375 and `logical-components.md` lines 208–213, 268, still "owed to the human at the gate," `nfr-requirements` still explicitly not edited. DISC-2 (literal scan is textual, not AST-based) — present verbatim at `security-design.md` lines 130–143, 376 and `logical-components.md` lines 155–161, 269, still "owed at 3.5," still bars any artifact from describing the scan as AST-based until it is.
+- **Regression grep: no live `FR-P1-02-3`+`TA-18` mispairing survives outside preserved text.** Every remaining co-occurrence of `FR-P1-02-3` and `TA-18` in `security-design.md` (lines 91, 334, 337, 442, 569, 578, 584, 617, 622, 640) and `logical-components.md` (lines 233–234) sits inside a dated correction box or a preserved prior `## Review` section quoting the pre-repair defect for the record — none is a live current-fact claim.
+- **No overclaim.** Neither table marks a new row satisfied or an acceptance row discharged by either fix; `FR-P1-02-6`'s "NO ACCEPTANCE ROW" status is unaffected; WS-18/TA-18/TA-27/TA-28 remain `Pending` in both files; `NFR-AUD-01` remains "one half unbuilt." Nothing in either fix touches a scientific value or a `TBD — freeze gate` field.
+
+### Coverage limits
+
+- This pass re-derived ownership from `inception/units-generation/unit-of-work.md` and `unit-of-work-story-map.md` (the shared inception contracts passed with this dispatch) and from `inception/requirements-analysis/requirements.md`; no sibling unit's `construction/<other-unit>/` content was opened, globbed, or grepped.
+- The line-level code claims re-verified across five prior passes (`open_restricted`'s five properties, DISC-1's seven-member enumeration, DISC-2's textual scan, the two absent symbols, `_read_guarded` at both sites) were not re-run this pass; nothing in the two fixes touches built code, only the coverage tables and § Sources.
+- The `unit-of-work-story-map.md` line-285 header inconsistency (`TA-18` vs. the file's own `TA-25`) is reported as an observation for the record, not corrected here and not treated as blocking this artifact's READY — it sits in a contract this unit's stage does not own or edit.
+
+### Summary
+
+Both fixes hold under independent re-derivation against the shared contracts. Fix 1's ownership label (`FR-P1-02-3` owned by `inventory-and-registry`) is confirmed by `unit-of-work.md`'s per-unit carried/acceptance lists and by `unit-of-work-story-map.md`'s own per-ID table row, and `governance-guards`' own carried list confirms it never owned the requirement. Fix 2's `logical-components.md` § Sources addition is present and dated to match its sibling. The prior Critical repair's acceptance-row citations, the 12/7/7+5=12 count, and both self-reported discrepancies (DISC-1, DISC-2) all stand unsoftened, and no live mispairing of `FR-P1-02-3`/`TA-18` survives outside preserved review text. One residual observation — a stale acceptance-row label inside `unit-of-work-story-map.md` itself — is noted for the record but belongs to `units-generation`, not to this artifact. Zero Critical, zero Major, zero Minor against this artifact.
+
+READY
+
+---
+
+## Review — 2026-09-05 re-affirmation (post-gate receipt refresh)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-05T08:05:18Z
+**Iteration:** 1 (re-affirmation)
+
+### What was confirmed
+
+1. **Terminal prior verdict.** The PRIMARY's last review before this pass is `## Review — 2026-09-04 confirming pass (fourth floor)`, dated 2026-09-04T22:03:51Z, iteration 1, verdict **READY**, zero findings (Critical/Major/Minor all zero).
+2. **No content edits after that verdict.** `git log` on both `security-design.md` and `logical-components.md` shows exactly one commit after the terminal review: `7ec1feb` ("Re-register nfr-design artifacts on this clone; repair split sentence"). Its diff against `governance-guards`' two files adds only a dated "fifth re-save 2026-09-04 — not a redo" banner paragraph to each file, stating explicitly that the consolidated summary confirmation stands, was not re-asked, and "no status claim is altered by this note" / "no design content changed." The commit touched four other units (`acquisition`, `external-products`, `foundation`, `inventory-and-registry` — visible in the full commit, `governance-guards` was one of the six re-registered but not one of the four the gate rejection revised); this unit's coverage tables, § Sources, and correction boxes are byte-identical to the terminal-review state.
+3. **Spot-checks of the terminal review's verified claims, re-derived directly from current file content (not accepted from the review text):**
+   - `security-design.md` line 314 and `logical-components.md` line 222 both still read the `FR-P1-02-3` row as **"row owned by `inventory-and-registry`"**, matching the terminal review's Fix 1 confirmation.
+   - `logical-components.md` § Sources (line 72) still carries **`FR-P1-05-12`** with its dated addition note, matching the terminal review's Fix 2 confirmation.
+   - `DISC-1` and `DISC-2` are both still present, unsoftened, at `security-design.md` lines 113 and 130 (and echoed in the re-save banner at line 10), matching the terminal review's "stand unsoftened" claim.
+
+All three hold. No new edit exists to introduce a defect between the terminal verdict and this receipt refresh.
 
 READY
