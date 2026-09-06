@@ -15,8 +15,12 @@ What this script can and cannot run today
   separate loader): `configs/features.yaml`'s `permitted_producers` is `TBD -- freeze gate`
   and assigned to nobody, so `load_permitted_producers` raises `LeakageError` naming the
   rows lacking entries, the run writes an `aborted` registry row carrying that reason, and
-  NO feature matrix is produced. The refusal is checked FIRST, before partitions, because
-  it is this unit's deliverable and the reason a reviewer must see on the aborted row.
+  NO feature matrix is produced. The refusal is checked GENUINELY FIRST -- before the
+  feature dictionary is read and before partitions -- against the closed TE 6.2 row
+  identities (`SECTION_6_2_ROWS`), because it is this unit's deliverable and the reason a
+  reviewer must see on the aborted row even while `features.feature_dictionary` is itself
+  `TBD -- freeze gate`. Once the dictionary loads, producers are re-checked against the
+  dictionary-derived rows so a dictionary/row disagreement still surfaces.
 * Behind it, `build_partitions` REFUSES while `data.partitions` / `experiment.embargo_hours`
   are unfrozen (`PartitionError`), and `read_availability_lags` while
   `features.availability_lags` is (`FeatureAvailabilityError`). Every refusal is an
@@ -100,6 +104,7 @@ from src.data.splits import (  # noqa: E402
 )
 from src.features.availability import assert_lags_safe, build_availability_matrix  # noqa: E402
 from src.features.build import (  # noqa: E402
+    SECTION_6_2_ROWS,
     FrameSpec,
     build_features,
     load_feature_dictionary,
@@ -310,7 +315,13 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     snapshot = entry["snapshot"]
     workspace = Path(snapshot.resolved_roots["workspace"])
 
-    # 1. The fail-closed refusal FIRST (SD-F-01): no matrix without the producer list.
+    # 1. The fail-closed refusal GENUINELY FIRST (SD-F-01): the permitted-producer list is
+    #    checked against the closed TE 6.2 ROW IDENTITIES (`SECTION_6_2_ROWS`, identities not
+    #    values) BEFORE the dictionary is read, so the aborted row names the producer list even
+    #    while `features.feature_dictionary` is itself `TBD -- freeze gate`. Then the dictionary
+    #    loads and producers are RE-CHECKED against the dictionary-derived rows, so a
+    #    dictionary/row disagreement still surfaces.
+    load_permitted_producers(args.config, dictionary_rows=sorted(SECTION_6_2_ROWS))
     dictionary = load_feature_dictionary(snapshot)
     rows = sorted({str(e["dictionary_row"]) for e in dictionary.values()})
     load_permitted_producers(args.config, dictionary_rows=rows)
