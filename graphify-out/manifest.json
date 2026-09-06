@@ -1710,9 +1710,9 @@
     "semantic_hash": "aeefec4746629646f2055504a48840dd"
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/aidlc-state.md": {
-    "mtime": 1788682088.0,
-    "seen": 1788691881.843747,
-    "ast_hash": "835b469a353b9c07be2d06861b3ee473",
+    "mtime": 1788693263.8540444,
+    "seen": 1788703440.5888965,
+    "ast_hash": "2693bd1ce1ad54228debeb54e0fe940b",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/git-ae-srv-rdt1-df792a9b0ad4.md": {
@@ -2352,9 +2352,9 @@
     "semantic_hash": ""
   },
   "scripts/05_build_features_and_splits.py": {
-    "mtime": 1788691051.456059,
-    "seen": 1788691881.842913,
-    "ast_hash": "a6192a7f0f343419b0ff4491d46f0dc9",
+    "mtime": 1788692906.549173,
+    "seen": 1788703440.5880573,
+    "ast_hash": "8ad8b449b1384385ff91c5b221e8ac73",
     "semantic_hash": ""
   },
   "scripts/gate_secret_scan.py": {
@@ -2382,9 +2382,9 @@
     "semantic_hash": ""
   },
   "src/data/config.py": {
-    "mtime": 1788690930.0622027,
-    "seen": 1788691881.842913,
-    "ast_hash": "1a5fb1125d24554631b6bcfc2883b0a8",
+    "mtime": 1788703320.2592607,
+    "seen": 1788703440.5880573,
+    "ast_hash": "d608028cd5ab27338470dc572a60128b",
     "semantic_hash": ""
   },
   "src/data/experiment_registry.py": {
@@ -2628,9 +2628,9 @@
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/git-ae-srv-rdt1-70cbd7665fd0.md": {
-    "mtime": 1788689038.3209574,
-    "seen": 1788691881.843747,
-    "ast_hash": "2b5c1152c7aa60b653d69477efde742b",
+    "mtime": 1788703225.3962564,
+    "seen": 1788703440.5888965,
+    "ast_hash": "094794be1236b7e617aaba8be8298128",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/git-ae-srv-rdt1-88df1eb1e72b.md": {
@@ -2730,9 +2730,9 @@
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/code-generation/memory.md": {
-    "mtime": 1788689097.1628351,
-    "seen": 1788691881.843747,
-    "ast_hash": "09812c201b4c712f42cb4467bb185e85",
+    "mtime": 1788700810.4707758,
+    "seen": 1788703440.5888965,
+    "ast_hash": "9ca019bcf35944445ea8a1aaa9603a54",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/functional-design/business-logic-model.md": {
@@ -2874,9 +2874,9 @@
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-generation-plan.md": {
-    "mtime": 1788682088.0,
-    "seen": 1788691881.843747,
-    "ast_hash": "3d6c146bdab0d88bfa27b70c8fb6d22e",
+    "mtime": 1788691922.925154,
+    "seen": 1788703440.592646,
+    "ast_hash": "db635e965ee52f90e492c147a64b25e9",
     "semantic_hash": ""
   },
   "aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-generation-questions.md": {
@@ -3522,9 +3522,9 @@
     "semantic_hash": ""
   },
   "configs/experiment.yaml": {
-    "mtime": 1788682088.0,
-    "seen": 1788691881.844131,
-    "ast_hash": "bb948fcbc9f214b1c536c3f674c5c421",
+    "mtime": 1788702757.0235522,
+    "seen": 1788703440.5931327,
+    "ast_hash": "6c287888d5011296716c0f9c4c37a105",
     "semantic_hash": ""
   },
   "configs/features.yaml": {
@@ -3618,9 +3618,93 @@
     "semantic_hash": ""
   },
   "requirements.txt": {
-    "mtime": 1788682094.0,
-    "seen": 1788691881.844131,
-    "ast_hash": "9a064b5e3a02bf47c7fc494e144512db",
+    "mtime": 1788701739.8278825,
+    "seen": 1788703440.5931327,
+    "ast_hash": "6d269d161d6822f838b5977ac72c5e92",
+    "semantic_hash": ""
+  },
+  "scripts/06_train_and_predict.py": {
+    "mtime": 1788703138.957772,
+    "seen": 1788703440.5880573,
+    "ast_hash": "3e28b8fe50a1b3082a822e5b8bfa4b87",
+    "semantic_hash": ""
+  },
+  "src/models/checkpoint.py": {
+    "mtime": 1788702526.278221,
+    "seen": 1788703440.5880573,
+    "ast_hash": "1ef09c72c202efce1b76d8a70e2b69bb",
+    "semantic_hash": ""
+  },
+  "src/models/climatology.py": {
+    "mtime": 1788702294.6852438,
+    "seen": 1788703440.5880573,
+    "ast_hash": "42839b2fffb85a49d1a1f8f82c492c06",
+    "semantic_hash": ""
+  },
+  "src/models/lstm.py": {
+    "mtime": 1788702526.2838252,
+    "seen": 1788703440.5880573,
+    "ast_hash": "ed28c71346dd1b1704b46aa2fd8fe483",
+    "semantic_hash": ""
+  },
+  "src/models/persistence.py": {
+    "mtime": 1788702263.003324,
+    "seen": 1788703440.5880573,
+    "ast_hash": "6de0b2a99875c207cf700bd13fd274b5",
+    "semantic_hash": ""
+  },
+  "src/models/random_forest.py": {
+    "mtime": 1788702345.7621622,
+    "seen": 1788703440.5880573,
+    "ast_hash": "85602c7cfc26b690a56e2591d7d7e8e6",
+    "semantic_hash": ""
+  },
+  "src/models/ridge.py": {
+    "mtime": 1788702317.7588222,
+    "seen": 1788703440.5880573,
+    "ast_hash": "c9e3cb4d6d6983efb3ad727ba3f2e0c7",
+    "semantic_hash": ""
+  },
+  "src/models/train.py": {
+    "mtime": 1788702596.5456667,
+    "seen": 1788703440.5880573,
+    "ast_hash": "8c21176c05134b6e9140a298f7466253",
+    "semantic_hash": ""
+  },
+  "tests/test_checkpoint_restore.py": {
+    "mtime": 1788702894.0472386,
+    "seen": 1788703440.5880573,
+    "ast_hash": "8955e9a32327de92aa6ab047a0afad9d",
+    "semantic_hash": ""
+  },
+  "tests/test_models_smoke.py": {
+    "mtime": 1788703315.9070232,
+    "seen": 1788703440.5880573,
+    "ast_hash": "0fd4109b986c69915e5c45037aa90a72",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md": {
+    "mtime": 1788693180.6751225,
+    "seen": 1788703440.592646,
+    "ast_hash": "aa6a5cd1bc72047c05d39d5b08b726e3",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-generation-plan.md": {
+    "mtime": 1788703224.2437131,
+    "seen": 1788703440.592646,
+    "ast_hash": "48033d0d171a4f68b1764e0cd3c6ee3a",
+    "semantic_hash": ""
+  },
+  "aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-generation-questions.md": {
+    "mtime": 1788694723.6968305,
+    "seen": 1788703440.592646,
+    "ast_hash": "0a0f56f1563c9ffe1f0d94b117c5a2c9",
+    "semantic_hash": ""
+  },
+  "governance/CHANGE_RECORD_2026-09-06_BLK03_confirmatory_contract.md": {
+    "mtime": 1788701724.6498315,
+    "seen": 1788703440.5931327,
+    "ast_hash": "edecab4242c6e2e37d0fde6537263b3f",
     "semantic_hash": ""
   }
 }

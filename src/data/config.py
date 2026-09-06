@@ -599,6 +599,15 @@ REQUIRED_FIELDS_MAP: Final[Mapping[tuple[str, int], tuple[str, ...]]] = {
     # honest `aborted` registry row, which the approved plan requires. Field IDENTITIES
     # only, never values (the map's own rule).
     ("features-and-splits", 1): ("seeds.development",),
+    # models-and-baselines' preflight (stage 3.5): deliberately MINIMAL, the same shape as
+    # the four entries above. `experiment.grids`, `experiment.models`, `experiment.ablations`
+    # and `experiment.horizons` are NOT listed here BY DESIGN: each is enforced at its own
+    # entry point (`read_grids` / `assert_grid_content`, `read_lstm_fixed_settings`,
+    # `read_ablations`, `read_horizons` each raise IntegrityError naming the field) — a
+    # blanket preflight entry would bar the script's honest `aborted` registry row, which
+    # the approved plan requires, and `seeds.final` is read at `three_seed_mean`'s call site
+    # (R-91). Field IDENTITIES only, never values (the map's own rule).
+    ("models-and-baselines", 1): ("seeds.development",),
 }
 
 #: `CredentialNameMap` (FU-3 = A, Q8 = D; domain-entities 3): `(stage_slug, provider)`

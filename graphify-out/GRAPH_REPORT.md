@@ -1,16 +1,16 @@
 # Graph Report - Th-1  (2026-09-06)
 
 ## Corpus Check
-- 598 files · ~2,367,610 words
+- 612 files · ~2,404,011 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 15625 nodes · 24842 edges · 601 communities (575 shown, 26 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 843 edges (avg confidence: 0.9)
+- 16057 nodes · 26219 edges · 607 communities (581 shown, 26 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 964 edges (avg confidence: 0.91)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `06207c48`
+- Built from commit: `ec8eacff`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,12 +31,12 @@
 - aidlc-directive.ts
 - Workflow Planning Guide
 - AI-DLC Audit Log
-- activeSpace
+- aidlc-fold-usage.ts
 - AI-DLC Audit Log
 - aidlc-reviewer-scope.ts
 - errorMessage
 - Project Vision and Research Definition v4.3
-- test_split_embargo.py
+- PartitionError
 - aidlc-runner-gen.ts
 - aidlc-orchestrate.ts Engine CLI
 - GOV-2026-08-20-RA-01 Requirements Analysis Gate Report
@@ -48,24 +48,24 @@
 - Product Guide
 - Constraint Register — Hourly VTEC Forecasting
 - LeakageError
-- D-12 (>=90% usable hourly coverage per station per month)
+- test_models_smoke.py
 - aidlc-swarm.ts
 - aidlc-runtime.ts
 - GOV-2026-08-21-RA-02 Requirements Analysis Gate Report (fourth revision)
 - Walking-Skeleton Acceptance Checklist (WS-01 to WS-20)
-- config.py
+- 01_inventory_and_registry.py
 - Components - Hourly VTEC Forecasting (TEC_Project Phase 1)
 - test_acquisition_window.py
 - GOV-2026-08-15-FE-01 (Feasibility, FAIL)
 - aidlc-doctor-bundle.ts
 - DevSecOps Pipeline Patterns
-- test_determinism.py
+- config.py
 - aidlc-worktree.ts
 - Review TEC Governance Skill
 - Gate Ownership Table (section 13.1)
 - Requirements - Hourly VTEC Forecasting (TEC_Project Phase 1), 94 rows
 - Code Generation Stage
-- aidlc-bolt.ts
+- aidlc-log.ts
 - aidlc-metrics.ts
 - Mandated 17-Module Test Set (§12 tests/ tree)
 - Initiative Approval and Handoff Stage
@@ -101,8 +101,8 @@
 - Accessibility WCAG 2.1 AA Guide
 - Caveman Communication Mode
 - Comparison Hierarchy
-- NFR-LEAK-01 - forecast safety (leakage prevention)
-- Application Design Questions (stage 2.6)
+- aidlc-audit.ts
+- src/data/locked_test.py (NEW) - December path guard and access log
 - GOV-2026-08-15-AH-01 (Approval & Handoff, CONDITIONAL PASS)
 - GOV-2026-08-13-IC-02 (Intent Capture, FULL BOARD, FAIL)
 - aidlc-statusline.ts
@@ -124,13 +124,13 @@
 - AI-DLC Core Principles
 - AI-DLC To TEC Gate Map
 - src/data/phase_contract.py - phase boundary, runtime import guard, transition manifest
-- aidlc-validate.ts
+- loadDelegate
 - aidlc-sensor-linter.ts
 - VAL-1 - restricted-path half of the locked-test custody rule absent
 - Delivery Planning — Questions
 - Interaction Design Patterns
 - SLO, SLI and Error Budget Patterns
-- src/data/config.py (NEW) - config load, per-run snapshot, hashes, determinism helper
+- Application Design Questions (stage 2.6)
 - Reviewer invocation (12a): adversarial and advisory review classes
 - Ablation Registry
 - Risk and Sequencing Rationale — Hourly VTEC Forecasting (TEC_Project Phase 1)
@@ -147,7 +147,7 @@
 - Functional Design Guide
 - AskUserQuestion Harness Binding
 - AI-DLC Session Replay Skill
-- NEVER Mix Kyoto Dst Release Grades Within One Series (D-10.1)
+- GOV-2026-08-15-FE-02 (Feasibility re-review, CONDITIONAL PASS)
 - buildBundle
 - runDoctorAnalysis
 - NFR-DET-01 - controlled randomness
@@ -156,8 +156,8 @@
 - Caveman Compress Skill
 - AI-DLC Workflow Record — TEC Hourly Forecast
 - GOV-2026-08-13-IC-01 (Intent Capture, FAIL, reconstructed)
-- Board Finding BENCH-05 (licence and reuse register)
-- loadLedger
+- evidence/audit_evidence_2022-FULL (re-merge obligation, relocated under D-15)
+- emptyTotals
 - test_december_audit.py
 - aidlc-sensor-type-check.ts
 - What changed, by recommendation
@@ -169,13 +169,13 @@
 - Deployment Strategies
 - Phase Boundary Verification
 - Scope-to-Stage Mapping
-- Four Governed Configs (data/features/experiment/seeds.yaml)
+- Supervisor Countersignature Request 2026-08-16 (stage 2.2)
 - audit_ec1_drivers.py
 - CI Pipeline Stage
 - Deployment Execution Stage
 - Caveman Stats (README)
-- GOV-2026-08-15-FE-02 (Feasibility re-review, CONDITIONAL PASS)
-- Item 1 - TE §12 Amendment for test_acquisition_window.py (countersigned)
+- test_checkpoint_restore.py
+- Preflight Gate §18.3 (zero unresolved P0, no failing critical test)
 - Findings
 - DATA-23 - FR-P1-02-1 carries a mixed verdict in a pass/fail column
 - aidlc-sensor-coverage-threshold.ts
@@ -194,10 +194,10 @@
 - invoke-swarm Directive
 - run-stage Directive
 - reconstructTimeline
-- Change Record CR-2026-08-21-FREEZES
+- Governance Finding DATA-07 (FULL provenance unverifiable in principle)
 - ML-01 - ML input space not closed to the TE 6.2 dictionary
 - FR-P1-05-11 (reporting breakdowns and storm-event guard)
-- merge_coverage_year.py
+- 06_train_and_predict.py
 - Delivery Agent
 - aidlc-worktree info Subcommand
 - Business Logic Model — `target-standardization`
@@ -238,16 +238,16 @@
 - Review output contract
 - Unit of Work Dependencies — Hourly VTEC Forecasting (TEC_Project Phase 1)
 - Unit of Work Story Map — Hourly VTEC Forecasting (TEC_Project Phase 1)
-- ConfigSnapshot
-- Vision §15.2 change record — `CR-2026-08-22-TE-AMEND`
-- test_prepared_target_schema.py
 - IntegrityError
+- Vision §15.2 change record — `CR-2026-08-22-TE-AMEND`
+- StandardizationError
+- 04_build_external_products.py
 - MANDATORY: recommendations and impact analysis in every question file
 - test_reuse_registry.py
 - windows.py
 - Phase Boundary Verification — Inception → Construction
 - Phase Boundary Verification — Inception → Construction
-- sessionUsageAggregate
+- foldTranscriptIntoLedger
 - spaceweather.py
 - write_release
 - Security Design — `target-standardization`
@@ -263,25 +263,25 @@
 - finalize_audit_reports
 - Business Logic Model — `statistical-inference`
 - Security Design — `models-and-baselines`
-- test_acquisition.py
-- inventory.py
+- guard_egress
+- InventoryError
 - LockedTestError
 - Security Requirements — `fixtures-and-reproducibility`
 - Security Design — `acquisition`
 - Security Requirements — `governance-guards`
 - Path
 - prepared.py
-- GateError
+- inventory.py
 - Security Requirements — `acquisition`
 - Functional Design Questions — `governance-guards`
 - Functional Design Questions — `features-and-splits`
 - Business Rules — `foundation`
-- test_external_drivers.py
+- resolve_f107_at_origin
 - Functional Design Questions — `acquisition`
 - Security Requirements — `regimes-diagnostics-reporting`
 - aidlc-deliver-stage-rules.ts
-- 00_acquire_prepared_vtec.py
-- 01_inventory_and_registry.py
+- AcquisitionError
+- Code Summary — `features-and-splits`
 - Security Requirements — `evaluation-and-comparison`
 - Security Requirements — `features-and-splits`
 - Security Requirements — `statistical-inference`
@@ -310,7 +310,7 @@
 - Security Requirements — `models-and-baselines`
 - Reconstruction
 - ReleaseError
-- _frozen_config
+- _standardize
 - Functional Design Questions — `evaluation-and-comparison`
 - Business Logic Model — `external-products`
 - Security Design — `statistical-inference`
@@ -336,7 +336,7 @@
 - Domain Entities — `foundation`
 - Business Rules — `inventory-and-registry`
 - isPlainObject
-- assert_row_conforms
+- test_prepared_target_schema.py
 - Domain Entities — `acquisition`
 - Domain Entities — `features-and-splits`
 - Minor
@@ -349,10 +349,10 @@
 - Domain Entities — `inventory-and-registry`
 - Business Logic Model — `regimes-diagnostics-reporting`
 - Domain Entities — `target-standardization`
-- Any
+- RetrievalClient
 - iri.py
 - gim.py
-- trailing_mean
+- _day
 - test_merge_script_restricted_reads.py
 - Domain Entities — `evaluation-and-comparison`
 - Logical Components — `external-products`
@@ -360,7 +360,7 @@
 - Logical Components — `inventory-and-registry`
 - Logical Components — `models-and-baselines`
 - Domain Entities — `statistical-inference`
-- ADR-10 - The four-part section 12/13.2 amendment recorded as an obligation
+- AWS CDK Best Practices
 - Code Summary — `acquisition`
 - Review — 2026-08-25 eleventh-redo pass, iteration 1
 - Code Summary — `external-products`
@@ -368,9 +368,9 @@
 - Code Summary — `foundation`
 - Code Summary — `target-standardization`
 - Logical Components — `target-standardization`
-- aggregateUsageAuditFields
+- Change Record — the confirmatory-prediction contract approved as the governed BLK-03 contract
 - Change Record — R-74 and R-83 approved as the governed BLK-04 / BLK-09 contracts
-- _interpolation_fill_sites
+- test_external_drivers.py
 - Market Research Methods
 - Review — 2026-08-25 post-reset pass, iteration 1
 - Review — 2026-08-25 post-reset pass, iteration 2 (terminal)
@@ -382,8 +382,8 @@
 - Logical Components — `governance-guards`
 - Code Summary — `inventory-and-registry`
 - Domain Entities — `regimes-diagnostics-reporting`
-- Board Finding ML-03 (estimand and vector bootstrap)
-- notebook_output_violations
+- Requirements Analysis - Stage Memory (observation diary)
+- test_acquisition.py
 - Review — 2026-08-26 thirteenth-redo pass, iteration 2 (terminal)
 - Review — 2026-08-26 post-reset pass, iteration 2 (terminal)
 - Review — 2026-08-26 post-reset pass, iteration 1
@@ -506,7 +506,7 @@
 - CR-2026-08-28-LOCKED-SCORED-SET — EXECUTED (record only)
 - Change Record — DRAFT: the December-audit import boundary's three matrix edits
 - Ruling — nfr-design governance review dispositions (2026-09-05)
-- test_uncharacterised_platform_refuses_the_write_before_any_row
+- write_restricted
 - Inception Requirements Quality Rule
 - Review
 - Review — 2026-08-29 adversarial pass, iteration 2 (final)
@@ -565,7 +565,7 @@
 - NFR Design Questions — `statistical-inference`
 - NFR Requirements — Questions — `statistical-inference`
 - NFR Requirements — Questions — `target-standardization`
-- assert_single_grade
+- foldFileIntoLedger
 - ML-07 - ablation registry incomplete
 - Review — 2026-08-29 adversarial pass, iteration 1
 - Review
@@ -593,11 +593,11 @@
 - Review — 2026-08-23 full mirror audit
 - Review — 2026-08-24 three-representation cross-check
 - Review — 2026-08-24 finding corrections
-- readAuditSafely
+- Code Generation Questions — `models-and-baselines`
 - gate_secret_scan.py
-- assert_derived_release_provenance
+- assert_budget_complete
 - assert_no_prohibited_phrasing
-- resolve_aggregation_statistic
+- _signed_snapshot
 - Review — 2026-08-26 fourteenth-redo confirming pass, iteration 2
 - W-4 — One window definition, two representations
 - Review — 2026-08-26 fourteenth-receipt confirming pass
@@ -609,30 +609,36 @@
 - test_required_field_enumeration_matches_te_13_3
 - test_collision_bound_is_recorded_and_matches_d29
 - tec-hourly-forecast
+- Code Generation Plan — `models-and-baselines`
+- resolve_float_tolerance
+- _tuning_call_sites
+- refuse_divergent_rerun
+- assert_label_permitted
+- Test Strategy levels (minimal / standard / comprehensive)
 
 ## God Nodes (most connected - your core abstractions)
 1. `AI-DLC Audit Log` - 3408 edges
 2. `AI-DLC Audit Log` - 2166 edges
-3. `IntegrityError` - 134 edges
+3. `IntegrityError` - 226 edges
 4. `errorMessage()` - 108 edges
-5. `getField()` - 89 edges
-6. `LeakageError` - 87 edges
+5. `LeakageError` - 107 edges
+6. `getField()` - 89 edges
 7. `GOV-2026-08-20-RA-01 Requirements Analysis Gate Report` - 84 edges
 8. `resolveProjectDir()` - 81 edges
-9. `StandardizationError` - 63 edges
-10. `Constraint Register — Hourly VTEC Forecasting` - 63 edges
+9. `PartitionError` - 67 edges
+10. `AI-DLC Audit Log` - 66 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `requirement-coverage sensor (test-pro, advisory)` --semantically_similar_to--> `BENCH-06 - binding honesty rule shown as test-covered and is not`  [INFERRED] [semantically similar]
   sensors/aidlc-requirement-coverage.md → governance/reviews/GOV-2026-08-20-RA-01.md
-- `Preflight Gate (zero unresolved P0, no failing critical test)` --semantically_similar_to--> `Inception Requirements Quality Rule`  [INFERRED] [semantically similar]
-  PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md → .claude/tools/data/memory-seed/phases/inception.md
 - `Every Hard Rule Gets a Negative-Control Test` --semantically_similar_to--> `test-pro API Positive and Negative Instructions`  [INFERRED] [semantically similar]
   aidlc/spaces/default/memory/team.md → contributions/construction/build-and-test.md
+- `Preflight Gate (zero unresolved P0, no failing critical test)` --semantically_similar_to--> `Inception Requirements Quality Rule`  [INFERRED] [semantically similar]
+  PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md → .claude/tools/data/memory-seed/phases/inception.md
 - `phase_transition_manifest` --semantically_similar_to--> `Operation Deployment Procedures Rule (rollback required)`  [INFERRED] [semantically similar]
   PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md → .claude/tools/data/memory-seed/phases/operation.md
-- `Ideation Evidence Standards` --semantically_similar_to--> `Verdict: Feasible; binding constraint is calendar time plus two signatures`  [INFERRED] [semantically similar]
-  .claude/tools/data/memory-seed/phases/ideation.md → aidlc/spaces/default/intents/260813-tec-hourly-forecast/ideation/feasibility/feasibility-assessment.md
+- `test_prediction_carries_exactly_the_eight_approved_fields()` --uses--> `Prediction`  [INFERRED]
+  tests/test_models_smoke.py → src/models/train.py
 
 ## Import Cycles
 - None detected.
@@ -678,27 +684,27 @@
 - **Test Pyramid to CI Quality Gate Stack** — _claude_knowledge_aidlc_quality_agent_test_strategy_patterns_test_pyramid, _claude_knowledge_aidlc_quality_agent_testing_guide_test_pyramid, _claude_knowledge_aidlc_quality_agent_test_strategy_patterns_coverage_metrics_and_targets, _claude_knowledge_aidlc_pipeline_deploy_agent_cicd_patterns_quality_gates, _claude_knowledge_aidlc_quality_agent_testing_guide_quality_gate_definitions [INFERRED 0.85]
 - **test-pro validation path (scope, stages, advisory sensors)** — scopes_test_pro_validation_test_pro_validation, stages_construction_test_pro_integration_test_pro_integration, stages_operation_test_pro_full_suite_test_pro_full_suite, sensors_aidlc_coverage_threshold_coverage_threshold, sensors_aidlc_requirement_coverage_requirement_coverage [INFERRED 0.85]
 
-## Communities (601 total, 26 thin omitted)
+## Communities (607 total, 26 thin omitted)
 
 ### Community 0 - "aidlc-lib.ts"
 Cohesion: 0.02
-Nodes (164): ACTIVE_INTENT_POINTER, ACTIVE_SPACE_POINTER, ActiveDirectiveMarker, anyIntentRecordExists(), AUDIT_LOCK_DEPTH, AUDIT_LOCK_EXIT_HANDLERS, auditLockDir(), auditLockIdentity() (+156 more)
+Nodes (167): orientationPrefix(), ACTIVE_INTENT_POINTER, ACTIVE_SPACE_POINTER, ActiveDirectiveMarker, activeIntent(), activeIntentUuid(), activeSpace(), anyIntentRecordExists() (+159 more)
 
 ### Community 1 - "aidlc-utility.ts"
 Cohesion: 0.03
-Nodes (153): mergeFindings(), applyPluginSelection(), enabledScopeNames(), keywordCollisions(), requireInstalledHarness(), __resetGraphCache(), sensorsDir(), codekbScopeFingerprint() (+145 more)
+Nodes (152): mergeFindings(), applyPluginSelection(), enabledScopeNames(), requireInstalledHarness(), __resetGraphCache(), codekbRepoName(), codekbScopeFingerprint(), DEFAULT_SPACE (+144 more)
 
 ### Community 2 - "aidlc-graph.ts"
 Cohesion: 0.03
-Nodes (131): AGENT_FIELD_ORDER, ARS_COMPONENTS, ARS_PROJECT_TYPES, ArsBand, ArsComponent, ArsDecision, ArsPriors, arsPriorsPath() (+123 more)
+Nodes (134): AGENT_FIELD_ORDER, ARS_COMPONENTS, ARS_PROJECT_TYPES, ArsBand, ArsComponent, ArsDecision, ArsPriors, arsPriorsPath() (+126 more)
 
 ### Community 3 - "aidlc-usage.ts"
-Cohesion: 0.09
-Nodes (28): attributeAgents(), BARE_ALIASES, ChunkRead, countsFromUsage(), CURRENT_SCHEMA_VERSION, dedupeByMessageId(), DEFAULT_RATES, foldFileIntoLedger() (+20 more)
+Cohesion: 0.10
+Nodes (27): aggregateUsageAuditFields(), BARE_ALIASES, ChunkRead, coercePriceRow(), computeCost(), CURRENT_SCHEMA_VERSION, DEFAULT_RATES, fmtTokensCompact() (+19 more)
 
 ### Community 4 - "aidlc-workspace-sync.ts"
 Cohesion: 0.08
-Nodes (60): REPO_NAME_REGEX, DoctorCheck, isObject(), parseWorkspaceManifest(), stripWorkspaceManifestComments(), WORKSPACE_GITIGNORE_GATE_BEGIN, WORKSPACE_GITIGNORE_GATE_END, WORKSPACE_RECOVERY_GITIGNORE (+52 more)
+Nodes (60): isValidRepoName(), REPO_NAME_REGEX, isObject(), parseWorkspaceManifest(), stripWorkspaceManifestComments(), WORKSPACE_GITIGNORE_GATE_BEGIN, WORKSPACE_GITIGNORE_GATE_END, WORKSPACE_RECOVERY_GITIGNORE (+52 more)
 
 ### Community 5 - "validate.py"
 Cohesion: 0.06
@@ -706,7 +712,7 @@ Nodes (56): benchmark_pair(), count_tokens(), main(), print_table(), Path, main(
 
 ### Community 6 - "aidlc-orchestrate.ts"
 Cohesion: 0.04
-Nodes (148): subgraphForScope(), clearActiveDirectiveMarker(), codekbRepoName(), firstInScopeStageOfPhase(), gridCostSummary(), harnessDir(), isPerUnitStage(), parsePluginCommand() (+140 more)
+Nodes (139): ScopeValidation, activeDirectiveMarkerPath(), BoltDagResolution, CheckboxLine, clearActiveDirectiveMarker(), parsePluginCommand(), PHASE_NUMBERS, PluginCommand (+131 more)
 
 ### Community 7 - "Technical Environment and Research Implementation v3.3"
 Cohesion: 0.05
@@ -730,7 +736,7 @@ Nodes (18): 10. `statistical-inference` — Statistical Inference — the vector
 
 ### Community 12 - "aidlc-learnings.ts"
 Cohesion: 0.08
-Nodes (46): memoryDirFor(), memorySegmentsForSpace(), assertActiveStage(), bindSensorToStage(), cidMarker(), ensureHeading(), escapeRegex(), fail() (+38 more)
+Nodes (48): memoryDirFor(), readSafe(), repointClaudeStub(), repointCodexConfig(), repointFile(), repointHarnessIncludes(), repointKiroAgentResources(), repointKiroSteeringReferences() (+40 more)
 
 ### Community 13 - "aidlc-directive.ts"
 Cohesion: 0.06
@@ -744,9 +750,9 @@ Nodes (49): Mob Programming Guide, Driver Role, Facilitator Role, Knowledge Tran
 Cohesion: 0.00
 Nodes (3408): AI-DLC Audit Log, Artifact Created, Artifact Created, Artifact Created, Artifact Created, Artifact Created, Artifact Created, Artifact Created (+3400 more)
 
-### Community 16 - "activeSpace"
-Cohesion: 0.08
-Nodes (57): currentStageSlug(), isLifecycleBoundaryToolCall(), main(), run(), BLOCKED_STATE_TRANSITIONS, directStateTransition(), executableShellText(), isLifecycleBoundaryCommand() (+49 more)
+### Community 16 - "aidlc-fold-usage.ts"
+Cohesion: 0.24
+Nodes (12): currentStageSlug(), isLifecycleBoundaryToolCall(), BLOCKED_STATE_TRANSITIONS, directStateTransition(), executableShellText(), isLifecycleBoundaryCommand(), main(), maskFunctionDefinitions() (+4 more)
 
 ### Community 17 - "AI-DLC Audit Log"
 Cohesion: 0.00
@@ -757,16 +763,16 @@ Cohesion: 0.12
 Nodes (42): candidateStrings(), canonicalSuffix(), commandBasename(), constructionIndex(), containsPath(), evaluateReviewerScope(), exemptSuffixOf(), firstOperand() (+34 more)
 
 ### Community 19 - "errorMessage"
-Cohesion: 0.06
-Nodes (114): allowStop(), blockCap(), blockStop(), continuationReason(), currentStageSlug(), decideBlock(), defaultBlockCap(), EngineDirective (+106 more)
+Cohesion: 0.07
+Nodes (91): allowStop(), blockCap(), blockStop(), continuationReason(), currentStageSlug(), decideBlock(), defaultBlockCap(), EngineDirective (+83 more)
 
 ### Community 20 - "Project Vision and Research Definition v4.3"
 Cohesion: 0.06
 Nodes (38): IC-6 IRI-2016 is benchmark-only, architecturally excluded, PC-02 — RMSE primary; MAPE excluded, PC-09 — No practical-relevance threshold introduced after December opens, TC-07 — IRI never reaches training or inference; joined at evaluation only, D-05 Technical Environment corrections via Vision 15.2, Benchmark Role (IRI-2016 architecturally excluded), Implementation Scope Parameters, NFR-DQ-01 Data quality and target uncertainty (+30 more)
 
-### Community 21 - "test_split_embargo.py"
+### Community 21 - "PartitionError"
 Cohesion: 0.05
-Nodes (117): PartitionError, A frame reached a scoring path for a partition it does not belong to. R-92's…, apply_embargo(), _as_date(), _as_utc(), assert_membership_from_timestamps(), assert_split_manifest(), _assert_structural_rules() (+109 more)
+Nodes (111): PartitionError, A frame reached a scoring path for a partition it does not belong to. R-92's…, apply_embargo(), _as_date(), _as_utc(), assert_membership_from_timestamps(), assert_split_manifest(), _assert_structural_rules() (+103 more)
 
 ### Community 22 - "aidlc-runner-gen.ts"
 Cohesion: 0.12
@@ -785,20 +791,20 @@ Cohesion: 0.05
 Nodes (42): FE-12 Vision 4.4 capacity clause becomes change request D-09, OC-07 — Technical Environment 1.5 corrected only via Vision 15.2, OC-09 — Implementation-capacity ceiling lifted 2026-08-15, TC-03A — ~10 GB governed storage envelope, TC-03B — ~30 Kaggle GPU hours available but not required, TC-03C — Two execution platforms only, TC-11 — Dst is diagnostic/hindcast-only, V-04 IRI-2016 build and runtime measurement (+34 more)
 
 ### Community 26 - "Discovered Rules - hard constraints traceable to the normative core"
-Cohesion: 0.09
-Nodes (34): assert_membership_from_timestamps(frame) - partition membership from record timestamps, scripts/run_walking_skeleton.py - fixture orchestrator, Developer agent contribution to practices discovery, Developer finding 7 - the SHA-256 helper is triplicated and the consolidation target is constrained, Developer finding 2 - the import-boundary rule is missing from both artifacts, Developer finding 1 - the notebook holds frozen scientific values and production logic, ideation/feasibility/constraint-register.md (TC/OC/PC rows, cross-check only), Discovered Rules - hard constraints traceable to the normative core (+26 more)
+Cohesion: 0.08
+Nodes (38): Developer agent contribution to practices discovery, Developer finding 7 - the SHA-256 helper is triplicated and the consolidation target is constrained, Developer finding 2 - the import-boundary rule is missing from both artifacts, Developer finding 1 - the notebook holds frozen scientific values and production logic, DevSecOps agent contribution to practices discovery, DevSecOps finding E - locked-test access control missing, the highest-value control, DevSecOps finding A - live NFR-SEC-01 violations in the workspace, DevSecOps finding J - version control is mandated by the normative core (+30 more)
 
 ### Community 27 - "aidlc.ts"
 Cohesion: 0.10
-Nodes (34): Action, ADAPTER_HARNESS_LEAF, AdapterHarness, Alias, bunExecutable(), Classification, CustomRoute, delegatedProjectDir() (+26 more)
+Nodes (37): Action, ADAPTER_HARNESS_LEAF, AdapterHarness, Alias, bunExecutable(), Classification, CustomRoute, delegatedProjectDir() (+29 more)
 
 ### Community 28 - "append_registry_event"
 Cohesion: 0.05
-Nodes (80): _access_timestamp(), append_registry_event(), check_registry_integrity(), derive_csv(), _derive_exploratory(), IntegrityReport, Any, BaseException (+72 more)
+Nodes (74): _access_timestamp(), append_registry_event(), check_registry_integrity(), derive_csv(), _derive_exploratory(), IntegrityReport, Any, Path (+66 more)
 
 ### Community 29 - "aidlc-state.ts"
 Cohesion: 0.07
-Nodes (126): handleSetAutonomy(), effectiveAction(), emitAudit(), error(), handleExecute(), handleResolve(), main(), parseFlags() (+118 more)
+Nodes (128): effectiveAction(), emitAudit(), error(), handleExecute(), handleResolve(), main(), parseFlags(), appendSlug() (+120 more)
 
 ### Community 30 - "Product Guide"
 Cohesion: 0.17
@@ -809,20 +815,20 @@ Cohesion: 0.04
 Nodes (53): Ideation Evidence Standards, Ideation Phase Guardrails (seed), Ideation Scope Discipline, FE-1 Pipeline scaffolding before acquisition, GOV-2026-08-15-FE-02 (CONDITIONAL PASS), Constraint Register — Hourly VTEC Forecasting, OC-01 — One academic semester with the empirical chapter due at its end, OC-04 — G-05 freeze manifest owned by NFR Requirements (3.2) (+45 more)
 
 ### Community 32 - "LeakageError"
-Cohesion: 0.07
-Nodes (80): list, LeakageError, Information from outside a partition's training range reached a fitted object., `[train_start 00:00, train_end + 1 day 00:00)` as aware UTC datetimes (end…, A sequence of record mappings carrying an `attrs` dict, mirroring…, RecordFrame, training_range(), assert_transform_identity() (+72 more)
+Cohesion: 0.08
+Nodes (77): LeakageError, Information from outside a partition's training range reached a fitted object., `[train_start 00:00, train_end + 1 day 00:00)` as aware UTC datetimes (end…, training_range(), assert_transform_identity(), FrameSpec, ADR-11's `FrameSpec`. `scored_end` is EXCLUSIVE: the scored range is…, ADR-11: the spec names a partition and its scored range is contained in what… (+69 more)
 
-### Community 33 - "D-12 (>=90% usable hourly coverage per station per month)"
-Cohesion: 0.21
-Nodes (12): D-12 (>=90% usable hourly coverage per station per month), D-13 (H4/SRQ-5 confirmatory only with >=3 December storm events), No Published Consensus Figure for Any of the Three Freezes, Vision §5.2 H4/SRQ-5 Predeclaration and Demotion Condition, Vision §6.1B Numerical Coverage Minimum (was TBD - supervisor freeze gate), D-2 (interim >=95% calendar-day coverage rule, set non-blind), FR-P1-02-4 (coverage gate requirement), FR-P1-05-18 (H4/SRQ-5 demotion requirement) (+4 more)
+### Community 33 - "test_models_smoke.py"
+Cohesion: 0.05
+Nodes (105): list, AlignmentError, A driver series did not align onto the hourly grid as its contract requires., A seed was defaulted, inlined, or chosen on validation., SeedError, A sequence of record mappings carrying an `attrs` dict, mirroring…, RecordFrame, frame_attrs() (+97 more)
 
 ### Community 34 - "aidlc-swarm.ts"
-Cohesion: 0.07
-Nodes (68): activeUnitCheckpoint(), asReviewClass(), auditBlockField(), auditShardDir(), boltSlugForUnit(), currentUnitLifecycleRows(), freshReviewReceipts, humanActedSinceLastAnswer() (+60 more)
+Cohesion: 0.09
+Nodes (52): activeUnitCheckpoint(), auditBlockField(), boltSlugForUnit(), currentUnitLifecycleRows(), latestMainWorkflowStageRunFloor(), latestMainWorkflowStageRunFloorForProject(), latestMainWorkflowStageStarted(), parseArgs() (+44 more)
 
 ### Community 35 - "aidlc-runtime.ts"
 Cohesion: 0.08
-Nodes (43): findAllEvents(), memoryFilePath(), parseMemoryHeadings(), runtimeGraphPath(), unitDependencyPath(), worktreeRecordRoot(), worktreeRuntimeGraphPath(), BoltDag (+35 more)
+Nodes (39): findAllEvents(), memoryFilePath(), parseMemoryHeadings(), unitDependencyPath(), worktreeRuntimeGraphPath(), BoltDag, BoltInstance, buildPhaseMap() (+31 more)
 
 ### Community 36 - "GOV-2026-08-21-RA-02 Requirements Analysis Gate Report (fourth revision)"
 Cohesion: 0.12
@@ -832,21 +838,21 @@ Nodes (26): DATA-09 - release manifest field set truncated, DATA-15 - two open F
 Cohesion: 0.08
 Nodes (25): TC-09 — Hourly alignment without interpolation; carry-forward <= 3 h, TC-16 — Single comparison-wide mask for all comparisons, NFR-FAIR-01 Fair comparisons, NFR-LEAK-01 Forecast safety, Split Configuration F1-F4 and Locked December, TA-09 — Both fixtures pass all 20 Section 16 checks, TA-11 — F1-F4 splits, embargo, train-only transforms, comparison-wide masks, TA-18 — Locked-test guard, hash-before-metrics, registry access log (+17 more)
 
-### Community 38 - "config.py"
-Cohesion: 0.06
-Nodes (77): Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()). 2.…, _stage_entry(), main(), _parse_args(), Any, Namespace, Path, Stage script 02: standardize the Phase 1 hourly target under D-17 — or REFUSE.… (+69 more)
+### Community 38 - "01_inventory_and_registry.py"
+Cohesion: 0.04
+Nodes (110): _assert_phase1_field_contract(), _build_transport(), main(), _parse_args(), Any, Namespace, Path, Stage script 00: acquire the D-144-approved prepared VTEC product and driver… (+102 more)
 
 ### Community 39 - "Components - Hourly VTEC Forecasting (TEC_Project Phase 1)"
-Cohesion: 0.18
-Nodes (18): Dependency matrix (rows import columns; X marks a forbidden edge), assert_lags_safe(matrix) - actual lag >= declared safe lag, build_features(...) -> (matrix, tensor) from one window definition, Components - Hourly VTEC Forecasting (TEC_Project Phase 1), IRI/GIM import allowlist (exactly two permitted importers), src/evaluation package - masks, metrics, uncertainty, reporting, src/external package - benchmark and comparator products, src/external/gim.py - CODE final GIM comparator (evaluation-time only) (+10 more)
+Cohesion: 0.12
+Nodes (25): Dependency matrix (rows import columns; X marks a forbidden edge), apply_transforms(frame, transform) -> DataFrame, assert_lags_safe(matrix) - actual lag >= declared safe lag, build_features(...) -> (matrix, tensor) from one window definition, fit_transforms(train, fold) -> Transform, Components - Hourly VTEC Forecasting (TEC_Project Phase 1), IRI/GIM import allowlist (exactly two permitted importers), src/evaluation package - masks, metrics, uncertainty, reporting (+17 more)
 
 ### Community 40 - "test_acquisition_window.py"
 Cohesion: 0.09
 Nodes (33): _allowed_dates(), _Experiment, _month_dirs(), _observed_dates(), date, parametrize, Path, Acquisition-window conformance for the Madrigal coverage audit. WHY THIS MODULE… (+25 more)
 
 ### Community 41 - "GOV-2026-08-15-FE-01 (Feasibility, FAIL)"
-Cohesion: 0.07
-Nodes (31): Defer Code Style to Project Linter Config, Squash-Merge Bolt Branches into main, Trunk-Based Development Default, Construction: No Hardcoded Credentials, NEVER Commit a Credential, API Key or Secret (NFR-SEC-01), ALWAYS Use the F1-F4 Fixed Calendar Folds with 24-Hour Embargo, NEVER Let an iri_* Field Reach ML Training or Inference (NFR-IRI-01), NEVER Import src/external/iri.py or gim.py from features/ or models/ (TA-07) (+23 more)
+Cohesion: 0.08
+Nodes (29): Defer Code Style to Project Linter Config, Squash-Merge Bolt Branches into main, Trunk-Based Development Default, Construction: No Hardcoded Credentials, NEVER Commit a Credential, API Key or Secret (NFR-SEC-01), NEVER Let an iri_* Field Reach ML Training or Inference (NFR-IRI-01), NEVER Import src/external/iri.py or gim.py from features/ or models/ (TA-07), ALWAYS Narrow a Rule, Never Relocate One the Normative Core Fixes (+21 more)
 
 ### Community 42 - "aidlc-doctor-bundle.ts"
 Cohesion: 0.07
@@ -856,9 +862,9 @@ Nodes (30): adaptLegacyResult(), AUDIT_EVENT_ALLOWLIST, AUDIT_FIELD_ALLOWLIST, A
 Cohesion: 0.14
 Nodes (30): DevSecOps Pipeline Patterns, Amazon Inspector, Bandit, cdk-nag, cfn-nag, Checkov, Amazon CodeGuru Reviewer, Container Image Scanning (+22 more)
 
-### Community 44 - "test_determinism.py"
-Cohesion: 0.04
-Nodes (79): assert_config_hashes_match(), assert_credential_names_present(), ConfigError, load_configs(), _parse_yaml(), PlatformError, Path, A governed config file is missing, malformed, or carries an unresolved `TBD`. (+71 more)
+### Community 44 - "config.py"
+Cohesion: 0.03
+Nodes (106): assert_config_hashes_match(), assert_credential_names_present(), BootstrapError, capture_environment_lock(), ConfigError, _configs_of(), credential_names_for(), DeterminismError (+98 more)
 
 ### Community 45 - "aidlc-worktree.ts"
 Cohesion: 0.19
@@ -873,24 +879,24 @@ Cohesion: 0.14
 Nodes (25): Open Supervisor Gates Carried Into Inception, OC-02 — Supervisor countersign required at G-05 and G-07, OC-03 — December stays shut until G-05; G-06 access rules at opening, GC-03 G-05 and G-07 Not Owned by This Stage, D-02 G-05 experiment-freeze signature, D-03 G-07 final acceptance, mandatory full board, R-05 Supervisor unavailability delays G-05, R-06 G-07 reproducibility package assembled late (+17 more)
 
 ### Community 48 - "Requirements - Hourly VTEC Forecasting (TEC_Project Phase 1), 94 rows"
-Cohesion: 0.13
-Nodes (27): Component Dependencies - dependency matrix and forbidden edges, count_storm_events(kp, release_grade, source) - source as a required argument, src/evaluation/regimes.py - Kp/Hp60 strata and the section 9.3 storm-event rule, CHAIR-03 - the board chair had materially changed the artifact it reviewed, Framework deadlock - drive-letter case makes audit write and summary guard mutually unsatisfiable, Requirements Analysis - Stage Memory (observation diary), Q10 - what the authority documents get wrong or leave dangerous (answer A), Q2 - decomposition unit (answer A: the P1-00 to P1-06 pipeline stage table) (+19 more)
+Cohesion: 0.14
+Nodes (24): TransitionManifest dataclass - fourteen protected hashes, observed Phase 1 schema, src/data/reuse_registry.py - the section 10.1 external-code register, Quality finding B - section 18.3 is the project quality gate and the draft never names it, Q10 - what the authority documents get wrong or leave dangerous (answer A), Q2 - decomposition unit (answer A: the P1-00 to P1-06 pipeline stage table), Q5 - non-functional requirements (answer C), under-enumerated the section 11 set as nine, Requirements Analysis - Questions (Q1-Q10), D-16 - hourly aggregation statistic frozen as the median (+16 more)
 
 ### Community 49 - "Code Generation Stage"
-Cohesion: 0.13
-Nodes (27): AIDLC-UNIT Target Marker, Code Generation Plan, Layer-by-Layer Plan Structure, Code Generation Stage, Test Strategy Tiers (Minimal/Standard/Comprehensive), Workspace-Root Code Placement Rule, Business Logic Model Artifact, Business Rules Artifact (+19 more)
+Cohesion: 0.14
+Nodes (26): AIDLC-UNIT Target Marker, Code Generation Plan, Layer-by-Layer Plan Structure, Code Generation Stage, Test Strategy Tiers (Minimal/Standard/Comprehensive), Workspace-Root Code Placement Rule, Business Logic Model Artifact, Question-Only / Artifact-Only / Full Execution Modes (+18 more)
 
-### Community 50 - "aidlc-bolt.ts"
-Cohesion: 0.29
-Nodes (22): BOOLEAN_FLAGS, emitAudit(), error(), failBolt(), failJson(), forkedStateFilePath(), handleAbort(), handleComplete() (+14 more)
+### Community 50 - "aidlc-log.ts"
+Cohesion: 0.12
+Nodes (48): BOOLEAN_FLAGS, emitAudit(), error(), failBolt(), failJson(), forkedStateFilePath(), handleAbort(), handleComplete() (+40 more)
 
 ### Community 51 - "aidlc-metrics.ts"
 Cohesion: 0.14
 Nodes (24): buildMagnitudeLines(), buildStatsdLine(), buildTagString(), emitMetricForAuditEvent(), extraHeaderLines(), _host, isMetricDispatchEnvelope(), MetricContext (+16 more)
 
 ### Community 52 - "Mandated 17-Module Test Set (§12 tests/ tree)"
-Cohesion: 0.10
-Nodes (22): Operation: Rollback Steps Required in Every Deployment, ALWAYS Use a Single Comparison-Wide Intersection Mask (NFR-FAIR-01, TC-16), ALWAYS Keep the Workflow Runnable on CPU (TC-01), NEVER Carry Phase 1 Weights or Results into Phase 2, NEVER Let Phase 1 Import Raw-Processing Modules (NFR-PHASE-01), §13.2 Ordered Clean-Run Contract, Gate G-P3A (Phase 2 raw-processing acceptance), Gate G-P3C (protected hashes unchanged) (+14 more)
+Cohesion: 0.09
+Nodes (25): Operation: Rollback Steps Required in Every Deployment, ALWAYS Use a Single Comparison-Wide Intersection Mask (NFR-FAIR-01, TC-16), ALWAYS Keep the Workflow Runnable on CPU (TC-01), NEVER Carry Phase 1 Weights or Results into Phase 2, NEVER Let Phase 1 Import Raw-Processing Modules (NFR-PHASE-01), §13.2 Ordered Clean-Run Contract, Gate G-P3A (Phase 2 raw-processing acceptance), Gate G-P3C (protected hashes unchanged) (+17 more)
 
 ### Community 53 - "Initiative Approval and Handoff Stage"
 Cohesion: 0.20
@@ -905,8 +911,8 @@ Cohesion: 0.13
 Nodes (24): Graphify Add (URL Ingestion), Watch Mode With Debounce, FalkorDB Export, Graphify MCP Stdio Server, Neo4j Cypher Export, Agent-Crawlable Wiki Export, Cross-Repo Graph Merge, Monorepo Subfolder Extraction (+16 more)
 
 ### Community 56 - "D-144 (adopt Madrigal MAPGPS gps binned VTEC as Phase 1 source)"
-Cohesion: 0.11
-Nodes (24): D-1 (coordinate-to-cell rule), D-143 (measured ICTP failure, closed), D-144 (adopt Madrigal MAPGPS gps binned VTEC as Phase 1 source), Five Freezes Attached to D-144's Approval, Gate G-P1A (prepared-data acceptance), Finding RA-F-01 (BLOCKER: D-144 authority conflict resolved by inference), Recorded Student/Supervisor Authority Equivalence, TA-25 (Blocked - replacement audit pending) (+16 more)
+Cohesion: 0.08
+Nodes (36): Change Record CR-2026-08-21-D144, D-143 (measured ICTP failure, closed), D-144 (adopt Madrigal MAPGPS gps binned VTEC as Phase 1 source), Gate G-P1A (prepared-data acceptance), Governance Report GOV-2026-08-21-RA-01, Finding RA-F-01 (BLOCKER: D-144 authority conflict resolved by inference), TA-25 (Blocked - replacement audit pending), Technical Environment §1.5 (Phase 1 replacement provider row) (+28 more)
 
 ### Community 57 - "TEC-05 - open supervisor gate enumeration omits six open gates"
 Cohesion: 0.13
@@ -953,8 +959,8 @@ Cohesion: 0.07
 Nodes (47): _closure_from(), _dynamic_import_sites(), _is_forbidden(), _limb_a_files(), _limb_a_offenders(), _module_index(), Path, SEC-I-01 limb 2 / SD-I-01: the December audit's import boundary, two limbs.… (+39 more)
 
 ### Community 68 - "Stage Protocol (runtime execution behaviour)"
-Cohesion: 0.12
-Nodes (24): RAID log for compliance risks and issues, Requirements traceability chain, The Conductor (execution-quality persona), Stage observation diary (memory.md), Reserved field namespace (when, on_failure, blocks_on, timeout, retry), Append-only per-clone audit shards, Depth guidance and scope-to-depth mapping, Phase boundary traceability verification (+16 more)
+Cohesion: 0.14
+Nodes (21): RAID log for compliance risks and issues, Requirements traceability chain, The Conductor (execution-quality persona), Stage observation diary (memory.md), Reserved field namespace (when, on_failure, blocks_on, timeout, retry), Append-only per-clone audit shards, Phase boundary traceability verification, Learnings ritual (13): tool-as-actor learning loop (+13 more)
 
 ### Community 69 - "Reverse Engineering Stage"
 Cohesion: 0.16
@@ -970,7 +976,7 @@ Nodes (23): D-2 Coverage gate (>=95% of calendar days, 100% of December), GC-02 
 
 ### Community 72 - "test_phase_contract.py"
 Cohesion: 0.06
-Nodes (71): _assert_phase1_field_contract(), R-24: the produced-field guard, called before this run's first write., _assert_phase1_field_contract(), R-24: the produced-field guard, called before this run's first write., PhaseBoundaryError, Phase 1 code reached a raw-processing module or field (NFR-PHASE-01)., assert_no_raw_fields(), assert_phase_boundary() (+63 more)
+Nodes (67): _assert_phase1_field_contract(), R-24: the produced-field guard, called before this run's first write., PhaseBoundaryError, Phase 1 code reached a raw-processing module or field (NFR-PHASE-01)., assert_no_raw_fields(), assert_protected_hashes_unchanged(), diff_protected_hashes(), _field_names() (+59 more)
 
 ### Community 73 - "D-14 (scientific fixture window = March 2022, all three cells)"
 Cohesion: 0.21
@@ -978,7 +984,7 @@ Nodes (12): Governance Finding CHAIR-02 (unsatisfiable fixture criterion), D-11 
 
 ### Community 74 - "Reviewing Artifacts (Architecture Lens)"
 Cohesion: 0.12
-Nodes (16): Architecture Decision Records, ADR Lifecycle States, Alternatives Considered Section, ADR as Decision Tool, Not Documentation, ADR Numbering Convention, ADR Creation Threshold, ADR Format (Architecture Guide), Reviewing Artifacts (Architecture Lens) (+8 more)
+Nodes (20): Architecture Decision Records, ADR Lifecycle States, Alternatives Considered Section, ADR as Decision Tool, Not Documentation, ADR Numbering Convention, ADR Creation Threshold, Architecture Guide, ADR Format (Architecture Guide) (+12 more)
 
 ### Community 75 - "Security Guide"
 Cohesion: 0.19
@@ -994,11 +1000,11 @@ Nodes (20): Q5 - Experiment registry write safety (answer C: append-only JSONL p
 
 ### Community 78 - "Governance Report GOV-2026-08-21-RA-02 (full board, FAIL)"
 Cohesion: 0.11
-Nodes (20): Deploy on Merge to Staging, ALWAYS Check the Drafted Artifact Against the Normative Core, Board Finding BENCH-01 (Kaggle-session test execution), ALWAYS Run the Critical Tests Inside the Kaggle Session (TC-03g), ALWAYS Verify a Fact Before Handing It On as Established, §13.3 Immutable Dataset Release Contract, Who Runs the Gate Tests (pre-commit hook plus local pre-run suite, no CI), Exactly Two Execution Platforms: Kaggle and Local (TC-03c) (+12 more)
+Nodes (18): ALWAYS Check the Drafted Artifact Against the Normative Core, Board Finding ML-05 (seed selection and grids), NEVER Select a Seed on Validation or After Seeing December, ALWAYS Use Fixed Seeds with the Three-Seed Element-Wise Mean (NFR-DET-01, TC-21), ALWAYS Use the Vector Time-Block Bootstrap (10,000 replicates, seed 20221201), ALWAYS Verify a Fact Before Handing It On as Established, Finding BENCH-12 (NOTE: constellation report and GPS+Galileo escalation unrequired), Finding CHAIR-03 (BLOCKER: reviewing agent authored the revision it reviewed) (+10 more)
 
 ### Community 79 - "aidlc-runtime-paths.ts"
-Cohesion: 0.22
-Nodes (18): rulesDir(), resolveHookPath(), distributionFor(), explicitHarnessRoot(), explicitRuntimeProjectDir(), HarnessLocation, isAidlcHarnessRoot(), isCompiledExecutable() (+10 more)
+Cohesion: 0.24
+Nodes (16): rulesDir(), distributionFor(), explicitHarnessRoot(), explicitRuntimeProjectDir(), HarnessLocation, isAidlcHarnessRoot(), isCompiledExecutable(), KNOWN_HARNESSES (+8 more)
 
 ### Community 80 - "aidlc-tiers.ts"
 Cohesion: 0.14
@@ -1024,13 +1030,13 @@ Nodes (19): Caveman Commit Overview, Mandatory Commit Body Cases, Caveman Commit
 Cohesion: 0.19
 Nodes (17): PC-03 — Three difficulty controls co-reported in the primary results table, PC-04 — A control beating the LSTM appears in the primary table and abstract, V-04a IRI-2016 implementation validation report, Mandatory Difficulty Controls M-01, M-02, M-03, B-01 IRI-2016 External Benchmark, Binding Honesty Rule, C-01 CODE Final GIM External Comparator, Comparison Hierarchy (+9 more)
 
-### Community 86 - "NFR-LEAK-01 - forecast safety (leakage prevention)"
-Cohesion: 0.18
-Nodes (14): Q1 - Method-surface depth (answer B: signatures at package boundaries only), apply_transforms(frame, transform) -> DataFrame, Component Methods - cross-package boundary signatures, fit_transforms(train, fold) -> Transform, src/features/transforms.py - train-only fitting, per fold, src/models/climatology.py - M-03 station x month x hour climatology, ADR-01 - Method-surface depth: signatures at package boundaries only, Review finding 2 (Major) - the fit/apply split does not make full-dataset fitting unrepresentable (+6 more)
+### Community 86 - "aidlc-audit.ts"
+Cohesion: 0.09
+Nodes (49): blockReason(), FreezeVerdict, judgeFreeze(), normalizeShellTarget(), ParsedShellArgs, parseShellArgs(), run(), shellCommandSegments() (+41 more)
 
-### Community 87 - "Application Design Questions (stage 2.6)"
-Cohesion: 0.10
-Nodes (30): Application Design Questions (stage 2.6), FU-1 - PYTHONHASHSEED enforcement versus the literal clean-run sequence (answer D), FU-2 - Which module owns the locked-test path guard (answer A: new src/data/locked_test.py), Q4 - Two locked-test guards, path and fold (answer C), Forbidden edges and what proves each one, AccessRecord dataclass - locked-test access-log row, assert_no_december_outside_restricted(evidence_root) - recursive custody guard, materialise_locked_partition(snapshot, g05_signature) - execution guard (+22 more)
+### Community 87 - "src/data/locked_test.py (NEW) - December path guard and access log"
+Cohesion: 0.13
+Nodes (24): Q4 - Two locked-test guards, path and fold (answer C), Forbidden edges and what proves each one, AccessRecord dataclass - locked-test access-log row, assert_membership_from_timestamps(frame) - partition membership from record timestamps, assert_no_december_outside_restricted(evidence_root) - recursive custody guard, materialise_locked_partition(snapshot, g05_signature) - execution guard, open_restricted(path, record, registry) - log-then-read path guard, sha256_file(path) - the single project-wide SHA-256 helper (+16 more)
 
 ### Community 88 - "GOV-2026-08-15-AH-01 (Approval & Handoff, CONDITIONAL PASS)"
 Cohesion: 0.13
@@ -1050,7 +1056,7 @@ Nodes (19): Test Pro Metrics Methodology (release-readiness delta reporting), te
 
 ### Community 92 - "Units Generation Stage"
 Cohesion: 0.20
-Nodes (18): Domain Entities Artifact, Question-Only / Artifact-Only / Full Execution Modes, Frontend Components Artifact, Per-Kind Artifact Applicability (produces_kinds), Functional Design Stage, Architecture Options Presentation, Component Dependency Artifact, Component Methods Artifact (+10 more)
+Nodes (18): Business Rules Artifact, Domain Entities Artifact, Frontend Components Artifact, Per-Kind Artifact Applicability (produces_kinds), Functional Design Stage, Architecture Options Presentation, Component Dependency Artifact, Component Methods Artifact (+10 more)
 
 ### Community 93 - "Requirements Analysis Stage"
 Cohesion: 0.15
@@ -1061,8 +1067,8 @@ Cohesion: 0.12
 Nodes (18): Mob Composition Artifact, Bolt, Bolt Plan Artifact, Confidence Hypothesis, Construction Iteration Mode (unit-major vs stage-major), Economic vs Topological Bolt Sequencing, External Dependency Map Artifact, Risk and Sequencing Rationale Artifact (+10 more)
 
 ### Community 95 - "Architecture Patterns"
-Cohesion: 0.11
-Nodes (24): Architecture Guide, Architectural Style Selection Matrix, Component Boundary Identification, Design Pattern Checklist, Reverse Engineering Synthesis Checklist, Architecture Patterns, CQRS (Command Query Responsibility Segregation), Pattern Decision Framework (+16 more)
+Cohesion: 0.12
+Nodes (18): Design Pattern Checklist, Architecture Patterns, CQRS (Command Query Responsibility Segregation), Pattern Decision Framework, Event-Driven Architecture, Hexagonal Architecture (Ports and Adapters), Architecture Migration Paths, Modular Monolith (+10 more)
 
 ### Community 96 - "Code Generation Guide"
 Cohesion: 0.20
@@ -1113,12 +1119,12 @@ Cohesion: 0.17
 Nodes (17): AI-DLC Interaction Rules, G-01 Scientific Framing, G-02 Station And Data Viability, G-03 GNSS Target, G-04 Feature Safety, G-05 Experiment Freeze, G-06 Locked Evaluation, G-07 Reproducibility (+9 more)
 
 ### Community 108 - "src/data/phase_contract.py - phase boundary, runtime import guard, transition manifest"
-Cohesion: 0.19
-Nodes (17): Q3 - Runtime enforcement of the Phase 1 import prohibition (answer B), Q8 - How much of Phase 2's interface to design now (answer B: governed boundary only), assert_no_raw_fields(frame, phase) - the produced-field limb, assert_phase_boundary(phase, loaded_modules) - the import limb, RAW_MODULES frozenset - the four prohibited src.gnss modules, TransitionManifest dataclass - fourteen protected hashes, observed Phase 1 schema, src/data/phase_contract.py - phase boundary, runtime import guard, transition manifest, src/gnss package - raw GNSS processing (Phase 2 only) (+9 more)
+Cohesion: 0.23
+Nodes (14): Q3 - Runtime enforcement of the Phase 1 import prohibition (answer B), Q8 - How much of Phase 2's interface to design now (answer B: governed boundary only), assert_no_raw_fields(frame, phase) - the produced-field limb, assert_phase_boundary(phase, loaded_modules) - the import limb, RAW_MODULES frozenset - the four prohibited src.gnss modules, src/data/phase_contract.py - phase boundary, runtime import guard, transition manifest, src/gnss package - raw GNSS processing (Phase 2 only), src/gnss/calibration.py - arcs, slips, levelling, DCB, mapping (Phase 2) (+6 more)
 
-### Community 109 - "aidlc-validate.ts"
-Cohesion: 0.28
-Nodes (12): extractBodySection(), findStageFile(), getHeaderField(), handleOutputs(), isOutputReferenced(), isPhase(), jsonError(), jsonSuccess() (+4 more)
+### Community 109 - "loadDelegate"
+Cohesion: 0.14
+Nodes (22): parseStageFrontmatter(), PHASES, loadDelegate(), fail(), Flags, main(), parseFlags(), parseH2Headings() (+14 more)
 
 ### Community 110 - "aidlc-sensor-linter.ts"
 Cohesion: 0.19
@@ -1140,9 +1146,9 @@ Nodes (16): Interaction Design Patterns, Autosave, Bottom Tab Bar (Mobile), Brea
 Cohesion: 0.11
 Nodes (36): Alerting Requirements Template, Availability Targets and Their Implications, Observability Anti-Patterns, Recovery Objectives (RTO, RPO, MTTR, MTBF), SLA / SLO / SLI Hierarchy, Incident Response Guide, Automated Remediation Patterns, Blameless Post-Incident Review (+28 more)
 
-### Community 115 - "src/data/config.py (NEW) - config load, per-run snapshot, hashes, determinism helper"
-Cohesion: 0.20
-Nodes (16): Q2 - Where config loading, snapshotting and hashing lives (answer B: new src/data/config.py), Q6 - Where determinism is plumbed (answer X: centralised helper with bootstrap carve-out), ConfigSnapshot dataclass - parsed configs, hashes, resolved roots, platform, ensure_process_determinism(argv) - PYTHONHASHSEED re-exec guard, load_configs(config_dir, phase) -> ConfigSnapshot, seed_everything(snapshot, stage) -> DeterminismRecord, src/data/config.py (NEW) - config load, per-run snapshot, hashes, determinism helper, ADR-05 - Determinism centralised, with the bootstrap seed carved out (+8 more)
+### Community 115 - "Application Design Questions (stage 2.6)"
+Cohesion: 0.09
+Nodes (34): Application Design Questions (stage 2.6), FU-1 - PYTHONHASHSEED enforcement versus the literal clean-run sequence (answer D), FU-2 - Which module owns the locked-test path guard (answer A: new src/data/locked_test.py), FU-3 - Home for the two homeless determinism checks (answer B: tests/test_determinism.py), Q1 - Method-surface depth (answer B: signatures at package boundaries only), Q2 - Where config loading, snapshotting and hashing lives (answer B: new src/data/config.py), Q6 - Where determinism is plumbed (answer X: centralised helper with bootstrap carve-out), Component Methods - cross-package boundary signatures (+26 more)
 
 ### Community 116 - "Reviewer invocation (12a): adversarial and advisory review classes"
 Cohesion: 0.17
@@ -1161,16 +1167,16 @@ Cohesion: 0.09
 Nodes (21): Authority and evidence, Board, Conditions on the `CONDITIONAL PASS`, Counts re-derived after remediation, Decision, Findings, Human decisions required, Rationale (+13 more)
 
 ### Community 120 - "AWS Cost Optimization Patterns"
-Cohesion: 0.18
-Nodes (12): cost-analysis Artifact, Serverless, AWS Cost Optimization Patterns, Compute Rightsizing, Cost Reviews and Anomaly Detection, DynamoDB Capacity Mode Selection, Lambda Cost Optimization, AWS Pricing Model Selection (+4 more)
+Cohesion: 0.15
+Nodes (14): cost-analysis Artifact, Serverless, Verdict Rules, AWS Cost Optimization Patterns, Compute Rightsizing, Cost Reviews and Anomaly Detection, DynamoDB Capacity Mode Selection, Lambda Cost Optimization (+6 more)
 
 ### Community 121 - "Wireframing Guide"
 Cohesion: 0.23
 Nodes (14): Wireframing Guide, Card Layout, Common Wireframing Mistakes, Component Library Basics, Wireframe Consistency Rules, Wireframe Fidelity Progression, The Five Screen States, High-Fidelity Interactive Prototypes (+6 more)
 
 ### Community 122 - "test_feature_availability.py"
-Cohesion: 0.07
-Nodes (72): assert_lags_safe(), assert_release_status_not_backfilled(), AvailabilityRow, Limb 1 (plus the backfill refusal and the anchor-record presence check). Raises…, Never backfill a driver from future final values: the grade must be the…, The approved six fields, plus two ADDITIVE recorded fields. `anchor_policy`…, assert_producers_cover(), load_feature_dictionary() (+64 more)
+Cohesion: 0.05
+Nodes (102): FeatureAvailabilityError, Driver-availability resolution had to stop rather than choose a default…, date, The mean of the `window_days` days ENDING AT `end_day` -- trailing, never…, trailing_mean(), _as_date(), _as_utc(), assert_anchor_recomputed() (+94 more)
 
 ### Community 123 - "Audit Event Taxonomy"
 Cohesion: 0.18
@@ -1185,16 +1191,16 @@ Cohesion: 0.19
 Nodes (14): D-7 Hourly modelling grid (5-minute aggregated), D-8 Claim boundary (three cells, 2022, December test), Claim Exclusion Carried From D-7 (no 5-minute claim at NICO), TC-03F — Two fixtures; seven-day run is never scientific evidence, TC-17 — Frozen cells ARUC 40/44, BSHM 32/35, NICO 35/33, calendar 2022, Fixture Manifests, plumbing_7day Fixture, scientific_1month Fixture (+6 more)
 
 ### Community 126 - "Supervisor (freeze-gate countersign authority)"
-Cohesion: 0.18
-Nodes (14): Examining Committee / Amirkabir University of Technology, Stakeholder Map - Hourly VTEC Forecasting (TEC_Project), Student / Thesis Author (Kimia Rezaei), Supervisor (freeze-gate countersign authority), review-tec-governance board process (influencer, not decision-maker), src/data/reuse_registry.py - the section 10.1 external-code register, D-144 - Phase 1 source adoption and the approved self-contained acquisition notebook, G-P1A - prepared-data acceptance including the section 6.1B coverage minimum (+6 more)
+Cohesion: 0.24
+Nodes (11): Examining Committee / Amirkabir University of Technology, Stakeholder Map - Hourly VTEC Forecasting (TEC_Project), Student / Thesis Author (Kimia Rezaei), Supervisor (freeze-gate countersign authority), review-tec-governance board process (influencer, not decision-maker), D-144 - Phase 1 source adoption and the approved self-contained acquisition notebook, G-P1A - prepared-data acceptance including the section 6.1B coverage minimum, Chain 1 - Intent to deliverable set to feasibility backing (no orphans) (+3 more)
 
 ### Community 127 - "External Dependency Map — Hourly VTEC Forecasting (TEC_Project Phase 1)"
 Cohesion: 0.10
 Nodes (19): A1 — Decidable at Gate 0, with no design work behind them, A1a — the F10.7 decisions, with the measured evidence behind them, A1b — the `plumbing_7day` station, with the measured evidence behind it, A1c — fixture reconciliation against the decision records, A2 — Presented at Gate 0, decided at the functional-design gate, A3 — Contract-type blockers, explicitly *not* Gate 0 items, A. Decisions this project cannot make for itself, Assumptions & Open Questions (+11 more)
 
 ### Community 128 - "test_locked_test_guard.py"
-Cohesion: 0.06
-Nodes (70): EvidenceScanError, fail_unparseable(), open_restricted(), R-27's fail-closed scan limb: a file a custody scan cannot read or parse. Rides…, R-27's shared rule, one home: an unparseable artifact is a FAILURE, never a…, Record the access, flush it, then return `path` for reading. Raises ------…, _access_row(), _any_restricted_file() (+62 more)
+Cohesion: 0.05
+Nodes (80): _append_and_flush(), assert_no_december_outside_restricted(), EvidenceScanError, fail_unparseable(), open_restricted(), Path, The restricted-root path guard: one chokepoint for every read under the locked…, R-27's fail-closed scan limb: a file a custody scan cannot read or parse. Rides… (+72 more)
 
 ### Community 129 - "Functional Design Guide"
 Cohesion: 0.22
@@ -1208,29 +1214,29 @@ Nodes (13): AI-DLC Method Import Stub, AskUserQuestion Harness Binding, Question
 Cohesion: 0.23
 Nodes (13): Active Space and Intent Record Resolution, AI-DLC Outcomes Pack Skill, aidlc-runtime.ts summary --json, Commit vs Archive Policy, Tool-Sourced Counting Rule, OUTCOMES.md Handover Document, AI-DLC Session Replay Skill, Audit Shard Event Trail (+5 more)
 
-### Community 132 - "NEVER Mix Kyoto Dst Release Grades Within One Series (D-10.1)"
-Cohesion: 0.17
-Nodes (13): D-10 (driver series: Dst grade, NaN policy, lags), NEVER Backfill a Driver from Future Final or Definitive Values, ALWAYS Lag Every Predictor to Its Availability Timestamp (TC-10), ALWAYS Treat Dst as Diagnostic/Hindcast-Only (TC-11), NEVER Mix Kyoto Dst Release Grades Within One Series (D-10.1), NEVER Impute the F10.7 Outage Window Before the Gap Is Governed (TC-20), NEVER Use a Centered F10.7 Window (trailing 81-day mean only), ALWAYS Store Gaps as Explicit NaN at Acquisition (D-5, D-10.2) (+5 more)
+### Community 132 - "GOV-2026-08-15-FE-02 (Feasibility re-review, CONDITIONAL PASS)"
+Cohesion: 0.12
+Nodes (19): D-10 (driver series: Dst grade, NaN policy, lags), NEVER Backfill a Driver from Future Final or Definitive Values, ALWAYS Lag Every Predictor to Its Availability Timestamp (TC-10), ALWAYS Treat Dst as Diagnostic/Hindcast-Only (TC-11), NEVER Mix Kyoto Dst Release Grades Within One Series (D-10.1), NEVER Impute the F10.7 Outage Window Before the Gap Is Governed (TC-20), NEVER Use a Centered F10.7 Window (trailing 81-day mean only), ALWAYS Store Gaps as Explicit NaN at Acquisition (D-5, D-10.2) (+11 more)
 
 ### Community 133 - "buildBundle"
 Cohesion: 0.21
 Nodes (13): buildBundle(), buildManifest(), enforceTotalBudget(), redactString(), redactValue(), safeIso(), stage(), stageContent() (+5 more)
 
 ### Community 134 - "runDoctorAnalysis"
-Cohesion: 0.18
-Nodes (15): extractStateFields(), newestAuditMs(), newRedactionContext(), readGraphStages(), readHookHealth(), readMarkers(), readShippedStageGraph(), runDoctorAnalysis() (+7 more)
+Cohesion: 0.16
+Nodes (17): extractStateFields(), firstLineIsMarker(), isSymlink(), newestAuditMs(), newRedactionContext(), readAuditSafely(), readGraphStages(), readHookHealth() (+9 more)
 
 ### Community 135 - "NFR-DET-01 - controlled randomness"
 Cohesion: 0.12
 Nodes (19): build_comparison_mask(predictions, benchmark) - one comparison-wide mask, paired_loss_differential(model, benchmark, mask) - benchmark minus model, Prediction dataclass - model_id, seed, frame, phase/source/target-definition IDs, three_seed_mean(predictions) -> Prediction (confirmatory prediction), vector_block_bootstrap(...) - 24-hour vector blocks, 10,000 replicates, required seed, src/evaluation/bootstrap.py - vector time-block bootstrap, seed 20221201, src/evaluation/masks.py - comparison-wide mask and IRI-free denial check, src/evaluation/metrics.py - the paired loss differential (+11 more)
 
 ### Community 136 - "Regulatory Frameworks"
-Cohesion: 0.10
-Nodes (22): drift-report Artifact, AWS CDK Best Practices, CDK Aspects for Compliance, CDK Assertion and Snapshot Testing, CDK Construct Levels (L1/L2/L3), Environment-Aware Stacks, Props Interface Pattern, CDK Security Defaults (+14 more)
+Cohesion: 0.17
+Nodes (12): drift-report Artifact, CDK Aspects for Compliance, Cost Allocation Tagging, S3 Lifecycle Policies, Regulatory Frameworks, Compliance-as-Code Patterns, Data Residency and Sovereignty, GDPR (+4 more)
 
 ### Community 137 - "test_iri_denial.py"
 Cohesion: 0.07
-Nodes (63): Module, _dynamic_import_sites(), _imports_of(), _in_domain(), iri_column_violations(), _is_allowlisted(), _matches_target(), _module_index() (+55 more)
+Nodes (63): _dynamic_import_sites(), _imports_of(), _in_domain(), iri_column_violations(), _is_allowlisted(), _matches_target(), _module_index(), _package_parts() (+55 more)
 
 ### Community 138 - "Caveman Compress Skill"
 Cohesion: 0.23
@@ -1241,20 +1247,20 @@ Cohesion: 0.20
 Nodes (12): Current Stage: application-design (Inception), Recorded Languages Field: TypeScript, Scope: research-pipeline-governed, AI-DLC Workflow Record — TEC Hourly Forecast, Audit Shard git-ae-srv-rdt1, STAGE_JUMPED REDO on requirements-analysis, REVIEW_FREEZE_BLOCKED on requirements.md, Audit Shard laptop-tv4ugfbc (+4 more)
 
 ### Community 140 - "GOV-2026-08-13-IC-01 (Intent Capture, FAIL, reconstructed)"
-Cohesion: 0.17
-Nodes (12): ALWAYS Disclose a Baseline That Beats the LSTM, NEVER Omit an Unfavourable Baseline Comparison (Binding Honesty Rule), ALWAYS Co-Report the Three Mandatory Difficulty Controls (PC-03, PC-04), D-103 (+1 h confirmatory horizon), GOV-02 (horizon widened to h=1..6 against D-103's +1 h), GOV-04 (primary metric changed to MAE; Vision fixes RMSE), GOV-05 (seasonal persistence and climatology omitted), GOV-09 (source register under-declares its own citations) (+4 more)
+Cohesion: 0.11
+Nodes (19): ALWAYS Disclose a Baseline That Beats the LSTM, NEVER Omit an Unfavourable Baseline Comparison (Binding Honesty Rule), ALWAYS Co-Report the Three Mandatory Difficulty Controls (PC-03, PC-04), NEVER Hide a Scientific Constant in Source or a Notebook (TC-03e), Commits Touching Governed Artifacts Must Cite a D-Number, evidence/DECISIONS.md D-Number Register, Four Governed Configs (data/features/experiment/seeds.yaml), Migration Obligation on Two Scripts and the Audit Notebook (+11 more)
 
-### Community 141 - "Board Finding BENCH-05 (licence and reuse register)"
-Cohesion: 0.20
-Nodes (12): Board Finding BENCH-05 (licence and reuse register), Board Finding IMPL-07 (full §10.1 reuse field set), ALWAYS Record Reused Third-Party Source in the §10.1 Register, NEVER Copy Third-Party Source with Absent or Incompatible Licence (NFR-LIC-01), AGPLv3 Global-TEC-forecasting Reuse Dependency, Gate G-P2 (code-reuse and licence), tests/test_reuse_registry.py, D-18 (FULL re-merge onto current per-month hashes) (+4 more)
+### Community 141 - "evidence/audit_evidence_2022-FULL (re-merge obligation, relocated under D-15)"
+Cohesion: 0.13
+Nodes (17): Board Finding BENCH-05 (licence and reuse register), Board Finding IMPL-07 (full §10.1 reuse field set), ALWAYS Record Reused Third-Party Source in the §10.1 Register, NEVER Copy Third-Party Source with Absent or Incompatible Licence (NFR-LIC-01), AGPLv3 Global-TEC-forecasting Reuse Dependency, Gate G-P2 (code-reuse and licence), tests/test_reuse_registry.py, evidence/audit_evidence_2022-FULL (re-merge obligation, relocated under D-15) (+9 more)
 
-### Community 142 - "loadLedger"
-Cohesion: 0.18
-Nodes (18): addInto(), cursorsLackByteOffset(), emptyLedger(), emptyStageBucket(), emptyTokenCounts(), emptyTotals(), emptyUsageAggregate(), foldRowIntoAggregate() (+10 more)
+### Community 142 - "emptyTotals"
+Cohesion: 0.22
+Nodes (13): addInto(), emptyLedger(), emptyStageBucket(), emptyTokenCounts(), emptyTotals(), emptyUsageAggregate(), foldRowIntoAggregate(), foldRowIntoLedger() (+5 more)
 
 ### Community 143 - "test_december_audit.py"
-Cohesion: 0.07
-Nodes (56): PreflightError, A TE 18.3 preflight precondition is unmet., The prepared product does not match its governed expected schema (W-5, R-49).…, SchemaError, assert_performance_blind(), assert_regime_report_states_range(), attribute_records_by_month(), build_regime_report() (+48 more)
+Cohesion: 0.06
+Nodes (68): PreflightError, A TE 18.3 preflight precondition is unmet., assert_figures_caveated(), assert_gp1a_record(), assert_performance_blind(), assert_prohibition_results(), assert_regime_report_states_range(), assert_unmixed_sources() (+60 more)
 
 ### Community 144 - "aidlc-sensor-type-check.ts"
 Cohesion: 0.27
@@ -1281,8 +1287,8 @@ Cohesion: 0.20
 Nodes (10): Communication topologies (inline, subagent, pipeline, mob), Collaborator contribution files as completion evidence, Engine-resolved artifact paths (no stage file hardcodes a root), mode field (stage communication topology), Stage Definition Format (authoritative stage-file contract), Swarm-trigger field coupling (for_each + mode), Terminal review receipt and review freeze, Subagent return summary and contribution file format (11) (+2 more)
 
 ### Community 150 - "build.py"
-Cohesion: 0.09
-Nodes (51): assert_dst_diagnostic_only(), Dst is diagnostic/hindcast-only (TC-11): a Dst-named field with any other class…, _as_utc(), _assert_driver_alignment(), _assert_field_name_clean(), _assert_name_matches_row(), _assert_provenance_matches_columns(), build_features() (+43 more)
+Cohesion: 0.07
+Nodes (63): _as_utc(), _assert_driver_alignment(), _assert_field_name_clean(), _assert_name_matches_row(), assert_producers_cover(), _assert_provenance_matches_columns(), build_features(), _feature_columns() (+55 more)
 
 ### Community 151 - "Deployment Strategies"
 Cohesion: 0.29
@@ -1296,33 +1302,33 @@ Nodes (10): Phase Boundary Verification, Phase Check Report, PHASE_VERIFIED Audi
 Cohesion: 0.40
 Nodes (10): bugfix Scope, enterprise Scope, feature Scope, infra Scope, mvp Scope, poc Scope, refactor Scope, security-patch Scope (+2 more)
 
-### Community 154 - "Four Governed Configs (data/features/experiment/seeds.yaml)"
-Cohesion: 0.17
-Nodes (12): ALWAYS Give Every Module a Purpose/Inputs/Re-Run Docstring, NEVER Hide a Scientific Constant in Source or a Notebook (TC-03e), Commits Touching Governed Artifacts Must Cite a D-Number, evidence/DECISIONS.md D-Number Register, Four Governed Configs (data/features/experiment/seeds.yaml), Migration Obligation on Two Scripts and the Audit Notebook, NN_verb_noun.py Stage Scripts and --config/--phase CLI Convention, src/data/release.py SHA-256 Helper Consolidation (+4 more)
+### Community 154 - "Supervisor Countersignature Request 2026-08-16 (stage 2.2)"
+Cohesion: 0.14
+Nodes (14): ALWAYS Give Every Module a Purpose/Inputs/Re-Run Docstring, NEVER Let an Agent Fill a TBD - freeze gate Value by Convenience, NN_verb_noun.py Stage Scripts and --config/--phase CLI Convention, D-1 (coordinate-to-cell rule), Five Freezes Attached to D-144's Approval, Recorded Student/Supervisor Authority Equivalence, D-16 (Phase 1 hourly aggregation statistic = median), D-1 Addendum (coordinate-to-cell rule approved under authority equivalence) (+6 more)
 
 ### Community 155 - "audit_ec1_drivers.py"
 Cohesion: 0.31
 Nodes (9): audit_dst(), audit_f107(), days_in_year(), main(), date, Path, EC-1 driver audit: Kyoto WDC Dst grade span and Canadian F10.7 archive…, Confirm a single grade across 2022 and count the day rows each month carries. (+1 more)
 
 ### Community 156 - "CI Pipeline Stage"
-Cohesion: 0.25
-Nodes (8): CI Config Artifact, Construction to Operation Phase Boundary Verification, Quality Gates Artifact, CI Pipeline Stage, Code Summary Artifact, CICD Pipeline Design Artifact, Ideation to Inception Phase Boundary Verification, Inception to Construction Phase Boundary Verification
+Cohesion: 0.22
+Nodes (9): CI Config Artifact, Construction to Operation Phase Boundary Verification, Quality Gates Artifact, CI Pipeline Stage, Code Summary Artifact, CICD Pipeline Design Artifact, Deployment Architecture Artifact, Ideation to Inception Phase Boundary Verification (+1 more)
 
 ### Community 157 - "Deployment Execution Stage"
-Cohesion: 0.21
-Nodes (15): Deployment Execution Stage, Deployment Pipeline Configuration Stage, cd-config Artifact, deployment-strategy Artifact, rollback-runbook Artifact, Environment Provisioning Stage, environment-inventory Artifact, nfr-validation-matrix Artifact (+7 more)
+Cohesion: 0.39
+Nodes (9): Deployment Execution Stage, Deployment Pipeline Configuration Stage, cd-config Artifact, deployment-strategy Artifact, rollback-runbook Artifact, Environment Provisioning Stage, environment-inventory Artifact, Infrastructure Pattern Alignment (+1 more)
 
 ### Community 158 - "Caveman Stats (README)"
 Cohesion: 0.39
 Nodes (9): Caveman Stats (README), HONEST-NUMBERS.md, Lifetime Savings Statusline Badge, Estimated Net Savings, Estimated Rule Overhead, Caveman Stats Skill, caveman-stats.js Hook Script, Caveman Mode Tracker Hook (+1 more)
 
-### Community 159 - "GOV-2026-08-15-FE-02 (Feasibility re-review, CONDITIONAL PASS)"
-Cohesion: 0.14
-Nodes (15): D-9 (Phase 1 acquisition input promotion), Governance Finding DATA-07 (FULL provenance unverifiable in principle), evidence/audit_evidence_2022-FULL (re-merge obligation, relocated under D-15), Finding DATA-01 (SHA-256 chain broken on Windows checkout), .gitattributes Denormalization Fix (60/60 artifacts verify), raw_isprint_cache/ Re-Acquisition with Provider Version Suffixes, D-15 (relocate December-bearing artifacts under locked_test_restricted/), Reconstructed Record Disclosure (original never written to disk) (+7 more)
+### Community 159 - "test_checkpoint_restore.py"
+Cohesion: 0.10
+Nodes (36): Protocol, assert_restored_is_best(), Checkpoint, CheckpointBackend, EpochRecord, Any, Checkpoint selection and restore: lowest validation RMSE, never the last epoch…, The record with the LOWEST validation RMSE; ties -> the earliest epoch (R-94). (+28 more)
 
-### Community 160 - "Item 1 - TE §12 Amendment for test_acquisition_window.py (countersigned)"
-Cohesion: 0.33
-Nodes (9): NEVER Derive Fold Membership from a Directory or File Name (ML-07), Board Finding ML-07 (year-blind predicate, fold membership), Record-Date Exclusion, Not Directory-Name Exclusion, Governance Finding TEC-09 (year-blind acquisition predicate), tests/test_acquisition_window.py, tests/test_release_hashes.py, evidence/CORRECTION_2026-08-16_acquisition_window.md, Item 1 - TE §12 Amendment for test_acquisition_window.py (countersigned) (+1 more)
+### Community 160 - "Preflight Gate §18.3 (zero unresolved P0, no failing critical test)"
+Cohesion: 0.11
+Nodes (23): Deploy on Merge to Staging, Board Finding BENCH-01 (Kaggle-session test execution), ALWAYS Use the F1-F4 Fixed Calendar Folds with 24-Hour Embargo, NEVER Derive Fold Membership from a Directory or File Name (ML-07), ALWAYS Run the Critical Tests Inside the Kaggle Session (TC-03g), Board Finding ML-07 (year-blind predicate, fold membership), ALWAYS Fit Transforms on Training Partitions Only (NFR-LEAK-01), §13.3 Immutable Dataset Release Contract (+15 more)
 
 ### Community 161 - "Findings"
 Cohesion: 0.04
@@ -1396,9 +1402,9 @@ Nodes (6): application-design Stage Runner, approval-handoff Stage Runner, Condu
 Cohesion: 0.33
 Nodes (6): extractAuditEvents(), gateOutcome(), lastEvent(), lastEventIndex(), parseAuditEvents(), reconstructTimeline()
 
-### Community 179 - "Change Record CR-2026-08-21-FREEZES"
+### Community 179 - "Governance Finding DATA-07 (FULL provenance unverifiable in principle)"
 Cohesion: 0.12
-Nodes (22): NEVER Invent an Ablation After Results; NEVER Use Raw Longitude, ALWAYS Predeclare Ablations as Named Runs in experiment.yaml, Board Finding ML-04 (ablation predeclaration, longitude), NEVER Let an Agent Fill a TBD - freeze gate Value by Convenience, ALWAYS Fit Transforms on Training Partitions Only (NFR-LEAK-01), Locked-Test Discipline as Executable Guard, Preflight Gate §18.3 (zero unresolved P0, no failing critical test), tests/test_locked_test_guard.py (+14 more)
+Nodes (16): NEVER Invent an Ablation After Results; NEVER Use Raw Longitude, ALWAYS Predeclare Ablations as Named Runs in experiment.yaml, Board Finding ML-03 (estimand and vector bootstrap), Board Finding ML-04 (ablation predeclaration, longitude), NEVER Substitute a Naive or Within-Station Bootstrap (TC-19), ALWAYS Use the Paired Loss Differential as the Confirmatory Estimand, D-9 (Phase 1 acquisition input promotion), Governance Finding DATA-07 (FULL provenance unverifiable in principle) (+8 more)
 
 ### Community 180 - "ML-01 - ML input space not closed to the TE 6.2 dictionary"
 Cohesion: 0.22
@@ -1408,9 +1414,9 @@ Nodes (11): FR-P1-04-1 (IRI-free ML boundary and import rule), FR-P1-04-3 (exter
 Cohesion: 0.33
 Nodes (6): FR-P1-05-11 (reporting breakdowns and storm-event guard), ML-11 - sign-convention reporting criterion absent, ML-12 - per-seed stability and fold table absent from breakdowns, TEC-14 - reporting breakdowns mis-sourced to Vision 11, FR-P1-05-16 (reporting breakdowns and storm-event guard), RA-F-11 - FR-P1-05-11 test link pointed at a row that tests plots
 
-### Community 182 - "merge_coverage_year.py"
-Cohesion: 0.29
-Nodes (9): _access_record(), guarded(), main(), month_dirs(), Merge per-month Madrigal coverage runs into one calendar-year evidence set. The…, Every per-month evidence folder, in month order, across both evidence roots.…, The row written before any restricted read in this run. purpose is…, Route a restricted path through the chokepoint; pass an ordinary path through.… (+1 more)
+### Community 182 - "06_train_and_predict.py"
+Cohesion: 0.12
+Nodes (36): _assert_phase1_field_contract(), _assert_registry_column_18(), _bundle_pair(), _bundle_root(), _child_rows(), _final_seeds(), _finish_locked_write(), _load_target_by_manifest() (+28 more)
 
 ### Community 183 - "Delivery Agent"
 Cohesion: 0.50
@@ -1496,21 +1502,21 @@ Nodes (11): Assumptions & Open Questions, Edge block, Edge table, Forbidden edge
 Cohesion: 0.18
 Nodes (10): Assumptions & Open Questions, Cross-unit responsibilities, Open verification gaps and their owners, Per-unit coverage summary, Requirements with no acceptance row, by unit, Sources, Table 1 — Requirement to unit, Table 2 — Acceptance row to unit (+2 more)
 
-### Community 223 - "ConfigSnapshot"
-Cohesion: 0.09
-Nodes (42): ConfigSnapshot, FeatureAvailabilityError, Driver-availability resolution had to stop rather than choose a default…, The approved stage-2.6 contract, unchanged (component-methods.md; domain-…, _as_date(), _as_utc(), assert_anchor_recomputed(), assert_trailing_not_centered() (+34 more)
+### Community 223 - "IntegrityError"
+Cohesion: 0.04
+Nodes (147): Exception, ConfigSnapshot, IntegrityError, InverseTransformError, Base for every project-defined integrity violation. R-01's constructor…, An inverse transform was not applied before a metric was computed. Not an…, The approved stage-2.6 contract, unchanged (component-methods.md; domain-…, FeatureBundle (+139 more)
 
 ### Community 224 - "Vision §15.2 change record — `CR-2026-08-22-TE-AMEND`"
 Cohesion: 0.18
 Nodes (10): 1. Requested change and reason, 2. Alternatives, 3. Affected requirements, data, code, experiments, schedule and claims, 4. Whether the locked test has been accessed, 5. Required regeneration or invalidation, 6. Approver, date and effective version, Class A — an already-approved historical amendment, applied late, Class B — new amendments expressly approved 2026-08-22 (+2 more)
 
-### Community 225 - "test_prepared_target_schema.py"
-Cohesion: 0.09
-Nodes (39): A target-standardization invariant is violated (unit `target-standardization`).…, StandardizationError, assert_closed_transformation_set(), assert_d17_config_matches(), assert_label_permitted(), assert_qc_operation_permitted(), The declared float tolerance from the fixture manifest — or STOP (TE 15.2).…, An operation outside the frozen QC list fails LIKE A FIFTH TRANSFORMATION… (+31 more)
+### Community 225 - "StandardizationError"
+Cohesion: 0.15
+Nodes (25): A target-standardization invariant is violated (unit `target-standardization`).…, StandardizationError, assert_d17_config_matches(), R-65: the statistic resolves from config CITING D-16; a run never runs a…, R-68: D-19's four thresholds, read from config WITH their measured basis…, W-3 steps 1-2: the CONFIG field set equals D-17 — before any row is compared. A…, resolve_aggregation_statistic(), resolve_support_thresholds() (+17 more)
 
-### Community 226 - "IntegrityError"
-Cohesion: 0.10
-Nodes (40): Exception, _assert_phase1_field_contract(), _attempt_benchmark(), _attempt_comparator(), _audit_dst(), _audit_f107(), _combined_digest(), _load_gate_state() (+32 more)
+### Community 226 - "04_build_external_products.py"
+Cohesion: 0.16
+Nodes (29): _assert_phase1_field_contract(), _attempt_benchmark(), _attempt_comparator(), _audit_dst(), _audit_f107(), _combined_digest(), _load_gate_state(), main() (+21 more)
 
 ### Community 227 - "MANDATORY: recommendations and impact analysis in every question file"
 Cohesion: 0.50
@@ -1521,8 +1527,8 @@ Cohesion: 0.11
 Nodes (37): assert_reuse_registered_before_use(), find_marked_modules(), load_register(), Path, The TE 10.1 External Method and Code-Reuse Register: registered BEFORE use, or…, One complete TE 10.1 register row. Every field is required and non-empty., Append one complete row, flushed and fsynced before returning (append-safe).…, Parse the register into `reuse_id -> row`. Fail-closed on every defect. Raises… (+29 more)
 
 ### Community 229 - "windows.py"
-Cohesion: 0.08
-Nodes (40): tensor_shape(), _as_utc(), assert_mask_is_comparison_wide(), assert_window_length_grid_free(), assert_window_parity(), build_comparison_mask(), build_windows(), ComparisonMask (+32 more)
+Cohesion: 0.10
+Nodes (33): FairnessError, A comparison used a pairwise or model-specific mask (NFR-FAIR-01, TC-16)., _as_utc(), assert_mask_is_comparison_wide(), assert_window_length_grid_free(), build_comparison_mask(), build_windows(), ComparisonMask (+25 more)
 
 ### Community 230 - "Phase Boundary Verification — Inception → Construction"
 Cohesion: 0.17
@@ -1532,13 +1538,13 @@ Nodes (11): Artifacts checked, Check 1 — Every requirement traces to exactly o
 Cohesion: 0.17
 Nodes (11): Artifacts checked, Check 1 — Every requirement traces to exactly one implementing unit, Check 2 — Units are defined, acyclic, and consistently named across artifacts, Check 3 — Design covers the units, Check 4 — Acceptance coverage, both directions, Check 5 — A delivery plan exists and is internally consistent, Check 6 — No contradiction carried forward silently, Check 7 — Open items handed to Construction (+3 more)
 
-### Community 232 - "sessionUsageAggregate"
-Cohesion: 0.67
-Nodes (4): readCurrentTranscriptPath(), safeSessionSegment(), sessionUsageAggregate(), sessionUsageKey()
+### Community 232 - "foldTranscriptIntoLedger"
+Cohesion: 0.27
+Nodes (16): main(), sessionsDir(), writeCurrentSessionId(), cursorsLackByteOffset(), foldTranscriptIntoLedger(), intentUsageKey(), ledgerPath(), loadLedger() (+8 more)
 
 ### Community 233 - "spaceweather.py"
-Cohesion: 0.09
-Nodes (39): AlignmentError, A driver series did not align onto the hourly grid as its contract requires., align_interval_series(), apply_carry_forward(), assert_alignment(), assert_carry_forward_conservation(), assert_gfz_cross_products(), assert_identical_across_cells() (+31 more)
+Cohesion: 0.08
+Nodes (40): Collection, align_interval_series(), apply_carry_forward(), assert_alignment(), assert_carry_forward_conservation(), assert_gfz_cross_products(), assert_identical_across_cells(), assert_single_grade() (+32 more)
 
 ### Community 234 - "write_release"
 Cohesion: 0.13
@@ -1585,8 +1591,8 @@ Cohesion: 0.40
 Nodes (4): Deviations, Interpretations, Open questions, Tradeoffs
 
 ### Community 245 - "finalize_audit_reports"
-Cohesion: 0.11
-Nodes (37): AuditScopeError, The December audit's declared scope fails a scope check (W-6, R-50, SD-I-04).…, assert_scope_equals_reference(), DeclaredAuditScope, finalize_audit_reports(), Path, Check 3 — TWO reconciliations over DIFFERENT questions (SD-I-04, corrected). 3a…, All-or-nothing evidence (SEC-I-03): validate, reconcile, THEN write both… (+29 more)
+Cohesion: 0.10
+Nodes (39): AuditScopeError, The December audit's declared scope fails a scope check (W-6, R-50, SD-I-04).…, assert_scope_equals_reference(), _current_restricted_root(), DeclaredAuditScope, finalize_audit_reports(), Path, Check 3 — TWO reconciliations over DIFFERENT questions (SD-I-04, corrected). 3a… (+31 more)
 
 ### Community 246 - "Business Logic Model — `statistical-inference`"
 Cohesion: 0.06
@@ -1596,17 +1602,17 @@ Nodes (35): Assumptions & Open Questions, Bootstrap construction vs. TC-19 / TE 
 Cohesion: 0.06
 Nodes (33): Assumptions & Open Questions, Confirmed no edits since that review, Coverage limits, Coverage limits, Coverage limits, Findings, Findings, Findings (+25 more)
 
-### Community 248 - "test_acquisition.py"
-Cohesion: 0.10
-Nodes (33): CredentialEgressError, guard_egress(), guard_egress_value(), The redaction boundary was handed an unredacted credential-bearing value. Sole-…, The one declared redaction chokepoint for a single value (W-9, R-39, Q1 = A).…, Recursively apply `guard_egress_value` to every string in a payload. Mapping…, Negative controls for the `acquisition` unit: every hard rule's violation is…, R-01's any-future clause: the stage entry contract's catch must see both. (+25 more)
+### Community 248 - "guard_egress"
+Cohesion: 0.12
+Nodes (22): _auth_header_reason(), CredentialEgressError, guard_egress(), guard_egress_value(), _heuristic_reason(), The redaction boundary was handed an unredacted credential-bearing value. Sole-…, Structural signed-URL detection. Returns the reason, or None., Structural auth-header detection. Returns the reason, or None. (+14 more)
 
-### Community 249 - "inventory.py"
-Cohesion: 0.10
-Nodes (33): InventoryError, A source-inventory invariant is violated (`inventory-and-registry` W-1, R-44).…, assert_entry_matches_release(), assert_source_entry(), assert_verbatim_notice(), _entry_id(), is_december_bearing(), new_audit_run_id() (+25 more)
+### Community 249 - "InventoryError"
+Cohesion: 0.17
+Nodes (21): InventoryError, A source-inventory invariant is violated (`inventory-and-registry` W-1, R-44).…, assert_entry_matches_release(), assert_source_entry(), assert_verbatim_notice(), _entry_id(), R-44: all nine TE 5.1 fields present and non-empty, or the entry FAILS. Raises…, R-44's boundary: consumed by release ID and hash, never by path. Raises ------… (+13 more)
 
 ### Community 250 - "LockedTestError"
-Cohesion: 0.10
-Nodes (32): LockedTestError, A restricted-root read was attempted outside the `open_restricted` chokepoint.…, assert_record_date_class_agreement(), audit_access_record(), _current_restricted_root(), One typed access row per December-bearing artifact per limb (R-50, Rec. 11).…, The restricted root, derived by `locked_test`'s OWN derivation. This module…, The post-read half of the class test: the CONTENT must agree with the class.… (+24 more)
+Cohesion: 0.09
+Nodes (30): _access_record(), guarded(), main(), month_dirs(), Merge per-month Madrigal coverage runs into one calendar-year evidence set. The…, Every per-month evidence folder, in month order, across both evidence roots.…, The row written before any restricted read in this run. purpose is…, Route a restricted path through the chokepoint; pass an ordinary path through.… (+22 more)
 
 ### Community 251 - "Security Requirements — `fixtures-and-reproducibility`"
 Cohesion: 0.06
@@ -1621,16 +1627,16 @@ Cohesion: 0.06
 Nodes (31): Assumptions & Open Questions, Coverage limits (4-call budget), Coverage limits (8-call budget), Exempt-module count and numeral sweep, Findings, New finding, New findings, No regression (+23 more)
 
 ### Community 254 - "Path"
-Cohesion: 0.13
-Nodes (32): CompletedProcess, _driver_evidence(), Path, R-60's disclosure trigger, keyed to the COMPARISON'S EXISTENCE: rendering ANY…, R-60 obligation 3: the map-product-to-map-product limitation AND the spatial-…, A temporary workspace: requirements.txt copied (the lock hashes it); no git…, Synthetic driver evidence in the original layout, named with a retrieval date., REQ-ENG-9 half 1 (R-61): an injected missing month -> the run CONTINUES (exit… (+24 more)
+Cohesion: 0.12
+Nodes (33): CompletedProcess, _driver_evidence(), _dst_month_html(), Path, R-60's disclosure trigger, keyed to the COMPARISON'S EXISTENCE: rendering ANY…, R-60 obligation 3: the map-product-to-map-product limitation AND the spatial-…, A temporary workspace: requirements.txt copied (the lock hashes it); no git…, Synthetic driver evidence in the original layout, named with a retrieval date. (+25 more)
 
 ### Community 255 - "prepared.py"
 Cohesion: 0.11
-Nodes (30): assert_budget_complete(), assert_excluded_absent(), build_coverage_report(), build_data_quality_block(), build_uncertainty_budget(), cell_bounds(), cell_of(), _field_tokens() (+22 more)
+Nodes (27): assert_excluded_absent(), assert_qc_operation_permitted(), build_coverage_report(), build_data_quality_block(), cell_bounds(), cell_of(), _field_tokens(), hour_start_utc() (+19 more)
 
-### Community 256 - "GateError"
+### Community 256 - "inventory.py"
 Cohesion: 0.11
-Nodes (30): assert_figures_caveated(), assert_gp1a_record(), assert_no_silent_imputation(), assert_prohibition_results(), assert_unmixed_sources(), build_gp1a_record(), GateError, _is_gap() (+22 more)
+Nodes (30): The prepared product does not match its governed expected schema (W-5, R-49).…, SchemaError, assert_no_silent_imputation(), is_december_bearing(), _is_gap(), new_audit_run_id(), _parse_utc(), date (+22 more)
 
 ### Community 257 - "Security Requirements — `acquisition`"
 Cohesion: 0.07
@@ -1648,9 +1654,9 @@ Nodes (27): Assumptions & Open Questions, Consolidated Summary Confirmation, Con
 Cohesion: 0.07
 Nodes (27): Assumptions & Open Questions, Business Rules — `foundation`, Finalized 2026-08-24 — the three amendments are settled, R-01 — `IntegrityError` is the single catchable base, R-02 — Preflight rejects both a missing field and a `TBD` field, R-03 — The required-fields map is keyed by `(stage, phase)`, R-04 — Authorized `TBD` in Bolt 1 is expected evidence, not a failure, R-05 — Determinism is applied before any graph construction, and re-exec comes first (+19 more)
 
-### Community 261 - "test_external_drivers.py"
-Cohesion: 0.11
-Nodes (27): assert_grade_eligible(), The F10.7 previous-day observed value usable at `origin`, or the R-57a stop.…, R-62 restriction 3 / GradeEligibility: eligibility is a property of THE DATA,…, resolve_f107_at_origin(), _dst_month_html(), _f107_availability(), datetime, Unit `external-products`: every Step 2-6 refusal negative-controlled. PURPOSE.… (+19 more)
+### Community 261 - "resolve_f107_at_origin"
+Cohesion: 0.21
+Nodes (12): The F10.7 previous-day observed value usable at `origin`, or the R-57a stop.…, resolve_f107_at_origin(), _f107_availability(), datetime, D-25's convention shape as a TEST callable: available at 00:00 UTC on D+1., The R-57a stop: unavailable previous-day median + TBD composition ->…, An ABSENT field is the same stop as a TBD one (the zero-TBD preflight's shape)., A filled composition field is NOT silently applied: its vocabulary and its… (+4 more)
 
 ### Community 262 - "Functional Design Questions — `acquisition`"
 Cohesion: 0.07
@@ -1661,16 +1667,16 @@ Cohesion: 0.07
 Nodes (26): Assumptions & Open Questions, Coverage limits, Dependent arithmetic check (`tech-stack-decisions.md`), Eleven-NFR-ID set-difference (owed from iteration 1's coverage limits), Finding 3 (iteration 1, TS-R-02) — NOT VERIFIED THIS PASS (flag, not a clearance), Findings, Findings 1 & 2 (iteration 1) — CONFIRMED RESOLVED, Findings (+18 more)
 
 ### Community 264 - "aidlc-deliver-stage-rules.ts"
-Cohesion: 0.13
-Nodes (25): augmentDispatchRules(), augmentSingleDispatch(), augmentText(), bundleBlock(), currentStage(), DISPATCH_TOOLS, dispatchHookOutput(), DispatchRuleResult (+17 more)
+Cohesion: 0.14
+Nodes (24): augmentDispatchRules(), augmentSingleDispatch(), augmentText(), bundleBlock(), currentStage(), DISPATCH_TOOLS, dispatchHookOutput(), DispatchRuleResult (+16 more)
 
-### Community 265 - "00_acquire_prepared_vtec.py"
-Cohesion: 0.13
-Nodes (26): _assert_phase1_field_contract(), _build_transport(), main(), _parse_args(), Any, Namespace, Path, Stage script 00: acquire the D-144-approved prepared VTEC product and driver… (+18 more)
+### Community 265 - "AcquisitionError"
+Cohesion: 0.16
+Nodes (19): AcquisitionError, assert_no_locked_month_records(), partition_by_locked_month(), Any, Split records into (kept, locked_month) on RECORD TIMESTAMPS alone (R-31). The…, BLK-07's acquisition-side bar: no December 2022 record enters this run's…, An acquisition invariant is violated (integrity tier, two-tier posture). Raised…, Write `sha256_manifest.json` (W-4): one entry per provider file PLUS one per… (+11 more)
 
-### Community 266 - "01_inventory_and_registry.py"
-Cohesion: 0.15
-Nodes (26): _assert_phase1_field_contract(), _dedup(), main(), _month_dirs(), _parse_args(), Any, Namespace, Path (+18 more)
+### Community 266 - "Code Summary — `features-and-splits`"
+Cohesion: 0.11
+Nodes (17): Code Summary — `features-and-splits`, Coverage limits, Coverage limits, Deviations, Files created, Files modified in place, Findings, Findings (+9 more)
 
 ### Community 267 - "Security Requirements — `evaluation-and-comparison`"
 Cohesion: 0.08
@@ -1709,12 +1715,12 @@ Cohesion: 0.08
 Nodes (24): Assumptions & Open Questions, Coverage limits, Coverage limits, Findings, New finding — repair-introduced regression, Per-recommendation verification, Regression sweep, Regression sweep — no other new inconsistency found (+16 more)
 
 ### Community 276 - "write_json_artifact"
-Cohesion: 0.11
-Nodes (25): W-1: the target-producing run — REFUSED while the QC list is unfrozen (Q2 = A).…, _run_standardize(), _load_tolerance(), _parse_args(), Namespace, Path, The declared tolerance from the fixture manifest — or STOP naming TE 15.2's…, W-2: the value-level verification — refuses honestly while no target exists.… (+17 more)
+Cohesion: 0.17
+Nodes (16): W-1: the target-producing run — REFUSED while the QC list is unfrozen (Q2 = A).…, _run_standardize(), Path, The target-writing path: every row conforms, every write carries the caveat.…, Read back rows written by `write_target_rows_csv` (the round-trip's read half)., Write a JSON artifact stamped with the three IDs, the label and the caveat.…, read_target_rows_csv(), write_json_artifact() (+8 more)
 
 ### Community 277 - "acquisition.py"
-Cohesion: 0.10
-Nodes (24): assert_gap_conservation(), _auth_header_reason(), count_gaps(), gap_accounting_entry(), _heuristic_reason(), _is_gap(), Acquisition library: redaction chokepoint, bounded retrieval, provenance…, The operational retrieval values, as recorded in the run record and manifests.… (+16 more)
+Cohesion: 0.11
+Nodes (22): assert_driver_inventory(), assert_gap_conservation(), _cli(), count_gaps(), gap_accounting_entry(), _is_gap(), Acquisition library: redaction chokepoint, bounded retrieval, provenance…, Hook entry point: `python -m src.data.acquisition check-notebook-outputs --name… (+14 more)
 
 ### Community 278 - "Security Design — `external-products`"
 Cohesion: 0.08
@@ -1733,8 +1739,8 @@ Cohesion: 0.08
 Nodes (23): Addendum, 2026-08-24 — three sites this record's own sweep missed, Amendment A — REJECTED, Amendment B — APPROVED, Amendment B — one site, Amendment C — REINSTATED and APPROVED, Amendment C — two sites, Approval, Approval status — stated precisely, because revision 1 conflated two acts (+15 more)
 
 ### Community 282 - "write_driver_manifest"
-Cohesion: 0.10
-Nodes (24): assert_series_provenance(), provenance_stamp(), Path, The four provenance fields, their internal consistency, and the per-series…, The provenance stamp every value written by `04_build_external_products.py`…, Write the driver manifest (domain-entities section 8): completeness recorded,…, SD-E-07: a revised external product is byte-identical, or explicitly divergent.…, refuse_divergent_rerun() (+16 more)
+Cohesion: 0.17
+Nodes (16): assert_series_provenance(), The four provenance fields, their internal consistency, and the per-series…, Write the driver manifest (domain-entities section 8): completeness recorded,…, write_driver_manifest(), R-63 control 2: omit any of the four fields -> fails on manifest completeness., R-63 control 1 -- the detectable form of the never-backfill rule: `final`…, R-63 control 3: a status recorded for a no-provenance-column file WITHOUT the…, No artifact may report the reanalysed-value check as closed for F10.7/Dst. (+8 more)
 
 ### Community 283 - "Security Requirements — `inventory-and-registry`"
 Cohesion: 0.09
@@ -1784,9 +1790,9 @@ Nodes (21): 1. Why this file exists, 2. What is lost, and cannot be recovered by
 Cohesion: 0.15
 Nodes (21): A dataset release violates its 13.3 contract. Raised by `write_release` for a…, ReleaseError, _canonical(), canonical_content_json(), collision_probability(), content_hash_of(), _enumerate_release_root(), _existing_prefixes() (+13 more)
 
-### Community 295 - "_frozen_config"
+### Community 295 - "_standardize"
 Cohesion: 0.16
-Nodes (22): FR-P1-03-1's proof: a VALUE-LEVEL diff showing only the documented…, verify_value_level(), _frozen_config(), _provider_rows(), Two stations, one UTC hour each, integer bin labels — the five-column shape., Q2 = A: the target-producing run refuses FIRST; no rows exist afterwards., R-68: a cell-hour below a threshold sets target_valid false; the reason is kept., R-71 content 3: the same cell and month identifiers the G-P1A record uses. (+14 more)
+Nodes (17): FR-P1-03-1's proof: a VALUE-LEVEL diff showing only the documented…, verify_value_level(), _provider_rows(), Two stations, one UTC hour each, integer bin labels — the five-column shape., R-68: a cell-hour below a threshold sets target_valid false; the reason is kept., R-71 content 3: the same cell and month identifiers the G-P1A record uses., An unattributable value change is a FIFTH transformation, not a reviewer's job., A verification of a target that must not exist refuses identically (Q2 = A). (+9 more)
 
 ### Community 296 - "Functional Design Questions — `evaluation-and-comparison`"
 Cohesion: 0.10
@@ -1837,8 +1843,8 @@ Cohesion: 0.10
 Nodes (19): Assumptions & Open Questions, Coverage-completeness sweep (this pass's primary check, per dispatch), Coverage limits (8-call budget), Findings, Other dispatch checks, Prior finding status, Requirement coverage, Review (+11 more)
 
 ### Community 308 - "write_request_manifest"
-Cohesion: 0.14
-Nodes (20): assert_driver_inventory(), assert_madrigalweb_version(), assert_single_release_grade(), Path, R-35 check 1: a non-empty `madrigalWeb_version`, absent failing AS `"unknown"`…, R-40 / REQ-NFR-A1: exactly ONE release grade per series for calendar 2022.…, R-40: every driver series carries ALL NINE of TE 5.1's inventory fields. Raises…, Write `request_manifest.json` (W-3, domain-entities 2). Every value guarded.… (+12 more)
+Cohesion: 0.16
+Nodes (18): assert_madrigalweb_version(), assert_single_release_grade(), Path, R-35 check 1: a non-empty `madrigalWeb_version`, absent failing AS `"unknown"`…, R-40 / REQ-NFR-A1: exactly ONE release grade per series for calendar 2022.…, Write `request_manifest.json` (W-3, domain-entities 2). Every value guarded.…, _write_json(), write_request_manifest() (+10 more)
 
 ### Community 309 - "Business Rules — `features-and-splits`"
 Cohesion: 0.11
@@ -1888,9 +1894,9 @@ Nodes (16): Assumptions & Open Questions, Business Rules — `inventory-and-regi
 Cohesion: 0.24
 Nodes (17): checkEnum(), checkGate(), checkOptionalBoolean(), checkOptionalConsumesAbsent(), checkOptionalNullableString(), checkOptionalPositiveInteger(), checkOptionalString(), checkOptionalStringArray() (+9 more)
 
-### Community 321 - "assert_row_conforms"
-Cohesion: 0.17
-Nodes (17): assert_row_conforms(), W-3 step 3: the ROW check — sixteen fields, the caveat column, the three IDs.…, parametrize, BLK-05's approved acceptance behaviour, limb 1: a valid row PASSES., Token matching: a renamed excluded-class column cannot walk past the check., R-69: a target artifact written without the lineage statement FAILS., test_non_d16_statistic_fails(), test_row_missing_a_required_field_fails() (+9 more)
+### Community 321 - "test_prepared_target_schema.py"
+Cohesion: 0.13
+Nodes (23): assert_closed_transformation_set(), assert_row_conforms(), R-64: the applied set is EXACTLY the four permitted transformations, no fifth.…, W-3 step 3: the ROW check — sixteen fields, the caveat column, the three IDs.…, parametrize, D-17 target-row schema contract, and every hard rule's negative control…, D-17's count is 16, counted from the enumeration; no duplicate; no QC-flag…, BLK-05's approved acceptance behaviour, limb 1: a valid row PASSES. (+15 more)
 
 ### Community 322 - "Domain Entities — `acquisition`"
 Cohesion: 0.12
@@ -1921,8 +1927,8 @@ Cohesion: 0.12
 Nodes (15): Assumptions & Open Questions, Business Logic Model — `inventory-and-registry`, Remediation of the terminal-pass findings — twelfth redo, 2026-08-26, Requirement-to-workflow map, Review — 2026-08-26 fourteenth-receipt confirming pass, Sources, The two, and what evidence would close each, W-1 — Building the source inventory (+7 more)
 
 ### Community 329 - "nounError"
-Cohesion: 0.22
-Nodes (16): handleConfig(), handleCustom(), handleGen(), handlePlugin(), handleRouteOnly(), handleWorkspace(), isAdapterHarness(), isSafeName() (+8 more)
+Cohesion: 0.24
+Nodes (15): handleConfig(), handleCustom(), handleGen(), handlePlugin(), handleRouteOnly(), handleWorkspace(), isAdapterHarness(), isSafeName() (+7 more)
 
 ### Community 330 - "Domain Entities — `external-products`"
 Cohesion: 0.13
@@ -1940,9 +1946,9 @@ Nodes (14): Assumptions & Open Questions, Business Logic Model — `regimes-diag
 Cohesion: 0.13
 Nodes (14): 1. `TargetRow` — D-17's sixteen fields, and the set that is never substituted, 2. `ExcludedFieldSet` — the half that catches a Phase 2 quantity, 3. `SupportThresholds` — D-19's four frozen values, with their measured basis, 4. `TransformationLedger` — what makes "only" checkable, 5. `SchemaCheck` — three ordered steps, two distinguishable failures, 6. `UncertaintyBudget` — two of six, plus the asymmetry statement, 7. `CoverageReport` — keyed to reconcile with G-P1A, 8. `TargetLabel` — the label and the lineage caveat, one shape carrying both (+6 more)
 
-### Community 334 - "Any"
-Cohesion: 0.17
-Nodes (11): partition_by_locked_month(), Any, BaseException, Split records into (kept, locked_month) on RECORD TIMESTAMPS alone (R-31). The…, Bounded-retry, rate-bounded retrieval against an INJECTED transport (TS-A-01).…, Retrieve one provider file; return its `ProviderFileRecord` mapping. `spec`…, _record_year_month(), RetrievalClient (+3 more)
+### Community 334 - "RetrievalClient"
+Cohesion: 0.32
+Nodes (4): BaseException, Bounded-retry, rate-bounded retrieval against an INJECTED transport (TS-A-01).…, Retrieve one provider file; return its `ProviderFileRecord` mapping. `spec`…, RetrievalClient
 
 ### Community 335 - "iri.py"
 Cohesion: 0.27
@@ -1952,9 +1958,9 @@ Nodes (14): BenchmarkError, The IRI benchmark gate refused (R-59, FR-P1-04-15; u
 Cohesion: 0.26
 Nodes (14): ComparatorError, The GIM comparator gate refused (R-60, FR-P1-04-18, FR-P1-04-9). Raised when…, evaluate_generation_gates(), generate_comparator(), interpolation_rule_from(), _parse_utc(), Any, datetime (+6 more)
 
-### Community 337 - "trailing_mean"
-Cohesion: 0.17
-Nodes (15): date, The mean of the `window_days` days ENDING AT `end_day` -- trailing, never…, trailing_mean(), _day(), date, Limb 2 -- the limb that carries the rule: perturbing ANY day after the safe-…, The shifted-input property (SD-E-06): shift the input one day, the output…, Negative control: a CENTERED mean fails limb 1 at every index and fails limb 2… (+7 more)
+### Community 337 - "_day"
+Cohesion: 0.20
+Nodes (10): _day(), date, Limb 2 -- the limb that carries the rule: perturbing ANY day after the safe-…, The shifted-input property (SD-E-06): shift the input one day, the output…, Negative control: a CENTERED mean fails limb 1 at every index and fails limb 2…, Limb 1: the mean at day d equals the mean of the window ENDING at d., test_centered_mean_variant_is_caught_by_both_limbs(), test_shifted_input_shifts_output_with_it() (+2 more)
 
 ### Community 338 - "test_merge_script_restricted_reads.py"
 Cohesion: 0.20
@@ -1984,9 +1990,9 @@ Nodes (13): Assumptions & Open Questions, C-1 — Model set (refuses: a family t
 Cohesion: 0.14
 Nodes (13): 1. `BootstrapDeclaration` — the frozen numbers live in config, and the fields go to the gate, 2. `BlockGrid` — the fixed non-overlapping partition as an assertable fact, 3. `VectorBlockDraw` — same indices, all three stations, ragged contents, 4. `PrecomputedDifferenceSeries` — d_s(t), one copy, computed once, 5. `BootstrapResult` — the result carries its own evidence, 6. `WideningGuardEvidence` — evidence of the check, quarantined from reporting, 7. `SensitivityResult` — labelled, separate, never merged, 8. `IntegrityError` subclasses raised here — placement under R-01's amended fifteen-exception hierarchy (+5 more)
 
-### Community 345 - "ADR-10 - The four-part section 12/13.2 amendment recorded as an obligation"
-Cohesion: 0.19
-Nodes (14): FU-3 - Home for the two homeless determinism checks (answer B: tests/test_determinism.py), tests/test_determinism.py (NEW) - determinism coverage module, ADR-10 - The four-part section 12/13.2 amendment recorded as an obligation, Review finding 3 (Major) - ADR-10 names citations that do not carry the count claimed, Quality finding I - the section 16 versus 16.1 contradiction the interview must resolve, Quality finding B - section 18.3 is the project quality gate and the draft never names it, Quality finding D - the draft names 2 of 17 mandated test modules, Quality agent contribution to practices discovery (+6 more)
+### Community 345 - "AWS CDK Best Practices"
+Cohesion: 0.13
+Nodes (16): nfr-validation-matrix Artifact, NFR-to-Architecture Mapping, AWS CDK Best Practices, CDK Assertion and Snapshot Testing, CDK Construct Levels (L1/L2/L3), Environment-Aware Stacks, Props Interface Pattern, CDK Security Defaults (+8 more)
 
 ### Community 346 - "Code Summary — `acquisition`"
 Cohesion: 0.15
@@ -2016,17 +2022,17 @@ Nodes (12): Code Summary — `target-standardization`, Coverage limits, Deviatio
 Cohesion: 0.15
 Nodes (12): Assumptions & Open Questions, Component inventory, Failure domains and blast radius, Logical Components — `target-standardization`, Receipt-floor note — 2026-09-04 (re-saved after the second re-affirmation), Requirement coverage, Shared resources, Sources (+4 more)
 
-### Community 353 - "aggregateUsageAuditFields"
-Cohesion: 0.19
-Nodes (13): aggregateUsageAuditFields(), coercePriceRow(), computeCost(), fmtTokensCompact(), formatByCost(), formatByTokens(), formatModelCost(), hasAnyTokens() (+5 more)
+### Community 353 - "Change Record — the confirmatory-prediction contract approved as the governed BLK-03 contract"
+Cohesion: 0.13
+Nodes (14): Blocker-register consequences — ROUTED TO THE GATE, NOT APPLIED, Change Record — the confirmatory-prediction contract approved as the governed BLK-03 contract, Evidence (created by the pass this record precedes), FU-1 = C — M-06 is written against the tf.keras 2.21.0 candidate API; the pin stays `TBD — freeze gate`, FU-2 = B — the inverse is GATED on an owner act that this record does not perform, Owed list, carried by this record (recorded, not discharged), Propagation sweep (`CHANGE_RECORD_PROCEDURE.md`), Proposed decision text for the owner to adopt (NOT a decision) (+6 more)
 
 ### Community 354 - "Change Record — R-74 and R-83 approved as the governed BLK-04 / BLK-09 contracts"
 Cohesion: 0.15
 Nodes (12): Blocker-register consequences — ROUTED TO THE GATE, NOT APPLIED, Change Record — R-74 and R-83 approved as the governed BLK-04 / BLK-09 contracts, Evidence (created by the pass this record precedes), Owed list, carried by this record (recorded, not discharged), Propagation sweep (`CHANGE_RECORD_PROCEDURE.md`), Q1 = A — R-74 is APPROVED as the governed BLK-04 cross-unit contract, Q2 = A — R-83 is APPROVED: `Partition` states BOTH bounds, Q3 = A — the permitted-producer accessor is a SEPARATE LOADER (+4 more)
 
-### Community 355 - "_interpolation_fill_sites"
-Cohesion: 0.15
-Nodes (13): _interpolation_fill_sites(), R-58 limb 3's control 3, asserted IN ORDER: a vectorised fill that names no…, The AST-level scan (R-58 limb 3): resolves the call target through import…, R-58 limb 3 over the real driver path: the named token set finds no…, R-58 limb 3, control 1: `.interpolate()` on a driver series is caught, naming…, R-58 limb 3, control 2: `f = pd.Series.ffill; f(s)` names no `.ffill(` token,…, A getattr-dispatched fill is reached; the same token inside a string literal or…, test_scan_catches_aliased_fill_that_a_textual_grep_passes() (+5 more)
+### Community 355 - "test_external_drivers.py"
+Cohesion: 0.10
+Nodes (26): assert_grade_eligible(), provenance_stamp(), R-62 restriction 3 / GradeEligibility: eligibility is a property of THE DATA,…, The provenance stamp every value written by `04_build_external_products.py`…, _interpolation_fill_sites(), Unit `external-products`: every Step 2-6 refusal negative-controlled. PURPOSE.…, R-58 limb 3's control 3, asserted IN ORDER: a vectorised fill that names no…, The AST-level scan (R-58 limb 3): resolves the call target through import… (+18 more)
 
 ### Community 356 - "Market Research Methods"
 Cohesion: 0.26
@@ -2072,13 +2078,13 @@ Nodes (11): Code Summary — `inventory-and-registry`, Coverage limits, Deviatio
 Cohesion: 0.17
 Nodes (11): 1. `PrimaryTableArtifact` — the co-reporting contract as a shape, 2. `ClaimsChecklistArtifact` — one row per prohibited class and per mandated disclosure, 3. `BreakdownArtifact` family — stamped, labelled, enumerated, 4. `PlotManifestEntry` — WS-19's evidence schema, 5. `IntegrityError` subclasses raised here — placement under the fourteen-exception hierarchy, 6. `ConclusionSurfaceArtifact` — the checked text given a declared subject, Assumptions & Open Questions, Domain Entities — `regimes-diagnostics-reporting` (+3 more)
 
-### Community 367 - "Board Finding ML-03 (estimand and vector bootstrap)"
-Cohesion: 0.17
-Nodes (12): Board Finding ML-03 (estimand and vector bootstrap), Board Finding ML-05 (seed selection and grids), NEVER Substitute a Naive or Within-Station Bootstrap (TC-19), ALWAYS Use the Paired Loss Differential as the Confirmatory Estimand, NEVER Select a Seed on Validation or After Seeing December, ALWAYS Use Fixed Seeds with the Three-Seed Element-Wise Mean (NFR-DET-01, TC-21), ALWAYS Use the Vector Time-Block Bootstrap (10,000 replicates, seed 20221201), tests/test_bootstrap.py (+4 more)
+### Community 367 - "Requirements Analysis - Stage Memory (observation diary)"
+Cohesion: 0.19
+Nodes (14): Component Dependencies - dependency matrix and forbidden edges, count_storm_events(kp, release_grade, source) - source as a required argument, src/evaluation/regimes.py - Kp/Hp60 strata and the section 9.3 storm-event rule, scripts/run_walking_skeleton.py - fixture orchestrator, MANDATED - run both walking-skeleton fixtures before any full-year job, CHAIR-03 - the board chair had materially changed the artifact it reviewed, Framework deadlock - drive-letter case makes audit write and summary guard mutually unsatisfiable, Requirements Analysis - Stage Memory (observation diary) (+6 more)
 
-### Community 368 - "notebook_output_violations"
-Cohesion: 0.20
-Nodes (12): _cli(), notebook_output_violations(), notebook_output_violations_from_text(), Every code cell carrying saved outputs or an execution count, named per cell.…, Parse notebook JSON text and delegate; unparseable input FAILS CLOSED. Raises…, Hook entry point: `python -m src.data.acquisition check-notebook-outputs --name…, _notebook(), The hook is PREVENTIVE (nfr-design review Minor 2): the existing notebook holds… (+4 more)
+### Community 368 - "test_acquisition.py"
+Cohesion: 0.13
+Nodes (21): assert_derived_release_provenance(), notebook_output_violations(), notebook_output_violations_from_text(), Every code cell carrying saved outputs or an execution count, named per cell.…, Parse notebook JSON text and delegate; unparseable input FAILS CLOSED. Raises…, R-42: a derived release re-merges from current months, or is re-pointed by…, _notebook(), Negative controls for the `acquisition` unit: every hard rule's violation is… (+13 more)
 
 ### Community 369 - "Review — 2026-08-26 thirteenth-redo pass, iteration 2 (terminal)"
 Cohesion: 0.18
@@ -2165,8 +2171,8 @@ Cohesion: 0.20
 Nodes (9): A correction to the fix scope, found before any artifact was edited, Corrections the finishing agents found (not in the board's report), Counts verified at source (against the authority documents, not the review), Governance layer — COMPLETE, Owner rulings taken (all recorded, all applied where applied), Per-unit remediation state, Remediation status — `GOV-2026-08-28-FD-01`, Resume sequence (+1 more)
 
 ### Community 390 - "AI-DLC Audit Log"
-Cohesion: 0.22
-Nodes (8): AI-DLC Audit Log, Human Turn, Human Turn, Human Turn, Human Turn, Question Answered, Session Start, Session Start
+Cohesion: 0.03
+Nodes (66): AI-DLC Audit Log, Artifact Created, Artifact Created, Artifact Created, Artifact Updated, Artifact Updated, Artifact Updated, Artifact Updated (+58 more)
 
 ### Community 391 - "Logical Components — `evaluation-and-comparison`"
 Cohesion: 0.22
@@ -2568,9 +2574,9 @@ Nodes (5): Change Record — DRAFT: the December-audit import boundary's three m
 Cohesion: 0.33
 Nodes (5): Disposition 1 — Minors riding READY verdicts → recorded input for 3.5, Disposition 2 — Recommendations 10–14 → gate checklist lines, Limitation (stated, not repaired), Non-actions, Ruling — nfr-design governance review dispositions (2026-09-05)
 
-### Community 491 - "test_uncharacterised_platform_refuses_the_write_before_any_row"
-Cohesion: 0.33
-Nodes (6): fixture, MonkeyPatch, The module's SUPPORTED TEST SEAM: `_repo_root` is monkeypatched to `tmp_path`,…, Q1=A applied to the write side: fail closed, no row, no byte., synthetic_boundary(), test_uncharacterised_platform_refuses_the_write_before_any_row()
+### Community 491 - "write_restricted"
+Cohesion: 0.14
+Nodes (18): Log durably FIRST, then write `payload` under the restricted root (R-33, Q2 =…, write_restricted(), fixture, MonkeyPatch, The module's SUPPORTED TEST SEAM: `_repo_root` is monkeypatched to `tmp_path`,…, Q2=C's enum extension: the three Vision 8.3 values remain, two are added., R-33's central negative control: no mutation without a record., Q1=A applied to the write side: fail closed, no row, no byte. (+10 more)
 
 ### Community 492 - "Inception Requirements Quality Rule"
 Cohesion: 0.40
@@ -2804,9 +2810,9 @@ Nodes (4): Consolidated Summary Confirmation, NFR Requirements — Questions —
 Cohesion: 0.40
 Nodes (4): Consolidated Summary Confirmation, NFR Requirements — Questions — `target-standardization`, Question 1, Question 2
 
-### Community 550 - "assert_single_grade"
-Cohesion: 0.40
-Nodes (5): Collection, assert_single_grade(), R-62 restriction 2 / D-10.1: exactly one recorded release grade per series for…, D-10.1: grades never mixed within one series -- fails at construction, and the…, test_mixed_release_grades_fail_at_construction()
+### Community 550 - "foldFileIntoLedger"
+Cohesion: 0.18
+Nodes (13): attributeAgents(), countsFromUsage(), dedupeByMessageId(), foldFileIntoLedger(), parseTranscriptLine(), readChunkFromOffset(), readClaudeSession(), readClaudeTranscript() (+5 more)
 
 ### Community 551 - "ML-07 - ablation registry incomplete"
 Cohesion: 0.50
@@ -2916,25 +2922,25 @@ Nodes (4): Findings, Review — 2026-08-24 three-representation cross-check, Sum
 Cohesion: 0.50
 Nodes (4): Findings, Review — 2026-08-24 finding corrections, Summary, Validation Tool Results
 
-### Community 578 - "readAuditSafely"
-Cohesion: 0.50
-Nodes (4): firstLineIsMarker(), isSymlink(), readAuditSafely(), withinProjectRoot()
+### Community 578 - "Code Generation Questions — `models-and-baselines`"
+Cohesion: 0.17
+Nodes (11): Code Generation Questions — `models-and-baselines`, Consolidated Summary Confirmation, Follow-up 1 (Q2 = B), Follow-up 2 (Q4 = B), Follow-up questions — contradictions in the Q2 and Q4 answers, Plan Approval, Question 1, Question 2 (+3 more)
 
 ### Community 579 - "gate_secret_scan.py"
 Cohesion: 0.67
 Nodes (3): _fail(), main(), TA-22 gate-scan wrapper: the history-inclusive secret scan, emitting SD-01's…
 
-### Community 580 - "assert_derived_release_provenance"
-Cohesion: 0.50
-Nodes (4): assert_derived_release_provenance(), R-42: a derived release re-merges from current months, or is re-pointed by…, R-42: digest equality or a D-number; D-18's re-merge is the first branch., test_stale_derived_release_fails_without_a_repointing_dnumber()
+### Community 580 - "assert_budget_complete"
+Cohesion: 0.22
+Nodes (10): assert_budget_complete(), build_uncertainty_budget(), W-7 / R-72: two applicable contents, the asymmetry statement, four not-…, R-72: the budget asserts its own completeness against the Phase 1-applicable…, FR-P1-05-10's failure condition: a budget file that exists and states nothing., A Phase 2 quantity emitted empty rather than recorded not-applicable fails., test_budget_is_complete_and_phase2_contents_carry_reasons(), test_budget_missing_an_applicable_content_fails() (+2 more)
 
 ### Community 581 - "assert_no_prohibited_phrasing"
 Cohesion: 0.50
 Nodes (4): assert_no_prohibited_phrasing(), R-69 limb 5: the grep-class check over machine-readable output VALUES. Skips…, The caveat quotes the prohibition in negation and must not trip the check., test_grep_class_check_catches_prohibited_phrasing_but_passes_the_caveat()
 
-### Community 582 - "resolve_aggregation_statistic"
-Cohesion: 0.50
-Nodes (4): R-65: the statistic resolves from config CITING D-16; a run never runs a…, resolve_aggregation_statistic(), test_statistic_absent_is_refused_never_defaulted(), test_statistic_without_d16_citation_is_refused()
+### Community 582 - "_signed_snapshot"
+Cohesion: 0.20
+Nodes (10): A verifying signature with NO loader still refuses: the read is limb 2's door., The positive control R-82 requires -- on synthetic dates only. The first…, Membership from record timestamps: a row from another month in the loaded frame…, A synthetic snapshot whose gates.G-05 record verifies `_SYNTH_SIGNATURE`., Rows over the SYNTHETIC locked month (synthetic year); stands in for a loader…, _signed_snapshot(), _synthetic_locked_loader(), test_limb1_owns_no_read_path() (+2 more)
 
 ### Community 583 - "Review — 2026-08-26 fourteenth-redo confirming pass, iteration 2"
 Cohesion: 0.67
@@ -2952,6 +2958,30 @@ Nodes (3): Findings, Review — 2026-08-26 fourteenth-receipt confirming pass, S
 Cohesion: 0.67
 Nodes (3): RES-04 — documented rerun of the three existing test modules under `open_restricted`, RES-05 — a 3.1 artifact cites a design signature by line number, Residual governance obligations — carried to stages 3.1 and 3.2
 
+### Community 601 - "Code Generation Plan — `models-and-baselines`"
+Cohesion: 0.33
+Nodes (5): Code Generation Plan — `models-and-baselines`, Ground rules binding every step, Out of scope, Recorded input — nfr-design review (human ruling 2026-09-05), Steps
+
+### Community 602 - "resolve_float_tolerance"
+Cohesion: 0.33
+Nodes (6): The declared float tolerance from the fixture manifest — or STOP (TE 15.2).…, resolve_float_tolerance(), Never a numpy.isclose default: unset -> stop, naming the fixture-manifest field., test_declared_tolerance_resolves(), test_tolerance_tbd_sentinel_also_stops(), test_tolerance_unset_stops_naming_the_te152_field()
+
+### Community 603 - "_tuning_call_sites"
+Cohesion: 0.33
+Nodes (6): AST-level (not textual) so the module's own docstring USE of the word 'tuning'…, Obligation 4's partial control: no fitting, tuning, optimiser or parameter-…, Negative control: a fitting or parameter-search call injected into comparator…, test_gim_module_carries_no_tuning_call(), test_tuning_call_injection_is_caught(), _tuning_call_sites()
+
+### Community 604 - "refuse_divergent_rerun"
+Cohesion: 0.40
+Nodes (5): Path, SD-E-07: a revised external product is byte-identical, or explicitly divergent.…, refuse_divergent_rerun(), SD-E-07: byte-identical re-run passes; a divergent product records BOTH…, test_rerun_byte_identical_passes_and_divergence_refuses()
+
+### Community 605 - "assert_label_permitted"
+Cohesion: 0.50
+Nodes (4): assert_label_permitted(), FR-P1-03-4: the product is labelled location-sampled gridded VTEC, and only…, test_only_the_frozen_label_passes(), test_receiver_specific_label_is_refused()
+
+### Community 606 - "Test Strategy levels (minimal / standard / comprehensive)"
+Cohesion: 0.67
+Nodes (3): Depth guidance and scope-to-depth mapping, Test Strategy levels (minimal / standard / comprehensive), Strategy-aware test instruction generation
+
 ## Ambiguous Edges - Review These
 - `Recorded Languages Field: TypeScript` → `Approved Technical Stack (Python 3.11, TensorFlow/Keras)`  [AMBIGUOUS]
   aidlc/spaces/default/intents/260813-tec-hourly-forecast/aidlc-state.md · relation: conceptually_related_to
@@ -2965,7 +2995,7 @@ Nodes (3): RES-04 — documented rerun of the three existing test modules under 
   agents/test-pro-metrics-agent.md · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **9346 isolated node(s):** `GuardRecord`, `EngineDirective`, `HookInput`, `DispatchRuleResult`, `DISPATCH_TOOLS` (+9341 more)
+- **9444 isolated node(s):** `GuardRecord`, `EngineDirective`, `HookInput`, `DispatchRuleResult`, `DISPATCH_TOOLS` (+9439 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -2982,7 +3012,7 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **What is the exact relationship between `tests/test_release_hashes.py` and `Test Pro Metrics Agent`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `IntegrityError` connect `IntegrityError` to `GateError`, `test_locked_test_guard.py`, `test_external_drivers.py`, `00_acquire_prepared_vtec.py`, `01_inventory_and_registry.py`, `test_december_audit.py`, `write_json_artifact`, `acquisition.py`, `test_split_embargo.py`, `build.py`, `write_driver_manifest`, `LeakageError`, `config.py`, `ReleaseError`, `assert_single_grade`, `test_determinism.py`, `test_phase_contract.py`, `iri.py`, `gim.py`, `trailing_mean`, `ConfigSnapshot`, `test_prepared_target_schema.py`, `_interpolation_fill_sites`, `test_reuse_registry.py`, `windows.py`, `test_feature_availability.py`, `spaceweather.py`, `RegistryError`, `notebook_output_violations`, `finalize_audit_reports`, `test_acquisition.py`, `inventory.py`, `LockedTestError`, `prepared.py`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Are the 34 inferred relationships involving `IntegrityError` (e.g. with `main()` and `main()`) actually correct?**
-  _`IntegrityError` has 34 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `IntegrityError` connect `IntegrityError` to `inventory.py`, `test_locked_test_guard.py`, `resolve_f107_at_origin`, `AcquisitionError`, `test_december_audit.py`, `acquisition.py`, `PartitionError`, `build.py`, `write_driver_manifest`, `test_checkpoint_restore.py`, `LeakageError`, `test_models_smoke.py`, `01_inventory_and_registry.py`, `ReleaseError`, `config.py`, `06_train_and_predict.py`, `test_prepared_target_schema.py`, `test_phase_contract.py`, `iri.py`, `gim.py`, `refuse_divergent_rerun`, `StandardizationError`, `04_build_external_products.py`, `test_external_drivers.py`, `test_reuse_registry.py`, `windows.py`, `test_feature_availability.py`, `RegistryError`, `spaceweather.py`, `test_acquisition.py`, `finalize_audit_reports`, `guard_egress`, `InventoryError`, `LockedTestError`, `prepared.py`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Are the 65 inferred relationships involving `IntegrityError` (e.g. with `main()` and `main()`) actually correct?**
+  _`IntegrityError` has 65 INFERRED edges - model-reasoned connections that need verification._

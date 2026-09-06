@@ -17,6 +17,12 @@
 numpy==1.26.4
 pandas==2.1.4
 pyyaml==6.0.1
+# scikit-learn: M-04 Ridge and M-05 Random Forest (TS-M-03). An ENGINEERING pin on
+# foundation's precedent, added under models-and-baselines code-generation Q3=A and
+# recorded in governance/CHANGE_RECORD_2026-09-06_BLK03_confirmatory_contract.md.
+# Imported lazily inside the fit paths; absence refuses by name. Its CV splitters are
+# never used (fold construction is features-and-splits').
+scikit-learn==1.4.2
 
 # --- test suite (a first-class deliverable, TC-06) ------------------------------------
 pytest==8.2.2

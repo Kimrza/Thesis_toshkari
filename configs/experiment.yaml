@@ -15,9 +15,136 @@ schema_version: "1.0.0"
 
 folds: "TBD — freeze gate"
 embargo_hours: "TBD — freeze gate"
-grids: "TBD — freeze gate"
-models: "TBD — freeze gate"
+
+# --- frozen hyperparameter grids (D-121, Vision §14.2 line 1206: "Exact frozen grids:
+# ridge 6, RF 18, LSTM 16 combinations, with fixed training settings" — Approved).
+# Contents transcribed VERBATIM from Vision §8.6 "Frozen Hyperparameter Grids" (the grid
+# table) by models-and-baselines code-generation Q5=A (2026-09-06), recorded in
+# governance/CHANGE_RECORD_2026-09-06_BLK03_confirmatory_contract.md. This is a COPY of an
+# approved decision under its D-number, exactly as seeds.yaml copies D-122; no value was
+# chosen here. §8.6: "Grids are exact, committed to configuration before G-05, and identical
+# in structure across families. No broad automated architecture optimization is permitted,
+# and no range may be changed after December is seen." The grid lives ONCE, here; what is
+# frozen and compared before G-05 is its hash (R-96); `combinations` is D-121's own count
+# and the code asserts the enumerated product of the axes equals it (content, not only
+# immutability).
+grids:
+  decision: "D-121"
+  source: "Vision §8.6, grid table; Vision §14.2 line 1206"
+  ridge: # M-04 — Vision §8.6 row "Ridge | alpha ∈ {0.01, 0.1, 1, 10, 100, 1000} | 6"
+    model_id: "M-04"
+    axes:
+      alpha: [0.01, 0.1, 1, 10, 100, 1000]
+    combinations: 6 # D-121
+  random_forest: # M-05 — Vision §8.6 row "Random Forest | n_estimators ∈ {300, 600} ×
+    # max_depth ∈ {8, 16, None} × min_samples_leaf ∈ {1, 5, 20}, max_features = sqrt | 18"
+    model_id: "M-05"
+    direct_only: true # D-120 / TE §8.2: direct RF only; residual RF removed
+    axes:
+      n_estimators: [300, 600]
+      max_depth: [8, 16, null] # `None` in §8.6 is YAML `null`
+      min_samples_leaf: [1, 5, 20]
+    fixed:
+      max_features: "sqrt" # §8.6: "max_features = sqrt"
+    combinations: 18 # D-121
+  lstm: # M-06 — Vision §8.6 row "LSTM | layers ∈ {1, 2} × units ∈ {32, 64} ×
+    # learning_rate ∈ {1e-3, 3e-4} × batch_size ∈ {64, 256} | 16"
+    model_id: "M-06"
+    direct_only: true # D-120 / TE §8.2: compact direct LSTM only; residual LSTM and GRU removed
+    axes:
+      layers: [1, 2]
+      units: [32, 64]
+      learning_rate: [1.0e-3, 3.0e-4]
+      batch_size: [64, 256]
+    combinations: 16 # D-121
+
+# --- model configuration -----------------------------------------------------------------
+# Only the seven fixed LSTM training settings are transcribed (Vision §8.6, the sentence
+# immediately below the grid table, quoted verbatim in `source_text`; D-121 "with fixed
+# training settings"). Everything else under `models` that D-121 / §8.6 does not fix stays
+# `TBD — freeze gate`: the per-track declared baseline of Vision §8.7 / D-124 is named in
+# configuration before tuning begins and is its owner's transcription, not this pass's.
+models:
+  lstm_fixed_settings:
+    decision: "D-121"
+    source: "Vision §8.6, fixed LSTM training settings sentence"
+    source_text: >-
+      Fixed LSTM training settings: dropout 0.2, Adam optimizer, MSE loss, maximum 100
+      epochs, early-stopping patience 10 epochs monitored on validation RMSE, minimum
+      improvement tolerance 1e-4 TECU, best-checkpoint restoration rather than last epoch.
+    dropout: 0.2 # setting 1
+    optimizer: "Adam" # setting 2
+    loss: "MSE" # setting 3
+    max_epochs: 100 # setting 4
+    early_stopping_patience: 10 # setting 5 — patience in epochs …
+    early_stopping_monitor: "validation_rmse" # … monitored on validation RMSE
+    min_improvement_tecu: 1.0e-4 # setting 6
+    checkpoint_policy: "best_checkpoint" # setting 7 — restoration of the lowest-validation-RMSE
+    # checkpoint, never the last epoch (R-94; WS-15; TA-13)
+  declared_baseline_per_track: "TBD — freeze gate" # Vision §8.7 / D-124 — not transcribed here
+  selection: "TBD — freeze gate" # Vision §8.7 / D-124: mean per-fold skill, 1% simplicity rule — not transcribed here
+  # The SELECTED configuration per track (R-101: chosen on mean per-fold skill over F1–F4,
+  # January–November only; refit changes no hyperparameter; frozen before G-05 among TE §7.0B's
+  # immutable items). Written by the tuning run's selection record, never by an implementer;
+  # 06_train_and_predict.py REFUSES naming this field while it is unset. Shape only (W-9).
+  selected: "TBD — freeze gate"
+
 estimand: "TBD — freeze gate"
 bootstrap: "TBD — freeze gate"
-ablations: "TBD — freeze gate"
+
+# --- ablation registry (TE §7.2 "Ablation registry (Q-18, Q-17, Q-11)") -------------------
+# TE §7.2: "Ablations are named, predeclared runs, not exploratory experiments invented after
+# results are seen. Each is registered in experiment.yaml with its own run ID and executes on
+# frozen January–November folds only, using identical folds, masks, tuning budget, and the
+# mean-skill selection rule of Vision §8.7." The FIVE named entries below transcribe §7.2's
+# table — identities, Phase-1 reachability, the §7.2 question and configuration change
+# quoted, and the two named constraints. What §7.2 does NOT fix stays `TBD — freeze gate`:
+# each entry's `run_id` and `registered_at` (R-97: registered with a run ID BEFORE the
+# freeze) are the owner's registration act, not this pass's. Five named, four reachable in
+# Phase 1 — stated both ways so the count is not quietly reduced (R-97). No ablation
+# configuration may be promoted to primary once the locked test is opened (TE §7.2).
+ablations:
+  source: "TE §7.2 ablation registry table"
+  entries:
+    ABL-NODOY:
+      question: "Does December skill depend on a seasonal encoding the model has seen only once?"
+      configuration_change: "Drop doy_sin, doy_cos; all else identical"
+      primary_remains: "Full feature set"
+      phase1_reachable: true
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-DIFF:
+      question: "Does a first-difference target improve learning?"
+      configuration_change: >-
+        Target becomes y_{t+1} - y_t; predictions inverse-transformed to absolute TECU before
+        any metric is computed
+      primary_remains: "Raw TECU"
+      phase1_reachable: true
+      inverse_before_metric: true # TE §7.2 implementation rule; D-27 (inverse is ABL-DIFF's alone)
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-NOSW:
+      question: "Do forecast-safe space-weather features add value beyond lagged VTEC and time?"
+      configuration_change: "Drop kp_safe, ap_safe, hp60_safe, ap60_safe, f107_safe, f107_81_trailing"
+      primary_remains: "Full feature set"
+      phase1_reachable: true
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-HIST48:
+      question: "Is 24 h the right history length?"
+      configuration_change: "48 h window and 48-step sequence. Runs only after the primary configuration is frozen."
+      primary_remains: "24 h"
+      phase1_reachable: true
+      after_primary_freeze_only: true # TE §7.2 (bold in the source); R-97
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-ZENITH:
+      question: "Does zenith-weighted aggregation change the target materially?"
+      configuration_change: "Zenith-weighted hourly aggregate (Vision §6.6); representative days only"
+      primary_remains: "IPP median"
+      phase1_reachable: false
+      phase_deferral: "Phase 2 — varies the hourly aggregation of the target, a choice that does not exist on the Phase 1 location-sampled gridded target (domain-entities § 8; R-97)"
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+
 practical_relevance_threshold: "TBD — freeze gate"
