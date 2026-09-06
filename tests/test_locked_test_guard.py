@@ -52,6 +52,32 @@ Extended at stage 3.5 (2026-09-05), four additions:
 8. The **SD-G-02 join** is wired: `AccessRecord` reconciles against foundation's
    registry (`reconcile_access_records`, a pure read), orphans both ways, known
    pre-guard orphans reported and never back-filled, both logs byte-identical after.
+
+Two units in one module (features-and-splits nfr-design Q3 = C, 2026-09-04)
+---------------------------------------------------------------------------
+ADR-03 splits the locked-test guard into two limbs held by two units, and this one
+TE 12-mandated module carries both. The ownership is stated here so a later reader does
+not attribute either limb to the other unit:
+
+* **Limb 2 -- the READ chokepoint -- `governance-guards`.** Sections 1-8 above:
+  `src/data/locked_test.py`'s `open_restricted` / `write_restricted`, R-25 (durable
+  before the read), R-27 (unparseable is a failure), R-28 (one door, the exempt list),
+  SD-G-01..SD-G-04. Cases unchanged by the 2026-09-06 extension.
+* **Limb 1 -- the EXECUTION block -- `features-and-splits`.** Section 9 below:
+  `src/data/splits.py`'s `materialise_locked_partition(snapshot, *, g05_signature)`
+  refuses with `LockedTestError` when the signature is `None` (the pre-G-05 execution
+  block WS-18 evidences) and when it fails verification against `configs/data.yaml`
+  `gates.G-05`; it owns no read path (a loader routed through `open_restricted` must be
+  supplied, and none is today); and a verifying signature over a SYNTHETIC calendar
+  materialises with the first embargo hours EXCLUDED AND COUNTED (R-82, SD-F-05,
+  D-28's 30-day shape). The read for the required pre-G-05 coverage audit never comes
+  through limb 1 -- that is limb 2's door.
+
+**No December 2022 content is read, parsed, counted or computed anywhere in this
+module** -- limb 1's cases run over the synthetic partition fixture
+`test_split_embargo.py` authors (a synthetic calendar year), and the repository's
+`configs/data.yaml` carries no `gates.G-05` record, so no real signature can verify.
+Both limbs support WS-18 and TA-18; neither discharges them.
 """
 
 from __future__ import annotations
@@ -901,3 +927,167 @@ def test_registry_claim_without_access_row_is_an_integrity_failure(tmp_path: Pat
     with pytest.raises(RegistryError) as excinfo:
         reconcile_access_records(registry, access_log, known_orphans=_KNOWN_PRE_GUARD_ORPHANS)
     assert "phantom-run" in str(excinfo.value)
+
+
+# --- 9. LIMB 1 (features-and-splits): the EXECUTION block on the locked partition -------
+#
+# ADR-03's other limb, owned by `features-and-splits` (nfr-design Q3 = C placed its cases
+# here rather than in a new module, keeping TE 12's mandated tree unchanged). Every case
+# runs over `test_split_embargo.py`'s SYNTHETIC partition fixture (a synthetic calendar
+# year): no December 2022 content, no restricted-root path, no real signature. The
+# repository's `configs/data.yaml` carries no `gates.G-05` record, so no real signature can
+# verify today, and none is supplied anywhere in this module.
+
+_TESTS_DIR = Path(__file__).resolve().parent
+if str(_TESTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_TESTS_DIR))
+
+import hashlib  # noqa: E402
+
+from test_split_embargo import (  # noqa: E402
+    SYNTH_EMBARGO_HOURS,
+    SYNTH_YEAR,
+    synthetic_partitions,
+    synthetic_snapshot,
+)
+
+from src.data.config import PartitionError  # noqa: E402
+from src.data.splits import (  # noqa: E402
+    LOCKED_ID,
+    materialise_locked_partition,
+    partition_by_id,
+    verify_g05_signature,
+)
+
+_SYNTH_SIGNATURE = "synthetic G-05 signature artifact -- never a real one"
+
+
+def _signed_snapshot():
+    """A synthetic snapshot whose gates.G-05 record verifies `_SYNTH_SIGNATURE`."""
+    return synthetic_snapshot(
+        data={
+            "gates": {
+                "G-05": {
+                    "status": "signed",
+                    "decision": "D-synthetic",
+                    "signature_sha256": hashlib.sha256(
+                        _SYNTH_SIGNATURE.encode("utf-8")
+                    ).hexdigest(),
+                }
+            }
+        }
+    )
+
+
+def _synthetic_locked_loader(partition):
+    """Rows over the SYNTHETIC locked month (synthetic year); stands in for a loader that,
+    in production, would route through `open_restricted` (limb 2's door)."""
+    assert partition.partition_id == LOCKED_ID and partition.validation_month is not None
+    first = dt.datetime(
+        partition.validation_month.year, partition.validation_month.month, 1, tzinfo=dt.UTC
+    )
+    return [
+        {"interval_start_utc": (first + dt.timedelta(hours=h)).isoformat(), "vtec_tecu": 1.0}
+        for h in range(3 * SYNTH_EMBARGO_HOURS)
+    ]
+
+
+def test_limb1_signature_absent_refuses_before_any_read(monkeypatch) -> None:
+    """R-82 / WS-18: `g05_signature=None` raises; the loader is never called."""
+    called: list[str] = []
+
+    def loader(partition):
+        called.append(partition.partition_id)
+        return []
+
+    with pytest.raises(LockedTestError) as excinfo:
+        materialise_locked_partition(synthetic_snapshot(), g05_signature=None, loader=loader)
+    assert "g05_signature is None" in str(excinfo.value)
+    assert "open_restricted" in str(excinfo.value)
+    assert called == [], "the read limb was reached without a signature"
+
+
+def test_limb1_signature_that_fails_verification_refuses() -> None:
+    """A signature string with no matching signed G-05 record is no signature."""
+    with pytest.raises(LockedTestError) as excinfo:
+        materialise_locked_partition(
+            synthetic_snapshot(), g05_signature="anything", loader=lambda p: []
+        )
+    assert "fails verification" in str(excinfo.value)
+    with pytest.raises(LockedTestError):
+        materialise_locked_partition(
+            _signed_snapshot(), g05_signature="the wrong artifact", loader=lambda p: []
+        )
+    assert verify_g05_signature(synthetic_snapshot(), "anything") is False
+    assert verify_g05_signature(_signed_snapshot(), _SYNTH_SIGNATURE) is True
+
+
+def test_limb1_unsigned_or_tbd_gate_record_never_verifies() -> None:
+    for status in ("pending", "Blocked", "TBD — freeze gate", ""):
+        snapshot = synthetic_snapshot(
+            data={
+                "gates": {
+                    "G-05": {
+                        "status": status,
+                        "decision": "D-synthetic",
+                        "signature_sha256": hashlib.sha256(
+                            _SYNTH_SIGNATURE.encode("utf-8")
+                        ).hexdigest(),
+                    }
+                }
+            }
+        )
+        assert verify_g05_signature(snapshot, _SYNTH_SIGNATURE) is False
+
+
+def test_limb1_owns_no_read_path() -> None:
+    """A verifying signature with NO loader still refuses: the read is limb 2's door."""
+    with pytest.raises(LockedTestError) as excinfo:
+        materialise_locked_partition(_signed_snapshot(), g05_signature=_SYNTH_SIGNATURE)
+    assert "no loader supplied" in str(excinfo.value)
+
+
+def test_limb1_verifying_signature_materialises_with_the_embargo_excluded_and_counted() -> None:
+    """The positive control R-82 requires -- on synthetic dates only. The first embargo
+    hours of the locked month are excluded AND counted (D-28's 30-day shape on a synthetic
+    calendar)."""
+    kept = materialise_locked_partition(
+        _signed_snapshot(), g05_signature=_SYNTH_SIGNATURE, loader=_synthetic_locked_loader
+    )
+    assert len(kept) == 2 * SYNTH_EMBARGO_HOURS
+    assert kept.attrs["excluded_embargo_rows"] == SYNTH_EMBARGO_HOURS
+    assert kept.attrs["partition_id"] == LOCKED_ID
+    dec = partition_by_id(synthetic_partitions(), LOCKED_ID)
+    assert dec.validation_month is not None and dec.validation_month.year == SYNTH_YEAR
+
+
+def test_limb1_rows_outside_the_locked_month_are_refused_by_timestamp() -> None:
+    """Membership from record timestamps: a row from another month in the loaded frame fails
+    even though the loader filed it under DEC."""
+
+    def loader(partition):
+        rows = _synthetic_locked_loader(partition)
+        rows.append(
+            {"interval_start_utc": f"{SYNTH_YEAR}-11-05T00:00:00+00:00", "vtec_tecu": 1.0}
+        )
+        return rows
+
+    with pytest.raises(PartitionError):
+        materialise_locked_partition(
+            _signed_snapshot(), g05_signature=_SYNTH_SIGNATURE, loader=loader
+        )
+
+
+def test_limb1_real_configs_carry_no_g05_record() -> None:
+    """The repository's own data.yaml has no gates.G-05 record: nothing verifies today, so the
+    execution limb cannot open the locked partition on this checkout."""
+    text = (REPO_ROOT / "configs" / "data.yaml").read_text(encoding="utf-8")
+    assert "G-05" not in text or "signature_sha256" not in text
+
+
+def test_limb1_splits_module_never_names_the_restricted_root() -> None:
+    """R-28's one-door property survives the new module: `src/data/splits.py` is NOT an
+    exempt literal holder and holds no restricted-root literal."""
+    source = (REPO_ROOT / "src" / "data" / "splits.py").read_text(encoding="utf-8")
+    assert "src/data/splits.py" not in RESTRICTED_LITERAL_EXEMPT_MODULES
+    assert not _source_holds_literal(source, REPO_ROOT / "src" / "data" / "splits.py")

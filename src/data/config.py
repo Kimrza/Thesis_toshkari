@@ -586,6 +586,19 @@ REQUIRED_FIELDS_MAP: Final[Mapping[tuple[str, int], tuple[str, ...]]] = {
     # refusal-attempt path itself, and the refusal IS the deliverable. Field IDENTITIES
     # only, never values (the map's own rule).
     ("target-standardization", 1): ("seeds.development",),
+    # features-and-splits' preflight (stage 3.5): deliberately MINIMAL, the same shape as
+    # the three entries above. `data.partitions`, `experiment.embargo_hours`,
+    # `experiment.window_length_hours`, `features.feature_dictionary`,
+    # `features.availability_lags` and `features.permitted_producers` are NOT listed here
+    # BY DESIGN: each is enforced at its own entry point (`build_partitions` raises
+    # PartitionError; `read_window_length` / `build_features` raise LeakageError;
+    # `load_feature_dictionary` raises PreflightError; `read_availability_lags` raises
+    # FeatureAvailabilityError; `load_permitted_producers` raises LeakageError naming which
+    # rows lack entries) — the refusals ARE this unit's deliverable while the values stay
+    # unfrozen (SD-F-01, Q1 = A), and a blanket preflight entry would bar the script's
+    # honest `aborted` registry row, which the approved plan requires. Field IDENTITIES
+    # only, never values (the map's own rule).
+    ("features-and-splits", 1): ("seeds.development",),
 }
 
 #: `CredentialNameMap` (FU-3 = A, Q8 = D; domain-entities 3): `(stage_slug, provider)`

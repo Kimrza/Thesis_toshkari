@@ -22,3 +22,14 @@ feature_set_id: "TBD — freeze gate"
 feature_dictionary: "TBD — freeze gate"
 availability_lags: "TBD — freeze gate"
 normalization: "TBD — freeze gate"
+
+# --- permitted-producer list (SHAPE only; the LIST is unauthored) ----------------------
+# features-and-splits SD-F-01 (Q1 = A) / code-generation Q3 = A (2026-09-05): per §6.2
+# dictionary row, the producing artifact(s) permitted to supply a column of that row,
+# keyed per (row, producer) pair. Read by the SEPARATE loader
+# src/features/build.py:load_permitted_producers, never through ConfigSnapshot.
+# While this is the sentinel (or incomplete), build_features REFUSES naming which rows
+# lack entries and NO feature matrix is produced. The list is assigned to nobody today;
+# whether an entry encodes a scientific choice (TC-03e) is decided when it is authored,
+# under a D-number. Writing the sentinel is not choosing a value (W-9).
+permitted_producers: "TBD — freeze gate"
