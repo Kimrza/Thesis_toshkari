@@ -74,7 +74,7 @@
 - **Revision Count**: 24
 
 - **Skeleton Stance**: off
-- **Active Unit**: evaluation-and-comparison
+- **Active Unit**: regimes-diagnostics-reporting
 - **Unit State**: in-progress
 ## Phase Progress
 <!-- Status values: Pending, Active, Verified, Skipped -->
@@ -136,7 +136,7 @@ Per unit: [TBD]
 - **Current Stage**: code-generation
 - **Next Stage**: build-and-test
 - **Status**: Running
-- **Last Updated**: 2026-09-06T14:29:52Z
+- **Last Updated**: 2026-09-06T19:39:17Z
 
 ## Session Resume Point
 - **Last Completed Stage**: nfr-design

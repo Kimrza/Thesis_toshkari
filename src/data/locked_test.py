@@ -50,15 +50,31 @@ Governance
   existing behaviour per the design's scheduling note (the refusal targets the governed
   audit host, and foundation SD-03's unverified-durability stamp already qualifies local
   rows at every freeze gate).
+* **Q2 = B (SD-C-02 containment), edited in place 2026-09-06 at `evaluation-and-comparison`
+  stage 3.5 on the owner's explicit instruction** (`governance/
+  CHANGE_RECORD_2026-09-06_R106_comparison_sets.md`; **flagged for `governance-guards`'
+  record and re-check** — this is a sibling unit's module and the edit is additive):
+  `AccessRecord` gains two OPTIONAL containment fields, `mask_bundle_ids` and
+  `mask_registry_hash`, and `open_restricted` populates them when a frozen-bundle manifest
+  is supplied and exists at access time (reads the manifest, hashes its bytes, lists its
+  `mask_id`s). The access record thereby CONTAINS evidence derived from the completed mask
+  registration, so registration-before-access is proven on any clocks, across any hosts —
+  no timestamp comparison (SD-C-02, Q1 = A there). With no manifest the fields stay `None`,
+  existing rows and callers are unbroken, and `evaluation-and-comparison`'s
+  `require_locked_receipt` REFUSES a `DEC` metric on `None` — the fail-closed half of the
+  half-contract. The manifest is write-once per freeze (`src/evaluation/masks.py`, Q4 = A),
+  so a mid-registration read sees either the old complete manifest or the new complete one,
+  never a partial file.
 """
 
 from __future__ import annotations
 
 import datetime as _dt
+import hashlib
 import json
 import os
 from collections.abc import Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Final
 
@@ -160,7 +176,19 @@ PURPOSES: Final[frozenset[str]] = frozenset(
 
 @dataclass(frozen=True)
 class AccessRecord:
-    """One row of the locked-month access log, describing a read before it happens."""
+    """One row of the locked-month access log, describing a read before it happens.
+
+    The two OPTIONAL containment fields (`mask_bundle_ids`, `mask_registry_hash`) are
+    SD-C-02's ordering evidence, added additively 2026-09-06 under the Q2 = B owner
+    instruction (`governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md`; flagged for
+    `governance-guards`' re-check): the record CONTAINS the frozen mask bundle's `mask_id`s
+    and its write-once manifest's SHA-256 as found at access time, so a mask registered
+    AFTER the access cannot appear in the record — registration-before-access is proven by
+    containment, on any clocks. `None` means no manifest was supplied or none existed;
+    `evaluation-and-comparison`'s `require_locked_receipt` refuses a `DEC` metric on `None`
+    (the fail-closed half). Existing rows and callers are unbroken: both fields default and
+    the required-field check below is untouched.
+    """
 
     run_id: str
     retrieved_at_utc: str
@@ -169,6 +197,8 @@ class AccessRecord:
     performance_inspected: bool
     locked_test_accessed: bool
     authorization: str
+    mask_bundle_ids: tuple[str, ...] | None = None
+    mask_registry_hash: str | None = None
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -245,8 +275,53 @@ def _append_and_flush(registry: Path, record: AccessRecord) -> str:
     return row["logged_at_utc"]
 
 
-def open_restricted(path: Path, *, record: AccessRecord, registry: Path) -> Path:
+def _containment_fields(
+    mask_bundle_manifest: Path | None,
+) -> tuple[tuple[str, ...] | None, str | None]:
+    """SD-C-02's containment evidence, read at access time (Q2 = B, 2026-09-06).
+
+    When a frozen-bundle manifest is supplied and exists, returns its enumerated
+    `mask_id`s and its byte-level SHA-256; otherwise `(None, None)` — the fields stay
+    unpopulated and the consuming refusal (`require_locked_receipt`) fails closed. A
+    manifest that exists but cannot be read or parsed is a FAILURE, not a pass (the same
+    R-27 posture as the custody scans): the containment evidence is what a G-06 reviewer
+    verifies, and silently recording `None` over a present-but-broken manifest would hide
+    exactly the defect the field exists to surface.
+    """
+    if mask_bundle_manifest is None:
+        return None, None
+    manifest_path = Path(mask_bundle_manifest)
+    if not manifest_path.is_file():
+        return None, None
+    try:
+        raw = manifest_path.read_bytes()
+        payload = json.loads(raw.decode("utf-8"))
+        mask_ids = tuple(str(m) for m in payload["mask_ids"])
+    except (OSError, UnicodeDecodeError, ValueError, KeyError, TypeError) as exc:
+        raise LockedTestError(
+            manifest_path,
+            f"frozen-bundle manifest exists but cannot be read or parsed ({exc}); the "
+            f"containment fields are ordering EVIDENCE (SD-C-02) and recording None over a "
+            f"present-but-broken manifest would hide the defect rather than surface it",
+        ) from exc
+    return mask_ids, hashlib.sha256(raw).hexdigest()
+
+
+def open_restricted(
+    path: Path,
+    *,
+    record: AccessRecord,
+    registry: Path,
+    mask_bundle_manifest: Path | None = None,
+) -> Path:
     """Record the access, flush it, then return `path` for reading.
+
+    When `mask_bundle_manifest` names an existing frozen-bundle manifest
+    (`src/evaluation/masks.py`'s write-once artifact), the appended record is populated
+    with `mask_bundle_ids` and `mask_registry_hash` read from it AT ACCESS TIME — SD-C-02's
+    containment proof that mask registration preceded this access, on any clocks (Q2 = B,
+    2026-09-06; additive keyword, existing callers unbroken). With no manifest the two
+    fields stay `None` and the DEC metric path refuses downstream (fail-closed).
 
     Raises
     ------
@@ -256,7 +331,9 @@ def open_restricted(path: Path, *, record: AccessRecord, registry: Path) -> Path
           evidence that restricted reads went through it;
         * when the registry write fails -- **a failed log write aborts the read rather
           than proceeding unlogged.** This is the branch that makes the ordering rule
-          enforceable instead of advisory.
+          enforceable instead of advisory;
+        * when a supplied frozen-bundle manifest exists but cannot be read or parsed --
+          broken containment evidence aborts the read rather than logging `None`.
 
     Returns
     -------
@@ -298,6 +375,15 @@ def open_restricted(path: Path, *, record: AccessRecord, registry: Path) -> Path
             f"path is not under {RESTRICTED_ROOT}; open_restricted is the chokepoint for "
             f"restricted reads only, and routing an ordinary read through it would make "
             f"the access log unable to distinguish the two",
+        )
+
+    # Q2 = B: populate the SD-C-02 containment fields from the frozen-bundle manifest as
+    # found at THIS moment, before the row is appended — the record then contains evidence
+    # derived from the completed registration, which is the ordering proof.
+    bundle_ids, registry_hash = _containment_fields(mask_bundle_manifest)
+    if bundle_ids is not None:
+        record = replace(
+            record, mask_bundle_ids=bundle_ids, mask_registry_hash=registry_hash
         )
 
     try:

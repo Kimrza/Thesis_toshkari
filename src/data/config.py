@@ -608,6 +608,17 @@ REQUIRED_FIELDS_MAP: Final[Mapping[tuple[str, int], tuple[str, ...]]] = {
     # the approved plan requires, and `seeds.final` is read at `three_seed_mean`'s call site
     # (R-91). Field IDENTITIES only, never values (the map's own rule).
     ("models-and-baselines", 1): ("seeds.development",),
+    # evaluation-and-comparison's preflight (stage 3.5): deliberately MINIMAL, the same
+    # shape as the five entries above. `experiment.comparison_sets` is NOT listed here BY
+    # DESIGN: its enforcement point is `read_comparison_sets` in `src/evaluation/masks.py`,
+    # which refuses naming the field while the declaration is absent or TBD (R-106; TE 18.3)
+    # — a blanket preflight entry would bar the script's honest `aborted` registry row and
+    # its refusal-attempt paths, which the approved plan requires to run. `estimand` and
+    # `bootstrap` stay TBD and are other stages' transcriptions; nothing here reads them.
+    # Field IDENTITIES only, never values (the map's own rule). Entry added at this unit's
+    # 3.5 exactly as the map's docstring anticipates ("entries are added as their owning
+    # stages land").
+    ("evaluation-and-comparison", 1): ("seeds.development",),
 }
 
 #: `CredentialNameMap` (FU-3 = A, Q8 = D; domain-entities 3): `(stage_slug, provider)`
