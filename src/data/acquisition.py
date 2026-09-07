@@ -122,6 +122,7 @@ __all__ = [
     "assert_derived_release_provenance",
     "partition_by_locked_month",
     "assert_no_locked_month_records",
+    "assert_records_within_window",
     "notebook_output_violations",
     "notebook_output_violations_from_text",
 ]
@@ -1011,10 +1012,12 @@ def assert_derived_release_provenance(
 # =======================================================================================
 
 
-def _record_year_month(record: Mapping[str, Any], timestamp_key: str) -> tuple[int, int]:
+def _record_date(record: Mapping[str, Any], timestamp_key: str) -> _dt.date:
+    """The ONE reader of a record's observation date (R-31): shared by the locked-month
+    predicate and by the window predicate below, so no second copy of the rule exists."""
     raw = str(record.get(timestamp_key, "") or "")
     try:
-        stamp = _dt.date.fromisoformat(raw[:10])
+        return _dt.date.fromisoformat(raw[:10])
     except ValueError:
         raise AcquisitionError(
             raw or f"<record with no {timestamp_key}>",
@@ -1023,6 +1026,10 @@ def _record_year_month(record: Mapping[str, Any], timestamp_key: str) -> tuple[i
             f"file name (R-31, project.md Forbidden), and a record whose date cannot "
             f"be established cannot be cleared — fail closed, never guess",
         ) from None
+
+
+def _record_year_month(record: Mapping[str, Any], timestamp_key: str) -> tuple[int, int]:
+    stamp = _record_date(record, timestamp_key)
     return stamp.year, stamp.month
 
 
@@ -1070,6 +1077,44 @@ def assert_no_locked_month_records(
             f"while BLK-07 stands (unit-of-work.md § 3; the authorization limb is "
             f"the project decision owner's)",
         )
+
+
+def assert_records_within_window(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    start: _dt.date,
+    end: _dt.date,
+    timestamp_key: str = "timestamp",
+) -> int:
+    """R-31's window form: every record's OBSERVATION DATE lies in `[start, end]`, inclusive.
+
+    Added additively for `fixtures-and-reproducibility` (Q4/Q5 sibling-edit precedent,
+    `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md` § 5):
+    the fixture orchestrator asserts every input record against the manifest's CITED window
+    with this predicate and the December exclusion with `assert_no_locked_month_records`, so
+    the record-date rule has ONE reader (`_record_date`) and no third copy. The directory a
+    record was filed under plays no role (TEC-09; ML-07). Returns the record count checked.
+
+    Raises
+    ------
+    AcquisitionError
+        naming the first out-of-window record's date and the window; or a record whose date
+        cannot be established (fail closed, never guess).
+    """
+    if start > end:
+        raise AcquisitionError(
+            f"window {start.isoformat()}..{end.isoformat()}", "start is after end"
+        )
+    for index, record in enumerate(records):
+        stamp = _record_date(record, timestamp_key)
+        if not (start <= stamp <= end):
+            raise AcquisitionError(
+                f"record {index} ({stamp.isoformat()})",
+                f"observation date lies outside the window {start.isoformat()}.."
+                f"{end.isoformat()} inclusive; membership is asserted on RECORD dates, "
+                f"never on the folder a file was filed under (R-31; FR-WS-3)",
+            )
+    return len(records)
 
 
 # =======================================================================================

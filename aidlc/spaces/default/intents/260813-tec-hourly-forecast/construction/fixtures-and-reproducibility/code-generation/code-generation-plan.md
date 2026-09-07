@@ -48,7 +48,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
 
 ## Steps
 
-- [ ] **Step 1 — Change record FIRST: `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md`** [Q1–Q6]
+- [x] **Step 1 — Change record FIRST: `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md`** [Q1–Q6]
   The blocker state limb by limb (BLK-03/04/09 approved — records cited; BLK-08 mechanism limb
   open — D-27 unreopened, checked by control 25; BLK-02 open — no manifest, no run, no measured
   value); Q2's loader home with the amendment ledger **+1 → 8 across 6 owed, not applied**
