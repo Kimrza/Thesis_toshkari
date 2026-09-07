@@ -15,6 +15,7 @@
 
 - 2026-09-06T18:40:00Z — evaluation-and-comparison: the plan said `FairnessError`/`InverseTransformError` are "declared HERE"; the developer found both already declared in `src/data/config.py` (foundation's amended R-01 single-declaration-site ruling) and imported-and-re-exported instead of redeclaring — a second class object with the same name would break catchability, the exact drift class R-01 exists to prevent. The design's "declared here" is read as "raised here", consistent with R-01's cross-unit obligation.
 - 2026-09-06T18:40:00Z — evaluation-and-comparison Q2 = B (owner-instructed sibling edit): `AccessRecord` gained the two SD-C-02 containment fields as additive optional fields and `open_restricted` populates them from a frozen-bundle manifest; a present-but-unparseable manifest aborts the read rather than logging None. Flagged for governance-guards' record and re-check — the cross-unit edit is the owner's explicit ruling, not an agent convenience.
+- 2026-09-07T00:45:00Z — regimes-diagnostics-reporting resumed on a new session at the reviewer step: plan Steps 1–7, 9–11 ticked (Step 8 gated, unticked by design), code-summary.md present, audit carried a REVIEW_REQUESTED (iteration 1) with no REVIEW_COMPLETED — the 2026-09-06T20:40Z session ended before the verdict. Re-recorded the same request with --retry-pending per §12a (consumes no new iteration) and dispatched the reviewer against the unchanged artifacts. Resume point per recovery read order (artifacts → diary → audit).
 
 ## Deviations
 

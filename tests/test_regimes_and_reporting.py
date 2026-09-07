@@ -913,10 +913,64 @@ def test_control_38_missing_driver_caveat_fails() -> None:
 
 
 def test_per_entry_caveatless_gim_into_w5_raises() -> None:
-    gim_row = _row("C-01")
-    del gim_row["spatial_representativeness_sentence"]
+    """Per-entry control (SD-R-01 § negative controls: "a caveat-less GIM comparison into
+    W-5"): the violating row is pushed THROUGH `build_breakdown_artifact` — the W-5
+    producing path — and the raise is asserted from that entry point. Iteration-2 repair
+    of the 2026-09-06 Critical: the earlier form called the bare guard directly, so the
+    suite was green while the call site had no coverage (`nfr-design:c58`)."""
+    mask = _Mask()
+
+    def _breakdown(payload: dict[str, Any]) -> dict[str, Any]:
+        return build_breakdown_artifact(
+            breakdown_id="tier3",
+            metrics_artifact=_metrics_artifact(mask),
+            mask=mask,
+            payload=payload,
+        )
+
+    # must NOT fire: the same payload WITH the caveat renders, the row printed unchanged
+    rendered = _breakdown({"rows": [_row("M-A"), _row("C-01")]})
+    assert (
+        rendered["payload"]["rows"][1]["spatial_representativeness_sentence"]
+        == SPATIAL_REPRESENTATIVENESS_SENTENCE
+    )
+    # the control: a caveat-less GIM row in the payload refuses at the producing path
+    caveatless = _row("C-01")
+    del caveatless["spatial_representativeness_sentence"]
+    with pytest.raises(RegimeError) as excinfo:
+        _breakdown({"rows": [_row("M-A"), caveatless]})
+    assert "C-01" in str(excinfo.value) and "lineage caveat" in str(excinfo.value)
+    # the walker, not a top-level key, is the mechanism: a nested per-station placement
+    # and an IRI row under `comparisons` are caught the same way
+    iri_caveatless = _row("B-01")
+    del iri_caveatless["spatial_representativeness_sentence"]
     with pytest.raises(RegimeError):
-        require_lineage_caveat(gim_row, surface="breakdown", kind="row")
+        _breakdown({"per_station": {"S1": {"comparisons": [iri_caveatless]}}})
+    # a non-IRI/GIM row without the sentence is NOT an IRI/GIM comparison: no refusal
+    plain = _row("M-B")
+    assert "spatial_representativeness_sentence" not in plain
+    _breakdown({"rows": [plain]})
+
+
+def test_per_entry_unitless_metrics_artifact_into_w5_raises() -> None:
+    """Per-entry control for `require_units` at W-5 (security-design.md Called-by "W-3,
+    W-5, W-6"; iteration-2 suggestion 1): a metrics artifact with no TECU units metadata
+    pushed THROUGH `build_breakdown_artifact` refuses, and the must-NOT-fire half: with
+    TECU metadata the breakdown renders carrying `units` printed from that metadata."""
+    mask = _Mask()
+    unitless = _metrics_artifact(mask)
+    del unitless["units"]
+    with pytest.raises(RegimeError) as excinfo:
+        build_breakdown_artifact(breakdown_id="per_cell", metrics_artifact=unitless, mask=mask)
+    assert "TECU" in str(excinfo.value)
+    wrong = _metrics_artifact(mask)
+    wrong["units"] = "TECU/10"  # a non-TECU assertion is refused, not rescaled
+    with pytest.raises(RegimeError):
+        build_breakdown_artifact(breakdown_id="per_cell", metrics_artifact=wrong, mask=mask)
+    rendered = build_breakdown_artifact(
+        breakdown_id="per_cell", metrics_artifact=_metrics_artifact(mask), mask=mask
+    )
+    assert rendered["units"] == "TECU"
 
 
 def test_top1pct_sensitivity_labelled_never_merged() -> None:

@@ -885,3 +885,395 @@
 **Unit**: evaluation-and-comparison
 
 ---
+
+## Session Start
+**Timestamp**: 2026-09-06T20:38:01Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-06T20:38:24Z
+**Event**: HUMAN_TURN
+
+---
+
+## Session Resume
+**Timestamp**: 2026-09-06T20:40:10Z
+**Event**: SESSION_RESUMED
+**Source**: resume
+
+---
+
+## Session End
+**Timestamp**: 2026-09-06T20:40:11Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-09-06T20:40:14Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-06T20:40:14Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-06T20:40:23Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-06T20:40:45Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-06T20:41:06Z
+**Event**: HUMAN_TURN
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-06T20:52:30Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: regimes-diagnostics-reporting
+**Iteration**: 1
+**Retry**: pending-request
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-06T20:56:59Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: C:/Users/s_inv/Desktop/New folder/Th/Th-1
+**Stage**: code-generation
+**Unit**: regimes-diagnostics-reporting
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-06T20:57:58Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: .
+**Stage**: code-generation
+**Unit**: regimes-diagnostics-reporting
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-06T20:58:09Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: .
+**Stage**: code-generation
+**Unit**: regimes-diagnostics-reporting
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-06T21:02:15Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-06T21:02:28Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: a29e119deb7b7f25a
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: NOT-READY**\n\nI appended the `## Review` section to `aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics
+
+---
+
+## Review Completed
+**Timestamp**: 2026-09-06T21:02:46Z
+**Event**: REVIEW_COMPLETED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: regimes-diagnostics-reporting
+**Iteration**: 1
+**Verdict**: NOT-READY
+**Artifact Fingerprint**: sha256:9d426767872dfac4d6f8fa02acf988875a7c4ae0a2d7428392200402c968b60b
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-06T21:15:48Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-developer-agent
+**Agent ID**: a60c8361c9c3d3972
+**Message**: All work is complete and verified; nothing further is needed. The `## Review` section is byte-identical to the pre-pass snapshot, the code-summary numstat (178/4) reconciles as the reviewer's 81 uncom
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-06T21:17:13Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: regimes-diagnostics-reporting
+**Iteration**: 2
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-06T21:18:04Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: C:/Users/s_inv/Desktop/New folder/Th/Th-1
+**Stage**: code-generation
+**Unit**: regimes-diagnostics-reporting
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-06T21:19:20Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: C:/Users/s_inv/Desktop/New folder/Th/Th-1
+**Stage**: code-generation
+**Unit**: regimes-diagnostics-reporting
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-06T21:25:41Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-06T21:25:54Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: affec384356a504d3
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict: NOT-READY**\n\nI verified the iteration-1 Critical is genuinely closed at the real entry point (read the code, ran the full suite myself — 82/
+
+---
+
+## Review Completed
+**Timestamp**: 2026-09-06T21:26:17Z
+**Event**: REVIEW_COMPLETED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: regimes-diagnostics-reporting
+**Iteration**: 2
+**Verdict**: NOT-READY
+**Artifact Fingerprint**: sha256:dc1fe4ce8d60ebd8b3edd25ef9aec6a5b4625fc6d5b08ce607b53141c4de1cec
+
+---
+
+## Error Logged
+**Timestamp**: 2026-09-06T21:28:50Z
+**Event**: ERROR_LOGGED
+**Tool**: aidlc-state
+**Command**: aidlc-state unit --help
+**Error**: Usage: aidlc-state.ts unit <start|pause|resume|complete> --stage <slug> --unit <name> [--reason <text>] [--next-action <text>]
+
+---
+
+## Unit Completed
+**Timestamp**: 2026-09-06T21:29:16Z
+**Event**: UNIT_COMPLETED
+**Stage**: code-generation
+**Unit**: regimes-diagnostics-reporting
+**Run floor**: STAGE_STARTED:2026-09-05T08:27:34Z#1
+**Next Action**: Stage gate: quote the unit's terminal NOT-READY (iteration 2) findings for the human
+
+---
+
+## Unit Started
+**Timestamp**: 2026-09-06T21:29:59Z
+**Event**: UNIT_STARTED
+**Stage**: code-generation
+**Unit**: fixtures-and-reproducibility
+**Run floor**: STAGE_STARTED:2026-09-05T08:27:34Z#1
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-09-06T21:38:05Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-questions.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-generation-questions.md
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-09-06T21:38:10Z
+**Event**: DECISION_RECORDED
+**Stage**: code-generation
+**Decision**: Question interaction mode for 6 code-generation questions (creation bar, loader home, not_applicable reading, clean-run data scope, receipt-check call site, three design defaults)
+**Options**: Guide me,I'll edit the file,Chat
+**Unit**: fixtures-and-reproducibility
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-07T05:48:37Z
+**Event**: HUMAN_TURN
+
+---
+
+## Question Answered
+**Timestamp**: 2026-09-07T05:48:58Z
+**Event**: QUESTION_ANSWERED
+**Stage**: code-generation
+**Details**: Guide me
+**Unit**: fixtures-and-reproducibility
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-09-07T05:48:58Z
+**Event**: DECISION_RECORDED
+**Stage**: code-generation
+**Decision**: Q1 creation bar (build now vs defer); Q2 loader home (src/data/fixture_manifest.py vs tests/fixtures/_manifest.py); Q3 §15.2 Phase-2 blocks (not_applicable reading vs literal); Q4 clean-run data scope (apparatus partitions via --fixture-manifest on 05/06/07 vs src-direct vs full-year); Q5 receipt-check call site (in-script vs services.md step vs orchestrator-only); Q6 three design defaults (adopt all vs mint FixtureError vs bootstrap as experiment.yaml run)
+**Options**: Q1: A,B,X; Q2: A,B,X; Q3: A,B,X; Q4: A,B,C,X; Q5: A,B,C,X; Q6: A,B,C,X
+**Unit**: fixtures-and-reproducibility
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-07T05:52:06Z
+**Event**: HUMAN_TURN
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-07T05:52:22Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-questions.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-generation-questions.md
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-07T05:52:24Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-questions.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-generation-questions.md
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-07T05:52:27Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-questions.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-generation-questions.md
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-07T05:52:31Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-questions.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-generation-questions.md
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-07T05:53:05Z
+**Event**: HUMAN_TURN
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-09-07T05:56:24Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: C:/Users/s_inv/Desktop/New folder/Th/Th-1/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-plan.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-generation-plan.md
+
+---
+
+## Question Answered
+**Timestamp**: 2026-09-07T05:56:31Z
+**Event**: QUESTION_ANSWERED
+**Stage**: code-generation
+**Details**: Q1=A, Q2=A, Q3=A, Q4=A, Q5=A, Q6=A
+**Unit**: fixtures-and-reproducibility
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-09-07T05:57:10Z
+**Event**: DECISION_RECORDED
+**Stage**: code-generation
+**Decision**: Does this all look correct before I generate the artifact?
+**Options**: Looks correct,Request changes
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-questions.md
+**Unit**: fixtures-and-reproducibility
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-07T05:57:50Z
+**Event**: HUMAN_TURN
+
+---
+
+## Summary Confirmation Recorded
+**Timestamp**: 2026-09-07T05:58:15Z
+**Event**: SUMMARY_CONFIRMATION_RECORDED
+**Stage**: code-generation
+**Details**: Looks correct
+**Checkpoint**: Consolidated Summary Confirmation
+**Questions File**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-generation-questions.md
+**Questions SHA-256**: 9a21d8112be683aab4fdb1c9c5302b3e2b3d5ec6147e6e86ede11d6d0ac38659
+**Unit**: fixtures-and-reproducibility
+
+---
+
+## Decision Recorded
+**Timestamp**: 2026-09-07T05:58:16Z
+**Event**: DECISION_RECORDED
+**Stage**: code-generation
+**Decision**: Plan Approval for fixtures-and-reproducibility code-generation plan (10 steps)
+**Options**: Approve Plan,Request Changes
+**Unit**: fixtures-and-reproducibility
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-07T06:00:15Z
+**Event**: HUMAN_TURN
+
+---
+
+## Question Answered
+**Timestamp**: 2026-09-07T06:00:37Z
+**Event**: QUESTION_ANSWERED
+**Stage**: code-generation
+**Details**: Approve Plan
+**Unit**: fixtures-and-reproducibility
+
+---

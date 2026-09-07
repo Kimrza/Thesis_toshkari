@@ -571,6 +571,30 @@ def top1pct_sensitivity_block(
     }
 
 
+def _irigim_items(node: Any) -> list[Mapping[str, Any]]:
+    """Every IRI/GIM comparison item anywhere in a breakdown payload tree.
+
+    A breakdown's comparison rows live inside its `payload` under whatever key the named
+    breakdown uses (`rows`, `comparisons`, a per-station sub-mapping, ...), so the W-5
+    lineage guard walks the tree rather than trusting one key: an item is an IRI/GIM
+    comparison when its `benchmark_id` is in `EXTERNAL_COMPARATOR_IDS` or it carries an
+    explicit `is_irigim_comparison` flag — the same membership test the guard applies.
+    Strings are leaves; only mappings, lists and tuples are descended.
+    """
+    found: list[Mapping[str, Any]] = []
+    if isinstance(node, Mapping):
+        if bool(node.get("is_irigim_comparison")) or (
+            str(node.get("benchmark_id", "")) in EXTERNAL_COMPARATOR_IDS
+        ):
+            found.append(node)
+        for value in node.values():
+            found.extend(_irigim_items(value))
+    elif isinstance(node, list | tuple):
+        for value in node:
+            found.extend(_irigim_items(value))
+    return found
+
+
 def build_breakdown_artifact(
     *,
     breakdown_id: str,
@@ -588,10 +612,22 @@ def build_breakdown_artifact(
     text — and mark the artifact partial (the two-tier posture). Per-station breakdowns
     carry the standing TC-12 driver-identity caveat from THIS producing path (Rec 17).
 
+    Two SD-R-01 guards run here because their Called-by column names W-5 (security-
+    design.md rows `require_units`, `require_lineage_caveat`; iteration-2 repair of the
+    2026-09-06 Critical, which found the lineage call absent from this path):
+    ``require_units`` asserts the metrics artifact's units metadata is TECU — every
+    breakdown value derives from that one artifact and breakdown rows carry no units
+    field of their own (R-127) — and the checked value is PRINTED onto the breakdown as
+    `units`, never assumed; ``require_lineage_caveat`` runs on every IRI/GIM comparison
+    item found anywhere in the payload tree (``_irigim_items``), so a caveat-less IRI/GIM
+    row refuses at construction time rather than at the after-the-fact W-4 scan.
+
     Raises
     ------
     RegimeError
-        via the stamp/role/provenance/caveat validators below.
+        units metadata absent or non-TECU on the metrics artifact; an IRI/GIM comparison
+        item in the payload without its lineage caveat; and via the stamp/role/provenance/
+        driver-caveat validators below.
     """
     surface = f"breakdown {breakdown_id}"
     artifact: dict[str, Any] = {
@@ -603,6 +639,7 @@ def build_breakdown_artifact(
         "aggregation": aggregation,
         "per_station": bool(per_station),
         "payload": dict(payload or {}),
+        "units": metrics_artifact.get("units"),  # printed from metadata, never assumed
         "completeness_shortfalls": [dict(s) for s in completeness_shortfalls],
         "partial": bool(completeness_shortfalls),
         "phase_id": getattr(mask, "phase_id", None),
@@ -620,6 +657,9 @@ def build_breakdown_artifact(
         artifact["driver_identity_caveat"] = DRIVER_IDENTITY_CAVEAT
     assert_breakdown_stamps(artifact)
     assert_headline_role(artifact)
+    require_units(metrics_artifact, surface=surface)
+    for item in _irigim_items(artifact["payload"]):
+        require_lineage_caveat(item, surface=surface, kind="row")
     require_provenance_block(artifact, mask=mask, surface=surface)
     if per_station:
         require_driver_caveat(artifact, surface=surface)

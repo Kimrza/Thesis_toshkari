@@ -195,3 +195,43 @@ Precondition ABSENT → Step 8 stopped, nothing ticked, nothing migrated:
 `notebooks/madrigal_phase1_coverage_audit.ipynb`, `configs/data.yaml` and
 `src/data/registry.py` are untouched by this pass. The migration stays owed at `team.md`
 § Code Style, gated on the owner adopting § 3's proposed D-number (or an edited form).
+
+## 7. Iteration 2 (reviewer finding 1) — 2026-09-07
+
+**Gap (adversarial review, iteration 1, Critical).** `require_lineage_caveat` — whose Called-by
+column the approved NFR design states as "W-3, W-5, W-7" (`nfr-design/security-design.md:47`,
+Governance Rec 9) — was never called from the W-5 producing path `build_breakdown_artifact`
+(`src/evaluation/diagnostics.py`); the only call in that module was inside the W-3 table
+builder. The test named for the mandated per-entry control ("a caveat-less GIM comparison into
+W-5", `security-design.md:81-85`) called the bare guard directly, so the suite was 81/81 green
+while the call site had no coverage — the exact failure `project.md` correction `nfr-design:c58`
+names. The same drift class held for `require_units` (Called-by "W-3, W-5, W-6",
+`security-design.md:48`; reviewer suggestion 1).
+
+**Fix (in place, no `_v2`, no signature widened, no scientific value decided).** In
+`build_breakdown_artifact`: `require_units(metrics_artifact, …)` (`diagnostics.py:660`) with the
+checked value printed onto the breakdown as `units`; a payload-tree walker `_irigim_items`
+(`diagnostics.py:574`, membership test = the guard's own: `EXTERNAL_COMPARATOR_IDS` or
+`is_irigim_comparison`) feeding `require_lineage_caveat(item, surface=…, kind="row")`
+(`diagnostics.py:662`) for every IRI/GIM item wherever it sits under `payload`. Breakdown rows
+carry no units field of their own under R-127, so the units assertion is made on the metrics
+artifact every breakdown value derives from — the same object W-3 asserts.
+
+**Tests.** `tests/test_regimes_and_reporting.py::test_per_entry_caveatless_gim_into_w5_raises`
+(L915) rewritten to push the caveat-less `C-01` row THROUGH `build_breakdown_artifact` and assert
+the raise from that entry point, with a must-NOT-fire half (same payload WITH the caveat
+renders), a nested-placement `B-01` control, and a non-IRI/GIM no-refusal control; new
+`test_per_entry_unitless_metrics_artifact_into_w5_raises` (L955). Count derived and printed:
+`grep -c "def test_"` → **82** (was 81). Runner: **82 passed, 0 failed, 0 skipped**;
+regressions `test_common_masks` + `test_bootstrap` **91 passed, 7 skipped** (unchanged);
+`compileall` OK. Stdlib pytest stand-in — **smoke evidence only, never governed**; real
+`pytest`/`ruff` owed.
+
+**Not done, recorded.** Reviewer suggestion 2 (an AST test of documented Called-by vs actual call
+sites) is not added: the derivation was run and shows four further documented-vs-actual
+mismatches outside this finding (`require_estimand_fields` @ W-5; `require_registered_surface`
+@ W-3/W-5 — mapping-dependent on where "registration" is deemed called; `require_derived_label`
+@ W-5), routed to the reviewer and the gate in the code summary's § Iteration 2 changes. The W-4
+checklist's TEC-06 scan reads top-level `rows`/`comparisons` while breakdowns nest rows under
+`payload` — recorded, not changed. **Nothing is discharged by this entry; no commit is made
+here — the student commits, citing this change ID.**
