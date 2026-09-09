@@ -174,6 +174,41 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _declared_data_window(snapshot: Any) -> tuple[dt.date, dt.date]:
+    """Board Rec 2 (ML-01, owner-authorised per CR-2026-09-07 §11.5; flagged for
+    `acquisition`'s record): the retrieval window THIS run declares, read from
+    `configs/data.yaml`'s acquisition block (c59 — derived from this script's own input
+    declaration, never from surrounding narrative). On a fixture run the TE 9.2 exemption
+    is bound to the fixture scope's cited window; while the fields are undeclared the
+    fixture exemption REFUSES naming them (TE 18.3: stop and report) — it is not granted
+    on a validating flag alone.
+
+    Raises
+    ------
+    IntegrityError
+        `acquisition.window_start`/`window_end` absent, unresolved (`TBD — freeze gate`),
+        or not calendar dates.
+    """
+    acquisition_cfg = snapshot.data.get("acquisition")
+    block = acquisition_cfg if isinstance(acquisition_cfg, Mapping) else {}
+    start, end = block.get("window_start"), block.get("window_end")
+    try:
+        if start is None or end is None:
+            raise ValueError("undeclared")
+        return (
+            dt.date.fromisoformat(str(start)[:10]),
+            dt.date.fromisoformat(str(end)[:10]),
+        )
+    except (TypeError, ValueError) as exc:
+        raise IntegrityError(
+            "configs/data.yaml: acquisition.window_start/window_end",
+            "undeclared or unresolved; a fixture acquisition run declares the retrieval "
+            "window it touches, and the TE 9.2 exemption is BOUND to the fixture scope's "
+            "cited window rather than granted on a validating flag alone (board Rec 2 / "
+            "ML-01; TE 18.3: stop and report, never default)",
+        ) from exc
+
+
 def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> dict[str, Any]:
     """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()).
 
@@ -196,8 +231,13 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism)
     assert_lock_complete(lock)
+    declared_window = _declared_data_window(snapshot) if fixture_manifest is not None else None
     receipts_gate = require_receipts_for_snapshot(
-        snapshot, lock, fixture_manifest=fixture_manifest
+        snapshot,
+        lock,
+        fixture_manifest=fixture_manifest,
+        declared_window=declared_window,
+        declared_window_resource="scripts/00_acquire_prepared_vtec.py: declared retrieval window",
     )
     return {
         "snapshot": snapshot,

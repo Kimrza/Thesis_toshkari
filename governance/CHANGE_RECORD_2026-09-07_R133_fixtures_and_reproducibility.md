@@ -282,3 +282,106 @@ The 2026-09-07 session ended after Steps 1–5 and 7; Steps 6, 8 and 9 were comp
   (`test_common_masks.py` restricted-root literal), and 4 import-error modules
   (`test_acquisition`, `test_experiment_registry`, `test_determinism`, `test_december_audit`).
   **Smoke evidence only, never governed.**
+
+### §11.1 — Correction, 2026-09-09: the commit state (§10's last bullet is superseded)
+
+§10's bullet "**No commit is made here.** The student commits, citing D-11, D-14, D-20,
+D-28, D-29, D-31 and this change ID" is left standing above as the record of the intent when
+written, and is **superseded as to the repository fact**: owner commit **`64c0551`**
+(2026-09-07 12:21 +0400, an unedited git template message, **no D-number cited**) already
+carries the Step 1–5/7 outputs (`src/data/fixture_manifest.py`, `fixture_gate.py`,
+`fixture_evidence.py`, `scripts/run_walking_skeleton.py`, the two fixture trees), the
+`src/data/acquisition.py` additive edit (`assert_records_within_window`) and this change
+record's first version. The **resume-pass outputs remain uncommitted**: the Step 6 sibling
+edits (the seven stage scripts and the `03_verify_processing.py` reroute),
+`tests/test_clean_run.py`, the plan checkbox ticks, §11 and this correction. The owed
+D-number citations (**D-11, D-14, D-20, D-28, D-29, D-31** plus
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY`) now attach to an
+**amend-or-follow-up decision that is the student's**, routed to the stage gate.
+*(Added 2026-09-09 per the adversarial review's commit-state finding; appended rather than
+rewritten, per this record's dated-update convention.)*
+
+### §11.2 — Addition, 2026-09-09: the 39/11 figure is now machine-checked, not carried
+
+Per the same review's Finding 3: `tests/test_clean_run.py` now carries a machine-readable
+control ledger (`CONTROL_HOSTS`, `MUST_NOT_FIRE_HOSTS`, `MNF_HOSTED_ELSEWHERE`) and a
+derivation meta-test (`test_control_counts_derived_from_business_rules_not_carried`) that
+parses the (1)–(39) enumeration and the 1+1+1+1+2+2+1+1+1 = 11 must-not-fire derivation
+from `functional-design/business-rules.md` § Negative-control count, SET-DIFFERENCES the ID
+lists (never totals), and prints both counts plus any missing/extra ids before asserting.
+One must-not-fire control is hosted elsewhere by design and asserted present there:
+R-137's November `score` containment pass (R-74's inherited control) lives in
+`tests/test_train_only_transforms.py` — no third copy is written.
+
+### §11.3 — Correction, 2026-09-09 (governance board Rec. 1): §11.1's commit state is itself superseded
+
+§11.1's sentence "The **resume-pass outputs remain uncommitted**" is left standing above as
+the fact at its writing time and is **superseded**: owner commit **`cf3185d`**
+(2026-09-09 20:54 +0400, an unedited git template message, **no D-number cited**) already
+carries the resume-pass governed outputs — the seven Step 6 stage-script edits including the
+`03_verify_processing.py` reroute, `tests/test_clean_run.py`, the code-summary, the
+`evidence/test_run_access_log.jsonl` rows, and §11/§11.1/§11.2 of this record — committed
+**before** the fixtures unit's iteration-2 READY verdict timestamp (2026-09-09T17:40Z). It is
+the eighth template-message, D-number-less commit of governed artifacts in this stage's window.
+Per the governance board's Recommendation 1 (preferred option (a), applied on the owner's
+"apply the recommended option" ruling of 2026-09-09): the disposition is **one combined
+follow-up commit** citing **D-11, D-14, D-20, D-28, D-29, D-31** plus
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` and naming both `64c0551` and `cf3185d`;
+no history is rewritten. The matching code-summary annotation the board recommended is
+deliberately NOT applied: the code-summary sits under the unit's terminal READY receipt and a
+post-receipt write would invalidate it — this section and the stage gate record carry the fact
+instead.
+
+### §11.4 — Corrections, 2026-09-09 (board Recs. 8–9): two counts restated from fresh derivation
+
+- §11 Step 8's "49 test functions (`grep -c "def test_"` …)" and Step 9's "46 passed …
+  436 passed" are superseded by the post-meta-test state: **50** test functions — derived by
+  the ANCHORED form `grep -c "^def test_" tests/test_clean_run.py` (the unanchored command
+  quoted in §11 now returns 53 on the current file and reproduces neither figure; the
+  implemented derivation in `test_function_count_derived_and_printed` is the anchored one) —
+  with `tests.test_clean_run` at **47 passed, 0 failed, 3 skipped** and the ten-module
+  regression total at **437 passed, 0 failed, 13 skipped, 0 errors**.
+- §11 Step 9's "**47 pre-existing over-99 lines**" is superseded: fresh derivation
+  (CRLF-stripped, `len > 99`, per file: `run_walking_skeleton.py` 21, `fixture_manifest.py` 10,
+  `fixture_gate.py` 6, `fixture_evidence.py` 14, `01_inventory_and_registry.py` 1) gives
+  **52**. Every resume-pass file still contains zero over-99 lines. Closure note:
+  `pyproject.toml` ignores `E501`, so these lines will never surface via `ruff check`; closure
+  runs through `ruff format` (or a scoped `E501` re-enable) in the governed environment.
+
+### §11.5 — Addition, 2026-09-09 (board Recs. 2–5, 10): apparatus remediation, owner-authorised
+
+On the owner's "apply the recommended option" ruling over the governance board's report, the
+following remediation was implemented as a separate pass after the review (board Recs. 2–5
+preferred options; the cross-unit edits into READY-receipted scripts are covered by that
+explicit ruling and flagged here for each owner's record):
+
+- **Rec. 2 (ML-01)** — the TE §9.2 receipt-gate exemption on `scripts/00/01/02/04` is bound to
+  the fixture scope's cited window (record-date assertion reusing
+  `assert_records_within_window`), no longer granted on a validating flag alone; one negative
+  control per script proves a full-scale invocation carrying a valid scope but out-of-window
+  inputs refuses.
+- **Rec. 3 (ML-02)** — `scripts/07`'s fixture path roots its mask registry under the fixture
+  tree (`artifacts/walking_skeleton/<fixture_id>/mask_registry`) and stamps each apparatus
+  registration; negative controls prove a post-fixture confirmatory registration succeeds and
+  `freeze_bundle` enumerates no apparatus `partition_id`.
+- **Rec. 4 (ML-03)** — the orchestrator's `build_phase1_commands` passes explicit output roots
+  under the fixture root and a deterministic run id through 05/06/07; 06's fixture path reads
+  the apparatus split manifest by its own name; stage fixture paths emit machine-readable
+  measurement blocks the orchestrator folds into candidate `measurements`; a dry-run
+  integration test (synthetic frozen configs, the `parsed=` injection pattern) asserts the
+  chain connects and a complete candidate validates from orchestrator-collectable measurements.
+- **Rec. 5 (ML-04)** — `--emit-candidate` composes `min`/`max` over N measuring runs (each
+  stamped with its run id) and refuses a zero-width runtime/storage range at composition.
+- **Rec. 10 (DR-03)** — the only-copy scan's claim is qualified here and in
+  `src/data/fixture_manifest.py`'s docstring: the AST scan flags `yaml.*load` calls whose
+  argument subtree **textually references** `fixture_manifest`; an intermediate-variable parse
+  is outside its reach, which remains a convention backed by review, per the module's
+  honest-limits paragraph. The §2 and §10 sentences claiming "any such parse fails the scan"
+  are superseded to that qualified form.
+
+Board Recs. 6–7 are gate-record conditions, applied at the AI-DLC stage gate: approval scope
+excludes W-5 breakdown production and the SD-R-03 registration net (blocked on
+`regimes-diagnostics-reporting`'s standing terminal NOT-READY), and the two pre-existing
+critical-suite reds (`test_iri_denial` containment scan; `test_locked_test_guard` restricted-
+root literal in `test_common_masks.py`) are registered verbatim as named preconditions of the
+next governed run.

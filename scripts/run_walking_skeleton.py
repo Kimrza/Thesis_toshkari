@@ -149,18 +149,23 @@ from src.data.fixture_manifest import (  # noqa: E402
     FIXTURE_IDS,
     PLUMBING_FIXTURE_ID,
     SCIENTIFIC_FIXTURE_ID,
+    WALKING_SKELETON_ROOT,
     FixtureManifest,
     IdentityDeclaration,
     assert_run_level_ranges,
+    collect_stage_measurements,
     compare_required_outputs,
     compose_candidate_manifest,
+    compose_measurement_ranges,
     fixture_root_for,
     load_fixture_scope,
+    load_measuring_results,
     manifest_path_for,
     output_matches,
     required_outputs_for,
     window_days,
     write_candidate_manifest,
+    write_measuring_result,
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
@@ -250,6 +255,13 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "freeze_record_agreement",
     "declared_inputs",
     "note",
+    "measurements",
+    "measuring_run_id",
+    "measuring_run_ids",
+    "min",
+    "max",
+    "units",
+    "sources",
 )
 
 
@@ -305,6 +317,18 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--measuring-runs",
+        action="append",
+        type=Path,
+        default=None,
+        help=(
+            "additional measuring-result inputs for --emit-candidate (board Rec 5): a "
+            "measuring_result_<run_id>.json file or a fixture root holding them, from "
+            "another environment's run; repeatable. Ranges compose min/max over ALL runs, "
+            "each run id stamped; a zero-width runtime/storage range refuses"
+        ),
+    )
+    parser.add_argument(
         "--code-commit",
         type=str,
         default=None,
@@ -323,6 +347,9 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     if not args.emit_candidate and args.identity is not None:
         parser.error("--identity is read only by a measuring run (--emit-candidate); a comparison "
                      "run reads the manifest at its fixed path")
+    if args.measuring_runs and not args.emit_candidate:
+        parser.error("--measuring-runs aggregates measuring results for --emit-candidate only "
+                     "(board Rec 5); a comparison run composes nothing")
     return args
 
 
@@ -446,10 +473,42 @@ def assert_phase1_invocation(script_name: str) -> None:
         )
 
 
+def lifecycle_arguments(script: str, fixture_id: str) -> list[str]:
+    """Board Rec 4 (ML-03, owner-authorised per CR §11.5): the explicit output roots the
+    orchestrator threads through 05/06/07 — all under the fixture root, so 05's bundles
+    feed 06, 06's predictions feed 07, and the TE 15.4 outputs land where
+    `collect_required_outputs` scans. Workspace-relative; POSIX-form for a platform-stable
+    argv."""
+    base = Path(WALKING_SKELETON_ROOT) / fixture_id
+    if script.startswith("05_"):
+        return ["--bundles-out", (base / "features").as_posix()]
+    if script.startswith("06_"):
+        return [
+            "--bundles-root",
+            (base / "features").as_posix(),
+            "--predictions-out",
+            (base / "predictions").as_posix(),
+        ]
+    if script.startswith("07_"):
+        return [
+            "--predictions-run",
+            (base / "predictions").as_posix(),
+            "--evaluation-out",
+            (base / "evaluation").as_posix(),
+        ]
+    return []
+
+
 def build_phase1_commands(
-    *, python: str, scripts_dir: Path, config_dir: Path, scope_path: Path
+    *,
+    python: str,
+    scripts_dir: Path,
+    config_dir: Path,
+    scope_path: Path,
+    fixture_id: str | None = None,
 ) -> list[list[str]]:
-    """TE 13.2's seven Phase 1 invocations, in order, plus the ruled scope argument (Q4/Q5)."""
+    """TE 13.2's seven Phase 1 invocations, in order, plus the ruled scope argument (Q4/Q5)
+    and — when `fixture_id` is given — the Rec 4 lifecycle roots under the fixture root."""
     commands: list[list[str]] = []
     for script, phase in PHASE1_SEQUENCE:
         assert_phase1_invocation(script)
@@ -457,6 +516,8 @@ def build_phase1_commands(
         if phase is not None:
             argv += ["--phase", str(phase)]
         argv += [FIXTURE_SCOPE_OPTION, str(scope_path)]
+        if fixture_id is not None:
+            argv += lifecycle_arguments(script, fixture_id)
         commands.append(argv)
     return commands
 
@@ -813,7 +874,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     env = child_environment(os.environ, workspace=workspace)
     commands = build_phase1_commands(
         python=args.python, scripts_dir=REPO_ROOT / "scripts", config_dir=Path(args.config),
-        scope_path=scope_path,
+        scope_path=scope_path, fixture_id=args.fixture,
     )
     sequence = run_sequence(commands, env=env, cwd=workspace)
     m10: dict[str, Any] | None = None
@@ -899,26 +960,52 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         summary.update({"matched_artifact_report": matched, "receipt": receipt["receipt_run_id"]})
         return summary
 
-    # 9. A measuring run: compose the candidate from the declaration and THIS run's
-    #    measurements; the schema refuses an incomplete candidate rather than inventing one.
-    measurements = {
+    # 9. A measuring run (board Recs 4-5, owner-authorised per CR §11.5): fold the stage-
+    #    emitted measurement blocks into THIS run's measuring result, persist it, then
+    #    compose min/max RANGES over every measuring result available — this run's, prior
+    #    runs' under the fixture root, and any --measuring-runs aggregation inputs from
+    #    other environments' fixture roots. Composition refuses a zero-width runtime or
+    #    storage range (a single run measures a point, not a range), and the schema refuses
+    #    an incomplete candidate rather than inventing one.
+    run_measurements: dict[str, dict[str, Any]] = {
         "runtime": {
             "cpu_total": {"min": runtime_seconds, "max": runtime_seconds, "units": "s"},
             "storage_total": {"min": storage_bytes, "max": storage_bytes, "units": "bytes"},
         },
     }
+    for area, quantities in collect_stage_measurements(fixture_root).items():
+        block = run_measurements.setdefault(area, {})
+        for key, value in quantities.items():
+            block[key] = {"min": value["min"], "max": value["max"], "units": value["units"]}
+    write_measuring_result(fixture_root, run_id=run_id, measurements=run_measurements)
+    results = load_measuring_results(fixture_root)
+    for extra in args.measuring_runs or []:
+        extra_path = Path(extra) if Path(extra).is_absolute() else workspace / extra
+        results.extend(load_measuring_results(extra_path))
+    seen_run_ids: set[str] = set()
+    for result in results:
+        rid = str(result.get("measuring_run_id"))
+        if rid in seen_run_ids:
+            raise IntegrityError(
+                f"measuring result {rid}",
+                "duplicate measuring_run_id across the aggregated results; every measuring "
+                "run is one recorded execution (NFR-AUD-01; board Rec 5)",
+            )
+        seen_run_ids.add(rid)
+    composed = compose_measurement_ranges(results)  # refuses a zero-width range (Rec 5)
     template = scope.data.get("required_outputs", {}).get("comparison_ledger", {})
     candidate = compose_candidate_manifest(
         scope.data,
         fixture_id=args.fixture,
-        measurements=measurements,
-        measuring_run_id=run_id,
+        measurements=composed,
+        measuring_run_id="+".join(sorted(seen_run_ids)),
         outputs=sorted(listing),
         comparison_ledger=template,
         artifact_manifest_ref=os.path.relpath(fixture_root / ARTIFACT_MANIFEST_NAME, manifest_path_for(workspace, args.fixture).parent),
     )
     written = write_candidate_manifest(manifest_path_for(workspace, args.fixture), candidate)
     summary["candidate_manifest"] = str(written)
+    summary["measuring_run_ids"] = sorted(seen_run_ids)
     return summary
 
 

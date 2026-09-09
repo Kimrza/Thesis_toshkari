@@ -85,6 +85,7 @@ from dataclasses import fields as _dataclass_fields
 from pathlib import Path
 from typing import Any, Final
 
+from src.data.acquisition import assert_records_within_window
 from src.data.config import ConfigSnapshot, IntegrityError, RunRecord, environment_lock_hash
 from src.data.experiment_registry import append_registry_event
 from src.data.fixture_manifest import (
@@ -114,6 +115,7 @@ __all__ = [
     "fixture_input_version_tag",
     "receipt_path_for",
     "gate_result_path_for",
+    "assert_declared_window_within_scope",
     "write_fixture_pass_receipt",
     "read_receipt",
     "verify_receipt",
@@ -202,6 +204,51 @@ def fixture_input_version_tag(fixture_id: str, manifest_sha256: str) -> str:
     if fixture_id not in FIXTURE_IDS:
         raise _refuse("fixture_id", f"{fixture_id!r} is not one of {list(FIXTURE_IDS)}")
     return f"{FIXTURE_INPUT_TAG_PREFIX}{fixture_id}:{manifest_sha256}"
+
+
+def assert_declared_window_within_scope(
+    scope: Any, *, declared_start: dt.date, declared_end: dt.date, resource: str
+) -> dict[str, str]:
+    """Board Rec 2 (ML-01, owner-authorised per CR §11.5): the TE 9.2 exemption is bound to
+    the fixture scope's cited window, no longer granted on a validating flag alone.
+
+    A record-date assertion reusing `acquisition.assert_records_within_window` (R-31
+    consumed, never copied): the caller's declared data window's endpoints are asserted
+    inside the scope's cited window. A full-scale invocation carrying a valid scope but
+    out-of-window inputs REFUSES here — this is the ONE guard home for the exemption
+    boundary (nfr-design c58), and each caller derives its own declared window from its own
+    input declaration (c59).
+
+    Raises
+    ------
+    IntegrityError
+        the declared window's endpoints do not lie inside the scope's cited window, or the
+        declared window is inverted.
+    """
+    start, end = scope.window
+    if declared_start > declared_end:
+        raise _refuse(resource, f"declared window {declared_start}..{declared_end} is inverted")
+    endpoints = [
+        {"date": declared_start.isoformat()},
+        {"date": declared_end.isoformat()},
+    ]
+    try:
+        assert_records_within_window(endpoints, start=start, end=end, timestamp_key="date")
+    except IntegrityError as exc:
+        raise _refuse(
+            resource,
+            f"declared data window {declared_start}..{declared_end} does not lie inside the "
+            f"fixture scope's cited window {start}..{end}; the TE 9.2 receipt-gate exemption "
+            f"is bound to the scope's window and is not granted on a validating flag alone — "
+            f"a fixture run touches only its cited window (board Rec 2 / ML-01; R-31's "
+            f"record-date assertion reused, never copied)",
+        ) from exc
+    return {
+        "declared_start": declared_start.isoformat(),
+        "declared_end": declared_end.isoformat(),
+        "scope_start": start.isoformat(),
+        "scope_end": end.isoformat(),
+    }
 
 
 def receipt_path_for(workspace: Path, fixture_id: str) -> Path:
@@ -533,27 +580,44 @@ def require_fixture_receipts(
     receipts: Mapping[str, Path],
     lock: RunRecord,
     fixture_manifest: Path | None = None,
+    declared_window: tuple[dt.date, dt.date] | None = None,
+    declared_window_resource: str = "declared data window",
 ) -> dict[str, Any]:
     """The exported two-receipt check every full-year job passes (R-140; Q5 = A).
 
     Exempt when `fixture_manifest` names a scope that validates (a fixture run is not a
-    full-year job); the exemption is recorded, never silent.
+    full-year job); the exemption is recorded, never silent. When the caller passes its
+    `declared_window`, the exemption is additionally BOUND to the scope's cited window
+    (board Rec 2 / ML-01, owner-authorised per CR §11.5): out-of-window inputs refuse.
 
     Raises
     ------
     IntegrityError
-        a fixture scope that does not validate; a missing or unfrozen manifest in force; a
-        missing receipt (27); a receipt failing any `verify_receipt` check (28/29 and the
-        SD-X-02 binding); the scientific receipt not citing the plumbing receipt found (26).
+        a fixture scope that does not validate; a declared window outside the scope's cited
+        window (Rec 2); a missing or unfrozen manifest in force; a missing receipt (27); a
+        receipt failing any `verify_receipt` check (28/29 and the SD-X-02 binding); the
+        scientific receipt not citing the plumbing receipt found (26).
     """
     if fixture_manifest is not None:
         scope = load_fixture_scope(fixture_manifest)
+        window_check: dict[str, str] | None = None
+        if declared_window is not None:
+            window_check = assert_declared_window_within_scope(
+                scope,
+                declared_start=declared_window[0],
+                declared_end=declared_window[1],
+                resource=declared_window_resource,
+            )
+        start, end = scope.window
         return {
             "exempt": True,
             "reason": "a fixture run is not a full-year job (TE 9.2; Q5 = A)",
             "fixture_id": scope.fixture_id,
             "scope_kind": type(scope).__name__,
             "scope_sha256": scope.sha256,
+            "scope_window_start": start.isoformat(),
+            "scope_window_end": end.isoformat(),
+            "declared_window_checked": window_check,
         }
     missing_ids = [fid for fid in FIXTURE_IDS if fid not in manifests or fid not in receipts]
     if missing_ids:
@@ -606,12 +670,18 @@ def _registry_path_for(snapshot: ConfigSnapshot) -> Path:
 
 
 def require_receipts_for_snapshot(
-    snapshot: ConfigSnapshot, lock: RunRecord, *, fixture_manifest: Path | None = None
+    snapshot: ConfigSnapshot,
+    lock: RunRecord,
+    *,
+    fixture_manifest: Path | None = None,
+    declared_window: tuple[dt.date, dt.date] | None = None,
+    declared_window_resource: str = "declared data window",
 ) -> dict[str, Any]:
     """The ONE-line call every stage script's `_stage_entry` makes after `assert_lock_complete`.
 
     Derives the registry path, both manifest paths and both receipt paths from the snapshot's
-    resolved roots, so no script restates a path convention.
+    resolved roots, so no script restates a path convention. `declared_window` is the
+    caller's own data-window derivation (c59), bound to the scope on a fixture run (Rec 2).
     """
     workspace = Path(snapshot.resolved_roots["workspace"])
     return require_fixture_receipts(
@@ -620,6 +690,8 @@ def require_receipts_for_snapshot(
         receipts={fid: receipt_path_for(workspace, fid) for fid in FIXTURE_IDS},
         lock=lock,
         fixture_manifest=fixture_manifest,
+        declared_window=declared_window,
+        declared_window_resource=declared_window_resource,
     )
 
 

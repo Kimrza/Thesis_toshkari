@@ -74,8 +74,6 @@
 - **Revision Count**: 24
 
 - **Skeleton Stance**: off
-- **Active Unit**: fixtures-and-reproducibility
-- **Unit State**: in-progress
 ## Phase Progress
 <!-- Status values: Pending, Active, Verified, Skipped -->
 
@@ -118,7 +116,7 @@ Per unit: [TBD]
 - [x] nfr-requirements — EXECUTE
 - [x] nfr-design — EXECUTE
 - [ ] infrastructure-design — SKIP
-- [-] code-generation — EXECUTE
+- [?] code-generation — EXECUTE
 - [ ] build-and-test — EXECUTE
 - [ ] ci-pipeline — SKIP
 
@@ -136,7 +134,7 @@ Per unit: [TBD]
 - **Current Stage**: code-generation
 - **Next Stage**: build-and-test
 - **Status**: Running
-- **Last Updated**: 2026-09-06T21:29:59Z
+- **Last Updated**: 2026-09-09T18:03:23Z
 
 ## Session Resume Point
 - **Last Completed Stage**: nfr-design

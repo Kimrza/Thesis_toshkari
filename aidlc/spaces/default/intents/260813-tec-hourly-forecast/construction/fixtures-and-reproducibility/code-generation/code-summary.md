@@ -15,7 +15,7 @@
 | `src/data/fixture_evidence.py` | 4 | F7 evidence emitters (three refusing emitters; D-number agreement checks with sidecar fallback); W-9, R-142, SD-X-01 step 3, SD-X-03 |
 | `scripts/run_walking_skeleton.py` | 5 | F3 orchestrator: `--fixture plumbing_7day` / `--fixture scientific_1month`, §13.2-conformant sequencing; W-3/W-4/W-5/W-7 |
 | `tests/fixtures/plumbing_7day/`, `tests/fixtures/scientific_1month/` | 7 | Fixture trees with `.gitkeep` + spec-conformant `README.md`; **no `fixture_manifest.yaml` anywhere** — BLK-02 held, no manifest authored by hand |
-| `tests/test_clean_run.py` | 8 | §12 mandated module: 49 test functions (count derived and printed by its own final test) hosting the 39 negative controls, 11 must-not-fire controls, per-area §15.2 enumeration, project-wide AST only-copy scan, §13.2 fence parse (membership AND order, flags verbatim, ruled scope argument recognised), and the skip-with-named-reason completion test |
+| `tests/test_clean_run.py` | 8 | §12 mandated module: 50 test functions (count derived from source and printed by its own final test) hosting the 39 negative controls and 11 must-not-fire controls — both figures machine-checked by `test_control_counts_derived_from_business_rules_not_carried`, which parses `business-rules.md`'s enumeration and set-differences it against the file's `CONTROL_HOSTS`/`MUST_NOT_FIRE_HOSTS` ledger (empty in both directions; `R-137:mnf1` hosted in `tests/test_train_only_transforms.py`, presence-asserted) — plus the per-area §15.2 enumeration, project-wide AST only-copy scan, §13.2 fence parse (membership AND order, flags verbatim, ruled scope argument recognised), and the skip-with-named-reason completion test |
 
 ## Files modified (Step 6 — sibling additive edits, Q4=A / Q5=A, each flagged for its owner)
 
@@ -36,8 +36,9 @@
 
 Environment: uv-managed CPython 3.11.16 in the session scratchpad + a stdlib pytest stand-in; PyPI unreachable (`pyyaml`/`pytest`/`ruff` absent). **Smoke evidence only, session-of-generation only, never governed.**
 
-- `tests/test_clean_run.py`: **46 passed, 0 failed, 3 skipped** — skips all by name: two pyyaml-gated production-loader paths (`require_fixture_receipts` full path incl. the Q5 exemption; control 32's frozen-hash staleness) and the clean-run completion test skipping with the §18.3 stop-and-report reason. It fails (never passes) on a non-zero exit when preconditions hold. WS-20/TA-09/TA-17/TA-21 stay `Pending`.
-- Ten named regression modules + test_clean_run: **436 passed, 0 failed, 13 skipped, 0 errors**.
+- `tests/test_clean_run.py`: **47 passed, 0 failed, 3 skipped** (46/0/3 at first completion; +1 after the reviewer-driven control-count meta-test was added) — skips all by name: two pyyaml-gated production-loader paths (`require_fixture_receipts` full path incl. the Q5 exemption; control 32's frozen-hash staleness, now also carrying the R-141 must-not-fire acceptance limb) and the clean-run completion test skipping with the §18.3 stop-and-report reason. It fails (never passes) on a non-zero exit when preconditions hold. WS-20/TA-09/TA-17/TA-21 stay `Pending`.
+- Derived counts printed by the meta-test (verbatim): `negative controls: enumerated 39 ((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []` and `must-not-fire: derived 11 (1+1+1+1+2+2+1+1+1 over ['R-133' … 'R-141']); annotated 11 (of which 1 hosted elsewhere); missing []; extra []`.
+- Ten named regression modules + test_clean_run: **437 passed, 0 failed, 13 skipped, 0 errors**.
 - One self-introduced regression fixed same pass: `test_models_smoke`'s source assertion tripped by the new fixture path; local renamed to `fixture_target`.
 - Pre-existing failures reproduced identically on the stashed, unmodified tree (git stash round-trip): `test_external_drivers` 11, `test_iri_denial` 1, `test_locked_test_guard` 1, 4 import-error modules — not caused by this pass.
 - `compileall` clean over `scripts/`, `src/`, `tests/`.
@@ -73,3 +74,32 @@ Independently verified and NOT flagged: `load_fixture_scope` is confirmed the si
 ### Suggestions (non-blocking)
 
 - Finding 3's meta-test would also let a future reviewer verify the 39/11 figures without manually reconciling `business-rules.md` prose against the test file's control-number citations.
+
+## Review — Iteration 2
+
+**Iteration:** 2 (terminal)
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-09T17:40:24Z
+
+### Verification of iteration-1 findings
+
+| # | Status | Evidence |
+|---|---|---|
+| 1 (Critical) | **Resolved** | `code-summary.md` "Key implementation decisions" and "Routed to the stage gate" now state the true repository fact instead of the false "no commit made" claim: owner commit `64c0551` (2026-09-07 12:21 +0400, unedited git template message, no D-number) carries Steps 1–5/7 plus the `acquisition.py` edit; verified this is still the actual, unamended commit (`git log -1 --format="%B" 64c0551` unchanged from iteration 1 — no history rewrite, consistent with the project's "never edit a signed record" posture). The new claim additionally names six prior same-pattern commits (`6246907`, `ec8eacf`, `06207c4`, `da6cb7b`, `c7e7a05`) as a "standing pattern" — verified independently: all six exist, all six carry the identical unedited git placeholder message with no D-number, so `64c0551` is genuinely the seventh instance, not an invented aggravating detail. `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md` gained a dated `§11.1` correction that supersedes `§10`'s original "no commit is made here" bullet without rewriting it in place (`§10` line 244 stands untouched, labelled superseded by `§11.1`) — consistent with `project.md`'s "never edit a human-signed record" correction discipline. The decision (amend the existing commit's message vs. let it stand with a recorded reason) is correctly routed to the student rather than resolved by the agent. |
+| 2 (Major) | **Resolved** | `code-summary.md`'s Files-modified table now lists `src/data/acquisition.py` (owner: acquisition, `assert_records_within_window`), matching what the change record already disclosed. |
+| 3 (Minor) | **Resolved** | `tests/test_clean_run.py` gained `CONTROL_HOSTS`/`MUST_NOT_FIRE_HOSTS`/`MNF_HOSTED_ELSEWHERE` ledgers and `test_control_counts_derived_from_business_rules_not_carried`, which parses `business-rules.md`'s `(1)-(39)` enumeration and its `1+1+1+1+2+2+1+1+1=11` must-not-fire derivation, set-differences (never totals) the annotated host lists against it, and prints counts plus missing/extra before asserting. Re-ran the full file in the session's uv-managed CPython 3.11.16 (`run_tests.py . test_clean_run`): output is `negative controls: enumerated 39 ((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []` and `must-not-fire: derived 11 (...); annotated 11 (of which 1 hosted elsewhere); missing []; extra []`, and the suite reports `47 passed, 0 failed, 3 skipped` — this matches `code-summary.md`'s claimed figures and printed derivation string exactly, character for character. The `R-137:mnf1`-hosted-elsewhere presence check against `tests/test_train_only_transforms.py` passed rather than being skipped, so the claimed disclosed indirection is real, not merely asserted. |
+
+### New finding (introduced by the fix; does not block)
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 4 | Minor | `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md:263,269,272` (§10, Step 8 log) vs. `code-summary.md` lines 18, 39, 41 | Adding the iteration-1 Finding-3 meta-test grew the suite by one test function and one passing test (49→50 functions, `test_clean_run` 46→47 passed, the ten-sibling-modules-plus-`test_clean_run` total 436→437), and `code-summary.md` was updated to the new figures throughout — but the change record's own `§10` "Step 8" log still asserts the superseded `49`/`46 passed`/`436 passed` figures, and unlike `§11.1` (which explicitly named both the old and new commit-state facts), the new `§11.2` addendum documents the *mechanism* added (the control ledger and derivation meta-test) without restating the count delta, so a reader comparing `§10` against `code-summary.md` meets two disagreeing totals with no signpost reconciling them. This is the same class of gap `project.md`'s correction-sweep rules target (a corrected fact's superseded representation left standing without a pointer to the correction), just on a fact of low consequence (a test-count delta of one, not a governance claim). | Add one sentence to `§11.2` (or a `§11.3`) stating the delta explicitly — "Step 8's `49`/`46 passed`/`436 passed` are superseded by `50`/`47 passed`/`437 passed` after this addition" — mirroring how `§11.1` restated the commit-state delta, so the two artifacts' totals reconcile without the reader having to re-derive which figure is current. |
+
+### Suite re-verification (this iteration)
+
+Re-ran in the session's uv-managed CPython 3.11.16 (PyPI unreachable, as before): `test_clean_run` alone reproduces `47 passed, 0 failed, 3 skipped` with the exact derived-count print lines quoted above. A combined run of the ten named regression modules plus `test_clean_run` reproduces the same pre-existing, disclosed `test_iri_denial` failure (1) seen in iteration 1 and unaffected by this pass; the exact "10 modules" partition behind the claimed `437/0/13` total could not be independently reconstructed byte-for-byte from the artifact (it does not name the ten modules), which mirrors an ambiguity already present and not flagged in iteration 1 rather than a new defect, so it is noted here but not raised as a fresh finding.
+
+### Verdict rationale
+
+Zero Critical, zero Major, two Minor (the pre-existing iteration-1 Minor is resolved; one new Minor surfaced by the fix itself). Per the stated verdict rule (READY if zero Critical, ≤2 Major, any number of Minor), and with the iteration budget exhausted, this unit is **READY**.

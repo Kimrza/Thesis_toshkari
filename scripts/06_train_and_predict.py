@@ -100,6 +100,7 @@ from src.data.experiment_registry import (  # noqa: E402
 from src.data.fixture_evidence import stamp_fixture_artifact, stamp_for_manifest  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
+    MEASUREMENTS_NAME,
     build_apparatus_partitions,
     load_fixture_scope,
     read_embargo_hours,
@@ -383,6 +384,24 @@ def _bundle_root(snapshot: Any, args: argparse.Namespace) -> Path:
             manifest,
             "no split manifest under the bundle root; bundles are read by manifest (FR-P1-04-5), "
             "and none has been produced (05 refuses at the unset permitted-producer list)",
+        )
+    return root
+
+
+def _fixture_bundle_root(snapshot: Any, args: argparse.Namespace) -> Path:
+    """The fixture-scale bundle root, validated against 05's ACTUAL fixture output by name
+    (`apparatus_split_manifest.json` — board Rec 4 / ML-03, owner-authorised per
+    CR-2026-09-07 §11.5; never the five-row confirmatory `split_manifest.json`, whose ids
+    are quarantined from every fixture artifact, R-137)."""
+    root = Path(snapshot.resolved_roots["workspace"]) / args.bundles_root
+    manifest = root / "apparatus_split_manifest.json"
+    if not manifest.is_file():
+        raise IntegrityError(
+            manifest,
+            "no apparatus split manifest under the fixture bundle root; the fixture path "
+            "reads what 05's fixture path actually wrote (apparatus_split_manifest.json), "
+            "by name, never the confirmatory split manifest (board Rec 4 / ML-03; R-137's "
+            "two-way quarantine)",
         )
     return root
 
@@ -693,6 +712,16 @@ def _run_fixture_scale(
     no receipt writer is reachable. The governed reads are unchanged (horizon, grids,
     seeds, the released target by manifest), so today this path refuses exactly where the
     full-year path does (TE 18.3, stop and report).
+
+    Board Rec 4 (ML-03, owner-authorised per CR-2026-09-07 §11.5; flagged for
+    `models-and-baselines`' record): the fixture bundle root is validated against 05's
+    ACTUAL fixture output (`apparatus_split_manifest.json`, by name — never the five-row
+    confirmatory `split_manifest.json`); predictions land DIRECTLY under
+    `--predictions-out` (no per-run segment), so the orchestrator's `--predictions-run`
+    hand-off to 07 is deterministic and a re-run refuses at the write-once prediction
+    rather than forking a second tree; and a machine-readable measurement block
+    (`fixture_measurements.json`, scored prediction rows) is emitted under the predictions
+    root for the orchestrator to fold into candidate measurements.
     """
     _assert_phase1_field_contract(args.phase)
     _assert_registry_column_18()
@@ -708,11 +737,12 @@ def _run_fixture_scale(
     expected_seeds = _final_seeds(snapshot)
 
     partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
-    bundle_root = _bundle_root(snapshot, args)
+    bundle_root = _fixture_bundle_root(snapshot, args)  # 05's apparatus manifest, by name
     fixture_target = _load_target_by_manifest(snapshot)  # the fixture-scale released target
-    out_root = workspace / args.predictions_out / run_id
+    out_root = workspace / args.predictions_out  # deterministic: no per-run segment (Rec 4)
 
     written: list[str] = []
+    scored_rows: list[int] = []
     for partition in partitions:
         pid = partition.partition_id
         stamp = stamp_for_manifest(scope, apparatus_partition_id=pid)
@@ -768,6 +798,31 @@ def _run_fixture_scale(
             prediction=confirmatory, manifest_path=path,
         )
         written.append(str(path))
+        scored_rows.append(len(records_of(confirmatory.frame)))
+    if scored_rows:  # Rec 4: measurable here — scored prediction rows per partition
+        measurements_path = out_root / MEASUREMENTS_NAME
+        measurements_path.parent.mkdir(parents=True, exist_ok=True)
+        measurements_path.write_text(
+            json.dumps(
+                {
+                    "stage": "06_train_and_predict",
+                    "measurements": {
+                        "row_count_ranges": {
+                            "feature_window": {
+                                "min": min(scored_rows),
+                                "max": max(scored_rows),
+                                "units": "rows",
+                            }
+                        }
+                    },
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        written.append(str(measurements_path))
     return {"horizon_hours": horizon, "grid_counts": grid_counts, "predictions_written": written}
 
 

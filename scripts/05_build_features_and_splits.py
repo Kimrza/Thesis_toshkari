@@ -93,6 +93,7 @@ from src.data.experiment_registry import (  # noqa: E402
 from src.data.fixture_evidence import stamp_for_manifest, write_sibling_stamp  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
+    MEASUREMENTS_NAME,
     build_apparatus_partitions,
     load_fixture_scope,
     read_embargo_hours,
@@ -109,6 +110,7 @@ from src.data.splits import (  # noqa: E402
     training_range,
     validation_month_range,
 )
+from src.features._frames import records_of  # noqa: E402
 from src.features.availability import assert_lags_safe, build_availability_matrix  # noqa: E402
 from src.features.build import (  # noqa: E402
     SECTION_6_2_ROWS,
@@ -364,6 +366,11 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     permitted-producer list; behind it `read_embargo_hours` refuses at
     `configs/experiment.yaml: embargo_hours` `TBD — freeze gate`). No locked record is
     written: no fixture partition is ever `locked` (R-137; R-82).
+
+    Board Rec 4 (ML-03, owner-authorised per CR-2026-09-07 §11.5; flagged for
+    `features-and-splits`' record): a machine-readable measurement block
+    (`fixture_measurements.json`, scored feature-window rows where measurable) is emitted
+    under the bundle root for the orchestrator to fold into candidate measurements.
     """
     _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
     snapshot = entry["snapshot"]
@@ -389,6 +396,7 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     out_root = workspace / args.bundles_out
     written: list[str] = []
     excluded_embargo: dict[str, int] = {}
+    scored_rows: list[int] = []
     for partition in partitions:
         pid = partition.partition_id
         train_start, train_end = training_range(partition)
@@ -418,6 +426,32 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             bundle_dir = write_bundle(score, out_root)
             write_sibling_stamp(Path(bundle_dir), stamp)
             written.append(str(bundle_dir))
+            scored_rows.append(len(records_of(score.matrix)))
+
+    if scored_rows:  # Rec 4: measurable here — scored feature-window rows per partition
+        measurements_path = out_root / MEASUREMENTS_NAME
+        measurements_path.parent.mkdir(parents=True, exist_ok=True)
+        measurements_path.write_text(
+            json.dumps(
+                {
+                    "stage": "05_build_features_and_splits",
+                    "measurements": {
+                        "row_count_ranges": {
+                            "feature_window": {
+                                "min": min(scored_rows),
+                                "max": max(scored_rows),
+                                "units": "rows",
+                            }
+                        }
+                    },
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        written.append(str(measurements_path))
 
     manifest = {
         "artifact_class": "apparatus_split_manifest",

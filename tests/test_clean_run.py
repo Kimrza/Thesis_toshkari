@@ -86,6 +86,7 @@ from src.data.fixture_evidence import (  # noqa: E402
 )
 from src.data.fixture_gate import (  # noqa: E402
     RECEIPT_KIND,
+    assert_declared_window_within_scope,
     environment_identity,
     fixture_input_version_tag,
     require_fixture_receipts,
@@ -1357,19 +1358,28 @@ def test_control_31_lock_disagreement_fails():
 
 def test_control_32_gate_result_predating_the_frozen_manifests_fails(tmp_path):
     """(32) A gate result predating the frozen manifests in force fails the same way a
-    stale receipt does. Needs the production loader (pyyaml) — SKIPS BY NAME here."""
+    stale receipt does; the matching `kaggle`-stamped result bound to the manifests in
+    force is ACCEPTED (R-141's must-not-fire). Needs the production loader (pyyaml) —
+    SKIPS BY NAME here, runs in a governed environment."""
     pytest.importorskip("yaml")
     manifest = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=FROZEN)
     sci = write_and_load(tmp_path / "sci", SCIENTIFIC_FIXTURE_ID, status=FROZEN)
+    manifests = {PLUMBING_FIXTURE_ID: manifest.path, SCIENTIFIC_FIXTURE_ID: sci.path}
     stale = _gate_payload(
         frozen_manifest_hashes={PLUMBING_FIXTURE_ID: "0" * 64, SCIENTIFIC_FIXTURE_ID: "1" * 64}
     )
     with pytest.raises(IntegrityError, match="predating|disagree"):
-        require_in_session_gate(
-            stale,
-            lock=_lock(platform="kaggle"),
-            manifests={PLUMBING_FIXTURE_ID: manifest.path, SCIENTIFIC_FIXTURE_ID: sci.path},
-        )
+        require_in_session_gate(stale, lock=_lock(platform="kaggle"), manifests=manifests)
+    matching = _gate_payload(
+        frozen_manifest_hashes={
+            PLUMBING_FIXTURE_ID: manifest.sha256,
+            SCIENTIFIC_FIXTURE_ID: sci.sha256,
+        }
+    )
+    accepted = require_in_session_gate(
+        matching, lock=_lock(platform="kaggle"), manifests=manifests
+    )
+    assert accepted["accepted"] and accepted["platform"] == "kaggle"
 
 
 # =========================================================================================
@@ -1680,3 +1690,558 @@ def test_function_count_derived_and_printed():
     print(f"def test_ count derived from source: {grep_count}; collected: {len(collected)}")
     assert grep_count == len(collected)
     assert grep_count >= 30  # the 39 controls + 11 must-not-fire land across these hosts
+
+
+# =========================================================================================
+# The control ledger: which test hosts which control, derived against business-rules.md
+# =========================================================================================
+
+#: Negative-control hosts: test function -> the (1)-(39) control id(s) it hosts. This is
+#: the machine-readable annotation the derivation meta-test below set-differences against
+#: `business-rules.md` § Negative-control count — the 39 is DERIVED there, never carried.
+CONTROL_HOSTS: dict[str, tuple[int, ...]] = {
+    "test_control_1_each_missing_area_fails_per_area_enumeration": (1,),
+    "test_control_2_hash_listing_absent_or_disagreeing_fails": (2,),
+    "test_control_3_required_output_without_ledger_entry_fails": (3,),
+    "test_control_4_only_copy_yaml_parse_scan_project_wide": (4,),
+    "test_control_5_candidate_manifest_cannot_produce_evidence": (5,),
+    "test_control_6_post_freeze_edit_fails_sibling_hash": (6,),
+    "test_control_7_identity_disagreeing_with_cited_decision_fails": (7,),
+    "test_control_8_measured_field_without_run_id_is_unrepresentable": (8,),
+    "test_control_9_foreign_station_record_fails": (9,),
+    "test_control_10_manifest_naming_other_station_fails_citation": (10,),
+    "test_control_11_and_38_coverage_figure_missing_either_caveat_fails": (11, 38),
+    "test_control_12_input_hash_disagreement_fails_before_the_run": (12,),
+    "test_control_13_smoke_only_artifact_refused_at_every_evidence_surface": (13,),
+    "test_control_14_december_record_caught_on_record_date_not_folder": (14,),
+    "test_control_15_frozen_partition_id_in_apparatus_declaration_fails": (15,),
+    "test_control_16_fixture_partition_id_at_adr11_identity_check_raises": (16,),
+    "test_control_17_m10_step_wired_after_plumbing_and_never_a_receipt": (17,),
+    "test_control_18_and_39_sequence_matches_the_fence_membership_and_order": (18,),
+    "test_control_19_no_gpu_visible_in_the_child_environment": (19,),
+    "test_control_20_pythonhashseed_unset_or_late_fails": (20,),
+    "test_control_21_single_bit_plant_in_exact_artifact_fails": (21,),
+    "test_control_22_no_tolerance_lives_in_a_test_body": (22,),
+    "test_control_23_exact_mismatch_never_updates_the_expectation": (23,),
+    "test_control_24_runtime_or_storage_outside_measured_range_fails": (24,),
+    "test_control_25_tecu_tolerance_without_inverse_route_is_not_freezable": (25,),
+    "test_control_26_scientific_without_plumbing_receipt_raises": (26,),
+    "test_control_27_full_year_invocation_without_both_receipts_raises": (27,),
+    "test_control_28_receipt_hash_disagreeing_with_frozen_manifest_raises": (28,),
+    "test_control_29_receipt_from_candidate_manifest_refused_at_write_time": (29,),
+    "test_control_30_local_stamped_gate_result_fails": (30,),
+    "test_control_31_lock_disagreement_fails": (31,),
+    "test_control_32_gate_result_predating_the_frozen_manifests_fails": (32,),
+    "test_control_33_matrix_row_citing_absent_module_fails": (33,),
+    "test_control_34_and_35_acceptance_table_bounds": (34, 35),
+    "test_control_36_report_figure_missing_either_caveat_fails": (36,),
+    "test_control_37_fixture_bootstrap_fields_and_divisibility": (37,),
+    "test_control_39_phase2_only_invocation_raises_phase_boundary_error": (39,),
+}
+
+#: Must-not-fire hosts in THIS module: test function -> per-rule ids `R-1nn:mnf<i>`, in the
+#: order § Negative-control count lists each rule's items.
+MUST_NOT_FIRE_HOSTS: dict[str, tuple[str, ...]] = {
+    # R-133's not_applicable Phase 2 block validates; R-134's provenance-carrying candidate
+    "test_must_not_fire_full_manifest_validates_with_not_applicable_phase2": (
+        "R-133:mnf1",
+        "R-134:mnf1",
+    ),
+    # R-135's verified assembly proceeds (both caveat fields asserted in control 11/38's host)
+    "test_control_12_input_hash_disagreement_fails_before_the_run": ("R-135:mnf1",),
+    # R-136's mislabelled-directory admission
+    "test_control_14_december_record_caught_on_record_date_not_folder": ("R-136:mnf1",),
+    # R-137's second: the M10 result is never a third receipt
+    "test_control_17_m10_step_wired_after_plumbing_and_never_a_receipt": ("R-137:mnf2",),
+    # R-138's two: the in-order CPU completion, and the reduced-replicate bootstrap
+    # executing without raising — both live inside the real clean run, which this host
+    # executes when the preconditions hold and otherwise SKIPS with the named reason
+    "test_clean_run_completion_or_skip_with_named_reason": ("R-138:mnf1", "R-138:mnf2"),
+    # R-139's within-tolerance variation: the untouched tree (exact AND toleranced) matches
+    "test_control_21_single_bit_plant_in_exact_artifact_fails": ("R-139:mnf1",),
+    # R-140's two-receipt full-year pass
+    "test_must_not_fire_two_receipts_in_order_pass": ("R-140:mnf1",),
+    # R-141's matching kaggle gate result is accepted (pyyaml-gated host)
+    "test_control_32_gate_result_predating_the_frozen_manifests_fails": ("R-141:mnf1",),
+}
+
+#: One must-not-fire control is HOSTED ELSEWHERE by design: R-137's first item is R-74's
+#: inherited November `score` containment pass, owned by `features-and-splits` and hosted in
+#: its own module — no third copy of the rule is written here (R-136's no-third-copy
+#: discipline applied to controls). The meta-test asserts the named module exists and
+#: carries the containment case (a PRESENCE check, the R-142 convention).
+MNF_HOSTED_ELSEWHERE: dict[str, tuple[str, str]] = {
+    "R-137:mnf1": ("tests/test_train_only_transforms.py", "containment"),
+}
+
+BUSINESS_RULES_PATH = (
+    REPO_ROOT
+    / "aidlc"
+    / "spaces"
+    / "default"
+    / "intents"
+    / "260813-tec-hourly-forecast"
+    / "construction"
+    / "fixtures-and-reproducibility"
+    / "functional-design"
+    / "business-rules.md"
+)
+
+
+def _negative_control_section() -> str:
+    text = BUSINESS_RULES_PATH.read_text(encoding="utf-8", errors="replace")
+    match = re.search(
+        r"^## Negative-control count.*?(?=^## )", text, re.MULTILINE | re.DOTALL
+    )
+    assert match, "business-rules.md § Negative-control count not found"
+    return match.group(0)
+
+
+def test_control_counts_derived_from_business_rules_not_carried():
+    """The 39-negative / 11-must-not-fire figures are DERIVED: the (1)-(39) enumeration and
+    the must-not-fire derivation are parsed from business-rules.md § Negative-control count,
+    the annotated hosts above are collected, and the two ID SETS are set-differenced — never
+    compared by totals (project.md: reconcile by set-differencing ID lists). Counts and any
+    missing/extra IDs are printed BEFORE the assertion."""
+    section = _negative_control_section()
+
+    # (a) the enumeration, parsed from the section — range, per-rule sum, stated total.
+    bounds = re.search(r"numbered \((\d+)\)[–—-]\((\d+)\)", section)
+    assert bounds, "the section states no (lo)-(hi) numbering"
+    low, high = int(bounds.group(1)), int(bounds.group(2))
+    expected_controls = set(range(low, high + 1))
+    total = re.search(r"(\d+(?:\+\d+)+)\s*=\s*\*\*(\d+)\s+distinct negative", section)
+    assert total, "the section prints no per-rule sum for the negative-control total"
+    stated_sum = sum(int(term) for term in total.group(1).split("+"))
+    stated_total = int(total.group(2))
+    assert stated_sum == stated_total == len(expected_controls), (
+        f"the section disagrees with itself: sum {stated_sum}, total {stated_total}, "
+        f"range size {len(expected_controls)}"
+    )
+
+    # (b) the annotated negative-control hosts, collected and verified to exist.
+    annotated: list[int] = []
+    for name, ids in CONTROL_HOSTS.items():
+        assert callable(globals().get(name)), f"CONTROL_HOSTS names no test function {name!r}"
+        annotated.extend(ids)
+    duplicates = sorted({i for i in annotated if annotated.count(i) > 1})
+    hosted_controls = set(annotated)
+
+    # (c) set-difference, printed before asserted.
+    missing = sorted(expected_controls - hosted_controls)
+    extra = sorted(hosted_controls - expected_controls)
+    print(
+        f"negative controls: enumerated {len(expected_controls)} "
+        f"(({low})-({high}), sum {stated_sum}); annotated {len(hosted_controls)}; "
+        f"missing {missing}; extra {extra}; duplicated {duplicates}"
+    )
+    assert not duplicates, f"control id(s) annotated on more than one host: {duplicates}"
+    assert missing == [] and extra == [], (
+        f"annotated control ids disagree with § Negative-control count: missing {missing}, "
+        f"extra {extra}"
+    )
+
+    # (d) the must-not-fire derivation: per-rule terms zipped with the rules named in order.
+    mnf_span = re.search(
+        r"controls that must \*not\* fire\*\*(.*?)Derivation:", section, re.DOTALL
+    )
+    derivation = re.search(r"Derivation:\s*([\d+]+)\s*=\s*\*\*(\d+)\*\*", section)
+    assert mnf_span and derivation, "the section states no must-not-fire derivation"
+    terms = [int(t) for t in derivation.group(1).split("+")]
+    mnf_total = int(derivation.group(2))
+    assert sum(terms) == mnf_total, f"must-not-fire sum {sum(terms)} != total {mnf_total}"
+    rules_in_order: list[str] = []
+    for rule in re.findall(r"R-1\d\d", mnf_span.group(1)):
+        if rule not in rules_in_order:
+            rules_in_order.append(rule)
+    assert len(rules_in_order) == len(terms), (
+        f"{len(rules_in_order)} rules named against {len(terms)} derivation terms"
+    )
+    expected_mnf = {
+        f"{rule}:mnf{i + 1}"
+        for rule, count in zip(rules_in_order, terms)
+        for i in range(count)
+    }
+
+    # (e) the annotated must-not-fire hosts, plus the one hosted elsewhere (asserted present).
+    hosted_mnf: set[str] = set()
+    for name, ids in MUST_NOT_FIRE_HOSTS.items():
+        assert callable(globals().get(name)), f"MUST_NOT_FIRE_HOSTS names no test {name!r}"
+        hosted_mnf.update(ids)
+    for mnf_id, (module, marker) in MNF_HOSTED_ELSEWHERE.items():
+        module_path = REPO_ROOT / module
+        assert module_path.is_file(), f"{mnf_id} points at an absent module {module}"
+        assert marker in module_path.read_text(encoding="utf-8", errors="replace"), (
+            f"{mnf_id}'s host {module} carries no {marker!r} case (presence check)"
+        )
+        hosted_mnf.add(mnf_id)
+
+    mnf_missing = sorted(expected_mnf - hosted_mnf)
+    mnf_extra = sorted(hosted_mnf - expected_mnf)
+    print(
+        f"must-not-fire: derived {mnf_total} ({'+'.join(map(str, terms))} over "
+        f"{rules_in_order}); annotated {len(hosted_mnf)} "
+        f"(of which {len(MNF_HOSTED_ELSEWHERE)} hosted elsewhere); "
+        f"missing {mnf_missing}; extra {mnf_extra}"
+    )
+    assert mnf_missing == [] and mnf_extra == [], (
+        f"annotated must-not-fire ids disagree with the derivation: missing {mnf_missing}, "
+        f"extra {mnf_extra}"
+    )
+
+
+# =========================================================================================
+# Governance-board remediation controls (Recs 2-5, owner-authorised per CR §11.5) — these
+# are NEW controls BEYOND business-rules.md's (1)-(39) enumeration and are deliberately
+# hosted OUTSIDE the CONTROL_HOSTS ledger so the 39/11 reconciliation stays exact.
+# =========================================================================================
+
+#: Board-added controls: test function -> board recommendation id. Excluded from the 39/11
+#: set-difference by construction (they extend the enumerated set; the enumeration itself
+#: is the practices gate's to amend).
+BEYOND_ENUMERATION_CONTROLS: dict[str, str] = {
+    "test_rec2_00_out_of_window_acquisition_exemption_refuses": "Rec 2 (ML-01)",
+    "test_rec2_01_out_of_window_inventory_and_audit_refuse": "Rec 2 (ML-01)",
+    "test_rec2_02_out_of_window_standardization_exemption_refuses": "Rec 2 (ML-01)",
+    "test_rec2_04_full_year_audit_exemption_refuses": "Rec 2 (ML-01)",
+    "test_rec3_fixture_registry_roots_are_separate_and_freeze_is_apparatus_free": "Rec 3 (ML-02)",
+    "test_rec3_two_fold_apparatus_registration_never_self_collides": "Rec 3 (ML-02)",
+    "test_rec4_lifecycle_chain_connects_through_each_script_entry": "Rec 4 (ML-03)",
+    "test_rec4_candidate_validates_from_orchestrator_collectable_measurements": "Rec 4 (ML-03)",
+    "test_rec5_multi_run_ranges_stamped_and_zero_width_refused": "Rec 5 (ML-04)",
+}
+
+
+def test_beyond_enumeration_controls_exist_and_do_not_touch_the_ledger():
+    """Every board-added control exists, and none of them is double-counted into the
+    (1)-(39) ledger the meta-test reconciles."""
+    for name in BEYOND_ENUMERATION_CONTROLS:
+        assert callable(globals().get(name)), f"board control {name!r} is not hosted"
+        assert name not in CONTROL_HOSTS, f"{name!r} must stay outside the (1)-(39) ledger"
+
+
+def _load_script(name: str):
+    """Import a digit-prefixed stage script as a module (its `main()` never runs)."""
+    import importlib.util
+
+    path = REPO_ROOT / "scripts" / name
+    spec = importlib.util.spec_from_file_location("script_" + name.replace(".", "_"), path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class _WindowSnapshot:
+    """Duck-typed stand-in: only `.data` is consumed by `_declared_data_window`."""
+
+    def __init__(self, window_start: Any, window_end: Any) -> None:
+        self.data = {"acquisition": {"window_start": window_start, "window_end": window_end}}
+
+
+def _assert_entry_passes_declared_window(module: Any) -> None:
+    """c58's invocation proof per entry point: THIS script's `_stage_entry` hands its own
+    declared window to the one guard home."""
+    source = inspect.getsource(module._stage_entry)
+    assert "declared_window=declared_window" in source and "_declared_data_window" in source, (
+        f"{module.__name__}: _stage_entry does not bind the exemption to the declared "
+        f"window (board Rec 2 / ML-01; c58 invocation proof)"
+    )
+
+
+def test_rec2_00_out_of_window_acquisition_exemption_refuses(tmp_path):
+    """Rec 2, scripts/00: a full-scale retrieval window declared against a valid fixture
+    scope refuses at the guard home; an in-window declaration passes; an UNDECLARED window
+    refuses at the script's own derivation (the exemption is never a bare flag)."""
+    module = _load_script("00_acquire_prepared_vtec.py")
+    scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
+    declared = module._declared_data_window(_WindowSnapshot("2001-01-01", "2001-12-31"))
+    with pytest.raises(IntegrityError, match="cited window"):
+        assert_declared_window_within_scope(
+            scope, declared_start=declared[0], declared_end=declared[1], resource="rec2-00"
+        )
+    inside = module._declared_data_window(_WindowSnapshot("2001-11-02", "2001-11-03"))
+    assert_declared_window_within_scope(
+        scope, declared_start=inside[0], declared_end=inside[1], resource="rec2-00"
+    )
+    with pytest.raises(IntegrityError, match="window_start"):
+        module._declared_data_window(_WindowSnapshot(None, None))
+    with pytest.raises(IntegrityError, match="window_start"):
+        module._declared_data_window(_WindowSnapshot("TBD — freeze gate", "TBD — freeze gate"))
+    _assert_entry_passes_declared_window(module)
+
+
+def test_rec2_01_out_of_window_inventory_and_audit_refuse(tmp_path):
+    """Rec 2, scripts/01: the out-of-window refusal, plus the audit limb — `--audit` can
+    never ride the fixture exemption (December lies outside every fixture window)."""
+    module = _load_script("01_inventory_and_registry.py")
+    scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
+    declared = module._declared_data_window(_WindowSnapshot("2001-01-01", "2001-12-31"))
+    with pytest.raises(IntegrityError, match="cited window"):
+        assert_declared_window_within_scope(
+            scope, declared_start=declared[0], declared_end=declared[1], resource="rec2-01"
+        )
+    with pytest.raises(IntegrityError, match="audit"):
+        module._refuse_fixture_audit(True, Path("some_scope.yaml"))
+    module._refuse_fixture_audit(False, Path("some_scope.yaml"))  # inventory run: no raise
+    module._refuse_fixture_audit(True, None)  # full-scale audit: gated by receipts, not here
+    _assert_entry_passes_declared_window(module)
+    assert "_refuse_fixture_audit(audit, fixture_manifest)" in inspect.getsource(
+        module._stage_entry
+    )
+
+
+def test_rec2_02_out_of_window_standardization_exemption_refuses(tmp_path):
+    """Rec 2, scripts/02: the out-of-window refusal through this script's own derivation."""
+    module = _load_script("02_standardize_prepared_target.py")
+    scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
+    declared = module._declared_data_window(_WindowSnapshot("2001-01-01", "2001-12-31"))
+    with pytest.raises(IntegrityError, match="cited window"):
+        assert_declared_window_within_scope(
+            scope, declared_start=declared[0], declared_end=declared[1], resource="rec2-02"
+        )
+    with pytest.raises(IntegrityError, match="window_start"):
+        module._declared_data_window(_WindowSnapshot(None, "2001-11-03"))
+    _assert_entry_passes_declared_window(module)
+
+
+def test_rec2_04_full_year_audit_exemption_refuses(tmp_path):
+    """Rec 2, scripts/04: the LIVE case — the migrated audit's own calendar-year window
+    (derived from `_AUDIT_YEAR`, this script's input declaration) can never fit inside a
+    fixture scope, so `04 --fixture-manifest <valid scope>` refuses instead of auditing the
+    full year under the exemption."""
+    module = _load_script("04_build_external_products.py")
+    scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
+    declared = module._declared_data_window()
+    assert declared[0].year == declared[1].year == module._AUDIT_YEAR
+    with pytest.raises(IntegrityError, match="cited window"):
+        assert_declared_window_within_scope(
+            scope, declared_start=declared[0], declared_end=declared[1], resource="rec2-04"
+        )
+    _assert_entry_passes_declared_window(module)
+
+
+def _synthetic_mask(set_id: str, partition_id: str):
+    from src.evaluation.masks import ComparisonMask, compute_mask_id
+
+    rows = (
+        {
+            "station": "SYNT",
+            "interval_start_utc": "2001-03-25T00:00:00",
+            "y_true": 1.0,
+            "y_hats": {"M-01": 1.0, "M-06": 1.0},
+        },
+    )
+    return ComparisonMask(
+        mask_id=compute_mask_id(set_id, ("M-01", "M-06"), rows),
+        set_id=set_id,
+        feature_set_id="fs-syn",
+        partition_id=partition_id,
+        member_ids=("M-01", "M-06"),
+        member_transform_ids=("tr::a", "tr::b"),
+        phase_id="P1",
+        source_id="SRC-SYN",
+        target_definition_id="TD-SYN",
+        row_counts={"SYNT": 1},
+        exclusion_counts={"SYNT": 0},
+        masked_rows=rows,
+        scored_window_statement="synthetic scored-window statement (apparatus)",
+        window_length_hours=24,
+    )
+
+
+def test_rec3_fixture_registry_roots_are_separate_and_freeze_is_apparatus_free(tmp_path):
+    """Rec 3: after a fixture-path registration, a confirmatory registration for the SAME
+    set_id succeeds (separate roots), and `freeze_bundle` over the confirmatory root
+    enumerates no apparatus partition_id. The 07 fixture path's rooting and its
+    stamp-beside-the-entries are invocation-proved on the source (c58)."""
+    from src.evaluation.masks import MaskRegistry
+
+    fixture_registry = MaskRegistry(
+        tmp_path / "walking_skeleton" / SCIENTIFIC_FIXTURE_ID / "mask_registry" / APPARATUS_FOLD
+    )
+    fixture_registry.register(_synthetic_mask("SET-A", APPARATUS_FOLD))
+    confirmatory = MaskRegistry(tmp_path / "evaluation" / "mask_registry")
+    confirmatory.register(_synthetic_mask("SET-A", "F1"))  # same set_id, separate root: OK
+    manifest = confirmatory.freeze_bundle()
+    assert set(manifest["entries"]) == {"SET-A"}
+    for entry_path in sorted(confirmatory.registry_dir.glob("mask_*.json")):
+        entry = json.loads(entry_path.read_text(encoding="utf-8"))
+        assert entry["partition_id"] == "F1", (
+            f"confirmatory freeze enumerates apparatus partition {entry['partition_id']!r}"
+        )
+    source = (REPO_ROOT / "scripts" / "07_evaluate_and_report.py").read_text(encoding="utf-8")
+    assert '"mask_registry" / partition.partition_id' in source
+    assert "write_sibling_stamp(registry.registry_dir" in source
+
+
+def test_rec3_two_fold_apparatus_registration_never_self_collides(tmp_path):
+    """Rec 3: a two-fold apparatus declaration completes the fixture path without
+    self-collision — one registry dir per apparatus partition — while the SAME dir twice
+    still raises (R-107's once-only stays intact)."""
+    from src.data.config import FairnessError
+    from src.evaluation.masks import MaskRegistry
+
+    root = tmp_path / "mask_registry"
+    first = MaskRegistry(root / "AP1")
+    second = MaskRegistry(root / "AP2")
+    first.register(_synthetic_mask("SET-A", "AP1"))
+    second.register(_synthetic_mask("SET-A", "AP2"))  # no self-collision across partitions
+    with pytest.raises(FairnessError):
+        first.register(_synthetic_mask("SET-A", "AP1"))  # once-only per root holds
+
+
+def _option_value(argv: list[str], option: str) -> str:
+    return argv[argv.index(option) + 1]
+
+
+def test_rec4_lifecycle_chain_connects_through_each_script_entry():
+    """Rec 4: the orchestrator's built argv carries explicit output roots under the fixture
+    root; 05's bundles feed 06 and 06's predictions feed 07; every one of the seven built
+    invocations parses through ITS OWN script's argparse entry; 06's fixture path reads
+    05's apparatus split manifest by name."""
+    built = skeleton.build_phase1_commands(
+        python="python",
+        scripts_dir=Path("scripts"),
+        config_dir=Path("configs/"),
+        scope_path=Path("SCOPE"),
+        fixture_id=PLUMBING_FIXTURE_ID,
+    )
+    by_script = {Path(argv[1]).name: argv for argv in built}
+    base = f"artifacts/walking_skeleton/{PLUMBING_FIXTURE_ID}"
+    bundles_out = _option_value(by_script["05_build_features_and_splits.py"], "--bundles-out")
+    bundles_root = _option_value(by_script["06_train_and_predict.py"], "--bundles-root")
+    predictions_out = _option_value(by_script["06_train_and_predict.py"], "--predictions-out")
+    predictions_run = _option_value(by_script["07_evaluate_and_report.py"], "--predictions-run")
+    evaluation_out = _option_value(by_script["07_evaluate_and_report.py"], "--evaluation-out")
+    assert bundles_out == bundles_root == f"{base}/features"
+    assert predictions_out == predictions_run == f"{base}/predictions"
+    assert evaluation_out == f"{base}/evaluation"
+    for name, argv in by_script.items():
+        module = _load_script(name)
+        parsed = module._parse_args(argv[2:])  # the script's OWN entry accepts the argv
+        assert str(parsed.fixture_manifest) == "SCOPE"
+    six_source = (REPO_ROOT / "scripts" / "06_train_and_predict.py").read_text(encoding="utf-8")
+    assert "apparatus_split_manifest.json" in six_source
+    assert "_fixture_bundle_root(snapshot, args)" in six_source
+
+
+def _stage_block(root: Path, stage: str, area: str, key: str, low: float, high: float) -> None:
+    from src.data.fixture_manifest import MEASUREMENTS_NAME
+
+    target = root / stage / MEASUREMENTS_NAME
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(
+            {
+                "stage": stage,
+                "measurements": {area: {key: {"min": low, "max": high, "units": "rows"}}},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _collected_as_measurements(collected: dict) -> dict:
+    """Strip the `sources` provenance for re-recording as one run's raw measurements."""
+    return {
+        area: {
+            key: {"min": v["min"], "max": v["max"], "units": v["units"]}
+            for key, v in quantities.items()
+        }
+        for area, quantities in collected.items()
+    }
+
+
+def test_rec4_candidate_validates_from_orchestrator_collectable_measurements(tmp_path):
+    """Rec 4 (+5): stage-emitted measurement blocks fold through
+    `collect_stage_measurements` into measuring results; two runs compose into ranges; the
+    composed measurements drive `compose_candidate_manifest` to a candidate that VALIDATES
+    (the dry-run form of the chain on synthetic trees — the real subprocess chain stays
+    gated by the stop-and-report preconditions the completion test names)."""
+    from src.data.fixture_manifest import (
+        collect_stage_measurements,
+        compose_candidate_manifest,
+        compose_measurement_ranges,
+        load_measuring_results,
+        write_measuring_result,
+    )
+
+    fixture_root = tmp_path / "fixture_root"
+    _stage_block(fixture_root, "features", "row_count_ranges", "feature_window", 100, 120)
+    _stage_block(fixture_root, "predictions", "row_count_ranges", "feature_window", 110, 130)
+    collected = collect_stage_measurements(fixture_root)
+    envelope = collected["row_count_ranges"]["feature_window"]
+    assert envelope["min"] == 100 and envelope["max"] == 130
+    assert envelope["sources"] == ["features", "predictions"]
+    for run_id, cpu in (("run-A", 10.0), ("run-B", 12.5)):
+        write_measuring_result(
+            fixture_root,
+            run_id=run_id,
+            measurements={
+                "runtime": {
+                    "cpu_total": {"min": cpu, "max": cpu, "units": "s"},
+                    "storage_total": {"min": 100 + cpu, "max": 100 + cpu, "units": "bytes"},
+                },
+                **_collected_as_measurements(collected),
+            },
+        )
+    composed = compose_measurement_ranges(load_measuring_results(fixture_root))
+    root = tmp_path / "decl"
+    root.mkdir()
+    declaration = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    candidate = compose_candidate_manifest(
+        declaration,
+        fixture_id=PLUMBING_FIXTURE_ID,
+        measurements=composed,
+        measuring_run_id="run-A+run-B",
+        outputs=list(declaration["required_outputs"]["outputs"]),
+        comparison_ledger=declaration["required_outputs"]["comparison_ledger"],
+        artifact_manifest_ref="artifact_manifest.json",
+    )
+    validate_manifest_mapping(candidate, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+    cpu = candidate["runtime"]["cpu_total"]
+    assert cpu["min"] < cpu["max"]
+    assert cpu["measuring_run_ids"] == ["run-A", "run-B"]
+
+
+def test_rec5_multi_run_ranges_stamped_and_zero_width_refused(tmp_path):
+    """Rec 5: a candidate composed from >= 2 measuring runs carries min < max with every
+    run id stamped; a zero-width runtime/storage range (one run, or N identical runs)
+    REFUSES at composition — never widened by invention."""
+    from src.data.fixture_manifest import (
+        compose_measurement_ranges,
+        load_measuring_results,
+        write_measuring_result,
+    )
+
+    fixture_root = tmp_path / "fr"
+    write_measuring_result(
+        fixture_root,
+        run_id="only-run",
+        measurements={
+            "runtime": {
+                "cpu_total": {"min": 10.0, "max": 10.0, "units": "s"},
+                "storage_total": {"min": 100, "max": 100, "units": "bytes"},
+            }
+        },
+    )
+    with pytest.raises(IntegrityError, match="zero-width"):
+        compose_measurement_ranges(load_measuring_results(fixture_root))
+    write_measuring_result(
+        fixture_root,
+        run_id="second-run",
+        measurements={
+            "runtime": {
+                "cpu_total": {"min": 11.0, "max": 11.0, "units": "s"},
+                "storage_total": {"min": 105, "max": 105, "units": "bytes"},
+            }
+        },
+    )
+    composed = compose_measurement_ranges(load_measuring_results(fixture_root))
+    cpu = composed["runtime"]["cpu_total"]
+    assert cpu["min"] == 10.0 and cpu["max"] == 11.0
+    assert cpu["measuring_run_ids"] == ["only-run", "second-run"]
+    with pytest.raises(IntegrityError, match="once per run id"):
+        write_measuring_result(fixture_root, run_id="only-run", measurements={})
+    with pytest.raises(IntegrityError, match="no measuring result"):
+        compose_measurement_ranges([])

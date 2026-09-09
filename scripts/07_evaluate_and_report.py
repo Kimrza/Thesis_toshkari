@@ -98,7 +98,9 @@ from src.data.experiment_registry import (  # noqa: E402
 from src.data.fixture_evidence import stamp_for_manifest, write_sibling_stamp  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
+    MEASUREMENTS_NAME,
     build_apparatus_partitions,
+    fixture_root_for,
     load_fixture_scope,
     read_embargo_hours,
 )
@@ -549,6 +551,18 @@ def _run_fixture_scale(
     `open_restricted`, no `LockedContext` is reachable. The governed reads are unchanged
     (declared comparison sets, the released target by manifest), so today this path
     refuses exactly where the full-year path does (TE 18.3, stop and report).
+
+    Board Rec 3 (ML-02, owner-authorised per CR-2026-09-07 §11.5; flagged for
+    `evaluation-and-comparison`'s record): the fixture path's mask registry is ROOTED
+    UNDER THE FIXTURE TREE — `artifacts/walking_skeleton/<fixture_id>/mask_registry/
+    <apparatus_partition_id>/` — never under the confirmatory registry root, so an
+    apparatus registration can never occupy a confirmatory set_id slot or enter the G-05
+    frozen bundle, and a two-fold apparatus declaration never self-collides (one registry
+    dir per apparatus partition). The fixture stamp is written INSIDE each per-partition
+    registry dir (`fixture_stamp.json`, beside its registration entries). Board Rec 4
+    (ML-03): a machine-readable measurement block (`fixture_measurements.json`,
+    per-station surviving mask rows where measurable) is emitted under the evaluation
+    output root for the orchestrator to fold into candidate measurements.
     """
     assert_no_raw_fields(PRODUCED_FIELDS, phase=args.phase)
     snapshot = entry["snapshot"]
@@ -566,14 +580,17 @@ def _run_fixture_scale(
             )
     target = _load_target_by_manifest(snapshot)  # refuses honestly today
     out_root = workspace / args.evaluation_out / run_id
-    registry = MaskRegistry(workspace / args.evaluation_out / "mask_registry")
+    fixture_root = fixture_root_for(workspace, scope.fixture_id)
     partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
 
     written: list[str] = []
+    surviving_counts: list[int] = []
     for partition in partitions:
         if partition.validation_month is None:
             continue  # an apparatus refit is scored nowhere, like the frozen one
         stamp = stamp_for_manifest(scope, apparatus_partition_id=partition.partition_id)
+        # Rec 3: one registry dir per apparatus partition, under the fixture tree.
+        registry = MaskRegistry(fixture_root / "mask_registry" / partition.partition_id)
         artifacts = _evaluate_partition(
             snapshot=snapshot,
             args=args,
@@ -585,9 +602,41 @@ def _run_fixture_scale(
             out_root=out_root,
             locked=None,  # no locked path at fixture scale, structurally
         )
+        write_sibling_stamp(registry.registry_dir, stamp)  # the stamp beside the entries
         for artifact in artifacts:
             write_sibling_stamp(Path(artifact), stamp)
+            try:
+                payload = json.loads(Path(artifact).read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            row_counts = payload.get("row_counts")
+            if isinstance(row_counts, Mapping):
+                surviving_counts.extend(int(v) for v in row_counts.values())
         written.extend(artifacts)
+    if surviving_counts:  # Rec 4: measurable here — per-station surviving mask rows
+        measurements_path = out_root / MEASUREMENTS_NAME
+        measurements_path.parent.mkdir(parents=True, exist_ok=True)
+        measurements_path.write_text(
+            json.dumps(
+                {
+                    "stage": "07_evaluate_and_report",
+                    "measurements": {
+                        "support_missingness": {
+                            "comparator": {
+                                "min": min(surviving_counts),
+                                "max": max(surviving_counts),
+                                "units": "rows",
+                            }
+                        }
+                    },
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        written.append(str(measurements_path))
     return {"sets": list(set_ids), "artifacts_written": written}
 
 

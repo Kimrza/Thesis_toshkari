@@ -262,6 +262,18 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _declared_data_window() -> tuple[dt.date, dt.date]:
+    """Board Rec 2 (ML-01, owner-authorised per CR-2026-09-07 §11.5; flagged for
+    `external-products`' record): the data window THIS run declares — the migrated audit's
+    own calendar-year window, derived from `_AUDIT_YEAR` (the constant the migration
+    preserved from `audit_ec1_drivers.py`, matching D-8's frozen claim boundary; c59 — this
+    script's own input declaration, not narrative). On a fixture run the TE 9.2 exemption
+    is bound to the fixture scope's cited window, so this FULL-YEAR declaration refuses
+    against any fixture scope — a full-scale invocation cannot ride the exemption on a
+    validating flag alone."""
+    return (dt.date(_AUDIT_YEAR, 1, 1), dt.date(_AUDIT_YEAR, 12, 31))
+
+
 def _stage_entry(
     config_dir: Path,
     *,
@@ -291,8 +303,15 @@ def _stage_entry(
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
+    declared_window = _declared_data_window() if fixture_manifest is not None else None
     receipts_gate = require_receipts_for_snapshot(
-        snapshot, lock, fixture_manifest=fixture_manifest
+        snapshot,
+        lock,
+        fixture_manifest=fixture_manifest,
+        declared_window=declared_window,
+        declared_window_resource=(
+            "scripts/04_build_external_products.py: declared audit window (calendar year)"
+        ),
     )
     return {
         "snapshot": snapshot,

@@ -65,13 +65,15 @@ No `fixture_manifest.yaml` exists in either fixture tree and none may be authore
 `build_apparatus_partitions` refuses today naming that field; this clone has no pyyaml, so the
 production read path refuses by name and the tests exercise the loader through `parsed=`.
 
-Limit, stated in the body (SD-X-01; TS-X-01)
---------------------------------------------
+Limit, stated in the body (SD-X-01; TS-X-01; qualified per board Rec 10 / DR-03)
+--------------------------------------------------------------------------------
 The chokepoint is a convention plus a scan, not an enforcement: a direct `yaml.safe_load` of a
 manifest bypasses every check here. The only-copy control (R-133 control 4,
-`tests/test_clean_run.py`) fails the suite on any such parse under `src/`, `scripts/` or
-`tests/` outside this module; it narrows the author-convenience case and closes nothing that
-goes around the repository.
+`tests/test_clean_run.py`) is an AST scan that fails the suite on `yaml.*load` calls under
+`src/`, `scripts/` or `tests/` outside this module **whose argument subtree textually
+references `fixture_manifest`** — an intermediate-variable parse (`text = path.read_text();
+yaml.safe_load(text)`) is outside its reach and remains a convention backed by review. The
+scan narrows the author-convenience case and closes nothing that goes around the repository.
 
 Enumerations carried (frozen upstream; identities, never values)
 ----------------------------------------------------------------
@@ -133,6 +135,12 @@ __all__ = [
     "build_apparatus_partitions",
     "compare_required_outputs",
     "assert_run_level_ranges",
+    "MEASUREMENTS_NAME",
+    "MEASURING_RESULT_PREFIX",
+    "collect_stage_measurements",
+    "write_measuring_result",
+    "load_measuring_results",
+    "compose_measurement_ranges",
     "compose_candidate_manifest",
     "write_candidate_manifest",
     "manifest_path_for",
@@ -1306,6 +1314,185 @@ def assert_run_level_ranges(
             f"(TA-17's declared storage tolerance; R-139 control 24)",
         )
     return {"runtime_seconds": runtime_seconds, "storage_bytes": storage_bytes, "within": True}
+
+
+# --- board Recs 4-5 (owner-authorised, CR §11.5): stage measurements and multi-run ranges --
+
+#: The machine-readable measurement block each stage fixture path emits under its own
+#: output root (board Rec 4 / ML-03): {"stage": ..., "measurements": {area: {key:
+#: {"min": n, "max": n, "units": u}}}} — VALUES measured by the run, never invented.
+MEASUREMENTS_NAME: Final[str] = "fixture_measurements.json"
+#: One per measuring run under the fixture root (board Rec 5 / ML-04): the raw measurement
+#: set a later --emit-candidate composes min/max ranges over.
+MEASURING_RESULT_PREFIX: Final[str] = "measuring_result_"
+#: The two run-level quantities whose composed range may never be zero-width (Rec 5): a
+#: single measuring run cannot freeze a RANGE (TE 15.1 measures ranges, not points).
+_RANGE_REQUIRED: Final[tuple[tuple[str, str], ...]] = (
+    ("runtime", "cpu_total"),
+    ("runtime", "storage_total"),
+)
+
+
+def collect_stage_measurements(fixture_root: Path) -> dict[str, dict[str, dict[str, Any]]]:
+    """Fold every stage-emitted `fixture_measurements.json` under the fixture root into one
+    {area: {key: {"min", "max", "units", "sources"}}} envelope (board Rec 4).
+
+    Raises
+    ------
+    IntegrityError
+        an unreadable block; a block without the `measurements` mapping; two stages
+        declaring the same quantity with disagreeing units.
+    """
+    merged: dict[str, dict[str, dict[str, Any]]] = {}
+    for path in sorted(Path(fixture_root).rglob(MEASUREMENTS_NAME)):
+        try:
+            block = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise _refuse(path, f"stage measurement block unreadable ({exc})") from exc
+        stage = str(block.get("stage", path.parent.name))
+        measurements = block.get("measurements")
+        if not isinstance(measurements, Mapping):
+            raise _refuse(path, "a stage measurement block carries a `measurements` mapping")
+        for area, quantities in measurements.items():
+            if not isinstance(quantities, Mapping):
+                raise _refuse(f"{path}: {area}", "area must map quantity -> measured values")
+            for key, value in quantities.items():
+                if not isinstance(value, Mapping) or "min" not in value or "max" not in value:
+                    raise _refuse(
+                        f"{path}: {area}.{key}", "a measured quantity carries min and max"
+                    )
+                slot = merged.setdefault(str(area), {}).setdefault(str(key), {})
+                low, high = float(value["min"]), float(value["max"])
+                units = str(value.get("units", ""))
+                if slot:
+                    if str(slot.get("units", "")) != units:
+                        raise _refuse(
+                            f"{path}: {area}.{key}",
+                            f"units {units!r} disagree with an earlier block's "
+                            f"{slot.get('units')!r}; one quantity has one unit",
+                        )
+                    slot["min"] = min(float(slot["min"]), low)
+                    slot["max"] = max(float(slot["max"]), high)
+                    slot["sources"] = sorted({*slot["sources"], stage})
+                else:
+                    slot.update({"min": low, "max": high, "units": units, "sources": [stage]})
+    return merged
+
+
+def write_measuring_result(
+    fixture_root: Path, *, run_id: str, measurements: Mapping[str, Mapping[str, Any]]
+) -> Path:
+    """Persist ONE measuring run's raw measurement set (write-once; board Rec 5)."""
+    if not _nonempty_str(run_id):
+        raise _refuse("measuring_run_id", "a measuring result carries its run's registry id")
+    target = Path(fixture_root) / f"{MEASURING_RESULT_PREFIX}{run_id}.json"
+    if target.exists():
+        raise _refuse(target, "a measuring result is written once per run id (NFR-AUD-01)")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "kind": "measuring_result",
+        "measuring_run_id": run_id,
+        "measurements": {a: dict(q) for a, q in measurements.items()},
+    }
+    target.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
+    )
+    return target
+
+
+def load_measuring_results(source: Path) -> list[dict[str, Any]]:
+    """Persisted measuring results from a fixture root (every `measuring_result_*.json`,
+    sorted by file name) or from ONE result file — the Rec 5 `--measuring-runs`
+    aggregation input from another environment's fixture root."""
+    source = Path(source)
+    if source.is_file():
+        paths = [source]
+    elif source.is_dir():
+        paths = sorted(source.glob(f"{MEASURING_RESULT_PREFIX}*.json"))
+    else:
+        raise _refuse(source, "no measuring result file or fixture root exists at this path")
+    results: list[dict[str, Any]] = []
+    for path in paths:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise _refuse(path, f"measuring result unreadable ({exc})") from exc
+        if not isinstance(payload, Mapping) or payload.get("kind") != "measuring_result":
+            raise _refuse(path, "payload does not carry `kind: measuring_result`")
+        results.append(dict(payload))
+    return results
+
+
+def compose_measurement_ranges(
+    results: Sequence[Mapping[str, Any]],
+) -> dict[str, dict[str, dict[str, Any]]]:
+    """Board Rec 5 (ML-04): compose min/max over N measuring runs, each run id stamped.
+
+    Every composed field carries `measuring_run_ids` (the per-run provenance, one entry per
+    contributing run). A ZERO-WIDTH runtime/storage range refuses: TE 15.1 freezes measured
+    RANGES, and a single run (or N identical runs) measures a point, not a range — run the
+    fixture again rather than inventing a width.
+
+    Raises
+    ------
+    IntegrityError
+        no results; a result without its run id; disagreeing units for one quantity; a
+        zero-width `runtime.cpu_total` or `runtime.storage_total` range.
+    """
+    if not results:
+        raise _refuse(
+            "measuring results",
+            "no measuring result exists; a candidate's measured ranges compose over at "
+            "least one recorded measuring run (TE 15.1; board Rec 5)",
+        )
+    composed: dict[str, dict[str, dict[str, Any]]] = {}
+    for result in results:
+        run_id = str(result.get("measuring_run_id", ""))
+        if not run_id.strip():
+            raise _refuse("measuring result", "carries no measuring_run_id (R-134)")
+        measurements = result.get("measurements")
+        if not isinstance(measurements, Mapping):
+            raise _refuse(f"measuring result {run_id}", "carries no `measurements` mapping")
+        for area, quantities in measurements.items():
+            for key, value in quantities.items():
+                if not isinstance(value, Mapping) or "min" not in value or "max" not in value:
+                    raise _refuse(
+                        f"measuring result {run_id}: {area}.{key}",
+                        "a measured quantity carries min and max",
+                    )
+                slot = composed.setdefault(str(area), {}).setdefault(str(key), {})
+                low, high = float(value["min"]), float(value["max"])
+                units = str(value.get("units", ""))
+                if slot:
+                    if str(slot.get("units", "")) != units:
+                        raise _refuse(
+                            f"measuring result {run_id}: {area}.{key}",
+                            f"units {units!r} disagree with {slot.get('units')!r}",
+                        )
+                    slot["min"] = min(float(slot["min"]), low)
+                    slot["max"] = max(float(slot["max"]), high)
+                    slot["measuring_run_ids"] = [*slot["measuring_run_ids"], run_id]
+                else:
+                    slot.update(
+                        {"min": low, "max": high, "units": units, "measuring_run_ids": [run_id]}
+                    )
+    for area, key in _RANGE_REQUIRED:
+        slot = composed.get(area, {}).get(key)
+        if slot is None:
+            raise _refuse(
+                f"measuring results: {area}.{key}",
+                "the run-level quantity was never measured; a candidate cannot compose "
+                "without it (TE 15.2 Runtime block)",
+            )
+        if float(slot["min"]) == float(slot["max"]):
+            raise _refuse(
+                f"measuring results: {area}.{key}",
+                f"zero-width range [{slot['min']}, {slot['max']}] over run(s) "
+                f"{slot['measuring_run_ids']}; TE 15.1 freezes measured RANGES and a range "
+                f"needs at least two measuring runs with distinct measurements — run the "
+                f"fixture again rather than inventing a width (board Rec 5 / ML-04)",
+            )
+    return composed
 
 
 # --- W-2 / R-134: the candidate writer ----------------------------------------------------
