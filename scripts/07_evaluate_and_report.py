@@ -95,6 +95,13 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
+from src.data.fixture_evidence import stamp_for_manifest, write_sibling_stamp  # noqa: E402
+from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import (  # noqa: E402
+    build_apparatus_partitions,
+    load_fixture_scope,
+    read_embargo_hours,
+)
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.splits import (  # noqa: E402
@@ -220,7 +227,26 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "containment fields from it, and require_locked_receipt re-verifies it"
         ),
     )
+    parser.add_argument(
+        "--fixture-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "the walking-skeleton fixture scope (a fixture manifest or identity declaration, "
+            "validated through the one loader). When given, this run is a FIXTURE run: the "
+            "apparatus partitions are built from the scope's declaration (never a frozen id, "
+            "R-137), the metrics artifacts receive sibling fixture stamps, no locked path "
+            "exists, and the TE 9.2 two-receipt gate is exempt (Q4/Q5 = A). Additive edit "
+            "flagged for `evaluation-and-comparison`'s record (fixtures-and-reproducibility "
+            "CR-2026-09-07)"
+        ),
+    )
     args = parser.parse_args(argv)
+    if args.fixture_manifest is not None and args.partition:
+        parser.error(
+            "--fixture-manifest runs the manifest's declared apparatus partitions; a frozen "
+            "--partition id alongside it is a contradiction (R-137's two-way quarantine)"
+        )
     wanted = tuple(args.partition) if args.partition else ()
     if LOCKED_ID in wanted and not (
         args.g05_signature
@@ -237,8 +263,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return args
 
 
-def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> dict[str, Any]:
-    """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main())."""
+def _stage_entry(
+    config_dir: Path,
+    *,
+    phase: int,
+    code_commit: str | None,
+    fixture_manifest: Path | None = None,
+) -> dict[str, Any]:
+    """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main());
+    then `require_receipts_for_snapshot` (TE 9.2; exempt on a fixture run, Q5 = A)."""
     snapshot = load_configs(config_dir, phase=phase)
     assert_no_tbd(snapshot, required=required_fields_for(STAGE, PHASE_DEFAULT))
     assert_declared_sources_exist(snapshot)
@@ -246,7 +279,15 @@ def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> di
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
-    return {"snapshot": snapshot, "determinism": determinism, "lock": lock}
+    receipts_gate = require_receipts_for_snapshot(
+        snapshot, lock, fixture_manifest=fixture_manifest
+    )
+    return {
+        "snapshot": snapshot,
+        "determinism": determinism,
+        "lock": lock,
+        "receipts_gate": receipts_gate,
+    }
 
 
 def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
@@ -494,7 +535,65 @@ def _evaluate_partition(
     return written
 
 
+def _run_fixture_scale(
+    entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
+) -> dict[str, Any]:
+    """Q4 = A (fixtures-and-reproducibility R-137): the fixture-scale path, additive only.
+
+    The SAME per-partition mask/estimand/artifact sequence as the full-year path, but over
+    the APPARATUS partitions the fixture scope declares (never a frozen id — the loader
+    refuses one, control 15), with a sibling fixture stamp written beside every metrics
+    artifact (`<artifact>.fixture_stamp.json`, carrying `evidence_class`, `data07_caveat`,
+    `december_representativeness` and `apparatus_partition_id`). NO locked path exists
+    here: an apparatus partition is never `locked` (R-137; R-82), so no G-05 argument, no
+    `open_restricted`, no `LockedContext` is reachable. The governed reads are unchanged
+    (declared comparison sets, the released target by manifest), so today this path
+    refuses exactly where the full-year path does (TE 18.3, stop and report).
+    """
+    assert_no_raw_fields(PRODUCED_FIELDS, phase=args.phase)
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    scope = load_fixture_scope(Path(args.fixture_manifest))
+
+    declared_sets = read_comparison_sets(snapshot)  # refuses while undeclared (R-106)
+    set_ids = tuple(args.sets) if args.sets else tuple(declared_sets)
+    for set_id in set_ids:
+        if set_id not in declared_sets:
+            raise IntegrityError(
+                f"--set {set_id}",
+                f"is not a declared comparison set {sorted(declared_sets)}; membership is "
+                f"configuration (R-106)",
+            )
+    target = _load_target_by_manifest(snapshot)  # refuses honestly today
+    out_root = workspace / args.evaluation_out / run_id
+    registry = MaskRegistry(workspace / args.evaluation_out / "mask_registry")
+    partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
+
+    written: list[str] = []
+    for partition in partitions:
+        if partition.validation_month is None:
+            continue  # an apparatus refit is scored nowhere, like the frozen one
+        stamp = stamp_for_manifest(scope, apparatus_partition_id=partition.partition_id)
+        artifacts = _evaluate_partition(
+            snapshot=snapshot,
+            args=args,
+            partition=partition,
+            declared_sets=declared_sets,
+            set_ids=set_ids,
+            registry=registry,
+            target=target,
+            out_root=out_root,
+            locked=None,  # no locked path at fixture scale, structurally
+        )
+        for artifact in artifacts:
+            write_sibling_stamp(Path(artifact), stamp)
+        written.extend(artifacts)
+    return {"sets": list(set_ids), "artifacts_written": written}
+
+
 def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:
+    if args.fixture_manifest is not None:
+        return _run_fixture_scale(entry, args, run_id=run_id)  # Q4 = A: the ONE fixture entry
     assert_no_raw_fields(PRODUCED_FIELDS, phase=args.phase)  # R-24: before the first write
     snapshot = entry["snapshot"]
     workspace = Path(snapshot.resolved_roots["workspace"])
@@ -567,7 +666,12 @@ def main() -> int:
     args = _parse_args(sys.argv[1:])
 
     try:
-        entry = _stage_entry(args.config, phase=args.phase, code_commit=args.code_commit)
+        entry = _stage_entry(
+            args.config,
+            phase=args.phase,
+            code_commit=args.code_commit,
+            fixture_manifest=args.fixture_manifest,
+        )
     except IntegrityError as exc:
         print(f"07_evaluate_and_report: preflight refusal: {exc}", file=sys.stderr)
         return 1

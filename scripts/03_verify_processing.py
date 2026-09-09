@@ -240,12 +240,24 @@ def _registry_row(
 def _load_tolerance(fixture_manifest_path: Path | None) -> float:
     """The declared tolerance from the fixture manifest — or STOP naming TE 15.2's field.
 
+    The manifest is read ONLY through the one validating loader
+    (`src.data.fixture_manifest.load_fixture_scope`, R-133): a second `yaml.safe_load`
+    of a fixture manifest here would be a second parser of one contract and fails
+    `tests/test_clean_run.py`'s only-copy scan (R-133 control 4). Rerouted 2026-09-09 by
+    `fixtures-and-reproducibility` code-generation (CR-2026-09-07); flagged for
+    `target-standardization`'s record — behaviour is strictly narrower: a file that is
+    not a valid fixture manifest or identity declaration now refuses at the loader
+    naming the violated expectation, instead of being parsed loosely for one field.
+
     Raises
     ------
     StandardizationError
         when the flag is omitted or the file is absent (the tolerance is then unset in
         every sense), and through `resolve_float_tolerance` when the manifest exists
         but the permitted-floating-point-tolerances field does not resolve.
+    IntegrityError
+        from the loader, when the named file is not a valid fixture manifest or
+        identity declaration (R-133).
     """
     field = f"{TOLERANCE_MANIFEST_KEY}.{TOLERANCE_MANIFEST_SUBKEY}"
     if fixture_manifest_path is None or not Path(fixture_manifest_path).is_file():
@@ -257,16 +269,10 @@ def _load_tolerance(fixture_manifest_path: Path | None) -> float:
             "library default such as numpy.isclose's, and the run stops rather than "
             "choosing one (SD-T-03)",
         )
-    import yaml  # deferred: no third-party import at module scope (R-05, transitive)
+    from src.data.fixture_manifest import load_fixture_scope  # deferred (R-05, transitive)
 
-    loaded = yaml.safe_load(Path(fixture_manifest_path).read_text(encoding="utf-8"))
-    if not isinstance(loaded, Mapping):
-        raise StandardizationError(
-            f"{fixture_manifest_path} {field}",
-            "the fixture manifest is not a mapping; the declared tolerance (TE 15.2) "
-            "cannot be resolved from it",
-        )
-    return resolve_float_tolerance(loaded)
+    scope = load_fixture_scope(Path(fixture_manifest_path))
+    return resolve_float_tolerance(scope.data)
 
 
 def _run_verification(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:

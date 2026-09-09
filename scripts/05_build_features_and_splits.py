@@ -90,6 +90,13 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
+from src.data.fixture_evidence import stamp_for_manifest, write_sibling_stamp  # noqa: E402
+from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import (  # noqa: E402
+    build_apparatus_partitions,
+    load_fixture_scope,
+    read_embargo_hours,
+)
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.registry import load_registry  # noqa: E402
 from src.data.splits import (  # noqa: E402
@@ -223,11 +230,37 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "written unpopulated (REQ-ENG-10)"
         ),
     )
-    return parser.parse_args(argv)
+    parser.add_argument(
+        "--fixture-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "the walking-skeleton fixture scope (a fixture manifest or identity declaration, "
+            "validated through the one loader). When given, this run is a FIXTURE run: the "
+            "apparatus partitions are built from the scope's declaration (never a frozen id, "
+            "R-137), every output is stamped, the run is fixture-scale, and the TE 9.2 "
+            "two-receipt gate is exempt (Q4/Q5 = A). Additive edit flagged for "
+            "`features-and-splits`' record (fixtures-and-reproducibility CR-2026-09-07)"
+        ),
+    )
+    args = parser.parse_args(argv)
+    if args.fixture_manifest is not None and args.partition:
+        parser.error(
+            "--fixture-manifest runs the manifest's declared apparatus partitions; a frozen "
+            "--partition id alongside it is a contradiction (R-137's two-way quarantine)"
+        )
+    return args
 
 
-def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> dict[str, Any]:
-    """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main())."""
+def _stage_entry(
+    config_dir: Path,
+    *,
+    phase: int,
+    code_commit: str | None,
+    fixture_manifest: Path | None = None,
+) -> dict[str, Any]:
+    """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main());
+    then `require_receipts_for_snapshot` (TE 9.2; exempt on a fixture run, Q5 = A)."""
     snapshot = load_configs(config_dir, phase=phase)
     assert_no_tbd(snapshot, required=required_fields_for(STAGE, PHASE_DEFAULT))
     assert_declared_sources_exist(snapshot)
@@ -235,7 +268,15 @@ def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> di
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
-    return {"snapshot": snapshot, "determinism": determinism, "lock": lock}
+    receipts_gate = require_receipts_for_snapshot(
+        snapshot, lock, fixture_manifest=fixture_manifest
+    )
+    return {
+        "snapshot": snapshot,
+        "determinism": determinism,
+        "lock": lock,
+        "receipts_gate": receipts_gate,
+    }
 
 
 def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
@@ -310,7 +351,94 @@ def _load_release_inputs(snapshot: Any) -> tuple[Any, Mapping[str, Any]]:
     )
 
 
+def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """Q4 = A (fixtures-and-reproducibility R-137): the fixture-scale path, additive only.
+
+    Runs the SAME three-call sequence as the full-year path, but over the APPARATUS
+    partitions the fixture scope declares (ids quarantined from the six frozen ids — the
+    loader refuses a frozen id, control 15), with `apparatus_partition_id` and the fixture
+    stamp on every output and an apparatus split manifest instead of the five-row one. The
+    scientific values are unchanged: the permitted-producer refusal, the dictionary, the
+    availability lags and the release-root inputs are the same governed reads, so today
+    this path refuses exactly where the full-year path does (first at the unset
+    permitted-producer list; behind it `read_embargo_hours` refuses at
+    `configs/experiment.yaml: embargo_hours` `TBD — freeze gate`). No locked record is
+    written: no fixture partition is ever `locked` (R-137; R-82).
+    """
+    _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    scope = load_fixture_scope(Path(args.fixture_manifest))
+
+    # The same fail-closed science refusals as the full-year path (fixture scale changes
+    # the partitions and the data scope, never a governed value — TC-03e; R-122).
+    load_permitted_producers(args.config, dictionary_rows=sorted(SECTION_6_2_ROWS))
+    dictionary = load_feature_dictionary(snapshot)
+    rows = sorted({str(e["dictionary_row"]) for e in dictionary.values()})
+    load_permitted_producers(args.config, dictionary_rows=rows)
+
+    # Apparatus partitions from the scope's declaration; embargo from configuration.
+    partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
+    stamp_base = stamp_for_manifest(scope)
+
+    target, drivers = _load_release_inputs(snapshot)  # refuses honestly today (TE 18.3)
+    matrix = build_availability_matrix(snapshot, drivers=drivers)
+    assert_lags_safe(matrix)
+    registry = load_registry(snapshot)
+
+    out_root = workspace / args.bundles_out
+    written: list[str] = []
+    excluded_embargo: dict[str, int] = {}
+    for partition in partitions:
+        pid = partition.partition_id
+        train_start, train_end = training_range(partition)
+        train_spec = FrameSpec(pid, "train", train_start, train_end)
+        common = {
+            "drivers": drivers,
+            "registry": registry,
+            "matrix": matrix,
+            "partitions": partitions,
+            "snapshot": snapshot,
+            "parity_tolerance": args.parity_tolerance,
+        }
+        stamp = stamp_for_manifest(scope, apparatus_partition_id=pid)
+        raw = build_features(target, spec=train_spec, **common)
+        transform = fit_transforms(raw, partition=partition)
+        train = build_features(target, spec=train_spec, transform=transform, **common)
+        for bundle in (raw, train):
+            bundle_dir = write_bundle(bundle, out_root)
+            write_sibling_stamp(Path(bundle_dir), stamp)
+            written.append(str(bundle_dir))
+        if partition.validation_month is not None:
+            score_start, score_end = validation_month_range(partition)
+            scored_target, excluded = apply_embargo(target, partition)
+            excluded_embargo[pid] = excluded
+            score_spec = FrameSpec(pid, "score", score_start, score_end)
+            score = build_features(scored_target, spec=score_spec, transform=transform, **common)
+            bundle_dir = write_bundle(score, out_root)
+            write_sibling_stamp(Path(bundle_dir), stamp)
+            written.append(str(bundle_dir))
+
+    manifest = {
+        "artifact_class": "apparatus_split_manifest",
+        "fixture_id": scope.fixture_id,
+        "partitions": sorted(p.partition_id for p in partitions),
+        "excluded_embargo_rows": excluded_embargo,
+        "fixture_stamp": stamp_base.as_mapping(),
+        "note": (
+            "apparatus partitions (R-122 test-apparatus constants; R-137's two-way "
+            "quarantine from the six frozen ids); never the five-row confirmatory manifest"
+        ),
+    }
+    manifest_path = out_root / "apparatus_split_manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
+    return {"split_manifest": str(manifest_path), "bundles_written": written}
+
+
 def _run(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    if args.fixture_manifest is not None:
+        return _run_fixture_scale(entry, args)  # Q4 = A: the ONE fixture-scale entry
     _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
     snapshot = entry["snapshot"]
     workspace = Path(snapshot.resolved_roots["workspace"])
@@ -383,7 +511,12 @@ def main() -> int:
     args = _parse_args(sys.argv[1:])
 
     try:
-        entry = _stage_entry(args.config, phase=args.phase, code_commit=args.code_commit)
+        entry = _stage_entry(
+            args.config,
+            phase=args.phase,
+            code_commit=args.code_commit,
+            fixture_manifest=args.fixture_manifest,
+        )
     except IntegrityError as exc:
         print(f"05_build_features_and_splits: preflight refusal: {exc}", file=sys.stderr)
         return 1

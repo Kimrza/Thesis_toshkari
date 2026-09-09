@@ -106,6 +106,7 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
+from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
 from src.external.spaceweather import write_driver_manifest  # noqa: E402
@@ -246,10 +247,28 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "importer and prints the rendered report -- no artifact is written"
         ),
     )
+    parser.add_argument(
+        "--fixture-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "the walking-skeleton fixture scope (a fixture manifest or identity declaration, "
+            "validated through the one loader). When given, this run is a FIXTURE run: the "
+            "TE 9.2 two-receipt gate is exempt (a fixture run is not a full-year job, Q5 = A) "
+            "and the exemption is recorded, never silent. Additive edit flagged for "
+            "`external-products`' record (fixtures-and-reproducibility CR-2026-09-07)"
+        ),
+    )
     return parser.parse_args(argv)
 
 
-def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> dict[str, Any]:
+def _stage_entry(
+    config_dir: Path,
+    *,
+    phase: int,
+    code_commit: str | None,
+    fixture_manifest: Path | None = None,
+) -> dict[str, Any]:
     """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()).
 
     2. `load_configs` -- snapshot, hash, resolve roots (the only read of configs/).
@@ -261,7 +280,9 @@ def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> di
     5. No authenticated provider access is declared for this stage (the audit reads
        local, already-retrieved driver evidence); the credential-NAME presence check
        has nothing to check and nothing is silently skipped -- this line records it.
-    6. Seed, capture the eight-item environment lock, and open the run record.
+    6. Seed, capture the eight-item environment lock, open the run record, then
+       `require_receipts_for_snapshot` (TE 9.2: both fixtures pass before any full-year
+       job; exempt on a fixture run carrying `--fixture-manifest`, Q5 = A).
     """
     snapshot = load_configs(config_dir, phase=phase)
     assert_no_tbd(snapshot, required=required_fields_for(STAGE, PHASE_DEFAULT))
@@ -270,7 +291,15 @@ def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> di
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
-    return {"snapshot": snapshot, "determinism": determinism, "lock": lock}
+    receipts_gate = require_receipts_for_snapshot(
+        snapshot, lock, fixture_manifest=fixture_manifest
+    )
+    return {
+        "snapshot": snapshot,
+        "determinism": determinism,
+        "lock": lock,
+        "receipts_gate": receipts_gate,
+    }
 
 
 def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
@@ -712,7 +741,12 @@ def main() -> int:
     args = _parse_args(sys.argv[1:])
 
     try:
-        entry = _stage_entry(args.config, phase=args.phase, code_commit=args.code_commit)
+        entry = _stage_entry(
+            args.config,
+            phase=args.phase,
+            code_commit=args.code_commit,
+            fixture_manifest=args.fixture_manifest,
+        )
     except IntegrityError as exc:
         print(f"04_build_external_products: preflight refusal: {exc}", file=sys.stderr)
         return 1

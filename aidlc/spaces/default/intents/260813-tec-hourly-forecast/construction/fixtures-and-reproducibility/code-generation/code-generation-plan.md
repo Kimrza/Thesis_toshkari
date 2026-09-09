@@ -66,7 +66,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   assembly-assertion result); the **M10 §13.2 placement proposal** (a named step after the
   plumbing fixture; gates no full-year job; not a third receipt); honest limits.
 
-- [ ] **Step 2 — `src/data/fixture_manifest.py` (new; F1 + the F2 read side)** [W-1, W-2, W-3 limb 1, W-5 limb 1; R-133, R-134, R-135, R-137, R-139 declaration side; FR-WS-1, FR-WS-5, NFR-REP-01]
+- [x] **Step 2 — `src/data/fixture_manifest.py` (new; F1 + the F2 read side)** [W-1, W-2, W-3 limb 1, W-5 limb 1; R-133, R-134, R-135, R-137, R-139 declaration side; FR-WS-1, FR-WS-5, NFR-REP-01]
   The one schema: the **twelve TE §15.2 areas by name** as required blocks (Identity, Inputs,
   Processing, Expected schema, Units, Row-count ranges, Support/missingness, Timestamp
   tolerances, Independent reference checks, Required outputs, Runtime, Numerical variation);
@@ -97,7 +97,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   schema package. Docstring names the unenforced-chokepoint limit and the only-copy control
   that narrows it.
 
-- [ ] **Step 3 — `src/data/fixture_gate.py` (new; F4 + F6)** [W-7, W-8; R-140, R-141; FR-WS-1, FR-WS-6, REQ-NFR-A3]
+- [x] **Step 3 — `src/data/fixture_gate.py` (new; F4 + F6)** [W-7, W-8; R-140, R-141; FR-WS-1, FR-WS-6, REQ-NFR-A3]
   **Receipts as append-safe registry rows** (Q6 (ii); SD-X-02 Rec 7): `write_fixture_pass_receipt(...)`
   appends via `experiment_registry.append_registry_event` a row carrying `fixture_id`,
   `frozen_manifest_hash`, `result`, `registry_run_id`, `completed_at_utc`, `platform`, the
@@ -116,7 +116,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   lock, manifests)` refuses a `local` stamp, a lock disagreement, and a result predating the
   frozen manifests (controls 30–32). Written as registry rows too, for the same reason.
 
-- [ ] **Step 4 — `src/data/fixture_evidence.py` (new; F7)** [W-9; R-142; SD-X-01 step 3; SD-X-03; FR-WS-2, FR-WS-4]
+- [x] **Step 4 — `src/data/fixture_evidence.py` (new; F7)** [W-9; R-142; SD-X-01 step 3; SD-X-03; FR-WS-2, FR-WS-4]
   Three **generated paths that refuse**: `build_traceability_matrix(...)` (TA-21 — three
   mandatory links per row; completeness against the implemented-requirement list; a row citing
   a test module absent from the workspace raises — control 33; presence, not coverage, stated
@@ -137,7 +137,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   behind the same function and its use recorded. `aws_ai_dlc_preflight_report` is named in
   the docstring as `foundation`'s and not built.
 
-- [ ] **Step 5 — `scripts/run_walking_skeleton.py` (new; the orchestrator; F3)** [W-3, W-4, W-5, W-7; R-135, R-136, R-137, R-140; FR-WS-1, FR-WS-2, FR-WS-3]
+- [x] **Step 5 — `scripts/run_walking_skeleton.py` (new; the orchestrator; F3)** [W-3, W-4, W-5, W-7; R-135, R-136, R-137, R-140; FR-WS-1, FR-WS-2, FR-WS-3]
   `--config configs/ --fixture plumbing_7day|scientific_1month [--emit-candidate]`; the
   six-step stage entry exactly as the seven scripts do (determinism first via
   `ensure_process_determinism`, then `load_configs` → `assert_no_tbd` →
@@ -168,7 +168,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   its result recorded in the run log as clean-run evidence, never a receipt (R-137
   must-not-fire). No domain logic; no import of `iri.py`/`gim.py`.
 
-- [ ] **Step 6 — Sibling stage scripts, additive edits only (Q4 = A, Q5 = A), each flagged for its owner's record**
+- [x] **Step 6 — Sibling stage scripts, additive edits only (Q4 = A, Q5 = A), each flagged for its owner's record**
   `05_build_features_and_splits.py`, `06_train_and_predict.py`, `07_evaluate_and_report.py`
   gain `--fixture-manifest <path>` (default `None`): when present, the apparatus partitions
   are built from the loader's declaration (never a frozen id; a frozen id in a fixture
@@ -180,7 +180,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   sibling script changes; each edit is one additive option and/or one call, recorded in the
   Step 1 table with the owning unit named.
 
-- [ ] **Step 7 — The two fixture trees, without manifests** [W-10; BLK-02]
+- [x] **Step 7 — The two fixture trees, without manifests** [W-10; BLK-02]
   `tests/fixtures/plumbing_7day/` and `tests/fixtures/scientific_1month/` created with a
   `.gitkeep` each and NO `fixture_manifest.yaml` — the manifests come from a measuring run
   (`--emit-candidate`) that cannot complete today, and the freeze act is the owner's. A
@@ -188,7 +188,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   will carry (D-11 + D-20; D-14) and the fact that no file here is a manifest. Nothing is
   invented.
 
-- [ ] **Step 8 — `tests/test_clean_run.py` (new; §12's mandated module)** [W-6, W-10; R-138, R-139; the 39 controls and 11 must-not-fire; WS-20, TA-17 as skipped evidence]
+- [x] **Step 8 — `tests/test_clean_run.py` (new; §12's mandated module)** [W-6, W-10; R-138, R-139; the 39 controls and 11 must-not-fire; WS-20, TA-17 as skipped evidence]
   Synthetic trees only (`tmp_path`; synthetic manifests, receipts, registry rows, planted
   records, mislabelled directories, single-bit plants — apparatus constants, R-122; no real
   config value). Hosts, by rule: R-133 (1)–(4), (37) incl. the per-area enumeration (one case
@@ -207,7 +207,7 @@ suite for a gate the owner has not signed), and WS-20/TA-09/TA-17/TA-21 stay `Pe
   absent manifests) — recorded as `not run` in the summary; it never passes on an abort. The
   count of test functions is derived (`grep -c "def test_"`) and printed before it is asserted.
 
-- [ ] **Step 9 — Smoke + lint** — scratchpad Python 3.11.16 + the stdlib pytest stand-in:
+- [x] **Step 9 — Smoke + lint** — scratchpad Python 3.11.16 + the stdlib pytest stand-in:
   `tests.test_clean_run`; regressions on every module a Step 6 edit can reach
   (`test_train_only_transforms`, `test_split_embargo`, `test_common_masks`, `test_bootstrap`,
   `test_regimes_and_reporting`, `test_models_smoke`, `test_checkpoint_restore`,

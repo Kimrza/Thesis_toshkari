@@ -244,13 +244,41 @@ amendment and is proposed here only.
 - **No commit is made here.** The student commits, citing D-11, D-14, D-20, D-28, D-29, D-31
   and this change ID.
 
-## 11. Step 9 outcome (recorded when reached, same pass)
+## 11. Step 9 outcome (recorded when reached; completed on the 2026-09-09 resume pass)
 
-*Filled in at Step 9 — see the code summary's § Test coverage summary for the exact runner
-lines; this section records only what changed on disk after the record was first written.*
+The 2026-09-07 session ended after Steps 1–5 and 7; Steps 6, 8 and 9 were completed on
+2026-09-09 by the resume dispatch. What changed on disk after this record was first written:
 
-- Step 9 executed 2026-09-07 on the scratchpad Python 3.11.16 + stdlib pytest stand-in.
-  `tests.test_clean_run`: see code summary (`grep -c "def test_"` printed before assertion).
-  Regressions on the ten named sibling modules: see code summary. `compileall` and the stdlib
-  99-column scan: see code summary. `graphify update .` run once after the code changes.
+- **Step 6 as tabulated in § 5**: the seven Phase 1 stage scripts gained `--fixture-manifest`
+  plus the one `require_receipts_for_snapshot` call after `assert_lock_complete`; `05`/`06`/`07`
+  gained `_run_fixture_scale` behind one early-return line. `src/data/acquisition.py`'s
+  `assert_records_within_window` was already present from the 2026-09-07 session.
+- **One consequence beyond § 5's table, recorded for its owner to confirm or reverse** (the
+  § 6.1 pattern): `scripts/03_verify_processing.py` (`target-standardization`; Phase 2 only)
+  carried its own `yaml.safe_load` of a fixture manifest in `_load_tolerance` — exactly the
+  second parser R-133 control 4 exists to refuse, predating this unit. Its read was rerouted
+  through `load_fixture_scope` (the one loader), strictly narrowing behaviour: an invalid
+  manifest now refuses at the loader instead of being parsed loosely for one field. Without
+  this the project-wide only-copy scan Q2 = A mandates would have failed on day one.
+- **Step 8**: `tests/test_clean_run.py` — 49 test functions (`grep -c "def test_"` printed
+  before assertion by its own final test), hosting the 39 controls, the 11 must-not-fire
+  controls, the per-area enumeration, the AST only-copy scan, the TE §13.2 fence parse
+  (membership AND order), and the completion test.
+- **Step 9, executed 2026-09-09** on the session-scratchpad Python 3.11.16 + a stdlib pytest
+  stand-in (PyPI unreachable; pyyaml/numpy/pandas/pytest/ruff uninstallable — attempted and
+  recorded): `tests.test_clean_run` **46 passed, 0 failed, 3 skipped** (skips by name:
+  two pyyaml-gated production-loader paths; the clean-run completion test skipping with the
+  stop-and-report reason "pyyaml is not importable on this clone"). Regressions on the ten
+  named sibling modules: **436 passed, 0 failed, 13 skipped, 0 errors** in total with
+  `test_clean_run` included; every skip is by name. `compileall` clean over `scripts/`, `src/`,
+  `tests/`. Stdlib 99-column scan: every line added by this pass conforms; **47 pre-existing
+  over-99 lines remain in the 2026-09-07 files** (`run_walking_skeleton.py`,
+  `fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`, one in
+  `01_inventory_and_registry.py`) — recorded here; real `ruff` is owed to a governed
+  environment. `graphify` is not on this clone's PATH (`command not found`); the graph update
+  is owed alongside ruff. Pre-existing failures NOT caused by this pass, verified by re-running
+  on the stashed (unmodified) tree: `test_external_drivers` 11 (pyyaml preflight, § 6.2's
+  routed item), `test_iri_denial` 1 (containment scan), `test_locked_test_guard` 1
+  (`test_common_masks.py` restricted-root literal), and 4 import-error modules
+  (`test_acquisition`, `test_experiment_registry`, `test_determinism`, `test_december_audit`).
   **Smoke evidence only, never governed.**

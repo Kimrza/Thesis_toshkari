@@ -97,6 +97,13 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
+from src.data.fixture_evidence import stamp_fixture_artifact, stamp_for_manifest  # noqa: E402
+from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import (  # noqa: E402
+    build_apparatus_partitions,
+    load_fixture_scope,
+    read_embargo_hours,
+)
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.splits import (  # noqa: E402
@@ -230,7 +237,25 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         default=None,
         help="the authorization the AccessRecord carries (the G-05 decision record)",
     )
+    parser.add_argument(
+        "--fixture-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "the walking-skeleton fixture scope (a fixture manifest or identity declaration, "
+            "validated through the one loader). When given, this run is a FIXTURE run: the "
+            "apparatus partitions are built from the scope's declaration (never a frozen id, "
+            "R-137), every prediction payload is stamped, no locked path exists, and the "
+            "TE 9.2 two-receipt gate is exempt (Q4/Q5 = A). Additive edit flagged for "
+            "`models-and-baselines`' record (fixtures-and-reproducibility CR-2026-09-07)"
+        ),
+    )
     args = parser.parse_args(argv)
+    if args.fixture_manifest is not None and args.partition:
+        parser.error(
+            "--fixture-manifest runs the manifest's declared apparatus partitions; a frozen "
+            "--partition id alongside it is a contradiction (R-137's two-way quarantine)"
+        )
     wanted = tuple(args.partition) if args.partition else FITTING_PARTITION_IDS
     if LOCKED_ID in wanted and not (
         args.g05_signature and args.locked_input and args.locked_authorization
@@ -243,8 +268,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return args
 
 
-def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> dict[str, Any]:
-    """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main())."""
+def _stage_entry(
+    config_dir: Path,
+    *,
+    phase: int,
+    code_commit: str | None,
+    fixture_manifest: Path | None = None,
+) -> dict[str, Any]:
+    """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main());
+    then `require_receipts_for_snapshot` (TE 9.2; exempt on a fixture run, Q5 = A)."""
     snapshot = load_configs(config_dir, phase=phase)
     assert_no_tbd(snapshot, required=required_fields_for(STAGE, PHASE_DEFAULT))
     assert_declared_sources_exist(snapshot)
@@ -252,7 +284,15 @@ def _stage_entry(config_dir: Path, *, phase: int, code_commit: str | None) -> di
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
-    return {"snapshot": snapshot, "determinism": determinism, "lock": lock}
+    receipts_gate = require_receipts_for_snapshot(
+        snapshot, lock, fixture_manifest=fixture_manifest
+    )
+    return {
+        "snapshot": snapshot,
+        "determinism": determinism,
+        "lock": lock,
+        "receipts_gate": receipts_gate,
+    }
 
 
 def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
@@ -640,7 +680,100 @@ def _finish_locked_write(
 # =======================================================================================
 
 
+def _run_fixture_scale(
+    entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
+) -> dict[str, Any]:
+    """Q4 = A (fixtures-and-reproducibility R-137): the fixture-scale path, additive only.
+
+    The SAME per-partition fit/predict sequence as the full-year path, but over the
+    APPARATUS partitions the fixture scope declares (never a frozen id — the loader refuses
+    one, control 15), with the fixture stamp embedded in every prediction payload and
+    `apparatus_partition_id` carried on each. NO locked path exists here: an apparatus
+    partition is never `locked` (R-137; R-82), so no G-05 argument, no `open_restricted`,
+    no receipt writer is reachable. The governed reads are unchanged (horizon, grids,
+    seeds, the released target by manifest), so today this path refuses exactly where the
+    full-year path does (TE 18.3, stop and report).
+    """
+    _assert_phase1_field_contract(args.phase)
+    _assert_registry_column_18()
+    snapshot = entry["snapshot"]
+    lock = entry["lock"]
+    lock_hash = environment_lock_hash(lock)
+    registry_path, access_log = _registry_paths(snapshot)
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    scope = load_fixture_scope(Path(args.fixture_manifest))
+
+    horizon = resolve_horizon(snapshot, args.horizon)
+    grid_counts = assert_grid_content(snapshot)
+    expected_seeds = _final_seeds(snapshot)
+
+    partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
+    bundle_root = _bundle_root(snapshot, args)
+    fixture_target = _load_target_by_manifest(snapshot)  # the fixture-scale released target
+    out_root = workspace / args.predictions_out / run_id
+
+    written: list[str] = []
+    for partition in partitions:
+        pid = partition.partition_id
+        stamp = stamp_for_manifest(scope, apparatus_partition_id=pid)
+        train_bundle, score_bundle = _bundle_pair(bundle_root, partition, partitions)
+        if score_bundle is None:
+            continue  # an apparatus refit is scored nowhere, like the frozen one
+        assert_stamp_match(score_bundle, partition)  # R-90: before EVERY scoring path
+        seeded: list[Prediction] = []
+        for model_id in MODEL_IDS:
+            seeds: tuple[int | None, ...] = (
+                tuple(sorted(expected_seeds)) if model_id == "M-06" else (None,)
+            )
+            params = _selected_params(snapshot, model_id)
+            for seed in seeds:
+                assert_stamp_match(score_bundle, partition)
+                prediction = fit_predict(
+                    model_id,
+                    bundle=train_bundle,
+                    partition=partition,
+                    snapshot=snapshot,
+                    target=fixture_target,  # the fixture-scale target; no locked path exists
+                    score_bundle=score_bundle,
+                    seed=seed,
+                    params=params,
+                    horizon_hours=horizon,
+                )
+                if model_id == "M-06":
+                    seeded.append(prediction)
+                name = f"{model_id}" + (f"_seed{seed}" if seed is not None else "") + ".json"
+                path = _write_prediction_once(
+                    out_root / pid / name,
+                    stamp_fixture_artifact(
+                        _prediction_payload(prediction, horizon_hours=horizon), stamp
+                    ),
+                )
+                _child_rows(
+                    run_id, lock_hash=lock_hash, snapshot=snapshot,
+                    code_commit=lock.code_commit, registry_path=registry_path,
+                    access_log=access_log, phase=args.phase, prediction=prediction,
+                    manifest_path=path,
+                )
+                written.append(str(path))
+        confirmatory = three_seed_mean(seeded, expected_seeds=expected_seeds)
+        path = _write_prediction_once(
+            out_root / pid / "M-06_confirmatory.json",
+            stamp_fixture_artifact(
+                _prediction_payload(confirmatory, horizon_hours=horizon), stamp
+            ),
+        )
+        _child_rows(
+            run_id, lock_hash=lock_hash, snapshot=snapshot, code_commit=lock.code_commit,
+            registry_path=registry_path, access_log=access_log, phase=args.phase,
+            prediction=confirmatory, manifest_path=path,
+        )
+        written.append(str(path))
+    return {"horizon_hours": horizon, "grid_counts": grid_counts, "predictions_written": written}
+
+
 def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:
+    if args.fixture_manifest is not None:
+        return _run_fixture_scale(entry, args, run_id=run_id)  # Q4 = A: the ONE fixture entry
     _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
     _assert_registry_column_18()
     snapshot = entry["snapshot"]
@@ -753,7 +886,12 @@ def main() -> int:
     args = _parse_args(sys.argv[1:])
 
     try:
-        entry = _stage_entry(args.config, phase=args.phase, code_commit=args.code_commit)
+        entry = _stage_entry(
+            args.config,
+            phase=args.phase,
+            code_commit=args.code_commit,
+            fixture_manifest=args.fixture_manifest,
+        )
     except IntegrityError as exc:
         print(f"06_train_and_predict: preflight refusal: {exc}", file=sys.stderr)
         return 1
