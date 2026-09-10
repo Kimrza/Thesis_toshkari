@@ -148,3 +148,32 @@ The reviewer's iteration-1 section below is left standing; its NOT-READY verdict
 - Same as iteration 1: no `ruff`/`pyyaml`/`pandas` in this environment; the reorder's actual runtime abort message (which exception text a live run against the real, unpinned config would print first) was traced statically through `load_permitted_producers`'s source rather than observed end-to-end.
 - Did not re-open sibling-unit content; did not re-verify the `evidence/test_run_access_log.jsonl` row count this iteration (unchanged since iteration 1, not touched by this pass's two diffs).
 - Did not independently re-run the framework's own hook/tool inventory to confirm the negative claim "no framework tool, hook or agent in this stage ran git commit" beyond reading `.githooks/pre-commit`'s source and the reflog shape; this is corroborating evidence for the section's claim, not proof of it, and the section itself routes the underlying disposition to the owner rather than resting on that claim.
+
+### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility`, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze. Under
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` (§5, §11.5; the owner's "apply the
+recommended option" ruling), the fixtures unit made these ADDITIVE edits to
+`scripts/05_build_features_and_splits.py` — nothing on the full-year path changed (current
+size, derived: 610 lines, `wc -l`):
+
+- Commit `cf3185d` (Q4/Q5 = A): `--fixture-manifest` option (a frozen `--partition`
+  alongside it is a parser error — R-137's two-way quarantine), `_stage_entry` kwarg + ONE
+  `require_receipts_for_snapshot` call after `assert_lock_complete`, and ONE early-return
+  in `_run` reaching the additive `_run_fixture_scale`: the SAME three-call sequence over
+  the scope's APPARATUS partitions (built by `build_apparatus_partitions`, never a frozen
+  id), sibling fixture stamps on every bundle, and `apparatus_split_manifest.json` instead
+  of the five-row confirmatory manifest. The permitted-producer refusal, dictionary,
+  availability lags and release-root reads are UNCHANGED governed reads.
+- Commit `0e002cd` (board Rec 4 / ML-03): the fixture path emits a machine-readable
+  `fixture_measurements.json` under the bundle root (scored feature-window rows via
+  `records_of(score.matrix)`) for the orchestrator's candidate-measurement folding; the
+  orchestrator now passes `--bundles-out artifacts/walking_skeleton/<fixture_id>/features`.
+- The M10 contract fixture (this unit's `test_train_only_transforms.py` +
+  `test_split_embargo.py`) is invoked by `run_walking_skeleton.py` after the plumbing
+  fixture (owner Q12 = C — clean-run evidence, never a third receipt), and R-137's
+  must-not-fire November-containment control is credited to this unit's module by the
+  fixtures suite's ledger (`MNF_HOSTED_ELSEWHERE`) rather than copied.
+
+Tests live in `tests/test_clean_run.py`. This unit's owner may confirm or reverse per the
+change record.

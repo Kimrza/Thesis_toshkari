@@ -80,3 +80,28 @@ This pass verified the unit's own artifacts, the passed functional-design/nfr-de
 ### Summary
 
 The code matches its receipted Q1/Q2 answers and its plan precisely: the refuse-to-RUN gate fires before any output path in both scripts and cannot be bypassed by a convenience non-empty list; the closed four-transformation set, the D-17 sixteen-field contract (independently re-derived and confirmed correct against a stale 17-field sibling test), the asserted-never-substituted excluded set, and the value-level verification with a fixture-manifest-only tolerance are all implemented as designed and hold under adversarial probing; the test-suite and lint claims are independently reproduced exactly. The only two findings are Minor: an inconsistency in whether unfrozen config keys should be stubbed as `TBD` sentinels versus omitted outright (harmless today, a convention gap), and a pre-existing sibling-file discrepancy this unit correctly did not touch and correctly routed to the gate. Neither blocks READY under this project's verdict rule.
+
+### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility`, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze. Under
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` (§5, §6.1, §11.1, §11.5; the owner's
+"apply the recommended option" ruling), the fixtures unit made these ADDITIVE edits to this
+unit's scripts — nothing on the full-year path changed:
+
+- `scripts/02_standardize_prepared_target.py` (commit `cf3185d`): `--fixture-manifest`
+  option (the visible Q5 = A exemption carrier), `_stage_entry(..., fixture_manifest=None)`
+  kwarg, and ONE `require_receipts_for_snapshot` call after `assert_lock_complete`
+  (TE §9.2's two-receipt gate; exempt on a fixture run).
+- `scripts/02_standardize_prepared_target.py` (commit `0e002cd`, board Rec 2 / ML-01):
+  `_declared_data_window` (the standardizer consumes acquisition's retrieved product, so
+  its declared window IS `acquisition.window_start`/`window_end` in `configs/data.yaml`;
+  undeclared → the fixture exemption refuses, TE §18.3).
+- `scripts/03_verify_processing.py` (commit `cf3185d`): `_load_tolerance`'s direct
+  `yaml.safe_load` of a fixture manifest was REROUTED through the one validating loader
+  (`src.data.fixture_manifest.load_fixture_scope`, R-133) — the second-parser case
+  R-133 control 4's project-wide only-copy scan exists to refuse; behaviour strictly
+  narrows (an invalid manifest now refuses at the loader instead of being parsed loosely
+  for one field). Current sizes, derived: `02` 428 lines, `03` 386 lines (`wc -l`).
+
+Tests live in `tests/test_clean_run.py` (`test_rec2_02_...`, `test_control_4_only_copy_...`).
+This unit's owner may confirm or reverse per the change record.

@@ -86,7 +86,16 @@ FOUNDATION_MODULES = (
 
 
 def _write_config_tree(root: Path, *, seeds_extra: str = "") -> Path:
-    """A minimal valid four-file governed config tree in tmp space."""
+    """A minimal valid four-file governed config tree in tmp space.
+
+    Every consumer immediately parses the tree through `load_configs`, whose production
+    read path is pyyaml BY DESIGN (TS-01: refuse by name, never a second parser) — so on
+    a clone where pyyaml is uninstallable these tests SKIP BY NAME here rather than
+    erroring at the loader's refusal. Classification, not suppression: the same tests
+    run in full in a governed environment. (Owner gate worklist 2026-09-10, item 3;
+    flagged for `foundation`'s record.)
+    """
+    pytest.importorskip("yaml")
     config_dir = root / "configs"
     config_dir.mkdir(parents=True, exist_ok=True)
     (config_dir / "data.yaml").write_text(
@@ -130,6 +139,7 @@ def snapshot(tmp_path, monkeypatch):
 
 def test_repository_configs_exist_and_parse(monkeypatch, tmp_path) -> None:
     """The real configs/ tree: all four exist, parse strictly, and carry no machine path."""
+    pytest.importorskip("yaml")  # the loader's read path is pyyaml by design (TS-01)
     monkeypatch.setenv("TEC_PLATFORM", "local")
     monkeypatch.setenv("TEC_WORKSPACE_ROOT", str(tmp_path))
     snap = load_configs(CONFIGS_DIR, phase=1)
@@ -142,6 +152,7 @@ def test_repository_configs_exist_and_parse(monkeypatch, tmp_path) -> None:
 
 def test_no_config_value_parses_as_an_absolute_path(monkeypatch, tmp_path) -> None:
     """R-16 negative control, half 1: no value in any of the four configs is absolute."""
+    pytest.importorskip("yaml")  # the loader's read path is pyyaml by design (TS-01)
     monkeypatch.setenv("TEC_PLATFORM", "local")
     monkeypatch.setenv("TEC_WORKSPACE_ROOT", str(tmp_path))
     snap = load_configs(CONFIGS_DIR, phase=1)
@@ -290,6 +301,7 @@ def test_required_fields_map_has_no_silent_empty_default() -> None:
 def test_required_fields_map_completeness(monkeypatch, tmp_path) -> None:
     """R-03's completeness control: every governed non-TBD scientific field in the
     repository configs appears in at least one map entry (today: the D-122 seeds)."""
+    pytest.importorskip("yaml")  # the loader's read path is pyyaml by design (TS-01)
     monkeypatch.setenv("TEC_PLATFORM", "local")
     monkeypatch.setenv("TEC_WORKSPACE_ROOT", str(tmp_path))
     snap = load_configs(CONFIGS_DIR, phase=1)

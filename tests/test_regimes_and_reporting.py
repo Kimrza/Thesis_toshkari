@@ -38,6 +38,7 @@ import datetime as dt
 import inspect
 import json
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -65,6 +66,7 @@ from src.evaluation.diagnostics import (  # noqa: E402
     build_claims_checklist,
     build_dec_regime_breakdown,
     build_dst_diagnostic,
+    build_member_metrics_breakdown,
     build_primary_table,
     build_quality_stratum,
     compute_member_metrics,
@@ -336,6 +338,8 @@ def _table(mask: _Mask, artifact: dict[str, Any] | None = None, **kwargs: Any):
         declared_member_ids=kwargs.pop("declared", DECLARED_MEMBERS),
         caption=caption,
         table_artifact_id="primary-table-synth-1",
+        registry=kwargs.pop("registry", None) or _mem_registry(),
+        emit_path=kwargs.pop("emit_path", None),
     )
     table["target_lineage_statement"] = (
         "Phase 1 target lineage: location-sampled gridded VTEC (grid-cell population)"
@@ -345,6 +349,13 @@ def _table(mask: _Mask, artifact: dict[str, Any] | None = None, **kwargs: Any):
 
 def _registry(tmp_path: Path) -> ConclusionSurfaceRegistry:
     return ConclusionSurfaceRegistry(tmp_path / "conclusion_surfaces")
+
+
+def _mem_registry() -> ConclusionSurfaceRegistry:
+    """A fresh registry per call (test apparatus): the W-3/W-5 builders now REGISTER
+    every artifact write-once (SD-R-03), so re-building a fixed artifact ID needs a
+    fresh registry root, exactly as a governed re-run needs a new version."""
+    return ConclusionSurfaceRegistry(Path(tempfile.mkdtemp(prefix="csr-")) / "registry")
 
 
 def _conclusion(registry: ConclusionSurfaceRegistry) -> dict[str, Any]:
@@ -652,6 +663,7 @@ def test_dec_breakdown_descriptive_only_below_threshold() -> None:
         experiment=SYNTH_EXPERIMENT,
         release_grade="definitive",
         source="GFZ Kp",
+        registry=_mem_registry(),
     )
     payload = breakdown["payload"]
     assert payload["descriptive_only"] is True
@@ -674,6 +686,7 @@ def test_must_not_fire_dec_breakdown_confirmatory_at_threshold() -> None:
         experiment=SYNTH_EXPERIMENT,
         release_grade="definitive",
         source="GFZ Kp",
+        registry=_mem_registry(),
     )
     assert breakdown["payload"]["descriptive_only"] is False
     assert_descriptive_only_label(breakdown, config=CONFIG)  # nothing fires
@@ -704,6 +717,7 @@ def test_control_5_missing_descriptive_label_fails() -> None:
         experiment=SYNTH_EXPERIMENT,
         release_grade="definitive",
         source="GFZ Kp",
+        registry=_mem_registry(),
     )
     breakdown["payload"]["descriptive_only"] = False  # tamper: the label suppressed
     with pytest.raises(RegimeError):
@@ -855,6 +869,7 @@ def test_control_14_pooled_row_weighted_headline_fails() -> None:
         mask=mask,
         role_label="supplementary",
         aggregation="pooled_row_weighted",
+        registry=_mem_registry(),
     )
     breakdown["role_label"] = "headline"  # tamper: pooled promoted to headline
     with pytest.raises(RegimeError):
@@ -882,7 +897,10 @@ def test_control_16_mean_only_per_seed_fails() -> None:
 def test_control_17_missing_stamp_fails() -> None:
     mask = _Mask()
     breakdown = build_breakdown_artifact(
-        breakdown_id="per_cell", metrics_artifact=_metrics_artifact(mask), mask=mask
+        breakdown_id="per_cell",
+        metrics_artifact=_metrics_artifact(mask),
+        mask=mask,
+        registry=_mem_registry(),
     )
     assert_breakdown_stamps(breakdown)
     breakdown["source_id"] = None  # tamper
@@ -905,6 +923,7 @@ def test_control_38_missing_driver_caveat_fails() -> None:
         metrics_artifact=_metrics_artifact(mask),
         mask=mask,
         per_station=True,
+        registry=_mem_registry(),
     )
     assert per_station["driver_identity_caveat"] == DRIVER_IDENTITY_CAVEAT  # emitted
     del per_station["driver_identity_caveat"]  # tamper
@@ -926,6 +945,7 @@ def test_per_entry_caveatless_gim_into_w5_raises() -> None:
             metrics_artifact=_metrics_artifact(mask),
             mask=mask,
             payload=payload,
+            registry=_mem_registry(),  # fresh per call: registration is write-once
         )
 
     # must NOT fire: the same payload WITH the caveat renders, the row printed unchanged
@@ -968,9 +988,142 @@ def test_per_entry_unitless_metrics_artifact_into_w5_raises() -> None:
     with pytest.raises(RegimeError):
         build_breakdown_artifact(breakdown_id="per_cell", metrics_artifact=wrong, mask=mask)
     rendered = build_breakdown_artifact(
-        breakdown_id="per_cell", metrics_artifact=_metrics_artifact(mask), mask=mask
+        breakdown_id="per_cell",
+        metrics_artifact=_metrics_artifact(mask),
+        mask=mask,
+        registry=_mem_registry(),
     )
     assert rendered["units"] == "TECU"
+
+
+def test_member_metrics_breakdown_w5_producing_path() -> None:
+    """W-5 point 9 (Rec 20; gate-reopened repair 2026-09-10 of the iteration-2 Critical):
+    the §5.5 metric set is COMPUTED on the breakdown path — RMSE plus the six supporting
+    metrics per member, and the `derived: true` percentage reduction per benchmark —
+    emitted as one stamped, provenanced, registered breakdown artifact."""
+    mask = _Mask()
+    registry = _mem_registry()
+    breakdown = build_member_metrics_breakdown(
+        metrics_artifact=_metrics_artifact(mask), mask=mask, registry=registry
+    )
+    payload = breakdown["payload"]
+    assert set(payload["member_metrics"]) == {"M-C", "M-A", "M-B", "B-01"}
+    for block in payload["member_metrics"].values():
+        for field in ("rmse", *diagnostics.SUPPORTING_METRIC_FIELDS):
+            assert field in block  # RMSE + the six §5.5 supporting metrics, per member
+    assert payload["member_metrics"]["M-A"]["rmse"] == pytest.approx(1.0)
+    reductions = payload["derived_percentage_rmse_reductions"]
+    assert set(reductions) == {"M-A", "M-B", "B-01"}
+    for reduction in reductions.values():
+        assert reduction["derived"] is True  # Vision §9.5 required result 2
+        assert reduction["definition"] == "1 - RMSE_model/RMSE_reference"
+    # the model (M-C) is perfect in the fixture: reduction = 1 - 0/RMSE_ref = 1.0
+    assert reductions["M-B"]["value"] == pytest.approx(1.0)
+    assert breakdown["units"] == "TECU" and breakdown["role_label"] == "supplementary"
+    # registered at the producing path (SD-R-03): the registry grew with the surface
+    assert registry.lookup("breakdown-member_metrics") is not None
+    # the breakdown_id enters the configured list, so the inventory refusal reaches it
+    configured = ("member_metrics", "per_cell")
+    with pytest.raises(RegimeError) as excinfo:
+        assert_breakdown_inventory(("per_cell",), configured_list=configured)
+    assert "member_metrics" in str(excinfo.value)
+
+
+def test_per_entry_fieldless_estimand_into_w5_raises() -> None:
+    """Per-entry control for `require_estimand_fields` at W-5 (SD-R-01 Called-by "W-3
+    table, W-5 breakdowns"; SEC-R-02 half 1): a comparison row without its recorded
+    orientation pushed THROUGH the W-5 §5.5 producing path refuses at that entry point."""
+    mask = _Mask()
+    artifact = _metrics_artifact(mask)
+    del artifact["comparisons"][0]["orientation"]
+    with pytest.raises(RegimeError) as excinfo:
+        build_member_metrics_breakdown(
+            metrics_artifact=artifact, mask=mask, registry=_mem_registry()
+        )
+    assert "orientation" in str(excinfo.value)
+
+
+def test_per_entry_unlabelled_reduction_into_w5_raises(monkeypatch: Any) -> None:
+    """Per-entry control for `require_derived_label` at W-5 (R-127 control (34)): an
+    unlabelled derived reduction pushed THROUGH the W-5 §5.5 producing path refuses at
+    that entry point — the guard being correct is proven once (control-34 test above);
+    the guard being INVOKED at W-5 is proven here (`nfr-design:c58`)."""
+    mask = _Mask()
+    original = diagnostics.derived_rmse_reduction
+
+    def _unlabelled(model_rmse: float, reference_rmse: float) -> dict[str, Any]:
+        out = dict(original(model_rmse, reference_rmse))
+        out.pop("derived")  # the violation: a derived quantity without its label
+        return out
+
+    monkeypatch.setattr(diagnostics, "derived_rmse_reduction", _unlabelled)
+    with pytest.raises(RegimeError) as excinfo:
+        build_member_metrics_breakdown(
+            metrics_artifact=_metrics_artifact(mask), mask=mask, registry=_mem_registry()
+        )
+    assert "derived" in str(excinfo.value)
+
+
+def test_per_entry_unregistered_table_emission_refuses() -> None:
+    """Per-entry control for `require_registered_surface` at W-3 (SD-R-03; iteration-2
+    Major): building the primary table with no ConclusionSurfaceRegistry refuses
+    fail-closed at the producing path — every other guard passing does not license an
+    unregistered emission."""
+    mask = _Mask()
+    with pytest.raises(RegimeError) as excinfo:
+        build_primary_table(
+            metrics_artifact=_metrics_artifact(mask),
+            mask=mask,
+            budget_artifact=_budget(),
+            declared_member_ids=DECLARED_MEMBERS,
+            caption="Primary results; plasmaspheric contribution caveat applies.",
+            table_artifact_id="primary-table-unregistered",
+        )
+    assert "registry" in str(excinfo.value)
+    # must NOT fire: the same build with a registry renders AND registers (SD-R-03)
+    registry = _mem_registry()
+    _table(mask, registry=registry)
+    assert registry.lookup("primary-table-synth-1") is not None
+
+
+def test_per_entry_unregistered_breakdown_emission_refuses() -> None:
+    """The W-5 half of the same control: a breakdown built with no registry refuses
+    fail-closed; with a registry it renders and is registered at the producing path."""
+    mask = _Mask()
+    with pytest.raises(RegimeError) as excinfo:
+        build_breakdown_artifact(
+            breakdown_id="per_cell", metrics_artifact=_metrics_artifact(mask), mask=mask
+        )
+    assert "registry" in str(excinfo.value)
+    registry = _mem_registry()
+    build_breakdown_artifact(
+        breakdown_id="per_cell",
+        metrics_artifact=_metrics_artifact(mask),
+        mask=mask,
+        registry=registry,
+    )
+    assert registry.lookup("breakdown-per_cell") is not None
+
+
+def test_w3_w5_emission_register_then_write(tmp_path: Path) -> None:
+    """`emit_registered_artifact` runs at the W-3/W-5 producing paths (SD-R-03's one
+    register-then-write transaction): the emitted file exists, the registry entry exists,
+    and a second emission of the same artifact ID refuses (NFR-AUD-01, write-once)."""
+    mask = _Mask()
+    registry = _registry(tmp_path)
+    out = tmp_path / "primary_table.json"
+    _table(mask, registry=registry, emit_path=out)
+    assert registry.lookup("primary-table-synth-1") is not None
+    assert json.loads(out.read_text("utf-8"))["artifact_class"] == "primary_table"
+    with pytest.raises(RegimeError):  # a silent re-emission is not a path
+        _table(mask, registry=registry, emit_path=tmp_path / "again.json")
+    out5 = tmp_path / "member_metrics.json"
+    build_member_metrics_breakdown(
+        metrics_artifact=_metrics_artifact(mask), mask=mask, registry=registry,
+        emit_path=out5,
+    )
+    assert registry.lookup("breakdown-member_metrics") is not None
+    assert json.loads(out5.read_text("utf-8"))["artifact_class"] == "breakdown"
 
 
 def test_top1pct_sensitivity_labelled_never_merged() -> None:
@@ -986,6 +1139,7 @@ def test_completeness_shortfalls_machine_readable_two_tier() -> None:
         metrics_artifact=_metrics_artifact(mask),
         mask=mask,
         completeness_shortfalls=[{"month": f"{SYNTH_YEAR}-07", "reason": "partial retrieval"}],
+        registry=_mem_registry(),
     )
     assert breakdown["partial"] is True
     assert breakdown["completeness_shortfalls"][0]["month"] == f"{SYNTH_YEAR}-07"
@@ -1299,10 +1453,15 @@ def test_checklist_inspects_exactly_the_registered_set(tmp_path: Path) -> None:
     mask = _Mask()
     table = _table(mask)
     registry.register({"artifact_id": table["artifact_id"], "kind": "primary_table", **IDENTITY})
+    before = registry.ids()
     checklist = _checklist(
         tmp_path, registry=registry, conclusion=conclusion, mask=mask, table=table
     )
-    assert tuple(checklist["inspected_registered_set"]) == registry.ids()
+    # The inspected set is captured BEFORE the checklist's own W-4 registration (owner
+    # gate worklist 2026-09-10, item 1): the checklist never inspects itself, and the
+    # registry afterwards carries it as a registered surface.
+    assert tuple(checklist["inspected_registered_set"]) == before
+    assert set(registry.ids()) == {*before, checklist["artifact_id"]}
 
 
 def test_happy_checklist_no_failed_rows_and_residual_stated(tmp_path: Path) -> None:
@@ -1360,6 +1519,7 @@ def test_control_12_planted_prohibited_phrase_caught(tmp_path: Path) -> None:
         metrics_artifact=_metrics_artifact(mask),
         mask=mask,
         payload={"claim": "this generalises beyond the frozen cells to other years"},
+        registry=_mem_registry(),
     )
     checklist = _checklist(tmp_path, mask=mask, breakdowns=[poisoned])
     d8_rows = _rows_by_ref(checklist, "D-8 claim boundary")
@@ -1375,6 +1535,7 @@ def test_control_37_planted_local_forcing_attribution_caught(tmp_path: Path) -> 
         mask=mask,
         per_station=True,
         payload={"note": "NICO underperforms due to local forcing at the site"},
+        registry=_mem_registry(),
     )
     checklist = _checklist(tmp_path, mask=mask, breakdowns=[poisoned])
     tc12_rows = _rows_by_ref(checklist, "TC-12 interpretive half")
@@ -1390,6 +1551,7 @@ def test_must_not_fire_caveat_itself_is_not_a_planted_phrase(tmp_path: Path) -> 
         metrics_artifact=_metrics_artifact(mask),
         mask=mask,
         per_station=True,
+        registry=_mem_registry(),
     )
     checklist = _checklist(tmp_path, mask=mask, breakdowns=[clean])
     tc12_rows = _rows_by_ref(checklist, "TC-12 interpretive half")
@@ -1434,15 +1596,33 @@ def test_fr_p1_03_4_row_fails_closed_without_a_caption_surface(tmp_path: Path) -
 
 
 def test_checklist_emitted_as_registered_surface_write_once(tmp_path: Path) -> None:
+    """W-4 registers ITS OWN emission through the producing path — the same SD-R-03
+    register-then-write convention as W-3/W-5 (owner gate worklist 2026-09-10, item 1).
+
+    Must-not-fire: the builder with `emit_path` registers the checklist and writes it
+    once, and `require_registered_surface` passes on the artifact it just made.
+    Negative control, through the real entry point: a SECOND build of the same checklist
+    id against the same registry refuses (NFR-AUD-01's once-only registration — the
+    checklist can no longer leave the builder unregistered, so a silent re-emission has
+    no path)."""
     registry = _registry(tmp_path)
     conclusion = _conclusion(registry)
-    checklist = _checklist(tmp_path, registry=registry, conclusion=conclusion)
     out = tmp_path / "claims_checklist.json"
-    emit_registered_artifact(checklist, out, registry=registry)
+    checklist = _checklist(
+        tmp_path, registry=registry, conclusion=conclusion, emit_path=out
+    )
     assert registry.lookup("claims_checklist") is not None
+    require_registered_surface("claims_checklist", registry=registry, surface="test")
     assert json.loads(out.read_text("utf-8"))["artifact_class"] == "claims_checklist"
-    with pytest.raises(RegimeError):
-        emit_registered_artifact(checklist, tmp_path / "again.json", registry=registry)
+    with pytest.raises(RegimeError):  # the negative control: once-only per registry
+        _checklist(
+            tmp_path,
+            registry=registry,
+            conclusion=conclusion,
+            emit_path=tmp_path / "again.json",
+        )
+    with pytest.raises(RegimeError):  # the old bypass surface stays closed too
+        emit_registered_artifact(checklist, tmp_path / "again2.json", registry=registry)
 
 
 def test_registry_write_once_and_stamp_requirements(tmp_path: Path) -> None:

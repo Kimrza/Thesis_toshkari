@@ -92,3 +92,127 @@ None.
 ### Summary
 
 This is an exceptionally well-cross-checked unit: every adversarial check specified in the dispatch (D-27 import discipline, `experiment.yaml` transcription exactness, all six guards and their discriminating exceptions, the estimand's ordered pipeline and sign convention, mask identity/once-only/write-once semantics, honesty mechanics and fail-closed GIM disclosure, script 07's chokepoint ordering and honest-abort path, the Q2 = B additive-only sibling edit, the 61-test count and control mapping, and the `config.py` entry) verified correct against the on-disk code, the governing business rules, and git diffs of the modified files. No Critical or Major defects were found. The two Minor findings above are documentation-symmetry nits with no functional impact and do not block readiness.
+
+### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility` and the gate worklist, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze. Under
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` (§5, §11.5) and the owner gate worklist
+of 2026-09-10 (items 2–3), these ADDITIVE/repair edits touched this unit's surfaces — the
+full-year path, the locked path and every guard are untouched in strength:
+
+- `scripts/07_evaluate_and_report.py` (commit `cf3185d`, Q4/Q5 = A): `--fixture-manifest`
+  option (parser error alongside a frozen `--partition`), `_stage_entry` kwarg + ONE
+  `require_receipts_for_snapshot` call, ONE early-return in `_run` to the additive
+  `_run_fixture_scale` (apparatus partitions; NO locked path reachable; sibling fixture
+  stamps on the metrics artifacts). Commit `0e002cd` (board Recs 3–4 / ML-02–03): the
+  fixture path's mask registry is rooted PER APPARATUS PARTITION under
+  `artifacts/walking_skeleton/<fixture_id>/mask_registry/<partition>/` — never the
+  confirmatory root, so no apparatus registration can occupy a confirmatory `set_id` slot
+  or enter the G-05 frozen bundle — with the fixture stamp written inside each registry
+  dir, and a `fixture_measurements.json` block emitted for the orchestrator. Current size,
+  derived: 774 lines (`wc -l`).
+- `tests/test_iri_denial.py` (2026-09-10, worklist item 2, uncommitted): the containment
+  scan is now SCOPE-AWARE — a DEFERRED (function-scope) target import inside an ALLOWLISTED
+  module is R-112's sanctioned evaluation-time mechanism, recorded under the new payload
+  field `sanctioned_deferred_target_sites`, never a violation; an EAGER target import in an
+  allowlisted module still fails every transitive chain, and a deferred target import
+  outside the allowlist still fails outright — both proved by new controls. This repairs
+  the pre-existing critical red (8 false violations through `metrics.py`'s deferred gim
+  import) at root cause without weakening the boundary: 22 passed, 0 failed.
+- `tests/test_common_masks.py` (2026-09-10, worklist item 2, uncommitted): three sites now
+  derive the restricted-root name from `locked_test.RESTRICTED_ROOT` instead of spelling
+  the literal, so R-28's exact-membership literal scan (`test_locked_test_guard`) holds
+  with this module correctly absent from the exempt list: 60 passed / 1 skipped, and
+  `test_locked_test_guard` 44 passed, 0 failed.
+
+This unit's owner may confirm or reverse per the change record and the gate worklist.
+
+### Cleanup review (2026-09-10)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T07:38:23Z
+**Iteration:** 1 (first review pass over the cross-unit edit record above)
+
+**Scope.** Verifies the two test-lane edits recorded above under the cross-unit edit
+record: `tests/test_iri_denial.py`'s scope-aware containment scan and
+`tests/test_common_masks.py`'s restricted-root literal derivation — both ADDITIVE edits
+to a READY unit's test files, made by another unit's owner-authorised worklist pass, per
+`project.md`'s `code-generation:c32` rule (route through an explicit ruling, carry the
+stale summary to the gate). The cross-unit edit record above already names that ruling
+(`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` §5/§11.5 and the 2026-09-10 owner gate
+worklist items 2–3), satisfying that rule textually; this review verifies the edits
+themselves rather than the routing.
+
+**Verification performed (adversarial, not trusting the described fix):**
+
+1. **`test_iri_denial.py` — narrowing is scoped, not a general weakening.** Read
+   `tests/test_iri_denial.py:176-201` (`_eager_imports_of`): re-walks the AST with
+   `FunctionDef`/`AsyncFunctionDef`/`Lambda` bodies pruned before collecting
+   `Import`/`ImportFrom` nodes — a target import inside a function or lambda body is
+   correctly excluded from the "eager" set because Python does not execute it merely by
+   importing the enclosing module. Read `run_containment_scan`
+   (`:263-370`): the narrowing fires ONLY when `current_allowlisted and name not in
+   eager_names` — i.e., only for a deferred import inside an already-allowlisted module;
+   every other target hit still lands in `violations`. Confirmed the injection mechanism
+   this rule actually protects, `iri_column_violations` (`:393-424` and its four tests at
+   `:736-769`), carries **zero diff** — the field/provenance-based data-flow denial is
+   untouched by this narrowing, which only concerns the static import-boundary scan.
+2. **Both directions proved by real negative controls, not asserted.** Read
+   `test_deferred_target_import_outside_the_allowlist_still_fails` (`:639-652`): plants a
+   deferred gim import in a NON-allowlisted module (`src/features/sneak.py`) and asserts
+   `outcome == "failed"` with that module in `violations` — proves the allowlist is not a
+   general deferral amnesty. Read
+   `test_eager_target_import_in_allowlisted_module_fails_transitive_chains` (`:655-671`):
+   plants an EAGER import inside an allowlisted module and asserts a downstream importer's
+   chain still fails — proves the allowlist does not launder an eager edge. Read
+   `test_deferred_target_import_in_allowlisted_module_is_sanctioned` (`:673-690`): the
+   must-not-fire half, asserting `outcome == "passed"`, `violations == []`, and the site
+   recorded under `sanctioned_deferred_target_sites`. All three push through the real
+   `run_containment_scan` entry point.
+3. **The narrowing is disclosed, not silent.** Read `run_containment_scan`'s docstring
+   (`:263-278`): states the narrowing explicitly under a "NARROWING, disclosed" heading,
+   names the mechanism (R-112's evaluation-time-only pattern), and states both
+   controls exist. This satisfies the dispatch's explicit instruction to verify
+   disclosure.
+4. **`test_common_masks.py` — the guard module itself is unchanged.** `git diff --stat --
+   src/` shows no diff for `src/data/locked_test.py` (the module owning
+   `RESTRICTED_ROOT` and the locked-test chokepoint) anywhere in this working tree — only
+   `src/evaluation/diagnostics.py` and `src/evaluation/report_guards.py` (a different
+   unit's lane) changed under `src/`. Read the diff of `tests/test_common_masks.py`
+   directly: three sites replaced a spelled `"evidence" / "locked_test_restricted"` /
+   `"locked_test_restricted"` literal with `locked_test.RESTRICTED_ROOT` (or
+   `Path(RESTRICTED_ROOT).name`) — a derivation, not a behavior change, since
+   `RESTRICTED_ROOT`'s value is unchanged. Confirmed the accompanying assertion in
+   `test_script_07_imports_no_features_models_or_external_and_names_no_restricted_root`
+   still checks the module is absent from `RESTRICTED_LITERAL_EXEMPT_MODULES` — the
+   exempt-membership assertion was not weakened, only its literal source.
+5. **Reproduced independently** (scratchpad CPython 3.11.16 + stdlib pytest stand-in,
+   PyPI unreachable): `tests.test_iri_denial` → **22 passed, 0 failed, 0 skipped, 0
+   errors**; `tests.test_locked_test_guard` → **44 passed, 0 failed, 0 skipped, 0
+   errors**; `tests.test_common_masks` → **60 passed, 0 failed, 1 skipped** (the one skip
+   is the pre-existing `pyyaml`-gated real-config test, unrelated to this edit) — all
+   three match the cross-unit edit record's claimed counts exactly.
+6. **No test deleted, no assertion weakened, no xfail introduced.** `git diff` on both
+   test files shows only additive hunks (new helper function, new test functions, or a
+   literal replaced by a derived constant); no `def test_` was removed and no
+   `pytest.mark.xfail` or `pytest.skip` (unconditional) was introduced — the only new
+   skip path (`pytest.importorskip("yaml")`, in the sibling `foundation` unit's file, not
+   this unit's) is a named classification, verified separately in that unit's review.
+
+**Findings:** none survive verification at any severity. The narrowing is real but
+correctly scoped, disclosed, and proved in both directions by tests that exercise the
+actual scan entry point; the restricted-root literal replacement is a pure derivation
+with the guard module itself byte-for-byte unchanged.
+
+### Summary
+
+Both test-lane edits recorded in the cross-unit edit record above are verified directly
+against the modified source: the IRI/GIM containment-scan narrowing is scoped exactly to
+the sanctioned deferred-import-in-an-allowlisted-module case, disclosed in the function's
+own docstring, and proved both ways by new negative controls through the real scan entry
+point, while the injection-detection half (`iri_column_violations`) is untouched; the
+restricted-root literal replacement in `test_common_masks.py` is a derivation from
+`locked_test.RESTRICTED_ROOT`, not a behavior change, and the locked-test guard module
+itself carries zero diff. All claimed suite counts (22/0, 44/0, 60/0/1) reproduce exactly
+under independent execution. No Critical, Major, or Minor defect found.

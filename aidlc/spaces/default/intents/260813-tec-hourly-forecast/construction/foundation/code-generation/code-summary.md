@@ -100,3 +100,82 @@ Owed downstream (restated so not lost): in-Kaggle durability measurement (W-6 st
 Claim honesty holds throughout: the 367/2 test count, the ruff-clean claim (correctly scoped to created/modified files), the seed values, the absence of machine paths and filled `TBD` sentinels, the eight-item lock, the credential-name-only handling, and the boundary discipline (no cross-unit import, no restricted-root path construction) were all independently re-derived and matched the artifact's own description. The one substantive gap is a missing negative control that R-01 itself mandates by name and that the governance report tied to explicit closure evidence — a real hole in this project's "every hard rule gets a test that proves the violation is caught" testing posture, but narrow in scope (one missing regression test for an enumeration that is today complete and correctly declared) and not accompanied by any other Major or Critical defect. Under this stage's stated verdict rule (NOT-READY on any Critical or more than two Major findings), one Major with zero Critical does not cross the threshold.
 
 **Verdict: READY**
+
+### Cross-unit edit record (2026-09-10) — `tests/test_determinism.py` skip classification, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze (owner gate worklist
+2026-09-10, item 3). On the pyyaml-less clone this unit's `tests/test_determinism.py`
+surfaced 19 errors + 3 failures, all one root cause: `load_configs`' production read path
+is pyyaml BY DESIGN (TS-01: refuse by name, never a second parser), so every test that
+parses a config tree errored at the loader's refusal. Classification applied, not
+suppression: `pytest.importorskip("yaml")` at the top of `_write_config_tree` (every
+consumer immediately parses the tree) and of the three real-`configs/` tests
+(`test_repository_configs_exist_and_parse`, `test_no_config_value_parses_as_an_absolute_path`,
+`test_required_fields_map_completeness`). Result on this clone: **12 passed, 23 skipped by
+name, 0 failed, 0 errors**; in a governed (pyyaml-bearing) environment all 35 run in full.
+No assertion was weakened and no test deleted. Note: the module's earlier import-time error
+was the session pytest stand-in's missing `@pytest.fixture` support — a tooling gap fixed
+in the scratchpad runner, no repo change.
+
+### Cleanup review (2026-09-10)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T07:38:23Z
+**Iteration:** 1 (first review pass over the cross-unit edit record above)
+
+**Scope.** Verifies the `tests/test_determinism.py` skip-classification edit recorded
+above: is the `importorskip` an honest classification of a design-intended pyyaml-only
+read path (TS-01), or a masking of a real repository defect, and was any assertion
+weakened.
+
+**Verification performed (adversarial, not trusting the described fix):**
+
+1. **Derived the module's total test count independently**: `grep -c "^def test_"
+   tests/test_determinism.py` → **35**, matching 12 passed + 23 skipped exactly (no test
+   uncounted or double-counted).
+2. **Read the diff directly** (`git diff tests/test_determinism.py`): exactly four
+   `pytest.importorskip("yaml")` lines added — one inside `_write_config_tree` (the shared
+   tree-builder every config-parsing test calls) and one each at the top of
+   `test_repository_configs_exist_and_parse`,
+   `test_no_config_value_parses_as_an_absolute_path`, and
+   `test_required_fields_map_completeness`. No existing line was deleted, no `assert`
+   statement was touched, no `pytest.mark.xfail` or unconditional `pytest.skip`
+   introduced — this is purely additive.
+3. **Checked whether the skip is an honest classification of a design-intended boundary,
+   not a mask for a defect.** `load_configs`'s production read path is stated (both in
+   this edit's rationale and independently corroborated by `tests/test_clean_run.py`'s
+   own skip at the same boundary: `test_exported_check_full_path_requires_yaml` and the
+   module-level clean-run skip both name "pyyaml is not importable on this clone... the
+   production read path refuses by name") to refuse any non-pyyaml parse path by name
+   (TS-01) rather than silently falling back to a second parser — this is the two-tier
+   error-handling posture (`team.md` § Code Style, Q12=B) applied at a missing-dependency
+   boundary: an environment gap, not a masked logic defect. The skipped tests are
+   precisely the ones that call `_write_config_tree` or otherwise parse the real
+   `configs/` tree through `load_configs`; no test unrelated to config-parsing was
+   touched.
+4. **Reproduced independently** (scratchpad CPython 3.11.16 + stdlib pytest stand-in,
+   PyPI unreachable): `tests.test_determinism` → **12 passed, 0 failed, 23 skipped, 0
+   errors** — matches the cross-unit edit record's claimed count exactly, and each of the
+   23 skip notes names `"could not import 'yaml'"` at the `importorskip` call, not a
+   silent pass.
+5. **Confirmed via the sibling review above** (this unit's own primary review, dated
+   separately) that the 367/2 test count and R-01–R-20 coverage claims already verified
+   there are undisturbed by this addition — the edit touches only
+   `tests/test_determinism.py`, and does not alter `src/data/environment.py` or any other
+   production module (`git diff --stat` confirms zero `src/` changes attributable to this
+   unit's edit).
+
+**Findings:** none survive verification at any severity. The skip classification is
+honest, narrowly scoped to the pyyaml-dependent config-parsing paths, does not weaken any
+assertion, and matches the project's own stated design (TS-01, refuse-by-name rather than
+silently substitute a parser).
+
+### Summary
+
+The `test_determinism.py` skip-classification edit is verified as an honest, narrowly
+scoped `pytest.importorskip("yaml")` applied only at the pyyaml-dependent config-parsing
+boundary that `load_configs` is designed (TS-01) to refuse by name on an environment
+without pyyaml. No assertion was weakened, no test was deleted, and the claimed 12/23/0/0
+result reproduces exactly under independent execution. No Critical, Major, or Minor
+defect found.

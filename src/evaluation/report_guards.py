@@ -34,7 +34,10 @@ The ten guards, exactly SD-R-01's table:
   provenance values, or a scored-window statement disagreeing with the registered mask's
   (R-125 controls (32)/(33); Vision §8.9; D-28). Called by W-3 AND W-5.
 * ``require_derived_label`` — a derived quantity rendered without its `derived: true`
-  label (R-127 control (34); Vision §9.5 required result 2). Called by W-5.
+  label (R-127 control (34); Vision §9.5 required result 2). Called by W-5 (its mandated
+  home, `build_member_metrics_breakdown`), and additionally at W-3 and W-6, where the
+  same §5.5 reduction also renders (gate-reopened repair 2026-09-10: the W-5 call site
+  exists from this pass; the W-3/W-6 calls predate it).
 * ``require_driver_caveat`` — a per-station breakdown emitted without the standing TC-12
   driver-identity caveat (R-127 control (38)). Called by W-5.
 

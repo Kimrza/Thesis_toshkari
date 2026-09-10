@@ -90,3 +90,40 @@ None.
 ### Summary
 
 This is an unusually thorough, contract-disciplined implementation: every named business rule (R-90…R-102a), every domain-entity shape (Prediction, TuningRecord, Checkpoint, AblationEntry, PredictionHashReceipt, ConfirmatoryPrediction's four limbs), the TBD-freeze-gate discipline for the TensorFlow pin (FU-1 = C), the D-27/Step-7 gating (FU-2 = B), and the D-121/Vision §8.6 grid transcription (Q5 = A) were independently re-derived from the functional-design and NFR-design contracts and matched exactly against the generated code and its 66 negative-control-bearing tests. The one defect found is a Minor citation error in `code-summary.md`'s own Sources line — a documentation-only recurrence of an error this same unit's `security-design.md` had already identified and corrected — and does not affect any executable behavior, test, or governed artifact. No Critical or Major implementation defect was found.
+
+### Correction (2026-09-10): `scripts/06_train_and_predict.py`'s line count, derived not carried
+
+The Files table's `741` was exact at this summary's writing time and is SUPERSEDED by
+cross-unit growth. Derived by `git show <commit>:scripts/06_train_and_predict.py | wc -l`
+and printed before assertion: **741** (summary time) → **806** at `64c0551` → **944** at
+`cf3185d` → **999** at `0e002cd` and in the working tree (`wc -l` = 999). The review-noted
+"794-vs-806" figures were intermediate states of the same growth. The deltas are the
+fixtures unit's owner-authorised additive edits recorded below; no full-year line of this
+unit's own logic changed. Derived alongside: `tests/test_models_smoke.py` now carries
+**56** test functions (`grep -c "^def test_"`; the table's 54 is superseded), of which 55
+pass and 1 skips by name on this clone.
+
+### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility`, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze. Under
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` (§5, §11.5; the owner's "apply the
+recommended option" ruling), the fixtures unit made these ADDITIVE edits to
+`scripts/06_train_and_predict.py` — the full-year path and the W-12/R-102a locked path are
+untouched:
+
+- Commit `cf3185d` (Q4/Q5 = A): `--fixture-manifest` option (a `--partition` alongside it
+  is a parser error), `_stage_entry` kwarg + ONE `require_receipts_for_snapshot` call after
+  `assert_lock_complete`, and ONE early-return in `_run` reaching the additive
+  `_run_fixture_scale`: the same per-partition fit/predict sequence over the scope's
+  APPARATUS partitions, the fixture stamp embedded in every prediction payload, and NO
+  locked path reachable (an apparatus partition is never `locked`).
+- Commit `0e002cd` (board Rec 4 / ML-03): `_fixture_bundle_root` validates against 05's
+  actual fixture output (`apparatus_split_manifest.json`, by name); fixture predictions
+  land directly under `--predictions-out` (deterministic hand-off to 07; a re-run refuses
+  at the write-once prediction); a machine-readable `fixture_measurements.json` (scored
+  prediction rows) is emitted for the orchestrator's candidate folding. One rename inside
+  the fixture path (`fixture_target`) keeps this unit's own
+  `test_a_dec_iteration_handed_the_pre_loop_target_is_refused` source assertion exact.
+
+Tests live in `tests/test_clean_run.py`. This unit's owner may confirm or reverse per the
+change record.

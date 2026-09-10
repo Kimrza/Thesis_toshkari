@@ -91,3 +91,27 @@ None survived adversarial verification.
 Every adversarial angle in the dispatch — containment evasions, the provenance flip, the trailing-mean/carry-forward/grade rules, both refusal gates' ordering checks, the migrated audit's two-tier posture, and the governance/authority-honesty claims — was traced against the actual source and, where a test existed, re-run rather than taken on faith. The full suite count (664 passed / 2 skipped) and ruff-clean claim both reproduced exactly under independent execution. No discrepancy between what the plan/summary claims and what is on disk was found; the one initial suspicion (an "R-28 one-door test green" claim for a script with no test of its own naming it) resolved in the artifact's favor once the repo-wide `test_locked_test_guard.py` scan was traced to confirm it does cover `scripts/04_build_external_products.py`. This is an unusually well self-verified unit.
 
 **Verdict: READY**
+
+### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility`, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze. Under
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` (§5, §6.1, §6.2, §11.5; the owner's
+"apply the recommended option" ruling), the fixtures unit made these ADDITIVE edits to
+`scripts/04_build_external_products.py` — nothing on the full-year path changed:
+
+- Commit `cf3185d`: `--fixture-manifest` option (the visible Q5 = A exemption carrier),
+  `_stage_entry(..., fixture_manifest=None)` kwarg, and ONE `require_receipts_for_snapshot`
+  call after `assert_lock_complete` (TE §9.2's two-receipt gate; exempt on a fixture run).
+- Commit `0e002cd` (board Rec 2 / ML-01): `_declared_data_window()` derives the declared
+  window from the migrated audit's own `_AUDIT_YEAR` (calendar year), so a fixture-flagged
+  invocation of the FULL-YEAR audit refuses against every fixture scope — the board's live
+  ML-01 case.
+- STANDING ROUTED ITEM (CR §6.2, unchanged): in a pyyaml-bearing environment
+  `tests/test_external_drivers.py`'s nine non-fixture subprocess invocations refuse at the
+  receipts gate before the paths they assert; the choice (pass `--fixture-manifest` in the
+  smoke invocations, assert the new refusal, or ask the gate to narrow Q5) is this unit's
+  owner's. On this clone those tests fail earlier, at the pyyaml preflight (11 failures,
+  pre-existing and reproduced on the unmodified tree).
+
+Tests live in `tests/test_clean_run.py` (`test_rec2_04_full_year_audit_exemption_refuses`).
+This unit's owner may confirm or reverse per the change record.

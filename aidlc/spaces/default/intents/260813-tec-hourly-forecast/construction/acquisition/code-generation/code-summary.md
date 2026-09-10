@@ -81,3 +81,26 @@ This pass verified the `acquisition` unit's own artifact set and the two named s
 One Major finding: the redaction chokepoint's own docstring claims coverage of "every value this unit writes to a manifest, **log** or notebook output," but the experiment-registry log row this unit's script constructs bypasses `guard_egress` entirely — a verified, currently-inert gap that becomes live the moment the deferred live-transport work lands. Every other adversarial angle (December/restricted discipline, write-ordering, completeness-before-hash, script contract, config edit, hook, claim honesty, suite/lint counts) was independently re-derived and held. One Major and zero Critical findings.
 
 **Verdict: READY**
+
+### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility`, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze, so this summary does not
+misdescribe the on-disk script. Under `CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY`
+(§5, §6.1, §11.5; the owner's "apply the recommended option" ruling), the fixtures unit
+made these ADDITIVE edits to this unit's surfaces — nothing on the full-year path changed:
+
+- `src/data/acquisition.py` (commit `64c0551`): one public predicate
+  `assert_records_within_window(records, *, start, end, timestamp_key)` on the same private
+  date reader as `partition_by_locked_month`, so the record-date window rule has ONE home.
+- `scripts/00_acquire_prepared_vtec.py` (commit `cf3185d`): `--fixture-manifest` option (the
+  visible Q5 = A exemption carrier), `_stage_entry(..., fixture_manifest=None)` kwarg, and
+  ONE `require_receipts_for_snapshot` call after `assert_lock_complete` (TE §9.2's
+  two-receipt gate; exempt on a fixture run).
+- `scripts/00_acquire_prepared_vtec.py` (commit `0e002cd`, board Rec 2 / ML-01):
+  `_declared_data_window` reads `configs/data.yaml`'s `acquisition.window_start`/
+  `window_end` (STRUCTURAL field names on this unit's config surface — the VALUES stay this
+  unit's owner's to transcribe) and binds the fixture exemption to the scope's cited
+  window; undeclared → the fixture exemption refuses naming the fields (TE §18.3).
+
+Tests live in `tests/test_clean_run.py` (`test_rec2_00_...` and the Q5 controls). This
+unit's owner may confirm or reverse per the change record.

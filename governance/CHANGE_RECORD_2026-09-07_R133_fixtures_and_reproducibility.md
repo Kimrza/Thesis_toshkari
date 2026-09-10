@@ -385,3 +385,35 @@ excludes W-5 breakdown production and the SD-R-03 registration net (blocked on
 critical-suite reds (`test_iri_denial` containment scan; `test_locked_test_guard` restricted-
 root literal in `test_common_masks.py`) are registered verbatim as named preconditions of the
 next governed run.
+
+### §11.6 — Addition, 2026-09-10 (owner gate worklist): the Rec-6/7 preconditions are repaired; deltas of the worklist pass
+
+The two pre-existing critical reds §11.5's closing paragraph registered as named
+preconditions are REPAIRED at root cause on the owner's 2026-09-10 gate worklist
+(uncommitted at this writing; none of the repairs touches a fixtures-unit file):
+
+- `tests/test_iri_denial.py` — the containment scan's 8 violations were all one root
+  cause: the transitive walk flagged `src/evaluation/metrics.py`'s DEFERRED
+  (function-scope) gim import — R-112's sanctioned evaluation-time mechanism — for every
+  chain that reached the allowlisted module. The scan is now scope-aware (eager vs
+  deferred), records such sites under `sanctioned_deferred_target_sites`, and keeps full
+  strength both ways (new controls: a deferred target import OUTSIDE the allowlist still
+  fails; an EAGER target import inside an allowlisted module still fails every chain).
+  Result: **22 passed, 0 failed**.
+- `tests/test_locked_test_guard.py` — the flagged holder (`tests/test_common_masks.py`)
+  now derives the restricted-root name from `locked_test.RESTRICTED_ROOT` at three sites
+  instead of spelling the literal; the guard itself is UNCHANGED and both membership
+  directions hold. Result: **44 passed, 0 failed** (test_common_masks: 60 passed / 1 skip).
+- The four import-error modules (§11 Step 9's list) are resolved: two were purely a
+  session-tooling gap (`@pytest.fixture` support added to the scratchpad stand-in —
+  `test_acquisition` **47 passed**, `test_experiment_registry` **49 passed**,
+  `test_december_audit` **62 passed**); `test_determinism` gained named
+  `pytest.importorskip("yaml")` classification at its config-parsing surfaces
+  (**12 passed / 23 skipped by name / 0 failed**, all 35 run in a pyyaml environment).
+- Staleness sweep of this record after those repairs: §11.4's counts stand (52 over-99
+  lines unchanged — PyPI re-verified unreachable 2026-09-10, `ruff`/`pyyaml`/`pytest`
+  uninstallable, fresh timeouts recorded; graphify remains a skill, not a CLI: no
+  executable on PATH, `npx` cannot resolve one); `tests/test_clean_run.py` is unchanged by
+  this pass (**57 passed / 3 skipped by name; 39/11 reconciliation empty both ways**).
+  The seven owning units' code-summaries and `models-and-baselines`' 741→806→944→999
+  line-count chain now carry dated cross-unit records (worklist item 4).

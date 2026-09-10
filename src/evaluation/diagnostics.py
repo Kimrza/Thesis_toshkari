@@ -17,10 +17,16 @@ Everything between a computed number and a defensible statement, as producing pa
   structural, headline/supplementary labels, the F1–F4 fold table, per-seed stability as
   separate fields, the top-1% sensitivity labelled never merged, machine-readable
   completeness shortfalls (two-tier posture), the inventory refusal, the standing TC-12
-  driver-identity caveat emitted from the per-station producing path (Rec 17), and the
-  DEC regime breakdown with the descriptive-only storm guard reading the REGISTERED
-  pre-G-05 audit count, the audit-count consistency raise (control (31)) and the
-  outside-scored-set exclusion (control (40)).
+  driver-identity caveat emitted from the per-station producing path (Rec 17),
+  ``build_member_metrics_breakdown`` — W-5 point 9's §5.5 metric set per member (RMSE,
+  the six supporting metrics, and the `derived: true` percentage reduction, with
+  `require_estimand_fields` and `require_derived_label` at this W-5 entry point; Rec 20,
+  gate-reopened repair 2026-09-10) — and the DEC regime breakdown with the
+  descriptive-only storm guard reading the REGISTERED pre-G-05 audit count, the
+  audit-count consistency raise (control (31)) and the outside-scored-set exclusion
+  (control (40)). Every W-3/W-5 producing path registers its artifact in the
+  `ConclusionSurfaceRegistry` and asserts the registration with
+  `require_registered_surface` (SD-R-03), refusing fail-closed without a registry.
 * ``practical_relevance_statement`` — W-6: the ONLY source of any practical-relevance
   statement; asserts the threshold timestamp precedes the G-06 receipt (PC-09), evaluates
   BOTH Vision §5.3 conjuncts (the measured improvement is a required input, control (35)),
@@ -51,8 +57,10 @@ Imports ONLY `src/data`, `src/evaluation` siblings and the standard library — 
 
 Re-run behaviour
 ----------------
-Pure computation over supplied artifacts; emission goes through
-`report_guards.emit_registered_artifact` (write-once atomic, registration enforced).
+Pure computation over supplied artifacts, except SD-R-03's producing-path registration:
+every W-3/W-5 build writes one write-once registry entry (a re-build under the same
+registry and artifact ID refuses, NFR-AUD-01), and emission with an `emit_path` goes
+through `report_guards.emit_registered_artifact` (write-once atomic, register-then-write).
 Deterministic given identical inputs. Every integrity refusal raises an `IntegrityError`
 subclass naming the resource and the violated expectation; completeness shortfalls are
 machine-readable fields on the artifact, never console text (the two-tier posture).
@@ -98,6 +106,7 @@ from src.evaluation.regimes import (
 from src.evaluation.report_guards import (
     DRIVER_IDENTITY_CAVEAT,
     ConclusionSurfaceRegistry,
+    emit_registered_artifact,
     require_beats_model,
     require_complete_members,
     require_d17_bound,
@@ -125,6 +134,7 @@ __all__ = [
     "derived_rmse_reduction",
     "build_primary_table",
     "build_breakdown_artifact",
+    "build_member_metrics_breakdown",
     "assert_headline_role",
     "assert_fold_table",
     "assert_per_seed_stability",
@@ -337,6 +347,49 @@ def derived_rmse_reduction(model_rmse: float, reference_rmse: float) -> dict[str
     }
 
 
+def _register_reported_artifact(
+    artifact: Mapping[str, Any],
+    *,
+    registry: ConclusionSurfaceRegistry | None,
+    emit_path: Path | None,
+    surface: str,
+) -> None:
+    """SD-R-03's producing-path registration, one home for W-3 and W-5 emission.
+
+    A table or breakdown is conclusion-bearing, so the producing path REGISTERS it (the
+    registry grows with the surface automatically) and then `require_registered_surface`
+    — the guard SD-R-01 assigns to W-3 and W-5 — asserts the registration it just made,
+    so an artifact cannot leave the builder registered-but-unguarded or
+    guarded-but-unregistered. With `emit_path`, the write goes through
+    `emit_registered_artifact`'s one register-then-write transaction (write-once atomic);
+    without it, the artifact is registered in place and the caller owns any later write.
+
+    Raises
+    ------
+    RegimeError
+        no registry supplied (fail-closed — 'unrunnable therefore skipped' is not a
+        path, control (36)); a duplicate registration (NFR-AUD-01); a missing stamp or
+        kind on the artifact (TEC-05); an existing file at `emit_path`.
+    """
+    artifact_id = str(artifact.get("artifact_id", "<no id>"))
+    if registry is None:
+        # the guard itself states the designed fail-closed refusal
+        require_registered_surface(artifact_id, registry=None, surface=surface)
+    if emit_path is not None:
+        emit_registered_artifact(artifact, Path(emit_path), registry=registry)
+    else:
+        registry.register(
+            {
+                "artifact_id": artifact.get("artifact_id"),
+                "kind": artifact.get("kind") or artifact.get("artifact_class"),
+                "phase_id": artifact.get("phase_id"),
+                "source_id": artifact.get("source_id"),
+                "target_definition_id": artifact.get("target_definition_id"),
+            }
+        )
+    require_registered_surface(artifact_id, registry=registry, surface=surface)
+
+
 # =======================================================================================
 # W-3: the primary results table
 # =======================================================================================
@@ -376,12 +429,20 @@ def build_primary_table(
     declared_member_ids: Sequence[str],
     caption: str,
     table_artifact_id: str,
+    registry: ConclusionSurfaceRegistry | None = None,
+    emit_path: Path | None = None,
 ) -> dict[str, Any]:
     """W-3: the one primary-table artifact — refuses, co-reports, prints, checks units.
 
     The three difficulty controls and the IRI comparison are rows of THIS one artifact by
     construction (PC-03/PC-04: appendix relegation unrepresentable). Everything printed is
     a copy of a checked field on the producing objects; nothing is restated.
+
+    The table is conclusion-bearing, so this producing path registers it in the supplied
+    `ConclusionSurfaceRegistry` and asserts the registration with
+    `require_registered_surface` (SD-R-03; SD-R-01's Called-by W-3), after every other
+    guard passes; with `emit_path`, emission goes through `emit_registered_artifact`'s
+    register-then-write transaction. A call without a registry refuses fail-closed.
 
     Raises
     ------
@@ -390,7 +451,8 @@ def build_primary_table(
     RegimeError
         units not TECU; a row without its estimand fields; a missing `beats_model`;
         provenance absent or the scored window disagreeing with the mask; an IRI/GIM row
-        without its lineage caveat; a budget-contents defect.
+        without its lineage caveat; a budget-contents defect; no registry supplied, a
+        duplicate registration, or a missing stamp at registration (SD-R-03).
     """
     surface = f"primary table {table_artifact_id}"
     rows = list(metrics_artifact.get("comparisons", ()))
@@ -457,6 +519,9 @@ def build_primary_table(
             "the Phase-2 not-independent-blind-test statement is absent or altered on the "
             "metrics artifact; the disclosure travels as a field (VAL-05)",
         )
+    _register_reported_artifact(
+        table, registry=registry, emit_path=emit_path, surface=surface
+    )
     return table
 
 
@@ -605,6 +670,8 @@ def build_breakdown_artifact(
     per_station: bool = False,
     payload: Mapping[str, Any] | None = None,
     completeness_shortfalls: Sequence[Mapping[str, Any]] = (),
+    registry: ConclusionSurfaceRegistry | None = None,
+    emit_path: Path | None = None,
 ) -> dict[str, Any]:
     """The generic W-5 producing function: stamped, labelled, provenanced, caveated.
 
@@ -622,12 +689,20 @@ def build_breakdown_artifact(
     item found anywhere in the payload tree (``_irigim_items``), so a caveat-less IRI/GIM
     row refuses at construction time rather than at the after-the-fact W-4 scan.
 
+    A breakdown is conclusion-bearing, so this producing path registers it and asserts
+    the registration with ``require_registered_surface`` (SD-R-03; SD-R-01's Called-by
+    W-5) after every other guard passes; with `emit_path`, emission goes through
+    ``emit_registered_artifact``'s register-then-write transaction. A call without a
+    registry refuses fail-closed (gate-reopened repair, 2026-09-10, of the iteration-2
+    Major: neither registration mechanism previously ran at W-3/W-5).
+
     Raises
     ------
     RegimeError
         units metadata absent or non-TECU on the metrics artifact; an IRI/GIM comparison
-        item in the payload without its lineage caveat; and via the stamp/role/provenance/
-        driver-caveat validators below.
+        item in the payload without its lineage caveat; no registry supplied, a duplicate
+        registration, or a missing stamp at registration (SD-R-03); and via the
+        stamp/role/provenance/driver-caveat validators below.
     """
     surface = f"breakdown {breakdown_id}"
     artifact: dict[str, Any] = {
@@ -663,7 +738,90 @@ def build_breakdown_artifact(
     require_provenance_block(artifact, mask=mask, surface=surface)
     if per_station:
         require_driver_caveat(artifact, surface=surface)
+    _register_reported_artifact(
+        artifact, registry=registry, emit_path=emit_path, surface=surface
+    )
     return artifact
+
+
+def build_member_metrics_breakdown(
+    *,
+    metrics_artifact: Mapping[str, Any],
+    mask: Any,
+    breakdown_id: str = "member_metrics",
+    role_label: str = "supplementary",
+    aggregation: str = "equal_station_macro",
+    registry: ConclusionSurfaceRegistry | None = None,
+    emit_path: Path | None = None,
+) -> dict[str, Any]:
+    """W-5 point 9 (Rec 20): the §5.5 metric set per member, ON the breakdown path.
+
+    Emits one breakdown artifact whose payload carries, per comparison-set member,
+    `rmse` and §5.5's six supporting metrics (``compute_member_metrics`` over the masked
+    rows only) and, per benchmark, the derived relative summary
+    `1 - RMSE_model/RMSE_reference` with its explicit `derived: true` label
+    (``derived_rmse_reduction``; Vision §9.5 required result 2). The breakdown_id enters
+    the configured breakdown list, so W-5 point 8's inventory refusal reaches it and a
+    missing metric row refuses the results artifact. The paired loss differential remains
+    the confirmatory estimand (Vision §2.3) — this is the REPORTED error surface and
+    decides nothing.
+
+    Two SD-R-01 guards run at THIS W-5 entry point because their Called-by scope names
+    W-5, derived per control (c59) from each control's own scope statement:
+    ``require_estimand_fields`` on every comparison row — the §5.5 rows are the W-5
+    surface that renders estimand values (SEC-R-02 half 1) — and ``require_derived_label``
+    on every reduction before it is packaged (R-127 control (34)). Stamps, units, lineage
+    caveats, provenance and registration then run in ``build_breakdown_artifact``, which
+    this function delegates to (one guard home per boundary, c58).
+
+    Raises
+    ------
+    RegimeError
+        no comparisons or no model_id on the metrics artifact; a comparison row without
+        its estimand fields; a reduction without its `derived: true` label; a masked row
+        missing a member's y_hat, a degenerate series, or a zero reference RMSE (via the
+        §5.5 computations); and every ``build_breakdown_artifact`` refusal, including the
+        fail-closed registration refusal (SD-R-03).
+    """
+    surface = f"breakdown {breakdown_id}"
+    rows = list(metrics_artifact.get("comparisons", ()))
+    model_id = str(metrics_artifact.get("model_id", ""))
+    if not model_id or not rows:
+        raise RegimeError(
+            surface,
+            "the metrics artifact carries no model_id or no comparisons; the §5.5 metric "
+            "breakdown is computed per member from the emitted metrics artifact and has "
+            "nothing to compute over (R-127 point 9; Rec 20)",
+        )
+    member_metrics = {model_id: compute_member_metrics(mask, model_id)}
+    reductions: dict[str, dict[str, Any]] = {}
+    out_rows: list[dict[str, Any]] = []
+    for row in rows:
+        require_estimand_fields(row, surface=surface)
+        benchmark_id = str(row["benchmark_id"])
+        member_metrics[benchmark_id] = compute_member_metrics(mask, benchmark_id)
+        reduction = derived_rmse_reduction(
+            member_metrics[model_id]["rmse"], member_metrics[benchmark_id]["rmse"]
+        )
+        require_derived_label(reduction, surface=surface)
+        reductions[benchmark_id] = reduction
+        out_rows.append(dict(row))  # printed from the artifact, never restated
+    payload: dict[str, Any] = {
+        "model_id": model_id,
+        "member_metrics": member_metrics,
+        "derived_percentage_rmse_reductions": reductions,
+        "rows": out_rows,
+    }
+    return build_breakdown_artifact(
+        breakdown_id=breakdown_id,
+        metrics_artifact=metrics_artifact,
+        mask=mask,
+        role_label=role_label,
+        aggregation=aggregation,
+        payload=payload,
+        registry=registry,
+        emit_path=emit_path,
+    )
 
 
 def build_dec_regime_breakdown(
@@ -677,6 +835,8 @@ def build_dec_regime_breakdown(
     source: str,
     demotion_record: Mapping[str, Any] | None = None,
     g05_freeze_utc: Any | None = None,
+    registry: ConclusionSurfaceRegistry | None = None,
+    emit_path: Path | None = None,
 ) -> dict[str, Any]:
     """W-2's DEC regime breakdown: post-receipt by construction, guarded by the
     REGISTERED count, divergence-checked, outside-event-excluded.
@@ -742,6 +902,8 @@ def build_dec_regime_breakdown(
         metrics_artifact=metrics_artifact,
         mask=mask,
         payload=payload,
+        registry=registry,
+        emit_path=emit_path,
     )
 
 
@@ -1045,6 +1207,7 @@ def build_claims_checklist(
     gim_overlap_has_run: bool = False,
     post_access_report: Mapping[str, Any] | None = None,
     checklist_artifact_id: str = "claims_checklist",
+    emit_path: Path | None = None,
 ) -> dict[str, Any]:
     """W-4: the machine-readable claims-and-limitations checklist artifact.
 
@@ -1053,14 +1216,22 @@ def build_claims_checklist(
     disclosure, each recording where the text was found — a registered artifact ID plus a
     surface plus a location — or FAILING. The residue (whether found text MEANS what the
     rule requires) stays human and is recorded per row. The checklist inspects EXACTLY
-    the registered surface set, states the hand-authored-prose residual, and never claims
-    full enforcement.
+    the registered surface set (captured BEFORE its own registration, so it never
+    inspects itself), states the hand-authored-prose residual, and never claims full
+    enforcement.
+
+    The checklist is itself conclusion-bearing, so this producing path REGISTERS the
+    artifact it emits through `_register_reported_artifact` — the same SD-R-03
+    register-then-write convention W-3 and W-5 use (added 2026-09-10 per the fresh READY
+    review's finding at the owner gate worklist, item 1: W-4 verified its INPUT surface
+    was registered but never registered its own emission).
 
     Raises
     ------
     RegimeError
         an absent, unmanifested or unregistered conclusion surface (fail-closed,
-        control (36)).
+        control (36)); a duplicate checklist registration (NFR-AUD-01); an existing file
+        at `emit_path`.
     """
     surfaces = _conclusion_surfaces(registry, conclusion_surface)
     conclusion_id = str(conclusion_surface.get("conclusion_artifact_id"))  # type: ignore
@@ -1336,6 +1507,12 @@ def build_claims_checklist(
         "source_id": table.get("source_id"),
         "target_definition_id": table.get("target_definition_id"),
     }
+    _register_reported_artifact(
+        checklist,
+        registry=registry,
+        emit_path=emit_path,
+        surface=f"claims checklist {checklist_artifact_id} (W-4)",
+    )
     return checklist
 
 

@@ -173,6 +173,32 @@ def _imports_of(tree: ast.Module, *, package_parts: tuple[str, ...]) -> tuple[se
     return modules, members
 
 
+def _eager_imports_of(
+    tree: ast.Module, *, package_parts: tuple[str, ...]
+) -> tuple[set[str], set[str]]:
+    """The subset of `_imports_of` that executes AT MODULE IMPORT TIME.
+
+    An import nested inside a `def`/`async def`/`lambda` body is DEFERRED: it executes
+    only when the enclosing function is called (R-05's deferral pattern; R-112's
+    evaluation-time-only mechanism). Module- and class-scope imports — including those
+    inside module-level `if`/`try` blocks — are EAGER. Derived by re-walking the tree
+    with function bodies pruned, so the eager set is exactly `_imports_of` minus the
+    deferred sites.
+    """
+    pruned = ast.Module(body=[], type_ignores=[])
+
+    def _prune(node: ast.AST) -> None:
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+                continue  # a deferred scope: nothing under it executes at import time
+            if isinstance(child, ast.Import | ast.ImportFrom):
+                pruned.body.append(child)
+            _prune(child)
+
+    _prune(tree)
+    return _imports_of(pruned, package_parts=package_parts)
+
+
 def _dynamic_import_sites(units: Sequence[tuple[str, ast.Module]]) -> list[str]:
     """Every `importlib.import_module` / `__import__` call site -- REVIEW ITEMS.
 
@@ -235,8 +261,19 @@ def run_containment_scan(
     """The ordered-switch transitive containment scan. Returns the ONE payload schema
     every outcome carries (SD-E-01): outcome, walked candidate set (count and module
     paths), risk-surface count, unresolved edges, violations (full reachability
-    CHAINS, not endpoints), dynamic-import review items, target presence, and -- on a
-    skip -- the empty limb's identifier.
+    CHAINS, not endpoints), sanctioned deferred target sites, dynamic-import review
+    items, target presence, and -- on a skip -- the empty limb's identifier.
+
+    NARROWING, disclosed (owner gate worklist 2026-09-10, item 2; R-112 made
+    machine-readable): a DEFERRED (function-scope) target import inside an ALLOWLISTED
+    module is the sanctioned evaluation-time mechanism -- `src/evaluation/metrics.py`
+    reaches IRI/GIM "at evaluation time only" precisely by deferring the import, so a
+    transitive chain that merely imports an allowlisted module does NOT execute the
+    target import and is recorded under `sanctioned_deferred_target_sites`, never as a
+    violation. NOTHING ELSE is narrowed and both directions stay proved by controls:
+    an EAGER target import in an allowlisted module still fails every transitive chain
+    that reaches it, and a deferred target import in a NON-allowlisted module still
+    fails outright.
     """
     domain = _python_domain(root)
     target_files = {root / Path(target.replace(".", "/") + ".py") for target in targets}
@@ -253,6 +290,7 @@ def run_containment_scan(
     ]
 
     violations: list[dict[str, Any]] = []
+    sanctioned_deferred: list[dict[str, Any]] = []
     unresolved_edges: list[str] = []
     unparseable: list[str] = []
     dynamic_sites: list[str] = []
@@ -275,13 +313,21 @@ def run_containment_scan(
             if current == start:
                 dynamic_sites.extend(_dynamic_import_sites(units))
             package = _package_parts(current, root)
+            current_allowlisted = _is_allowlisted(current, root)
             for unit_name, tree in units:
                 modules, members = _imports_of(tree, package_parts=package)
+                eager_modules, eager_members = _eager_imports_of(tree, package_parts=package)
+                eager_names = eager_modules | eager_members
                 for name in sorted(modules | members):
                     if _matches_target(name, targets):
-                        violations.append(
-                            {"module": chain[0], "chain": [*chain, name], "via": unit_name}
-                        )
+                        record = {"module": chain[0], "chain": [*chain, name], "via": unit_name}
+                        if current_allowlisted and name not in eager_names:
+                            # R-112's sanctioned evaluation-time mechanism: a DEFERRED
+                            # target import inside an ALLOWLISTED module does not execute
+                            # on a transitive import -- recorded, never a violation.
+                            sanctioned_deferred.append(record)
+                        else:
+                            violations.append(record)
                 for name in sorted(modules):
                     if _matches_target(name, targets):
                         continue  # already recorded above
@@ -316,6 +362,7 @@ def run_containment_scan(
         "unresolved_edges": sorted(set(unresolved_edges)),
         "unparseable": unparseable,
         "violations": violations,
+        "sanctioned_deferred_target_sites": sanctioned_deferred,
         "dynamic_import_review_items": sorted(set(dynamic_sites)),
         "empty_limb": None,
     }
@@ -394,6 +441,7 @@ def test_containment_scan_over_real_tree_is_never_vacuous() -> None:
         "risk_surface_count",
         "unresolved_edges",
         "violations",
+        "sanctioned_deferred_target_sites",
         "dynamic_import_review_items",
         "empty_limb",
     ):
@@ -586,6 +634,60 @@ def test_init_py_is_walked_even_though_uncounted(tmp_path: Path) -> None:
     _write(tmp_path, "src/features/__init__.py", "import src.external.iri\n")
     payload = run_containment_scan(tmp_path)
     assert payload["outcome"] == "failed"
+
+
+def test_deferred_target_import_outside_the_allowlist_still_fails(tmp_path: Path) -> None:
+    """Negative control (the narrowing's first proof, owner worklist 2026-09-10): a
+    DEFERRED gim import in a NON-allowlisted module fails outright — the sanctioning is
+    scoped to allowlisted modules only, never to the deferral alone."""
+    _tree_with_targets(tmp_path)
+    _write(tmp_path, "src/features/__init__.py", "")
+    _write(
+        tmp_path,
+        "src/features/sneak.py",
+        "def late():\n    from src.external import gim\n    return gim\n",
+    )
+    payload = run_containment_scan(tmp_path)
+    assert payload["outcome"] == "failed"
+    assert any(v["module"] == "src/features/sneak.py" for v in payload["violations"])
+
+
+def test_eager_target_import_in_allowlisted_module_fails_transitive_chains(
+    tmp_path: Path,
+) -> None:
+    """Negative control (the narrowing's second proof): an EAGER (module-scope) gim
+    import inside an allowlisted module executes on ANY transitive import of it, so a
+    non-allowlisted importer's chain still fails — the allowlist never launders an
+    eager edge."""
+    _tree_with_targets(tmp_path)
+    _write(tmp_path, "src/evaluation/__init__.py", "")
+    _write(tmp_path, "src/evaluation/metrics.py", "from src.external import gim\n")
+    _write(tmp_path, "scripts/report.py", "import src.evaluation.metrics\n")
+    payload = run_containment_scan(tmp_path)
+    assert payload["outcome"] == "failed"
+    matching = [v for v in payload["violations"] if v["module"] == "scripts/report.py"]
+    assert matching, payload["violations"]
+    assert "src/evaluation/metrics.py" in matching[0]["chain"]
+
+
+def test_deferred_target_import_in_allowlisted_module_is_sanctioned(tmp_path: Path) -> None:
+    """Must-not-fire (R-112 made machine-readable): a DEFERRED gim import inside an
+    allowlisted module, reached transitively from a non-allowlisted importer, PASSES —
+    with the site recorded under `sanctioned_deferred_target_sites`, visible rather
+    than silent."""
+    _tree_with_targets(tmp_path)
+    _write(tmp_path, "src/evaluation/__init__.py", "")
+    _write(
+        tmp_path,
+        "src/evaluation/metrics.py",
+        "def compare():\n    from src.external import gim\n    return gim\n",
+    )
+    _write(tmp_path, "scripts/report.py", "import src.evaluation.metrics\n")
+    payload = run_containment_scan(tmp_path)
+    assert payload["outcome"] == "passed", payload
+    assert payload["violations"] == []
+    sites = payload["sanctioned_deferred_target_sites"]
+    assert sites and all("metrics" in s["via"] for s in sites)
 
 
 def test_spaceweather_import_from_features_passes(tmp_path: Path) -> None:

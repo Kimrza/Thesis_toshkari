@@ -75,3 +75,23 @@
 This pass read only the files named in the dispatch (this unit's functional-design, nfr-design, the named contracts, and the two sibling security-design carve-outs for `acquisition` and `governance-guards`); no other sibling unit's `construction/` directory was accessed. Business-rules identifiers (W-1…W-9, R-44…R-53, SD-I-00…SD-I-08) were cross-checked against the code and the security-design excerpt quoted above (SD-I-04's corrected two-limb wording), not against every clause of `business-logic-model.md`/`business-rules.md` line by line.
 
 **Verdict: READY**
+
+### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility`, owner-authorised
+
+Appended after the gate rejection lifted the receipt freeze. Under
+`CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` (§5, §6.1, §11.5; the owner's "apply the
+recommended option" ruling), the fixtures unit made these ADDITIVE edits to
+`scripts/01_inventory_and_registry.py` — nothing on the full-year path changed:
+
+- Commit `cf3185d`: `--fixture-manifest` option (the visible Q5 = A exemption carrier),
+  `_stage_entry(..., fixture_manifest=None)` kwarg, and ONE `require_receipts_for_snapshot`
+  call after `assert_lock_complete` (TE §9.2's two-receipt gate; exempt on a fixture run).
+- Commit `0e002cd` (board Rec 2 / ML-01): `_declared_data_window` (the inventory walks
+  acquisition's outputs, so its declared window IS `acquisition.window_start`/`window_end`
+  in `configs/data.yaml`; undeclared → the fixture exemption refuses, TE §18.3), and
+  `_refuse_fixture_audit` — `--audit` combined with `--fixture-manifest` refuses outright,
+  because the December coverage/regime audit lies outside every fixture window by
+  construction; `_stage_entry` gained the `audit` flag to carry that check.
+
+Tests live in `tests/test_clean_run.py` (`test_rec2_01_...`). This unit's owner may
+confirm or reverse per the change record.

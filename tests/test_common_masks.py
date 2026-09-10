@@ -890,7 +890,12 @@ def test_open_restricted_populates_containment_fields_from_manifest(
     from src.data import locked_test
 
     monkeypatch.setattr(locked_test, "_repo_root", lambda: tmp_path)
-    restricted_dir = tmp_path / "evidence" / "locked_test_restricted"
+    # The synthetic root derives from the chokepoint's OWN constant, never a spelled
+    # literal: R-28's literal scan (tests/test_locked_test_guard.py) enumerates exactly
+    # the exempt holders, and this module is not one — the constant is the single source
+    # of truth, so the boundary moves with it. (Owner gate worklist 2026-09-10, item 2;
+    # flagged for `evaluation-and-comparison`'s record.)
+    restricted_dir = tmp_path / locked_test.RESTRICTED_ROOT
     restricted_dir.mkdir(parents=True)
     artifact = restricted_dir / "synthetic_fixture.json"
     artifact.write_text("[]", encoding="utf-8")
@@ -924,7 +929,9 @@ def test_must_not_fire_coverage_audit_purpose_passes_its_own_door(
     from src.data import locked_test
 
     monkeypatch.setattr(locked_test, "_repo_root", lambda: tmp_path)
-    restricted_dir = tmp_path / "evidence" / "locked_test_restricted"
+    # Derived from the chokepoint's constant, never a spelled literal (see the note in
+    # the sibling test above; R-28's exact-membership literal scan).
+    restricted_dir = tmp_path / locked_test.RESTRICTED_ROOT
     restricted_dir.mkdir(parents=True)
     artifact = restricted_dir / "synthetic_fixture.json"
     artifact.write_text("[]", encoding="utf-8")
@@ -1199,9 +1206,12 @@ def test_script_07_imports_no_features_models_or_external_and_names_no_restricte
             for name in names:
                 for forbidden in ("src.features", "src.models", "src.external", "src.gnss"):
                     assert not name.startswith(forbidden), (path, name)
-    assert "locked_test_restricted" not in source
-    from src.data.locked_test import RESTRICTED_LITERAL_EXEMPT_MODULES
+    # The probed name derives from the chokepoint's constant, never a spelled literal —
+    # this module is not on R-28's exempt-holder list either (the literal scan in
+    # tests/test_locked_test_guard.py; owner gate worklist 2026-09-10, item 2).
+    from src.data.locked_test import RESTRICTED_LITERAL_EXEMPT_MODULES, RESTRICTED_ROOT
 
+    assert Path(RESTRICTED_ROOT).name not in source
     assert "scripts/07_evaluate_and_report.py" not in RESTRICTED_LITERAL_EXEMPT_MODULES
 
 
