@@ -13,8 +13,17 @@
 
 schema_version: "1.0.0"
 
+# `folds` is deliberately left unresolved. It has NO reader anywhere in `src/` or `scripts/`;
+# the live split calendar is `configs/data.yaml: partitions`, read by
+# `src/data/splits.py: build_partitions`. Populating this field would create a second source
+# of truth for the same calendar. Owner ruling, 2026-09-10: leave TBD, do not remove.
 folds: "TBD — freeze gate"
-embargo_hours: "TBD — freeze gate"
+# embargo_hours — TRANSCRIBED from TE §7.1's split-configuration table, whose Embargo column
+# reads "24 hours" on every fold row (F1, F2, F3, F4). Authorized for transcription by the
+# project decision owner and the supervisor on 2026-09-10 and recorded as **D-38**. This is a
+# copy of an already-frozen value, not a choice: `build_partitions` applies it to all six
+# partitions and refuses rather than defaulting when it is unresolved (TE §18.3).
+embargo_hours: 24 # D-38 (2026-09-10); TE §7.1 "24 hours"
 
 # --- frozen hyperparameter grids (D-121, Vision §14.2 line 1206: "Exact frozen grids:
 # ridge 6, RF 18, LSTM 16 combinations, with fixed training settings" — Approved).

@@ -1974,6 +1974,70 @@ claimed.**
 
 ---
 
+## D-38 — The split configuration is transcribed into the live configs (transcription)
+
+**Decision date:** 2026-09-10. **Authorized by:** **Kimia Rezaei (project owner / student)
+and Dr. Reza Saraf Shirazi (supervisor)**, jointly, in the recorded authorization of
+2026-09-10 ("the fields below are now formally authorized for transcription … copy it
+verbatim from the reference"), and by the owner's subsequent approval of the proposed
+`partitions` block on the same date. **This is the first decision in this register whose
+authorization names the supervisor as an authorizing party.** Recorded honestly: the
+authorization is a **joint instruction of record**, not a separately signed artifact — no
+countersigned document file exists, and none is claimed.
+**Authority for the VALUES:** TE §7.1's split-configuration table; **D-8** (calendar
+boundary; the expanding-window origin); **R-80** Recommendation 25 (`DEC.train_end ==
+REFIT.train_end`); **FR-P1-04-14** (the final refit is scored nowhere); ADR-11 M5.
+
+**Decision.** The split configuration is transcribed into the two fields the pipeline
+actually reads. **No scientific value is chosen here**; every value is a copy of an
+already-frozen one.
+
+1. **`configs/data.yaml: partitions`** — the six partitions of R-80's closed space:
+
+   | id | kind | train_start | train_end | validation_month |
+   |---|---|---|---|---|
+   | F1 | fold | 2022-01-01 | 2022-03-31 | 2022-04-01 |
+   | F2 | fold | 2022-01-01 | 2022-06-30 | 2022-07-01 |
+   | F3 | fold | 2022-01-01 | 2022-09-30 | 2022-10-01 |
+   | F4 | fold | 2022-01-01 | 2022-10-31 | 2022-11-01 |
+   | REFIT | refit | 2022-01-01 | 2022-11-30 | *(null — scored nowhere)* |
+   | DEC | locked | 2022-01-01 | 2022-11-30 | 2022-12-01 |
+
+2. **`configs/experiment.yaml: embargo_hours` = `24`** — TE §7.1's Embargo column, which
+   reads **"24 hours"** on every fold row. Its single home is this field;
+   `build_partitions` applies it to all six partitions.
+
+**Provenance distinction, preserved at the owner's explicit instruction.** F1–F4 and REFIT
+are **specified directly** by TE §7.1. **DEC's training bounds are NOT**: TE §7.1 shows
+"—" for the locked row's training interval, so `DEC.train_start` and `DEC.train_end` are
+**determined** by constraints the validator already enforces — `train_start == study_start`
+(the expanding window from one origin, D-8) and `DEC.train_end == REFIT.train_end` (R-80) —
+which leave exactly one admissible value for each. Determined, not chosen; and derived from
+R-80 and D-8 rather than from TE §7.1.
+
+**What this decision does NOT do.** It does **not** resolve `configs/experiment.yaml:
+folds`, which has **no reader anywhere** in `src/` or `scripts/` and stays
+`TBD — freeze gate` **deliberately**, so that no second source of truth for the split
+calendar exists. It sets no other value: `stations`, `models.selected`,
+`tuning.declared_baseline_per_track`, `feature_set_id`, the top-level `normalization`
+placeholder, `availability_lags.window.recomputation_tolerance`, `december_day_range`,
+`tuning.selection` and the ablation `run_id`/`registered_at` fields all keep their
+sentinels. It alters **no validator and no split rule**, and discharges **no gate**: BLK-02
+stays OPEN, the two Q-31 freeze acts remain the owner's, and WS-20/TA-09/TA-17/TA-21 stay
+`Pending`.
+
+**Verification recorded with the decision.** The block was extracted from the file, printed,
+and fed to the project's own unmodified `build_partitions`, which accepted all six —
+exercising kind-matches-id, the expanding-window origin, `validation_month == train_end + 1
+day` for folds, REFIT-null-only, the `DEC`/`REFIT` `train_end` equality and the
+one-evaluation-role-per-month coverage check. A control re-run with an unresolved
+`embargo_hours` still refused, so no guard was weakened. `pyyaml` is uninstallable in the
+implementation environment (PyPI egress blocked, verified 2026-09-10), so that check used a
+printed stdlib extraction rather than the production loader; a full `load_configs` run is
+owed in a governed environment.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -2061,4 +2125,5 @@ exposed to challenge and should be read first.
 | D-34 Practical relevance — no threshold set | **Yes** | 2026-09-10 | Adopted as drafted (§3, draft D-B). **No numeric threshold is set anywhere**; the frozen object is the PROTOCOL (Vision §5.4 + PC-09): 10% is a named reference magnitude, not a pass/fail rule; descriptive reporting unless the supervisor explicitly approves a threshold; any approved threshold may not sit below the §6.9 target uncertainty budget; **no threshold may be introduced, changed or reinterpreted after December is opened**; significance and usefulness stay distinct. `configs/experiment.yaml: practical_relevance_threshold` **keeps its `TBD — freeze gate` sentinel**, which now records the DECIDED state "no threshold approved". Any future numeric needs a **separate governance act with explicit supervisor approval** and its own D-number. No supervisor signature exists or is claimed — none is required, because no threshold is approved. |
 | D-35 Permitted-producer policy + eleven rows | **Yes** | 2026-09-10 | Adopted as drafted (§4, draft D-C). Freezes the **leakage-safe policy** (available at the forecast origin; no future target TEC; no locked-December access; declared safe lags respected; no future information via preprocessing, train-only fitting; deterministic where required; 1-hour-ahead compatible; no IRI-derived anything) and the **eleven rows whose producing artifact the implemented contract fixes**: `vtec_lag`/`vtec_seq_24`/`target_support` → `phase1_hourly_target`; the four time rows → `record_timestamp`; the four station rows → `station_registry`. The **seven driver rows (`kp_safe`, `ap_safe`, `hp60_safe`, `ap60_safe`, `f107_safe`, `f107_81_trailing`, `dst`) REMAIN DEFERRED and fail closed** — not rejected, but unassignable without inventing a provider artifact identity (D-10.1 fixes providers, TE §6.2 says "GFZ or approved source" for Hp60/ap60). **`dst` stays diagnostic-only and is never an ML feature**; **R-78 is unchanged** (no support field admitted). Transcription of already-governed contract; no scientific value set. No supervisor signature exists or is claimed. |
 | D-36 TensorFlow pin `tensorflow==2.21.0` | **Yes** | 2026-09-10 | Adopted as drafted (§5, draft D-D); the owner selected the version. `requirements.txt` carries `tensorflow==2.21.0`, the CPU wheel (TC-01), the ONE neural stack (TE §8.3), matching the tf.keras 2.21.0 candidate API `src/models/lstm.py` was written against. **PINNING IS NOT VERIFICATION**: installation, import and API-compatibility checks have **NEVER BEEN EXECUTED** (PyPI unreachable, verified 2026-09-10); no TensorFlow import has ever succeeded here; **TE §8.1's both-platform (Kaggle AND local) condition is UNMET and the Kaggle compatibility check is OWED**. The guard now passes on the governed file; its refusal of an absent or commented-out pin is unchanged. No M-06 fit has run; TA-26 stays `Pending`. No supervisor signature exists or is claimed. |
+| D-38 Split configuration transcribed (`partitions` + `embargo_hours`) | **Yes — jointly authorized by Kimia Rezaei (owner/student) and Dr. Reza Saraf Shirazi (supervisor), 2026-09-10; joint instruction of record, no separately signed artifact exists or is claimed** | 2026-09-10 | Transcription only; **no scientific value chosen**. `configs/data.yaml: partitions` takes the six ids of R-80's closed space (F1 2022-01-01→2022-03-31/Apr; F2 →2022-06-30/Jul; F3 →2022-09-30/Oct; F4 →2022-10-31/Nov; REFIT →2022-11-30/null, scored nowhere per FR-P1-04-14; DEC →2022-11-30/Dec), and `configs/experiment.yaml: embargo_hours` takes **24** from TE §7.1's Embargo column. **Provenance kept distinct:** F1–F4 and REFIT are specified DIRECTLY by TE §7.1; **DEC's training bounds are NOT** — TE §7.1 shows "—" there, so they are DETERMINED by `train_start == study_start` (D-8) and `DEC.train_end == REFIT.train_end` (R-80), one admissible value each. **`experiment.yaml: folds` stays `TBD — freeze gate` deliberately** (no reader exists anywhere; populating it would create a second source of truth for the same calendar). Verified against the project's own unmodified `build_partitions` — six accepted, every structural rule exercised, and a control with an unresolved embargo still refused. `pyyaml` uninstallable here (PyPI egress blocked), so a full `load_configs` run is **owed in a governed environment**. Discharges no gate: **BLK-02 OPEN**, the two Q-31 freeze acts remain the owner's, WS-20/TA-09/TA-17/TA-21 `Pending`. |
 | D-37 D-27 affirmed; BLK-08 mechanism limb closed | **Yes** | 2026-09-10 | Adopted as drafted (§6, draft D-E); the owner chose Choice B, affirm the withholding. **A REAFFIRMATION, never a supersession — D-27 stands, unreopened and unamended.** D-27's withholding of a general inverse route is affirmed permanently: **the refusal IS the mechanism** (R-139 control 25 preserved at full strength); **R-103's joint contract is adopted in D-27's identity form**, the primary path's citable route being **`identity (D-27: primary target untransformed)`** because its output is already raw TECU; **`ABL-DIFF` keeps the only real inverse** with error propagation recorded (TE §7.2). **No generic inverse-transform route is created, no `inverse`/`apply` added to any transform, and no import-boundary change is authorised.** **BLK-08's mechanism limb is CLOSED by this decision; BLK-02 stays OPEN.** No supervisor signature exists or is claimed. |
