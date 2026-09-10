@@ -32,8 +32,11 @@ edit fails and the expectation is never updated (TE §13.7).
 ## The only read path
 
 `src.data.fixture_manifest.load_fixture_manifest(path)` — the one schema (the twelve TE §15.2
-areas by name), the one validating loader. A second YAML parse of a fixture manifest anywhere
-under `src/`, `scripts/` or `tests/` fails `tests/test_clean_run.py`'s only-copy check.
+areas by name), the one validating loader. A `yaml.*load` call anywhere under `src/`,
+`scripts/` or `tests/` whose argument subtree textually references a fixture manifest fails
+`tests/test_clean_run.py`'s only-copy AST scan (qualified per board Rec 10 / DR-03: an
+intermediate-variable parse is outside the scan's reach and remains a review-backed
+convention).
 
 ## What every artifact of this fixture carries
 
@@ -43,3 +46,24 @@ TC-03f). Every evidence surface asserts its absence.
 
 Neither fixture has ever run. No measured value exists. `.gitkeep` and this README are the only
 files here by design (`governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md`).
+
+## The Kaggle in-session sequence (TA-03 / TA-26 — both `Pending`; documented 2026-09-10)
+
+TC-03g (`binding: hard`) and TE §9.1/§9.2: before ANY governed run in a Kaggle session, run
+**inside that session**, in order —
+
+1. the critical test set (TE §18.3's ten named critical items, via their `tests/` modules,
+   under the real pytest of the pinned environment);
+2. both fixtures, in order:
+   `python scripts/run_walking_skeleton.py --config configs/ --fixture plumbing_7day` then
+   `--fixture scientific_1month` (frozen manifests in force; `--code-commit <sha>` is
+   REQUIRED there — a Kaggle session carries no git working tree);
+3. emit the machine-readable gate result via
+   `src.data.fixture_gate.emit_in_session_gate_result(...)` — platform read from
+   `ConfigSnapshot.platform`, never asserted — and reference it from the governed run's
+   registry evidence record. `require_in_session_gate` refuses a `local` stamp, a lock
+   disagreement, and a result predating the frozen manifests (R-141 controls 30–32).
+
+This sequence is EVIDENCE-PRODUCING only when it actually runs in-session; nothing here
+claims TA-03/TA-26 discharged — both stay `Pending` until a real Kaggle session emits the
+artifacts.

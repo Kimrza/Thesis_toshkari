@@ -296,7 +296,10 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--fixture",
         required=True,
         choices=FIXTURE_IDS,
-        help="which of TE 15.1's two fixtures to run; scientific_1month requires the plumbing receipt",
+        help=(
+            "which of TE 15.1's two fixtures to run; scientific_1month requires the "
+            "plumbing receipt"
+        ),
     )
     parser.add_argument(
         "--emit-candidate",
@@ -332,13 +335,19 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--code-commit",
         type=str,
         default=None,
-        help="explicit code commit for the lock where no git tree exists (Kaggle); never unpopulated",
+        help=(
+            "explicit code commit for the lock where no git tree exists (Kaggle); never "
+            "unpopulated"
+        ),
     )
     parser.add_argument(
         "--python",
         type=str,
         default=sys.executable,
-        help="the interpreter that runs the seven stage scripts and the M10 step (default: this one)",
+        help=(
+            "the interpreter that runs the seven stage scripts and the M10 step "
+            "(default: this one)"
+        ),
     )
     args = parser.parse_args(argv)
     if args.emit_candidate and args.identity is None:
@@ -383,7 +392,9 @@ def _stage_entry(
     assert_phase_boundary(PHASE, loaded_modules=sys.modules)
     determinism = seed_everything(snapshot, stage=STAGE)
     workspace = Path(snapshot.resolved_roots["workspace"])
-    resolved_scope = scope_path if scope_path is not None else manifest_path_for(workspace, fixture_id)
+    resolved_scope = (
+        scope_path if scope_path is not None else manifest_path_for(workspace, fixture_id)
+    )
     input_versions = (
         [fixture_input_version_tag(fixture_id, sha256_of_file(resolved_scope))]
         if resolved_scope.is_file()
@@ -551,7 +562,12 @@ def run_command(
     clock = time.monotonic()
     try:
         completed = subprocess.run(  # noqa: S603 - fixed argv, no shell; the interpreter is ours
-            list(argv), capture_output=True, text=True, env=dict(env), cwd=str(cwd), timeout=timeout,
+            list(argv),
+            capture_output=True,
+            text=True,
+            env=dict(env),
+            cwd=str(cwd),
+            timeout=timeout,
             check=False,
         )
         returncode = completed.returncode
@@ -586,7 +602,8 @@ def run_sequence(
             raise IntegrityError(
                 str(argv[1]) if len(argv) > 1 else " ".join(argv),
                 f"exited {result['returncode']} inside the fixture run; the sequence stops at "
-                f"the first refusal and reports it (stderr tail: {result['stderr_tail'][-600:]!r})",
+                f"the first refusal and reports it "
+                f"(stderr tail: {result['stderr_tail'][-600:]!r})",
             )
     return results
 
@@ -717,7 +734,9 @@ def assert_assembled_records(
                 f"D-20; R-135 control 9)",
             )
     start, end = scope.window
-    checked = assert_records_within_window(records, start=start, end=end, timestamp_key=timestamp_key)
+    checked = assert_records_within_window(
+        records, start=start, end=end, timestamp_key=timestamp_key
+    )
     assert_no_locked_month_records(records, timestamp_key=timestamp_key)
     days = {str(record.get(timestamp_key, ""))[:10] for record in records}
     return {
@@ -747,7 +766,8 @@ def collect_required_outputs(
     for required in required_outputs_for(scope.fixture_id):
         matches = sorted(
             p for p in root.rglob("*")
-            if p.is_file() and output_matches(str(p.relative_to(root)).replace("\\", "/"), required)
+            if p.is_file()
+            and output_matches(str(p.relative_to(root)).replace("\\", "/"), required)
         )
         if not matches:
             missing.append(required)
@@ -766,7 +786,9 @@ def collect_required_outputs(
 def _write_json(path: Path, payload: Mapping[str, Any]) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
+    )
     return path
 
 
@@ -791,7 +813,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     # 1. The manifest, ONLY through the loader (a missing one refuses naming the path).
     scope = load_fixture_scope(scope_path)
     if scope.fixture_id != args.fixture:
-        raise IntegrityError(scope_path, f"names fixture {scope.fixture_id!r}, not {args.fixture!r}")
+        raise IntegrityError(
+            scope_path, f"names fixture {scope.fixture_id!r}, not {args.fixture!r}"
+        )
     if args.emit_candidate and not isinstance(scope, IdentityDeclaration):
         raise IntegrityError(
             scope_path,
@@ -838,7 +862,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     rows = read_records_csv(Path(verification["evidence_dir"]) / verification["records_file"])
     citation = scope.identity.get("station_citation")
     stations = (
-        [str(citation["station_id"])] if isinstance(citation, Mapping) else list(scope.identity["stations"])
+        [str(citation["station_id"])]
+        if isinstance(citation, Mapping)
+        else list(scope.identity["stations"])
     )
     assembled = select_station_records(rows, stations)
     assembly = assert_assembled_records(assembled, scope=scope)
@@ -850,7 +876,11 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     _write_json(
         fixture_root / INPUT_MANIFEST_NAME,
         stamp_fixture_artifact(
-            {"kind": "input_manifest", "declared_inputs": verification, "assembly_assertion": assembly},
+            {
+                "kind": "input_manifest",
+                "declared_inputs": verification,
+                "assembly_assertion": assembly,
+            },
             stamp,
         ),
     )
@@ -867,7 +897,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     )
     _write_json(
         fixture_root / REGISTRY_ENTRY_NAME,
-        stamp_fixture_artifact({"kind": "registry_entry", "run_id": run_id, "platform": snapshot.platform}, stamp),
+        stamp_fixture_artifact(
+            {"kind": "registry_entry", "run_id": run_id, "platform": snapshot.platform}, stamp
+        ),
     )
 
     # 6. TE 13.2's seven Phase 1 invocations, in order, no GPU visible; then the M10 step.
@@ -894,7 +926,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     # 7. The run log and the test report (both TE 15.4 outputs), then the hash listing.
     _write_json(
         fixture_root / TEST_REPORT_NAME,
-        stamp_fixture_artifact({"kind": "test_report", "sequence": sequence, "m10_contract_fixture": m10}, stamp),
+        stamp_fixture_artifact(
+            {"kind": "test_report", "sequence": sequence, "m10_contract_fixture": m10}, stamp
+        ),
     )
     listing, missing = collect_required_outputs(fixture_root, scope)
     run_log = stamp_fixture_artifact(
@@ -912,7 +946,11 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             "assembly_assertion": assembly,
             "commands": [c["argv"] for c in sequence],
             "m10_contract_fixture": m10,
-            "missing_required_outputs": [m for m in missing if m not in (RUN_LOG_NAME.replace(".json", ".*"), ARTIFACT_MANIFEST_NAME)],
+            "missing_required_outputs": [
+                m
+                for m in missing
+                if m not in (RUN_LOG_NAME.replace(".json", ".*"), ARTIFACT_MANIFEST_NAME)
+            ],
         },
         stamp,
     )
@@ -943,7 +981,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     }
     if isinstance(scope, FixtureManifest):
         matched = compare_required_outputs(scope, fixture_root)
-        assert_run_level_ranges(scope, runtime_seconds=runtime_seconds, storage_bytes=storage_bytes)
+        assert_run_level_ranges(
+            scope, runtime_seconds=runtime_seconds, storage_bytes=storage_bytes
+        )
         receipt = write_fixture_pass_receipt(
             manifest=scope,
             result=RESULT_PASS,
@@ -953,7 +993,12 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             registry_path=registry_path,
             access_log_path=access_log,
             receipt_path=receipt_path_for(workspace, args.fixture),
-            registry_row=_registry_row(run_id, status="completed", lock_hash=environment_lock_hash(lock), snapshot=snapshot),
+            registry_row=_registry_row(
+                run_id,
+                status="completed",
+                lock_hash=environment_lock_hash(lock),
+                snapshot=snapshot,
+            ),
             phase=PHASE,
             plumbing_receipt=plumbing_receipt,
         )
@@ -1001,7 +1046,10 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         measuring_run_id="+".join(sorted(seen_run_ids)),
         outputs=sorted(listing),
         comparison_ledger=template,
-        artifact_manifest_ref=os.path.relpath(fixture_root / ARTIFACT_MANIFEST_NAME, manifest_path_for(workspace, args.fixture).parent),
+        artifact_manifest_ref=os.path.relpath(
+            fixture_root / ARTIFACT_MANIFEST_NAME,
+            manifest_path_for(workspace, args.fixture).parent,
+        ),
     )
     written = write_candidate_manifest(manifest_path_for(workspace, args.fixture), candidate)
     summary["candidate_manifest"] = str(written)
@@ -1017,7 +1065,10 @@ def main() -> int:
         probe_workspace = Path(os.environ.get("TEC_WORKSPACE_ROOT") or Path.cwd())
         scope_path = _scope_path(probe_workspace, args) if args.emit_candidate else None
         entry = _stage_entry(
-            args.config, fixture_id=args.fixture, scope_path=scope_path, code_commit=args.code_commit
+            args.config,
+            fixture_id=args.fixture,
+            scope_path=scope_path,
+            code_commit=args.code_commit,
         )
     except IntegrityError as exc:
         # Integrity tier before the run record exists: terminate non-zero naming the resource
@@ -1061,7 +1112,9 @@ def main() -> int:
 
     completed = _registry_row(run_id, status="completed", lock_hash=lock_hash, snapshot=snapshot)
     completed["code_commit"] = lock.code_commit
-    completed["artifact_manifest_path"] = str(Path(summary["fixture_root"]) / ARTIFACT_MANIFEST_NAME)
+    completed["artifact_manifest_path"] = str(
+        Path(summary["fixture_root"]) / ARTIFACT_MANIFEST_NAME
+    )
     append_registry_event(
         registry_path, completed, phase=PHASE, writer_role="stage", access_log_path=access_log
     )

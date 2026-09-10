@@ -417,3 +417,30 @@ preconditions are REPAIRED at root cause on the owner's 2026-09-10 gate worklist
   this pass (**57 passed / 3 skipped by name; 39/11 reconciliation empty both ways**).
   The seven owning units' code-summaries and `models-and-baselines`' 741→806→944→999
   line-count chain now carry dated cross-unit records (worklist item 4).
+
+### §11.7 — Addition, 2026-09-10 (second gate worklist): over-99 closure, in-session doc, decision requests
+
+- **§11.4's over-99 count is CLOSED**: the four 2026-09-07 fixture modules plus the one
+  line in `scripts/01_inventory_and_registry.py` were manually reformatted
+  (behavior-preserving wraps only; no `pyproject.toml` change). Re-derived after: **0**
+  over-99 lines across all five files; `compileall` clean; the full suite re-run
+  reproduces the pre-reformat per-module counts exactly (behavior preserved). Real `ruff`
+  STILL could not run — a fresh `uv pip install` retry on 2026-09-10 timed out against
+  PyPI again; the stdlib scan is the substitute of record.
+- **TA-03/TA-26 documentation gap closed**: both fixture READMEs now carry "The Kaggle
+  in-session sequence" (critical set → both fixtures → `emit_in_session_gate_result`,
+  `--code-commit` required in-session); both rows stay `Pending` — no evidence is claimed.
+- **Rec 10's qualification swept** to `tests/fixtures/plumbing_7day/README.md`'s only-copy
+  sentence (the last unqualified representation found).
+- **Decision requests prepared, none decided**:
+  `governance/FREEZE_DECISION_REQUEST_2026-09-10.md` — the complete 16-row
+  `TBD — freeze gate` inventory with per-field refusal probes (all fire), the Q-31 freeze
+  sequence (declarations → ≥2 measuring runs → the owner's two freeze acts), the D-27 /
+  BLK-08 mechanism-limb options (recommendation: affirm withholding, adopt R-103's joint
+  contract in D-27's identity form), the TensorFlow pin flagged as UNDECIDED (no D-number
+  anywhere; candidate `tensorflow==2.21.0` from the implemented M-06 API, recommendation
+  only), and the Q5/`test_external_drivers` options with recommendation (b) — the 11
+  failures stand pending the owner's ruling.
+- **CLAUDE.md's graphify section corrected (documentation only)**: the `graphify <verb>`
+  rules are now conditioned on an installed CLI (none exists on this clone — verified
+  again 2026-09-10; the `/graphify` skill remains the rebuild path).

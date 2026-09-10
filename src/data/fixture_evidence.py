@@ -186,8 +186,9 @@ def stamp_for_manifest(
     """Derive the stamp from a validated scope: `smoke_only` iff `plumbing_7day` (TC-03f)."""
     identity = scope.identity
     limitations = identity["limitations"]
+    smoke = scope.fixture_id == PLUMBING_FIXTURE_ID
     return FixtureArtifactStamp(
-        evidence_class=SMOKE_ONLY if scope.fixture_id == PLUMBING_FIXTURE_ID else SCIENTIFIC_FIXTURE_CLASS,
+        evidence_class=SMOKE_ONLY if smoke else SCIENTIFIC_FIXTURE_CLASS,
         fixture_id=scope.fixture_id,
         data07_caveat=str(identity["data07_caveat"]),
         december_representativeness=str(limitations["december_representativeness"]),
@@ -199,7 +200,9 @@ def stamp_for_manifest(
     )
 
 
-def stamp_fixture_artifact(payload: Mapping[str, Any], stamp: FixtureArtifactStamp) -> dict[str, Any]:
+def stamp_fixture_artifact(
+    payload: Mapping[str, Any], stamp: FixtureArtifactStamp
+) -> dict[str, Any]:
     """Embed the stamp under `fixture_stamp` in a payload the producing path constructs."""
     if stamp.december_representativeness != NOT_REPRESENTATIVE:
         raise _refuse(
@@ -241,7 +244,9 @@ def read_stamp(artifact: Mapping[str, Any] | Path) -> Mapping[str, Any] | None:
         return stamp if isinstance(stamp, Mapping) else None
     path = Path(artifact)
     candidates = [
-        path / DIRECTORY_STAMP_NAME if path.is_dir() else path.with_name(path.name + SIBLING_STAMP_SUFFIX),
+        path / DIRECTORY_STAMP_NAME
+        if path.is_dir()
+        else path.with_name(path.name + SIBLING_STAMP_SUFFIX),
     ]
     if path.is_file() and path.suffix.lower() == ".json":
         try:
@@ -352,7 +357,9 @@ def assert_freeze_record_agrees(
                 payload = json.loads(sidecar.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError) as exc:
                 raise _refuse(sidecar, f"freeze-record sidecar unreadable ({exc})") from exc
-            value = payload.get("fixture_manifest_sha256") if isinstance(payload, Mapping) else None
+            value = (
+                payload.get("fixture_manifest_sha256") if isinstance(payload, Mapping) else None
+            )
             if _nonempty(value):
                 recorded, source = str(value).lower(), str(sidecar)
     if recorded is None:
@@ -435,12 +442,15 @@ def _require_frozen(manifests: Mapping[str, FixtureManifest], *, surface: str) -
     for fid in FIXTURE_IDS:
         manifest = manifests.get(fid)
         if manifest is None:
-            raise _refuse(surface, f"no {fid} manifest supplied; evidence binds to both frozen manifests")
+            raise _refuse(
+                surface, f"no {fid} manifest supplied; evidence binds to both frozen manifests"
+            )
         if not manifest.is_frozen:
             raise _refuse(
                 surface,
-                f"{fid} manifest is {manifest.status!r}; a run against a candidate manifest cannot "
-                f"produce WS-20/TA-09/TA-17 evidence — the emitters refuse (R-134 control 5)",
+                f"{fid} manifest is {manifest.status!r}; a run against a candidate manifest "
+                f"cannot produce WS-20/TA-09/TA-17 evidence — the emitters refuse "
+                f"(R-134 control 5)",
             )
         hashes[fid] = manifest.sha256
     return hashes
@@ -481,7 +491,9 @@ def build_traceability_matrix(
             )
         ref = str(row["test_or_experiment_ref"])
         if _is_test_module_ref(ref):
-            candidate = workspace / ref if "/" in ref.replace("\\", "/") else workspace / "tests" / ref
+            candidate = (
+                workspace / ref if "/" in ref.replace("\\", "/") else workspace / "tests" / ref
+            )
             if not candidate.is_file():
                 raise _refuse(
                     f"{surface} row {requirement}",
@@ -563,7 +575,9 @@ def build_acceptance_table(
             raise _refuse(f"{surface} row {ws}", "duplicate row")
         status = str(row.get("status", ""))
         if status not in _ALLOWED_STATUSES:
-            raise _refuse(f"{surface} row {ws}", f"status {status!r} not in {list(_ALLOWED_STATUSES)}")
+            raise _refuse(
+                f"{surface} row {ws}", f"status {status!r} not in {list(_ALLOWED_STATUSES)}"
+            )
         if status == "PASS" and not _nonempty(row.get("evidence_link")):
             raise _refuse(
                 f"{surface} row {ws}",
@@ -641,9 +655,16 @@ def build_environment_and_cpu_preflight_report(
     for fid in FIXTURE_IDS:
         receipt = receipts.get(fid)
         if not isinstance(receipt, Mapping) or receipt.get("kind") != RECEIPT_KIND:
-            raise _refuse(surface, f"no {fid} fixture-pass receipt supplied (two references required)")
-        if receipt.get("result") != RESULT_PASS or receipt.get("frozen_manifest_hash") != frozen[fid]:
-            raise _refuse(surface, f"{fid} receipt is not a pass against the frozen manifest in force")
+            raise _refuse(
+                surface, f"no {fid} fixture-pass receipt supplied (two references required)"
+            )
+        if (
+            receipt.get("result") != RESULT_PASS
+            or receipt.get("frozen_manifest_hash") != frozen[fid]
+        ):
+            raise _refuse(
+                surface, f"{fid} receipt is not a pass against the frozen manifest in force"
+            )
     for index, figure in enumerate(coverage_figures):
         assert_caveats_present(figure, surface=f"{surface}: coverage figure {index}")
     measured_total_runtime = None
@@ -652,7 +673,9 @@ def build_environment_and_cpu_preflight_report(
     return {
         "artifact_class": "environment_and_cpu_preflight_report",
         "gate": "G-07 Reproducibility (Blocked, Supervisor)",
-        "not_this": "aws_ai_dlc_preflight_report evidences G-09 and is foundation's (TA-23; FR-WS-7)",
+        "not_this": (
+            "aws_ai_dlc_preflight_report evidences G-09 and is foundation's (TA-23; FR-WS-7)"
+        ),
         "environment_lock": lock_items(lock),
         "platform": platform,
         "cpu_only_completion": {

@@ -532,9 +532,9 @@ def output_matches(output: str, required: str) -> bool:
     `plots/residuals.png`); exact names match exactly. Paths are compared with `/`."""
     normalised = output.replace("\\", "/")
     if required.endswith(".*"):
-        return fnmatch.fnmatchcase(normalised, required) and normalised.count("/") == required.count(
+        return fnmatch.fnmatchcase(normalised, required) and normalised.count(
             "/"
-        )
+        ) == required.count("/")
     return normalised == required
 
 
@@ -718,7 +718,9 @@ def _validate_identity(manifest_path: Path, fixture_id: str, data: Mapping[str, 
             )
     if data.get("status") == FROZEN:
         freeze = identity.get("freeze_citation")
-        if not isinstance(freeze, Mapping) or not _DECISION_RE.match(str(freeze.get("decision", ""))):
+        if not isinstance(freeze, Mapping) or not _DECISION_RE.match(
+            str(freeze.get("decision", ""))
+        ):
             raise _refuse(
                 f"{res}.freeze_citation",
                 "a frozen manifest cites the D-number of its freeze act (SD-X-01 step 2); the "
@@ -915,7 +917,9 @@ def _validate_fixture_bootstrap(
     res = f"{manifest_path}: fixture_bootstrap"
     if fixture_id != SCIENTIFIC_FIXTURE_ID:
         if block is not None:
-            raise _refuse(res, "the reduced-replicate fixture bootstrap is fixture-2-only (TE 15.3)")
+            raise _refuse(
+                res, "the reduced-replicate fixture bootstrap is fixture-2-only (TE 15.3)"
+            )
         return
     if not isinstance(block, Mapping):
         raise _refuse(
@@ -997,7 +1001,8 @@ def _validate_status_and_sibling(
 def _validate_hash_listing(
     manifest_path: Path, fixture_id: str, data: Mapping[str, Any]
 ) -> tuple[Path, tuple[str, ...]]:
-    """R-133 obligation 3 / control 2: the TE 15.4 listing exists, is complete, agrees with disk."""
+    """R-133 obligation 3 / control 2: the TE 15.4 listing exists, is complete, agrees
+    with disk."""
     ref = str(data["required_outputs"]["artifact_manifest_ref"])
     listing_path = (manifest_path.parent / ref).resolve()
     if not listing_path.is_file():
@@ -1059,7 +1064,9 @@ def validate_manifest_mapping(
     """
     if not isinstance(data, Mapping):
         raise _refuse(manifest_path, "fixture manifest must be a mapping")
-    fixture_id = _require_fixture_id(data.get("fixture_id"), resource=f"{manifest_path}: fixture_id")
+    fixture_id = _require_fixture_id(
+        data.get("fixture_id"), resource=f"{manifest_path}: fixture_id"
+    )
     _validate_status_and_sibling(manifest_path, data, file_sha256=file_sha256)
     for area_key, area_name, quantities in CONTENT_AREAS:
         block = data.get(area_key)
@@ -1081,7 +1088,9 @@ def validate_manifest_mapping(
     return fixture_id, str(data["status"]), listing_path, present
 
 
-def load_fixture_manifest(path: Path, *, parsed: Mapping[str, Any] | None = None) -> FixtureManifest:
+def load_fixture_manifest(
+    path: Path, *, parsed: Mapping[str, Any] | None = None
+) -> FixtureManifest:
     """THE read path (R-133): read, parse, validate, hash-check; refuse on any violation.
 
     Raises
@@ -1187,7 +1196,9 @@ def _numeric_leaf_compare(expected: Any, actual: Any, *, tolerance: float, trail
         if set(expected) != set(actual):
             raise _refuse(trail, f"key sets differ: {sorted(expected)} vs {sorted(actual)}")
         for key in expected:
-            _numeric_leaf_compare(expected[key], actual[key], tolerance=tolerance, trail=f"{trail}.{key}")
+            _numeric_leaf_compare(
+                expected[key], actual[key], tolerance=tolerance, trail=f"{trail}.{key}"
+            )
         return
     if isinstance(expected, list | tuple) and isinstance(actual, list | tuple):
         if len(expected) != len(actual):
@@ -1266,7 +1277,10 @@ def compare_required_outputs(manifest: FixtureManifest, produced_root: Path) -> 
         reference = manifest.artifact_manifest_path.parent / output
         tolerance = float(entry["fp_tolerance"]["value"])
         _numeric_leaf_compare(
-            _read_values(reference), _read_values(produced), tolerance=tolerance, trail=str(produced)
+            _read_values(reference),
+            _read_values(produced),
+            tolerance=tolerance,
+            trail=str(produced),
         )
         results[output] = {
             "comparison_class": "toleranced",
@@ -1681,12 +1695,18 @@ def load_identity_declaration(
             f"a declaration states no measurement, schema or expectation; TE 15.2 areas "
             f"{forbidden} belong to a manifest emitted by a measuring run",
         )
-    fixture_id = _require_fixture_id(data.get("fixture_id"), resource=f"{declaration_path}: fixture_id")
+    fixture_id = _require_fixture_id(
+        data.get("fixture_id"), resource=f"{declaration_path}: fixture_id"
+    )
     if not isinstance(data.get("identity"), Mapping):
         raise _refuse(declaration_path, "the identity block is required")
     inputs = data.get("inputs")
     if inputs is not None:
-        stray = [] if not isinstance(inputs, Mapping) else sorted(set(inputs) - set(_DECLARATION_INPUT_KEYS))
+        stray = (
+            []
+            if not isinstance(inputs, Mapping)
+            else sorted(set(inputs) - set(_DECLARATION_INPUT_KEYS))
+        )
         if not isinstance(inputs, Mapping) or stray:
             raise _refuse(
                 f"{declaration_path}: inputs",

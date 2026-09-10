@@ -382,7 +382,9 @@ def _run_inventory(entry: Mapping[str, Any]) -> dict[str, Any]:
     )
     out_path = Path(snapshot.resolved_roots["artifacts"]) / "inventory" / "source_inventory.json"
 
-    manifests = sorted(release_root.rglob("release_manifest.json")) if release_root.is_dir() else []
+    manifests = (
+        sorted(release_root.rglob("release_manifest.json")) if release_root.is_dir() else []
+    )
     missing_entries: list[str] = []
     if not manifests:
         missing_entries.append(

@@ -364,7 +364,11 @@ def _child_rows(
         "artifact_manifest_path": str(artifact_path),
     }
     append_registry_event(
-        registry_path, started, phase=phase, writer_role=_WRITER_ROLE, access_log_path=access_log_path
+        registry_path,
+        started,
+        phase=phase,
+        writer_role=_WRITER_ROLE,
+        access_log_path=access_log_path,
     )
     append_registry_event(
         registry_path,
@@ -424,7 +428,10 @@ def write_fixture_pass_receipt(
             f"manifest so the append-only registry row hashes it (SD-X-02 Rec 7)",
         )
     if manifest.fixture_id == SCIENTIFIC_FIXTURE_ID:
-        if not isinstance(plumbing_receipt, Mapping) or plumbing_receipt.get("kind") != RECEIPT_KIND:
+        if (
+            not isinstance(plumbing_receipt, Mapping)
+            or plumbing_receipt.get("kind") != RECEIPT_KIND
+        ):
             raise _refuse(
                 receipt_path,
                 "the scientific receipt records the plumbing receipt it found (identity by "
@@ -502,9 +509,9 @@ def verify_receipt(
     if payload.get("frozen_manifest_hash") != manifest.sha256:
         raise _refuse(
             receipt_path,
-            f"receipt binds frozen manifest {payload.get('frozen_manifest_hash')} but the manifest "
-            f"in force hashes to {manifest.sha256}; a re-frozen manifest invalidates old receipts "
-            f"by construction (R-140 control 28)",
+            f"receipt binds frozen manifest {payload.get('frozen_manifest_hash')} but the "
+            f"manifest in force hashes to {manifest.sha256}; a re-frozen manifest "
+            f"invalidates old receipts by construction (R-140 control 28)",
         )
     recorded_lock = payload.get("environment_lock")
     if not isinstance(recorded_lock, Mapping):
@@ -568,7 +575,11 @@ def require_plumbing_receipt(
         )
     payload = read_receipt(receipt_path)
     verified = verify_receipt(
-        payload, manifest=manifest, registry_path=registry_path, lock=lock, receipt_path=receipt_path
+        payload,
+        manifest=manifest,
+        registry_path=registry_path,
+        lock=lock,
+        receipt_path=receipt_path,
     )
     return {**verified, "payload": payload}
 
@@ -811,7 +822,10 @@ def require_in_session_gate(
     with the manifests in force — wrong manifests (a stale result predating a re-freeze).
     """
     if result.get("kind") != GATE_RESULT_KIND:
-        raise _refuse("in-session gate result", f"payload kind {result.get('kind')!r} is not a gate result")
+        raise _refuse(
+            "in-session gate result",
+            f"payload kind {result.get('kind')!r} is not a gate result",
+        )
     platform = str(result.get("platform", ""))
     if platform != KAGGLE:
         raise _refuse(

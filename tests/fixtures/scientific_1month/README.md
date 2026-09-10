@@ -39,3 +39,12 @@ reading them as December evidence travels with every number (D-14 clause (ii); R
 
 Neither fixture has ever run. No measured value exists. `.gitkeep` and this README are the only
 files here by design (`governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md`).
+
+## The Kaggle in-session sequence (TA-03 / TA-26)
+
+See `tests/fixtures/plumbing_7day/README.md` § "The Kaggle in-session sequence" — the
+critical set and BOTH fixtures run inside the Kaggle session before any governed run there,
+and the gate result is emitted via `src.data.fixture_gate.emit_in_session_gate_result`
+(platform from `ConfigSnapshot`, never asserted). The scientific fixture additionally
+requires the verified plumbing receipt (R-140 control 26). Both TA rows stay `Pending`
+until a real Kaggle session emits the artifacts.
