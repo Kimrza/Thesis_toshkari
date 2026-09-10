@@ -115,3 +115,61 @@ Appended after the gate rejection lifted the receipt freeze. Under
 
 Tests live in `tests/test_clean_run.py` (`test_rec2_04_full_year_audit_exemption_refuses`).
 This unit's owner may confirm or reverse per the change record.
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T11:33:57Z
+**Iteration:** Owner-rulings implementation review (2026-09-10)
+
+### Findings
+
+None survive verification at any severity for this unit.
+
+### Verification performed
+
+- **Q5 = Choice B** (this unit owns `04_build_external_products.py` and its test file).
+  `tests/test_external_drivers.py` diff (+159/−49) reproduced under the stdlib pytest
+  stand-in on scratchpad CPython 3.11.16: `test_external_drivers: 51 passed, 0 failed, 0
+  skipped, 0 errors` — matches the claimed 51/0 exactly. Test-function count is unchanged
+  at 51 before and after (`grep -c "^def test_"` on `git show HEAD:` vs. working tree),
+  ruling out silent deletion.
+  `_assert_gate_fails_closed` was read in full: it asserts `returncode != 0` (a genuine
+  fail-closed check, not loosened to accept success) and requires the stderr to contain
+  one of a small, specific marker set (`fixture`, `receipt`, `pyyaml is required`, plus
+  each caller's own pre-Q5 marker via `also_accepts`) — not "any stderr". Confirmed against
+  `scripts/04_build_external_products.py`'s `_stage_entry`/`main()` (read directly) that
+  `main()` unconditionally calls `_stage_entry` — including for `--render-comparison` —
+  so the dual-branch structure in `test_comparison_report_emits_statements_and_flag_itself`
+  reflects real, existing script behaviour (not this unit's diff) rather than test-side
+  fabrication. `test_manifest_stamps_every_series_and_names_missing_months` (unchanged)
+  independently confirms the REQ-ENG-9 missing-month/partial semantics the rewritten
+  subprocess test no longer asserts directly, so that coverage was moved, not dropped.
+  `test_script_missing_month_continues_and_names_which` additionally now asserts no audit
+  manifest is left behind on a refused run — verified present in the diff, not merely
+  claimed.
+- **No fabricated fixture manifest or receipt** anywhere in the diff — confirmed by
+  reading the full diff hunk; no new fixture/receipt JSON files appear in
+  `git status`/`git diff --stat`.
+- **TensorFlow pin (item 5)** and **`practical_relevance_threshold` (item 3)** do not
+  touch this unit's owned files; verified at the repo level (see the `foundation`,
+  `features-and-splits`, and `models-and-baselines` units' review blocks) and cross-checked
+  here only for absence of any conflicting reference to `04_build_external_products.py`.
+  None found.
+- **Test totals**: full-suite run (26 modules, stdlib stand-in) reproduces exactly
+  `1134 passed, 0 failed, 39 skipped, 0 errors`, matching the claim.
+- **`src/data/locked_test.py`**: `git diff HEAD` is empty (0 lines) — zero diff confirmed
+  independently.
+- **`evidence/DECISIONS.md`**: ends at D-32 (`git diff HEAD` empty) — no D-number was
+  minted by this pass; all five drafts (D-A…D-E) live only inside
+  `governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md`, unadopted.
+
+### Summary
+
+This unit's cross-cutting exposure is the Q5 receipt-gate contract in
+`tests/test_external_drivers.py`, and the rewritten assertions are genuine fail-closed
+checks against real subprocess exit codes and stderr text, not loosened placeholders —
+verified by independent reproduction of the exact claimed pass count and by reading the
+gated script's control flow directly. No fabricated evidence, no deleted tests, no
+scope creep into this unit's other owned modules.

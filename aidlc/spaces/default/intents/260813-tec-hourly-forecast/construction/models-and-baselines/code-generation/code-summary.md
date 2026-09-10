@@ -127,3 +127,59 @@ untouched:
 
 Tests live in `tests/test_clean_run.py`. This unit's owner may confirm or reverse per the
 change record.
+
+### Owner-rulings implementation review (2026-09-10)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T11:33:57Z
+**Iteration:** Owner-rulings implementation review (2026-09-10)
+
+#### Findings
+
+None survive verification at any severity for this unit.
+
+#### Verification performed
+
+- **TensorFlow pin (owner ruling 5: `tensorflow == 2.21.0`).** `requirements.txt` and
+  `src/models/lstm.py` diffs read in full. Grepped the whole repository for
+  `tensorflow==`/`tf==`/version strings: the only non-comment pin is
+  `requirements.txt: tensorflow==2.21.0`, and every other mention (docstrings, test
+  synthetic-file fixtures) is textually consistent with it — no stale or conflicting pin
+  found anywhere, and `configs/experiment.yaml` carries no TensorFlow field to sync (
+  confirmed by grep: no match). `src/models/lstm.py`'s stale "pin is TBD" docstring
+  prose was corrected to reflect the frozen pin while still stating "the ENVIRONMENT is
+  not verified" (PyPI unreachable) — an honest, not overclaiming, correction.
+  `require_frozen_pin`, `build_keras_model`, and `determinism_check` all gained a
+  `requirements_path: Path | None = None` parameter (verified at lines 109, 170/176,
+  199/203) used by the re-pointed tests to inject an unpinned synthetic file — the guard
+  logic itself is otherwise unchanged, and no `tensorflow` import happens outside a
+  `require_frozen_pin()`-gated path (still true after this diff).
+- **`tests/test_models_smoke.py` (+39/−12) re-pointed controls**, read in full: the
+  absent/commented-pin negative controls still raise `IntegrityError` naming `TS-M-01` and
+  `TBD` on synthetic files (unchanged assertion strength); a new assertion additionally
+  proves the guard reads the real, now-frozen `requirements.txt` and returns
+  `"tensorflow==2.21.0"`;
+  `test_m06_fit_refuses_at_the_guard_before_any_tensorflow_import` was extended, not
+  weakened — it now separately proves the guard still fires on an injected unpinned file
+  AND that, with the real (frozen) file, the next failure is `ModuleNotFoundError` (an
+  environment fact — TensorFlow is not installed — correctly distinguished from a guard
+  failure). Full-module run: `test_models_smoke: 55 passed, 0 failed, 1 skipped, 0 errors`
+  — the skip is a `pytest.importorskip("yaml")` on this pyyaml-less clone, matching the
+  claim.
+- **D-27/BLK-08 (owner ruling 6).** This unit's own `ABL-DIFF` gating (referenced in its
+  original review's "Ablations" check, row 85 above) was re-verified unaffected: `git diff
+  HEAD -- src/data/fixture_manifest.py` is empty (R-139 control 25 byte-unchanged), and
+  `evidence/DECISIONS.md` still ends at D-32 with nothing dated 2026-09-10 — confirming no
+  duplicate or reopened decision landed, consistent with the change record's draft D-E
+  being unadopted.
+- **Test totals**: full-suite run (26 modules, stdlib stand-in) reproduces exactly
+  `1134 passed, 0 failed, 39 skipped, 0 errors`.
+
+#### Summary
+
+The TensorFlow pin freeze is transcribed consistently across `requirements.txt` and
+`src/models/lstm.py` with no stale or conflicting version string anywhere in the
+repository, and the re-pointed pin-guard tests genuinely strengthen (not weaken) the
+guard-vs-import distinction. This unit's own D-27-dependent ablation gating (`ABL-DIFF`)
+is confirmed untouched. No defect found in this unit's exposure to the pass.

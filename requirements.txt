@@ -7,9 +7,11 @@
 # Re-run behaviour: installing from these pins on a clean Python 3.11 must be
 #   reproducible on both governed platforms (Kaggle and local, TE §9.1).
 #
-# TensorFlow is EXCLUDED from these pins (code-generation Q3=A, receipted):
-# its pin is `TBD — freeze gate` and no implementer may fill it by convenience
-# (Vision §1.2; TE §1.1). It is added here only under an approved D-number.
+# TensorFlow is PINNED below by the project decision owner's ruling of 2026-09-10
+# (draft D-D in governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md;
+# the D-number is the owner's to adopt). It supersedes the earlier state, recorded
+# here as history: the pin was `TBD — freeze gate` under code-generation Q3=A and no
+# implementer could fill it by convenience (Vision §1.2; TE §1.1) — the owner did.
 # PyTorch is prohibited outright (TE §8.3). No GPU package: CPU is a complete
 # execution path (TC-01), never a dependency of any result.
 
@@ -23,6 +25,14 @@ pyyaml==6.0.1
 # Imported lazily inside the fit paths; absence refuses by name. Its CV splitters are
 # never used (fold construction is features-and-splits').
 scikit-learn==1.4.2
+# tensorflow: the ONE neural stack (TE §8.3; PyTorch prohibited). Version selected by the
+# project decision owner's ruling of 2026-09-10 (draft D-D) — the CPU wheel, never a GPU
+# build (TC-01), and the version src/models/lstm.py was implemented against (TE §8.1's
+# candidate 2.21.0). NOT YET VERIFIED: PyPI is unreachable from the implementation
+# environment, so installation, import, API-compatibility and the TE §8.1 both-platform
+# (Kaggle AND local) check are OWED — freezing the pin makes M-06's guard pass; it does
+# not make the environment exist.
+tensorflow==2.21.0
 
 # --- test suite (a first-class deliverable, TC-06) ------------------------------------
 pytest==8.2.2

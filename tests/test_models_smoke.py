@@ -1034,11 +1034,22 @@ def test_no_importance_score_reaches_the_fit_or_selection_path() -> None:
 # =======================================================================================
 
 
-def test_the_pin_guard_refuses_against_the_real_requirements_and_a_commented_pin(
+def test_the_pin_guard_refuses_an_absent_or_commented_pin_and_reads_the_frozen_one(
     tmp_path: Path,
 ) -> None:
+    """The pin-guard negative controls, re-pointed 2026-09-10 after the owner froze the
+    pin at `tensorflow==2.21.0` (draft D-D, CR-2026-09-10).
+
+    The refusal is still PROVED, on synthetic requirements files: an absent pin and a
+    commented-out pin both raise naming TS-M-01. What changed is the real
+    `requirements.txt`, which now carries the frozen pin — asserted here so the guard's
+    positive branch is covered against the governed file, not only a synthetic one. No
+    `tensorflow` import happens in any branch.
+    """
+    absent = tmp_path / "absent.txt"
+    absent.write_text("numpy==1.26.4\n")
     with pytest.raises(IntegrityError) as excinfo:
-        lstm.require_frozen_pin()  # the real requirements.txt: comment-only TBD entry
+        lstm.require_frozen_pin(absent)
     assert "TS-M-01" in str(excinfo.value) and "TBD" in str(excinfo.value)
     commented = tmp_path / "requirements.txt"
     commented.write_text("# tensorflow==2.21.0 (candidate, not frozen)\nnumpy==1.26.4\n")
@@ -1047,6 +1058,8 @@ def test_the_pin_guard_refuses_against_the_real_requirements_and_a_commented_pin
     frozen = tmp_path / "frozen.txt"
     frozen.write_text("numpy==1.26.4\ntensorflow==0.0.0\n")
     assert lstm.require_frozen_pin(frozen) == "tensorflow==0.0.0"
+    # the governed file: the owner's frozen pin, read through the same guard
+    assert lstm.require_frozen_pin() == "tensorflow==2.21.0"
     assert "tensorflow" not in sys.modules
 
 
@@ -1058,7 +1071,13 @@ class _NullBackend:
         return None
 
 
-def test_m06_fit_refuses_at_the_guard_before_any_tensorflow_import() -> None:
+def test_m06_fit_refuses_at_the_guard_before_any_tensorflow_import(tmp_path: Path) -> None:
+    """The guard fires BEFORE any TensorFlow import — proved against a synthetic
+    requirements file carrying no pin (re-pointed 2026-09-10: the real file now carries
+    the owner's frozen `tensorflow==2.21.0`, so the unfrozen state must be injected to
+    stay testable). The seed refusal ahead of it is unchanged."""
+    unpinned = tmp_path / "requirements.txt"
+    unpinned.write_text("numpy==1.26.4\n")
     train = _bundle(_train_spec("F1"), transform_id="T-F1", hours=4)
     score = _bundle(_score_spec("F1"), transform_id="T-F1", hours=2)
     params = lstm.enumerate_lstm_grid(SNAPSHOT)[0]
@@ -1073,12 +1092,24 @@ def test_m06_fit_refuses_at_the_guard_before_any_tensorflow_import() -> None:
             "M-06", bundle=train, score_bundle=score, partition=_p("F1"), snapshot=SNAPSHOT,
             target=_target(_ts(1, 1), _ts(5, 1)), seed=seed, params=params,
             horizon_hours=SYNTH_HORIZON, backend=_NullBackend(),
+            requirements_path=unpinned,
         )
     assert "TS-M-01" in str(excinfo.value)
     assert "tensorflow" not in sys.modules
     with pytest.raises(IntegrityError):
-        lstm.determinism_check(seed=seed)
+        lstm.determinism_check(seed=seed, requirements_path=unpinned)
     with pytest.raises(IntegrityError):
+        lstm.build_keras_model(
+            params,
+            n_features=1,
+            window_steps=3,
+            settings=SYNTH_SETTINGS,
+            requirements_path=unpinned,
+        )
+    # With the owner's frozen pin the guard PASSES and the next obstacle is the absent
+    # TensorFlow module itself — an environment fact, not a guard failure. Asserted so the
+    # distinction is explicit and the "no import before the guard" property stays proved.
+    with pytest.raises(ModuleNotFoundError):
         lstm.build_keras_model(params, n_features=1, window_steps=3, settings=SYNTH_SETTINGS)
 
 

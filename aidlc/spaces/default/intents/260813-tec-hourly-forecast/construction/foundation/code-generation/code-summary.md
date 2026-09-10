@@ -179,3 +179,51 @@ boundary that `load_configs` is designed (TS-01) to refuse by name on an environ
 without pyyaml. No assertion was weakened, no test was deleted, and the claimed 12/23/0/0
 result reproduces exactly under independent execution. No Critical, Major, or Minor
 defect found.
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T11:33:57Z
+**Iteration:** Owner-rulings implementation review (2026-09-10)
+
+### Findings
+
+None survive verification at any severity for this unit.
+
+### Verification performed
+
+- **`cell_rule` (owner ruling 2: freeze the EXISTING convention).** `configs/data.yaml`
+  diff read in full: `cell_rule: "floor-half-open-d1"`. Cross-checked against
+  `src/data/registry.py` — this unit's own module, untouched by the diff (`git diff HEAD --
+  src/data/registry.py` produces no output) — where `CELL_RULE_ID: Final[str] =
+  "floor-half-open-d1"` (line 98) was already the live identifier `assert_registry_resolved`
+  compares the config field against (lines 289–301). The value transcribed into
+  `configs/data.yaml` is therefore the pre-existing code constant verbatim, not an invented
+  identifier. `stations` in the same file is confirmed byte-unchanged (`TBD — freeze gate`)
+  by reading the diff — no station was moved, matching the claim.
+  `governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §2 (draft D-A)
+  states the §18.2 Student+Supervisor countersignature obligation explicitly and marks it
+  owed, not discharged — matches TE §18.2's actual assignment of this rule.
+- **`practical_relevance_threshold` (owner ruling 3).** Not this unit's owned field
+  (`configs/experiment.yaml`, consumed elsewhere in the pipeline); confirmed the sentinel
+  `TBD — freeze gate` is preserved verbatim in the diff and that no numeric value was
+  written anywhere in the repository search for `practical_relevance_threshold` under
+  `src/`, `tests/`, `scripts/` (no enforcement point exists that would require a numeral).
+- **`evidence/DECISIONS.md`**: ends at D-32, zero diff — confirmed independently. No
+  D-number was minted by this pass for D-A; the register remains the owner's to update.
+- **Test totals**: full-suite run under the stdlib pytest stand-in (26 modules) reproduces
+  exactly `1134 passed, 0 failed, 39 skipped, 0 errors`, matching the claim, with this
+  unit's own `test_determinism.py` module contributing `12 passed, 0 failed, 23 skipped, 0
+  errors` unchanged from its own prior review.
+- **Untouched TBDs**: spot-checked `folds`, `embargo_hours`, `feature_set_id`,
+  `feature_dictionary`, `availability_lags`, `normalization` directly in
+  `configs/experiment.yaml`/`configs/features.yaml` — all still read `TBD — freeze gate`
+  verbatim, matching §7 of the change record.
+
+### Summary
+
+The `cell_rule` freeze is a genuine transcription of this unit's own pre-existing
+`CELL_RULE_ID` constant, not an invented value, and the diff leaves `stations` and this
+unit's other TBD sentinels untouched. The Student+Supervisor countersignature obligation
+is stated, not silently discharged. No defect found in this unit's exposure to the pass.

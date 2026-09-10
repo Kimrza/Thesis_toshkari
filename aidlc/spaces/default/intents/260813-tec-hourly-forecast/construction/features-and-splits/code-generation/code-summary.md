@@ -177,3 +177,60 @@ size, derived: 610 lines, `wc -l`):
 
 Tests live in `tests/test_clean_run.py`. This unit's owner may confirm or reverse per the
 change record.
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T11:33:57Z
+**Iteration:** Owner-rulings implementation review (2026-09-10)
+
+### Findings
+
+None survive verification at any severity for this unit.
+
+### Verification performed
+
+- **`permitted_producers` (owner ruling 4: strict leakage-safe policy).**
+  `configs/features.yaml` diff read in full: 11 of 18 rows filled
+  (`vtec_lag`, `vtec_seq_24`, `target_support` → `phase1_hourly_target`;
+  `utc_hour_sin/cos`, `doy_sin/cos` → `record_timestamp`; `lst_sin/cos`,
+  `station_onehot`, `station_lat` → `station_registry`), 7 driver-class rows
+  (`kp_safe`, `ap_safe`, `hp60_safe`, `ap60_safe`, `f107_safe`, `f107_81_trailing`,
+  `dst`) deliberately unfilled. Cross-checked each producer id against
+  `src/features/build.py` (this unit's own module, zero diff in this pass):
+  `STATION_REGISTRY_PRODUCER = "station_registry"` (line 163) and
+  `TIMESTAMP_PRODUCER = "record_timestamp"` (line 165) match exactly; `phase1_hourly_target`
+  matches the release directory name `scripts/05_build_features_and_splits.py` and its
+  siblings already read (`release_root / "phase1_hourly_target" / "release_manifest.json"`
+  in `scripts/05_build_features_and_splits.py`) — a pre-existing artifact id, not invented.
+  Confirmed `load_permitted_producers` (lines 389–458) and the per-column check at
+  build time (lines 995–1015) genuinely gate the real code path: a computed `producer`
+  value must be `in producers[row_id]` or the build refuses — this is live enforcement,
+  not decorative config.
+- **Three new tests in `tests/test_feature_availability.py`** (read in full):
+  `test_permitted_producers_real_features_yaml_carries_exactly_the_contract_fixed_rows`
+  performs a bidirectional set-difference against a hardcoded (not config-imported)
+  11-row literal, so config and code cannot silently drift apart while the test still
+  passes; `test_permitted_producers_still_fails_closed_on_every_deferred_driver_row`
+  proves each of the 7 deferred rows still refuses by name;
+  `test_permitted_producers_admit_no_removed_or_iri_or_longitude_row` proves `ssn`,
+  `iri_vtec`, `glon`, `longitude` are all refused, and cross-checks
+  `build.REMOVED_ROWS == frozenset({"ssn"})` (verified at `src/features/build.py:157`)
+  disjoint from the 11 filled rows. Full-module run:
+  `test_feature_availability: 54 passed, 0 failed, 2 skipped, 0 errors` (the 2 skips are
+  `pytest.importorskip("yaml")` on this pyyaml-less clone, not silent passes) —
+  reproduces the claim exactly.
+- **Test totals**: full-suite run (26 modules, stdlib stand-in) reproduces exactly
+  `1134 passed, 0 failed, 39 skipped, 0 errors`.
+- **`evidence/DECISIONS.md`** ends at D-32, zero diff; draft D-C is unadopted, matching
+  the "no D-number minted" constraint.
+
+### Summary
+
+The 11 filled `permitted_producers` rows are genuine transcriptions of this unit's own
+pre-existing code constants and a release directory name used elsewhere in the pipeline,
+verified against live enforcement code that actually gates the build path — not a set of
+strings chosen to make a test pass. The 7 deferred driver rows are honestly reported as
+deferred (fail-closed, not admitted), and the new tests exercise real refusal paths rather
+than asserting shape only. No defect found in this unit's exposure to the pass.

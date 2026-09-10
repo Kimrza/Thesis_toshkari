@@ -3,13 +3,19 @@
 Purpose
 -------
 `domain-entities.md` sections 1, 4, 7 (W-2, W-4, W-6; R-94, R-96; TS-M-01, TS-M-02, TS-M-04).
-The one NN stack is TensorFlow/Keras (TE 8.3 prohibits a second deep-learning stack). The
-TensorFlow pin is `TBD — freeze gate` (TE 8.1 freezes it only AFTER the Kaggle and local
-fixture runs), so under code-generation FU-1 = C this module is written against the tf.keras
-API of TE 8.1's CANDIDATE 2.21.0 while **no `tensorflow` import exists at module scope or
-outside a path that first calls `require_frozen_pin()`**. That guard reads `requirements.txt`
-and refuses — naming TS-M-01 and the pin — unless a non-comment `tensorflow==<version>` line
-exists. Nothing here fills the pin; the refusal IS the deliverable for M-06's fit path today.
+The one NN stack is TensorFlow/Keras (TE 8.3 prohibits a second deep-learning stack). This
+module is written against the tf.keras API of **2.21.0**, which the project decision owner
+selected as the frozen pin on **2026-09-10** (draft D-D in
+`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md`; the D-number is the
+owner's to adopt) — so `requirements.txt` now carries `tensorflow==2.21.0` and the implemented
+API and the pinned version agree by construction. **No `tensorflow` import exists at module
+scope or outside a path that first calls `require_frozen_pin()`**: that guard reads
+`requirements.txt` and refuses — naming TS-M-01 and the pin — unless a non-comment
+`tensorflow==<version>` line exists, and it keeps refusing an absent or commented-out pin.
+Nothing here fills the pin. **The pin is frozen; the ENVIRONMENT is not verified**:
+installation, import, API-compatibility and TE 8.1's both-platform (Kaggle and local) check
+have never executed here (PyPI unreachable), so no M-06 fit has ever run and TA-26 stays
+`Pending`.
 
 What is real and testable without the pin: grid enumeration from `configs/experiment.yaml`
 (sixteen combinations, D-121), the seven fixed Vision 8.6 settings asserted from config,

@@ -73,6 +73,7 @@ from src.features.availability import (  # noqa: E402
     build_availability_matrix,
     read_availability_lags,
 )
+from src.features import build  # noqa: E402
 from src.features.build import (  # noqa: E402
     SECTION_6_2_ROWS,
     FrameSpec,
@@ -563,13 +564,81 @@ def test_permitted_producers_incomplete_names_only_the_missing_rows() -> None:
     assert "['doy_sin', 'kp_safe']" in message and "'vtec_lag'" not in message.split("row(s)")[1]
 
 
-def test_permitted_producers_reads_the_real_features_yaml_and_refuses_today() -> None:
-    """Q3 = A's separate loader against the repository's own `configs/`: the block is the
-    sentinel, so the refusal fires and no matrix can be produced."""
+#: The eleven dictionary rows whose PRODUCING ARTIFACT the implemented contract itself
+#: fixes, and the producer each takes — transcribed by the owner's ruling of 2026-09-10
+#: (draft D-C, CR-2026-09-10). Enumerated here literally, never imported from the config
+#: it checks (that would be circular).
+_CONTRACT_FIXED_PRODUCERS: dict[str, str] = {
+    "vtec_lag": "phase1_hourly_target",
+    "vtec_seq_24": "phase1_hourly_target",
+    "target_support": "phase1_hourly_target",
+    "utc_hour_sin": "record_timestamp",
+    "utc_hour_cos": "record_timestamp",
+    "doy_sin": "record_timestamp",
+    "doy_cos": "record_timestamp",
+    "lst_sin": "station_registry",
+    "lst_cos": "station_registry",
+    "station_onehot": "station_registry",
+    "station_lat": "station_registry",
+}
+#: The seven driver-class rows deliberately left unassigned until the driver release
+#: exists (draft D-C §4.3): NOT rejected on policy grounds, and still fail-closed.
+_DEFERRED_DRIVER_ROWS: tuple[str, ...] = (
+    "kp_safe",
+    "ap_safe",
+    "hp60_safe",
+    "ap60_safe",
+    "f107_safe",
+    "f107_81_trailing",
+    "dst",
+)
+
+
+def test_permitted_producers_real_features_yaml_carries_exactly_the_contract_fixed_rows() -> (
+    None
+):
+    """Owner ruling 2026-09-10 (draft D-C): the repository's own block now carries the
+    eleven contract-fixed rows with their contract-fixed producers, and NOTHING else.
+
+    Asserted by set-difference in both directions, so an added row (a producer assigned
+    without a decision) and a dropped row both fail. The producer strings are compared to
+    the code constants they transcribe, so config and code cannot drift apart.
+    """
     pytest.importorskip("yaml")
-    with pytest.raises(LeakageError) as excinfo:
-        load_permitted_producers(REPO_ROOT / "configs", dictionary_rows=["vtec_lag"])
-    assert "unset" in str(excinfo.value)
+    producers = load_permitted_producers(REPO_ROOT / "configs")
+    missing = sorted(set(_CONTRACT_FIXED_PRODUCERS) - set(producers))
+    extra = sorted(set(producers) - set(_CONTRACT_FIXED_PRODUCERS))
+    assert missing == [] and extra == [], f"missing {missing}, extra {extra}"
+    for row, expected in _CONTRACT_FIXED_PRODUCERS.items():
+        assert tuple(producers[row]) == (expected,), row
+    # the transcription agrees with the code constants it came from
+    assert build.STATION_REGISTRY_PRODUCER == "station_registry"
+    assert build.TIMESTAMP_PRODUCER == "record_timestamp"
+
+
+def test_permitted_producers_still_fails_closed_on_every_deferred_driver_row() -> None:
+    """The seven driver rows are UNASSIGNED, not admitted: any run requesting one refuses
+    naming exactly the missing rows, and no feature matrix is produced (SD-F-01)."""
+    pytest.importorskip("yaml")
+    for row in _DEFERRED_DRIVER_ROWS:
+        with pytest.raises(LeakageError) as excinfo:
+            load_permitted_producers(REPO_ROOT / "configs", dictionary_rows=["vtec_lag", row])
+        message = str(excinfo.value)
+        assert row in message and "no feature matrix is produced" in message.lower()
+
+
+def test_permitted_producers_admit_no_removed_or_iri_or_longitude_row() -> None:
+    """The leakage-safe policy's absolute exclusions cannot enter THROUGH the block: a
+    REMOVED row (`ssn`), an `iri_*` row and a raw-longitude row are all outside the TE 6.2
+    dictionary, so the loader refuses them by name rather than admitting a producer."""
+    for forbidden in ("ssn", "iri_vtec", "glon", "longitude"):
+        snapshot = synthetic_snapshot(
+            features={"permitted_producers": {forbidden: ["some_artifact"]}}
+        )
+        with pytest.raises(LeakageError):
+            load_permitted_producers(snapshot)
+    assert "ssn" in build.REMOVED_ROWS
+    assert not set(_CONTRACT_FIXED_PRODUCERS) & set(build.REMOVED_ROWS)
 
 
 def test_permitted_producers_row_outside_dictionary_refused() -> None:

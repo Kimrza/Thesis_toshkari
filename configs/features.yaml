@@ -23,13 +23,55 @@ feature_dictionary: "TBD — freeze gate"
 availability_lags: "TBD — freeze gate"
 normalization: "TBD — freeze gate"
 
-# --- permitted-producer list (SHAPE only; the LIST is unauthored) ----------------------
+# --- permitted-producer list (POLICY frozen; 11 of 18 rows transcribed) ----------------
 # features-and-splits SD-F-01 (Q1 = A) / code-generation Q3 = A (2026-09-05): per §6.2
 # dictionary row, the producing artifact(s) permitted to supply a column of that row,
 # keyed per (row, producer) pair. Read by the SEPARATE loader
 # src/features/build.py:load_permitted_producers, never through ConfigSnapshot.
-# While this is the sentinel (or incomplete), build_features REFUSES naming which rows
-# lack entries and NO feature matrix is produced. The list is assigned to nobody today;
-# whether an entry encodes a scientific choice (TC-03e) is decided when it is authored,
-# under a D-number. Writing the sentinel is not choosing a value (W-9).
-permitted_producers: "TBD — freeze gate"
+# While a REQUESTED row has no entry, build_features REFUSES naming that row and NO
+# feature matrix is produced.
+#
+# THE LEAKAGE-SAFE POLICY, frozen by the project decision owner's ruling of 2026-09-10
+# (draft D-C in governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md; the
+# D-number is the owner's to adopt). A feature may be produced for a row only if it is
+# available at the forecast origin; carries no future target TEC; needs no locked-December
+# access; respects its declared safe lag; introduces no future information through
+# preprocessing (train-only fitting where any fitting occurs); is deterministic where
+# determinism is required; and is compatible with the 1-hour-ahead forecast. Feature
+# philosophy: local historical VTEC, temporal features, and legitimately-available
+# solar/geomagnetic drivers — no IRI-derived anything, no future leakage. Every clause is
+# existing binding text (Vision §6; TE §6.2; D-10.3; TC-09; NFR-IRI-01; NFR-LEAK-01;
+# FR-P1-04-10; TE §6.2's REMOVED `ssn` row) — this block transcribes, it does not create.
+#
+# The eleven rows below are the rows whose PRODUCING ARTIFACT the implemented contract
+# itself fixes (code constants and the released target identity), so each entry is a
+# transcription rather than a choice. The seven driver-class rows —
+# kp_safe, ap_safe, hp60_safe, ap60_safe, f107_safe, f107_81_trailing, dst — are
+# DELIBERATELY ABSENT and are NOT rejected: all seven are legitimate under the policy
+# (dst as diagnostic/hindcast-only, already barred from modelling input by
+# DIAGNOSTIC_ONLY_SERIES). They are unfilled because a permitted-producer entry is a
+# producing-ARTIFACT identity and the driver artifacts do not exist yet: D-10.1 fixes the
+# PROVIDERS (Kp/ap3 → GFZ Potsdam; Dst → Kyoto WDC; F10.7 → Canada's Solar Radio
+# Monitoring Program, OBSERVED flux) and TE §6.2 fixes Hp60/ap60 as "GFZ or approved
+# source" — a provider, not an artifact id. Writing a literal now would invent a provider
+# artifact identity and could later refuse a legitimately produced feature. The entries
+# are OWED when the driver release exists; the loader keeps refusing those rows by name.
+permitted_producers:
+  # target-derived rows — the released D-17 Phase 1 hourly target, read by manifest by
+  # 05/06/07; lagged/sequence VTEC is target history strictly BEFORE the forecast origin.
+  vtec_lag: ["phase1_hourly_target"]
+  vtec_seq_24: ["phase1_hourly_target"]
+  # the support field travels on the same target release; R-78 still governs ADMISSION.
+  target_support: ["phase1_hourly_target"]
+  # time rows — TIMESTAMP_PRODUCER in src/features/build.py: a pure function of the
+  # record's own interval_start_utc, so no external artifact and no future information.
+  utc_hour_sin: ["record_timestamp"]
+  utc_hour_cos: ["record_timestamp"]
+  doy_sin: ["record_timestamp"]
+  doy_cos: ["record_timestamp"]
+  # station rows — STATION_REGISTRY_PRODUCER, gated by assert_registry_resolved. Local
+  # solar time is the ONLY route longitude may take into the input space (FR-P1-04-10).
+  lst_sin: ["station_registry"]
+  lst_cos: ["station_registry"]
+  station_onehot: ["station_registry"]
+  station_lat: ["station_registry"]
