@@ -28,7 +28,12 @@
 ## Key implementation decisions
 
 - **BLK-02 held throughout**: the apparatus is built; no fixture manifest exists on disk and no measuring run can complete before the `TBD — freeze gate` fields and TensorFlow pin freeze. The two Q-31 freeze acts remain owner acts.
-- **BLK-08 mechanism limb** stays a checked refusal (R-139 control 25, TECU/inverse-route refusal in the comparison ledger) — D-27 unreopened.
+- **BLK-08 mechanism limb — CLOSED by D-37 (2026-09-10), reaffirming D-27** (updated after
+  the owner's adoption; the line previously read "stays a checked refusal … D-27 unreopened").
+  The checked refusal REMAINS the mechanism: R-139 control 25 still refuses a `toleranced`
+  TECU entry whose producing path declares no `inverse_route`, at full strength. D-27 stands
+  unreopened; the primary path's citable route is `identity (D-27: primary target
+  untransformed)`; `ABL-DIFF` keeps the only real inverse. **BLK-02 stays OPEN.**
 - **Guard-boundary shape (nfr-design c58/c59)**: `load_fixture_scope` is the single manifest-loading guard home; every public entry point (the seven stage scripts + orchestrator) carries a negative control pushing a violating input through that entry point.
 - **Step 10 gated stop is the terminal state for the agent**: the agent made no commit and may not. The repository fact, however (reviewer finding 1, verified by `git log`): owner commit `64c0551` (2026-09-07 12:21 +0400) already carries the Step 1–5/7 outputs, the `acquisition.py` edit and the change record's first version, with an unedited git template message and **no D-number cited** — violating `team.md`'s hard linking rule; the seventh template-message owner commit in the standing pattern (6246907, ec8eacf, 06207c4, da6cb7b, c7e7a05). The resume-pass outputs (Step 6 sibling edits, `tests/test_clean_run.py`, plan ticks, this summary) remain uncommitted. The owed citations — D-11, D-14, D-20, D-28, D-29, D-31 plus `CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY` — now attach to an amend-or-follow-up decision that is the student's, routed to the stage gate.
 

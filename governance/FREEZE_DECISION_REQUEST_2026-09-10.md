@@ -81,9 +81,12 @@ general `src/evaluation` → `src/features` inverse route was withheld. The regi
 **D-32**; nothing reopens D-27. `RULING_2026-09-05` states the reopening protocol verbatim:
 a new D-number that states its new argument and honours D-27's reasoning.
 
-**What stays open (BLK-08's mechanism limb):** R-139 control 25 refuses a `toleranced`
-ledger entry declaring TECU units whose `producing_path` carries no `inverse_route`, until
-`evaluation-and-comparison`'s R-103 joint contract is adopted by both halves.
+**RESOLVED 2026-09-10 — the owner adopted Choice B, recorded as D-37** (this section is kept
+as the record of what was requested). BLK-08's mechanism limb is **CLOSED by D-37**, which
+reaffirms D-27; the checked refusal remains the mechanism. Original text: *"What stays open
+(BLK-08's mechanism limb): R-139 control 25 refuses a `toleranced` ledger entry declaring TECU
+units whose `producing_path` carries no `inverse_route`, until `evaluation-and-comparison`'s
+R-103 joint contract is adopted by both halves."*
 
 **Choice A — reopen D-27 (new D-number): build the general inverse route.**
 `src/features` transforms would gain `inverse`/`apply`; TECU tolerances become freezable

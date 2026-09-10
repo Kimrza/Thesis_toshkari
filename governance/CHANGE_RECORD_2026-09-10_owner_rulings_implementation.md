@@ -313,3 +313,57 @@ blocker is not removed from any ledger.
 **No test was weakened, skipped or deleted to produce green.** Where a test's expectation
 changed, it changed because the owner's ruling changed the governed truth it asserts, and
 the negative control it carried was re-pointed rather than removed.
+
+---
+
+## 10. Owner adoption (2026-09-10) — all five drafts adopted AS DRAFTED and recorded
+
+The project decision owner **adopted all five drafted decisions as drafted** and instructed
+that the governance record be updated using the next real D-numbers. That instruction is the
+authorization under which the register was written for these five adoptions only; the
+standing rule (agents never write `evidence/DECISIONS.md`) is otherwise unchanged and
+resumes immediately after this act.
+
+**D-numbers assigned sequentially from the register's end (D-32), in the owner's own
+adoption order.** No repository convention contradicting sequential assignment was found:
+each decision carries a prose section AND a row in the `D-1 addendum` countersignature
+table, and both were written for each of the five.
+
+| Draft | Adopted as | Subject | Countersignature column |
+|---|---|---|---|
+| D-A | **D-33** | `cell_rule` — identifier `floor-half-open-d1` + config transcription of the existing convention | **No — TE §18.2 countersignature REQUIRED and NOT YET GIVEN** |
+| D-B | **D-34** | Practical relevance reported descriptively; **no threshold set**; sentinel preserved as the decided state | **Yes** (none required — no threshold approved) |
+| D-C | **D-35** | Leakage-safe producer policy + the eleven contract-fixed rows; seven driver rows deferred, fail-closed | **Yes** |
+| D-D | **D-36** | TensorFlow pin `tensorflow==2.21.0`; pinning ≠ verification, Kaggle check owed | **Yes** |
+| D-E | **D-37** | D-27 **reaffirmed** (not superseded); BLK-08's mechanism limb closes in D-27's identity form | **Yes** |
+
+**The draft sections above (§§2–6) are NOT rewritten** — they stand as the historical record
+of what was proposed. The register rows are now the operative statements.
+
+**Repository made consistent with the adopted state.** Every "draft D-x" citation in
+`configs/data.yaml`, `configs/experiment.yaml`, `configs/features.yaml`, `requirements.txt`,
+`src/models/lstm.py`, `tests/test_feature_availability.py` and `tests/test_models_smoke.py`
+now cites the adopted D-number. **No value changed** in that pass — only citation text — and
+`practical_relevance_threshold` **keeps its `TBD — freeze gate` sentinel** by D-34's own
+terms.
+
+**§8's statement is superseded by this section.** It read that every BLK-08 representation
+"now reads *resolution drafted, owner adoption owed*"; with D-37 recorded, the live
+representations read **"mechanism limb CLOSED by D-37 (2026-09-10), reaffirming D-27; the
+checked refusal remains the mechanism"**. Sites updated (full list derived, not taken from
+the instruction): this record's §8; `CHANGE_RECORD_2026-09-07_R133_…` §1 ledger row;
+`FREEZE_DECISION_REQUEST_2026-09-10.md` §2; `fixtures-and-reproducibility`'s
+`code-summary.md`; and a dated append at `inception/units-generation/unit-of-work.md`'s
+blocker roll-up. **Deliberately NOT edited:** the 2026-09-05 and 2026-09-06 change records
+and the completed-stage `functional-design`/`nfr-design`/`nfr-requirements` artifacts of
+`features-and-splits`, `evaluation-and-comparison`, `statistical-inference`,
+`regimes-diagnostics-reporting`, `external-products` and `fixtures-and-reproducibility` —
+each is the accurate dated record of the state when written, and this project's convention
+forbids rewriting history to match a later decision. **BLK-02 stays OPEN throughout.**
+
+**Untouched by this adoption pass, verified by probe:** `models.selected`, `stations`,
+`december_day_range`, `folds`, `embargo_hours`, `feature_set_id`, `feature_dictionary`,
+`availability_lags`, `normalization`, the `tuning.*` fields and the ten ablation
+`run_id`/`registered_at` fields — all still carry `TBD — freeze gate` and all still refuse.
+No fixture run was started; no fixture manifest, run id, receipt or evidence was created; no
+locked December data was accessed (`src/data/locked_test.py` carries a zero diff).

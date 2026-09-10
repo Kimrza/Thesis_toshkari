@@ -246,9 +246,9 @@ regimes:
 
 # practical_relevance_threshold — the SENTINEL IS THE DECIDED STATE, not an open question.
 # The project decision owner ruled on 2026-09-10 that NO numeric threshold is set and that
-# the RULE is the frozen object (draft D-B in
-# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md; the D-number is the
-# owner's to adopt). The protocol, transcribed from Vision §5.4 and PC-09 without addition:
+# the RULE is the frozen object — ADOPTED as **D-34** (2026-09-10); prepared at
+# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
+# evidence/DECISIONS.md. The protocol, transcribed from Vision §5.4 and PC-09 unchanged:
 #   1. Ten percent RMSE reduction is a NAMED REFERENCE MAGNITUDE, not a pass/fail rule and
 #      not a hypothesis.
 #   2. Practical relevance is reported DESCRIPTIVELY unless the supervisor explicitly
@@ -263,4 +263,4 @@ regimes:
 #      statement is descriptive commentary beside it, never a second test.
 # Any future numeric requires an explicit supervisor approval and its own D-number, and is
 # barred once December is opened. No implementer may fill this by convenience (TE §1.1).
-practical_relevance_threshold: "TBD — freeze gate" # decided: no threshold approved (D-B draft)
+practical_relevance_threshold: "TBD — freeze gate" # D-34: DECIDED — no threshold approved

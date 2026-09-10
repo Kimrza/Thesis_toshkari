@@ -24610,3 +24610,161 @@
 **Event**: HUMAN_TURN
 
 ---
+
+## Error Logged
+**Timestamp**: 2026-09-10T11:39:11Z
+**Event**: ERROR_LOGGED
+**Tool**: aidlc-state
+**Command**: aidlc-state approve code-generation --user-input Approve + commit --project-dir C:\Users\s_sch\Desktop\test\Thesis_toshkari-main\Thesis_toshkari-main
+**Error**: Refusing to complete "code-generation": it declares a reviewer (aidlc-architecture-reviewer-agent) but 8 of 12 applicable units have no fresh recorded review (governance-guards, acquisition, inventory-and-registry, target-standardization, evaluation-and-comparison, statistical-inference, regimes-diagnostics-reporting, fixtures-and-reproducibility). The reviewer fires once per unit; record each with `aidlc-log.ts review --stage code-generation --unit <unit> --reviewer aidlc-architecture-reviewer-agent --verdict <READY|NOT-READY>` before approving.
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-09-10T11:39:32Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/.aidlc-reviewer-dispatch.json
+**Context**: .aidlc-reviewer-dispatch.json
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:40Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: governance-guards
+**Iteration**: 1
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:40Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: acquisition
+**Iteration**: 1
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:41Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: inventory-and-registry
+**Iteration**: 1
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:41Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: target-standardization
+**Iteration**: 1
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:41Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: evaluation-and-comparison
+**Iteration**: 1
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:42Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: statistical-inference
+**Iteration**: 1
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:42Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: regimes-diagnostics-reporting
+**Iteration**: 1
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-10T11:39:42Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: fixtures-and-reproducibility
+**Iteration**: 1
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-10T11:40:07Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a6ca5b1ec0013427b
+**Message**: continue
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-10T11:41:30Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-10T11:44:05Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: ac6fc0f220bfe24ca
+**Message**: Adopt D-A through D-E and authorise the transcriptions
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-10T11:48:16Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-10T11:49:46Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: aad96f86ddf17490f
+**Message**: Sequential D-33 through D-37 is correct, proceed
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-10T11:50:48Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-10T11:51:01Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a417369be139676fa
+**Message**: commit this
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-10T11:59:02Z
+**Event**: HUMAN_TURN
+
+---

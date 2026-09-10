@@ -5,9 +5,9 @@ Purpose
 `domain-entities.md` sections 1, 4, 7 (W-2, W-4, W-6; R-94, R-96; TS-M-01, TS-M-02, TS-M-04).
 The one NN stack is TensorFlow/Keras (TE 8.3 prohibits a second deep-learning stack). This
 module is written against the tf.keras API of **2.21.0**, which the project decision owner
-selected as the frozen pin on **2026-09-10** (draft D-D in
-`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md`; the D-number is the
-owner's to adopt) — so `requirements.txt` now carries `tensorflow==2.21.0` and the implemented
+selected as the frozen pin on **2026-09-10**, adopted as **D-36** (prepared at
+`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md`, recorded in
+`evidence/DECISIONS.md`) — so `requirements.txt` carries `tensorflow==2.21.0` and the implemented
 API and the pinned version agree by construction. **No `tensorflow` import exists at module
 scope or outside a path that first calls `require_frozen_pin()`**: that guard reads
 `requirements.txt` and refuses — naming TS-M-01 and the pin — unless a non-comment

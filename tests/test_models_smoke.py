@@ -1038,7 +1038,7 @@ def test_the_pin_guard_refuses_an_absent_or_commented_pin_and_reads_the_frozen_o
     tmp_path: Path,
 ) -> None:
     """The pin-guard negative controls, re-pointed 2026-09-10 after the owner froze the
-    pin at `tensorflow==2.21.0` (draft D-D, CR-2026-09-10).
+    pin at `tensorflow==2.21.0` (D-36, adopted 2026-09-10).
 
     The refusal is still PROVED, on synthetic requirements files: an absent pin and a
     commented-out pin both raise naming TS-M-01. What changed is the real

@@ -1776,6 +1776,204 @@ not represent itself as satisfying such a requirement.
 
 ---
 
+## D-33 — The coordinate-to-cell rule's identifier and config transcription (freeze)
+
+**Decision date:** 2026-09-10. **Decided by:** the project decision owner, adopting as
+drafted the request prepared at
+`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §2 (draft D-A).
+**Authority:** the owner's ruling of 2026-09-10 ("freeze the EXISTING convention; do not
+invent a new grid, do not move stations"); **D-1** and its addendum (the convention
+itself, already frozen); Vision §6.1A/§6.1B (the rule *"must be frozen and recorded, not
+guessed"*); `team.md` § Code Style **Q11 = B** (freeze the current inline constants as a
+D-number BEFORE the migration moves them, so the migration cannot silently change a
+scientific value).
+
+**Decision.** The coordinate-to-cell rule is the convention already implemented and in
+use, transcribed here unchanged:
+
+> 1° × 1° cell identified by its **lower-left (floor) corner**, half-open in both axes:
+> `cell = [floor(lat), floor(lat)+1) × [floor(lon), floor(lon)+1)`
+
+Its governed identifier is **`floor-half-open-d1`** — the identifier already declared in
+`src/data/registry.py` (`CELL_RULE_ID`), which `assert_registry_resolved` requires
+`configs/data.yaml: cell_rule` to equal and refuses any other value for. The convention's
+source text is `notebooks/madrigal_phase1_coverage_audit.ipynb` cell 4 (*"DEFAULT
+convention adopted here"*), reproduced above without alteration; it is the same rule
+D-1's addendum states as `cell = (floor(lat), floor(lon))` tested half-open on both axes.
+`configs/data.yaml: cell_rule` now carries that identifier.
+
+**What this decision does NOT do.** It does **not move a station**, does **not change the
+grid resolution**, and does **not resolve `stations`**, which stays `TBD — freeze gate`
+with its coordinates still PROVISIONAL pending IGS site-log validation. It does **not
+discharge the notebook's own standing caveat**: the convention must still be **CONFIRMED
+against the real bin edges Madrigal returns** before it is relied on scientifically —
+that confirmation **remains owed** and is a recorded limitation of this freeze, not
+something satisfied by it.
+
+**Governance condition.** TE §18.2 classes the coordinate-to-cell rule as a **Student +
+Supervisor** forbidden choice. **The supervisor countersignature is REQUIRED and has NOT
+YET BEEN GIVEN** for this decision: no signed document, email or minute from
+Dr. Reza Saraf Shirazi exists for it and none is represented as existing. Readers should
+also consult the **D-1 addendum**, which records that D-1's own §18.2 condition was
+closed under the recorded student/supervisor authority equivalence; this decision does
+not extend that closure to itself and records the countersignature as outstanding.
+
+**Consequence.** One limb of `assert_registry_resolved`'s refusal is closed. The registry
+still refuses overall while `stations` and `igrf_version` are unresolved — this decision
+closes a limb, not the refusal.
+
+---
+
+## D-34 — Practical relevance is reported descriptively; no threshold is set (reading)
+
+**Decision date:** 2026-09-10. **Decided by:** the project decision owner, adopting as
+drafted the request prepared at
+`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §3 (draft D-B).
+**Authority:** the owner's ruling of 2026-09-10 ("no invented numeric"); **Vision §5.4**;
+**PC-09** (`constraint-register.md`, `binding: hard`).
+
+**Decision.** **No practical-relevance threshold is set, and no numeric value is written
+anywhere.** What is frozen is the PROTOCOL, transcribed from Vision §5.4 and PC-09
+without addition:
+
+1. Ten percent RMSE reduction is a **named reference magnitude, not a pass/fail rule**
+   and not a hypothesis.
+2. **Practical relevance is reported descriptively unless the supervisor explicitly
+   approves a threshold** (PC-09, `binding: hard`).
+3. An approved reference or threshold **shall not correspond to an RMSE difference
+   smaller than the target uncertainty budget** of Vision §6.9; if it does, practical
+   relevance is reported descriptively only.
+4. **No threshold may be introduced, changed, or reinterpreted after December is opened**
+   (Vision §5.4; PC-09; `project.md` § Forbidden).
+5. Significance and usefulness stay distinct: the confirmatory claim is the paired loss
+   differential with its 95% interval (Vision §2.3/§5.5); a practical-relevance statement
+   is descriptive commentary beside it, **never a second test**.
+
+**Consequence.** `configs/experiment.yaml: practical_relevance_threshold` **keeps the
+`TBD — freeze gate` sentinel**, and that sentinel is now the correct, *decided* state: it
+records **"no threshold approved"**, not "not yet considered". Any future numeric requires
+a **separate governance act with explicit supervisor approval** and its own D-number, and
+is **barred once December is opened**. **No supervisor signature artifact exists for this
+decision and none is claimed** — none is required, because no threshold is approved by it.
+
+---
+
+## D-35 — The permitted-producer policy and the eleven contract-fixed rows (freeze)
+
+**Decision date:** 2026-09-10. **Decided by:** the project decision owner, adopting as
+drafted the request prepared at
+`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §4 (draft D-C).
+**Authority:** the owner's ruling of 2026-09-10; Vision §6 (the feature contract);
+TE §6.2 (the dictionary, its lag and normalization columns, and the REMOVED `ssn` row);
+**D-10.3** (availability lags); TC-09 (carry-forward ≤ 3 h then exclude); NFR-IRI-01 and
+TE §12 (IRI denial); NFR-LEAK-01 (train-only fitting); FR-P1-04-10 (longitude only via
+`lst_*`); SD-F-01 (Q1 = A, the fail-closed producer list).
+
+**Decision, limb 1 — the leakage-safe policy.** A feature may be produced for a dictionary
+row only if it is **available at the forecast origin**; carries **no future target TEC**;
+requires **no locked-December access**; **respects its declared safe lag**; introduces
+**no future information through preprocessing** (train-only fitting where any fitting
+occurs); is **deterministic where determinism is required**; and is **compatible with the
+1-hour-ahead forecast**. Feature philosophy: local historical VTEC, temporal features and
+legitimately-available solar/geomagnetic drivers — **no IRI-derived anything, and no
+future leakage**. Every clause is existing binding project text; this decision
+**transcribes, it does not create**.
+
+**Decision, limb 2 — the eleven rows whose producing artifact the implemented contract
+itself fixes**, now carried in `configs/features.yaml`:
+
+| Dictionary row(s) | Permitted producer | Why this producer is fixed, not chosen |
+|---|---|---|
+| `vtec_lag`, `vtec_seq_24`, `target_support` | `phase1_hourly_target` | The released D-17 Phase 1 hourly target, read by manifest by `05`/`06`/`07`; lagged/sequence VTEC is target history strictly BEFORE the forecast origin. `target_support` travels on the same release |
+| `utc_hour_sin`, `utc_hour_cos`, `doy_sin`, `doy_cos` | `record_timestamp` | `TIMESTAMP_PRODUCER` in `src/features/build.py` — a pure function of the record's own `interval_start_utc`; no external artifact, no future information |
+| `lst_sin`, `lst_cos`, `station_onehot`, `station_lat` | `station_registry` | `STATION_REGISTRY_PRODUCER`, gated by `assert_registry_resolved`; local solar time is the ONLY route longitude may take into the input space (FR-P1-04-10) |
+
+**Decision, limb 3 — the seven driver-class rows REMAIN DEFERRED.** `kp_safe`, `ap_safe`,
+`hp60_safe`, `ap60_safe`, `f107_safe`, `f107_81_trailing` and `dst` are **not assigned a
+producer and not rejected**: none violates the policy. They are deferred because a
+permitted-producer entry is a producing-**artifact** identity and the driver artifacts do
+not exist yet — D-10.1 fixes the **providers** (Kp/ap3 → GFZ Potsdam; Dst → Kyoto WDC;
+F10.7 → Canada's Solar Radio Monitoring Program, **observed** flux) and TE §6.2 fixes
+Hp60/ap60 as *"GFZ or approved source"*, a provider and not an artifact id. **No artifact
+identity is invented here.** Their entries are owed when the driver release exists, and
+until then `load_permitted_producers` **fails closed**, refusing any run that requests one
+of these rows and naming exactly those rows, with no feature matrix produced.
+
+**What this decision does NOT do.** **`dst` stays diagnostic/hindcast-only and is never a
+confirmatory ML feature** (TC-11; `DIAGNOSTIC_ONLY_SERIES`) — its presence in the
+dictionary is not admission to the model input space. **R-78 is unchanged**: no support
+field is admitted by this decision; its approval-ID and pre-freeze-timestamp conditions
+still govern `target_support`. No lag, threshold, window or normalization value is set.
+**No supervisor signature artifact exists and none is claimed.**
+
+---
+
+## D-36 — The TensorFlow pin is `tensorflow==2.21.0` (freeze)
+
+**Decision date:** 2026-09-10. **Decided by:** the project decision owner, adopting as
+drafted the request prepared at
+`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §5 (draft D-D); the
+owner selected the version. **Authority:** TE §8.1 (the pinned environment); TE §8.3
+(TensorFlow/Keras is the ONE neural stack; PyTorch prohibited); TC-01 (CPU is a complete
+execution path — the pin is the CPU wheel, never a GPU build); TS-M-01 (M-06's pin guard).
+
+**Decision.** `requirements.txt` carries **`tensorflow==2.21.0`**. `src/models/lstm.py`
+was implemented against the tf.keras **2.21.0 candidate API**, so the frozen pin and the
+implemented serialization/determinism contract agree by construction. This supersedes the
+earlier `TBD — freeze gate` state recorded under code-generation Q3 = A.
+
+**Pinning is not verification, and this decision does not claim it is.** The
+installability and API-compatibility check **has NEVER BEEN EXECUTED**: PyPI is
+unreachable from the implementation environment (verified again 2026-09-10), so
+`pip install tensorflow==2.21.0` has never run here and **no TensorFlow import has ever
+succeeded**. **TE §8.1's own condition — that the pin be verified on BOTH governed
+platforms (Kaggle and local) — is UNMET, and the Kaggle compatibility check is OWED.**
+Freezing the pin makes M-06's guard pass; **it does not make the environment exist**, no
+M-06 fit has ever run, and TA-26 stays `Pending`.
+
+**Consequence.** `require_frozen_pin` now reads a frozen pin from the governed file; its
+refusal of an **absent or commented-out** pin is unchanged and remains proved by negative
+controls on synthetic requirements files. **No supervisor signature artifact exists and
+none is claimed.**
+
+---
+
+## D-37 — D-27 is affirmed; BLK-08's mechanism limb resolves in D-27's identity form (reaffirmation)
+
+**Decision date:** 2026-09-10. **Decided by:** the project decision owner, adopting as
+drafted the request prepared at
+`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §6 (draft D-E);
+the owner chose **Choice B, affirm the withholding**. **Authority:** **D-27**
+(2026-08-24); TE §7.2 (`ABL-DIFF`'s inverse obligation); TE §12's import boundary;
+`governance/RULING_2026-09-05_nfr-design_governance_dispositions.md` (the reopening
+protocol, **not invoked**).
+
+**This is a REAFFIRMATION, not a supersession.** **D-27 stands, unreopened and
+unamended**; nothing here replaces, narrows or duplicates it.
+
+**Decision.** D-27's withholding of a general inverse route is **affirmed permanently** as
+the project's mechanism. BLK-08's mechanism limb resolves as follows:
+
+1. **The refusal IS the mechanism.** R-139 control 25 — a `toleranced` ledger entry
+   declaring TECU units for an output whose producing path declares no `inverse_route` is
+   **not freezable** — stays exactly as implemented, **at full strength**.
+2. **R-103's joint contract is adopted in D-27's identity form.** The primary path's
+   output is already raw TECU (D-27: *"Primary remains, Raw TECU"*), so its citable
+   `inverse_route` is the **identity route**, cited as
+   **`identity (D-27: primary target untransformed)`**.
+3. **`ABL-DIFF` keeps the only real inverse**, scoped to its own ablation scoring, with
+   error propagation recorded (TE §7.2).
+
+**What this decision does NOT do.** It creates **no generic inverse-transform route**, adds
+no `inverse`/`apply` to any transform, and authorises **no import-boundary change**: no
+`src/evaluation` → `src/features` route is created and TE §12's allowlist is untouched.
+
+**Consequence.** **BLK-08's mechanism limb is CLOSED** by this decision. **BLK-02 remains
+OPEN** and is untouched by it. **No supervisor signature artifact exists and none is
+claimed.**
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -1859,3 +2057,8 @@ exposed to challenge and should be read first.
 | D-30 `.dst_summary.json` relocation | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, on `GOV-2026-08-28-FD-01` Rec 44(b) (board option 2). Moves the file into `evidence/audit_ec1_2026-08-15/kyoto_dst/`, inside R-27s scan root, verified byte-identical on the D-15 method with the access-log row written **before** the move. Makes `governance-guards` R-26 driver-exclusion **class 4 unconditional**. **Not a December read** — bytes and hash only, no field parsed. Changes no value and approves no new input; Dst stays diagnostic-only. **No supervisor signature exists or is claimed.** |
 | D-31 G-09 Agent preflight SIGNED | **Yes** | 2026-08-28 | **Signed and approved by the project decision owner**, in session, under the recorded student/supervisor authority equivalence. **Recorded WITH its §18.3 preconditions disclosed as UNMET**: `configs/`, `src/` and `pyproject.toml` do not exist, so the mandated automated zero-TBD preflight **cannot run**; the ten named critical tests **cannot be executed** (no Python interpreter is installed in this environment); and the evidence artifact `aws_ai_dlc_preflight_report` **does not exist**. "No failing critical test" is therefore **unproven, not proven**. **Unblocks** module creation and the two defects deferred solely on G-09 (TA-15s §13.3 field coverage and R-13 overwrite refusal; routing the two unlogged restricted reads through `open_restricted`). **Does NOT unblock** G-05, G-06, G-P1A, G-P2, G-P3A/C or G-07, and does not relax TE §18.2s absolute rule or §18.3s standing stop-and-report obligation. **No independent supervisor signature artifact exists and none is claimed.** |
 | D-32 All eight §15.2 acceptance rows approved | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, on `GOV-2026-08-28-FD-01` Rec 22, **board option 1** (the boards own recommendation). All eight approved, **none deferred**: FR-P1-04-15, FR-P1-04-18, FR-P1-05-7, FR-P1-05-20, `TST-CLAIMS-01`, FR-P1-05-19, FR-P1-05-16, FR-P1-05-18. Closes the `GOV-F-06` interval that options 2 and 3 would have left open. **Approval creates the bar and discharges nothing** — none of the eight is executable today because no producing code exists, which was true of every option. **No scientific value is decided**: FR-P1-04-18s interpolation method stays a §18.2 Student-owned forbidden choice (Q-15) and FR-P1-05-18s disturbed-hour minimum stays supervisor-owned. A Vision §15.2 amendment to the §16/§19 tables is **owed**. `models-and-baselines` inline acceptance form stays excluded and open. **No supervisor signature artifact exists and none is claimed.** |
+| D-33 cell_rule identifier + config transcription | **No — TE §18.2 countersignature REQUIRED and NOT YET GIVEN** | 2026-09-10 | Adopted as drafted by the project decision owner on the 2026-09-10 ruling (`CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §2, draft D-A). Freezes the EXISTING convention only: 1°×1° cell by its lower-left (floor) corner, half-open on both axes, identifier **`floor-half-open-d1`** (already `CELL_RULE_ID` in `src/data/registry.py`), transcribed into `configs/data.yaml`. **No station moved, no grid resolution changed, `stations` NOT resolved** (still `TBD — freeze gate`, coordinates still PROVISIONAL). **The Madrigal bin-edge confirmation remains OWED** and is a recorded limitation of the freeze. TE §18.2 makes this a Student + Supervisor forbidden choice: **no signed document from Dr. Reza Saraf Shirazi exists for D-33 and none is claimed**; see the D-1 addendum for D-1's own closure under the recorded authority equivalence, which this decision does not extend to itself. |
+| D-34 Practical relevance — no threshold set | **Yes** | 2026-09-10 | Adopted as drafted (§3, draft D-B). **No numeric threshold is set anywhere**; the frozen object is the PROTOCOL (Vision §5.4 + PC-09): 10% is a named reference magnitude, not a pass/fail rule; descriptive reporting unless the supervisor explicitly approves a threshold; any approved threshold may not sit below the §6.9 target uncertainty budget; **no threshold may be introduced, changed or reinterpreted after December is opened**; significance and usefulness stay distinct. `configs/experiment.yaml: practical_relevance_threshold` **keeps its `TBD — freeze gate` sentinel**, which now records the DECIDED state "no threshold approved". Any future numeric needs a **separate governance act with explicit supervisor approval** and its own D-number. No supervisor signature exists or is claimed — none is required, because no threshold is approved. |
+| D-35 Permitted-producer policy + eleven rows | **Yes** | 2026-09-10 | Adopted as drafted (§4, draft D-C). Freezes the **leakage-safe policy** (available at the forecast origin; no future target TEC; no locked-December access; declared safe lags respected; no future information via preprocessing, train-only fitting; deterministic where required; 1-hour-ahead compatible; no IRI-derived anything) and the **eleven rows whose producing artifact the implemented contract fixes**: `vtec_lag`/`vtec_seq_24`/`target_support` → `phase1_hourly_target`; the four time rows → `record_timestamp`; the four station rows → `station_registry`. The **seven driver rows (`kp_safe`, `ap_safe`, `hp60_safe`, `ap60_safe`, `f107_safe`, `f107_81_trailing`, `dst`) REMAIN DEFERRED and fail closed** — not rejected, but unassignable without inventing a provider artifact identity (D-10.1 fixes providers, TE §6.2 says "GFZ or approved source" for Hp60/ap60). **`dst` stays diagnostic-only and is never an ML feature**; **R-78 is unchanged** (no support field admitted). Transcription of already-governed contract; no scientific value set. No supervisor signature exists or is claimed. |
+| D-36 TensorFlow pin `tensorflow==2.21.0` | **Yes** | 2026-09-10 | Adopted as drafted (§5, draft D-D); the owner selected the version. `requirements.txt` carries `tensorflow==2.21.0`, the CPU wheel (TC-01), the ONE neural stack (TE §8.3), matching the tf.keras 2.21.0 candidate API `src/models/lstm.py` was written against. **PINNING IS NOT VERIFICATION**: installation, import and API-compatibility checks have **NEVER BEEN EXECUTED** (PyPI unreachable, verified 2026-09-10); no TensorFlow import has ever succeeded here; **TE §8.1's both-platform (Kaggle AND local) condition is UNMET and the Kaggle compatibility check is OWED**. The guard now passes on the governed file; its refusal of an absent or commented-out pin is unchanged. No M-06 fit has run; TA-26 stays `Pending`. No supervisor signature exists or is claimed. |
+| D-37 D-27 affirmed; BLK-08 mechanism limb closed | **Yes** | 2026-09-10 | Adopted as drafted (§6, draft D-E); the owner chose Choice B, affirm the withholding. **A REAFFIRMATION, never a supersession — D-27 stands, unreopened and unamended.** D-27's withholding of a general inverse route is affirmed permanently: **the refusal IS the mechanism** (R-139 control 25 preserved at full strength); **R-103's joint contract is adopted in D-27's identity form**, the primary path's citable route being **`identity (D-27: primary target untransformed)`** because its output is already raw TECU; **`ABL-DIFF` keeps the only real inverse** with error propagation recorded (TE §7.2). **No generic inverse-transform route is created, no `inverse`/`apply` added to any transform, and no import-boundary change is authorised.** **BLK-08's mechanism limb is CLOSED by this decision; BLK-02 stays OPEN.** No supervisor signature exists or is claimed. |

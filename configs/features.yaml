@@ -32,8 +32,9 @@ normalization: "TBD — freeze gate"
 # feature matrix is produced.
 #
 # THE LEAKAGE-SAFE POLICY, frozen by the project decision owner's ruling of 2026-09-10
-# (draft D-C in governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md; the
-# D-number is the owner's to adopt). A feature may be produced for a row only if it is
+# ADOPTED as **D-35** (2026-09-10); prepared at
+# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
+# evidence/DECISIONS.md. A feature may be produced for a row only if it is
 # available at the forecast origin; carries no future target TEC; needs no locked-December
 # access; respects its declared safe lag; introduces no future information through
 # preprocessing (train-only fitting where any fitting occurs); is deterministic where

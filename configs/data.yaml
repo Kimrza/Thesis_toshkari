@@ -44,17 +44,18 @@ release:
 # see the note at the field itself; `stations` is unchanged and still unresolved.)
 stations: "TBD — freeze gate"
 # cell_rule — FROZEN as the EXISTING convention by the project decision owner's ruling of
-# 2026-09-10 (draft D-A in
-# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md; the D-number is the
-# owner's to adopt, and TE §18.2 assigns this rule to Student + Supervisor, so a SUPERVISOR
-# COUNTERSIGNATURE IS OWED). The value is the identifier already declared in
+# 2026-09-10, ADOPTED as **D-33** (2026-09-10). Prepared at
+# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
+# evidence/DECISIONS.md. TE §18.2 assigns this rule to Student + Supervisor, so a
+# SUPERVISOR COUNTERSIGNATURE IS REQUIRED AND NOT YET GIVEN. The value is the identifier
+# already declared in
 # src/data/registry.py (CELL_RULE_ID) for the convention already in use — a 1° × 1° cell
 # identified by its lower-left (floor) corner, half-open in both axes:
 #   cell = [floor(lat), floor(lat)+1) × [floor(lon), floor(lon)+1)
 # (notebooks/madrigal_phase1_coverage_audit.ipynb cell 4, verbatim). No grid was invented
 # and no station was moved. The notebook's own caveat is NOT discharged by this freeze:
 # confirm the convention against the real bin edges Madrigal returns before relying on it.
-cell_rule: "floor-half-open-d1" # draft D-A (owner ruling 2026-09-10); countersignature owed
+cell_rule: "floor-half-open-d1" # D-33 (2026-09-10); TE §18.2 countersignature NOT YET GIVEN
 
 # Declared input sources with hashes (assert_declared_sources_exist walks these;
 # a declared hash that does not resolve is a failure, never a warning). Empty:

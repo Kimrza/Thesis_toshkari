@@ -566,8 +566,8 @@ def test_permitted_producers_incomplete_names_only_the_missing_rows() -> None:
 
 #: The eleven dictionary rows whose PRODUCING ARTIFACT the implemented contract itself
 #: fixes, and the producer each takes — transcribed by the owner's ruling of 2026-09-10
-#: (draft D-C, CR-2026-09-10). Enumerated here literally, never imported from the config
-#: it checks (that would be circular).
+#: (D-35, adopted 2026-09-10). Enumerated here literally, never imported from the
+#: config it checks (that would be circular).
 _CONTRACT_FIXED_PRODUCERS: dict[str, str] = {
     "vtec_lag": "phase1_hourly_target",
     "vtec_seq_24": "phase1_hourly_target",
@@ -582,7 +582,7 @@ _CONTRACT_FIXED_PRODUCERS: dict[str, str] = {
     "station_lat": "station_registry",
 }
 #: The seven driver-class rows deliberately left unassigned until the driver release
-#: exists (draft D-C §4.3): NOT rejected on policy grounds, and still fail-closed.
+#: exists (D-35 limb 3): NOT rejected on policy grounds, and still fail-closed.
 _DEFERRED_DRIVER_ROWS: tuple[str, ...] = (
     "kp_safe",
     "ap_safe",
@@ -597,7 +597,7 @@ _DEFERRED_DRIVER_ROWS: tuple[str, ...] = (
 def test_permitted_producers_real_features_yaml_carries_exactly_the_contract_fixed_rows() -> (
     None
 ):
-    """Owner ruling 2026-09-10 (draft D-C): the repository's own block now carries the
+    """Owner ruling 2026-09-10, adopted as D-35: the repository's own block now carries the
     eleven contract-fixed rows with their contract-fixed producers, and NOTHING else.
 
     Asserted by set-difference in both directions, so an added row (a producer assigned

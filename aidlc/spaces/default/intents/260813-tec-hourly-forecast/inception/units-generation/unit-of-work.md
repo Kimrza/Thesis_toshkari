@@ -872,6 +872,18 @@ interpolation rule.
 | `fixtures-and-reproducibility` | BLK-02 (implementation limb), BLK-03 ↓, BLK-04 ↓, **BLK-08 ↓**, **BLK-09 ↓** | the `plumbing_7day` manifest — hence its completion gate. **Station resolved 2026-08-22 as BSHM (D-20); manifest, execution and measured evidence still pending.** Inherited: the clean-run tolerance comparison and TA-21's traceability matrix consume artifacts from all four units carrying BLK-03 and BLK-04, so what those contracts permit bounds what a clean run can be said to reproduce. **BLK-01 closed 2026-08-22**: TE §13.2 now carries the `PYTHONHASHSEED=0` clause, so the clean-run contract is no longer blocked on its absence. |
 | `inventory-and-registry`, `external-products` | — | none of their own; both call `foundation`'s now-authorized stage entry contract, and `inventory-and-registry`'s December coverage audit is already routed through `open_restricted`. |
 
+> **⚠ BLK-08 status update — 2026-09-10: the MECHANISM LIMB is CLOSED by D-37.** Appended,
+> not rewritten: every `BLK-08` mark in the table above and in the per-unit paragraphs is the
+> accurate record of the state when written, and the rows are left standing. The project
+> decision owner adopted the D-27 reaffirmation as drafted
+> (`governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md` §6), recorded as
+> **D-37** in `evidence/DECISIONS.md`: D-27 stands unreopened, **the refusal IS the
+> mechanism** (R-139 control 25 preserved at full strength), R-103's joint contract is adopted
+> in D-27's identity form with `identity (D-27: primary target untransformed)` as the primary
+> path's citable route, and `ABL-DIFF` keeps the only real inverse. No generic
+> inverse-transform route and no import-boundary change is created. **BLK-02 remains OPEN and
+> is untouched by D-37**, as do BLK-05, BLK-06 and BLK-07 in their own limbs.
+
 Roll-up notation matches the `Blockers` column in § Unit definitions and each
 unit's `**Blockers.**` line: an unmarked ID is owned here, **↓** is inherited
 through a consumed contract.
