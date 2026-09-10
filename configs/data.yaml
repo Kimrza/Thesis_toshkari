@@ -57,6 +57,56 @@ stations: "TBD — freeze gate"
 # confirm the convention against the real bin edges Madrigal returns before relying on it.
 cell_rule: "floor-half-open-d1" # D-33 (2026-09-10); TE §18.2 countersignature NOT YET GIVEN
 
+# --- the six frozen partitions (ADR-11; R-80's closed six-value space) -------------------
+# TRANSCRIPTION into the live source of truth, approved by the project decision owner on
+# 2026-09-10. This is NOT a new split calendar: `src/data/splits.py: build_partitions` is the
+# only consumer, `configs/experiment.yaml: folds` is inert (no reader) and is deliberately
+# left unresolved so no second source of truth exists.
+#
+# PROVENANCE, kept distinct per the owner's ruling:
+#   * F1-F4 and REFIT — train_start, train_end and validation_month are specified DIRECTLY by
+#     TE §7.1's split-configuration table ("1 January-31 March 2022 | 24 hours | April 2022",
+#     and so on; final refit "1 January-30 November 2022", evaluated nowhere per FR-P1-04-14).
+#   * DEC — TE §7.1 shows "—" for the locked row's TRAINING interval, so its bounds are NOT
+#     transcribed from it. They are DETERMINED by existing constraints the validator enforces:
+#     `train_start == study_start` (TE §7.1's expanding window from one origin, D-8) and
+#     `DEC.train_end == REFIT.train_end` (R-80, Recommendation 25 — a locked-month fit is
+#     unrepresentable by the field). Exactly one value is admissible for each.
+# The embargo is NOT repeated here: its single home is `configs/experiment.yaml:
+# embargo_hours`, read by `build_partitions` and applied to every partition (TE §7.1's
+# "24 hours" column). No validator or split rule is altered by this transcription.
+partitions:
+  F1:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-03-31
+    validation_month: 2022-04-01
+  F2:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-06-30
+    validation_month: 2022-07-01
+  F3:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-09-30
+    validation_month: 2022-10-01
+  F4:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-10-31
+    validation_month: 2022-11-01
+  REFIT:
+    kind: "refit"
+    train_start: 2022-01-01
+    train_end: 2022-11-30
+    validation_month: null # scored nowhere (FR-P1-04-14; ADR-11 M5 — only REFIT carries null)
+  DEC:
+    kind: "locked"
+    train_start: 2022-01-01 # determined: study start (expanding window, D-8)
+    train_end: 2022-11-30 # determined: == REFIT.train_end (R-80)
+    validation_month: 2022-12-01
+
 # Declared input sources with hashes (assert_declared_sources_exist walks these;
 # a declared hash that does not resolve is a failure, never a warning). Empty:
 # nothing is declared yet; acquisition declares its inputs when it lands.
