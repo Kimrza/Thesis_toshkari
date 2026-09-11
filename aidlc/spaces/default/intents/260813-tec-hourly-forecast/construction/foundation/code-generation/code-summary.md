@@ -227,3 +227,58 @@ The `cell_rule` freeze is a genuine transcription of this unit's own pre-existin
 `CELL_RULE_ID` constant, not an invented value, and the diff leaves `stations` and this
 unit's other TBD sentinels untouched. The Student+Supervisor countersignature obligation
 is stated, not silently discharged. No defect found in this unit's exposure to the pass.
+
+## Floor-reset re-review (2026-09-11)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T13:30:47Z
+**Iteration:** Gate-floor reset — re-derived against HEAD `715f392`, not carried from any
+prior verdict in this file.
+
+### Scope and method
+
+Re-verified adversarially against the current tree: `src/data/config.py`,
+`src/data/experiment_registry.py`, `src/data/release.py`, `configs/*.yaml`,
+`tests/test_determinism.py`, `tests/test_experiment_registry.py`,
+`tests/test_release_hashes.py`, plus (spot-check only, per the dispatch's named
+integration point) `src/data/acquisition.py` and `tests/test_acquisition.py` for the
+cross-unit egress guard this unit's module now calls into. `git log`/`git show 715f392`
+used to establish which commit actually changed which files (this unit's module was
+edited in `715f392`, not a prior commit, contra a naive stat-only read of that commit's
+top-of-diff).
+
+### Findings
+
+| # | Severity | Where | What | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `functional-design/business-rules.md` R-01 (lines ~411–416: "Negative control — the enumeration itself"); `tests/` (26 modules, no such test) | **Unresolved across three review passes (2026-09-05, 2026-09-10, this one).** R-01's own rule text mandates a test that re-derives every project-defined `*Error` name raised across the twelve units' `functional-design` artifacts and fails when a name is neither in R-01's fifteen nor disclosed under the any-future clause — the control the rule states exists "to catch the failure R-01 suffered twice." `grep -rn "def test_" tests/*.py` (26 modules) turns up per-unit spot-checks (`issubclass(XError, IntegrityError)` in `test_acquisition.py`, `test_reuse_registry.py`, `test_phase_contract.py`, `test_common_masks.py`, `test_prepared_target_schema.py`) but no census/reconciliation test anywhere in the suite; `tests/test_determinism.py` (this unit's own C-1 module) has none. The governance closure evidence explicitly asked for "one programmatic derivation… reconciled against R-01's list and printed in `foundation`'s artifact" — still absent from both the test suite and this artifact. | Add the reconciliation test to `tests/test_determinism.py` (or a new `tests/test_exception_taxonomy.py`) before this stage is treated as closed; the fifteen-plus-any-future census is otherwise a hand-maintained claim with no regression guard, which is exactly the failure mode R-01 names. |
+| 2 | Minor | `code-summary.md` (this file), "Files modified in place" table | This unit's own record still does not describe the credential-egress addition to `src/data/experiment_registry.py` (`REDACTED_FREE_TEXT_FIELDS`, `_guard_free_text_egress`, called from `append_registry_event`) landed by the `acquisition` repair in `715f392`. Confirmed a real gap, not a false claim: `git show 715f392 -- src/data/experiment_registry.py` shows +62/−0 lines to a module this file's own table describes with no reference to the addition anywhere above. Already disclosed as a known gate item in the `715f392` commit message and in `team.md`'s `gf-3` learning, so this is recorded per the dispatch instruction rather than treated as newly discovered. | Update the "Files modified in place" entry for `src/data/experiment_registry.py` at the next touch of this artifact, per `gf-3`. |
+
+### Verification performed (evidence, not trust)
+
+- **Cross-unit edit soundness (item 2 of the dispatch).** Read `git show 715f392 -- src/data/experiment_registry.py` in full: `_guard_free_text_egress` is called inside `append_registry_event` immediately after `_validate_row` and strictly *before* `os.open`/`os.write` (line ~380, confirmed by direct read of the function body, lines 341–430) — `_validate_row` itself performs no I/O (read in full, lines 185–239: pure dict/type checks, no `open`/`os.write`). A refused row therefore reaches no `os.write` call at all; the log is byte-identical on refusal, not merely "restored." `tests/test_acquisition.py::test_registry_reason_carrying_a_credential_refuses_and_writes_no_byte` asserts `registry.read_bytes() == before` directly, and `test_registry_notes_carrying_a_credential_refuses_and_writes_no_byte` asserts `not registry.exists()` on the first-row case — both independently reproduced (below).
+  - **False-positive risk on this unit's own legitimate writers**: `test_registry_egress_coverage_is_derived_and_equals_the_declared_field_set` drives every one of the twenty registry columns plus `reason` with a credential sentinel and asserts the DERIVED refused-set equals `REDACTED_FREE_TEXT_FIELDS` exactly (`("notes", "reason")`) — so the guard neither over-refuses a machine-generated column (`run_id`, hex digests, `environment_lock_hash`) nor under-covers a prose column. `test_a_clean_registry_row_still_appends_after_the_guard` is the explicit must-not-fire control: ordinary prose in `notes` appends exactly one record. Reproduced independently (below): both pass.
+  - **R-01 compliance of the new exception**: `CredentialEgressError` derives from `IntegrityError` (`src/data/acquisition.py:172`), riding the any-future clause per R-01's own text — consistent, not a second declaration site; R-01 governs the base-class relation, not a single-file-only declaration (business-rules.md ~line 170: "every project-defined exception derives from `IntegrityError`", eighteen named riders including `CredentialEgressError` explicitly enumerated at ~line 226).
+- **R-01 single-base-class integrity (re-derived, not carried).** `grep -rn "^class .*Error" src/` → 30 classes; every one derives from `IntegrityError` either directly or (for `AcquisitionError`, `CredentialEgressError`) as its own subclass of `IntegrityError`. `IntegrityError` itself and its 23 direct subclasses live solely in `src/data/config.py` (the single declaration site for the *base hierarchy proper*); the six riders declared in their raising units (`AcquisitionError`, `CredentialEgressError` in `acquisition.py`; `GateError` in `inventory.py`; `EvidenceScanError` in `locked_test.py`; `ManifestError` in `phase_contract.py`; `ReuseError` in `reuse_registry.py`) match R-01's own "declared where raised, under the any-future clause" design — not a violation of R-01, which never claims single-file declaration for every subclass, only a shared base.
+- **`load_configs` / `ConfigSnapshot` / D-38 additions.** `configs/data.yaml`'s `partitions` (six entries, F1–F4 plus locked December) and `configs/experiment.yaml`'s `embargo_hours: 24` read as real, transcribed values (not `TBD — freeze gate`); `grep -n "embargo_hours\|folds" configs/experiment.yaml` confirms `folds` is still the literal sentinel and carries an explicit "has NO reader" comment. Neither `partitions` nor `embargo_hours` is a `REQUIRED_FIELDS_MAP` entry for any stage (`src/data/config.py` lines 539–608, read in full) — by the same documented design as the other deliberately-minimal preflight entries, enforced at each consuming unit's own raise point rather than this unit's preflight. `grep -c TBD configs/*.yaml` → data.yaml 2, features.yaml 5, experiment.yaml 20, seeds.yaml 0 — no sentinel silently filled. `grep` for `C:\`, `/home/`, `/Users/`, `D:\` across all four configs → zero hits.
+- **`tests/test_determinism.py` skip classification.** `grep -c "^def test_" tests/test_determinism.py` → 35, matching 12+23 exactly. Independently reproduced under the scratchpad's stdlib pytest stand-in (`26ca41ab.../scratchpad/pytest_standin/run_tests.py`, CPython 3.11.16): **12 passed, 0 failed, 23 skipped, 0 errors**, each skip naming `could not import 'yaml'` — matches the prior cleanup review's claim exactly, no drift since 2026-09-10.
+- **Test totals, independently re-run** (stdlib stand-in; real pytest/ruff unavailable, PyPI egress blocked — named honestly, not called "pytest"):
+  - `tests.test_experiment_registry`: **49 passed, 0 failed, 0 skipped, 0 errors** (26 source-level `def test_` functions, 3 parametrized, expanding to 49 executed cases — matches the code-summary's "49 cases" read as executed-case count, not function count).
+  - `tests.test_determinism`: **12 passed, 0 failed, 23 skipped, 0 errors**.
+  - `tests.test_release_hashes`: **149 passed, 0 failed, 0 skipped, 0 errors**.
+  - Full 26-module suite: **1144 passed, 0 failed, 39 skipped, 0 errors** — reproduces `715f392`'s commit-message claim exactly.
+  - `tests.test_acquisition` (spot-check for the cross-unit guard only): **56 passed, 0 failed, 0 skipped, 0 errors**, including the egress-coverage-derivation and must-not-fire controls named above.
+- **No credential, no weakened guard, no silently filled TBD** found anywhere in this unit's touched surface. `requirements.txt` carries `tensorflow==2.21.0` per the owner's D-36 ruling, consistent with the dispatch context (install/import unverified, disclosed, not this unit's defect to raise again).
+
+### Coverage limits of this pass
+
+- Read scope: this unit's own artifacts and modules, the shared contracts named in the dispatch, `configs/`, `evidence/DECISIONS.md`, and — as the one permitted spot-check for the named integration point — `src/data/acquisition.py` and `tests/test_acquisition.py` for the guard this unit's module now calls. No other sibling unit's `construction/<unit>/` directory was read.
+- Did not re-run `ruff` (not installed, PyPI egress blocked) — consistent with every prior pass on this unit; code inspection only for style/lint conformance on the new lines.
+- Did not re-verify governance/gate-worklist state beyond what bears directly on this unit's code and tests.
+
+### Summary
+
+One Major survives, unresolved for the third consecutive review pass: R-01's own mandated reconciliation negative control (the enumeration census) is still absent from the suite, though the hierarchy it would check is today correctly declared and no live violation exists. The cross-unit edit to `src/data/experiment_registry.py` is genuinely additive and fail-closed — verified by direct read of call order (guard before any `os.write`), by independent reproduction of the byte-identical-on-refusal and must-not-fire tests, and by the derived-coverage test that pins the routed-column set exactly to `REDACTED_FREE_TEXT_FIELDS`; it does not newly refuse any row this unit's own writers legitimately produce. The one disclosed record-staleness item (this file not describing that edit) is recorded per dispatch instruction rather than newly discovered, and is not treated as a code defect. D-38's config additions are genuine transcriptions with no TBD weakened and no machine path introduced. All re-run test counts (49 / 12+23 / 149 / 1144 total) reproduce exactly under independent execution. Per this stage's stated verdict rule (NOT-READY only on any Critical or more than two Major findings), one Major with zero Critical does not cross the threshold.
+
+**Verdict: READY**

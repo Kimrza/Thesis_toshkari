@@ -25447,3 +25447,182 @@
 **Event**: HUMAN_TURN
 
 ---
+
+## Gate Rejected
+**Timestamp**: 2026-09-11T13:22:58Z
+**Event**: GATE_REJECTED
+**Stage**: code-generation
+**Recovered**: true
+**Details**: Backfilled by the revision backstop: the artifact was revised at an open gate with no reject recorded
+
+---
+
+## Stage Revising
+**Timestamp**: 2026-09-11T13:22:58Z
+**Event**: STAGE_REVISING
+**Stage**: code-generation
+**Revision count**: 29
+**Recovered**: true
+
+---
+
+## Stage Awaiting Approval
+**Timestamp**: 2026-09-11T13:22:58Z
+**Event**: STAGE_AWAITING_APPROVAL
+**Stage**: code-generation
+**Recovered**: true
+**Details**: Re-entering gate after backfilled revision
+
+---
+
+## Error Logged
+**Timestamp**: 2026-09-11T13:22:58Z
+**Event**: ERROR_LOGGED
+**Tool**: aidlc-state
+**Command**: aidlc-state approve code-generation --user-input Approve + commit --project-dir C:\Users\s_sch\Desktop\test\Thesis_toshkari-main\Thesis_toshkari-main
+**Error**: Refusing to complete "code-generation": it declares a reviewer (aidlc-architecture-reviewer-agent) but 12 of 12 applicable units have no fresh recorded review (foundation, governance-guards, acquisition, inventory-and-registry, external-products, target-standardization, features-and-splits, models-and-baselines, evaluation-and-comparison, statistical-inference, regimes-diagnostics-reporting, fixtures-and-reproducibility). The reviewer fires once per unit; record each with `aidlc-log.ts review --stage code-generation --unit <unit> --reviewer aidlc-architecture-reviewer-agent --verdict <READY|NOT-READY>` before approving.
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-11T13:29:46Z
+**Event**: HUMAN_TURN
+
+---
+
+## Gate Rejected
+**Timestamp**: 2026-09-11T13:29:56Z
+**Event**: GATE_REJECTED
+**Stage**: code-generation
+**Feedback**: Reopen to re-run all 12 unit reviews on the current floor: the prior receipts were invalidated when reviewer verdict blocks were written into produces[] artifacts at an open gate, and the engine correctly backfilled a rejection. Reviews will now run while the stage is in the revising state, where artifact writes are legitimate.
+
+---
+
+## Stage Revising
+**Timestamp**: 2026-09-11T13:29:56Z
+**Event**: STAGE_REVISING
+**Stage**: code-generation
+**Revision count**: 30
+**Feedback**: Reopen to re-run all 12 unit reviews on the current floor: the prior receipts were invalidated when reviewer verdict blocks were written into produces[] artifacts at an open gate, and the engine correctly backfilled a rejection. Reviews will now run while the stage is in the revising state, where artifact writes are legitimate.
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-11T13:30:09Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: foundation
+**Iteration**: 1
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-11T13:32:41Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Glob
+**Target**: .
+**Stage**: code-generation
+**Unit**: foundation
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-11T13:34:33Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: .
+**Stage**: code-generation
+**Unit**: foundation
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-11T13:34:37Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: .
+**Stage**: code-generation
+**Unit**: foundation
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-11T13:38:16Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/code-generation/code-summary.md
+**Context**: construction > foundation > code-generation > code-summary.md
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-11T13:38:34Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: a8f1a0330ebc60d2a
+**Message**: Both findings are recorded in the code-summary.md's new "Floor-reset re-review (2026-09-11)" section with full evidence trails. The second finding is a known, already-disclosed gate item (per the `715
+
+---
+
+## Review Completed
+**Timestamp**: 2026-09-11T13:39:07Z
+**Event**: REVIEW_COMPLETED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: foundation
+**Iteration**: 1
+**Verdict**: READY
+**Artifact Fingerprint**: sha256:015a86b9722265560caf460ef6a5aa91eeb1aed608c054f13f44dc0aada7f955
+
+---
+
+## Review Requested
+**Timestamp**: 2026-09-11T13:39:07Z
+**Event**: REVIEW_REQUESTED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: governance-guards
+**Iteration**: 1
+
+---
+
+## Reviewer Scope Blocked
+**Timestamp**: 2026-09-11T13:41:36Z
+**Event**: REVIEWER_SCOPE_BLOCKED
+**Tool**: Bash
+**Target**: .
+**Stage**: code-generation
+**Unit**: governance-guards
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-11T13:43:12Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/governance-guards/code-generation/code-summary.md
+**Context**: construction > governance-guards > code-generation > code-summary.md
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-11T13:43:27Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-architecture-reviewer-agent
+**Agent ID**: a80bc35147829ffd3
+**Message**: **Reviewer:** aidlc-architecture-reviewer-agent\n\n**Verdict:** NOT-READY\n\nRe-deriving the verdict fresh against HEAD `715f392` (not carrying forward the 2026-09-10 block), I found that nothing has chan
+
+---
+
+## Review Completed
+**Timestamp**: 2026-09-11T13:43:44Z
+**Event**: REVIEW_COMPLETED
+**Stage**: code-generation
+**Reviewer**: aidlc-architecture-reviewer-agent
+**Unit**: governance-guards
+**Iteration**: 1
+**Verdict**: NOT-READY
+**Artifact Fingerprint**: sha256:26861170e357e13b424fe5c83d23fe9041d32ab4e0cd3fbc3f6f63059eb330e4
+
+---
