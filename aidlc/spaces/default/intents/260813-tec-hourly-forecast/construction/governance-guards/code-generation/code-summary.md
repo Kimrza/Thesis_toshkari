@@ -133,3 +133,46 @@ The unit is well-built and its most safety-critical mechanisms (phase-boundary l
 Both iteration-1 Majors are substantively repaired: all three originally-proven evasions are now caught, the disclosure is honest and pinned by a non-vacuous test, and the completeness checker's two realistic failure modes (omitted call, wrong order) are now genuinely proven by synthetic fixtures rather than resting on unexercised code. Direct execution surfaces two residuals beyond what was fixed: a keyword-argument call form (e.g. `.format(a=...)`) still bypasses the literal-assembly fold and is undisclosed, contradicting the unqualified "`str.format` with constant operands" claim (Major, narrower in scope than iteration 1's finding but a real, reproducible bypass of a claim actually made); and the completeness checker has no reachability awareness, so a guard call placed in dead/unreached code passes as compliant (Minor — a more contrived scenario, partially covered by the existing general heuristic disclaimer, and the two realistic failure modes it was built to catch are confirmed working). Zero Critical, one Major, one Minor: within the stated verdict rule (READY if zero Critical, ≤2 Major, any number of Minor).
 
 **Verdict: READY**
+
+## Gate-floor re-review (2026-09-10)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Verdict:** READY
+
+### Scope note
+
+The dispatch brief for this pass asked for a fresh verdict on four units
+(`acquisition`, `governance-guards`, `inventory-and-registry`,
+`target-standardization`) in one pass. This session's reviewer read-scope hook
+(`aidlc-reviewer-scope.ts`) hard-locked every attempted read to unit
+`governance-guards` only — every path under `construction/acquisition/`,
+`construction/inventory-and-registry/`, and `construction/target-standardization/`
+was refused, including bare top-level directory listings, on repeated retry with
+literal (non-variable) paths. That is an environment constraint, not a choice:
+this re-review covers `governance-guards` only. The other three units were not
+opened, read, or assessed in this pass and carry no fresh verdict from this
+session.
+
+### Findings
+
+| # | Severity | Where | What | Recommended action |
+|---|---|---|---|---|
+| 1 | Major | `src/data/locked_test.py` (whole-file diff since this unit's 2026-09-05 iteration-2 READY, verified via `git show 8a6cb61 -- src/data/locked_test.py`); `governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md:82-85` | The dispatch brief asked for independent verification that `src/data/locked_test.py` "must show ZERO diff." It does not: commit `8a6cb61` (2026-09-07, authored at `evaluation-and-comparison` stage 3.5 under owner ruling Q2=B) adds two optional `AccessRecord` fields (`mask_bundle_ids`, `mask_registry_hash`) and a new `_containment_fields`/`open_restricted(..., mask_bundle_manifest=None)` code path. The CHANGE_RECORD states verbatim (line 84-85): "`governance-guards` owes its own review of the two fields at its next touch." This code-summary — the unit's own frozen receipt — has not been updated to record that review; this gate-floor pass is the first point at which the obligation is discharged, and only inside this Review addendum, not in the summary body above. Independently verified by direct execution: the change is additive and backward-compatible (`AccessRecord.__post_init__`'s required-field check is untouched; both new fields default `None`; existing callers unaffected — confirmed via `inspect.signature`), and `_containment_fields` fails closed on a present-but-unparseable manifest (raises `LockedTestError` rather than silently recording `None`, per the diff's own docstring). However, the new code path's own test coverage lives entirely in a sibling test file (`tests/test_common_masks.py:744-951`, `evaluation-and-comparison`'s), not in `tests/test_locked_test_guard.py` — governance-guards' own suite has zero tests naming `mask_bundle_ids`, `mask_registry_hash`, or `_containment_fields`, for a new failure mode (broken-manifest refusal) in a module this unit owns. | Update `code-summary.md`'s body (not only this addendum) to record the Q2=B edit under Files-modified and add at least one governance-guards-owned test in `tests/test_locked_test_guard.py` that exercises `_containment_fields`/`open_restricted`'s new keyword directly, rather than relying solely on the sibling's coverage. |
+| 2 | Minor | `tests/test_phase_contract.py:266-291` (`test_every_phase1_producing_script_calls_the_field_guard_before_its_first_write`); code-summary.md line 26 ("no hourly-target artifact; producing-script population empty") | `scripts/00_acquire_prepared_vtec.py` through `07_evaluate_and_report.py` (all eight names in `PHASE1_PRODUCING_SCRIPTS`) now exist on disk, added by sibling units after this unit's 2026-09-05 review. The R-24 completeness test's population is therefore no longer empty, and it no longer hits its `pytest.skip` branch — it now executes the real per-script check. Re-derived independently by direct AST execution against all eight real scripts (reimplementing `_first_guard_call_lineno`/`_first_write_lineno` inline): every script calls `assert_no_raw_fields` before its first write (guard line precedes write line, or no write exists), so the real check currently PASSES. This is a functionally sound outcome, but code-summary.md's "producing-script population empty (explicit-record skip, never silent vacuity)" claim is now stale and unswept. | Re-run the suite, confirm `test_every_phase1_producing_script_calls_the_field_guard_before_its_first_write` now executes (not skips), and update the skip-count/skip-reason line in code-summary.md accordingly. |
+
+### Verified and held (checked independently this pass, not defects)
+
+- `tests/test_locked_test_guard.py` gained a disclosed, non-invasive Section 9 (commit `6246907`, 2026-09-06, `features-and-splits`' ADR-03 "limb 1", ~190 lines) appended after governance-guards' own material. Its own docstring states "Cases unchanged by the 2026-09-06 extension" for governance-guards' sections 1-8 — verified true by reading the diff hunk directly: the only change to the pre-existing body is an added docstring paragraph before line 1; no line in sections 1-8 is touched. `src/data/splits.py` and `tests/test_split_embargo.py`, which the new section imports from, both exist and parse cleanly (`ast.parse`, no `SyntaxError`). Not a defect against this unit; code-summary's "16 → 36 tests" figure remains accurate for governance-guards' own share of the file, though the file as a whole now holds more tests than that number implies.
+- `src/data/phase_contract.py`, `src/data/reuse_registry.py`, `tests/test_reuse_registry.py`, `tests/test_phase_boundary.py` carry no commits after this unit's own 2026-09-05 work (`git log` shows their last touch predates it) — genuinely zero diff on these four.
+- `configs/experiment.yaml`'s D-38 additions (`embargo_hours: 24`, the `partitions:` block) do not add a `protected_entries`/`protected` key anywhere in `configs/*.yaml` (grepped across all four config files) — `diff_protected_hashes`'s R-19/R-20 claim ("authoritative list not yet in config; BLK-06 untouched") still holds exactly as stated.
+- `evidence/DECISIONS.md` decisions cited by this unit (D-15, D-18, D-31) are all still present and un-renumbered at their cited section headers, alongside the new D-33/D-38 (register now ends at D-38, confirmed).
+- No TBD sentinel owned by this unit was filled; no scientific constant or credential appears in the touched files.
+
+### Coverage limits of this pass
+
+- No real `pytest` is installed in the session's scratchpad venv (PyPI egress blocked, confirmed); verification used direct Python execution (`inspect.signature`, `ast.parse`, hand-reimplemented AST walks matching the tested functions) rather than a full suite run. `tests/test_split_embargo.py` could not be imported standalone in this venv (`ModuleNotFoundError: No module named 'pytest'`) — this is the sandbox's own limitation, not a claim about the project's bootstrapped environment where the unit's own 449-passed count was produced.
+- Per the scope note above, `acquisition`, `inventory-and-registry`, and `target-standardization` were not reachable in this session and carry no verdict here.
+
+### Summary
+
+`src/data/locked_test.py` does not show zero diff since this unit's last review: a sibling unit's owner-instructed, additive edit landed on 2026-09-06 and is explicitly flagged in its own CHANGE_RECORD as owed to `governance-guards`' "next touch" — a debt this code-summary has not yet paid down, though the edit itself verifies as safe, backward-compatible, and fail-closed. A second, unrelated drift — the R-24 completeness test's population going from empty to populated as sibling units filled in `scripts/` — is also unswept in the summary's prose, though the underlying check passes. Both are real, machine-verified findings; neither is a runtime or safety regression, and no Critical finding survived adversarial pressure. Zero Critical, one Major, one Minor: within the stated verdict rule (READY if zero Critical, ≤2 Major, any number of Minor).

@@ -11,6 +11,13 @@ happy path works. Covered, by plan step:
   allowlisted-shaped (structural detection is never allowlist-gated); an auth header
   is refused; a legitimate hash and UUID pass via the named allowlist;
   `CredentialEgressError` derives from `IntegrityError` (R-01 any-future clause).
+* Step 1b (W-9 on the LOG surface): the experiment registry's free-text columns. A
+  credential-shaped `notes` or `reason` refuses at `append_registry_event` and leaves
+  the log byte-identical; `record_abort_honestly` then reports both failures and claims
+  nothing (R-10); the routed set is DERIVED by driving every column with the sentinel
+  and printed before it is asserted equal to `REDACTED_FREE_TEXT_FIELDS`, so the unit's
+  stated chokepoint coverage is pinned by behaviour rather than by prose; and the stage
+  script is checked to keep NO inline copy of the guard (one guard home, c58).
 * Step 2 (SD-A-01, SEC-A-02): the bounded-retry client — a truncated stream never
   yields a manifest row with a hash (completeness BEFORE hash); a divergent re-run
   records both provider filenames and both hashes and refuses to overwrite; retry is
@@ -77,6 +84,7 @@ from src.data.acquisition import (  # noqa: E402
     count_gaps,
     gap_accounting_entry,
     guard_egress,
+    guard_egress_free_text,
     guard_egress_value,
     notebook_output_violations,
     notebook_output_violations_from_text,
@@ -86,7 +94,13 @@ from src.data.acquisition import (  # noqa: E402
     write_request_manifest,
     write_sha256_manifest,
 )
-from src.data.config import IntegrityError, ReleaseError  # noqa: E402
+from src.data.config import IntegrityError, RegistryError, ReleaseError  # noqa: E402
+from src.data.experiment_registry import (  # noqa: E402
+    REDACTED_FREE_TEXT_FIELDS,
+    REGISTRY_COLUMNS,
+    append_registry_event,
+    record_abort_honestly,
+)
 from src.data.locked_test import (  # noqa: E402
     PURPOSES,
     RESTRICTED_ROOT,
@@ -161,6 +175,247 @@ def test_guard_egress_walks_nested_payloads() -> None:
     dirty = {"meta": {"url": f"https://x.example.org/f?sig={SHA64}"}}
     with pytest.raises(CredentialEgressError):
         guard_egress(dirty, context="manifest")
+
+
+# =======================================================================================
+# Step 1b — the chokepoint on the LOG surface: the experiment registry's free-text columns
+# (W-9/R-39; adversarial re-review 2026-09-10 Finding 1, carried forward from 2026-09-05)
+# =======================================================================================
+
+#: A credential-shaped sentinel of the TEST APPARATUS (R-122) — a published GitHub token
+#: PREFIX followed by filler, never a real or valid credential. `guard_egress_value` refuses
+#: it by named prefix, so a refusal here proves the value reached the chokepoint.
+CREDENTIAL_SENTINEL = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6"
+
+
+def _registry_row_for_egress(status: str = "completed", /, **overrides: object) -> dict:
+    """A schema-valid TE 13.4 row (all twenty columns populated where required)."""
+    row: dict = {column: "" for column in REGISTRY_COLUMNS}
+    row.update(
+        {
+            "run_id": "apparatus-run-0001",
+            "started_at_utc": "2001-11-02T00:00:00+00:00",
+            "completed_at_utc": "2001-11-02T00:00:01+00:00",
+            "status": status,
+            "code_commit": "c" * 40,
+            "environment_lock_hash": "d" * 64,
+            "platform": "local",
+            "locked_test_accessed": False,
+            "notes": "apparatus row; no credential",
+        }
+    )
+    if status in ("aborted", "failed"):
+        row["reason"] = "apparatus abort reason; no credential"
+    row.update(overrides)
+    return row
+
+
+def test_registry_notes_carrying_a_credential_refuses_and_writes_no_byte(tmp_path) -> None:
+    """The `notes` column is a LOG this unit writes: a credential-shaped value refuses at
+    the one chokepoint, and the registry file is never created."""
+    registry = tmp_path / "experiment_registry.jsonl"
+    with pytest.raises(CredentialEgressError) as excinfo:
+        append_registry_event(
+            registry,
+            _registry_row_for_egress(notes=f"retrieval policy; token {CREDENTIAL_SENTINEL}"),
+            phase=1,
+            writer_role="stage",
+            access_log_path=tmp_path / "no_access_log.jsonl",
+        )
+    assert "notes" in str(excinfo.value)
+    assert "ghp_" in str(excinfo.value)  # the DETECTION is named, not the value
+    assert CREDENTIAL_SENTINEL not in str(excinfo.value)
+    assert not registry.exists(), "a refused row must leave no byte in the registry"
+
+
+def test_registry_reason_carrying_a_credential_refuses_and_writes_no_byte(tmp_path) -> None:
+    """The aborted branch's `reason` is `str(exc)` in every stage script — the exact field a
+    live provider transport's error text would reach. It refuses, and the prior rows stand."""
+    registry = tmp_path / "experiment_registry.jsonl"
+    append_registry_event(
+        registry,
+        _registry_row_for_egress("started"),
+        phase=1,
+        writer_role="stage",
+        access_log_path=tmp_path / "no_access_log.jsonl",
+    )
+    before = registry.read_bytes()
+    with pytest.raises(CredentialEgressError) as excinfo:
+        append_registry_event(
+            registry,
+            _registry_row_for_egress(
+                "aborted",
+                reason=f"transport failed for https://p.example.org/?sig={CREDENTIAL_SENTINEL}",
+            ),
+            phase=1,
+            writer_role="stage",
+            access_log_path=tmp_path / "no_access_log.jsonl",
+        )
+    assert "reason" in str(excinfo.value)
+    assert registry.read_bytes() == before, "the refused append must not have run"
+
+
+def test_record_abort_honestly_claims_nothing_when_the_reason_is_refused(tmp_path, capsys):
+    """R-10 reaching the egress layer: when the `aborted` row is itself refused, the writer
+    returns False, preserves the ORIGINAL failure, and never claims a record was written."""
+    registry = tmp_path / "experiment_registry.jsonl"
+    original = AcquisitionError("provider transport", "the original failure")
+    written = record_abort_honestly(
+        registry,
+        _registry_row_for_egress("aborted", reason=f"Authorization: Bearer {SHA64}"),
+        phase=1,
+        writer_role="stage",
+        access_log_path=tmp_path / "no_access_log.jsonl",
+        original_error=original,
+    )
+    assert written is False
+    assert not registry.exists()
+    err = capsys.readouterr().err
+    assert "ORIGINAL FAILURE (preserved): " in err and "the original failure" in err
+    assert "REGISTRY WRITE FAILURE" in err
+
+
+def test_registry_egress_coverage_is_derived_and_equals_the_declared_field_set(tmp_path):
+    """The coverage PIN (the claim is derived here, never asserted in prose).
+
+    Every registry column is driven with the credential sentinel in turn and the outcome
+    classified from the raise: refused-by-egress, refused-by-schema, or written. The derived
+    egress set is PRINTED, then asserted equal to `REDACTED_FREE_TEXT_FIELDS` — so both
+    halves are pinned: widening the routing without updating the constant fails here, and so
+    does narrowing it. A column in `written` is the DOCUMENTED boundary, not an oversight:
+    those values are machine-generated from a schema-fixed vocabulary.
+    """
+    by_egress: list[str] = []
+    by_schema: list[str] = []
+    written: list[str] = []
+    for index, column in enumerate((*REGISTRY_COLUMNS, "reason")):
+        registry = tmp_path / f"registry_{index}.jsonl"
+        row = _registry_row_for_egress("aborted")
+        row[column] = CREDENTIAL_SENTINEL
+        try:
+            append_registry_event(
+                registry,
+                row,
+                phase=1,
+                writer_role="stage",
+                access_log_path=tmp_path / "no_access_log.jsonl",
+            )
+        except CredentialEgressError:
+            by_egress.append(column)
+            assert not registry.exists(), f"{column}: refused but a byte was written"
+        except RegistryError:
+            by_schema.append(column)
+        else:
+            written.append(column)
+    print(
+        f"registry egress coverage derived: refused-by-egress {by_egress}; "
+        f"refused-by-schema {by_schema}; written unguarded {written}"
+    )
+    assert tuple(by_egress) == REDACTED_FREE_TEXT_FIELDS, (
+        f"the routed columns derived from behaviour ({by_egress}) disagree with the "
+        f"declared REDACTED_FREE_TEXT_FIELDS ({list(REDACTED_FREE_TEXT_FIELDS)})"
+    )
+    assert set(by_egress).isdisjoint(written)
+
+
+def test_a_clean_registry_row_still_appends_after_the_guard(tmp_path) -> None:
+    """Must-not-fire: the guard blocks credentials, not ordinary prose. `notes` carrying a
+    retrieval-policy sentence and a provider filename appends exactly one record."""
+    registry = tmp_path / "experiment_registry.jsonl"
+    record = append_registry_event(
+        registry,
+        _registry_row_for_egress(notes=f"acquisition run; retrieval policy: {retrieval_policy()}"),
+        phase=1,
+        writer_role="stage",
+        access_log_path=tmp_path / "no_access_log.jsonl",
+    )
+    assert record["run_id"] == "apparatus-run-0001"
+    assert len(registry.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_embedded_tier_catches_a_carrier_the_per_value_detector_cannot_see() -> None:
+    """The two tiers are distinguishable, and the free-text tier is the STRICTLY wider one.
+
+    Each case below is a carrier embedded mid-sentence: `guard_egress_value` passes it (the
+    whole value is prose, not a credential) and `guard_egress_free_text` refuses it. That
+    difference is the whole reason the second tier exists — `reason = str(exc)`.
+    """
+    embedded = (
+        f"retrieval failed: GET https://provider.example.org/f.hdf5?X-Amz-Signature={SHA64}",
+        "provider replied with header Authorization: Bearer abc",
+        f"the configured token {CREDENTIAL_SENTINEL} was rejected",
+        "provider returned https://user:secretpass@provider.example.org/f.hdf5",
+    )
+    for value in embedded:
+        assert guard_egress_value(value, context="c") == value  # per-value tier: passes
+        with pytest.raises(CredentialEgressError) as excinfo:
+            guard_egress_free_text(value, context="registry.reason")
+        assert "EMBEDDED" in str(excinfo.value)
+        assert "registry.reason" in str(excinfo.value)
+
+
+def test_free_text_tier_never_fires_on_the_prose_an_abort_record_legitimately_carries():
+    """Must-not-fire, and the reason the entropy heuristic is excluded per token.
+
+    A real `aborted` reason names run ids, snapshot directories, paths and hashes — all
+    three-class tokens over the heuristic's length floor. Refusing them would destroy the
+    audit row NFR-AUD-01 exists to keep, so the embedded tier reads structural carriers and
+    published prefixes only. These must pass.
+    """
+    legitimate = (
+        "acquisition-20260910T120000Z-a1b2c3d4 aborted at the preflight",
+        "artifacts/run_snapshots/20260910T120000Z-a1b2c3d4/data.yaml no longer matches",
+        f"configs/data.yaml: recorded {SHA64}, actual {SHA64}",
+        "provider file aruc011a.22g.002 diverged from aruc011a.22g.003",
+        "see the permanent citation https://cedar.openmadrigal.org/ for terms",
+        "acquisition run; retrieval policy: {'retry_max_attempts': 5, 'retry_jitter': 'full'}",
+    )
+    for value in legitimate:
+        assert guard_egress_free_text(value, context="registry.reason") == value
+
+
+def test_the_stated_limit_of_the_chokepoint_is_pinned_not_assumed() -> None:
+    """The DOCUMENTED residual, asserted so it can never become a silent surprise.
+
+    A credential that is neither a structural carrier nor a published prefix, appearing only
+    mid-sentence, is NOT detected on any surface of this unit — manifests included. This test
+    records that limit as current behaviour; if a later tier closes it, this test fails and
+    the module docstring's stated limit must be rewritten in the same pass.
+    """
+    opaque = "A1b2C3d4E5f6G7h8J9k0LmNoPqRsTuVw"  # refused when it IS the whole value
+    with pytest.raises(CredentialEgressError):
+        guard_egress_value(opaque, context="c")
+    sentence = f"the provider rejected the value {opaque} supplied for this account"
+    assert guard_egress_free_text(sentence, context="registry.reason") == sentence
+
+
+def test_the_stage_script_keeps_no_inline_copy_of_the_egress_guard() -> None:
+    """nfr-design c58: ONE guard home. The stage script composes the row and must not carry
+    its own `guard_egress` call — an inline copy is the drift the single home exists to
+    prevent, and the registry writer is where the refusal is proved."""
+    source = (REPO_ROOT / "scripts" / "00_acquire_prepared_vtec.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    called = {
+        node.func.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    assert not called & {"guard_egress", "guard_egress_value"}, (
+        "the stage script calls the redaction guard inline; the boundary's one home is "
+        "experiment_registry.append_registry_event (nfr-design c58)"
+    )
+    registry_tree = ast.parse(
+        (REPO_ROOT / "src" / "data" / "experiment_registry.py").read_text(encoding="utf-8")
+    )
+    registry_calls = {
+        node.func.id
+        for node in ast.walk(registry_tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    assert "guard_egress_free_text" in registry_calls, (
+        "the registry writer no longer calls the redaction chokepoint; that call IS the "
+        "guard home this test asserts the stage script may delegate to"
+    )
 
 
 # =======================================================================================

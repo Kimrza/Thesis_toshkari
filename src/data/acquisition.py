@@ -6,14 +6,40 @@ The `acquisition` unit's library surface (Q2 = A, receipted: a NEW module,
 `src/data/acquisition.py`). Four responsibilities, each a workflow of the approved
 functional design:
 
-1. **The redaction serializer (W-9, R-39, SD-A-02).** One declared chokepoint every
-   value this unit writes to a manifest, log or notebook output passes through.
-   A **signed request URL** and an **auth header** are refused UNCONDITIONALLY on
-   structural detection — the allowlist is never consulted for them. Everything else
-   passes an entropy/prefix heuristic that **blocks the write and names what it
-   matched**. `CredentialEgressError` is integrity tier: the run terminates and the
-   `aborted` registry row is written through the stage entry contract's
-   `IntegrityError` catch.
+1. **The redaction serializer (W-9, R-39, SD-A-02).** One declared chokepoint —
+   `guard_egress_value`, with `guard_egress` its recursive form. A **signed request URL**
+   and an **auth header** are refused UNCONDITIONALLY on structural detection — the
+   allowlist is never consulted for them. Everything else passes an entropy/prefix
+   heuristic that **blocks the write and names what it matched**. `CredentialEgressError`
+   is integrity tier: the run terminates and the `aborted` registry row is written through
+   the stage entry contract's `IntegrityError` catch.
+
+   **What the chokepoint covers, stated exactly** (the claim is pinned by
+   `tests/test_acquisition.py`, not left to prose). Every value this unit writes to a
+   manifest or notebook output: `write_request_manifest` and `write_sha256_manifest` guard
+   their FULL payload before a byte is written, and `RetrievalClient.retrieve` guards each
+   provider-file record it returns. On the LOG side the covered surface is the experiment
+   registry's operator-composed free-text columns — `notes` and `reason` — routed at
+   `experiment_registry.append_registry_event` through
+   `experiment_registry.REDACTED_FREE_TEXT_FIELDS`, which is where a live provider
+   transport's error text would otherwise reach a permanent artifact. The registry's
+   remaining columns are machine-generated from a schema-fixed vocabulary (ids, ISO
+   timestamps, hex digests, the derived extension fields) and are OUT of that routing by
+   design: they are token-shaped by construction, so routing them would force exactly the
+   allowlist growth `REDACTION_ALLOWLIST`'s own rule forbids. Anything else a stage script
+   prints to stderr is a transient console line, not an artifact this unit writes.
+
+   **Two tiers, one chokepoint.** `guard_egress_value` (and its recursive form
+   `guard_egress`) is a per-VALUE detector: correct for a manifest field, which holds one
+   value. `guard_egress_free_text` adds the EMBEDDED tier for prose fields — it runs the
+   per-value detector unchanged, then walks the value's tokens for the two STRUCTURAL
+   carriers and the published token prefixes, because a caught exception deposits a request
+   URL or a response header mid-sentence rather than as the whole field. The entropy
+   heuristic is deliberately NOT run per token, for the reason stated on
+   `_embedded_carrier_reason`. A credential that is neither a structural carrier nor a
+   published prefix and appears only mid-sentence remains undetected on every surface of
+   this unit — a stated limit of the design, pinned by a must-not-fire test rather than
+   left as an assumption.
 2. **The bounded-retry retrieval client (W-1, SD-A-01, TS-A-01/03).** Bounded retry
    with exponential backoff and full jitter on transient transport failure; resumption
    where the transport supports it; the **completeness check runs BEFORE the hash** —
@@ -102,6 +128,7 @@ __all__ = [
     "retrieval_policy",
     "REDACTION_ALLOWLIST",
     "guard_egress_value",
+    "guard_egress_free_text",
     "guard_egress",
     "TransportResult",
     "RetrievalClient",
@@ -376,6 +403,77 @@ def guard_egress_value(value: object, *, context: str) -> object:
             f"naming why the shape is safe — the allowlist is a review surface, "
             f"never grown to silence a failure (SD-A-02)",
         )
+    return value
+
+
+#: Punctuation stripped from a prose token before the embedded-carrier detectors read it,
+#: so `"(ghp_...)"` and a comma-terminated URL are still recognised. The trimmed form is
+#: checked IN ADDITION to the raw token, never instead of it: `:` is in this set and an auth
+#: header's detection depends on the colon, so trimming alone would hide the very carrier the
+#: tier exists to catch. Checking both can only widen detection, never narrow it.
+_FREE_TEXT_TRIM: Final[str] = "()[]{}<>\"'`,;:!?"
+
+
+def _embedded_carrier_reason(token: str) -> str | None:
+    """The EMBEDDED-carrier tier: structural carriers and published token prefixes only.
+
+    Deliberately excludes the entropy heuristic, and the exclusion is evidenced rather than
+    convenient. Prose legitimately carries run ids (`acquisition-20260910T120000Z-a1b2c3d4`)
+    and snapshot directory names, which are three-character-class tokens well over the
+    heuristic's length floor: running the entropy tier per token would refuse a legitimate
+    `aborted` record — destroying the audit row NFR-AUD-01 exists to keep — and the only
+    repair would be growing `REDACTION_ALLOWLIST`, the one act SD-A-02's ⚠ box forbids.
+    A structural carrier and a published prefix carry no such ambiguity.
+    """
+    for detector in (_signed_url_reason, _auth_header_reason):
+        reason = detector(token)
+        if reason:
+            return reason
+    for name, prefix in _KNOWN_CREDENTIAL_PREFIXES:
+        if token.startswith(prefix):
+            return f"known credential prefix {prefix!r} ({name})"
+    return None
+
+
+def guard_egress_free_text(value: object, *, context: str) -> object:
+    """The FREE-TEXT form of the chokepoint (W-9, R-39): whole value, then embedded carriers.
+
+    `guard_egress_value` is a per-VALUE detector — correct for a manifest field, which holds
+    one value, and insufficient for a prose field, which is where a caught exception's
+    `str(exc)` deposits a request URL or a response header MID-SENTENCE. This variant runs
+    the declared chokepoint over the whole value first (unchanged semantics, nothing
+    weakened), then walks the value's whitespace-separated tokens through
+    `_embedded_carrier_reason`.
+
+    Use it for operator-composed prose only — the experiment registry's
+    `REDACTED_FREE_TEXT_FIELDS`. Structured payloads keep `guard_egress`: this is a second
+    TIER of the same chokepoint, not a second chokepoint (nfr-design c58).
+
+    Raises
+    ------
+    CredentialEgressError
+        naming the write context and what was detected, never the value itself.
+    """
+    guard_egress_value(value, context=context)
+    if not isinstance(value, str):
+        return value
+    for token in value.split():
+        reason = None
+        for candidate in (token, token.strip(_FREE_TEXT_TRIM)):
+            if not candidate:
+                continue
+            reason = _embedded_carrier_reason(candidate)
+            if reason:
+                break
+        if reason:
+            raise CredentialEgressError(
+                context,
+                f"refused: {reason} EMBEDDED in a free-text field; prose is where a caught "
+                f"exception's message deposits a request URL or a response header, and a "
+                f"permanent log never carries a credential carrier (TE 10, NFR-SEC-01, "
+                f"R-39) — the embedded tier detects structural carriers and published token "
+                f"prefixes, never the entropy heuristic",
+            )
     return value
 
 

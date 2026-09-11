@@ -39,6 +39,19 @@ including failed and aborted ones — stay visible with status and reason (R-09,
 NFR-AUD-01). No entry is ever deleted, overwritten or silently re-run. The integrity
 check and the reconciliation are pure reads.
 
+Credential egress
+-----------------
+The registry is a LOG this pipeline writes, so `acquisition`'s W-9/R-39 redaction
+chokepoint reaches it: `append_registry_event` routes every column named in
+`REDACTED_FREE_TEXT_FIELDS` (`notes`, `reason` — the operator-composed text) through
+`guard_egress_free_text` BEFORE the append, so a credential-shaped value refuses the write
+rather than landing in a permanent, committed artifact. The remaining columns are
+machine-generated from a schema-fixed vocabulary and are deliberately outside that
+routing; the constant's own comment states why, and `tests/test_acquisition.py` pins the
+coverage rather than leaving it asserted in prose. This closes the second write path into
+a log that previously bypassed the declared chokepoint (adversarial re-review 2026-09-10,
+Finding 1, carried forward from 2026-09-05).
+
 Durability
 ----------
 Every append is followed by flush + fsync before the writer returns; a durability
@@ -62,6 +75,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Final
 
+from src.data.acquisition import guard_egress_free_text
 from src.data.config import (
     CHARACTERISED_DURABILITY_PLATFORMS,
     RegistryError,
@@ -70,6 +84,7 @@ from src.data.config import (
 __all__ = [
     "REGISTRY_COLUMNS",
     "EXTENSION_FIELDS",
+    "REDACTED_FREE_TEXT_FIELDS",
     "STATUSES",
     "TERMINAL_STATUSES",
     "FORBIDDEN_PREDICTION_HASH_WRITERS",
@@ -119,6 +134,24 @@ EXTENSION_FIELDS: Final[tuple[str, ...]] = (
     "exploratory_carveout",
     "durability",
 )
+
+#: W-9 / R-39: the registry columns routed through `acquisition`'s ONE declared redaction
+#: chokepoint, in its free-text form (`guard_egress_free_text` — the per-value detector plus
+#: the embedded-carrier tier), before the append. These two are the OPERATOR-COMPOSED
+#: columns and the whole of this log's credential-egress surface: `notes` is prose a stage
+#: script builds, and `reason` is `str(exc)` from a caught exception — which is exactly where
+#: a live provider transport's error text (a signed request URL, a response header, a
+#: provider error body) would reach a permanent, committed log once `_build_transport` is
+#: wired (`scripts/00_acquire_prepared_vtec.py`).
+#:
+#: Every OTHER column is machine-generated from a schema-fixed vocabulary (`STATUSES`, ISO
+#: timestamps, ids, hex digests, the derived extension fields) and is deliberately NOT routed:
+#: `run_id`, `environment_lock_hash` and `prediction_hash` are token-shaped BY CONSTRUCTION
+#: and the heuristic tier would refuse them, so routing them would force allowlist growth —
+#: the one act `REDACTION_ALLOWLIST`'s own rule forbids. Widening this tuple is therefore a
+#: REVIEWED edit exactly as an allowlist entry is, and the coverage it states is pinned by
+#: `tests/test_acquisition.py` rather than asserted here.
+REDACTED_FREE_TEXT_FIELDS: Final[tuple[str, ...]] = ("notes", "reason")
 
 #: R-07: the closed status vocabulary. `aborted` is an intentional or
 #: preflight-triggered stop; `failed` is an execution failure. Not interchangeable.
@@ -203,6 +236,31 @@ def _validate_row(
             "could set it could suppress it, which is the act the flag exists to "
             "prevent",
         )
+
+
+def _guard_free_text_egress(registry_path: Path, row: Mapping[str, Any]) -> None:
+    """W-9 / R-39: route the free-text registry columns through the ONE redaction chokepoint.
+
+    The registry is a log this pipeline writes, so `acquisition`'s declared chokepoint claim
+    covers it; `REDACTED_FREE_TEXT_FIELDS` names precisely which of its columns carry
+    operator-composed text and therefore reach the chokepoint. Called BEFORE the append, so
+    a refused row is never written at all: `CredentialEgressError` is integrity tier, the
+    stage terminates through its `IntegrityError` catch, and on the abort path
+    `record_abort_honestly` reports both failures and claims nothing (R-10).
+
+    One guard HOME, not an inline copy per caller (nfr-design c58): every writer of this log
+    — the nine stage scripts, the walking-skeleton orchestrator and `fixture_gate`'s child
+    rows — passes through `append_registry_event`, so the boundary cannot fail open on a
+    forgotten call site the way a per-script copy would.
+
+    Raises
+    ------
+    CredentialEgressError
+        naming the column and what was detected, never the refused value itself.
+    """
+    for column in REDACTED_FREE_TEXT_FIELDS:
+        if column in row:
+            guard_egress_free_text(row[column], context=f"{registry_path.name}.{column}")
 
 
 def _read_access_records(access_log_path: Path) -> list[Mapping[str, Any]]:
@@ -313,9 +371,13 @@ def append_registry_event(
         a Phase 1 row; caller-passed `exploratory`; or a durability failure on the
         append — named with the file and the violated expectation, never a warning
         beside a write reported as successful (R-10 reaching the durability layer).
+    CredentialEgressError
+        a `REDACTED_FREE_TEXT_FIELDS` column carrying a credential-shaped value. Raised
+        BEFORE the append, so a refused row leaves the log byte-identical (W-9, R-39).
     """
     registry_path = Path(registry_path)
     _validate_row(registry_path, row, phase=phase, writer_role=writer_role)
+    _guard_free_text_egress(registry_path, row)  # W-9/R-39, before any byte is written
 
     access_records = _read_access_records(Path(access_log_path))
     exploratory, carveout = _derive_exploratory(row, access_records)

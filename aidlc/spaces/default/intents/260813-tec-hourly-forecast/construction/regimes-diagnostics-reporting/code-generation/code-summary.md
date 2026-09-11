@@ -717,3 +717,168 @@ same fail-closed, write-once `_register_reported_artifact` convention already ve
 W-3/W-5, and both the must-fire and must-not-fire halves of the new negative control push
 through the real `build_claims_checklist` entry point. No Critical, Major, or Minor defect
 found in this addition.
+
+## Gate-floor re-review (2026-09-10)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T14:40:30Z
+**Iteration:** fresh adversarial pass against the CURRENT on-disk state, per the gate's
+"most eventful history" instruction — re-derived from scratch, not rubber-stamped from the
+verdicts already standing above.
+
+**Scope.** Re-verifies, against HEAD `f0d9e49` (repo HEAD at dispatch time; three commits
+ahead of the `0e002cd` this file's most recent "Iteration 1 (gate-reopened repair attempt)"
+and "Cleanup review" passes were run against — `git log --oneline 0e002cd..f0d9e49` shows
+one intervening commit, `cdc61f7` "Gate-worklist cleanup: critical reds, import modules,
+W-4 registration, doc sync", touching exactly this unit's three files per
+`git diff --stat 0e002cd f0d9e49 -- src/evaluation tests/test_regimes_and_reporting.py`):
+both iteration-2 terminal findings (the §5.5 metric set on no W-5 path; the unwired
+registration mechanism) and the W-4 self-registration addition, all independently, not by
+trusting any prior pass's narrative.
+
+**Verification performed (adversarial, evidence-grounded):**
+
+1. **§5.5 metric set, derived independently from `functional-design/business-logic-model.md`
+   lines 413–423 and 636–646** (not carried from the prior review's own derivation): per
+   member `rmse`; the derived relative summary `1 - RMSE_model/RMSE_reference` with an
+   explicit `derived: true` label; and the six supporting metrics MAE, median absolute
+   error, mean error/bias, R², correlation, 90th/95th percentile absolute error. Read
+   `src/evaluation/diagnostics.py:269-347` (`compute_member_metrics`,
+   `derived_rmse_reduction`) directly — all eight fields present, field names identical to
+   the design's own vocabulary; set-difference is empty in both directions. Read
+   `build_member_metrics_breakdown` (`diagnostics.py:747-824`) directly: it is a genuine
+   second producing path (not a relabelled W-3 call) that computes both functions per
+   member/benchmark, calls `require_estimand_fields` on every comparison row and
+   `require_derived_label` on every reduction before packaging, then delegates to
+   `build_breakdown_artifact` for stamps/units/lineage/provenance/registration. No set
+   difference against the design's field list; no bypass path found (the function raises
+   if `metrics_artifact` carries no `model_id` or no `comparisons` — it cannot silently
+   produce an empty breakdown).
+2. **`emit_registered_artifact` call sites**: `grep -n "emit_registered_artifact\|require_registered_surface" src/evaluation/*.py`
+   (run fresh, reproduced above) shows `emit_registered_artifact` called at
+   `diagnostics.py:379` (inside `_register_reported_artifact`) and `plots.py:134` (W-7,
+   pre-existing) — no longer zero call sites. `require_registered_surface` called at
+   `diagnostics.py:377,390` (inside `_register_reported_artifact`) and `:1179` (W-4's
+   INPUT-surface check, distinct from the W-4 self-registration added later). Read
+   `_register_reported_artifact` (`diagnostics.py:350-390`) directly: `registry=None` hits
+   `require_registered_surface(artifact_id, registry=None, ...)` immediately, which raises
+   — fail-closed by construction, not by convention.
+3. **Producing-path wiring, checked for bypass, not assumed complete**: `build_primary_table`
+   (W-3, `:522-524`), `build_breakdown_artifact` (W-5, `:741-743`, and therefore also
+   `build_member_metrics_breakdown` and `build_dec_regime_breakdown`, both of which
+   delegate to it and both of which forward their own `registry`/`emit_path` parameters
+   through — read `build_dec_regime_breakdown:827-903` directly, confirming no breakdown
+   producer in this file bypasses `_register_reported_artifact`), and `build_claims_checklist`
+   (W-4, `:1510-1515`) each end with a call to `_register_reported_artifact`. No producing
+   function in `diagnostics.py` returns an artifact without passing through it — checked by
+   reading every `def build_*` in the file, not merely the three named in the prior review.
+4. **W-4 self-registration ordering, read fresh**: `diagnostics.py:1238`
+   (`registered_set = registry.ids() if registry is not None else ()`) executes before
+   `diagnostics.py:1510` (`_register_reported_artifact(checklist, ...)`) in the only control
+   flow through the function — confirmed by reading the function top-to-bottom rather than
+   trusting the docstring's claim. `inspected_registered_set` (assigned at `:1496` from the
+   pre-registration `registered_set`) is therefore provably the pre-self-registration
+   snapshot.
+5. **Negative controls, read at their real entry points, not summarised**: read
+   `tests/test_regimes_and_reporting.py:999-1127` (`test_member_metrics_breakdown_w5_producing_path`,
+   `test_per_entry_fieldless_estimand_into_w5_raises`,
+   `test_per_entry_unlabelled_reduction_into_w5_raises`,
+   `test_per_entry_unregistered_table_emission_refuses`,
+   `test_per_entry_unregistered_breakdown_emission_refuses`,
+   `test_w3_w5_emission_register_then_write`) and `:1450-1464,1598-1626`
+   (`test_checklist_inspects_exactly_the_registered_set`,
+   `test_checklist_emitted_as_registered_surface_write_once`) directly: every one calls
+   `build_member_metrics_breakdown`, `build_primary_table`, `build_breakdown_artifact`, or
+   the `_checklist` wrapper around `build_claims_checklist` — none asserts against a bare
+   guard call. Each carries a must-NOT-fire half (a registry present, or the label/field
+   intact, renders) beside its must-fire half — the paired-negative-control shape this
+   project's `nfr-design:c58` mandates.
+6. **`count_storm_events` / `activate_regime_config` module-state guard**: read
+   `src/evaluation/regimes.py:207-236` directly. `_ACTIVE_CONFIG` is module-level, starts
+   `None`; `active_regime_config()` raises `RegimeError` naming
+   `configs/experiment.yaml regimes` when unactivated (`:221-230`) — fail-closed, confirmed
+   by reading the guard body, not inferred from its docstring. `build_dec_regime_breakdown`
+   calls `activate_regime_config(experiment)` (`:872`) before `count_storm_events`
+   (`:873`), so the only call site in this unit's code always activates first; a caller
+   that skipped activation would hit the `None`-check raise, not a silent default.
+7. **Confirmatory-surface regression check**: `build_primary_table` (`diagnostics.py:424-525`,
+   read in full) still iterates every row of `metrics_artifact.get("comparisons", ())`
+   unconditionally — no filtering, no special-casing that could silently drop a
+   persistence/seasonal-persistence/climatology baseline row from co-reporting; PC-03/PC-04
+   co-reporting is structural (this unit renders whatever comparison rows the upstream
+   metrics artifact carries, and never partitions them into a table/appendix split). The
+   paired loss differential remains untouched — `compute_member_metrics`/
+   `derived_rmse_reduction` are explicitly the REPORTED surface and are never used as the
+   estimand (their own docstrings state this, and no code path in this unit computes or
+   consumes an estimand). The comparison-wide mask (`mask.masked_rows`) is read, never
+   constructed, by this unit's functions — unchanged.
+8. **Test run, reproduced independently** (scratchpad CPython 3.11.16 +
+   `pytest_standin/run_tests.py`, PyPI unreachable — same constraint prior passes recorded):
+   `python run_tests.py <repo_root> test_regimes_and_reporting` →
+   **88 passed, 0 failed, 0 skipped, 0 errors**, matching the code-summary's claimed count.
+   `grep -c "^def test_" tests/test_regimes_and_reporting.py` → **88** (derived, not carried
+   from prose).
+9. **Disk-vs-claim reconciliation, printed before assertion**: `wc -l` on the current
+   working tree gives `src/evaluation/diagnostics.py` = **1611**,
+   `src/evaluation/report_guards.py` = **522**, `tests/test_regimes_and_reporting.py` =
+   **1833**. The code-summary's Files table (top of this document) and the "Iteration 1
+   (gate-reopened repair attempt, 2026-09-10)" review's verification run both assert
+   1596/522/1810 — correct for the state immediately after the gate-reopened repair, but
+   **stale after the subsequent "Addition (2026-09-10, gate worklist item 1)" / "Cleanup
+   review" section**, which added the W-4 self-registration wiring (confirmed via
+   `git diff --stat 0e002cd f0d9e49` above: +171/−9 net on `diagnostics.py` across the
+   full range, of which the gate-reopened repair alone accounted for +162/−9 — the residual
+   ~9 lines and the tests file's growth from 1810 to 1833 trace to the W-4 addition, which
+   the document never restates against a refreshed line count). This is a **stale figure in
+   a superseded representation** (the Files table and the earlier review's own verification
+   run), not a functional defect: the true current counts (1611/522/1833) are nowhere
+   asserted wrong, and every functional claim in the "Addition"/"Cleanup review" sections
+   was independently re-verified above against the actual current file, not against the
+   stale cell. Rated Minor — see findings.
+10. **TBD sentinels, scientific constants, credentials, guard weakening, locked-December
+   reachability**: `grep -n "TBD" src/evaluation/*.py` shows only checked-and-refused
+   sentinel comparisons (`bootstrap.py`, `masks.py`, `regimes.py`) — none filled by
+   convenience. `grep -nE '\b(3|4|5|12|24)\b' src/evaluation/regimes.py` shows every hit
+   inside a docstring or an f-string message citing Vision §9.3/D-13/TE §18.3 — no bare
+   code-level threshold literal (unchanged from the prior AST-and-grep verification). No
+   credential, API key, or secret pattern found in `src/evaluation/*.py`. `report_guards.py`
+   guard bodies are byte-for-byte unchanged from the version already verified READY at
+   iteration 2 (only the module docstring's Called-by row for `require_derived_label` was
+   corrected) — no guard was weakened. `configs/experiment.yaml`'s `regimes:` block
+   (`quiet_kp_below: 4`, `disturbed_kp_min: 4`, `storm_kp_min: 5`, `december_day_range: "TBD
+   — freeze gate"`) is untouched by the unrelated D-38 `embargo_hours` transcription a few
+   lines above it — confirmed by direct read; no locked-December reachability channel
+   exists in this unit's code beyond the already-reviewed post-receipt, registered-count-
+   governed `build_dec_regime_breakdown` path.
+11. **Non-coupling check, repeated**: `grep -n "diagnostics\.\|from src.evaluation" scripts/07_evaluate_and_report.py`
+   shows only `src.evaluation.masks` and `src.evaluation.metrics` imports — this unit's
+   `diagnostics.py` builders are not called from the one script that could reach a live
+   run; the fresh commit `cdc61f7` added no coupling to this unit's producing functions.
+
+**Findings:**
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `code-summary.md` Files table (lines 22–23, 29) and the "Iteration 1 (gate-reopened repair attempt, 2026-09-10)" review's verification-run block (line 479) | The Files table's line-count cells for `src/evaluation/diagnostics.py` (states 1596) and `tests/test_regimes_and_reporting.py` (states 1810) are stale: the current on-disk counts, after the later "Addition (2026-09-10, gate worklist item 1)" / "Cleanup review" section's own edits, are 1611 and 1833 respectively (`wc -l`, printed above). No functional claim in the document is wrong as a result — the Addition/Cleanup sections state their own deltas correctly and every functional claim was independently re-verified against the actual current file in this pass — but a reader consulting only the Files table (the artifact's own stated "what's in this delivery" summary) meets a superseded pair of numbers. | Update the Files table's two line-count cells to 1611/1833 (or note "see § Addition (2026-09-10) for the final count") in the next touch of this document; no code change needed. |
+
+No Critical or Major finding survives verification. Both iteration-2 terminal findings (the
+§5.5 metric set's absent W-5 path; the unwired registration mechanism) and the W-4
+self-registration addition are confirmed closed at their real producing/entry paths against
+the CURRENT on-disk state (`f0d9e49`, one commit past what any prior review in this file
+verified), independently re-derived from the functional design's own field names rather than
+carried from an earlier pass's narrative, and covered by negative controls that push
+violations through the actual producing functions with both must-fire and must-not-fire
+halves. All 88 test functions pass under an independently reproduced run.
+
+### Summary
+
+A fresh, from-scratch adversarial pass against the current HEAD (`f0d9e49`) — one commit
+past the state any prior review in this file examined — finds both terminal findings from
+the iteration-2 review and the W-4 self-registration addition genuinely closed at their real
+producing and entry paths, confirmed by direct reads (not narrative-trust) of
+`diagnostics.py`, `regimes.py`, `report_guards.py` and the test file, an independent
+88/0/0/0 test run, and cross-reference against `business-logic-model.md`'s own §5.5 field
+list. The sole finding is a Minor stale-line-count pair in the Files table and one earlier
+review's verification-run block, left behind by the subsequent W-4 addition's edits and
+carrying no functional consequence. Verdict: READY.

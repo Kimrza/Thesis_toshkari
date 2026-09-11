@@ -44,11 +44,13 @@ Run: pytest tests/test_clean_run.py -rs
 
 from __future__ import annotations
 
+import ast
 import datetime as dt
 import inspect
 import json
 import re
 import sys
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -1900,6 +1902,7 @@ def test_control_counts_derived_from_business_rules_not_carried():
 #: set-difference by construction (they extend the enumerated set; the enumeration itself
 #: is the practices gate's to amend).
 BEYOND_ENUMERATION_CONTROLS: dict[str, str] = {
+    "test_rec2_00_stage_entry_real_invocation_refuses_out_of_window": "Rec 2 (ML-01)",
     "test_rec2_00_out_of_window_acquisition_exemption_refuses": "Rec 2 (ML-01)",
     "test_rec2_01_out_of_window_inventory_and_audit_refuse": "Rec 2 (ML-01)",
     "test_rec2_02_out_of_window_standardization_exemption_refuses": "Rec 2 (ML-01)",
@@ -1939,12 +1942,207 @@ class _WindowSnapshot:
 
 
 def _assert_entry_passes_declared_window(module: Any) -> None:
-    """c58's invocation proof per entry point: THIS script's `_stage_entry` hands its own
-    declared window to the one guard home."""
-    source = inspect.getsource(module._stage_entry)
-    assert "declared_window=declared_window" in source and "_declared_data_window" in source, (
-        f"{module.__name__}: _stage_entry does not bind the exemption to the declared "
-        f"window (board Rec 2 / ML-01; c58 invocation proof)"
+    """STRUCTURAL wiring check: `_stage_entry` binds `declared_window` from its OWN
+    `_declared_data_window(...)` call, binds it exactly once, and hands THAT name to the
+    guard home.
+
+    An AST assertion, not a source-text substring test. The substring form this replaces
+    (`"declared_window=declared_window" in source`) passed on a body that computed the
+    window and discarded it — a defect rebinding the name, or binding it from something
+    else, still contained the literal. Here the binding COUNT and the binding SOURCE are
+    both asserted, so "computed then thrown away" fails.
+
+    This is a wiring check, deliberately weaker than an invocation. Script 00 additionally
+    carries a genuine end-to-end invocation of `_stage_entry`
+    (`test_rec2_00_stage_entry_real_invocation_refuses_out_of_window`); the sibling scripts
+    01/02/04 carry this structural check only, and that difference is stated rather than
+    blurred (adversarial re-review 2026-09-10, Finding 2).
+    """
+    tree = ast.parse(textwrap.dedent(inspect.getsource(module._stage_entry)))
+    bindings = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == "declared_window" for t in node.targets)
+    ]
+    rebindings = [
+        node
+        for node in ast.walk(tree)
+        if (isinstance(node, ast.AnnAssign | ast.AugAssign) and _binds(node.target))
+        or (isinstance(node, ast.NamedExpr) and _binds(node.target))
+    ]
+    assert len(bindings) == 1 and not rebindings, (
+        f"{module.__name__}: declared_window is bound {len(bindings)} time(s) plus "
+        f"{len(rebindings)} rebinding(s); exactly one binding makes the source assertion "
+        f"below meaningful (board Rec 2 / ML-01)"
+    )
+    derived_from = {
+        node.func.id
+        for node in ast.walk(bindings[0].value)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    assert "_declared_data_window" in derived_from, (
+        f"{module.__name__}: declared_window is not bound from this script's own "
+        f"_declared_data_window(...) call (c59: each caller derives its own window)"
+    )
+    handed_on = [
+        keyword
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        for keyword in node.keywords
+        if keyword.arg == "declared_window"
+    ]
+    assert handed_on and all(
+        isinstance(keyword.value, ast.Name) and keyword.value.id == "declared_window"
+        for keyword in handed_on
+    ), (
+        f"{module.__name__}: the declared_window keyword handed to the guard home is not "
+        f"the name bound from _declared_data_window (board Rec 2 / ML-01)"
+    )
+
+
+def _binds(target: Any) -> bool:
+    return isinstance(target, ast.Name) and target.id == "declared_window"
+
+
+#: The synthetic acquisition identity of the TEST APPARATUS (R-122). These are NOT D-144's
+#: frozen Madrigal experiment/kindat/parameter values — two of D-144's four attached freezes
+#: are still open and no agent may fill them (TE 18.2). They exist only so `assert_no_tbd`
+#: sees a resolved required field on a tmp tree; the governed `configs/` is never touched.
+APPARATUS_ACQUISITION_IDENTITY: dict[str, Any] = {
+    "experiment": "apparatus-experiment-not-a-frozen-value",
+    "kindat": "apparatus-kindat-not-a-frozen-value",
+    "parameters": ["apparatus-parameter-not-a-frozen-value"],
+}
+
+
+def _apparatus_config_tree(root: Path, *, window: tuple[str, str] | None) -> Path:
+    """Write the four governed config files as JSON text on a synthetic tmp tree.
+
+    JSON, because YAML 1.2 is a JSON superset: `_apparatus_parsers` swaps the two production
+    YAML READ ADAPTERS for `json.loads`, which is exact for this text. Nothing else about
+    `load_configs` is replaced — it still resolves platform roots, writes and hashes the run
+    snapshot, and returns a real `ConfigSnapshot`.
+    """
+    config_dir = root / "configs"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    acquisition: dict[str, Any] = dict(APPARATUS_ACQUISITION_IDENTITY)
+    if window is not None:
+        acquisition["window_start"], acquisition["window_end"] = window
+    payloads: dict[str, dict[str, Any]] = {
+        "data.yaml": {
+            "schema_version": "1.0.0",
+            "roots": {
+                "release_root": "artifacts/releases",
+                "snapshot_root": "artifacts/run_snapshots",
+                "registry_root": "artifacts/registry",
+            },
+            "declared_sources": [],
+            "acquisition": acquisition,
+        },
+        "features.yaml": {"schema_version": "1.0.0"},
+        "experiment.yaml": {"schema_version": "1.0.0"},
+        "seeds.yaml": {
+            "schema_version": "1.0.0",
+            "development": 42,
+            "final": [1337, 2024, 7],
+            "bootstrap": 20221201,
+            "determinism": {"expected_nondeterministic_ops": []},
+        },
+    }
+    for name, payload in payloads.items():
+        (config_dir / name).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return config_dir
+
+
+def _apparatus_parsers(monkeypatch, workspace: Path) -> None:
+    """Inject the FOUR process-boundary adapters a synthetic tmp workspace cannot satisfy.
+
+    Each is an I/O adapter at the edge of the process, never a step of the logic under test:
+
+    * `config._parse_yaml` and `fixture_manifest._parse_yaml_text` -> `json.loads`, because
+      pyyaml is uninstallable on this clone (PyPI unreachable) and the production read path
+      refuses BY NAME rather than falling back to a second parser (TS-01, TS-X-01). This is
+      the same injection the `parsed=` seam performs for every other test in this file.
+    * `config._git_head` and `config._pip_freeze`, because a tmp workspace is not a git tree
+      and this interpreter has no pip. Both return declared apparatus constants.
+
+    Everything BETWEEN them runs unmodified: the preflight, the phase boundary, the
+    credential-name check, seeding, the environment lock, the window derivation and the
+    receipt gate. Both halves of the test below inject identically, so the injection can
+    never be what makes one half refuse and the other proceed — the declared window is.
+    """
+    import src.data.config as config_module
+    import src.data.fixture_manifest as manifest_module
+
+    monkeypatch.setattr(
+        config_module, "_parse_yaml", lambda path: json.loads(Path(path).read_text("utf-8"))
+    )
+    monkeypatch.setattr(manifest_module, "_parse_yaml_text", lambda path, text: json.loads(text))
+    monkeypatch.setattr(config_module, "_git_head", lambda ws: "c" * 40)
+    monkeypatch.setattr(config_module, "_pip_freeze", lambda: "apparatus==0.0\n")
+    monkeypatch.setenv("TEC_PLATFORM", "local")
+    monkeypatch.setenv("TEC_WORKSPACE_ROOT", str(workspace))
+    workspace.mkdir(parents=True, exist_ok=True)
+    (workspace / "requirements.txt").write_text("apparatus==0.0\n", encoding="utf-8")
+
+
+def test_rec2_00_stage_entry_real_invocation_refuses_out_of_window(tmp_path, monkeypatch):
+    """Rec 2, scripts/00 — the REAL invocation proof, replacing a source-text substring check.
+
+    `scripts/00_acquire_prepared_vtec.py::_stage_entry` is driven with real arguments through
+    the actual code path, and the OBSERVABLE CONSEQUENCE is asserted rather than the presence
+    of a literal in its source:
+
+    1. must-fire — a run carrying a VALID fixture scope but a declared retrieval window
+       outside that scope's cited window REFUSES, and the refusal names this script's own
+       `declared_window_resource`, proving the value travelled from `_declared_data_window`
+       through `_stage_entry` into the guard home;
+    2. must-not-fire — an in-window declaration PROCEEDS, and the returned gate result echoes
+       the declared endpoints, proving the value was consumed rather than computed and
+       discarded (the exact defect the substring check could not see);
+    3. the undeclared case still refuses by field name at the script's own derivation;
+    4. a FULL-SCALE invocation (no `--fixture-manifest`) never reaches the exemption at all —
+       it refuses at the two-receipt gate, so the exemption is unreachable without a scope.
+    """
+    workspace = tmp_path / "workspace"
+    _apparatus_parsers(monkeypatch, workspace)
+    module = _load_script("00_acquire_prepared_vtec.py")
+    scope = write_and_load(tmp_path / "scope", PLUMBING_FIXTURE_ID, status=CANDIDATE)
+    scope_start, scope_end = scope.window
+
+    outside = _apparatus_config_tree(tmp_path / "outside", window=("2001-01-01", "2001-12-31"))
+    with pytest.raises(IntegrityError) as excinfo:
+        module._stage_entry(outside, fixture_manifest=scope.path)
+    assert "cited window" in str(excinfo.value)
+    assert "00_acquire_prepared_vtec.py: declared retrieval window" in str(excinfo.value)
+
+    inside_window = (scope_start.isoformat(), (scope_start + dt.timedelta(days=1)).isoformat())
+    inside = _apparatus_config_tree(tmp_path / "inside", window=inside_window)
+    entry = module._stage_entry(inside, fixture_manifest=scope.path)
+    gate = entry["receipts_gate"]
+    assert gate["exempt"] is True and gate["fixture_id"] == PLUMBING_FIXTURE_ID
+    assert gate["declared_window_checked"] == {
+        "declared_start": inside_window[0],
+        "declared_end": inside_window[1],
+        "scope_start": scope_start.isoformat(),
+        "scope_end": scope_end.isoformat(),
+    }
+
+    undeclared = _apparatus_config_tree(tmp_path / "undeclared", window=None)
+    with pytest.raises(IntegrityError, match="window_start"):
+        module._stage_entry(undeclared, fixture_manifest=scope.path)
+
+    with pytest.raises(IntegrityError) as full_scale:
+        module._stage_entry(inside)  # no fixture scope: the full-year path
+    refusal = str(full_scale.value)
+    assert MANIFEST_NAME in refusal and "no fixture manifest exists at this path" in refusal, (
+        f"a full-scale invocation must refuse in the NON-exempt branch of the two-receipt "
+        f"gate (no frozen manifest in force yet — BLK-02); got: {refusal}"
+    )
+    assert "cited window" not in refusal, (
+        "the window-bound exemption was consulted on a full-scale run; it is reachable "
+        "only with --fixture-manifest (TE 9.2; Q5 = A)"
     )
 
 

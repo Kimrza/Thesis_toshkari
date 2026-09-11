@@ -216,3 +216,147 @@ restricted-root literal replacement in `test_common_masks.py` is a derivation fr
 `locked_test.RESTRICTED_ROOT`, not a behavior change, and the locked-test guard module
 itself carries zero diff. All claimed suite counts (22/0, 44/0, 60/0/1) reproduce exactly
 under independent execution. No Critical, Major, or Minor defect found.
+
+### Gate-floor re-review (2026-09-10)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T14:33:47Z
+**Iteration:** 1 (fresh verdict after gate-rejection reset the review floor; re-derived
+against current HEAD `f0d9e49` plus the uncommitted sibling `acquisition` repair, which
+touches no file this unit owns)
+
+**Scope and posture.** Adversarial re-derivation, not a rubber-stamp of the prior
+verdicts above. Re-verified repo-wide config state (D-33…D-38), this unit's specific
+exposure points named in the dispatch (IRI/GIM boundary, comparison-wide mask, difficulty
+controls, the two owner-ruled cross-unit edits, freeze_bundle/apparatus containment), and
+executed this unit's tests plus `test_iri_denial.py` independently rather than trusting
+the counts already on record.
+
+**Repo-wide state verified first, per dispatch:**
+- `configs/features.yaml`: the seven driver rows (`kp_safe`, `ap_safe`, `hp60_safe`,
+  `ap60_safe`, `f107_safe`, `f107_81_trailing`, `dst`) are absent — confirmed by direct
+  grep, only a comment at line 50 names them as deliberately excluded; `dst` is not
+  present as a feature row anywhere in the file.
+- `configs/experiment.yaml:26`: `embargo_hours: 24 # D-38 (2026-09-10)` — confirmed.
+  `configs/experiment.yaml:275`: `practical_relevance_threshold: "TBD — freeze gate" # D-34:
+  DECIDED — no threshold approved` — confirmed as the decided sentinel, not an omission.
+- `configs/data.yaml:58`: `cell_rule: "floor-half-open-d1" # D-33 (2026-09-10)` and
+  `stations: "TBD — freeze gate"` (line 45, unchanged) — confirmed; a six-entry
+  `partitions:` block starting at line 78 (F1…F4, DEC, plus the sixth) — confirmed present.
+- `evidence/DECISIONS.md`: `grep -n "^## D-"` shows the register ends at `## D-38`
+  (`## D-1 addendum` follows as a countersignature note, not a new decision) — confirmed,
+  no decision beyond D-38 exists. D-37 reaffirms D-27; D-38 is the split-configuration
+  transcription the dispatch names.
+
+**This unit's specific exposure, verified against code (not description):**
+1. **IRI/GIM evaluation-time-only boundary.** `src/evaluation/metrics.py:477`
+   (`from src.external import gim`) is the only external-comparator import in this unit's
+   files, deferred inside `_gim_disclosure_block` and reached only after the registered-mask
+   precondition; `grep -in "iri" src/evaluation/*.py` returns only comment/docstring
+   prose (lines 32, 38, 40, 48) — no `from src.external import iri` anywhere. The
+   injection-denial mechanism `iri_column_violations` (referenced at
+   `src/evaluation/metrics.py` and exercised by `test_iri_denial.py`) is untouched by the
+   sibling `fixtures-and-reproducibility` narrowing recorded above in this file — verified
+   independently by re-executing `tests/test_iri_denial.py` (below), not merely reading
+   the prior review's claim.
+2. **Comparison-wide intersection mask.** `src/evaluation/masks.py:397-475`
+   (`build_comparison_mask`) computes exactly one mask per declared `set_id` over the
+   full membership (stamps → exact declared membership, rejecting duplicate/merged/partial
+   membership including "thereby every pairwise attempt", per its own docstring at
+   line 413 → matched-window agreement → intersection). `MaskRegistry.register`
+   (`masks.py:610-636`) raises `FairnessError` on a second registration for the same
+   `set_id` ("computed ONCE per comparison set... a second registration raises") and on
+   registration after `freeze_bundle()` — both are executable checks, not comments.
+3. **Difficulty controls co-reported.** `configs/experiment.yaml:154-156`: the `primary`
+   comparison set's `member_ids` are `["M-01","M-02","M-03","M-06","B-01"]` and
+   `benchmark_ids` are `["B-01","M-01","M-02","M-03"]` — with the file's own comment
+   naming M-01/M-02/M-03 as "the three difficulty controls" alongside B-01 (IRI) in the
+   SAME set. `build_metrics_artifact`'s completeness refusal (control 24, `metrics.py`)
+   requires one estimand per declared (model, benchmark) pair over the set's one mask
+   before any emission — structurally forcing persistence/seasonal/climatology and IRI
+   into the same primary table row-set; this unit does not itself define which model_id is
+   "persistence" versus "climatology" (that identity mapping is a sibling unit's
+   concern), but the completeness guard is this unit's and is real.
+4. **Owner-ruled cross-unit edits (Q2=B / FU-2=A).** `src/data/locked_test.py:178-201`:
+   `AccessRecord` carries `mask_bundle_ids`/`mask_registry_hash` as optional fields
+   (`= None` defaults); `_containment_fields` (`locked_test.py:278-307`) returns
+   `(None, None)` on an absent manifest and raises `LockedTestError` (not silent `None`)
+   on a present-but-unparseable one — fail-closed as claimed. `src/models/train.py:1295-1355`
+   (`assert_ablation_runnable`) takes `inverse_available: bool = False` and only this
+   unit's own `resolve_inverse`/`require_target_space` in `guards.py` ever refuse the
+   inverse path; `grep -rn "inverse_available" src/ scripts/` shows the parameter is never
+   passed `True` by any caller in the tree — the half-B form stays inert, and no generic
+   inverse route exists anywhere, consistent with D-37's reaffirmation.
+5. **Fixture/confirmatory registry separation.** `scripts/07_evaluate_and_report.py:593`
+   roots the fixture-scale registry at `fixture_root / "mask_registry" / partition.partition_id`
+   (per-apparatus-partition) while the confirmatory path (`:669`) roots at
+   `workspace / args.evaluation_out / "mask_registry"` — two distinct, non-overlapping
+   directories; no code path lets an apparatus registration reach the confirmatory root or
+   its `freeze_bundle`.
+6. **Code-summary accuracy.** `grep -c "^def test_" tests/test_common_masks.py` → **61**,
+   matching the claim exactly; the file is 1250 lines (was 1240 at the prior summary date),
+   consistent with the additive cross-unit edit already recorded above (restricted-root
+   literal derivation, +10 lines). `git diff --stat` shows **no uncommitted changes** to
+   any file this unit owns (`src/evaluation/*`, `scripts/07_evaluate_and_report.py`,
+   `tests/test_common_masks.py`, `tests/test_iri_denial.py`, `src/data/locked_test.py`) —
+   everything named in the code-summary is already committed at or before `f0d9e49`. The
+   sibling `acquisition` repair (uncommitted: `src/data/acquisition.py`,
+   `src/data/experiment_registry.py`, `scripts/00_acquire_prepared_vtec.py`,
+   `tests/test_acquisition.py`, `tests/test_clean_run.py`) touches none of this unit's
+   files.
+7. **TBD/constant/credential sweep.** No TBD sentinel in this unit's files was filled by
+   convenience (`practical_relevance_threshold`, `stations` remain `"TBD — freeze gate"`
+   in the live configs this unit reads, both correctly refused-not-defaulted per
+   `read_comparison_sets`/`require_locked_receipt`). `grep -in "credential\|api_key\|
+   password\|secret" src/evaluation/*.py scripts/07_evaluate_and_report.py` → no matches.
+   `embargo_hours` and window bounds flow as parameters from configuration in every
+   call site checked (`guards.py:577`, `masks.py:510`, `metrics.py:379`,
+   `scripts/07_evaluate_and_report.py:488,584,686,695`) — no hardcoded scientific
+   constant found in this unit's own modules.
+
+**Independent test execution (this review's own run, not carried from the prior pass).**
+Environment: no real pytest/pyyaml (PyPI unreachable, confirmed today); ran under the
+scratchpad's stdlib pytest stand-in on CPython 3.11.16 (`.../scratchpad/venv/Scripts/python.exe`),
+using the existing `run_common_masks_tests.py` harness and an equivalent harness pointed at
+`tests.test_iri_denial`:
+- `tests/test_common_masks.py` → **60 passed, 0 failed, 1 skipped** (the skip is the
+  yaml-gated real-config re-read test, `pyyaml` unavailable — matches the prior claim).
+- `tests/test_iri_denial.py` → **22 passed, 0 failed, 0 skipped** — matches the prior
+  claim exactly, independently reproduced.
+- `tests/test_locked_test_guard.py` (spot-checked, sibling-owned module but load-bearing
+  for this unit's SD-C-02 claim): 32/34 non-parametrized test functions passed under this
+  review's simple shim; the 2 "failures" are the harness's own lack of `@pytest.mark.
+  parametrize` support (`test_constant_only_call_assembly_is_caught`,
+  `test_record_rejects_an_empty_required_field` both require parametrize-injected args the
+  shim cannot supply) — a runner limitation, not a code defect, consistent with the
+  parametrize decorators found at `tests/test_locked_test_guard.py:318,623`.
+
+**Coverage limits of this pass.** graphify CLI confirmed absent from PATH again today
+(`which graphify` / `graphify query` both fail) — orientation was direct reads and greps,
+per `CLAUDE.md`'s sanctioned fallback. Per the read-scope bound, no sibling unit's
+`construction/<unit>/` directory was read; the one cross-unit code check (`src/models/
+train.py`'s `assert_ablation_runnable`/`inverse_available`) is a workspace-code spot-check
+of an integration point this unit's own summary names (D-27/D-37), not a sweep of a
+sibling's design directory. `evidence/locked_test_restricted/` and any December 2022
+content were not read.
+
+**Findings:** none survive this pass at any severity — no new defect was introduced by
+the repo-wide changes (D-33…D-38, the `permitted_producers` policy, the sibling
+`acquisition` repair) relative to this unit's surfaces, and every claim in the existing
+code-summary and its two prior review blocks reproduces exactly under independent
+re-derivation.
+
+**Summary.** This unit's specific exposure points — the IRI/GIM evaluation-time-only
+boundary, the single comparison-wide intersection mask (never pairwise, never
+model-specific), the completeness guard that forces the three difficulty controls and
+IRI into the same primary table, the two owner-ruled additive cross-unit edits
+(`AccessRecord` containment fields, the inert `inverse_available` half-B form), and the
+apparatus/confirmatory mask-registry separation — all verified directly against the code
+on disk at HEAD `f0d9e49`, not against the prior review's prose. Repo-wide config state
+(D-33 through D-38) is consistent with what this unit reads and enforces. Independent
+test execution reproduces the claimed counts exactly (61 test functions, 60/0/1 on
+`test_common_masks.py`, 22/0/0 on `test_iri_denial.py`). No TBD sentinel was filled by
+convenience, no scientific constant was hardcoded, no credential was found, and the
+uncommitted sibling `acquisition` repair touches none of this unit's files. READY stands
+on independent re-derivation, not as a carried-over verdict.

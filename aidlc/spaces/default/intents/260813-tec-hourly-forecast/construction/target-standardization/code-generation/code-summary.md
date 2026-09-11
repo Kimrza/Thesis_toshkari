@@ -105,3 +105,160 @@ unit's scripts — nothing on the full-year path changed:
 
 Tests live in `tests/test_clean_run.py` (`test_rec2_02_...`, `test_control_4_only_copy_...`).
 This unit's owner may confirm or reverse per the change record.
+
+## Review — 2026-09-10 (code-generation, gate-floor re-review, iteration 2)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T14:19:48Z
+**Iteration:** 2 (fresh review against current state; the earlier READY was reset by a
+gate rejection unrelated to this unit's own artifacts, per the dispatch brief)
+
+### Scope of this pass
+
+Re-derived from scratch against HEAD `f0d9e49` plus the uncommitted sibling
+`acquisition` repair (`_guard_free_text_egress` in `src/data/experiment_registry.py`,
+new controls in `tests/test_acquisition.py`/`tests/test_clean_run.py`). Confirmed this
+unit's own files (`src/data/prepared.py`, `scripts/02_standardize_prepared_target.py`,
+`scripts/03_verify_processing.py`, `tests/test_prepared_target_schema.py`,
+`src/data/config.py`) carry **no uncommitted changes** (`git status --porcelain` shows
+only `acquisition`/`governance-guards`/`inventory-and-registry` code-summaries and the
+acquisition-unit source/tests as dirty) — this unit's own work is exactly the
+already-committed state the prior review examined, plus the owner-authorised
+cross-unit edits already disclosed in the "Cross-unit edit record" section above.
+
+### Findings
+
+None new. The two Minor findings from the 2026-09-05 review (unstubbed
+`qc_operations`/`target.*` keys in `configs/data.yaml`; the stale 17-field
+`D17_TARGET_FIELDS` in the sibling `tests/test_phase_boundary.py:95`) are **unresolved,
+still present, and correctly not this unit's to fix** — re-verified below.
+
+| # | Severity | Where | Status |
+|---|---|---|---|
+| 1 | Minor | `configs/data.yaml` | Still absent (confirmed by direct grep: no `qc_operations`/`target.*` key anywhere in the file even after the D-33/D-38 additions of `cell_rule`/`partitions`/`embargo_hours`). Harmless — `assert_qc_operations_frozen` treats absent and TBD identically and still refuses correctly (live-executed below). Carried forward, not blocking. |
+| 2 | Minor | `tests/test_phase_boundary.py:95` (sibling file, not owned by this unit) | Still 17 fields (`processor_qc_flags` extra) against D-17's frozen 16; independently re-derived from `evidence/DECISIONS.md` D-17's field table this pass (16 rows counted: `interval_start_utc, station_id, cell_gdlat, cell_glon, cell_lat_bounds, cell_lon_bounds, vtec_tecu, valid_observation_count, within_hour_spread_tecu, largest_internal_gap_s, provider_dtec_summary, aggregation_config_id, target_valid, phase_id, source_id, target_definition_id`). Still routed to the gate as owed before any target-producing run; correctly not touched by this unit. |
+
+### Adversarial checks run this pass, with evidence
+
+- **`scripts/03_verify_processing.py`'s `_load_tolerance` reroute (the brief's named
+  hardest-attack surface) does strictly narrow, verified directly, not just read.**
+  Diffed the pre-reroute version (`ed5808b:scripts/03_verify_processing.py`) against
+  HEAD: the old path was `yaml.safe_load(text)` → `isinstance(..., Mapping)` check →
+  `resolve_float_tolerance(loaded)` directly on the raw parsed dict — i.e. it accepted
+  *any* mapping carrying `permitted_floating_point_tolerances.value_level_diff_tecu`,
+  full TE §15.2 manifest or not. The new path calls
+  `src.data.fixture_manifest.load_fixture_scope`, which (read directly,
+  `fixture_manifest.py:1750-1772`) dispatches to either `load_fixture_manifest` (full
+  12-content-area TE §15.2 validation) or `load_identity_declaration`
+  (`kind == "identity_declaration"`), **both fully validating**, and only then hands
+  `resolve_float_tolerance` the *same* `scope.data` raw mapping the old code used
+  (`FixtureManifest.data`/`IdentityDeclaration.data` are the unmodified parsed dict,
+  confirmed at `fixture_manifest.py:410,1621`). So the new accept-set (full manifest ∧
+  tolerance-key resolves) is a strict subset of the old accept-set (any-mapping ∧
+  tolerance-key resolves) — nothing the old code accepted and the new code rejects
+  fails to also be structurally invalid by TE §15.2, and nothing the new code accepts
+  was rejected by the old code. Exception-type check: old code raised only
+  `StandardizationError`; new code can raise `IntegrityError` (from the loader) or
+  `StandardizationError` (from `resolve_float_tolerance`) — both are caught by the
+  same `except IntegrityError` at `scripts/03_verify_processing.py:359`, confirmed
+  live: `StandardizationError` is declared as an `IntegrityError` subclass in
+  `src/data/config.py` (code-summary decision 1), so no caller-visible behavior change
+  from the exception-type widening. **No widening found.**
+- **Script 03 confirmed Phase-1-only and unreachable from Phase 1's own boundary
+  rule**: `--phase` has `choices=(1,)` (`scripts/03_verify_processing.py:158`),
+  matching script 02 (`scripts/02_standardize_prepared_target.py:176`); no `03a`/`03b`
+  variant file exists.
+- **Q2=A refuse-to-RUN gate live-executed this pass, not merely re-read**, against
+  three probes built from the current `assert_qc_operations_frozen` signature:
+  absent `qc_operations` key (matches the current `configs/data.yaml` state exactly)
+  → refuses naming the field and "FROZEN UNDER A D-NUMBER... never mere
+  non-emptiness"; a non-empty operations list without a `decision` D-number citation →
+  refuses identically (the convenience-fill bypass attempt fails); a list *with* a
+  D-number citation → passes. All three matched the documented contract exactly.
+- **D-5 (never impute/interpolate/fill) verified by direct search**: no
+  `interpolate`/`fillna`/`ffill`/`bfill`/`impute` call anywhere in `prepared.py` or
+  scripts 02/03 — the only matches are the docstring/comment sentences stating the
+  prohibition, not code that violates it.
+- **D-17's 16-field contract and the 8-class excluded set independently re-derived
+  from `evidence/DECISIONS.md` this pass** (not carried from the prior review's
+  count): both match `prepared.py`'s `D17_FIELDS` and `DECLARED_EXCLUDED_SET` exactly,
+  same order, same count.
+- **Location-sampled gridded VTEC labeling verified**: `TARGET_LABEL =
+  "location-sampled gridded VTEC"`, `_PROHIBITED_FRAGMENTS = ("station-observed",
+  "receiver-specific")`, and `target_definition_id` stamped on every row
+  (`prepared.py:136-153,653,1383`) — the mislabeling this project forbids does not
+  occur.
+- **No TBD sentinel filled by this unit, no scientific constant hardcoded, no
+  credential/secret** — grepped `prepared.py` and both scripts: every `TBD_SENTINEL`
+  reference is refusal logic (raises on encountering the literal), not a fill; no
+  `api_key`/`secret`/`password`/token-literal pattern found.
+- **Sibling `acquisition` repair's blast radius on this unit, checked directly (this
+  unit imports `guard_egress` from `src/data/acquisition.py` and
+  `append_registry_event`/`record_abort_honestly` from
+  `src/data/experiment_registry.py`)**: `git diff --stat` confirms the repair is
+  additive (168 insertions, 8 deletions across the two files); `guard_egress` still
+  exists unchanged at `acquisition.py:480`; `append_registry_event`/
+  `record_abort_honestly` still exist unchanged in `experiment_registry.py`. The new
+  `_guard_free_text_egress` now routes `notes`/`reason` through
+  `guard_egress_free_text` before every registry append — **live-tested against this
+  unit's actual message strings** (script 03's fixed `notes` text, a real
+  `StandardizationError` string, the QC-refusal message, a Windows file-path
+  `IntegrityError` string): none triggered a false-positive `CredentialEgressError`.
+  No regression to this unit's registry-write path.
+- **`code-summary.md` line-count claims re-verified against disk, printed before
+  asserting**: `wc -l scripts/02_standardize_prepared_target.py
+  scripts/03_verify_processing.py` → 428 / 386, exactly matching both this document's
+  own claim and the cross-unit edit record's claim.
+- **Test counts independently re-executed** with a purpose-built stand-in runner
+  (real pytest/pyyaml unreachable — PyPI blocked, verified again this pass; CPython
+  3.11.16 via the scratchpad venv) that expands `@pytest.mark.parametrize` cases
+  (the shipped stand-in shim no-ops parametrize, which would have undercounted):
+  `tests/test_prepared_target_schema.py` → **62 passed, 0 failed, 0 errored**,
+  matching the claimed 62 exactly; `tests/test_phase_boundary.py` → **52 passed, 0
+  failed, 1 skipped** (the skip is `test_target_artifact_conforms_to_d17_when_it_exists`
+  at line 247, matching the claimed pre-existing skip reason verbatim: no target
+  artifact exists). Combined: 114 passed, 0 failed, 1 skipped, 0 errored across both
+  files — no regression.
+
+### Repo-wide config changes checked for spillover into this unit
+
+- `configs/data.yaml`'s new `cell_rule` (D-33, supervisor countersignature not yet
+  given) and `partitions` (D-38) blocks, and `configs/experiment.yaml`'s new
+  `embargo_hours` (D-38): none of these keys are read by `prepared.py` or scripts
+  02/03 (grepped; the standardization engine reads only `qc_operations`, `target.*`,
+  and the D-16/D-17/D-19 paths, none of which changed). `stations` and
+  `practical_relevance_threshold` remain `TBD — freeze gate`, correctly unread here.
+  No TBD was silently resolved by this unit's code path as a side effect of the
+  sibling transcriptions.
+
+### Coverage limits (unchanged from iteration 1, restated)
+
+This pass verified the unit's own artifacts, the passed functional-design/nfr-design/
+units-generation contracts, `evidence/DECISIONS.md` D-16/D-17/D-19, `configs/data.yaml`
+and `configs/experiment.yaml`, `governance/CHANGE_RECORD_2026-09-07_R133_...md` §11.5
+(the reroute's own change record), and the single sibling files this unit's own
+artifacts or the dispatch brief named as integration points
+(`tests/test_phase_boundary.py`, `src/data/acquisition.py`,
+`src/data/experiment_registry.py`) — resolved to their owning locations rather than
+browsed. No other sibling unit's construction directory was read.
+
+### Summary
+
+Nothing has regressed and nothing new was silently introduced: this unit's own five
+files are byte-identical to the already-reviewed committed state: the sibling
+`acquisition` repair touches only files this unit imports from, additively, and its
+new credential-egress guard was live-tested against this unit's actual log strings
+without a false-positive refusal. The specific attack the brief named hardest — the
+`03_verify_processing.py` tolerance-loader reroute — was verified directly against the
+pre-reroute git history rather than taken on the change record's word, and the
+strictly-narrows claim holds: the new accept-set is a proper subset of the old one, and
+the exception-type change is absorbed by an existing subclass relationship with no
+caller-visible effect. The Q2=A gate was re-executed live against three probes and
+discriminates absent/unfrozen/frozen states exactly as designed. Both named test files
+were independently re-run with parametrize expansion and match the claimed counts
+exactly, with zero failures. The two Minor findings from the prior review are
+confirmed still present, still correctly unfixed by this unit (one belongs to a
+sibling file, one is a disclosed convention gap with no functional effect), and
+neither individually nor together rises to blocking under this project's verdict
+rule. READY stands on independent re-derivation, not on re-reading the prior verdict.

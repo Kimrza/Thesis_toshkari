@@ -265,6 +265,16 @@ def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
 def _registry_row(
     run_id: str, *, status: str, lock_hash: str, snapshot: Any, reason: str = ""
 ) -> dict[str, Any]:
+    """Compose one TE 13.4 registry row for this run (started | aborted | completed).
+
+    The two free-text columns this function fills — `notes`, and `reason` on the aborted
+    branch, where `reason` is `str(exc)` and would carry a live transport's error text —
+    are routed through the W-9 redaction chokepoint by the registry writer itself
+    (`experiment_registry.REDACTED_FREE_TEXT_FIELDS`, applied in `append_registry_event`
+    before any byte is written). This script deliberately keeps NO inline copy of that
+    guard: one boundary, one guard home, and the refusal is proved per entry point rather
+    than per composer (nfr-design c58).
+    """
     now = dt.datetime.now(dt.UTC).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
@@ -319,8 +329,10 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
     """The acquisition work: guard, resolve, retrieve, screen, account, write.
 
     Returns the summary the completed registry row's notes cite. Every output value
-    passes the W-9 redaction chokepoint inside the manifest writers; December is
-    excluded by RECORD-DATE predicate before anything is written (R-31, BLK-07).
+    passes the W-9 redaction chokepoint: manifest payloads inside the manifest writers,
+    and this run's registry free-text columns inside `append_registry_event` (see
+    `_registry_row`). December is excluded by RECORD-DATE predicate before anything is
+    written (R-31, BLK-07).
     """
     _assert_phase1_field_contract()  # R-24: before the first write, always
 

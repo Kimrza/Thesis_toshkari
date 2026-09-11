@@ -136,3 +136,110 @@ graphify correction, the fixture-README Kaggle in-session sections, and CR `§11
 ### Verdict rationale
 
 One Minor (a staleness gap in the PRIMARY artifact's own Deviations/routing text, superseded by this pass's own change record but not swept back into `code-summary.md`), zero Critical, zero Major. This unit remains **READY**.
+
+## Gate-floor re-review (2026-09-10)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T14:47:09Z
+**Scope:** fresh floor re-derivation against HEAD `f0d9e49` + uncommitted working tree, after
+a gate rejection reset the review floor. Working-tree changes since the last verdict: a
+sibling `acquisition` repair touching `src/data/experiment_registry.py`, `src/data/acquisition.py`,
+`scripts/00_acquire_prepared_vtec.py`, `tests/test_acquisition.py`, and — in this unit's own
+lane — `tests/test_clean_run.py`; plus `configs/data.yaml` (`partitions:` block, D-38) and
+`configs/experiment.yaml` (`embargo_hours: 24`, D-38); plus `evidence/DECISIONS.md` D-37/D-38.
+Environment: no real pytest/ruff/pyyaml (PyPI egress blocked, re-verified 2026-09-10);
+ran the stdlib pytest stand-in at
+`...\26ca41ab-0b23-424c-a7c3-a767d4b33251\scratchpad\pytest_standin\run_tests.py` under uv-managed
+CPython 3.11.16 — a stand-in, not real pytest; named honestly.
+
+### Re-derived facts (printed, not carried)
+
+- **Suite run** (`run_tests.py <repo> test_clean_run`): `58 passed, 0 failed, 3 skipped, 0 errors`.
+  The 3 skips are all pyyaml-gated (`test_exported_check_full_path_requires_yaml`,
+  `test_control_32_gate_result_predating_the_frozen_manifests_fails`, and the clean-run
+  completion test skipping with its named §18.3 reason: *"clean-run completion NOT RUN —
+  first unmet precondition: pyyaml is not importable on this clone... TS-X-01"*). The
+  completion test's skip/execute transition is still honest: it did NOT flip to executing or
+  to claiming WS-20/TA-17 evidence merely because `configs/data.yaml`'s `partitions:` and
+  `configs/experiment.yaml`'s `embargo_hours` cleared two of its precondition fields —
+  pyyaml unavailability is a separate, still-unmet precondition, and the printed reason
+  names exactly that one.
+- **39/11 reconciliation, printed by the file's own meta-test**: `negative controls:
+  enumerated 39 ((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []` /
+  `must-not-fire: derived 11 (1+1+1+1+2+2+1+1+1 over [R-133..R-141]); annotated 11 (of which
+  1 hosted elsewhere); missing []; extra []`. Both set-differences are empty in both
+  directions. The sibling repair's new real-invocation test,
+  `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window`, is confirmed present
+  only in `BEYOND_ENUMERATION_CONTROLS` (`tests/test_clean_run.py:1904-1906`) — it does not
+  appear in, and was not counted toward, the 39/11 enumerated ledger.
+- **`grep -c "^def test_" tests/test_clean_run.py` → 61** (was 50 at the last verdict; 60 at
+  committed HEAD per the change record's own `§11.6` count, +1 for the sibling's new
+  real-invocation test). `58` of 61 pass, matching the runner.
+- **BLK-02**: `find . -iname fixture_manifest.yaml` → no hits anywhere in the repository.
+  No measured value is stated, inferred or substituted; `configs/experiment.yaml: folds`
+  stays the literal `TBD — freeze gate` sentinel; only `embargo_hours` was filled, and only
+  under D-38's disclosed joint owner+supervisor authorization, not by convenience.
+- **`evidence/DECISIONS.md` tail confirmed at D-38**, D-37 immediately before it. D-37: *"D-27
+  stands, unreopened and unamended... R-139 control 25 preserved at full strength... BLK-08's
+  mechanism limb is CLOSED by this decision; BLK-02 stays OPEN."* Cross-checked against
+  `business-rules.md` R-139 control (25)'s own text (line 642: a `toleranced` entry declaring
+  TECU units for an output whose producing path declares no `inverse_route` fails) — unchanged,
+  and `tests/test_clean_run.py::test_control_25_tecu_tolerance_without_inverse_route_is_not_freezable`
+  is present, unmodified in the diff, and passing.
+- **`load_fixture_scope` single-guard-home scan**: `test_control_4_only_copy_yaml_parse_scan_project_wide`
+  (an AST scan, not a substring grep) passes; independently re-grepped `safe_load`/`yaml.load`
+  across `src/`, `scripts/`, `tests/` for `fixture_manifest` mentions — the only hits are inside
+  `src/data/fixture_manifest.py` itself (the one loader) and a doc-comment in
+  `scripts/03_verify_processing.py` describing the reroute, not a second parse call. The scan's
+  disclosed limit (it flags only calls whose argument subtree textually mentions
+  `fixture_manifest`) is stated honestly in the test's own docstring
+  (`tests/test_clean_run.py:493-526`) and is not overclaimed anywhere in `code-summary.md`.
+- **Multi-run composition / freeze-write guards** (`src/data/fixture_manifest.py`):
+  `compose_measurement_ranges` still refuses a zero-width `runtime.cpu_total`/`storage_total`
+  range (lines 1501-1508); `write_candidate_manifest` still refuses any `data["status"] !=
+  CANDIDATE` (lines 1571-1576) — the owner's Q-31 freeze act stays unreachable from this code.
+- **Over-99-column count, re-derived character-aware** (not byte-count): `0` across
+  `src/data/fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`,
+  `scripts/run_walking_skeleton.py`, `scripts/01_inventory_and_registry.py` — matches the
+  prior "Reformat + decision-request review" pass's derivation.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-summary.md` "Test results" section (lines 44-49) and `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md` §11.6-§11.7 | Both of this unit's own governing artifacts describe `tests/test_clean_run.py` as it stood before the sibling `acquisition` repair: `code-summary.md` still asserts "47 passed, 0 failed, 3 skipped" / "50 test functions"; the change record's last word on the file (`§11.6`) says "unchanged by this pass (57 passed / 3 skipped by name)". The actual current file (working tree) has 61 `test_` functions and passes 58 of them (re-derived and printed above), because a sibling unit's repair added `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window` to a module this unit owns, and neither of this unit's artifacts records that edit at all — not the fact that the file changed, not the new count, not the new test's purpose. `project.md`'s repeatedly-affirmed corrections (`fd-2026-08-30-sweep-derive-sites`, `code-generation:c32`) require exactly this: a cross-unit edit to an owned module gets an explicit ruling and the owning unit's now-stale artifact is carried to the gate under its frozen receipt, disclosed — not silently left to assert a superseded count. | Add a dated note to `code-summary.md`'s Test results section and a new change-record entry (e.g. `§11.8`) stating: `tests/test_clean_run.py` was edited by the `acquisition` unit's 2026-09-10 adversarial-re-review repair (Finding 2), adding one real-invocation test; current counts are 61 functions / 58 passed / 0 failed / 3 skipped, reconciliation still empty both ways. This is disclosure, not a fix owed by this unit — the edit itself is sound and already independently reviewed by the sibling's own re-review per the test's docstring. |
+| 2 | Minor (unresolved, carried from the 2026-09-10 "Reformat + decision-request" review) | `code-summary.md` lines 56 and 60 (Deviations item 4; "Routed to the stage gate") | Still asserts "47 over-99-column lines remain … real `ruff` owed" and "the 47 over-99 lines + owed `ruff`/`graphify` runs." Re-derived independently this pass (character-aware, not byte-count): the actual count is `0` across all five files named in the prior review's own derivation (`fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`, `run_walking_skeleton.py`, `01_inventory_and_registry.py`), consistent with `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md` §11.7's closure. This Minor was flagged in the prior review pass and remains unswept in `code-summary.md` itself. | Same as previously recommended: add one line to `code-summary.md` stating the over-99 count is 0 per CR §11.7, distinct from the still-open `ruff`/`graphify` obligations. |
+
+### Verified and NOT flagged
+
+- BLK-02 holds (no `fixture_manifest.yaml` anywhere; no measured value stated/inferred/substituted).
+- BLK-08's mechanism limb is CLOSED by D-37, reaffirming D-27 unreopened; R-139 control 25
+  is unchanged and at full strength; BLK-02 stays OPEN — all four facts consistent across
+  `evidence/DECISIONS.md`, `business-rules.md`, `tests/test_clean_run.py`, and
+  `code-summary.md`'s own "Key implementation decisions" section.
+- `load_fixture_scope` remains the single manifest-loading guard home project-wide; the
+  scan's disclosed textual-mention limit is stated honestly, not overclaimed.
+- The clean-run completion test's skip/execute transition stays honest after D-38 filled two
+  of its precondition fields — it still skips on the pyyaml precondition and does not claim
+  WS-20/TA-17 evidence.
+- No TBD sentinel was filled by convenience; no scientific constant lives in source; no
+  credential found in the touched files; no guard was weakened (every diff hunk inspected in
+  the sibling's edit to `tests/test_clean_run.py`, `src/data/acquisition.py`,
+  `src/data/experiment_registry.py` adds a check or a structural AST assertion — none removes
+  a `pytest.raises`, downgrades an exception type, or loosens a condition).
+- The zero-width multi-run range refusal and the `status != CANDIDATE` freeze-write refusal
+  in `src/data/fixture_manifest.py` are both unchanged and still exercised by passing tests.
+
+### Verdict rationale
+
+Zero Critical, one Major (Finding 1: this unit's own artifacts are silent about a sibling
+edit to a module this unit owns, understating the current test count — a disclosure gap,
+not a code defect; the edit itself was independently reviewed by the sibling's own
+adversarial re-review per the new test's docstring), one Minor carried forward unresolved
+(Finding 2, the stale over-99 line count). Per the stated verdict rule (READY if zero
+Critical, ≤2 Major, any Minor), this unit is **READY**, with Finding 1 routed to the stage
+gate for disclosure rather than blocking: the hard invariants this re-review was dispatched
+to attack — BLK-02, BLK-08/D-27, the 39/11 reconciliation, the single guard home, the
+zero-width and freeze-write refusals, TBD-sentinel discipline — all hold at full strength
+against the current tree.

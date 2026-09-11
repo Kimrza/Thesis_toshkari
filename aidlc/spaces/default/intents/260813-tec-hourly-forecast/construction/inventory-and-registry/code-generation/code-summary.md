@@ -95,3 +95,152 @@ recommended option" ruling), the fixtures unit made these ADDITIVE edits to
 
 Tests live in `tests/test_clean_run.py` (`test_rec2_01_...`). This unit's owner may
 confirm or reverse per the change record.
+
+## Gate-floor re-review (2026-09-10)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-10T14:09:54Z
+**Iteration:** 2 (gate-floor reset; fresh verdict against current repository state, HEAD
+`f0d9e49` plus the uncommitted sibling `acquisition` repair pass to
+`src/data/experiment_registry.py`, `src/data/acquisition.py`, `tests/test_acquisition.py`,
+`tests/test_clean_run.py`)
+
+### What changed since the 2026-09-05 verdict, verified against disk
+
+- `configs/data.yaml`: `cell_rule` transcribed to `"floor-half-open-d1"` under **D-33**
+  (2026-09-10) — supervisor countersignature explicitly recorded as **NOT YET GIVEN**
+  (`evidence/DECISIONS.md:2124`, `configs/data.yaml:46-58`). `stations` unchanged, still
+  `TBD — freeze gate`. New `partitions:` block (D-38); not read by this unit's code.
+- `src/data/experiment_registry.py`: new `REDACTED_FREE_TEXT_FIELDS = ("notes", "reason")`
+  and `_guard_free_text_egress`, called from `append_registry_event` before every append
+  (lines 154, 241-263, 380). This unit's registry rows (`scripts/01_inventory_and_registry.py:
+  _registry_row`) write `notes` as a fixed literal and `reason` only as `str(exc)` from this
+  unit's own `IntegrityError`/`LockedTestError` messages — no operator-supplied or
+  provider-transport text reaches either column from this unit's code path.
+- Board Rec 2 exemption code (`_declared_data_window`, `_refuse_fixture_audit`,
+  `--fixture-manifest`) already present from the prior iteration, now re-verified against
+  the current test file.
+
+### Attack-point findings
+
+1. **`code-summary.md` vs. disk.** File counts and claims re-derived: `src/data/inventory.py`,
+   `src/data/registry.py`, `scripts/01_inventory_and_registry.py`,
+   `tests/test_import_boundary.py`, `tests/test_station_registry.py`,
+   `tests/test_december_audit.py`, `governance/CHANGE_RECORD_2026-09-05_import_boundary_matrix.md`
+   all present and matching the described content. No count claim to re-derive beyond the
+   file list itself (this summary makes no numeric test/line-count assertion needing a
+   printed derivation). No stale claim found in the body text.
+
+2. **`assert_registry_resolved` / `cell_rule` interaction — no defect.** Traced
+   `load_registry` (`src/data/registry.py:250-302`): the `stations` check runs FIRST and
+   raises unconditionally while the sentinel is `TBD — freeze gate`, before the `cell_rule`
+   check is ever reached. Reproduced directly against a `ConfigSnapshot` built from the
+   ACTUAL current `configs/data.yaml` values (`stations="TBD — freeze gate"`,
+   `cell_rule="floor-half-open-d1"`, `igrf_version` absent):
+   `RegistryError` raised naming `configs/data.yaml:stations`, citing the correct field.
+   **No path resolves the registry today** — `cell_rule` being frozen (even without its
+   required supervisor countersignature) is inert while `stations` blocks. Latent
+   observation, not a live defect: `load_registry` has no check that a populated
+   `cell_rule` also carries its TE §18.2 supervisor countersignature — if `stations` is
+   filled by a future freeze before that countersignature lands, the registry would
+   resolve `cell_rule` on the identifier match alone. Not actionable now (no such path
+   exists while `stations` is TBD) and D-33 itself states the countersignature gap is a
+   recorded, accepted limitation of the freeze, not a mechanism this unit's code was asked
+   to enforce — noted for the record, not raised as a finding.
+
+3. **Board Rec 2 window exemption — genuinely fail-closed; the 01/02/04 vs. 00 asymmetry is
+   honestly disclosed, not a hidden gap.** `_refuse_fixture_audit` and `_declared_data_window`
+   are both exercised by REAL invocation in `test_rec2_01_out_of_window_inventory_and_audit_refuse`
+   (direct calls, not AST) — confirmed `--audit` + `--fixture-manifest` raises `IntegrityError`
+   naming the December-outside-every-fixture-window rationale, `--audit` alone with no
+   manifest is unaffected (gated instead by the separate BLK-07 check), and an out-of-window
+   declared window is rejected by `assert_declared_window_within_scope`. What is NOT present
+   for script 01 (unlike script 00's `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window`)
+   is a genuine end-to-end invocation of `_stage_entry` itself with real config directories;
+   instead `_assert_entry_passes_declared_window` is an AST wiring check, and the final
+   assertion is a literal source-substring check. This asymmetry is stated verbatim in the
+   test file's own docstring (`tests/test_clean_run.py:1955-1959`, "adversarial re-review
+   2026-09-10, Finding 2") — it is disclosed, not silently narrower. Read `_stage_entry`
+   directly (`scripts/01_inventory_and_registry.py:276-314`): the wiring is a single
+   straight-line call (`declared_window = _declared_data_window(snapshot) if fixture_manifest
+   is not None else None`, passed straight to `require_receipts_for_snapshot`), not
+   conditional logic complex enough for the AST+unit-level coverage to plausibly miss a
+   wiring defect. Verdict: an honest, disclosed asymmetry, not a gap this unit needs to close
+   to be READY — but it is not yet reflected in this unit's OWN code-summary, only in the
+   test file's docstring; noted as a Minor finding below.
+
+4. **`_refuse_fixture_audit` / December — refusal is real, negative-controlled, and
+   redundant with BLK-07.** `--audit` is refused twice, independently: `_require_december_
+   authorization()` (BLK-07, unconditional, first statement of `_run_audit`) and
+   `_refuse_fixture_audit` (only when `--fixture-manifest` is also given). Both paths were
+   exercised directly (`test_audit_entry_point_refuses_naming_blk07`,
+   `test_rec2_01_out_of_window_inventory_and_audit_refuse`). No path today lets `--audit`
+   through regardless of fixture-manifest state.
+
+5. **Free-text egress guard — safe interaction, no fail-open, no newly-refused legitimate
+   row.** `_guard_free_text_egress` runs before every `append_registry_event` append and
+   covers exactly `notes`/`reason`. This unit's `_registry_row` (`scripts/01_inventory_and_
+   registry.py:330-358`) sets `notes` to the fixed literal `"inventory-and-registry run
+   (P1-02)"` and `reason` only from `str(exc)` on this unit's own templated
+   `IntegrityError`/`LockedTestError` messages (no external provider text, no credential-
+   shaped content ever appears in either). Ran the full suite; `test_acquisition.py`'s
+   printed egress-coverage derivation (`registry egress coverage derived: refused-by-egress
+   ['notes', 'reason']; refused-by-schema ['status']; written unguarded [...]`) confirms the
+   claimed coverage matches the code. No legitimate row from this unit is at risk of a false
+   refusal, and no path bypasses the guard.
+
+6. **TBD sentinels, scientific constants, credentials, weakened guards.** No TBD sentinel
+   filled by this unit's code. `CELL_RULE_ID` is a rule IDENTIFIER (a string label), not a
+   numeric scientific constant — consistent with the 2026-09-05 review's finding and D-33's
+   own framing ("the rule's IDENTIFIER is validated here; its numeric consequences enter
+   only through config"). No credential literal found in any touched or read file. No guard
+   found weakened relative to the 2026-09-05 pass; `_guard_free_text_egress` is additive
+   (new, not a replacement of a stronger check).
+
+7. **Test run — exact counts, printed.** Environment: CPython 3.11.16 via the stdlib
+   pytest stand-in at the scratch path (never called "pytest"; `pyyaml`/`numpy`/`tensorflow`
+   unavailable, PyPI egress blocked, verified today).
+   - This unit's modules: `test_station_registry` 29 passed; `test_experiment_registry` 49
+     passed; `test_import_boundary` 6 passed; `test_december_audit` 62 passed — **146
+     passed, 0 failed, 0 skipped, 0 errors** across the four.
+   - Full repository suite (26 `test_*.py` modules present on disk today — Phase-2-only
+     modules `test_rinex_schema`/`test_dcb_sign`/`test_hourly_target` do not exist yet, as
+     expected for Phase 1): **1144 passed, 0 failed, 39 skipped, 0 errors**. All 39 skips
+     are `pyyaml`/`numpy` import-unavailability skips on this clone (verified by message),
+     none touching this unit's own modules.
+
+### New findings (this pass)
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `src/data/registry.py:14-20`; `scripts/01_inventory_and_registry.py:21-23`; `src/data/config.py:561-568` (comment) | All three still assert "`configs/data.yaml` keeps its `TBD — freeze gate` sentinels" for "the coordinate-to-cell rule" collectively with stations/IGRF. This is now factually wrong for `cell_rule` specifically: D-33 (2026-09-10) transcribed it to `"floor-half-open-d1"`; only `stations` and `igrf_version` remain TBD. Functionally inert today (traced and reproduced in finding 2: `stations` still blocks unconditionally before `cell_rule` is read), but the docstrings now misdescribe the disk state across three separate files/representations. | On the next touch of any of these three files, narrow the claim to name `stations` and `igrf_version` only, and state `cell_rule`'s actual status (frozen under D-33, supervisor countersignature outstanding) rather than grouping it with the still-TBD fields. No code change required to reach READY. |
+| 2 | Minor | `aidlc/.../inventory-and-registry/code-generation/code-summary.md` (this file, prior to this edit) | The known, test-file-disclosed asymmetry between script 00's real end-to-end `_stage_entry` invocation test and scripts 01/02/04's AST-wiring-only check (`tests/test_clean_run.py:1955-1959`) was not previously carried into this unit's own code-summary, only into the test file's docstring — a reader of this artifact alone would not know the coverage is narrower for script 01 than for script 00. | Recorded here now (finding 3 of the attack-point list above); no further action needed for READY since the asymmetry is honestly disclosed at its source and the wiring itself is simple, direct, and covered by real invocation of its two constituent calls. |
+
+### Verdict
+
+**READY.** Zero Critical, zero Major, two Minor (both documentation/disclosure gaps with
+no runtime consequence, independently reproduced not to affect current behaviour). The
+registry's `stations`-first refusal ordering was reproduced directly against today's actual
+`configs/data.yaml` values and continues to refuse for the correct, named reason regardless
+of `cell_rule`'s new frozen-but-uncountersigned state. The Board Rec 2 fixture/audit
+exemption is fail-closed on every path exercised, including the December-audit combination,
+and its one known test-coverage asymmetry against script 00 is disclosed at its source
+rather than hidden. The new free-text egress guard in `experiment_registry.py` does not
+interact adversely with this unit's registry writes (traced and confirmed by the suite's own
+printed coverage derivation). Full suite re-run independently: 1144 passed, 0 failed, 39
+skipped (all pre-existing import-unavailability skips), 0 errors; this unit's four test
+modules: 146 passed, 0 failed, 0 errors.
+
+### Coverage limits (this pass)
+
+Read: this unit's own record directory; `configs/data.yaml`, `configs/experiment.yaml`
+(referenced, not modified by this unit); `evidence/DECISIONS.md` D-33 through D-38;
+`src/data/registry.py`, `src/data/inventory.py` (not re-read line-by-line this pass, no
+change since 2026-09-05), `scripts/01_inventory_and_registry.py`,
+`src/data/experiment_registry.py`, `src/data/acquisition.py` (diff only), `src/data/config.py`
+(`REQUIRED_FIELDS_MAP` section); `tests/test_station_registry.py`,
+`tests/test_experiment_registry.py`, `tests/test_import_boundary.py`,
+`tests/test_december_audit.py`, `tests/test_clean_run.py` (Rec 2 section);
+`governance-guards`/`acquisition` `construction/` directories were NOT read, per the
+per-unit read-scope bound — the free-text guard's origin was verified only through the
+diff and this unit's own consumption of it.
