@@ -65,6 +65,7 @@ from src.data.acquisition import (  # noqa: E402
     assert_records_within_window,
 )
 from src.data.config import (  # noqa: E402
+    TBD_SENTINEL,
     IntegrityError,
     LeakageError,
     PhaseBoundaryError,
@@ -1576,6 +1577,94 @@ def test_stamp_travels_and_is_never_rewritten(tmp_path):
 # =========================================================================================
 
 
+#: The three outcomes `_config_field_state` reports for one field. `UNDETERMINED` exists so
+#: the stdlib reader can say "I cannot read this field's value" instead of guessing at it.
+_RESOLVED = "resolved"
+_UNRESOLVED = "unresolved"
+_UNDETERMINED = "undetermined"
+
+
+def _scalar_on_key_line(rest: str) -> str:
+    """The scalar part of a `key:` line's remainder.
+
+    Purpose: strip an inline YAML comment without a YAML parser. Inputs: everything after
+    the colon on one line. Re-run behaviour: pure. A `#` ends the scalar only when it sits
+    outside quotes AND is preceded by whitespace (YAML's own rule), so a `#` inside a
+    quoted value is kept rather than truncating the value.
+    """
+    quote: str | None = None
+    for index, char in enumerate(rest):
+        if quote is not None:
+            if char == quote:
+                quote = None
+            continue
+        if char in "\"'":
+            quote = char
+            continue
+        if char == "#" and index > 0 and rest[index - 1] in " \t":
+            return rest[:index].strip()
+    return rest.strip()
+
+
+def _config_field_state(text: str, field: str) -> tuple[str, str]:
+    """Classify ONE top-level field's OWN value in a governed config's text.
+
+    Purpose: answer "is THIS field's value the `TBD — freeze gate` sentinel", never "does
+    this file mention the field somewhere AND mention TBD somewhere". The whole-file
+    co-occurrence form this replaces named a field that merely co-occurred with the string,
+    so it reported the wrong offender as soon as the checked order or the file changed.
+    Inputs: the config text and one field name. Re-run behaviour: pure — no file, clock or
+    network is touched.
+
+    Stdlib only, deliberately: this runs BEFORE the pyyaml precondition it guards, so no
+    YAML parser exists yet. It therefore reads only what it can read exactly — a top-level
+    `field: <scalar>` line — and reports `_UNDETERMINED` with a stated reason for anything
+    else (absent, declared twice, block-valued, or a non-sentinel `TBD` marker) rather than
+    guessing (TE 18.3: stop and report, never default).
+    """
+    matches = re.findall(rf"^{re.escape(field)}[ \t]*:(.*)$", text, re.MULTILINE)
+    if not matches:
+        return _UNDETERMINED, f"no top-level `{field}:` key is present"
+    if len(matches) > 1:
+        return _UNDETERMINED, f"`{field}:` is declared {len(matches)} times at top level"
+    value = _scalar_on_key_line(matches[0])
+    if not value:
+        return _UNDETERMINED, f"`{field}:` carries no scalar on its own line (block value)"
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        value = value[1:-1]
+    if value == TBD_SENTINEL:
+        return _UNRESOLVED, f"`{field}` is the literal sentinel"
+    if "TBD" in value:
+        return _UNDETERMINED, f"`{field}` carries a non-sentinel `TBD` marker: {value!r}"
+    return _RESOLVED, f"`{field}` is {value!r}"
+
+
+def _config_tbd_reason(config_name: str, text: str, fields: tuple[str, ...]) -> str | None:
+    """The stop-and-report reason for the FIRST of `fields` whose OWN value does not
+    resolve in `text`, or None when every checked field resolves.
+
+    Inputs: the config's name (for the message), its text, and the checked field names in
+    the order they are checked. Re-run behaviour: pure. The order of `fields` decides which
+    offender is reported FIRST; it never decides WHICH field is named, because the named
+    field is always the one whose own value failed (the defect this replaces).
+    """
+    for field in fields:
+        state, detail = _config_field_state(text, field)
+        if state == _RESOLVED:
+            continue
+        if state == _UNRESOLVED:
+            return (
+                f"configs/{config_name}: {field} is `{TBD_SENTINEL}`; every stage "
+                f"entry refuses at assert_no_tbd and writes an aborted row (TE 18.3: "
+                f"stop and report, never default)"
+            )
+        return (
+            f"configs/{config_name}: {field}'s own value cannot be read by this stdlib "
+            f"check ({detail}); it says so rather than guessing (TE 18.3)"
+        )
+    return None
+
+
 def _completion_preconditions() -> str | None:
     """The FIRST unmet precondition of the real §13.2 clean run, or None when all hold
     (TE 18.3 stop-and-report, named — never worked around)."""
@@ -1603,13 +1692,9 @@ def _completion_preconditions() -> str | None:
         if not config_path.is_file():
             return f"configs/{config_name} is absent"
         text = config_path.read_text(encoding="utf-8", errors="replace")
-        for field in fields:
-            if field in text and "TBD" in text:
-                return (
-                    f"configs/{config_name}: {field} is `TBD — freeze gate`; every stage "
-                    f"entry refuses at assert_no_tbd and writes an aborted row (TE 18.3: "
-                    f"stop and report, never default)"
-                )
+        reason = _config_tbd_reason(config_name, text, fields)
+        if reason is not None:
+            return reason
     requirements = REPO_ROOT / "requirements.txt"
     if not requirements.is_file() or "tensorflow" not in requirements.read_text(
         encoding="utf-8", errors="replace"
@@ -1658,6 +1743,62 @@ def test_clean_run_completion_or_skip_with_named_reason():
         )
         if completed.returncode != 0:
             pytest.fail(f"clean run ABORTED at {script}: {completed.stderr[-800:]}")
+
+
+def test_precondition_names_the_field_whose_own_value_is_the_sentinel():
+    """NEGATIVE CONTROL for the misattribution fixed on 2026-09-12 (floor-reset re-review,
+    Major): an EARLIER-checked field is resolved and a LATER one carries the sentinel, and
+    the reason must name the LATER field. The apparatus text also satisfies the whole-file
+    co-occurrence condition the replaced form tested (the earlier field's name is present
+    and the string `TBD` is present), so that form would have named the earlier field —
+    which is exactly the defect. Synthetic field names (R-122): no governed config is read
+    and no config value is stated here."""
+    text = (
+        "schema_version: \"1.0.0\"\n"
+        "apparatus_alpha: 24  # resolved; this comment mentions TBD on purpose\n"
+        f"apparatus_beta: \"{TBD_SENTINEL}\"\n"
+    )
+    assert "apparatus_alpha" in text and "TBD" in text  # the replaced form's own condition
+    reason = _config_tbd_reason("apparatus.yaml", text, ("apparatus_alpha", "apparatus_beta"))
+    assert reason is not None, "the sentinel-valued field must still block the clean run"
+    assert "apparatus_beta" in reason and "apparatus_alpha" not in reason, (
+        f"the reason names the wrong field: {reason!r}"
+    )
+    assert _config_field_state(text, "apparatus_alpha")[0] == _RESOLVED
+
+
+def test_precondition_does_not_fire_when_every_checked_field_resolves():
+    """MUST-NOT-FIRE half of the control above: with every checked field carrying its own
+    resolved scalar — including one whose inline comment mentions the sentinel and one
+    whose quoted value contains a `#` — the precondition returns None and the clean-run
+    test is not skipped for a TBD reason it invented."""
+    text = (
+        "apparatus_alpha: 24  # resolved under a synthetic decision; mentions TBD — freeze gate\n"
+        "apparatus_beta: \"synthetic # not a comment\"\n"
+    )
+    fields = ("apparatus_alpha", "apparatus_beta")
+    assert _config_tbd_reason("apparatus.yaml", text, fields) is None
+    assert _config_field_state(text, "apparatus_beta")[1].endswith("'synthetic # not a comment'")
+
+
+def test_precondition_reports_an_unreadable_field_instead_of_guessing():
+    """TE 18.3 on the reader itself: where the stdlib check cannot read a field's own value
+    — absent, declared twice at top level, or block-valued — it returns a reason that SAYS
+    SO and names the field, rather than silently treating it as resolved (which would let
+    the completion test proceed on an unverified precondition)."""
+    absent = "apparatus_alpha: 24\n"
+    block = "apparatus_beta:\n  nested: 1\n"
+    twice = "apparatus_beta: 1\napparatus_beta: 2\n"
+    for text, fragment in (
+        (absent, "no top-level `apparatus_beta:` key"),
+        (block, "carries no scalar on its own line"),
+        (twice, "declared 2 times at top level"),
+    ):
+        state, detail = _config_field_state(text, "apparatus_beta")
+        assert state == _UNDETERMINED and fragment in detail, (state, detail)
+        reason = _config_tbd_reason("apparatus.yaml", text, ("apparatus_beta",))
+        assert reason is not None and "apparatus_beta" in reason
+        assert "cannot be read" in reason and TBD_SENTINEL not in reason
 
 
 def test_fixture_trees_exist_without_manifests():
@@ -1893,14 +2034,15 @@ def test_control_counts_derived_from_business_rules_not_carried():
 
 
 # =========================================================================================
-# Governance-board remediation controls (Recs 2-5, owner-authorised per CR §11.5) — these
-# are NEW controls BEYOND business-rules.md's (1)-(39) enumeration and are deliberately
-# hosted OUTSIDE the CONTROL_HOSTS ledger so the 39/11 reconciliation stays exact.
+# Controls BEYOND business-rules.md's (1)-(39) enumeration — the governance board's
+# remediation rows (Recs 2-5, owner-authorised per CR §11.5) and the 2026-09-12 repair
+# controls. All are deliberately hosted OUTSIDE the CONTROL_HOSTS ledger so the 39/11
+# reconciliation stays exact.
 # =========================================================================================
 
-#: Board-added controls: test function -> board recommendation id. Excluded from the 39/11
-#: set-difference by construction (they extend the enumerated set; the enumeration itself
-#: is the practices gate's to amend).
+#: Beyond-enumeration controls: test function -> the board recommendation id or the dated
+#: repair that added it. Excluded from the 39/11 set-difference by construction (they extend
+#: the enumerated set; the enumeration itself is the practices gate's to amend).
 BEYOND_ENUMERATION_CONTROLS: dict[str, str] = {
     "test_rec2_00_stage_entry_real_invocation_refuses_out_of_window": "Rec 2 (ML-01)",
     "test_rec2_00_out_of_window_acquisition_exemption_refuses": "Rec 2 (ML-01)",
@@ -1912,6 +2054,18 @@ BEYOND_ENUMERATION_CONTROLS: dict[str, str] = {
     "test_rec4_lifecycle_chain_connects_through_each_script_entry": "Rec 4 (ML-03)",
     "test_rec4_candidate_validates_from_orchestrator_collectable_measurements": "Rec 4 (ML-03)",
     "test_rec5_multi_run_ranges_stamped_and_zero_width_refused": "Rec 5 (ML-04)",
+    # Repair-added 2026-09-12 (floor-reset re-review, Major): the clean-run precondition's
+    # per-field value check. Same reason as the board rows — beyond the (1)-(39)
+    # enumeration, so hosted here and excluded from the reconciliation by construction.
+    "test_precondition_names_the_field_whose_own_value_is_the_sentinel": (
+        "2026-09-12 repair (precondition misattribution)"
+    ),
+    "test_precondition_does_not_fire_when_every_checked_field_resolves": (
+        "2026-09-12 repair (precondition misattribution, must-not-fire)"
+    ),
+    "test_precondition_reports_an_unreadable_field_instead_of_guessing": (
+        "2026-09-12 repair (unreadable field is reported, never guessed)"
+    ),
 }
 
 

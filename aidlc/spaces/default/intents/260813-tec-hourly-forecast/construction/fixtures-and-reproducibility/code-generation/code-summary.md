@@ -15,7 +15,7 @@
 | `src/data/fixture_evidence.py` | 4 | F7 evidence emitters (three refusing emitters; D-number agreement checks with sidecar fallback); W-9, R-142, SD-X-01 step 3, SD-X-03 |
 | `scripts/run_walking_skeleton.py` | 5 | F3 orchestrator: `--fixture plumbing_7day` / `--fixture scientific_1month`, §13.2-conformant sequencing; W-3/W-4/W-5/W-7 |
 | `tests/fixtures/plumbing_7day/`, `tests/fixtures/scientific_1month/` | 7 | Fixture trees with `.gitkeep` + spec-conformant `README.md`; **no `fixture_manifest.yaml` anywhere** — BLK-02 held, no manifest authored by hand |
-| `tests/test_clean_run.py` | 8 | §12 mandated module: 50 test functions (count derived from source and printed by its own final test) hosting the 39 negative controls and 11 must-not-fire controls — both figures machine-checked by `test_control_counts_derived_from_business_rules_not_carried`, which parses `business-rules.md`'s enumeration and set-differences it against the file's `CONTROL_HOSTS`/`MUST_NOT_FIRE_HOSTS` ledger (empty in both directions; `R-137:mnf1` hosted in `tests/test_train_only_transforms.py`, presence-asserted) — plus the per-area §15.2 enumeration, project-wide AST only-copy scan, §13.2 fence parse (membership AND order, flags verbatim, ruled scope argument recognised), and the skip-with-named-reason completion test |
+| `tests/test_clean_run.py` | 8 | §12 mandated module: **64 test functions** (corrected in place 2026-09-12; was `50`, superseded first by the sibling `acquisition` repair of 2026-09-10 and then by this unit's own 2026-09-12 precondition repair — count derived from source and printed by its own final test: `def test_ count derived from source: 64; collected: 64`) hosting the 39 negative controls and 11 must-not-fire controls — both figures machine-checked by `test_control_counts_derived_from_business_rules_not_carried`, which parses `business-rules.md`'s enumeration and set-differences it against the file's `CONTROL_HOSTS`/`MUST_NOT_FIRE_HOSTS` ledger (empty in both directions; `R-137:mnf1` hosted in `tests/test_train_only_transforms.py`, presence-asserted) — plus the per-area §15.2 enumeration, project-wide AST only-copy scan, §13.2 fence parse (membership AND order, flags verbatim, ruled scope argument recognised), and the skip-with-named-reason completion test |
 
 ## Files modified (Step 6 — sibling additive edits, Q4=A / Q5=A, each flagged for its owner)
 
@@ -41,9 +41,9 @@
 
 Environment: uv-managed CPython 3.11.16 in the session scratchpad + a stdlib pytest stand-in; PyPI unreachable (`pyyaml`/`pytest`/`ruff` absent). **Smoke evidence only, session-of-generation only, never governed.**
 
-- `tests/test_clean_run.py`: **47 passed, 0 failed, 3 skipped** (46/0/3 at first completion; +1 after the reviewer-driven control-count meta-test was added) — skips all by name: two pyyaml-gated production-loader paths (`require_fixture_receipts` full path incl. the Q5 exemption; control 32's frozen-hash staleness, now also carrying the R-141 must-not-fire acceptance limb) and the clean-run completion test skipping with the §18.3 stop-and-report reason. It fails (never passes) on a non-zero exit when preconditions hold. WS-20/TA-09/TA-17/TA-21 stay `Pending`.
+- `tests/test_clean_run.py`: **61 passed, 0 failed, 3 skipped, 0 errors** over **64 test functions** — figures re-derived and printed 2026-09-12, correcting **in this section's own body** the superseded `47 passed / 50 functions` that three consecutive review passes flagged and that was only ever corrected in a `## Review` addendum (`project.md` `code-generation:fr-2`). The trail, stated so no reader has to reconstruct it: `46/0/3` at first completion → `47/0/3` after the control-count meta-test → `58/0/3` over 61 functions after the sibling `acquisition` unit's 2026-09-10 repair added `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window` to this module → `61/0/3` over 64 functions after this unit's own 2026-09-12 precondition repair added three beyond-enumeration controls (see § Precondition check corrected (2026-09-12) below). Skips all by name: two pyyaml-gated production-loader paths (`require_fixture_receipts` full path incl. the Q5 exemption; control 32's frozen-hash staleness, now also carrying the R-141 must-not-fire acceptance limb) and the clean-run completion test skipping with the §18.3 stop-and-report reason. It fails (never passes) on a non-zero exit when preconditions hold. WS-20/TA-09/TA-17/TA-21 stay `Pending`.
 - Derived counts printed by the meta-test (verbatim): `negative controls: enumerated 39 ((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []` and `must-not-fire: derived 11 (1+1+1+1+2+2+1+1+1 over ['R-133' … 'R-141']); annotated 11 (of which 1 hosted elsewhere); missing []; extra []`.
-- Ten named regression modules + test_clean_run: **437 passed, 0 failed, 13 skipped, 0 errors**.
+- ~~Ten named regression modules + test_clean_run: **437 passed, 0 failed, 13 skipped, 0 errors**.~~ **Superseded 2026-09-12.** This figure is not reproducible from the artifact, because the artifact never names which ten modules it partitions (a reviewer recorded the same ambiguity on 2026-09-10 without raising it as a finding). Replaced with a partition that IS reproducible — **every `tests/test_*.py` module in the repository, 26 modules: 1160 passed, 0 failed, 39 skipped, 0 errors** (2026-09-12, same stand-in runner). The pre-existing failures line below is likewise superseded by that run: the four import-error modules and the `test_external_drivers` / `test_iri_denial` / `test_locked_test_guard` failures it records are all green on the current tree.
 - One self-introduced regression fixed same pass: `test_models_smoke`'s source assertion tripped by the new fixture path; local renamed to `fixture_target`.
 - Pre-existing failures reproduced identically on the stashed, unmodified tree (git stash round-trip): `test_external_drivers` 11, `test_iri_denial` 1, `test_locked_test_guard` 1, 4 import-error modules — not caused by this pass.
 - `compileall` clean over `scripts/`, `src/`, `tests/`.
@@ -53,11 +53,11 @@ Environment: uv-managed CPython 3.11.16 in the session scratchpad + a stdlib pyt
 1. `03_verify_processing.py` reroute (above) — owner-reversible, change-record §11.
 2. Two controls + the exported-check full path are pyyaml-gated skips; substance exercised at stdlib level through `verify_receipt`/`write_fixture_pass_receipt`/`require_in_session_gate` (controls 26–31 real). Full runs owed to a governed environment.
 3. `graphify update .` not run — CLI absent on this clone; owed with `ruff`.
-4. 47 over-99-column lines remain in the four 2026-09-07 files (plus one pre-existing in `01`); every line added by the resume pass conforms; real `ruff` owed.
+4. **0 over-99-column lines remain** — corrected in place 2026-09-12, superseding "47 … remain in the four 2026-09-07 files (plus one pre-existing in `01`)", which the 2026-09-07 reformat (change record §11.7) had already closed and which three consecutive review passes flagged as unswept HERE. Re-derived character-aware (never byte-count: an em dash is 3 UTF-8 bytes and 1 character) over the same five files every prior derivation used — `src/data/fixture_manifest.py` 0, `src/data/fixture_gate.py` 0, `src/data/fixture_evidence.py` 0, `scripts/run_walking_skeleton.py` 0, `scripts/01_inventory_and_registry.py` 0, **total 0** — and additionally over `tests/test_clean_run.py` itself after the 2026-09-12 repair: **0**. Real `ruff` remains owed and is a separate, still-open obligation; the line-count clause alone is what is closed.
 
 ## Routed to the stage gate
 
-Amendment ledger +1 → 8 across 6 owed (`component-methods.md`); the seven sibling edits + stale code-summaries plus the 03 reroute (owner ruling requested); §15.2 REQ-ENG-4 13→12 correction owed in `requirements.md`; the FR-WS-2/FR-WS-3 candidate §15.2 rows and M10 §13.2 placement proposals (change record §§8–9); the two Q-31 freeze acts; BLK-02 open, BLK-08 mechanism limb open; WS-20/TA-09/TA-17/TA-21 `Pending`; TA-03/TA-26 unproducible off Kaggle; TA-15 not covered (foundation's); the stale `team.md` § Walking Skeleton "remains open under Q-31" line (practices-gate-owned); the 47 over-99 lines + owed `ruff`/`graphify` runs; and the commit disposition: owner commit `64c0551` exists with a template message and no D-number (the standing pattern's seventh instance) — the student's ruling is owed on amending it to cite D-11, D-14, D-20, D-28, D-29, D-31 + `CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY`, or letting it stand with a recorded reason, before the still-uncommitted resume-pass outputs land on top. The agent made no commit.
+Amendment ledger +1 → 8 across 6 owed (`component-methods.md`); the seven sibling edits + stale code-summaries plus the 03 reroute (owner ruling requested); §15.2 REQ-ENG-4 13→12 correction owed in `requirements.md`; the FR-WS-2/FR-WS-3 candidate §15.2 rows and M10 §13.2 placement proposals (change record §§8–9); the two Q-31 freeze acts; BLK-02 open, BLK-08 mechanism limb open; WS-20/TA-09/TA-17/TA-21 `Pending`; TA-03/TA-26 unproducible off Kaggle; TA-15 not covered (foundation's); the stale `team.md` § Walking Skeleton "remains open under Q-31" line (practices-gate-owned); the owed `ruff`/`graphify` runs (the over-99 line count that used to be routed here alongside them is **0**, re-derived 2026-09-12 — see Deviations item 4; only the tool runs remain owed); and the commit disposition: owner commit `64c0551` exists with a template message and no D-number (the standing pattern's seventh instance) — the student's ruling is owed on amending it to cite D-11, D-14, D-20, D-28, D-29, D-31 + `CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY`, or letting it stand with a recorded reason, before the still-uncommitted resume-pass outputs land on top. The agent made no commit.
 
 ## Review
 
@@ -345,3 +345,309 @@ defect — one is chronic documentation staleness in the PRIMARY artifact, the o
 dormant code defect that fails safe today and has not yet produced an incorrect result.
 Both should be closed before this unit's next gate encounter; a fourth consecutive pass
 finding #1 unresolved would warrant escalating it past Major.
+
+---
+
+## Precondition check corrected (2026-09-12)
+
+**Scope.** The owner reopened the code-generation gate to fix exactly one correctness
+defect — Finding 2 of the 2026-09-12 floor-reset re-review (Major, real but dormant). No
+other code change was made, no guard was weakened, no locked December data was accessed,
+no `TBD — freeze gate` sentinel was filled, and no evidence was fabricated. The existing
+review history above is untouched; the stale claims this repair uncovered were corrected
+**in the body sections that make them** (the Files-created row for
+`tests/test_clean_run.py`, § Test results, § Deviations item 4, § Routed to the stage
+gate), per `project.md` `code-generation:fr-2` — a correction filed only in a review
+addendum leaves the stale claim standing for its own reader.
+
+### The defect as found
+
+`tests/test_clean_run.py`, `_completion_preconditions`, at HEAD `c8c63d2` lines 1598–1612:
+
+```python
+for config_name, fields in (
+    ("experiment.yaml", ("folds", "embargo_hours")),
+    ("data.yaml", ("stations", "cell_rule")),
+):
+    ...
+    for field in fields:
+        if field in text and "TBD" in text:
+            return f"configs/{config_name}: {field} is `TBD — freeze gate`; ..."
+```
+
+`if field in text and "TBD" in text` is a **whole-file substring co-occurrence test**. It
+asks "does this field's NAME appear anywhere in the file, AND does the string `TBD` appear
+anywhere in the file" — never "is THIS field's own value the sentinel". It therefore named
+the correct blocking field only by tuple-order coincidence, and would misattribute as soon
+as that order or the files changed — which they already have: **D-38** resolved
+`embargo_hours` to `24` and **D-33** resolved `cell_rule` to `floor-half-open-d1`, while
+`folds` and `stations` remain the sentinel. It is dormant on this clone only because the
+pyyaml-import precondition short-circuits ahead of it.
+
+Probe against the real `configs/`, printed — the offender each form names, in both tuple
+orders:
+
+| Checked order | Old form names | New form names |
+|---|---|---|
+| `("folds", "embargo_hours")` | `folds` | `folds` |
+| `("embargo_hours", "folds")` | **`embargo_hours`** (resolved by D-38) | `folds` |
+| `("stations", "cell_rule")` | `stations` | `stations` |
+| `("cell_rule", "stations")` | **`cell_rule`** (resolved by D-33) | `stations` |
+
+The two reversed-order rows are the defect realised: the old form names a field a signed
+decision has already resolved.
+
+### The fix
+
+Three stdlib-only helpers replace the co-occurrence test with a **per-field value check**,
+and `_completion_preconditions` now delegates to them:
+
+| Symbol | Role |
+|---|---|
+| `_scalar_on_key_line(rest)` | Strips an inline YAML comment without a parser: a `#` ends the scalar only when it is outside quotes AND preceded by whitespace (YAML's own rule), so a `#` inside a quoted value is preserved rather than truncating the value. |
+| `_config_field_state(text, field)` | Classifies ONE top-level `field:` line's OWN value as `_RESOLVED`, `_UNRESOLVED` (equal to `TBD_SENTINEL`) or `_UNDETERMINED`, returning a stated reason in every case. |
+| `_config_tbd_reason(config_name, text, fields)` | The reason for the FIRST of `fields` that does not resolve, or `None`. The order of `fields` decides which offender is reported first; it never decides WHICH field is named. |
+
+Design points, each deliberate:
+
+- **Stdlib only.** pyyaml is unavailable (PyPI egress blocked, verified) and this check runs
+  ahead of the pyyaml precondition it guards, so no YAML parser may be used. The reader is
+  narrow by construction: it reads a top-level `field: <scalar>` line and nothing else.
+- **It says so rather than guessing.** Where it cannot read a field's own value — key
+  absent, declared more than once at top level, or block-valued — it returns
+  `_UNDETERMINED` with the reason named, and `_config_tbd_reason` turns that into a
+  stop-and-report skip reason naming the field. A value containing `TBD` that is not the
+  sentinel is also `_UNDETERMINED`, never silently resolved. This strengthens the check:
+  the old form treated every one of those cases as "resolved".
+- **The sentinel literal is no longer duplicated.** The check imports `TBD_SENTINEL` from
+  `src/data/config.py` (the R-01 single declaration site) instead of re-spelling
+  `TBD — freeze gate` in the test, so the test and `assert_no_tbd` cannot drift.
+- **Nothing was weakened.** The precondition chain's ORDER is unchanged (pyyaml/numpy/pandas
+  → fixture manifests → config fields → TensorFlow pin), the skip-with-named-reason
+  behaviour is unchanged, the TBD reason string is byte-identical to the old one, and
+  `test_clean_run_completion_or_skip_with_named_reason` still `pytest.fail`s on a non-zero
+  subprocess exit when every precondition holds. **It claims no WS-20/TA-17 evidence: those
+  rows stay `Pending`, and the completion test still skips on this clone.**
+
+### New controls (three, all outside the (1)-(39) ledger)
+
+Registered in `BEYOND_ENUMERATION_CONTROLS`, not `CONTROL_HOSTS`, exactly as the governance
+board's Rec 2–5 rows are — so the 39/11 reconciliation is untouched by construction, and
+`test_beyond_enumeration_controls_exist_and_do_not_touch_the_ledger` asserts each is hosted
+and absent from the ledger. All three use synthetic field names (R-122): no governed config
+is read and no config value is stated in them.
+
+| Control | What it proves |
+|---|---|
+| `test_precondition_names_the_field_whose_own_value_is_the_sentinel` | The misattribution is fixed. An EARLIER-checked field is resolved (`apparatus_alpha: 24`, with `TBD` planted in its inline comment) and a LATER one carries the sentinel; the reason must name `apparatus_beta` and must NOT contain `apparatus_alpha`. The test also asserts the replaced form's own condition holds on that same text (`"apparatus_alpha" in text and "TBD" in text`), so it is an explicit regression witness for the defect, not merely a check of the new behaviour. |
+| `test_precondition_does_not_fire_when_every_checked_field_resolves` | The must-not-fire half. With every checked field resolved — including one whose inline comment spells the full sentinel and one whose quoted value contains a `#` — `_config_tbd_reason` returns `None`, so the completion test is never skipped for a TBD reason the checker invented. |
+| `test_precondition_reports_an_unreadable_field_instead_of_guessing` | TE §18.3 applied to the reader itself. For each of absent / block-valued / declared-twice, the state is `_UNDETERMINED`, the detail names the specific reason, and the returned reason names the field and says it *cannot be read* — and does not claim the sentinel. Without this the new reader could fail open the way the old one did. |
+
+### Results (derived and printed, never carried)
+
+Runner, named honestly: **uv-managed CPython 3.11.16 in the session scratchpad plus the
+stdlib pytest stand-in** (`pytest_standin/run_tests.py`). **Real `pytest` did not run and
+real `ruff` did not run** — PyPI is unreachable on this clone; both remain owed to a
+governed environment. Smoke evidence only, never governed.
+
+- `tests/test_clean_run.py`: **61 passed, 0 failed, 3 skipped, 0 errors** over **64 test
+  functions** (58/0/3 over 61 before this repair: +3 passed, +3 functions, exactly the three
+  new controls). The file's own derivation printed: `def test_ count derived from source:
+  64; collected: 64`.
+- The three skips are unchanged and all named: two pyyaml-gated production-loader paths, and
+  the completion test skipping with `pyyaml is not importable on this clone (PyPI
+  unreachable); the production read path refuses by name (TS-X-01)` — the first unmet
+  precondition, i.e. the repaired config check is still not the one reached on this clone.
+- **39/11 reconciliation, printed verbatim after the change — EMPTY in both directions:**
+  - `negative controls: enumerated 39 ((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []`
+  - `must-not-fire: derived 11 (1+1+1+1+2+2+1+1+1 over ['R-133', 'R-134', 'R-135', 'R-136', 'R-137', 'R-138', 'R-139', 'R-140', 'R-141']); annotated 11 (of which 1 hosted elsewhere); missing []; extra []`
+- Full suite, all 26 `tests/test_*.py` modules: **1160 passed, 0 failed, 39 skipped, 0
+  errors**.
+- Over-99-column lines, re-derived character-aware after the change: **0** in
+  `tests/test_clean_run.py` and **0** across the five files every prior derivation used.
+
+### Residuals, stated precisely
+
+1. **The repaired path is still not exercised against the real `configs/` by the suite on
+   this clone.** `_completion_preconditions` short-circuits at the pyyaml import, so the
+   config-field branch is reached only by the three synthetic controls and by the probe
+   recorded above. This is the same environment limit that makes WS-20/TA-17 `Pending`; it
+   is not closed by this repair and must not be read as closed.
+2. **`ruff` and `graphify update .` remain owed** — both tools are absent on this clone. No
+   formatter or linter verified these lines; the 99-column figure above is a hand-derived
+   character count, not a `ruff` result. The graph under `graphify-out/` is stale for
+   `tests/test_clean_run.py`.
+3. **The reader is deliberately narrow.** It handles top-level scalar fields only. If a
+   checked field ever becomes nested or block-valued, the check reports `_UNDETERMINED` and
+   the clean-run test skips naming it — correct and safe, but it means a future nested
+   required field needs a real parser rather than an extension of this helper.
+4. **`evidence/test_run_access_log.jsonl` grew by 37 append-only rows** during the
+   full-suite run, written by the locked-test guard on behalf of `test_acquisition_window`
+   and `test_release_hashes` (pre-existing modules; `purpose: coverage_audit`,
+   `performance_inspected: false`). No row came from `tests/test_clean_run.py` or from any
+   control added here, no December content was inspected, and the log was not edited or
+   truncated — it is append-only by design (WS-18 / TA-18).
+5. **Repository state at the time of writing, re-verified** (`git log -1`, `git status` —
+   `project.md` `code-generation:c30`): HEAD is `c8c63d2`; `tests/test_clean_run.py` and this
+   file are modified and **uncommitted**; `aidlc-state.md`, the audit shard and
+   `evidence/test_run_access_log.jsonl` are also modified in the working tree. **The agent
+   made no commit and no push**, as instructed. The commit disposition routed at § Routed to
+   the stage gate is unchanged and still the student's.
+
+---
+
+## Precondition-fix review (2026-09-12)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-12T11:48:54Z
+**Scope:** adversarial re-verification of the one Major fix ("Precondition check corrected
+(2026-09-12)" above), repo HEAD `c8c63d2` + uncommitted `tests/test_clean_run.py` and this
+file. Environment re-verified: no real pytest/ruff/pyyaml/numpy/pandas (PyPI egress
+blocked); ran the stdlib pytest stand-in
+(`...\26ca41ab-0b23-424c-a7c3-a767d4b33251\scratchpad\pytest_standin\run_tests.py`) under
+the scratchpad's uv-managed CPython 3.11.16 venv — a stand-in, not real pytest, named
+honestly.
+
+### Independent reproduction of the fix's own demonstration
+
+Wrote a standalone probe importing `_config_field_state`/`_config_tbd_reason` from
+`tests/test_clean_run.py` alongside a literal reimplementation of the replaced
+`if field in text and "TBD" in text` form, run against the real `configs/data.yaml` and
+`configs/experiment.yaml`. Confirmed first, independent of the artifact's own claim, that
+`configs/data.yaml:45` reads `stations: "TBD — freeze gate"` (genuinely unresolved) and
+`configs/data.yaml:58` reads `cell_rule: "floor-half-open-d1"  # D-33 …` (resolved);
+`configs/experiment.yaml:20` reads `folds: "TBD — freeze gate"` and
+`configs/experiment.yaml:26` reads `embargo_hours: 24  # D-38 …` (resolved). With the tuple
+order reversed:
+
+| Order | Old form (reimplemented) | New form (`_config_tbd_reason`) |
+|---|---|---|
+| `("cell_rule", "stations")` | names `cell_rule` (resolved by D-33) | names `stations` |
+| `("embargo_hours", "folds")` | names `embargo_hours` (resolved by D-38) | names `folds` |
+
+This matches the artifact's table exactly and is not a case of `_UNDETERMINED` masquerading
+as stricter behaviour — both `stations` and `folds` really are the literal sentinel today,
+and `_config_field_state` reports `_RESOLVED` for `cell_rule`/`embargo_hours` in the same
+probe, so the new form's correctness is a genuine fix, not an artifact of over-caution.
+
+**Adversarial attacks on `_scalar_on_key_line`/`_config_field_state`, all held:**
+- `#` inside a quoted value (`"value # not comment"  # real comment`) is preserved verbatim;
+  only the real trailing comment is stripped.
+- A resolved field whose own inline comment spells the sentinel text
+  (`folds: 4  # TBD — freeze gate is what this USED to say`) is still reported `_RESOLVED`
+  — immune to the exact co-occurrence trap the fix targets.
+- A quoted value containing the sentinel plus extra characters
+  (`"TBD — freeze gate extra"`) is reported `_UNDETERMINED` with a stated non-sentinel-TBD
+  reason, never silently treated as either resolved or the sentinel — correctly
+  conservative rather than fooled.
+- A field whose value **is** the exact sentinel but carries a trailing comment claiming
+  otherwise is still `_UNRESOLVED` on the value alone — comment content never overrides the
+  value. No path found that flips a genuinely-unresolved field to `_RESOLVED`, or vice
+  versa, by comment or quoting tricks.
+
+Chain order (`yaml`/`numpy`/`pandas` import → fixture manifests → `experiment.yaml` then
+`data.yaml`, same field-tuple order → `requirements.txt`) is unchanged from the pre-fix
+version (diffed against `git show HEAD:tests/test_clean_run.py`, formerly at lines
+1579–1615). The `_UNRESOLVED` reason string is byte-identical to the replaced form's
+(`f"configs/{config_name}: {field} is \`{TBD_SENTINEL}\`; every stage entry refuses at
+assert_no_tbd…"` — `TBD_SENTINEL` resolves to the same literal `"TBD — freeze gate"` the old
+code hardcoded). `TBD_SENTINEL` is now imported from `src/data/config.py` (R-01's single
+declaration site) rather than duplicated — confirmed at import block lines 63–69. No path
+in the fixed code or its three new tests claims WS-20/TA-17 evidence; the completion test
+(`test_clean_run_completion_or_skip_with_named_reason`) still skips on this clone with the
+named `pyyaml is not importable` reason, confirmed by direct run below.
+
+### New controls and reconciliation
+
+`test_precondition_names_the_field_whose_own_value_is_the_sentinel` independently confirmed
+to assert the OLD form's own condition holds on its apparatus text
+(`"apparatus_alpha" in text and "TBD" in text`) before asserting the NEW form names the
+correct field — a genuine regression witness, not a check of new behaviour alone.
+`test_precondition_does_not_fire_when_every_checked_field_resolves` and
+`test_precondition_reports_an_unreadable_field_instead_of_guessing` reproduce as described.
+All three are registered only in `BEYOND_ENUMERATION_CONTROLS`, confirmed absent from
+`CONTROL_HOSTS` by direct grep, and asserted so by
+`test_beyond_enumeration_controls_exist_and_do_not_touch_the_ledger`.
+
+Re-ran the file's own reconciliation meta-test: `negative controls: enumerated 39
+((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []` /
+`must-not-fire: derived 11 (…); annotated 11 (of which 1 hosted elsewhere); missing [];
+extra []` — both empty in both directions, independently reproduced, matching
+`business-rules.md` § Negative-control count's own printed derivation (checked by reading
+that section directly: `5+4+5+2+3+4+5+4+3+4 = 39`, `1+1+1+1+2+2+1+1+1 = 11`).
+
+### Re-derived counts (all reproduced independently via the stand-in runner)
+
+- `tests/test_clean_run.py`: **61 passed, 0 failed, 3 skipped, 0 errors** over **64**
+  `def test_` functions (`grep -c "^def test_"` → 64, matching `collected: 64`). Matches the
+  artifact's claim exactly.
+- Full suite, all 26 `tests/test_*.py` modules present in the repo: **1160 passed, 0
+  failed, 39 skipped, 0 errors** — matches the artifact's claim exactly.
+- Over-99-character lines (character-aware, not byte-count): **0** across
+  `src/data/fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`,
+  `scripts/run_walking_skeleton.py`, `scripts/01_inventory_and_registry.py`, and
+  `tests/test_clean_run.py` itself — matches Deviations item 4 and the Routed-to-gate line
+  exactly.
+
+### Verification of the five claimed body corrections
+
+All five verified accurate against the working-tree diff (`git diff HEAD`) and independent
+re-derivation, and none is a rewrite of prior review history — the diff is purely additive
+after the last existing `## Review` block, plus the five targeted body edits themselves:
+
+1. Files-created row for `tests/test_clean_run.py`: `50` → **64**, correct (re-derived).
+2. § Test results: `47 passed / 0 failed / 3 skipped` → **61/0/3 over 64**, with the
+   `46→47→58→61` trail stated; correct and internally consistent with the three prior
+   review passes' own printed figures (47 after the control-count meta-test, 58/61 after
+   the sibling `acquisition` repair).
+3. The un-reproducible "ten named regression modules… 437 passed" line struck through and
+   replaced with the reproducible 26-module partition, **1160/0/39/0** — correct
+   (re-derived above), and the strikethrough preserves the original text rather than
+   deleting it, consistent with the project's "never edit a signed record" posture applied
+   here to its own prior claim.
+4. § Deviations item 4: `47 over-99` → **0**, correct (re-derived above), with the
+   superseded figure's context (four 2026-09-07 files plus one in `01`) preserved in the new
+   text rather than erased.
+5. § Routed to the stage gate: the `47 over-99 lines` clause replaced with a pointer to
+   Deviations item 4's `0`, leaving the still-open `ruff`/`graphify` obligations distinct
+   and intact — correct.
+
+No existing `## Review` block's text, verdict, or findings table was altered; the new
+material is appended after the "Floor-reset re-review (2026-09-11)" section and its own
+`---` separator, exactly as the artifact claims.
+
+### Also checked, held
+
+- BLK-02: `find . -iname fixture_manifest.yaml` → no hits anywhere in the repository;
+  `git diff HEAD -- configs/` is a zero-line diff — no TBD sentinel filled, no scientific
+  constant touched.
+- R-139 control 25 (`test_control_25_tecu_tolerance_without_inverse_route_is_not_freezable`)
+  present, unmodified in the diff, still annotated `(25,)` in `CONTROL_HOSTS`.
+- `load_fixture_scope` (`src/data/fixture_manifest.py:493`) remains the only production
+  `yaml.safe_load` of a `fixture_manifest`-named artifact in `src/`, `scripts/`, `tests/`;
+  `scripts/03_verify_processing.py:244` carries only a doc-comment describing the reroute.
+- `compose_measurement_ranges` (zero-width refusal) and `write_candidate_manifest`
+  (freeze-write refusal) both still `raise _refuse(...)` at their prior line numbers,
+  unmodified in the diff.
+- No credential/secret pattern (`api[_-]?key|password|secret|kaggle\.json|token\s*=`) in the
+  `tests/test_clean_run.py` diff. No guard removed, no exception downgraded, no condition
+  loosened anywhere in the diff — every hunk either adds the three helpers/three tests or
+  swaps the one loop body for a delegated call with an unchanged reason string.
+- `evidence/test_run_access_log.jsonl`'s new rows are all `purpose: coverage_audit`,
+  `performance_inspected: false` — no locked-December performance inspection reachable from
+  this change, consistent with every prior pass.
+- Full suite run reproduced with zero failures, so no regression was introduced by the fix
+  outside the one module it touches.
+
+### Verdict rationale
+
+Zero Critical, zero Major, zero Minor newly found. The one Major this reopening was
+dispatched to fix (`_completion_preconditions`'s whole-file substring co-occurrence test) is
+resolved: independently reproduced with the real `configs/` files, adversarially probed for
+comment/quoting-based fooling with no success found, chain order and reason-string byte
+identity confirmed unchanged, and the three new negative/must-not-fire controls verified to
+prove what they claim without touching the existing 39/11 reconciliation. All five stale
+body representations flagged by the dispatch are corrected accurately and in place, with no
+rewriting of prior signed review history. Full 1160-test suite green; no TBD filled, no
+credential, no guard weakened, no locked-December reachability introduced. **READY.**
