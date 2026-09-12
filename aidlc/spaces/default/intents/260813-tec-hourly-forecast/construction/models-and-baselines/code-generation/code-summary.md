@@ -183,3 +183,87 @@ The TensorFlow pin freeze is transcribed consistently across `requirements.txt` 
 repository, and the re-pointed pin-guard tests genuinely strengthen (not weaken) the
 guard-vs-import distinction. This unit's own D-27-dependent ablation gating (`ABL-DIFF`)
 is confirmed untouched. No defect found in this unit's exposure to the pass.
+
+### Floor-reset re-review (2026-09-11)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T14:44:56Z
+**Iteration:** Floor-reset re-review (2026-09-11), fresh verdict against HEAD `b0b7c1d`
+
+#### Scope and method
+
+Re-derived independently against the current repository state (`git status` shows no
+pending changes to any file this unit owns; the last commit touching this
+`code-summary.md` is `17e0767`, three commits behind `b0b7c1d`, and `scripts/06_train_and_predict.py`
+is byte-identical at `0e002cd` and `HEAD`, confirmed via `git show <rev>:... | wc -l` = 999 both
+times). No `graphify` executable is on PATH (`which graphify` → not found; per `CLAUDE.md`'s
+2026-09-10 verification), so file reads/greps were used as the sanctioned fallback. Ran the
+requested test modules with the stdlib pytest stand-in against a real CPython 3.11.16
+interpreter (no third-party packages installed; PyPI unreachable, consistent with prior runs).
+
+#### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Minor | `code-summary.md:44` ("66 test functions total (54 + 12, derived by count)") | Stale count, not caught by the 2026-09-10 correction box. `grep -c "^def test_" tests/test_models_smoke.py` = **56** and `tests/test_checkpoint_restore.py` = **12** today, total **68**, not 66. The 2026-09-10 correction (line ~102-104) restated the smoke-test count as 56 but never propagated that into this "Test coverage summary" section's own total, which still reads the pre-correction 54+12=66. This is exactly the failure mode `project.md`'s "sweep every REPRESENTATION" rule targets: one representation of the count was corrected, a second (the section total) was not. | Update line 44 to state 68 (56+12), derived and printed, or mark the figure superseded the way the line-count correction below it already does. |
+
+No Critical or Major finding survives verification. Every item this dispatch named as the
+unit's specific exposure was re-checked directly against source, not carried from prior
+review prose:
+
+- **Frozen grids (D-121):** `configs/experiment.yaml:43-68` — ridge axes product = 6 (one
+  axis, 6 values), RF = 2×3×3 = 18, LSTM = 2×2×2×2 = 16, each matching its own `combinations:`
+  field. `src/models/train.py:998-1025` (`assert_grid_content`) recomputes the product via
+  `enumerate_grid`/`itertools.product` and raises `IntegrityError` naming R-96 if the
+  enumerated count and the declared `combinations` disagree — content is asserted, not only
+  immutability, confirmed by reading the function body, not just its docstring.
+- **Seeds:** `configs/seeds.yaml` carries `development: 42`, `final: [1337, 2024, 7]`,
+  `bootstrap: 20221201` (D-122) and no seed value appears as a literal anywhere under
+  `src/models/` (`grep` for the digits returns nothing outside `seeds.yaml`/tests-that-read-config).
+  `three_seed_mean` (`train.py:690-750`) takes `expected_seeds` as a parameter and the only
+  call sites (`scripts/06_train_and_predict.py:737,843`) read it via `_final_seeds(snapshot)`
+  from `ConfigSnapshot.seeds` — never inlined.
+- **Seven fixed LSTM settings:** transcribed verbatim in `configs/experiment.yaml:76-89`
+  (`lstm_fixed_settings`, `source_text` quoted from Vision §8.6) and read by
+  `fixed_settings()` in `src/models/lstm.py:137-150` — no literal `0.2`/`"Adam"`/`100`/etc.
+  hardcoded in source.
+- **Locked-December unreachability:** `_dec_target` in `scripts/06_train_and_predict.py:605-663`
+  calls `materialise_locked_partition`, uses the frame it RETURNS (`loaded`), and explicitly
+  refuses (`LockedTestError`) if that returned frame is `None` or is the same object as the
+  pre-loop `released_target` — the earlier Critical (discarding the returned frame and
+  scoring against the pre-loop target) is not present in the code at HEAD.
+- **`ABL-DIFF`/D-27:** `src/models/train.py:1313,1352` and `src/features/transforms.py:31,101`
+  confirm no `inverse`/`apply` method exists on any transform, and `evidence/DECISIONS.md`'s
+  final entry is **D-38** (D-37 reaffirms D-27's withholding as permanent, "the refusal IS the
+  mechanism," no generic inverse route created) — `ABL-DIFF` still refuses, naming D-27, and no
+  post-2026-09-06 decision reopens it.
+- **Phase 1 → Phase 2 weight carry-over:** no Phase 2 training/checkpoint-carry code exists
+  anywhere in `src/models/` for this rule to violate; not applicable to the code as it stands.
+- **TBD sentinels:** `configs/experiment.yaml:93,94,99` — `models.declared_baseline_per_track`,
+  `models.selection`, and `models.selected` all still read `"TBD — freeze gate"`.
+  `scripts/06_train_and_predict.py:456-471` (`_selected_params`) and
+  `src/models/train.py:_read_selection_block` (~1153-1174) both raise `IntegrityError` naming
+  the unfilled field rather than defaulting or filling it.
+- **Credentials/secrets/hardcoded constants:** none found under `src/models/`,
+  `scripts/06_train_and_predict.py`, or `requirements.txt` (grepped for API-key/secret/token
+  patterns and for literal seed/grid values — no matches outside config and tests-that-read-config).
+- **Test execution** (stdlib stand-in, CPython 3.11.16, real venv interpreter, no third-party
+  packages — honestly not a governed pytest run):
+  - `tests/test_models_smoke.py`: **55 passed, 0 failed, 1 skipped** (skip:
+    `test_real_experiment_yaml_transcription_is_internally_consistent`, `pytest.importorskip("yaml")`
+    on this pyyaml-less environment) — matches the 2026-09-10 correction's claimed figures exactly.
+  - `tests/test_checkpoint_restore.py`: **12 passed, 0 failed, 0 skipped**.
+  - `tests/test_determinism.py`: **12 passed, 0 failed, 23 skipped** (all 23 skips are
+    `pytest.importorskip("yaml")`; this module is not one this unit's `Files created` table
+    lists, so its skip count is reported for completeness, not scored against this unit).
+
+#### Summary
+
+No Critical or Major defect survives this fresh pass. The specific risk areas this dispatch
+named — grid-content assertion, seed provenance, the seven LSTM settings, locked-December
+frame handling, the D-27/`ABL-DIFF` refusal, TBD-sentinel discipline, and credential/constant
+hygiene — all check out against the code at HEAD `b0b7c1d`, not merely against prior review
+prose. The one Minor finding is a stale total in this artifact's own "Test coverage summary"
+section, left unfixed by the 2026-09-10 correction that fixed the same fact elsewhere in the
+file; it does not affect any executable behavior, governed artifact, or test result.

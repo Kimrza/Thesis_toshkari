@@ -59,10 +59,10 @@ ADR-03 splits the locked-test guard into two limbs held by two units, and this o
 TE 12-mandated module carries both. The ownership is stated here so a later reader does
 not attribute either limb to the other unit:
 
-* **Limb 2 -- the READ chokepoint -- `governance-guards`.** Sections 1-8 above:
-  `src/data/locked_test.py`'s `open_restricted` / `write_restricted`, R-25 (durable
-  before the read), R-27 (unparseable is a failure), R-28 (one door, the exempt list),
-  SD-G-01..SD-G-04. Cases unchanged by the 2026-09-06 extension.
+* **Limb 2 -- the READ chokepoint -- `governance-guards`.** Sections 1-8 above AND
+  section 10 below: `src/data/locked_test.py`'s `open_restricted` / `write_restricted`,
+  R-25 (durable before the read), R-27 (unparseable is a failure), R-28 (one door, the
+  exempt list), SD-G-01..SD-G-04. Cases unchanged by the 2026-09-06 extension.
 * **Limb 1 -- the EXECUTION block -- `features-and-splits`.** Section 9 below:
   `src/data/splits.py`'s `materialise_locked_partition(snapshot, *, g05_signature)`
   refuses with `LockedTestError` when the signature is `None` (the pre-G-05 execution
@@ -73,10 +73,27 @@ not attribute either limb to the other unit:
   D-28's 30-day shape). The read for the required pre-G-05 coverage audit never comes
   through limb 1 -- that is limb 2's door.
 
+Section 10 -- the SD-C-02 containment fields (added 2026-09-11, governance-guards)
+----------------------------------------------------------------------------------
+`src/data/locked_test.py` is this unit's module, and commit `8a6cb61` (2026-09-07)
+added an owner-ruled, additive edit to it from `evaluation-and-comparison`'s stage 3.5
+(Q2 = B, SD-C-02; `governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md:82-85`,
+which records the review as "owed to `governance-guards`' next touch"). Until now the
+only coverage of that edit lived in a sibling's `tests/test_common_masks.py`, and it
+covered the CONSUMER (`require_locked_receipt`'s refusal), never the PRODUCER. Section
+10 is this unit's own coverage of the producer: every violating input is driven through
+the real `open_restricted` entry point (the c58/c59 shape -- prove invocation per entry
+point, never correctness of a bare helper once), including the new failure mode a
+present-but-unparseable manifest introduces, which ABORTS the read rather than logging
+`None`.
+
 **No December 2022 content is read, parsed, counted or computed anywhere in this
 module** -- limb 1's cases run over the synthetic partition fixture
 `test_split_embargo.py` authors (a synthetic calendar year), and the repository's
 `configs/data.yaml` carries no `gates.G-05` record, so no real signature can verify.
+Section 10 likewise runs entirely against a synthetic `tmp_path` boundary installed
+through the module's supported `_repo_root` seam: no real restricted artifact is opened
+and no manifest fixture carries a December timestamp.
 Both limbs support WS-18 and TA-18; neither discharges them.
 """
 
@@ -95,6 +112,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.data import locked_test  # noqa: E402
 from src.data.config import LockedTestError, RegistryError  # noqa: E402
 from src.data.experiment_registry import (  # noqa: E402
     REGISTRY_COLUMNS,
@@ -1091,3 +1109,343 @@ def test_limb1_splits_module_never_names_the_restricted_root() -> None:
     source = (REPO_ROOT / "src" / "data" / "splits.py").read_text(encoding="utf-8")
     assert "src/data/splits.py" not in RESTRICTED_LITERAL_EXEMPT_MODULES
     assert not _source_holds_literal(source, REPO_ROOT / "src" / "data" / "splits.py")
+
+
+# --- 10. SD-C-02 containment fields: governance-guards' own coverage of the Q2 = B edit --
+#
+# OWNERSHIP. `src/data/locked_test.py` belongs to `governance-guards`. Commit `8a6cb61`
+# (2026-09-07) edited it in place from `evaluation-and-comparison`'s stage 3.5 on the
+# owner's explicit Q2 = B instruction, and the change record
+# (`governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md:82-85`) states verbatim
+# that "`governance-guards` owes its own review of the two fields at its next touch".
+# This section is that touch. It was written 2026-09-11 after two consecutive review
+# passes found the edit tested only by a sibling (`tests/test_common_masks.py`), which
+# exercises the CONSUMER refusal (`require_locked_receipt` on `None`) and never the
+# PRODUCER that populates -- or refuses to populate -- the fields.
+#
+# WHAT IS NEW, AND WHY IT NEEDS A NEGATIVE CONTROL HERE. The edit adds a failure mode
+# the chokepoint did not previously have: a supplied frozen-bundle manifest that EXISTS
+# but cannot be read or parsed ABORTS the read, rather than recording `None` and
+# proceeding. That distinction is the whole of SD-C-02's evidentiary value -- `None` is
+# a legitimate, fail-closed state downstream, so silently writing `None` over a broken
+# manifest would launder a defect into an ordinary refusal and destroy the signal. Every
+# case below drives the violating input through `open_restricted` ITSELF, never through
+# `_containment_fields` directly (project.md `nfr-design:c58`/`c59`: prove invocation per
+# public entry point, because a helper proved correct once still fails open on a call
+# site that forgets it).
+#
+# NO DECEMBER CONTENT. The boundary is a synthetic `tmp_path` tree installed through the
+# module's own documented test seam (`locked_test._repo_root`); the guarded artifact and
+# every manifest fixture are synthetic and carry no 2022-12 timestamp.
+
+
+@pytest.fixture
+def containment_boundary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """The module's SUPPORTED TEST SEAM: `_repo_root` -> `tmp_path`.
+
+    The boundary is composed from the imported `RESTRICTED_ROOT` constant rather than
+    spelled out again, and holds one synthetic artifact with no December content.
+    `TEC_PLATFORM` is pinned to `local` so the Q1 = A durability refusal (section 7)
+    does not pre-empt the containment path under test.
+    """
+    monkeypatch.setattr(locked_test, "_repo_root", lambda: tmp_path)
+    monkeypatch.setenv("TEC_PLATFORM", "local")
+    root = tmp_path / RESTRICTED_ROOT
+    root.mkdir(parents=True, exist_ok=True)
+    target = root / "synthetic_guarded_artifact.json"
+    target.write_text('{"synthetic": true, "december_content": false}', encoding="utf-8")
+    return target
+
+
+def _manifest(path: Path, mask_ids: list[str]) -> bytes:
+    """Write a frozen-bundle manifest in the producer's shape and return its exact bytes.
+
+    The shape mirrors `src/evaluation/masks.py`'s `freeze_bundle` (sibling-owned). Only
+    the `mask_ids` key is the CONSUMER contract `_containment_fields` actually reads;
+    `test_containment_manifest_key_matches_the_producer` pins that key against the real
+    producer statically, so this fixture cannot drift away from it unnoticed.
+    """
+    raw = (
+        json.dumps(
+            {"artifact_class": "frozen_mask_bundle_manifest", "mask_ids": mask_ids},
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n"
+    ).encode("utf-8")
+    path.write_bytes(raw)
+    return raw
+
+
+#: Every way a PRESENT manifest can be unusable, one row per exception class
+#: `_containment_fields` declares it catches. Each must abort, none may log `None`.
+_BROKEN_MANIFESTS: list[tuple[str, bytes]] = [
+    ("not JSON at all", b"{not json at all"),
+    ("valid JSON, no mask_ids key", b'{"artifact_class": "frozen_mask_bundle_manifest"}'),
+    ("mask_ids is not iterable", b'{"mask_ids": 5}'),
+    ("top-level JSON is a list, not an object", b"[1, 2]"),
+    ("bytes are not UTF-8", b"\xff\xfe\x00\x00 not utf-8 \x9c"),
+    ("empty file", b""),
+]
+
+
+@pytest.mark.parametrize(("label", "payload"), _BROKEN_MANIFESTS)
+def test_containment_present_but_unparseable_manifest_aborts_the_read(
+    containment_boundary: Path, tmp_path: Path, label: str, payload: bytes
+) -> None:
+    """THE new failure mode, driven through the real entry point: abort, never log `None`.
+
+    A present-but-broken manifest is exactly the case where recording `None` would be
+    indistinguishable from the legitimate no-manifest state that `require_locked_receipt`
+    refuses on -- the defect would arrive downstream wearing the costume of an ordinary
+    fail-closed refusal. Asserted in three parts, because any one alone is passable by a
+    weaker implementation: the call RAISES, no access row is consumed, and the message
+    names the offending manifest rather than failing anonymously.
+    """
+    manifest = tmp_path / "broken_manifest.json"
+    manifest.write_bytes(payload)
+    registry = tmp_path / "access.jsonl"
+
+    with pytest.raises(LockedTestError) as excinfo:
+        open_restricted(
+            containment_boundary,
+            record=_record(),
+            registry=registry,
+            mask_bundle_manifest=manifest,
+        )
+
+    message = str(excinfo.value)
+    assert "cannot be read or parsed" in message, (
+        f"the abort for {label!r} did not say the manifest was unreadable; a guard that "
+        f"refuses anonymously cannot be acted on by the reviewer who reads the failure"
+    )
+    assert manifest.name in message, f"the refusal for {label!r} does not name the manifest"
+    assert not registry.exists(), (
+        f"a broken manifest ({label}) consumed an access row; the containment read must "
+        f"abort BEFORE the append, or a refused read leaves a phantom row behind"
+    )
+
+
+def test_containment_abort_leaves_an_existing_access_log_byte_identical(
+    containment_boundary: Path, tmp_path: Path
+) -> None:
+    """The stronger form of the ordering claim: not merely 'no file', but 'no append'.
+
+    `test_containment_present_but_unparseable_manifest_aborts_the_read` asserts the
+    registry does not exist, which a pre-existing log would satisfy vacuously. Here the
+    log already holds one good row; the aborted call must leave it byte-identical.
+    """
+    registry = tmp_path / "access.jsonl"
+    good = tmp_path / "good_manifest.json"
+    _manifest(good, ["mask-alpha"])
+    open_restricted(
+        containment_boundary, record=_record(), registry=registry, mask_bundle_manifest=good
+    )
+    before = registry.read_bytes()
+
+    broken = tmp_path / "broken_manifest.json"
+    broken.write_bytes(b"{not json at all")
+    with pytest.raises(LockedTestError):
+        open_restricted(
+            containment_boundary,
+            record=_record(),
+            registry=registry,
+            mask_bundle_manifest=broken,
+        )
+
+    assert registry.read_bytes() == before, (
+        "the aborted containment read appended to the access log anyway; the abort must "
+        "precede `_append_and_flush`, not follow it"
+    )
+
+
+def test_containment_valid_manifest_populates_the_record_and_the_read_proceeds(
+    containment_boundary: Path, tmp_path: Path
+) -> None:
+    """The MUST-NOT-FIRE half: a usable manifest is evidence, not an obstacle.
+
+    A refusal-only test would pass against a guard that refused everything, which would
+    block the pre-G-05 coverage audit outright. This pins that a valid manifest yields a
+    populated row -- the `mask_id`s AS FOUND (order preserved, not normalised, because
+    the record is evidence of the bytes read) and the manifest's byte-level SHA-256 --
+    and that the read still returns the resolved path.
+    """
+    import hashlib
+
+    manifest = tmp_path / "frozen_bundle_manifest.json"
+    raw = _manifest(manifest, ["mask-beta", "mask-alpha"])
+    registry = tmp_path / "access.jsonl"
+
+    returned = open_restricted(
+        containment_boundary,
+        record=_record(),
+        registry=registry,
+        mask_bundle_manifest=manifest,
+    )
+
+    assert returned == containment_boundary.resolve(), "the read did not proceed"
+    row = json.loads(registry.read_text(encoding="utf-8").splitlines()[-1])
+    assert row["mask_bundle_ids"] == ["mask-beta", "mask-alpha"], (
+        "the containment field was normalised or reordered; the record must contain the "
+        "ids as the manifest held them at access time"
+    )
+    assert row["mask_registry_hash"] == hashlib.sha256(raw).hexdigest(), (
+        "the recorded hash is not the SHA-256 of the manifest's own bytes, so it cannot "
+        "be re-verified against the artifact after the fact"
+    )
+
+
+def test_containment_record_cannot_contain_a_mask_registered_after_the_access(
+    containment_boundary: Path, tmp_path: Path
+) -> None:
+    """SD-C-02's actual property, stated as a test: containment, not clock comparison.
+
+    The access row evidences registration-before-access because it CONTAINS the bundle
+    as of the read. A mask that lands in the manifest afterwards therefore cannot appear
+    in a row already written -- which is what makes the ordering provable on any clocks
+    and across any hosts, with no timestamp comparison anywhere.
+    """
+    manifest = tmp_path / "frozen_bundle_manifest.json"
+    _manifest(manifest, ["mask-registered-before"])
+    registry = tmp_path / "access.jsonl"
+
+    open_restricted(
+        containment_boundary,
+        record=_record(),
+        registry=registry,
+        mask_bundle_manifest=manifest,
+    )
+    # A later registration rewrites the manifest. (The real producer's manifest is
+    # write-once per freeze, `src/evaluation/masks.py` Q4 = A; this fixture simulates the
+    # next freeze's bundle to prove the ALREADY-WRITTEN row cannot absorb it.)
+    _manifest(manifest, ["mask-registered-before", "mask-registered-after"])
+
+    row = json.loads(registry.read_text(encoding="utf-8").splitlines()[-1])
+    assert row["mask_bundle_ids"] == ["mask-registered-before"], (
+        "a mask registered after the access appeared in the access record; containment "
+        "is the ordering proof and a mutable row would destroy it"
+    )
+
+
+def test_containment_absent_manifest_leaves_the_fields_none_and_the_read_proceeds(
+    containment_boundary: Path, tmp_path: Path
+) -> None:
+    """ABSENT is not BROKEN: the two must stay distinguishable.
+
+    A manifest path that does not exist records `None` and proceeds (the downstream
+    `require_locked_receipt` refusal is the fail-closed half). Widening the abort to
+    cover this case would break the acquisition and coverage-audit read paths, which
+    supply no bundle; narrowing the abort to cover neither would hide broken evidence.
+    This test is the boundary between the two, and it fails if either drifts.
+    """
+    registry = tmp_path / "access.jsonl"
+    returned = open_restricted(
+        containment_boundary,
+        record=_record(),
+        registry=registry,
+        mask_bundle_manifest=tmp_path / "no_such_manifest.json",
+    )
+    row = json.loads(registry.read_text(encoding="utf-8").splitlines()[-1])
+    assert returned == containment_boundary.resolve()
+    assert row["mask_bundle_ids"] is None and row["mask_registry_hash"] is None
+
+
+def test_containment_default_keyword_is_backward_compatible(
+    containment_boundary: Path, tmp_path: Path
+) -> None:
+    """The edit was ruled ADDITIVE; this is the test that holds it to that.
+
+    A caller that predates the 2026-09-06 edit passes no `mask_bundle_manifest` at all.
+    It must still log and read exactly as before, with the two new fields present and
+    `None` rather than absent -- a row missing the keys would break the consuming
+    refusal's own `None` check as surely as a wrong value would.
+    """
+    registry = tmp_path / "access.jsonl"
+    returned = open_restricted(containment_boundary, record=_record(), registry=registry)
+
+    assert returned == containment_boundary.resolve()
+    row = json.loads(registry.read_text(encoding="utf-8").splitlines()[-1])
+    assert row["mask_bundle_ids"] is None
+    assert row["mask_registry_hash"] is None
+    # The pre-edit contract is untouched: same required fields, same guard-stamped
+    # ordering evidence, same one-row-per-open behaviour.
+    assert row["locked_test_accessed"] is True
+    assert row["purpose"] in PURPOSES
+    assert dt.datetime.fromisoformat(row["logged_at_utc"]).tzinfo is not None
+
+
+def test_containment_fields_are_optional_on_the_record_itself() -> None:
+    """`AccessRecord`'s required-field check must be untouched by the additive edit.
+
+    Constructed three ways: without the fields (the pre-edit call shape), with them, and
+    with a required field blanked while the new fields are supplied -- the last proving
+    the new optional fields cannot be mistaken for the required set.
+    """
+    without = _record()
+    assert without.mask_bundle_ids is None and without.mask_registry_hash is None
+
+    with_fields = AccessRecord(
+        run_id="r",
+        retrieved_at_utc="t",
+        scope="s",
+        purpose="locked_evaluation",
+        performance_inspected=False,
+        locked_test_accessed=True,
+        authorization="a",
+        mask_bundle_ids=("mask-alpha",),
+        mask_registry_hash="0" * 64,
+    )
+    assert with_fields.mask_bundle_ids == ("mask-alpha",)
+
+    with pytest.raises(LockedTestError):
+        AccessRecord(
+            run_id="",
+            retrieved_at_utc="t",
+            scope="s",
+            purpose="locked_evaluation",
+            performance_inspected=False,
+            locked_test_accessed=True,
+            authorization="a",
+            mask_bundle_ids=("mask-alpha",),
+            mask_registry_hash="0" * 64,
+        )
+
+
+def test_containment_manifest_key_matches_the_producer() -> None:
+    """Static cross-check: the key this unit's guard reads is the key the producer writes.
+
+    `_containment_fields` reads `payload["mask_ids"]`, and the fixtures above synthesise
+    manifests in that shape. A synthetic fixture agreeing with a synthetic expectation
+    proves nothing about the real producer, so this test parses the sibling's
+    `src/evaluation/masks.py` and confirms `freeze_bundle` really does build a mapping
+    with a literal `mask_ids` key. Parsed, never imported and never executed: the
+    producer is `evaluation-and-comparison`'s module, and this unit checks the contract
+    between them without taking a runtime dependency on it.
+    """
+    producer = REPO_ROOT / "src" / "evaluation" / "masks.py"
+    if not producer.is_file():
+        pytest.skip(
+            "src/evaluation/masks.py (the frozen-bundle manifest's producer, owned by "
+            "evaluation-and-comparison) is not on disk; the consumer contract "
+            "`payload['mask_ids']` in `_containment_fields` cannot be cross-checked "
+            "against it, and is left asserted only by this section's fixtures"
+        )
+    tree = ast.parse(producer.read_text(encoding="utf-8"), filename=str(producer))
+    freeze = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "freeze_bundle"
+    ]
+    assert freeze, "src/evaluation/masks.py no longer defines freeze_bundle"
+    keys = {
+        key.value
+        for node in ast.walk(freeze[0])
+        if isinstance(node, ast.Dict)
+        for key in node.keys
+        if isinstance(key, ast.Constant) and isinstance(key.value, str)
+    }
+    assert "mask_ids" in keys, (
+        f"`freeze_bundle` no longer writes a 'mask_ids' key (found {sorted(keys)}), but "
+        f"`_containment_fields` still reads `payload['mask_ids']` -- the producer and "
+        f"the guard have drifted, and every read supplying a manifest would now abort"
+    )

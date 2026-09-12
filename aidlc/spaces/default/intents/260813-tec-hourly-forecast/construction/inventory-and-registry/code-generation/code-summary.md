@@ -244,3 +244,132 @@ change since 2026-09-05), `scripts/01_inventory_and_registry.py`,
 `governance-guards`/`acquisition` `construction/` directories were NOT read, per the
 per-unit read-scope bound — the free-text guard's origin was verified only through the
 diff and this unit's own consumption of it.
+
+## Floor-reset re-review (2026-09-11)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T00:00:00Z (re-derive from repo; see below for exact command output)
+**Iteration:** 3 (fresh floor-reset verdict against CURRENT repo state, HEAD `b0b7c1d`)
+
+### What changed since the 2026-09-10 verdict, verified against disk
+
+- `git status --porcelain` at review time: five modified paths, none inside this unit's
+  owned files — `aidlc-state.md`, `audit/git-ae-srv-rdt1-8d4da85135a5.md`,
+  `construction/acquisition/code-generation/code-summary.md`,
+  `construction/external-products/code-generation/code-summary.md`,
+  `construction/governance-guards/code-generation/code-summary.md`,
+  `evidence/test_run_access_log.jsonl`, `tests/test_locked_test_guard.py`.
+- `git show --stat b0b7c1d` (the commit since the 2026-09-10 pass): touches
+  `aidlc-state.md`, the audit shard, `construction/foundation/code-generation/code-summary.md`,
+  `construction/governance-guards/code-generation/code-summary.md`, and
+  `evidence/test_run_access_log.jsonl`. None of `src/data/inventory.py`,
+  `src/data/registry.py`, `scripts/01_inventory_and_registry.py`,
+  `src/data/config.py`, `src/data/experiment_registry.py`, or this unit's four test
+  modules are touched by this commit or by the current uncommitted diff.
+- The one uncommitted change adjacent to this unit's territory,
+  `tests/test_locked_test_guard.py`, is `governance-guards`'s own module (its docstring
+  names itself as such, "Section 10 -- the SD-C-02 containment fields (added
+  2026-09-11, governance-guards)") — read only to confirm it is not this unit's file;
+  content not otherwise reviewed, per the per-unit read-scope bound.
+- Net: this unit's owned code is byte-identical to the 2026-09-10 pass. This review
+  re-derives every attack point against current disk rather than carrying the prior
+  verdict forward.
+
+### Attack-point findings (re-derived fresh, not carried)
+
+1. **Registry refusal ordering, re-traced against today's actual `configs/data.yaml`.**
+   Read `configs/data.yaml` directly today: `stations: "TBD — freeze gate"` (line 45,
+   unchanged), `cell_rule: "floor-half-open-d1"` (line 58, D-33, supervisor
+   countersignature explicitly still NOT YET GIVEN per the file's own comment).
+   Re-read `src/data/registry.py:250-311` line-by-line: `stations_block` is checked
+   first (lines 270-281) and raises `RegistryError("configs/data.yaml:stations", ...)`
+   unconditionally on the TBD sentinel, before `cell_rule` is read at all (line 289).
+   No code path today reaches the `cell_rule` check. The registry still refuses, and
+   refuses naming the correct field (`stations`, not `cell_rule`). No regression, no
+   new promotion of a header or frozen-but-uncountersigned value to authority.
+
+2. **Free-text egress guard, re-verified as unmodified and non-interacting.**
+   `grep` of `src/data/experiment_registry.py` today: `REDACTED_FREE_TEXT_FIELDS =
+   ("notes", "reason")` (line 154) and `_guard_free_text_egress` (lines 241-263),
+   called at line 380 inside `append_registry_event` before the append — identical to
+   the 2026-09-10 pass, confirming no drift. Re-read `scripts/01_inventory_and_
+   registry.py:_registry_row` (lines 330-358) and its one call site with `reason=`
+   (line 678): `notes` is the fixed literal `"inventory-and-registry run (P1-02)"`,
+   `reason` is `str(exc)` from this unit's own `IntegrityError`/`LockedTestError`
+   raises — no operator-supplied or provider-transport text reaches either guarded
+   column from this unit's code path. No fail-open, no newly-refused legitimate row.
+
+3. **Board Rec 2 fixture/audit exemption — re-confirmed present and unchanged.**
+   `_declared_data_window`, `_refuse_fixture_audit`, `--fixture-manifest` still present
+   in `scripts/01_inventory_and_registry.py`; `tests/test_clean_run.py` still carries
+   `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window` (real invocation,
+   script 00) and `test_rec2_01_out_of_window_inventory_and_audit_refuse` (script 01,
+   AST-wiring-level per its own docstring at lines ~1955-1959, self-labelled
+   "adversarial re-review 2026-09-10, Finding 2"). The asymmetry is still honestly
+   disclosed at its source; unchanged from the prior pass — no new gap introduced.
+
+4. **`code-summary.md` vs. disk — counts re-derived, not carried.** Ran the stdlib
+   pytest stand-in directly (never called "pytest"; CPython 3.11.16,
+   `pyyaml`/`numpy`/`tensorflow` unavailable, PyPI egress blocked, verified today)
+   against this unit's four modules:
+   `test_station_registry` 29 passed; `test_experiment_registry` 49 passed;
+   `test_import_boundary` 6 passed; `test_december_audit` 62 passed — **146 passed, 0
+   failed, 0 skipped, 0 errors**, exact match to the file's own claim.
+   Full-repository run today (26 `test_*.py` modules present, counted with `ls
+   tests/test_*.py | wc -l`): **1157 passed, 0 failed, 39 skipped, 0 errors** — this
+   is HIGHER than the file's stated "1144 passed... 39 skipped" from the 2026-09-10
+   pass, because sibling units (`governance-guards`'s new Section 10 in
+   `test_locked_test_guard.py`, uncommitted; other sibling repairs) added tests since
+   that pass ran. This is drift in the REPOSITORY, not a defect in this unit's own
+   code or claim — the file's number was correct when written and this unit's own
+   four modules are unaffected (146/146 match exactly). Not raised as a finding
+   against this unit: the stated count was never claimed as "current as of any later
+   date" and no full-suite regression exists (0 failed both times).
+
+5. **TBD sentinels, scientific constants, credentials, weakened guards — re-checked,
+   none found.** No TBD sentinel filled by this unit's code (`stations` still TBD on
+   disk, confirmed above). `CELL_RULE_ID` remains an identifier string, not a numeric
+   constant. No credential literal in any file read this pass. No guard weakened
+   relative to the 2026-09-10 baseline — `_guard_free_text_egress` unchanged, byte for
+   byte, per the diff check above.
+
+6. **Prior Minor findings 1 and 2 (docstring vs. disk on `cell_rule`; script
+   00-vs-01/02/04 coverage asymmetry) — unresolved, still Minor, no worse.** Neither
+   has been touched since 2026-09-10 (files unchanged per the diff check); both remain
+   documentation/disclosure gaps with no traced runtime consequence, as re-verified in
+   points 1 and 3 above.
+
+### Verdict
+
+**Verdict:** READY
+
+Zero Critical, zero Major, two Minor (carried forward unchanged: the `cell_rule`
+docstring-vs-disk gap in three files, and the script-00-vs-01 test-coverage asymmetry
+disclosure gap in this unit's own code-summary — both independently re-traced this
+pass and confirmed to have no runtime effect). This unit's owned files are unchanged
+since the 2026-09-10 pass (confirmed via `git show --stat` on the intervening commit
+and `git status --porcelain` on the working tree); every attack point was re-derived
+against current disk rather than carried forward. The registry still refuses on
+`stations` before `cell_rule` is ever read, naming the correct field, regardless of
+`cell_rule`'s frozen-but-uncountersigned state. The free-text egress guard added to
+`src/data/experiment_registry.py` is confirmed unmodified and does not interact
+adversely with this unit's registry writes (`notes` fixed literal, `reason` only
+`str(exc)` from this unit's own exceptions). The Board Rec 2 fixture/audit exemption
+remains fail-closed with its one known coverage asymmetry honestly disclosed at its
+source. This unit's four test modules: 146 passed, 0 failed, 0 errors (exact match).
+Full repository suite re-run independently today: 1157 passed, 0 failed, 39 skipped,
+0 errors — higher than the file's stated 1144 due to sibling-unit test additions since
+that count was taken, not a regression or a defect in this unit's own claim.
+
+### Coverage limits (this pass)
+
+Read: this unit's own record directory; `configs/data.yaml` (stations/cell_rule
+lines); `src/data/registry.py:250-311`; `src/data/experiment_registry.py` (guard
+section, lines 154, 241-263, 380); `scripts/01_inventory_and_registry.py`
+(`_registry_row` and its one `reason=` call site); `tests/test_clean_run.py` (Rec 2
+section, line numbers only); `tests/test_acquisition.py` (egress-coverage derivation
+line only); `tests/test_locked_test_guard.py` (docstring only, to confirm ownership,
+not reviewed as this unit's content). Ran this unit's four test modules and the full
+26-module suite directly via the stdlib stand-in. Did not re-read
+`governance-guards`/`acquisition`/`foundation`/`external-products` `construction/`
+directories, per the per-unit read-scope bound.

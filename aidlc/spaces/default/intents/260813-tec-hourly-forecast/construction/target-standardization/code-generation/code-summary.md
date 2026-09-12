@@ -262,3 +262,76 @@ confirmed still present, still correctly unfixed by this unit (one belongs to a
 sibling file, one is a disclosed convention gap with no functional effect), and
 neither individually nor together rises to blocking under this project's verdict
 rule. READY stands on independent re-derivation, not on re-reading the prior verdict.
+
+## Floor-reset re-review (2026-09-11)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T00:00:00Z (see repo evidence below for exact commands/output; wall-clock
+date taken from session context, not machine-derived)
+**Iteration:** 3 (fresh re-derivation against HEAD `b0b7c1d`, per this floor-reset dispatch;
+prior verdicts not rubber-stamped)
+
+### Scope of this pass
+
+This unit's own five files (`src/data/prepared.py`, `scripts/02_standardize_prepared_target.py`,
+`scripts/03_verify_processing.py`, `tests/test_prepared_target_schema.py`,
+`src/data/config.py`) are confirmed **byte-identical** to the state iteration 2 reviewed:
+`git status --porcelain` against all five returns nothing, and `git log f0d9e49..HEAD` for
+those paths returns zero commits. The repo-wide uncommitted diff at HEAD touches only
+`tests/test_locked_test_guard.py` (+362/-4) and four sibling units' code-summaries plus
+`evidence/test_run_access_log.jsonl` — none imported by or referenced from this unit's code
+(grepped `tests/test_locked_test_guard.py` for `prepared`/`target_standard`/`02_standardize`/
+`03_verify`: zero matches). D-33..D-38 (repo-wide context) touch no key this unit's code
+reads (`qc_operations`, `target.*`, D-16/D-17/D-19 paths unchanged; `stations`,
+`practical_relevance_threshold` still `TBD` and unread here) — re-confirmed by grep, not
+carried from the prior review's claim.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-summary.md:4` vs. git history | The artifact's headline claim — "No `git commit` (governance stop)" — is **false as a statement about the current repository**, and self-contradicts the same document's own iteration-2 text ("this unit's own work is exactly the already-committed state," line ~127). `git log --oneline -1 -- src/data/prepared.py` → `ed5808b`; this unit's five files (plus `configs/data.yaml`/`experiment.yaml`/`features.yaml`/`seeds.yaml`) were introduced in commit `ed5808b`, whose message is the unedited git placeholder ("Please enter the commit message for your changes...") — not a real message, and it cites none of D-16/D-17/D-19/D-1. `scripts/02_standardize_prepared_target.py` was further modified in `cf3185d` and `0e002cd`, neither of which cites a D-number either, though `0e002cd`'s subject line at least names "board remediation." This is exactly the failure class `project.md` corrections c30/gf-1 exist to catch (re-verify commit state before asserting a claim about it) — the commit didn't just happen, it happened three times without the D-number citation team.md's Way of Working makes mandatory ("Any commit that changes a scientific constant, a config value..., or another governed artifact must cite its D-number in the commit message"). | Correct line 4 (and the parallel claim at line 44, "No governed commit before the records exist") to state the actual fact: this unit's code IS committed (`ed5808b`, further touched by `cf3185d`/`0e002cd`), and none of those commits cites D-16/D-17/D-19/D-1 as team.md requires. Per `project.md`'s "never edit a human-signed record" and c30, do not amend/re-commit — state the discrepancy and route a remediation choice (an amend, or a follow-up commit that cites the D-numbers, or an explicit owner waiver) to the gate. |
+| 2 | Minor (carried forward, unresolved, correctly not this unit's to fix) | `configs/data.yaml` | `qc_operations`/`target.*` keys still entirely absent (re-confirmed by direct grep this pass) rather than stubbed `TBD — freeze gate` like the `stations`/`cell_rule` precedent. Harmless: `assert_qc_operations_frozen` treats absent and TBD identically and still refuses correctly (re-verified live below). | No new action; already on the gate list. |
+| 3 | Minor (carried forward, unresolved, correctly not this unit's to fix) | `tests/test_phase_boundary.py:95` (sibling file) | `D17_TARGET_FIELDS` still enumerates 17 fields (`processor_qc_flags` extra) against D-17's frozen 16, re-derived this pass directly from `evidence/DECISIONS.md` D-17's field table (counted 16 distinct names: `interval_start_utc, station_id, cell_gdlat, cell_glon, cell_lat_bounds, cell_lon_bounds, vtec_tecu, valid_observation_count, within_hour_spread_tecu, largest_internal_gap_s, provider_dtec_summary, aggregation_config_id, target_valid, phase_id, source_id, target_definition_id`) and cross-checked byte-for-byte against `prepared.py`'s `D17_FIELDS` tuple (16 entries, same order). Still routed to the gate; still not this unit's file to edit. | No new action; already on the gate list. |
+
+### Adversarial checks run this pass, independently re-derived (not carried from iteration 2)
+
+- **Q2=A gate is still the literal first statement**: read `standardize_hourly_target` body directly (`prepared.py:967`, `assert_qc_operations_frozen(data_config)  # Q2 = A: ALWAYS first`) — confirmed by direct read, not grep alone.
+- **Script 02 wiring re-confirmed by direct read** (`scripts/02_standardize_prepared_target.py`): `require_receipts_for_snapshot` called at line 255 (after `assert_phase_boundary` at 250, before `assert_qc_operations_frozen`'s call inside `standardize_hourly_target` at 331); `assert_no_raw_fields(PRODUCED_FIELDS, phase=PHASE)` present at line 155.
+- **`scripts/03_verify_processing.py`'s `_load_tolerance` reroute** (the brief's named hardest attack surface) re-confirmed present and unchanged by direct read: `load_fixture_scope` import and call at lines 272/274-275, `resolve_float_tolerance(scope.data)` at 275 — matches iteration 2's directly-verified strictly-narrows analysis; no regression possible since the file has zero commits since that analysis (`git log f0d9e49..HEAD -- scripts/03_verify_processing.py` → empty).
+- **Target label discipline re-confirmed by direct read**: `TARGET_LABEL = "location-sampled gridded VTEC"` (`prepared.py:137`), `_PROHIBITED_FRAGMENTS = ("station-observed", "receiver-specific")` (`prepared.py:141`), enforced by `assert_no_prohibited_phrasing`/label checks (`prepared.py:824-863`); `target_definition_id` stamped and asserted present (`prepared.py:653,800,805`).
+- **D-5/D-10.2 (never impute/interpolate/fill) re-verified by direct grep this pass**: `interpolate|fillna|ffill|bfill|impute` across `src/data/prepared.py`, `scripts/02_standardize_prepared_target.py`, `scripts/03_verify_processing.py` → the only matches are prose ("interpolates, smooths and fills NOTHING" / "No value is interpolated, smoothed or filled") — zero executable occurrences.
+- **D-17 sixteen-field contract independently re-counted from `evidence/DECISIONS.md` this pass** (see Finding 3) and matched exactly against `D17_FIELDS` in `prepared.py:195-211` (16 entries, same order) — not carried from the prior review's count.
+- **No TBD sentinel filled, no credential/secret, no scientific constant hardcoded**: `configs/data.yaml` still carries no `qc_operations`/`target.*` key at all (Finding 2); grep for `api_key|secret|password|token\s*=` across this unit's three code files returns only a local variable literally named `token` used for text tokenization (`prepared.py:727,733`) — not a credential.
+- **Line-count and test-count claims independently re-executed, not re-read**: `wc -l` → `scripts/02_standardize_prepared_target.py` 428, `scripts/03_verify_processing.py` 386, `src/data/prepared.py` 1555, `tests/test_prepared_target_schema.py` 741 — the first two match the code-summary's own claim exactly. Ran the scratchpad's parametrize-expanding stand-in runner (`run_target_std_tests.py`, stdlib-only, CPython 3.11.16; real pytest/pyyaml unreachable, PyPI egress blocked, reconfirmed) against both named test files: `tests/test_prepared_target_schema.py` → **62 passed, 0 failed, 0 errored, 0 skipped**; `tests/test_phase_boundary.py` → **52 passed, 0 failed, 0 errored, 1 skipped** (`test_target_artifact_conforms_to_d17_when_it_exists`, skip reason: no target artifact exists, matching the Q2=A design). Combined **114 passed, 0 failed, 1 skipped** — matches the code-summary's and iteration 2's claimed counts exactly.
+- **Repo-wide D-33..D-38 spillover re-checked**: none of `cell_rule`, `partitions`, `embargo_hours` is read by this unit's code (grepped `prepared.py` and both scripts for each key name — zero matches); `stations` and `practical_relevance_threshold` remain `TBD — freeze gate` and are correctly unread here.
+
+### Coverage limits
+
+Same bound as iteration 2: this unit's own artifacts, the passed functional-design/
+nfr-design/units-generation contracts, `evidence/DECISIONS.md` (D-16/D-17/D-19 re-derived;
+D-33/D-34/D-35/D-36/D-37/D-38 read for spillover only), `configs/data.yaml`/
+`configs/experiment.yaml`, and the sibling files this unit's own artifacts name as
+integration points (`tests/test_phase_boundary.py`) or that the dispatch brief named for a
+blast-radius check (`tests/test_locked_test_guard.py`, checked for references only, not
+reviewed as a unit). No other sibling unit's construction directory was read.
+
+### Summary
+
+Nothing has regressed: this unit's five owned files are unchanged since the iteration-2
+review (zero commits, zero uncommitted diff), and every adversarial check re-derived this
+pass — the Q2=A refuse-first gate, the script-03 tolerance-loader narrowing, the D-17
+sixteen-field contract, the target-label discipline, the imputation ban, and the test/line
+counts — reproduces exactly, independently, without carrying forward any prior count. The
+two carried-forward Minor findings remain correctly unowned by this unit and non-blocking.
+One new finding this pass is Major, not Critical: the artifact's own headline claim ("No
+git commit") is stale and self-contradicting against its own later text and against git
+history — this unit's code has in fact been committed three times (`ed5808b`, `cf3185d`,
+`0e002cd`), and none of those commits cites the D-16/D-17/D-19/D-1 context the team's Way
+of Working makes mandatory for a commit touching a governed artifact. This is a
+documentation-accuracy and commit-hygiene defect, not a functional or architectural one —
+no code path, test, or gate mechanism is affected — so under this project's stated verdict
+rule (zero Critical, ≤2 Major) it does not block READY, but it must be corrected at the
+artifact level and the D-number-citation gap routed to the gate rather than silently
+amended.

@@ -16,14 +16,14 @@
 
 | Path | What |
 |---|---|
-| `src/data/locked_test.py` | **Q1=A refusal — found ABSENT, implemented**: fires FIRST, before any row append, when `resolve_platform_roots` labels a non-`local` platform not in `CHARACTERISED_DURABILITY_PLATFORMS` (imported from foundation's `config.py`, so stamp posture and refusal posture can never disagree; set empty ⇒ kaggle refused until W-6 step 8 measures). Also: `EvidenceScanError` + shared `fail_unparseable` helper (R-27's one home); residency scan's silent `continue` on unreadable files replaced with failure; `RESTRICTED_LITERAL_EXEMPT_MODULES` source constant (7 members). Built chokepoint properties untouched |
+| `src/data/locked_test.py` | ⚠️ **INCOMPLETE as written — a second, later edit to this file is disclosed in § "Cross-unit edit disclosed (2026-09-11)" below; read the two together.** **Q1=A refusal — found ABSENT, implemented**: fires FIRST, before any row append, when `resolve_platform_roots` labels a non-`local` platform not in `CHARACTERISED_DURABILITY_PLATFORMS` (imported from foundation's `config.py`, so stamp posture and refusal posture can never disagree; set empty ⇒ kaggle refused until W-6 step 8 measures). Also: `EvidenceScanError` + shared `fail_unparseable` helper (R-27's one home); residency scan's silent `continue` on unreadable files replaced with failure; `RESTRICTED_LITERAL_EXEMPT_MODULES` source constant (7 members). Built chokepoint properties untouched |
 | `tests/test_locked_test_guard.py` | 16 → 36 tests. Literal scan now AST-based with constant folding. Scope stated exactly (iteration-1 Major 1 fix): **DISC-2's named evasion (Q2=B `+`-concatenation) closed; folder extended to constant-only call forms** (`os.path.join`/`joinpath`, `%`-format, `str.format`, `str.join` over constant elements, pathlib `/` over constants — one negative control per caught form); **runtime assembly remains statically unclosable and is disclosed** in the scan's docstring, pinned by a documentation test that also proves a runtime-fed assembly is genuinely not caught. Substring check retained as superset; notebook code cells included; unparseable ⇒ failure through shared helper. Exempt-set exact re-derivation (seven members, both directions). Q1=A controls. 3 SD-G-02 reconciliation tests |
 | `tests/test_phase_boundary.py` | Additive only: subordinate-status docstring paragraph (Q7 rider); documentation test guards it. All 53 tests green, none weakened |
 | `tests/test_determinism.py` | **Join-required edit to foundation's file, flagged for the gate**: its R-15 needle was assembled from concatenated constants ("assembled so this test file itself passes") — exactly the evasion the new folding scan exists to catch, and it was caught on first run. Needle now derived at run time from `locked_test.RESTRICTED_ROOT`; R-15's control intact; the ruled-at-seven exempt list NOT widened |
 
 ## Test and lint results (smoke evidence only — never governed)
 
-- **Full suite after iteration-2 fixes: 449 passed, 3 skipped, 0 failed** — Python 3.11.9 (bootstrapped env). Iteration 1's counts were 437/3, independently re-verified by the reviewer; the +12 are the iteration-2 controls (8 in test_locked_test_guard, 4 in test_phase_contract). Skips unchanged: no hourly-target artifact; producing-script population empty (explicit-record skip, never silent vacuity); dataset_version derivation covered by D-29 tests.
+- **Full suite after iteration-2 fixes: 449 passed, 3 skipped, 0 failed** — Python 3.11.9 (bootstrapped env). Iteration 1's counts were 437/3, independently re-verified by the reviewer; the +12 are the iteration-2 controls (8 in test_locked_test_guard, 4 in test_phase_contract). Skips unchanged: no hourly-target artifact; producing-script population empty (explicit-record skip, never silent vacuity) — ⚠️ **this middle clause is SUPERSEDED as of 2026-09-11; the population is no longer empty and the test no longer skips. See § "Cross-unit edit disclosed (2026-09-11)" → "Correction 2" below for the printed derivation**; dataset_version derivation covered by D-29 tests.
 - Per-module: test_locked_test_guard 36, test_phase_contract 36, test_reuse_registry 27, test_phase_boundary 53, test_determinism 35.
 - `ruff check`: all checks passed on the 8 created/modified files; the 4 new files plus `tests/test_locked_test_guard.py` also `ruff format`-clean (remaining pre-existing files not wholesale reformatted — repo was not format-clean before this unit; owed to a later cleanup if wanted).
 
@@ -220,3 +220,217 @@ Nothing regressed and nothing new was discovered, but nothing was fixed either: 
 - Read-scope bound: this unit's record dir, `configs/`, `evidence/DECISIONS.md`, `governance/`, and workspace code/tests; no sibling `construction/<unit>/` record dir was opened. `tests/test_common_masks.py` was referenced only by grep-count (confirming zero governance-guards-owned coverage exists), not opened and read as a sibling artifact.
 - Test execution used the session's stdlib pytest stand-in (`pytest_standin/`) against a real CPython 3.11.16 interpreter found under the scratchpad's `uv-pythons/` cache — no real pytest or PyYAML is installed (PyPI egress blocked, confirmed by `ModuleNotFoundError` on both). This is smoke evidence only, consistent with this unit's own stated posture, never governed evidence.
 - Did not re-attempt the AST-folding adversarial probes (keyword-argument call forms, dead-code guard placement) that iteration 2's review already surfaced as accepted, disclosed residuals; no regression indication in those areas prompted re-probing them this pass.
+
+## Cross-unit edit disclosed (2026-09-11)
+
+Written by `aidlc-developer-agent` at `code-generation`, closing both findings the
+2026-09-11 floor-reset re-review carried forward as **UNRESOLVED**. The Review sections
+above are left untouched byte for byte, including their verdicts: a review records what
+was true when it ran, and this section records what changed afterwards.
+
+Two body sentences above are now annotated in place with a ⚠️ pointer to this section —
+the "Files modified in place" row for `src/data/locked_test.py` (Correction 1) and the
+skip-reason clause in § "Test and lint results" (Correction 2). **Nothing was deleted or
+reworded**: the original text stands verbatim and the pointer is additive, because a
+correction filed only at the foot of the artifact leaves the superseded claim intact for
+exactly the reader it was written for (`project.md`
+`units-generation:re-1`, `functional-design:fd-2026-08-30-sweep-derive-sites`).
+
+### Correction 1 (closes Major) — the Q2 = B containment edit to this unit's module
+
+**What was edited, by whom, under what authority.** `src/data/locked_test.py` is
+`governance-guards`' module. Commit **`8a6cb61`** (2026-09-07) edited it in place from
+`evaluation-and-comparison`'s stage 3.5, on the **project decision owner's explicit
+Q2 = B instruction**, implementing **SD-C-02**. The change record is
+`governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md:82-85`, which states the
+obligation verbatim: "`governance-guards` owes its own review of the two fields at its
+next touch." This section is that touch; the review is discharged here, in the body, not
+only in a Review addendum.
+
+**What the edit added** (`src/data/locked_test.py:278-386`):
+
+| Symbol | Line | What |
+|---|---|---|
+| `AccessRecord.mask_bundle_ids` | `src/data/locked_test.py:200` | `tuple[str, ...] \| None = None` — optional, defaults `None` |
+| `AccessRecord.mask_registry_hash` | `src/data/locked_test.py:201` | `str \| None = None` — optional, defaults `None` |
+| `_containment_fields` | `src/data/locked_test.py:278-307` | Reads a frozen-bundle manifest, returns its `mask_ids` and the SHA-256 of its bytes |
+| `open_restricted(..., mask_bundle_manifest=None)` | `src/data/locked_test.py:310-398` | New keyword; populates both fields at access time via `replace()` before the append |
+
+**The new failure mode, which is why this needed a test here.** A manifest that is
+supplied and **exists but cannot be read or parsed ABORTS the read**
+(`src/data/locked_test.py:300-306` raises `LockedTestError`) rather than recording
+`None` and proceeding. That distinction carries the whole evidentiary value of SD-C-02:
+`None` is a legitimate fail-closed state downstream — `evaluation-and-comparison`'s
+`require_locked_receipt` refuses a `DEC` metric on it — so silently writing `None` over
+a broken manifest would launder a defect into an ordinary refusal and erase the signal.
+
+**Why this unit owed the test rather than the sibling.** The only coverage was
+`tests/test_common_masks.py` (`evaluation-and-comparison`'s), which exercises the
+**consumer** refusal and never the **producer** that populates or refuses to populate
+the fields. `grep -n "containment\|mask_bundle\|mask_registry" tests/test_locked_test_guard.py
+tests/test_phase_contract.py` returned **zero matches** across two consecutive review
+passes.
+
+**What was added (2026-09-11).** `tests/test_locked_test_guard.py` gains **Section 10**,
+appended after the sibling's Section 9 so that block stays byte-identical, plus a
+module-docstring ownership paragraph and one import of the module object for the
+documented `_repo_root` test seam. Every case drives its input through the real
+`open_restricted` entry point, never through `_containment_fields` directly — the
+`nfr-design:c58`/`c59` shape, because a helper proved correct once still fails open at a
+call site that forgets it.
+
+| Test | Half | What it pins |
+|---|---|---|
+| `test_containment_present_but_unparseable_manifest_aborts_the_read` | must-fire | 6 parametrized breakage classes (not JSON; no `mask_ids` key; `mask_ids` not iterable; top-level list; non-UTF-8 bytes; empty file) each raise, name the manifest, and **consume no access row** |
+| `test_containment_abort_leaves_an_existing_access_log_byte_identical` | must-fire | The stronger ordering form: with a log that already holds a good row, the aborted call leaves it byte-identical (a "file does not exist" assertion alone passes vacuously) |
+| `test_containment_valid_manifest_populates_the_record_and_the_read_proceeds` | must-NOT-fire | Ids recorded **as found** (order preserved, not normalised) and the hash is the SHA-256 of the manifest's own bytes; the read still returns the resolved path |
+| `test_containment_record_cannot_contain_a_mask_registered_after_the_access` | must-NOT-fire | SD-C-02's actual property: a mask added to the manifest afterwards cannot appear in an already-written row — ordering by containment, on any clocks |
+| `test_containment_absent_manifest_leaves_the_fields_none_and_the_read_proceeds` | boundary | ABSENT ≠ BROKEN; fails if either side of that line drifts |
+| `test_containment_default_keyword_is_backward_compatible` | regression | A pre-edit caller passing no manifest logs and reads exactly as before, with both keys **present and `None`** |
+| `test_containment_fields_are_optional_on_the_record_itself` | regression | `__post_init__`'s required-field check is untouched; the new optional fields cannot be mistaken for the required set |
+| `test_containment_manifest_key_matches_the_producer` | anti-drift | Parses (never imports) `src/evaluation/masks.py` and confirms `freeze_bundle` really writes a literal `mask_ids` key — so a synthetic fixture cannot agree with a synthetic expectation about a real producer |
+
+**The controls are proved non-vacuous by mutation, not asserted to be.**
+`_containment_fields` was replaced at runtime with a weakened version returning
+`(None, None)` instead of raising — the exact weakening that would make these tests
+easier — and **9 of the 13 cases failed**: all six broken-manifest rows, the
+byte-identical-log control, the valid-manifest population control, and the
+containment control. The four that correctly still passed (absent manifest, default
+keyword, record-optional fields, producer key) describe behaviour the mutation does not
+change. The abort behaviour was **not weakened**; no test was simplified by relaxing it.
+
+**No December content.** Section 10 runs entirely against a synthetic `tmp_path`
+boundary installed through the module's own documented seam
+(`locked_test._repo_root`, `src/data/locked_test.py:230-240`). No real restricted
+artifact is opened, and no manifest fixture carries a 2022-12 timestamp.
+
+### Correction 2 (closes Minor) — the "producing-script population empty" claim is stale
+
+The superseded clause in § "Test and lint results" read: *"producing-script population
+empty (explicit-record skip, never silent vacuity)"*. **Derivation, printed before
+assertion** (`project.md` `application-design:count-derivation` — derive it from the
+artifact, never carry it from a review's text), by executing
+`_producing_script_violations(SCRIPTS_DIR)` from `tests/test_phase_contract.py`
+directly:
+
+```
+enumerated n = 8            # PHASE1_PRODUCING_SCRIPTS
+checked n    = 8            # on disk, derived by the checker itself
+set-diff enumerated - checked = []
+set-diff checked - enumerated = []
+offenders = {}  | skip branch taken? False
+```
+
+Reconciled by **set difference in both directions, never by comparing totals**
+(`project.md` `delivery-planning:c21`): empty both ways, so the population is exactly
+the enumerated eight — `scripts/00_acquire_prepared_vtec.py` … `07_evaluate_and_report.py`,
+all written by sibling units after this unit's 2026-09-05 work.
+
+**Corrected claim.** `tests/test_phase_contract.py:266-291`
+(`test_every_phase1_producing_script_calls_the_field_guard_before_its_first_write`)
+**executes the real per-script R-24 ordering check and passes; it no longer takes its
+`pytest.skip` branch.** Confirmed by execution, not only by derivation: this module
+reports **36 passed, 0 failed, 0 skipped**. R-24's completeness promise no longer rests
+on a skip plus synthetic controls — it is now enforced against the real population.
+
+### Test results (smoke evidence only — never governed)
+
+**Runner named honestly: there is NO real `pytest` and NO `ruff` in this session.** PyPI
+egress is blocked (verified: `ModuleNotFoundError` for `pytest`, `yaml`, `numpy`). Every
+figure below comes from the session's **stdlib pytest stand-in**
+(`pytest_standin/run_tests.py`) on **CPython 3.11.16**. **No `ruff check` and no
+`ruff format` were run, and none is claimed** — the 99-column limit and clean
+`ast.parse` were verified by a direct script instead (0 lines over 99, 0 trailing
+whitespace, file parses).
+
+| Module | Before (HEAD `715f392`) | After | Δ |
+|---|---|---|---|
+| `tests/test_locked_test_guard.py` | 44 passed, 0 failed, 0 skipped | **57 passed, 0 failed, 0 skipped** | +13 |
+| `tests/test_phase_contract.py` | 36 passed, 0 failed, 0 skipped | **36 passed, 0 failed, 0 skipped** | 0 |
+| `tests/test_phase_boundary.py` | 52 passed, 0 failed, 1 skipped | **52 passed, 0 failed, 1 skipped** | 0 |
+| `tests/test_common_masks.py` | 60 passed, 0 failed, 1 skipped | **60 passed, 0 failed, 1 skipped** | 0 |
+
+Full suite, all 26 test modules: **1157 passed, 0 failed, 39 skipped, 0 errors.** Of the
+39 skips, **37 are this sandbox's missing third-party packages** (31 `yaml`, 5 `numpy`,
+1 `test_clean_run` whose named first unmet precondition is pyyaml) and **2 are genuine
+explicit-record project skips** (no hourly-target artifact yet; `dataset_version`
+derived by `write_release`, covered by the D-29 tests). This is smoke evidence on a
+dependency-incomplete clone, never governed evidence, and it does not reproduce the
+bootstrapped environment in which this unit's earlier 449-passed figure was produced.
+
+### Repository state, re-verified at summary-writing time
+
+Per `project.md` `code-generation:c30`. The dispatch brief named HEAD `715f392`; **HEAD
+moved during this session to `b0b7c1d` (2026-09-11 17:47 +0400)** — an owner commit,
+outside this stage. Verified by `git show --name-only`: it touches **no** file under
+`src/`, `tests/` or `scripts/` (only workspace record files, including this
+`code-summary.md`, plus `evidence/test_run_access_log.jsonl`), so the code work above is
+unaffected by it. **No commit, amend or push was made by this stage** — the governance
+stop above still stands, and the disposition (fold into the next commit, or a follow-up)
+is the owner's.
+
+`evidence/test_run_access_log.jsonl` carries **74 uncommitted appended rows** from the
+full-suite run. These are written by `tests/test_acquisition_window.py:70` and
+`tests/test_release_hashes.py:75` (sibling-owned, pre-existing by design — the guard
+logs every real restricted read), **not** by Section 10, whose registries are all under
+`tmp_path`. Checked: **zero of the new rows contain `2022-12`**.
+
+### Residual, stated rather than implied closed
+
+`test_containment_manifest_key_matches_the_producer` **parses** `src/evaluation/masks.py`
+and does not **execute** `freeze_bundle`. It therefore pins the manifest's *key name*
+across the unit boundary but not its runtime payload; a producer that emitted a
+`mask_ids` key of the wrong type would still be caught at read time by the abort path
+(`TypeError` is in `_containment_fields`' caught set — pinned by the `mask_ids is not
+iterable` row), but not by this static check. Executing the sibling's producer would take
+a runtime dependency on `evaluation-and-comparison`'s module from `governance-guards`'
+own test, which is not this unit's call to make. Disclosed, not narrowed silently.
+
+Nothing in this section discharges an acceptance row: **WS-18, TA-18, TA-25, TA-27,
+TA-28 all remain `Pending`**; BLK-06 and BLK-07 remain open; no TBD sentinel was filled;
+no locked December data was accessed.
+
+## Floor-reset re-review — iteration 2 (2026-09-11, terminal)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T14:02:34Z
+**Iteration:** 2 of 2 (ADVERSARIAL, terminal — this verdict stands)
+
+### Independent re-verification performed (by direct execution, not description)
+
+**Fix 1 (was Major — sibling's Q2=B edit untested/undisclosed).**
+
+- `git diff 8a6cb61 HEAD -- src/data/locked_test.py` and `git diff 8a6cb61 -- src/data/locked_test.py` (working tree) both empty: `src/data/locked_test.py` is byte-identical to its post-`8a6cb61` state, through HEAD (`b0b7c1d`) and in the current working tree. The abort logic was **not weakened** to ease testing.
+- Read `src/data/locked_test.py:278-398` directly: `_containment_fields` raises `LockedTestError` on `(OSError, UnicodeDecodeError, ValueError, KeyError, TypeError)` **before** `open_restricted` calls `_append_and_flush` (line 383 precedes line 390) — confirms "consumes no access row" is a structural property, not merely asserted.
+- Read `tests/test_locked_test_guard.py:1114-1451` (Section 10) in full: 13 test cases exactly as claimed — the 6-way parametrized broken-manifest control (`test_containment_present_but_unparseable_manifest_aborts_the_read`), the byte-identical-log ordering control, the must-not-fire population control, the containment/no-future-mask control, the absent-≠-broken boundary test, the backward-compatible-default regression, the `__post_init__`-untouched regression, and the producer-key-name cross-check (parses, never imports, `src/evaluation/masks.py`). All drive input through the real `open_restricted` entry point per the file's own text — confirmed by reading each case body, not just its docstring.
+- Read `src/evaluation/masks.py:659-696` (`freeze_bundle`): writes a literal `"mask_ids"` key into the manifest dict — matches what the cross-boundary test asserts via AST parse.
+- **Ran the tests myself** with the session's stdlib pytest stand-in (`pytest_standin/run_tests.py`, CPython 3.11.16 at the scratchpad's `uv-pythons/cpython-3.11.16-windows-x86_64-none/python.exe` — no real pytest/PyYAML, PyPI egress confirmed blocked): `test_locked_test_guard` → **57 passed, 0 failed, 0 skipped**; `test_phase_contract` → **36/0/0**; `test_phase_boundary` → **52/0/1** (named skip: no hourly-target artifact); `test_common_masks` → **60/0/1** (named skip: `yaml` unimportable). All four exactly match the code-summary's claimed figures.
+- **Ran the mutation myself**, independently of the artifact's narration: temporarily replaced `_containment_fields`'s body with `return None, None`, re-ran `test_locked_test_guard`, then restored the file via `git checkout --` (confirmed clean afterward, `git diff --stat` empty). Result: **48 passed, 9 failed** — the exact 9 named (all 6 broken-manifest parametrizations, the byte-identical-log control, the valid-manifest-population control, the containment-property control); the other 4 (absent-manifest, default-keyword, post-init, producer-key) correctly still passed. This reproduces the claimed "9 of 13" precisely — not merely accepted on the artifact's word.
+- `git diff HEAD -- tests/test_locked_test_guard.py`: confirms Section 9 (lines 1-1091, all pre-existing test functions) carries **zero code changes** — the only edit above the Section 10 append is a rewording of the module-docstring's ownership-limb paragraph (to mention Section 10) and one new import line; no test body in Section 9 was touched.
+- Disclosure section verified at `code-summary.md:224-391` (`## Cross-unit edit disclosed (2026-09-11)`), exactly where claimed. `git diff HEAD` on this file shows the two ⚠️-pointer edits are **strictly additive superstrings** of the original sentences (original text preserved verbatim, pointer appended in-line) — nothing deleted or reworded. The prior `## Review` blocks (lines 61-222, including the 2026-09-05 iteration-1/2 blocks and the 2026-09-11 floor-reset block) are untouched by this diff.
+
+**Fix 2 (was Minor — stale R-24 claim).**
+
+- Read `tests/test_phase_contract.py:255-289` directly: `test_every_phase1_producing_script_calls_the_field_guard_before_its_first_write` takes its `pytest.skip` branch only when `_producing_script_violations(SCRIPTS_DIR)` returns an empty `checked`; my own run of this module shows **0 skipped**, confirming the real per-script check executed, not the skip branch.
+- The printed derivation in Correction 2 (`enumerated n = 8`, `checked n = 8`, empty set-diff both directions, `skip branch taken? False`) is consistent with direct execution.
+- Confirmed appended, not rewritten in place: `git diff HEAD` shows the original stale sentence in `code-summary.md:26` ("producing-script population empty...") preserved verbatim with only an inline ⚠️ pointer added; the correction's own text lives entirely in the new `## Cross-unit edit disclosed` section below it.
+
+### New finding (Minor, emerges from this iteration's added disclosure text)
+
+| # | Severity | Location | Finding | Evidence |
+|---|---|---|---|---|
+| 1 | Minor | `code-summary.md` § "Repository state, re-verified at summary-writing time" (~line 372) | The claim "`evidence/test_run_access_log.jsonl` carries **74 uncommitted appended rows**" is wrong; the actual count is **111** (`git diff HEAD -- evidence/test_run_access_log.jsonl` shows 111 added lines; `wc -l` on the file is 4311 against `git show HEAD:...` at 4200, i.e. 4311−4200=111). The safety-relevant part of the claim — zero rows contain `2022-12` — is independently confirmed true (`grep -c "2022-12"` on the diff's added lines returns 0), and all 111 added rows carry `run_id` of either `test_acquisition_window` (6) or `test_release_hashes` (105), consistent with the claim these are sibling-owned pre-existing loggers rather than anything from Section 10 (whose fixtures are all under `tmp_path`, confirmed by reading Section 10's fixture code). The miscount does not touch either of the two closed findings and does not indicate any governed-evidence or leakage problem, but it is exactly the kind of uncounted-then-asserted numeral `project.md`'s `application-design:count-derivation` correction exists to catch, and it should be corrected at the next touch of this artifact rather than carried forward silently. |
+
+### Also verified
+
+- No TBD-sentinel fill: the one `TBD` hit in `tests/test_locked_test_guard.py:1044` is a negative-control literal value inside a test parametrization (`test_limb1_unsigned_or_tbd_gate_record_never_verifies`), not a filled sentinel. No credential/secret pattern (`api_key`/`password`/`secret`, case-insensitive) in any of the three touched/added `src/` modules.
+- No locked-December access: 0 occurrences of `2022-12` in the newly appended access-log rows; Section 10's fixtures are entirely synthetic under `tmp_path`, confirmed by direct read.
+- No guard weakened: `src/data/locked_test.py` byte-identical to its `8a6cb61` post-edit state, confirmed by `git diff` both against history and the working tree.
+- Full-suite claim (1157/0/39/0) was not re-run in full (would exceed this pass's scope/time); the four named modules were re-run in full and match exactly, and the described skip composition (37 missing-package + 2 genuine explicit-record skips) is internally consistent with the per-module skip reasons observed directly in the four modules actually re-run.
+- Read-scope respected: only this unit's record dir, `configs/`, `evidence/`, `governance/`, and workspace code/tests were read; `src/evaluation/masks.py` was opened only as the disclosed cross-boundary integration point, and only to check the one function (`freeze_bundle`) the disclosure names.
+
+### Verdict rationale
+
+Both carried-forward findings are independently confirmed closed by direct execution, not accepted on the report's word: the Major's missing test coverage now exists, runs through the real entry point, is proven non-vacuous by an independently-reproduced mutation kill, and is honestly disclosed as an additive appendix without touching the frozen prior Review history; the Minor's stale claim is corrected with a re-executed, matching derivation. The one new finding (Minor, a miscounted row count) does not touch either closed item, carries no safety implication (the count that matters — zero December rows — is independently confirmed correct), and is well within the stated verdict rule (READY if zero Critical, ≤2 Major, any Minor): 0 Critical, 0 Major, 1 Minor.
+
+**Verdict:** READY

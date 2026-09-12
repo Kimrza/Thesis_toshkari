@@ -234,3 +234,152 @@ verified against live enforcement code that actually gates the build path — no
 strings chosen to make a test pass. The 7 deferred driver rows are honestly reported as
 deferred (fail-closed, not admitted), and the new tests exercise real refusal paths rather
 than asserting shape only. No defect found in this unit's exposure to the pass.
+
+## Floor-reset re-review (2026-09-11)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T14:37:13Z
+**Iteration:** Floor-reset re-review, class ADVERSARIAL (repo-wide D-38/D-35 landing)
+
+### Scope and baseline
+
+HEAD `b0b7c1d`. `git diff --stat 715f392 HEAD -- src/data/splits.py src/features/ configs/data.yaml
+configs/experiment.yaml configs/features.yaml scripts/05_build_features_and_splits.py
+tests/test_split_embargo.py tests/test_train_only_transforms.py tests/test_feature_availability.py
+aidlc/.../construction/features-and-splits/` prints **empty** — every file this unit owns is
+byte-identical to the state the 2026-09-10 review already accepted. HEAD `b0b7c1d`'s own diff
+(`git show --stat HEAD`) touches only `aidlc-state.md`, the audit shard, `foundation`'s and
+`governance-guards`' code-summaries, and `evidence/test_run_access_log.jsonl` — none of this
+unit's files, so its unedited-git-template message and missing D-number are not this unit's
+defect (stated per `project.md:code-generation:gf-1` — baselined explicitly, not asserted as an
+unqualified invariant). The only uncommitted (dirty) file touching this unit's territory,
+`tests/test_locked_test_guard.py`, is a `governance-guards`-owned addition (its own "Section 10 —
+the SD-C-02 containment fields (added 2026-09-11, governance-guards)", diffed and read in full):
+it only extends the docstring's ownership paragraph and appends section 10 after this unit's
+existing section 9; section 9 itself carries zero diff. Ran the whole file after the addition —
+57 passed / 0 failed / 0 errors — confirming the addition did not disturb this unit's limb.
+
+### Verification performed (executed, not read)
+
+All commands run against the REAL repository files under
+`C:\Users\s_sch\Desktop\test\Thesis_toshkari-main\Thesis_toshkari-main`, using the session's
+CPython 3.11.16 stand-in (`scratchpad/uv-pythons/.../python.exe`; pyyaml/pandas/numpy remain
+uninstallable, PyPI egress blocked, matching the summary's own stated environment) plus the
+pre-existing stdlib pytest stand-in and a tiny hand-written config-block extractor (printed
+before use, same technique the unit's own `Iteration 2`/D-38 commits used) feeding the
+project's own unmodified validators — never a rewritten copy of the logic under test.
+
+1. **Split contract against the real, now-filled `configs/data.yaml: partitions` and
+   `configs/experiment.yaml: embargo_hours = 24` (D-38).** `build_partitions(snapshot)` built
+   from the real file accepts exactly 6 partitions matching the on-disk F1–F4/REFIT/DEC values.
+   Eight targeted negative controls, each mutating one field of the real block and re-running
+   the unmodified validator: R-80 `DEC.train_end != REFIT.train_end` refused; a validation month
+   not immediately after `train_end` refused (fold contiguity); `kind` disagreeing with `id`
+   refused; a 5th-partition (missing id) and a 7th-partition (extra id) block both refused; a
+   non-null `REFIT.validation_month` refused; a `train_start` diverging from the study origin
+   refused (expanding-window bar). `embargo_hours` TBD, `0`, `-1`, and `True` (bool-as-int) all
+   refused. `build_split_manifest` gives exactly 5 rows (`DEC` absent); a hand-assembled 6-row
+   manifest (with `DEC`) and a 4-row manifest were both fed to `assert_split_manifest` directly
+   and both refused; a manifest missing one fold's `excluded_embargo_rows` count refused.
+2. **24-hour embargo, executed against the real `embargo_hours=24`.** 30 synthetic hourly rows
+   from the validation-month start: `apply_embargo` excludes exactly 24 and keeps 6. Boundary
+   check: the row at `start+23h` is excluded, the row at `start+24h` is kept — the boundary is
+   `[start, start+24h)`, half-open, matching TE §7.1's "24 hours" column exactly.
+3. **NFR-LEAK-01 (train-only transforms).** Read `src/features/transforms.py` in full:
+   `fit_transforms` raises `LeakageError` unless `spec.role == "train"` AND
+   `(scored_start, scored_end) == (train_start, train_end+1d)` exactly (over-wide and
+   strict-subset both refused) AND the bundle is untransformed; there is no code path that
+   fits over an unscoped/full-dataset matrix — the only entry point that computes means/scales
+   is gated by these three checks in sequence, before any arithmetic runs.
+4. **December/locked unreachability.** `materialise_locked_partition` refused with
+   `g05_signature=None` and again with a non-verifying signature string — executed, not just
+   read. `verify_g05_signature(real_snapshot, "anything") == False`: the real `configs/data.yaml`
+   carries no `gates.G-05` block at all today, so nothing verifies. `FITTING_PARTITION_IDS`
+   excludes `DEC` (checked directly). `assert_membership_from_timestamps` accepted an in-range
+   February row under F1's train role and refused a December-timestamped row under the same
+   role/partition — membership is derived from the timestamp, never a directory name.
+5. **`permitted_producers` fail-closed (D-35), executed against the real `configs/features.yaml`.**
+   Extracted the real 11-row block and called `load_permitted_producers` (the `ConfigSnapshot`
+   path, not the yaml-dependent `Path` branch) requesting all 18 `SECTION_6_2_ROWS`: raised
+   `LeakageError` naming exactly the 7 deliberately-deferred driver rows
+   (`kp_safe, ap_safe, hp60_safe, ap60_safe, f107_safe, f107_81_trailing, dst`) and no others.
+   Requesting only the 11 filled rows succeeded and returned the exact producer mapping written
+   in the file. Requesting `kp_safe` alone also refused. No feature-matrix path was exercised
+   that could route around this refusal — `load_permitted_producers` is the first call in
+   `scripts/05_build_features_and_splits.py`'s `_run()` (confirmed by direct read, both
+   `_assert_phase1_field_contract`/`ensure_process_determinism` precede it and
+   `load_feature_dictionary` follows it, matching iteration 2's fix).
+6. **R-114 one-copy rule.** `grep -rln 'def paired_difference_series\|def equal_station_mean' src/`
+   returns exactly one file, `src/evaluation/metrics.py`; neither name appears anywhere under
+   `src/data/`, `src/features/`, or this unit's test files.
+7. **D-27-withheld inverse.** `grep -rn inverse src/features/` returns three hits, all prose
+   ("No inverse path", "No `inverse` and no `apply` method exist here") — no `def inverse`, no
+   `inverse_transform`, no callable inverse surface anywhere in `build.py` or `transforms.py`.
+8. **Count derivation, printed before assertion.** `grep -c '^def test_'` on the four
+   §12-mandated modules gives `test_split_embargo.py` 34, `test_train_only_transforms.py` 28,
+   `test_feature_availability.py` **56** (not the "54" the Files-created table states — traced
+   the discrepancy to source rather than asserting it as a defect: `git show 6246907:tests/
+   test_feature_availability.py | grep -c` gives 54 at the pre-D-35 baseline the table describes;
+   `git diff 6246907 17e0767` shows the D-35 pass removed
+   `test_permitted_producers_reads_the_real_features_yaml_and_refuses_today` — obsolete once the
+   config stopped refusing — and added the three new contract tests named in the "Owner-rulings"
+   section, net +2 → 56. The "54 passed, 0 failed, 2 skipped" claim in that later section is
+   exactly 56 total and matches; no false count found), `test_locked_test_guard.py` 42 (this
+   unit's section-9 subset; +15 new section-10 cases from `governance-guards` account for the
+   file's 57-passed total, confirmed by the diff in Scope above). Ran all four (plus
+   `test_common_masks.py` as the fifth §12 module this unit's R-114 boundary touches) under the
+   stdlib stand-in: `test_split_embargo` 35 passed/1 skipped, `test_train_only_transforms` 28
+   passed, `test_feature_availability` 54 passed/2 skipped, `test_common_masks` 60 passed/1
+   skipped, `test_locked_test_guard` 57 passed — **0 failures across all five**, all skips
+   `pytest.importorskip("yaml")` (environmental, not silent passes). No `2022`/`2001` literal
+   found in `src/data/splits.py`; no `iri`/`gim`/`sklearn`/`evaluation` import under
+   `src/features/*.py` or `src/data/splits.py`.
+9. **No TBD sentinel filled by convenience; no credential; no weakened guard.** Read
+   `configs/data.yaml`/`experiment.yaml`/`features.yaml` in full: `stations`,
+   `feature_dictionary`, `availability_lags`, `normalization`, `feature_set_id`,
+   `practical_relevance_threshold`, `folds`, `models.selected`/`declared_baseline_per_track`
+   all still carry the sentinel; D-33's `cell_rule` explicitly states its supervisor
+   countersignature is NOT YET GIVEN; the 7 driver-producer rows stay unfilled. Grepped the
+   touched files for credential/secret/token/API-key patterns — none found. `Partition.
+   embargo_hours` still carries no default (`= 24` was the rejected shape); no `24` literal
+   reappears anywhere the tests check for it outside the calendar-arithmetic exception the
+   prior review already ruled acceptable.
+10. **Repository-owner decision cross-check.** `evidence/DECISIONS.md` D-38's prose
+    ("six accepted, every structural rule exercised, and a control with an unresolved embargo
+    still refused") matches this pass's independent re-derivation exactly, and the commit
+    messages for `9d3e853`/`f0d9e49` cite the D-numbers `team.md` requires for a governed-config
+    commit — both commits predate and are unaffected by HEAD's un-cited template message, which
+    (per Scope above) touches none of this unit's governed files.
+
+### Findings
+
+None survive verification at any severity for this unit's exposure to this pass.
+
+### Coverage limits
+
+- `pyyaml`/`pandas`/`numpy` remain uninstallable in this environment (PyPI egress blocked,
+  re-verified this pass); the yaml-dependent branch of `load_permitted_producers` (the `Path`
+  signature, as opposed to the `ConfigSnapshot` signature exercised above) and a full
+  `load_configs` run were not executed end-to-end — same limitation the unit's own summary and
+  D-38's commit both state and route as owed to a governed environment.
+- Did not read any sibling unit's `construction/<other-unit>/` content; the `governance-guards`
+  section-10 addition to the shared `test_locked_test_guard.py` was read only because it is the
+  single file this unit's own record names as jointly owned, and only to confirm it left this
+  unit's section 9 untouched (the carve-out for a named integration point).
+- Did not re-verify `evidence/test_run_access_log.jsonl`'s append-only growth row-by-row (large,
+  JSONL, append-only by construction); confirmed only that it is not this unit's owned artifact
+  and that no restricted-root/December content appears in the tests that write to it.
+
+### Summary
+
+Every structural split rule, the 24-hour embargo, the December/locked unreachability guard, the
+train-only-transform boundary, the permitted-producer fail-closed policy, and the R-114/D-27
+one-copy and no-inverse invariants were exercised against the REAL, now-frozen `configs/data.yaml`
+(D-38 partitions), `configs/experiment.yaml` (D-38 embargo_hours), and `configs/features.yaml`
+(D-35 permitted_producers) — not read as prose — including eighteen distinct negative controls,
+and every one behaved exactly as this unit's code-summary and the governing D-numbers claim. The
+one apparent count discrepancy (54 vs. 56 test functions) traced to a legitimate test replacement
+at the D-35 pass, not a stale or wrong assertion. This unit's own files carry zero diff since the
+last accepted review; the one dirty file in its territory is a sibling's own out-of-scope
+addition that leaves this unit's limb intact.

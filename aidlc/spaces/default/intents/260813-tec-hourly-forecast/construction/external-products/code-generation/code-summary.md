@@ -173,3 +173,92 @@ checks against real subprocess exit codes and stderr text, not loosened placehol
 verified by independent reproduction of the exact claimed pass count and by reading the
 gated script's control flow directly. No fabricated evidence, no deleted tests, no
 scope creep into this unit's other owned modules.
+
+## Floor-reset re-review (2026-09-11)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T14:17:46Z
+**Iteration:** Adversarial floor-reset re-review, against HEAD `b0b7c1d`
+
+Re-derived from scratch against the current tree — no earlier verdict in this file was
+taken on faith. Environment: no real pytest/pyyaml (PyPI egress blocked, confirmed);
+ran both owned test modules under the stdlib pytest stand-in
+(`.../scratchpad/pytest_standin/run_tests.py`) on the scratchpad's CPython 3.11.16 venv.
+
+### Verification performed
+
+- **Read all four owned source files in full**: `src/external/spaceweather.py`,
+  `src/external/iri.py`, `src/external/gim.py`, `scripts/04_build_external_products.py`.
+  Traced the trailing-mean window (`[end_day-(window_days-1), end_day]`, no future day
+  can enter it — no `centered` implementation anywhere in the module; the only two hits
+  for "centered" are the docstring's own negative statement), the ≤3h carry-forward
+  bound with `excluded_epochs` beyond it (`apply_carry_forward`), the conservation
+  invariant, the R-59/R-60 gate orderings (`declared_at >= comparison_at` and
+  `checked_at/audited_at >= generation_attempt_utc` both fail-closed on `>=`, not `>`),
+  and `generate_benchmark`/`generate_comparator`'s injection-mode terminal refusal
+  placed BEFORE the gated `import iricore` line — confirmed the import is unreachable
+  even when injected state satisfies every prior gate.
+- **Import-boundary walk (not grep alone, TA-07)**: `grep -rn "^\s*from src.external import\|^\s*import src.external" src` across the whole `src/` tree returns exactly one
+  real import site — `src/evaluation/metrics.py:477`, `from src.external import gim`,
+  indented inside a function body (deferred/evaluation-time-only, matching that
+  module's own docstring claim, spot-checked as the one named integration point outside
+  this unit). No import of `src.external.iri` exists anywhere in `src/`. `src/features`
+  and `src/models` carry only docstring mentions of the boundary rule, never a live
+  import statement.
+- **D-35's seven deferred driver rows** (`kp_safe`, `ap_safe`, `hp60_safe`, `ap60_safe`,
+  `f107_safe`, `f107_81_trailing`, `dst`): confirmed genuinely absent from
+  `configs/features.yaml: permitted_producers` with the exact D-35 rationale
+  transcribed in the surrounding comment — this unit's code does not fabricate a
+  producer identity for any of them; `REQUIRED_FIELDS_MAP[("external-products", 1)]`
+  in `src/data/config.py:577` is exactly `("seeds.development",)`, matching the "no
+  scientific value, field identities only" claim.
+- **Governance stop still open**: `governance/CHANGE_RECORD_2026-09-05_R55_external_contracts.md`
+  still opens `Status: DRAFT — NOT APPLIED`; no credential/secret pattern in any of the
+  four owned/modified files.
+- **Fixture-gate integration** (`src/data/fixture_gate.require_receipts_for_snapshot`,
+  the one named external integration point besides `metrics.py`): read in full;
+  confirmed the call site in `scripts/04_build_external_products.py`'s `_stage_entry`
+  matches the real signature exactly (`fixture_manifest=`, `declared_window=`,
+  `declared_window_resource=`), and that `_declared_data_window()` only returns a
+  value (thereby engaging the Rec-2/ML-01 window-bound check) when
+  `fixture_manifest is not None` — a full-year invocation with no `--fixture-manifest`
+  gets no `declared_window` and is not exempted, consistent with the script's own
+  docstring claim.
+- **Test re-execution, independently, not taken on the summary's word**:
+  `tests/test_iri_denial.py`: **22 passed, 0 failed, 0 skipped, 0 errors**.
+  `tests/test_external_drivers.py`: **51 passed, 0 failed, 0 skipped, 0 errors**.
+  The 51/0 for `test_external_drivers.py` matches the code-summary's claim exactly.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-summary.md` line 14 (Files-created table) | The artifact still asserts **"19 tests"** for `tests/test_iri_denial.py`, and both prior review passes (2026-09-05, 2026-09-10T11:33:57Z) treated 19 as independently confirmed. The file has carried **22** `test_` functions since commit `cdc61f7` ("Gate-worklist cleanup…", 2026-09-10 11:41:01, whose own message states "test_iri_denial: … 22/0" and adds a scope-aware containment-scan narrowing for the `src/evaluation/metrics.py` deferred-import case) — a commit landed **after** this file's last review timestamp (11:33:57Z, eight minutes earlier) and never reflected here. Independently re-derived by count (`git show ed5808b:tests/test_iri_denial.py \| grep -c "^def test_"` = 19 at creation vs. `git show cdc61f7:...` = 22 now) and by execution (22 passed, 0 failed under the stand-in) — the number itself is not in question, only that this artifact still states the superseded figure. The commit's own message records that "dated cross-unit edit records" were appended to eight other owners' code-summaries for this same commit; no equivalent update or disclosure was made to this unit's own code-summary for the edit to its own owned test file. This is the same failure mode `project.md`'s count-derivation and cross-unit-disclosure corrections (`application-design:count-derivation`, `code-generation:gf-3`) were written to catch, now recurring against this unit's own artifact rather than a sibling's. No functional or gate-safety defect follows from it — the containment-scan narrowing itself is real, correctly scoped (verified against `src/evaluation/metrics.py`'s actual deferred import), and negative-controlled both directions — but a reader of this "READY"-verdicted summary is told a stale count for the unit's second-most-scrutinised test file. | Correct "19 tests" to "22 tests" in the Files-created table, and append a short dated note (mirroring the existing cross-unit-edit-record convention already used elsewhere in this file) recording the `cdc61f7` narrowing and its test-count effect. |
+
+### Coverage limits (this pass did not additionally verify)
+
+- Did not re-derive whether the `sanctioned_deferred_target_sites` narrowing changes any
+  of the other 21 tests' pass/fail boundary beyond re-running the suite (which shows
+  0 failures) — correctness of the containment-scan logic itself was read, not
+  independently re-implemented against a second scan.
+- Did not re-verify `tests/test_feature_availability.py` (a `features-and-splits`-owned
+  file) beyond running it as instructed by the dispatch (54 passed, 2 skipped — both
+  skips are pre-existing `pyyaml`-import skips, not this unit's concern).
+- The `iricore`-gated code path and the 26,000-call IRI workload remain genuinely
+  unreachable in this environment, as in the prior review.
+
+### Summary
+
+No Critical finding and one Major finding survive this floor-reset pass. The
+import-boundary, gate-ordering, carry-forward, trailing-mean, and driver-row-deferral
+claims were all independently re-traced against source and re-executed against the real
+test suite rather than re-taken from the prior review's word, and all held. The one
+Major finding is a stale test-count claim and a missed disclosure opportunity in this
+unit's own artifact following a post-review commit to its own owned test file — a
+documentation-integrity defect, not a correctness or gate-safety defect: the code
+behind the claim is sound, fail-closed, and the actual current count (22/0) is more
+favorable than what is claimed, not less. One Major does not, on its own, move this
+unit's stage output to NOT-READY.
+
+**Verdict: READY**

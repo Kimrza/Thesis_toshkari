@@ -243,3 +243,105 @@ gate for disclosure rather than blocking: the hard invariants this re-review was
 to attack — BLK-02, BLK-08/D-27, the 39/11 reconciliation, the single guard home, the
 zero-width and freeze-write refusals, TBD-sentinel discipline — all hold at full strength
 against the current tree.
+
+## Floor-reset re-review (2026-09-11)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T15:07:51Z
+**Scope:** fresh floor derivation against HEAD `b0b7c1d` + uncommitted working tree
+(`git status --short`: this unit's own record files are UNCHANGED since the last verdict —
+only sibling code-summaries, `evidence/test_run_access_log.jsonl`, and
+`tests/test_locked_test_guard.py` — a `governance-guards`-owned module, out of this unit's
+lane — are modified). Environment re-verified: no real pytest/ruff/pyyaml (PyPI egress
+blocked); ran the stdlib pytest stand-in at
+`...\26ca41ab-0b23-424c-a7c3-a767d4b33251\scratchpad\uv-pythons\cpython-3.11.16-windows-x86_64-none\python.exe`
+against `...\scratchpad\pytest_standin\run_tests.py` — a stand-in, not real pytest.
+
+### Re-derived facts (printed by the tools, not carried)
+
+- **`grep -c "^def test_" tests/test_clean_run.py` → 61** (file byte-for-byte unchanged
+  from the last verdict; not touched by this floor's working-tree diff).
+- **Suite run**: `test_clean_run: 58 passed, 0 failed, 3 skipped, 0 errors`. The three skips
+  are the same named pyyaml-gated ones as the last verdict, including the completion test's
+  named §18.3 reason.
+- **39/11 reconciliation, printed by the file's own meta-test**: `negative controls:
+  enumerated 39 ((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []` /
+  `must-not-fire: derived 11 (1+1+1+1+2+2+1+1+1 over [R-133..R-141]); annotated 11 (of
+  which 1 hosted elsewhere); missing []; extra []`. The board-remediation control
+  `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window` sits only in
+  `BEYOND_ENUMERATION_CONTROLS` (`tests/test_clean_run.py:1904-1915`, ten board-added
+  controls total, Rec 2–5), verified via
+  `test_beyond_enumeration_controls_exist_and_do_not_touch_the_ledger`
+  (`tests/test_clean_run.py:1918-1923`), which asserts each is callable AND `not in
+  CONTROL_HOSTS` — it is structurally excluded from the enumerated ledger, not merely
+  claimed to be.
+- **BLK-02**: `find . -iname fixture_manifest.yaml` → no hits anywhere in the repository.
+  `configs/experiment.yaml: folds` and `configs/data.yaml: stations` remain the literal
+  `TBD — freeze gate` sentinel.
+- **`evidence/DECISIONS.md` tail confirmed at D-38**, D-37 immediately before it, text
+  unchanged from the last verdict's quotation. R-139 control 25
+  (`tests/test_clean_run.py:1068`, `business-rules.md` line 642) is present, unmodified,
+  and passing — BLK-08's mechanism limb reads CLOSED by D-37 (reaffirming D-27
+  unreopened); BLK-02 stays OPEN.
+- **Guard-home scan**: `grep -rn "safe_load\|yaml.load" src/ scripts/ tests/ | grep -i
+  fixture_manifest` finds exactly one production call site
+  (`src/data/fixture_manifest.py:493`, inside `load_fixture_scope` itself) plus its own
+  docstring's description of the chokepoint's disclosed limit, and a doc-comment in
+  `scripts/03_verify_processing.py:244` describing the reroute (not a second parse call).
+  No second manifest-loading guard home exists.
+- **Multi-run/freeze-write refusals** (`src/data/fixture_manifest.py`):
+  `compose_measurement_ranges` still raises `_refuse` on `float(min) == float(max)`
+  (lines 1501–1508, unchanged); `write_candidate_manifest` still raises `_refuse` on any
+  `data["status"] != CANDIDATE` (lines 1571–1576, unchanged).
+- **Over-99-column count, re-derived character-aware over the same five files as every
+  prior pass**: `0` (`fixture_manifest.py` 0, `fixture_gate.py` 0, `fixture_evidence.py`
+  0, `run_walking_skeleton.py` 0, `01_inventory_and_registry.py` 0; total 0).
+- **No credential/secret pattern** (`api[_-]?key|password|secret|kaggle\.json|token\s*=`)
+  found in `src/data/fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`,
+  `scripts/run_walking_skeleton.py`, or `tests/test_clean_run.py`.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-summary.md` "Test results" section (lines 44–49) | **Unresolved for the third consecutive review pass.** These lines still assert "47 passed, 0 failed, 3 skipped" and "50 test functions," a fact superseded twice over: first by the 2026-09-10 "Reformat + decision-request" pass's own line-count correction, then explicitly named stale by the 2026-09-10 "Gate-floor re-review" (its own Finding 1), which derived and printed the true figures (61 functions / 58 passed). The current working tree is unchanged from that state — `tests/test_clean_run.py` still has 61 `def test_` functions and 58 pass (re-derived above) — yet the PRIMARY artifact's Test results section, the section a reader consults first, has not been edited to match either the prior review's own printed derivation or this one. `project.md`'s repeatedly-affirmed correction ("sweep every REPRESENTATION of a corrected fact... a register entry, the owning unit's own paragraph... are different representations") applies here a third time without effect: the correction lives only in two `## Review` addenda, never in the artifact body it corrects. | Edit the "Test results" section itself (not another review addendum) to state 61 functions / 58 passed / 0 failed / 3 skipped, and cite the sibling `acquisition` edit that added the 61st function, before this reaches the gate a third time with the same stale numbers. |
+| 2 | Major | `tests/test_clean_run.py:1598-1612` (`_completion_preconditions`, the `configs/*.yaml` TBD-field loop) | The per-field TBD check is a substring co-occurrence test, not a per-field value check: `if field in text and "TBD" in text` returns true whenever the field's NAME appears anywhere in the file's text AND the literal string `"TBD"` appears ANYWHERE else in that same file — it never isolates the specific field's assigned value. Today this coincidentally reports the correct blocking field only because the genuinely-unresolved field is listed FIRST in each pair (`("folds", "embargo_hours")`, `("stations", "cell_rule")`) and short-circuits before the second field is ever evaluated: verified `configs/data.yaml:45` `stations: "TBD — freeze gate"` (genuinely unresolved) precedes `configs/data.yaml:58` `cell_rule: "floor-half-open-d1"` (genuinely resolved, D-33) in the checked tuple, and `configs/experiment.yaml:20` `folds: "TBD — freeze gate"` precedes `configs/experiment.yaml:26` `embargo_hours: 24` (resolved, D-38). If `stations` or `folds` resolves before the paired field, or if any other `TBD` sentinel remains anywhere else in either file's prose (both files carry multiple explanatory `TBD — freeze gate` comments even outside the checked fields), this check will misattribute the block to a field that is actually resolved — violating the org/team Mandated rule that an integrity failure must be surfaced "naming the file and the violated expectation," which this project treats as a hard practice for exactly this class of gate (§18.3 stop-and-report). The defect is currently dormant: the outer `yaml`/`numpy`/`pandas` import check (lines 1582–1589) short-circuits before this loop is ever reached on this clone (pyyaml is unavailable), so no wrong reason has actually been printed yet, and the check still fails SAFE in aggregate (it never claims completion when a real TBD blocks it) — but it is a genuine correctness defect in code this project relies on for a supervisor-facing reproducibility gate (G-07), not merely a documentation staleness issue. | Replace the substring check with a per-field value read (parse the field's own line/value, or — once pyyaml is available — load the mapping and check the specific key's value against the literal sentinel) so the named "first unmet precondition" is always the field actually holding the sentinel, independent of file-wide TBD prose or tuple ordering. |
+| 3 | Minor (unresolved, carried across two prior reviews) | `code-summary.md` lines 56 and 60 (Deviations item 4; "Routed to the stage gate") | Still asserts "47 over-99-column lines remain … real `ruff` owed" and "the 47 over-99 lines + owed `ruff`/`graphify` runs." Re-derived independently this pass (character-aware, not byte-count) over the same five files named in every prior derivation: `0`. This Minor was flagged in both the 2026-09-10 "Reformat + decision-request" review and the 2026-09-10 "Gate-floor re-review," and remains unswept in `code-summary.md` itself through this third pass. | Same as previously recommended: edit lines 56/60 to state the over-99 count is 0 per CR §11.7, distinct from the still-open `ruff`/`graphify` obligations. |
+
+### Verified and NOT flagged
+
+- BLK-02 holds; no `fixture_manifest.yaml` anywhere; no measured value stated, inferred,
+  or substituted; no TBD sentinel filled by convenience.
+- BLK-08's mechanism limb is CLOSED by D-37, reaffirming D-27 unreopened; R-139 control 25
+  is unchanged and at full strength; BLK-02 stays OPEN — consistent across
+  `evidence/DECISIONS.md`, `business-rules.md`, `tests/test_clean_run.py`, and
+  `code-summary.md`'s own "Key implementation decisions" section.
+- `load_fixture_scope` remains the single manifest-loading guard home project-wide; no
+  second production parse of a `fixture_manifest.yaml` exists.
+- The zero-width multi-run range refusal (`compose_measurement_ranges`) and the
+  `status != CANDIDATE` freeze-write refusal (`write_candidate_manifest`) are both
+  unchanged and still exercised by passing tests.
+- No credential, API key, or secret pattern found in this unit's five owned modules.
+- The 39/11 negative-control/must-not-fire reconciliation is empty in both directions,
+  independently re-run and printed, and the board-remediation controls added by the
+  sibling `acquisition` re-review are structurally confirmed excluded from that ledger.
+- `tests/test_locked_test_guard.py` (modified in the current working tree) is
+  `governance-guards`'s module, not this unit's — out of lane, not reviewed here.
+
+### Verdict rationale
+
+Zero Critical, two Major (Finding 1: the Test-results disclosure gap, now unresolved
+across three consecutive review passes though independently re-derived and printed each
+time; Finding 2: a newly-found, currently-dormant substring-matching defect in the
+completion precondition's TBD-field naming), one Minor carried forward unresolved
+(Finding 3, the stale over-99 line count, also unresolved across three passes). Per the
+stated verdict rule (READY if zero Critical, ≤2 Major, any Minor), this unit remains
+**READY** — every hard invariant this floor-reset was dispatched to attack (BLK-02,
+BLK-08/D-27 and R-139 control 25, the single guard-home, the zero-width and freeze-write
+refusals, the 39/11 reconciliation, TBD-sentinel and credential discipline) holds at full
+strength against the current tree, and neither Major finding is a runtime or scientific
+defect — one is chronic documentation staleness in the PRIMARY artifact, the other is a
+dormant code defect that fails safe today and has not yet produced an incorrect result.
+Both should be closed before this unit's next gate encounter; a fourth consecutive pass
+finding #1 unresolved would warrant escalating it past Major.

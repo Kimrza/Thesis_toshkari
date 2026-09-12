@@ -381,3 +381,62 @@ re-derived here to the same figures, and was appended without disturbing the sig
 review history. Zero Critical, zero Major, zero Minor findings against this remediation.
 
 **Verdict: READY**
+
+## Floor-reset re-review (2026-09-11)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T14:11:14Z
+**Class:** ADVERSARIAL, fresh re-derivation against HEAD `b0b7c1d` — the prior READY receipt
+above does not carry forward. Verified with the pinned CPython 3.11.16 stdlib pytest
+stand-in (`.../scratchpad/pytest_standin/run_tests.py`) — real pytest/ruff/pyyaml remain
+uninstallable (PyPI egress blocked, re-confirmed today).
+
+### Repository state, re-verified before any claim (project.md c30)
+
+`git log --oneline -5`: HEAD is `b0b7c1d` (an uncommitted-message-artifact commit touching
+`aidlc-state.md`, an audit shard, `foundation`'s and `governance-guards`' own code-summaries,
+and `evidence/test_run_access_log.jsonl` — none of it this unit's files), one ahead of
+`715f392` ("Close code-generation: acquisition repair + gate-floor re-review of all 12
+units"). `git diff HEAD --stat -- src/data/acquisition.py src/data/experiment_registry.py
+scripts/00_acquire_prepared_vtec.py tests/test_acquisition.py tests/test_clean_run.py` is
+empty: this unit's own five touched files are byte-identical to HEAD, so the review below
+targets committed content, not working-tree drift. (`git status --short` does show
+uncommitted changes to `tests/test_locked_test_guard.py`, `evidence/test_run_access_log.jsonl`
+and `governance-guards`' own code-summary — confirmed via `git show HEAD:tests/test_locked_test_guard.py
+| grep -c "^def test_"` = 34 vs. working tree 42, i.e. a sibling unit's in-progress Section 10
+addition, dated 2026-09-11 in its own docstring. Out of this unit's read-scope and immaterial
+to acquisition's verdict; noted only so the guard-trio counts below are read against the
+right baseline.)
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-summary.md:4` ("No `git commit` (governance stop)") and `:142` ("no commit and no push was made by this pass") | Both claims are now false and were never revisited. `git diff f0d9e49 715f392 --stat -- src/data/acquisition.py src/data/experiment_registry.py scripts/00_acquire_prepared_vtec.py tests/test_acquisition.py tests/test_clean_run.py` shows commit `715f392` ("Close code-generation: acquisition repair + gate-floor re-review of all 12 units") contains exactly the five files the remediation above describes (642 insertions across all five), and `715f392`'s own commit message states "Cites CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY and D-33..D-38" and correctly discloses the cross-unit staleness of `fixtures-and-reproducibility`'s and `foundation`'s records. So the commit did land, cites the right decisions, and is not itself defective — but this artifact's own header and its remediation-section claim of "no commit" were left standing after the commit happened, which is the exact failure mode `project.md`'s own learned correction demands be caught: "ALWAYS re-verify the repository commit state ... before asserting any claim about what is or is not committed" (cid:code-generation:c30). A reader of this file at the current gate is told twice, in the artifact's own words, that no commit exists when one does. | Add a dated note at the top of the file (or immediately after line 142) stating the commit hash (`715f392`) and date it landed, without editing the original claims (this record appends, per `project.md`'s "never edit a human-signed record" practice — the header is descriptive prose, not a signed record, but the same non-destructive convention applies cleanly here). |
+
+### Verified and held (re-derived against HEAD `b0b7c1d`, no defect found)
+
+- **Egress redaction (Fix 1), independently re-read at HEAD `b0b7c1d`:** `src/data/experiment_registry.py:154` `REDACTED_FREE_TEXT_FIELDS = ("notes", "reason")`; `_guard_free_text_egress` at `:241-264`; called from `append_registry_event` at `:380`, confirmed to run before `_read_access_records` (`:382`) and the `os.open`/`os.write` append (`:409-418`) — a raised `CredentialEgressError` propagates before any byte reaches the file. `src/data/acquisition.py`'s `guard_egress_free_text` (`:438-468`) runs the unchanged per-value `guard_egress_value` first, then a token-walk tier — confirmed by direct read, no detector weakened. Ran `tests/test_acquisition.py` under the pinned stand-in: **56 passed, 0 failed, 0 skipped**, matching the code-summary's claimed count exactly (`grep -c "^def test_"` also gives 56). The printed coverage-derivation line (`registry egress coverage derived: refused-by-egress ['notes', 'reason']; refused-by-schema ['status']; written unguarded [...]`) reproduces live at run time, confirming the pin is a genuine behavioural derivation, not a self-referential assertion.
+- **Real invocation proof (Fix 2), independently re-read at HEAD `b0b7c1d`:** `tests/test_clean_run.py:2090-2146` (`test_rec2_00_stage_entry_real_invocation_refuses_out_of_window`) drives `module._stage_entry` with real arguments through all four claimed limbs (must-fire naming `declared_window_resource`; must-not-fire echoing the declared endpoints in `gate["declared_window_checked"]`; undeclared refusing by field name; full-scale refusing in the non-exempt two-receipt branch with `"cited window"` absent). `_assert_entry_passes_declared_window` (`:1944-2001`) is a real AST assertion (binding count, binding source via `_declared_data_window`, keyword-identity check) — not a substring test — and its own docstring states plainly that it is "deliberately weaker than an invocation" and names script 00 as the only genuine end-to-end case, so the asymmetry with scripts 01/02/04 is disclosed rather than blurred. Ran `tests/test_clean_run.py`: **58 passed, 0 failed, 3 skipped** (all three skips are pre-existing `pyyaml`-unavailable classifications, unrelated to this unit), matching the claimed count.
+- **December record-date exclusion (ML-07), re-derived independently:** `assert_no_locked_month_records` (`src/data/acquisition.py:1156-1177`) and `assert_records_within_window` (`:1180-1215`) both route through the single reader `_record_date` (`:1113-1126`), which reads `record.get(timestamp_key, ...)` and nothing filesystem-shaped; `partition_by_locked_month` (`:1134-1152`) likewise keys off `_record_year_month` derived from `_record_date`. No path in this unit decides membership from a directory or filename.
+- **`assert_records_within_window` is additive-only, re-confirmed by grep:** its only caller anywhere in `scripts/*.py` is `scripts/run_walking_skeleton.py:737` (the fixture path); `scripts/00_acquire_prepared_vtec.py`'s full-year path calls only `assert_no_locked_month_records` (`:350`). No behaviour change to the full-year acquisition flow.
+- **Window-bound receipt-gate exemption, re-confirmed unreachable on a full-scale run:** `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window`'s fourth limb (`tests/test_clean_run.py:2136-2146`) asserts a no-`--fixture-manifest` invocation refuses in the non-exempt branch with `"cited window"` absent from the refusal text — re-run and passed.
+- **Test counts, re-derived, not carried from the artifact's prose:** `tests/test_acquisition.py` — `grep -c "^def test_"` = 56, executed 56 passed. `tests/test_acquisition_window.py` — `grep -c "^def test_"` = 7, executed 29 passed (parametrize expansion, matches Finding-3's printed derivation). `tests/test_locked_test_guard.py` **at its committed HEAD content** (34 `def test_`, unchanged since commit `6246907`, well before `f0d9e49`/`715f392`/`b0b7c1d` — confirmed by `git log --oneline -- tests/test_locked_test_guard.py`) was independently re-derived to 44 executed cases by the 2026-09-10 iteration-2 pass and nothing has touched the committed file since; the working-tree's 42-def/57-passed figure belongs to `governance-guards`' uncommitted Section 10 and is not this unit's evidence.
+- **No TBD sentinel filled, no credential, no scientific constant introduced:** `git diff f0d9e49 715f392 -- src/data/acquisition.py src/data/experiment_registry.py scripts/00_acquire_prepared_vtec.py` contains zero occurrences of `TBD`/`freeze gate`; `configs/data.yaml` still carries no `acquisition:` block (grep, zero hits), so the preflight still refuses rather than being fed a filled value. Grep of `src/data/acquisition.py` for credential-shaped literals (`api_key`, `secret`, `Bearer`, `AKIA`) turns up only the guard's own detector-pattern definitions (`:245,264,272,315-316,342`), not live secrets.
+- **Cross-unit disclosure of the `tests/test_clean_run.py` edit (project.md gf-3):** the code-summary's Fix 1 section carries an explicit inline "Cross-unit edit, declared" paragraph for `src/data/experiment_registry.py`, but Fix 2's section carries no equivalent inline sentence for `tests/test_clean_run.py` (also not this unit's file, per the file's own earlier "Cross-unit edit record (2026-09-10)" section naming `fixtures-and-reproducibility` as its owner). The disclosure exists, but one level up: commit `715f392`'s own message states verbatim "Carried to the gate as disclosure items, NOT edited under their terminal receipts: fixtures-and-reproducibility and foundation records still describe tests/test_clean_run.py and src/data/experiment_registry.py as they were before the acquisition repair edited them." This satisfies the substance of gf-3 (the staleness reaches the gate) but not its letter (the owning unit's record, or this file, should carry the note) — held as Minor, not counted toward the verdict, because the gate-level disclosure is real and machine-checkable in the commit history.
+
+### Summary
+
+One new Major: this artifact's own header and remediation-section prose still assert "no
+commit" when commit `715f392` (independently verified to contain exactly this unit's five
+touched files, correctly citing D-33..D-38) has in fact landed — a factual claim about
+repository state that was never re-verified after the fact this project's own memory records
+having gotten wrong twice before. Every substantive claim carried forward from the two prior
+gate-floor passes — the egress-redaction fix, the real invocation proof (including its
+mutation-tested guarantee), the corrected test counts, the December record-date discipline,
+the additive-only window predicate, and the unreachable-without-a-scope receipt exemption —
+was independently re-derived against current HEAD and held. One Major, zero Critical: within
+the ≤2-Major threshold, but the artifact must not stand uncorrected on a commit-state claim
+it is explicitly disciplined never to leave stale.
+
+**Verdict: READY**

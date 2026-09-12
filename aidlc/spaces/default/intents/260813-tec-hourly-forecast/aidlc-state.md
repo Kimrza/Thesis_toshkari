@@ -116,7 +116,7 @@ Per unit: [TBD]
 - [x] nfr-requirements — EXECUTE
 - [x] nfr-design — EXECUTE
 - [ ] infrastructure-design — SKIP
-- [R] code-generation — EXECUTE
+- [?] code-generation — EXECUTE
 - [ ] build-and-test — EXECUTE
 - [ ] ci-pipeline — SKIP
 
@@ -134,7 +134,7 @@ Per unit: [TBD]
 - **Current Stage**: code-generation
 - **Next Stage**: build-and-test
 - **Status**: Running
-- **Last Updated**: 2026-09-11T13:29:56Z
+- **Last Updated**: 2026-09-12T11:29:41Z
 
 ## Session Resume Point
 - **Last Completed Stage**: nfr-design

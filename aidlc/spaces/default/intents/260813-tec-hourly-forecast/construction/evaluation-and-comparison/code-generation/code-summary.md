@@ -360,3 +360,165 @@ test execution reproduces the claimed counts exactly (61 test functions, 60/0/1 
 convenience, no scientific constant was hardcoded, no credential was found, and the
 uncommitted sibling `acquisition` repair touches none of this unit's files. READY stands
 on independent re-derivation, not as a carried-over verdict.
+
+### Floor-reset re-review (2026-09-11)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-11T14:50:50Z
+**Iteration:** 1 (fresh verdict against HEAD `b0b7c1d`, re-derived; not a rubber-stamp of
+the three prior verdicts above)
+
+**What changed since the last reviewed HEAD (`f0d9e49`).** `git diff --stat f0d9e49..b0b7c1d`
+touches only `acquisition`-lane and `foundation`-lane files (`src/data/acquisition.py`,
+`src/data/experiment_registry.py`, `scripts/00_acquire_prepared_vtec.py`,
+`tests/test_acquisition.py`, `tests/test_clean_run.py`), eight sibling `code-summary.md`
+files, `aidlc-state.md`, and `evidence/test_run_access_log.jsonl` — nothing this unit owns
+(`src/evaluation/*`, `scripts/07_evaluate_and_report.py`, `tests/test_common_masks.py`,
+`tests/test_iri_denial.py`, `src/data/locked_test.py`) has any diff since `f0d9e49`
+(`git diff --stat f0d9e49..b0b7c1d -- <those paths>` is empty; confirmed again against
+current `git status --short`, which lists none of this unit's files as modified). One
+in-flight, uncommitted change exists in the working tree: `tests/test_locked_test_guard.py`
+gained a new "Section 10" (governance-guards' own module, +343 lines) that is the sibling
+owner's promised producer-side coverage of this unit's Q2 = B edit to
+`src/data/locked_test.py` — read and executed below; `src/data/locked_test.py` itself has
+zero diff (`git diff --stat -- src/data/locked_test.py` empty), so this unit's cross-unit
+edit is unchanged code being newly tested by its owner, not a code change to re-verify.
+
+**Repo-wide state re-verified first, per dispatch:** `grep -n "^## D-" evidence/DECISIONS.md`
+confirms the register ends at `## D-38` (`## D-1 addendum` is a countersignature note, not a
+new decision) — D-37 (`## D-37 — D-27 is affirmed; BLK-08's mechanism limb resolves in
+D-27's identity form (reaffirmation)`, decided 2026-09-10) explicitly states "D-27 stands,
+unreopened and unamended; nothing here replaces, narrows or duplicates it," and affirms the
+withholding of a generic inverse route **permanently**. `inverse_available` appears only at
+`src/models/train.py:1301` (parameter, default `False`) and `:1348` (the one read site); a
+repo-wide grep for callers (`assert_ablation_runnable`) finds it invoked only from
+`tests/test_models_smoke.py` — no production caller anywhere passes `True`, so the half-B
+form stays inert exactly as the prior review claimed.
+
+**This unit's specific exposure, re-executed and re-read against code, not against prose:**
+
+1. **IRI/GIM evaluation-time-only boundary.** Ran the fixture-capable stand-in harness
+   (`pytest_standin/run_tests.py`, which supports `tmp_path`/`monkeypatch`/parametrize,
+   superseding the two older ad-hoc runners already on record) against
+   `tests.test_iri_denial`: **22 passed, 0 failed, 0 skipped** — matches the claimed count
+   exactly, independently reproduced with a harness that actually exercises every
+   parametrized case (the older `run_iri_denial_tests.py` fails 15/22 for lack of fixture
+   support; that is a harness limitation, not a code defect, and `run_iri_denial_tests2.py`
+   / the new stand-in both confirm 22/0/0). `src/evaluation/metrics.py:477` remains the sole
+   `from src.external import gim` in this unit's files, function-scope-deferred inside
+   `_gim_disclosure_block`; `grep -in "iri" src/evaluation/*.py` still returns only
+   comment/docstring prose, no `from src.external import iri`. `iri_column_violations` is
+   untouched by the sibling narrowing (already verified two reviews ago; re-confirmed here
+   by re-running the module rather than trusting the prior claim).
+2. **Comparison-wide intersection mask.** `src/evaluation/masks.py:397-475`
+   (`build_comparison_mask`) and `MaskRegistry.register`/`freeze_bundle` (`:610-636`) are
+   byte-identical to the last-reviewed state (no diff since `f0d9e49`); re-ran
+   `tests.test_common_masks` under the fixture-capable harness: **60 passed, 0 failed, 1
+   skipped** (the skip is the pre-existing `pyyaml`-gated re-read test) — exact match.
+3. **Difficulty controls co-reported.** `configs/experiment.yaml:154-160`'s `primary` set
+   is unchanged: `member_ids: ["M-01","M-02","M-03","M-06","B-01"]`,
+   `benchmark_ids: ["B-01","M-01","M-02","M-03"]`, with the file's own comment naming
+   M-01/M-02/M-03 as "the three difficulty controls" beside B-01 (IRI) in the same set;
+   `build_metrics_artifact`'s completeness refusal (control 24) still requires one estimand
+   per declared pair before emission.
+4. **Owner-ruled cross-unit edits (Q2=B, SD-C-02).** `src/data/locked_test.py` carries zero
+   diff since the last review (confirmed by `git diff --stat`); this pass additionally
+   read and ran the sibling's brand-new PRODUCER-side test coverage
+   (`tests/test_locked_test_guard.py` Section 10, uncommitted): every violating manifest
+   shape (`not JSON`, `no mask_ids key`, `mask_ids not iterable`, `top-level list`,
+   `non-UTF-8 bytes`, `empty file`) is driven through the real `open_restricted` entry
+   point and asserted to raise `LockedTestError` naming the manifest, with the access
+   registry left untouched (no phantom row) — the fail-closed-on-unparseable claim this
+   unit's own summary makes is now independently exercised from the producer side, not
+   only the consumer side (`require_locked_receipt`) as in the prior two reviews. Ran the
+   full module under the fixture-capable harness: `tests.test_locked_test_guard` **57
+   passed, 0 failed, 0 skipped** (up from 44 at the last review, consistent with +13 new
+   Section 10 tests; the two "failures" the prior review attributed to a parametrize-blind
+   shim are gone under this harness, which does support `@pytest.mark.parametrize`).
+5. **Fixture/confirmatory registry separation.** `scripts/07_evaluate_and_report.py:593`
+   (`MaskRegistry(fixture_root / "mask_registry" / partition.partition_id)`) versus `:669`
+   (`MaskRegistry(workspace / args.evaluation_out / "mask_registry")`) — unchanged, two
+   non-overlapping roots, re-confirmed by direct read.
+6. **Locked-December ordering.** Re-read `scripts/07_evaluate_and_report.py`: the `DEC`
+   partition is reachable only via `materialise_locked_partition(..., g05_signature=...)`
+   (`:680-682`) then `open_restricted` (`:451`), both inside `_locked_loader`; no path
+   computes a metric before this chokepoint. Unchanged since the last review.
+7. **Code-summary accuracy.** `grep -c "^def test_" tests/test_common_masks.py` → **61**,
+   matching the claim exactly, file unchanged since `f0d9e49`. `git status --short`
+   confirms every file this unit's summary lists as created/modified is clean (no
+   uncommitted diff) at `b0b7c1d` — the "no commit was made" failure mode named in the
+   dispatch (`project.md` `code-generation:c30`) does not apply here: this unit's own
+   commits (`8a6cb61` for the Q2=B edit, and the earlier code-generation commit) are
+   already landed, and no owner commit occurred mid-generation for this unit specifically.
+8. **TBD/constant/credential sweep, re-run.** `configs/experiment.yaml:275`
+   (`practical_relevance_threshold: "TBD — freeze gate"`, D-34's decided sentinel) and
+   `configs/data.yaml:45` (`stations: "TBD — freeze gate"`) remain unfilled in the live
+   configs this unit reads and correctly refuses on, not defaulted.
+   `grep -in "credential\|api_key\|password\|secret" src/evaluation/*.py
+   scripts/07_evaluate_and_report.py` → no matches, re-confirmed.
+
+**One new, real finding this pass surfaced (Minor, non-blocking).**
+`src/evaluation/guards.py:358-359` — `resolve_inverse`'s docstring states
+`` `evidence/DECISIONS.md` ends at D-32 with D-27 unreopened (verified 2026-09-06)` ``. The
+register now ends at `## D-38` (confirmed by `grep -n "^## D-" evidence/DECISIONS.md`),
+six decisions past what the comment claims, and D-27's non-reopening is now affirmed by a
+*later* decision, `## D-37` (2026-09-10), that this comment does not cite. The refusal
+behaviour is unaffected — nothing in `resolve_inverse` or `require_target_space` executes
+a live check against the register's length; the guard raises `InverseTransformError`
+unconditionally regardless of what the docstring says, and no test in
+`tests/test_common_masks.py` asserts the stale "ends at D-32" text (`grep -n "D-32\|D-27\|
+ends at" tests/test_common_masks.py` shows no such assertion) — so this is a stale factual
+claim embedded in a live guard module's docstring, not a functional or test-coverage
+defect. Given this project's own repeated governance findings about stale D-number/count
+claims propagating unchecked (`team.md`'s `fd-team-01`, `project.md`'s
+`sweep-derive-sites`/`sweep-numerals-and-surfaces` corrections), this is worth a one-line
+fix at the next touch of `guards.py` (cite D-37 and drop the dated "ends at D-32" claim in
+favour of "unreopened, most recently reaffirmed by D-37"), but it does not change any
+enforced behaviour and does not block readiness.
+
+**Independent test execution, this pass's own run (fixture-capable harness, not the two
+narrower ad-hoc runners already on record):**
+- `tests.test_common_masks` → **60 passed, 0 failed, 1 skipped**
+- `tests.test_iri_denial` → **22 passed, 0 failed, 0 skipped**
+- `tests.test_locked_test_guard` → **57 passed, 0 failed, 0 skipped** (sibling-owned,
+  load-bearing for this unit's SD-C-02 claim; the two prior "harness-limitation" failures
+  are resolved by this harness's parametrize support)
+- `tests.test_release_hashes` → **149 passed, 0 failed, 0 skipped** (per dispatch item 9;
+  sibling-owned module, run to confirm the release-hash mutation-protection mechanism this
+  unit's `MaskRegistry.freeze_bundle` analogy depends on is itself green)
+- Environment: no real pytest/pyyaml (PyPI egress blocked, re-verified); stdlib stand-in
+  (`.../scratchpad/pytest_standin/run_tests.py`) on CPython 3.11.16 at
+  `.../scratchpad/venv/Scripts/python.exe`. Named honestly as a scratchpad harness, never a
+  governed CI run.
+
+**Coverage limits of this pass.** graphify CLI confirmed absent from PATH again
+(`which graphify` exit 1); orientation was direct reads and greps, per `CLAUDE.md`'s
+sanctioned fallback — `graphify-out/graph.json` may be stale for files this unit touches.
+Per the read-scope bound, no sibling unit's `construction/<unit>/` design directory was
+read; the one integration-point spot-check (`src/models/train.py`'s
+`assert_ablation_runnable`/`inverse_available`) is workspace code this unit's own summary
+names (D-27/D-37), not a sweep of a sibling's design. `evidence/locked_test_restricted/`
+and any December 2022 content were not read. Deep line review this pass was concentrated on
+`guards.py`'s `resolve_inverse`/`require_target_space`, `masks.py`'s registry/freeze path,
+`scripts/07_evaluate_and_report.py`'s locked-entry chokepoint and fixture/confirmatory
+root split, and the new `test_locked_test_guard.py` Section 10; the remainder of
+`test_common_masks.py`'s 61 bodies and `metrics.py` were re-confirmed by test execution and
+targeted grep rather than a fresh full re-read (both were fully read line-by-line in the
+2026-09-10 pass on record above and carry zero diff since).
+
+**Findings:** one Minor (stale D-number citation in a docstring, no functional or test
+effect); none survive at Critical or Major severity.
+
+**Summary.** Nothing this unit owns changed between the last reviewed HEAD (`f0d9e49`) and
+current HEAD (`b0b7c1d`); the only in-flight change touching this unit's surface is a
+sibling's new, additive, producer-side test file for a cross-unit edit whose target module
+(`src/data/locked_test.py`) itself carries zero diff. Independent re-execution under a
+fixture-capable harness (superseding the two narrower ad-hoc runners on record) reproduces
+every claimed count exactly and additionally confirms 57/0/0 on the sibling's new Section
+10 and 149/0/0 on `test_release_hashes.py`. D-37's reaffirmation of D-27 and the continued
+absence of any caller passing `inverse_available=True` confirm BLK-08's mechanism limb
+remains closed as this unit implements it. The one new finding — a stale "ends at D-32"
+claim in `guards.py`'s docstring, six decisions behind the current register — is
+non-functional and does not block. READY stands on this pass's own independent
+re-derivation against `b0b7c1d`.
