@@ -1,0 +1,43 @@
+{
+  "kind": "identity_declaration",
+  "fixture_id": "plumbing_7day",
+  "identity": {
+    "fixture_id": "plumbing_7day",
+    "stations": [
+      "BSHM"
+    ],
+    "utc_dates": "2022-11-01..2022-11-07",
+    "selection_rule": "D-11 (verbatim rationale): November is the closest eligible late-year month to the locked test month, and 2022-11-01..07 is deliberately stress-bearing rather than quiet: it is November's most disturbed seven-day window, carrying the month's minimum provisional Dst of -92 nT. Eligibility judged on derived-artifact verification (team.md § Walking Skeleton); smoke test only, never scientific evidence (TC-03f).",
+    "creator": "Kimia Rezaei (student; Q-31 assigns fixture station, dates and acceptance tolerances to the Student, TE §18.2)",
+    "approval_status": "adopted 2026-09-13 under Q-31 (student-owned; owner FINAL RULING of 2026-09-13, CR-2026-09-13-000102-FIXTURE-WINDOW; no supervisor countersignature required per team.md § Walking Skeleton)",
+    "window_citation": {
+      "decision": "D-11",
+      "start_utc": "2022-11-01",
+      "end_utc": "2022-11-07"
+    },
+    "station_citation": {
+      "decision": "D-20",
+      "station_id": "BSHM",
+      "cell": "32/35"
+    },
+    "aruc_shortfall_status": {
+      "status": "dormant",
+      "reactivation_condition": "D-11 (verbatim): ARUC is short exactly one bin on five of the seven days (3-7 November), a uniformity that suggests a systematic single-bin gap rather than random loss and should be explained before the manifest is frozen (BLK-02 lineage)."
+    },
+    "limitations": {
+      "december_representativeness": "not_representative",
+      "clauses": [
+        "D-11 mandatory limitation (verbatim): This window does not reproduce December's winter-solstice regime or its activity distribution and must not be treated as representative of the locked month.",
+        "D-11 Dst restriction (verbatim): Provisional values may characterise fixture selection only. They must not become modelling inputs, frozen tolerances, or G-05 regime counts."
+      ]
+    },
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified — no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md § Walking Skeleton).",
+    "eligibility_evidence": {
+      "decision": "D-11",
+      "source": "evidence/audit_evidence_2022-11/madrigal_coverage_raw_records.csv (D-11/D-20 measured basis: BSHM 168/168 hourly bins, 7/7 days)"
+    },
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  }
+}

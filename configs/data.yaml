@@ -107,6 +107,23 @@ partitions:
     train_end: 2022-11-30 # determined: == REFIT.train_end (R-80)
     validation_month: 2022-12-01
 
+# The D-144-frozen Madrigal acquisition identity (transcribed 2026-09-13 on the owner's
+# FINAL RULING, CR-2026-09-13-000102-FIXTURE-WINDOW). Values are register-derived only:
+# instrument and kindat verbatim from D-3/D-144 (kindat 3505 line-of-sight and 3506 site
+# list are EXCLUDED by the same decision); the parameter list is the EXECUTED five-column
+# identity D-17 records as "confirmed identical across all twelve monthly request
+# manifests" — the owner ruled AGAINST D-4's nine-parameter list, whose four-driver limb
+# was superseded by D-10 (drivers come from their governed external sources, never the
+# Madrigal request). Read by REQUIRED_FIELDS_MAP[("acquisition", 1)]'s TE 18.3 preflight;
+# scripts RESOLVE these, never choose them (R-30).
+# window_start/window_end are DELIBERATELY ABSENT: fixture runs derive their window from
+# the fixture scope (Option B, same CR), and this pair stays reserved for the future real
+# re-acquisition window (DATA-07 work) so the field's meaning is never overloaded.
+acquisition:
+  experiment: 8000 # D-3/D-144: Madrigal instrument 8000, World-wide GNSS Receiver Network
+  kindat: 3500 # D-3/D-144: "TEC binned 1 degree by 1 degree by 5 min"
+  parameters: [ut1_unix, gdlat, glon, tec, dtec] # executed five (D-17; D-10) — not D-4's nine
+
 # Declared input sources with hashes (assert_declared_sources_exist walks these;
 # a declared hash that does not resolve is a failure, never a warning). Empty:
 # nothing is declared yet; acquisition declares its inputs when it lands.

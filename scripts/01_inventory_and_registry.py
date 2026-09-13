@@ -108,6 +108,7 @@ from src.data.inventory import (  # noqa: E402
     write_source_inventory,
 )
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.locked_test import RESTRICTED_ROOT  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.registry import assert_registry_resolved, load_registry  # noqa: E402
@@ -218,13 +219,19 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def _declared_data_window(snapshot: Any) -> tuple[dt.date, dt.date]:
-    """Board Rec 2 (ML-01, owner-authorised per CR-2026-09-07 §11.5; flagged for
-    `inventory-and-registry`'s record): the data window THIS run declares. The inventory
-    and registry surface walks `acquisition`'s outputs, so its input window IS the
-    acquisition block's declared window in `configs/data.yaml` (c59 — derived from this
-    script's own input declaration). On a fixture run the TE 9.2 exemption is bound to the
-    fixture scope's cited window; while the fields are undeclared the fixture exemption
-    REFUSES naming them (TE 18.3) — it is not granted on a validating flag alone.
+    """Board Rec 2 (ML-01): the config-declared data window, read from
+    `configs/data.yaml`'s acquisition block (c59 — this script's own input declaration,
+    since the inventory surface walks `acquisition`'s outputs).
+
+    NOT the fixture path (CR-2026-09-13-000102-FIXTURE-WINDOW, owner-ruled Option B, the
+    Stage-04 precedent): on a fixture run the declared window IS the fixture scope's
+    cited window — D-11's and D-14's windows are disjoint, so no single static config
+    pair could serve both fixtures — and this function is never consulted there. On a
+    fixture run this stage's only record-reading path, the December audit, is REFUSED
+    outright by `_refuse_fixture_audit`, so no month directory is read, counted, or
+    required at all. This config declaration remains for the future real re-acquisition
+    window (DATA-07); while `window_start/window_end` stay untranscribed it REFUSES
+    naming them (TE 18.3: stop and report, never default).
 
     Raises
     ------
@@ -298,19 +305,38 @@ def _stage_entry(
     lock = capture_environment_lock(snapshot, determinism)
     assert_lock_complete(lock)
     _refuse_fixture_audit(audit, fixture_manifest)
-    declared_window = _declared_data_window(snapshot) if fixture_manifest is not None else None
+    if fixture_manifest is not None:
+        # Option B (CR-2026-09-13-000102-FIXTURE-WINDOW, Stage-04 precedent): the fixture
+        # scope's cited window IS the declaration. The reads-narrowing half for this
+        # stage is `_refuse_fixture_audit` above: the December audit — this script's only
+        # month-record reading path — refuses under ANY fixture scope, so no month
+        # directory is read, counted, or required on a fixture run; the inventory path
+        # consumes release manifests by ID and hash, never records.
+        scope = load_fixture_scope(fixture_manifest)
+        audit_window: tuple[dt.date, dt.date] | None = scope.window
+        fixture_scope_id: str | None = scope.fixture_id
+        declared_window: tuple[dt.date, dt.date] | None = audit_window
+    else:
+        audit_window = None
+        fixture_scope_id = None
+        declared_window = None
     receipts_gate = require_receipts_for_snapshot(
         snapshot,
         lock,
         fixture_manifest=fixture_manifest,
         declared_window=declared_window,
-        declared_window_resource="scripts/01_inventory_and_registry.py: declared data window",
+        declared_window_resource=(
+            "scripts/01_inventory_and_registry.py: declared data window "
+            "(fixture scope's cited window on a fixture run)"
+        ),
     )
     return {
         "snapshot": snapshot,
         "determinism": determinism,
         "lock": lock,
         "receipts_gate": receipts_gate,
+        "audit_window": audit_window,
+        "fixture_scope_id": fixture_scope_id,
     }
 
 

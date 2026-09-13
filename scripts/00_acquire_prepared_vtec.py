@@ -69,6 +69,7 @@ from src.data.acquisition import (  # noqa: E402
     AcquisitionError,
     RetrievalClient,
     assert_no_locked_month_records,
+    assert_records_within_window,
     retrieval_policy,
     write_request_manifest,
     write_sha256_manifest,
@@ -92,6 +93,7 @@ from src.data.experiment_registry import (  # noqa: E402
     record_abort_honestly,
 )
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 
 #: The manifest/artifact field names this run produces. Screened through R-23's
@@ -175,13 +177,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def _declared_data_window(snapshot: Any) -> tuple[dt.date, dt.date]:
-    """Board Rec 2 (ML-01, owner-authorised per CR-2026-09-07 §11.5; flagged for
-    `acquisition`'s record): the retrieval window THIS run declares, read from
-    `configs/data.yaml`'s acquisition block (c59 — derived from this script's own input
-    declaration, never from surrounding narrative). On a fixture run the TE 9.2 exemption
-    is bound to the fixture scope's cited window; while the fields are undeclared the
-    fixture exemption REFUSES naming them (TE 18.3: stop and report) — it is not granted
-    on a validating flag alone.
+    """Board Rec 2 (ML-01): the config-declared retrieval window, read from
+    `configs/data.yaml`'s acquisition block (c59 — this script's own input declaration).
+
+    NOT the fixture path (CR-2026-09-13-000102-FIXTURE-WINDOW, owner-ruled Option B, the
+    Stage-04 precedent): on a fixture run the declared window IS the fixture scope's
+    cited window and the retrieval reads are bounded to it, so this function is never
+    consulted there — D-11's and D-14's windows are disjoint, and no single static config
+    pair could serve both fixtures. This config declaration remains for the future real
+    re-acquisition window (DATA-07 work); `window_start/window_end` stay deliberately
+    untranscribed until that work lands, and while undeclared this function REFUSES
+    naming them (TE 18.3: stop and report, never default).
 
     Raises
     ------
@@ -231,19 +237,36 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism)
     assert_lock_complete(lock)
-    declared_window = _declared_data_window(snapshot) if fixture_manifest is not None else None
+    if fixture_manifest is not None:
+        # Option B (CR-2026-09-13-000102-FIXTURE-WINDOW, Stage-04 precedent): the fixture
+        # scope's cited window is BOTH the declaration and the retrieval read bound; the
+        # config pair `acquisition.window_start/window_end` is deliberately not consulted
+        # on this path (it stays reserved for the real re-acquisition window, DATA-07).
+        scope = load_fixture_scope(fixture_manifest)
+        audit_window: tuple[dt.date, dt.date] | None = scope.window
+        fixture_scope_id: str | None = scope.fixture_id
+        declared_window: tuple[dt.date, dt.date] | None = audit_window
+    else:
+        audit_window = None
+        fixture_scope_id = None
+        declared_window = None
     receipts_gate = require_receipts_for_snapshot(
         snapshot,
         lock,
         fixture_manifest=fixture_manifest,
         declared_window=declared_window,
-        declared_window_resource="scripts/00_acquire_prepared_vtec.py: declared retrieval window",
+        declared_window_resource=(
+            "scripts/00_acquire_prepared_vtec.py: declared retrieval window "
+            "(fixture scope's cited window on a fixture run)"
+        ),
     )
     return {
         "snapshot": snapshot,
         "determinism": determinism,
         "lock": lock,
         "receipts_gate": receipts_gate,
+        "audit_window": audit_window,
+        "fixture_scope_id": fixture_scope_id,
     }
 
 
@@ -348,6 +371,19 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
     # Membership from record timestamps, never from a name (R-31); no acquisition
     # run may touch calendar 2022-12 while BLK-07 stands.
     assert_no_locked_month_records(retrieved_records, timestamp_key="timestamp")
+
+    # Option B reads-narrowing (CR-2026-09-13-000102-FIXTURE-WINDOW): on a fixture run
+    # every retrieved/read record must lie inside the scope's cited window — an
+    # out-of-window record REFUSES (R-31's record-date assertion consumed, never
+    # copied). Non-fixture runs are unchanged: no window bound beyond R-31.
+    audit_window = entry.get("audit_window")
+    if audit_window is not None:
+        assert_records_within_window(
+            retrieved_records,
+            start=audit_window[0],
+            end=audit_window[1],
+            timestamp_key="timestamp",
+        )
 
     request_manifest = write_request_manifest(
         out_dir / "request_manifest.json",

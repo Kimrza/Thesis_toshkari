@@ -1,0 +1,65 @@
+{
+  "kind": "identity_declaration",
+  "fixture_id": "scientific_1month",
+  "identity": {
+    "fixture_id": "scientific_1month",
+    "stations": [
+      "ARUC",
+      "BSHM",
+      "NICO"
+    ],
+    "station_cells": {
+      "ARUC": "40/44",
+      "BSHM": "32/35",
+      "NICO": "35/33"
+    },
+    "utc_dates": "2022-03-01..2022-03-31",
+    "selection_rule": "D-14 (verbatim rationale): regime separation — D-11's frozen seven-day plumbing window is 2022-11-01 to 2022-11-07, so placing the scientific fixture in a different season means the two fixtures probe different diurnal and seasonal structure; March is an equinox month. Measured coverage — March is the best-covered eligible month outside January and February (ARUC 99.5%, BSHM 99.9%, NICO 97.8% in-month hourly) with raw_isprint_cache/ present.",
+    "creator": "Kimia Rezaei (student; Q-31 assigns fixture station, dates and acceptance tolerances to the Student, TE §18.2)",
+    "approval_status": "adopted 2026-09-13 under Q-31 (student-owned; owner FINAL RULING of 2026-09-13, CR-2026-09-13-000102-FIXTURE-WINDOW; no supervisor countersignature required per team.md § Walking Skeleton)",
+    "window_citation": {
+      "decision": "D-14",
+      "start_utc": "2022-03-01",
+      "end_utc": "2022-03-31"
+    },
+    "limitations": {
+      "december_representativeness": "not_representative",
+      "clauses": [
+        "D-14 mandatory limitation, clause (i) (verbatim): March 2022 is an equinox month and does not reproduce December's winter-solstice regime or its activity distribution.",
+        "D-14 mandatory limitation, clause (ii) (verbatim): It is not representative of the locked test month, and no fixture result may be read as evidence about December behaviour."
+      ]
+    },
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified — no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md § Walking Skeleton).",
+    "eligibility_evidence": {
+      "decision": "D-14",
+      "source": "evidence/audit_evidence_2022-03/madrigal_coverage_raw_records.csv (D-14 measured basis: in-month hourly coverage ARUC 99.5%, BSHM 99.9%, NICO 97.8%)"
+    },
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "apparatus_partitions": {
+    "FIX-MAR-FOLD-01": {
+      "kind": "fold",
+      "train_start": "2022-03-01",
+      "train_end": "2022-03-14",
+      "validation_month": "2022-03-15"
+    },
+    "FIX-MAR-FOLD-02": {
+      "kind": "fold",
+      "train_start": "2022-03-01",
+      "train_end": "2022-03-21",
+      "validation_month": "2022-03-22"
+    }
+  },
+  "fixture_bootstrap": {
+    "replicates": 1000,
+    "scored_range": {
+      "hours": 336
+    },
+    "block_counts": {
+      "24h": 14,
+      "48h": 7
+    }
+  }
+}

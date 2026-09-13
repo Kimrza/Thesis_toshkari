@@ -739,3 +739,58 @@ def test_scripts_are_phase1_only_and_never_skip_the_boundary(script: str) -> Non
     assert "assert_phase_boundary" in text  # entry-contract step 4, never skipped
     assert "assert_no_raw_fields" in text  # R-24: before the first write
     assert "ensure_process_determinism(sys.argv)" in text  # entry-contract step 1
+
+
+def test_optionb_02_row_window_bound_behavioural_and_wired() -> None:
+    """CR-2026-09-13-000102-FIXTURE-WINDOW (owner-ruled Option B): on a fixture run every
+    STANDARDIZED row is bound to the fixture scope's cited window BEFORE the first write.
+
+    Behavioural half — the shared predicate 02 wires, driven on D-17-shaped rows: an
+    out-of-window `interval_start_utc` REFUSES naming its date; in-window rows pass. The
+    bound reads the ISO interval through R-31's ONE date reader — provider rows carry
+    unix-second `ut1_unix` stamps no second parser may interpret, which is why the bound
+    sits on the standardized rows rather than the raw provider rows (the hash-verified
+    release files are the carrier, the Stage-04 fluxtable nuance).
+    Structural half — `_run_standardize` places the guarded bound between standardization
+    and `write_target_rows_csv`, so a refusal leaves an honest aborted registry row and
+    no artifact. Pre-repair `_run_standardize` carries no bound at all, so this control
+    FAILS against pre-repair HEAD (mutation probe recorded in the CR).
+    """
+    import datetime as dt
+    import importlib.util
+    import inspect
+
+    from src.data.acquisition import AcquisitionError, assert_records_within_window
+
+    window = (dt.date(2022, 3, 1), dt.date(2022, 3, 31))
+    inside = [
+        {"interval_start_utc": "2022-03-01T00:00:00", "station_id": "ARUC"},
+        {"interval_start_utc": "2022-03-31T23:00:00", "station_id": "NICO"},
+    ]
+    assert assert_records_within_window(
+        inside, start=window[0], end=window[1], timestamp_key="interval_start_utc"
+    ) == 2
+    outside = [*inside, {"interval_start_utc": "2022-11-03T00:00:00", "station_id": "BSHM"}]
+    with pytest.raises(AcquisitionError, match="2022-11-03"):
+        assert_records_within_window(
+            outside, start=window[0], end=window[1], timestamp_key="interval_start_utc"
+        )
+
+    script = SCRIPTS_DIR / "02_standardize_prepared_target.py"
+    spec = importlib.util.spec_from_file_location("stage_02_under_test", script)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    run_source = inspect.getsource(module._run_standardize)
+    bound_at = run_source.find("assert_records_within_window(")
+    first_write_at = run_source.find("write_target_rows_csv(")
+    guard_at = run_source.find("if audit_window is not None")
+    assert bound_at != -1 and first_write_at != -1 and bound_at < first_write_at, (
+        "scripts/02::_run_standardize must bind the standardized rows to the fixture "
+        "window BEFORE the first write (CR-2026-09-13-000102-FIXTURE-WINDOW)"
+    )
+    assert guard_at != -1 and guard_at < bound_at, (
+        "the row bound must be guarded on the fixture window so non-fixture runs are "
+        "byte-identical to the pre-repair behaviour"
+    )
+    assert 'timestamp_key="interval_start_utc"' in run_source

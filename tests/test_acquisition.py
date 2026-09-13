@@ -1143,3 +1143,67 @@ def test_acquisition_preflight_entry_names_the_d144_identity_fields() -> None:
     assert "data.acquisition.kindat" in fields
     assert "data.acquisition.parameters" in fields
     assert "seeds.development" in fields
+
+
+# ------------------------------------------------------------------------------------------
+# CR-2026-09-13-000102-FIXTURE-WINDOW (owner-ruled Option B, Stage-04 precedent):
+# on a fixture run, script 00's declared window IS the fixture scope's cited window and
+# every retrieved/read record is bound to it through R-31's ONE date reader.
+# ------------------------------------------------------------------------------------------
+
+
+def test_optionb_00_record_window_bound_behavioural_and_wired(tmp_path) -> None:
+    """LOAD-BEARING out-of-window record control for script 00.
+
+    Behavioural half — the shared predicate 00 wires (`assert_records_within_window`):
+    an out-of-window record REFUSES naming its date and the window; an in-window set
+    passes and returns the count checked; a record with no parseable date fails closed.
+    Structural half — script 00's `_run` binds every retrieved record to the entry's
+    `audit_window` through that predicate with `timestamp_key="timestamp"`, guarded so
+    non-fixture runs are unchanged. The record set 00 retrieves is EMPTY by design today
+    (no live transport until the DATA-07 re-acquisition), so the end-to-end injection is
+    unbuildable without inventing a transport — stated, not blurred; the wiring plus the
+    shared-predicate behaviour is the honest provable bound. Pre-repair `_run` carries no
+    window bound at all, so the structural half FAILS against pre-repair HEAD (mutation
+    probe recorded in the CR).
+    """
+    import datetime as dt
+    import importlib.util
+    import inspect
+
+    from src.data.acquisition import assert_records_within_window
+
+    window = (dt.date(2022, 11, 1), dt.date(2022, 11, 7))
+    inside = [{"timestamp": "2022-11-03T10:00:00"}, {"timestamp": "2022-11-07T23:59:59"}]
+    assert assert_records_within_window(
+        inside, start=window[0], end=window[1], timestamp_key="timestamp"
+    ) == 2
+    outside = [*inside, {"timestamp": "2022-03-15T00:00:00"}]
+    with pytest.raises(AcquisitionError, match="2022-03-15"):
+        assert_records_within_window(
+            outside, start=window[0], end=window[1], timestamp_key="timestamp"
+        )
+    with pytest.raises(AcquisitionError):
+        assert_records_within_window(
+            [{"timestamp": ""}], start=window[0], end=window[1], timestamp_key="timestamp"
+        )
+
+    script = REPO_ROOT / "scripts" / "00_acquire_prepared_vtec.py"
+    spec = importlib.util.spec_from_file_location("stage_00_under_test", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    run_source = inspect.getsource(module._run)
+    bound_at = run_source.find("assert_records_within_window(")
+    assert bound_at != -1, (
+        "scripts/00::_run lost its fixture-window record bound "
+        "(CR-2026-09-13-000102-FIXTURE-WINDOW)"
+    )
+    assert 'timestamp_key="timestamp"' in run_source and "audit_window" in run_source, (
+        "the record bound must consume the entry's audit_window through R-31's one date "
+        "reader on the record timestamp key"
+    )
+    guard_at = run_source.find("if audit_window is not None")
+    assert guard_at != -1 and guard_at < bound_at, (
+        "the record bound must be guarded on the fixture window so non-fixture runs are "
+        "byte-identical to the pre-repair behaviour"
+    )

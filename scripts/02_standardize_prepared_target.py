@@ -90,7 +90,9 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
+from src.data.acquisition import assert_records_within_window  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.prepared import (  # noqa: E402
     LINEAGE_CAVEAT_FIELD,
@@ -196,13 +198,18 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def _declared_data_window(snapshot: Any) -> tuple[dt.date, dt.date]:
-    """Board Rec 2 (ML-01, owner-authorised per CR-2026-09-07 §11.5; flagged for
-    `target-standardization`'s record): the data window THIS run declares. The standardizer
-    consumes `acquisition`'s retrieved prepared product, so its input window IS the
-    acquisition block's declared window in `configs/data.yaml` (c59 — derived from this
-    script's own input declaration). On a fixture run the TE 9.2 exemption is bound to the
-    fixture scope's cited window; while the fields are undeclared the fixture exemption
-    REFUSES naming them (TE 18.3) — it is not granted on a validating flag alone.
+    """Board Rec 2 (ML-01): the config-declared data window, read from
+    `configs/data.yaml`'s acquisition block (c59 — this script's own input declaration,
+    since the standardizer consumes `acquisition`'s retrieved prepared product).
+
+    NOT the fixture path (CR-2026-09-13-000102-FIXTURE-WINDOW, owner-ruled Option B, the
+    Stage-04 precedent): on a fixture run the declared window IS the fixture scope's
+    cited window — D-11's and D-14's windows are disjoint, so no single static config
+    pair could serve both fixtures — and this function is never consulted there; the
+    standardized rows are asserted inside the scope's window before any write. This
+    config declaration remains for the future real re-acquisition window (DATA-07);
+    while `window_start/window_end` stay untranscribed it REFUSES naming them
+    (TE 18.3: stop and report, never default).
 
     Raises
     ------
@@ -251,14 +258,27 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism)
     assert_lock_complete(lock)
-    declared_window = _declared_data_window(snapshot) if fixture_manifest is not None else None
+    if fixture_manifest is not None:
+        # Option B (CR-2026-09-13-000102-FIXTURE-WINDOW, Stage-04 precedent): the fixture
+        # scope's cited window is BOTH the declaration and the row bound the target-
+        # producing run enforces before any write; the config pair
+        # `acquisition.window_start/window_end` is deliberately not consulted here.
+        scope = load_fixture_scope(fixture_manifest)
+        audit_window: tuple[dt.date, dt.date] | None = scope.window
+        fixture_scope_id: str | None = scope.fixture_id
+        declared_window: tuple[dt.date, dt.date] | None = audit_window
+    else:
+        audit_window = None
+        fixture_scope_id = None
+        declared_window = None
     receipts_gate = require_receipts_for_snapshot(
         snapshot,
         lock,
         fixture_manifest=fixture_manifest,
         declared_window=declared_window,
         declared_window_resource=(
-            "scripts/02_standardize_prepared_target.py: declared data window"
+            "scripts/02_standardize_prepared_target.py: declared data window "
+            "(fixture scope's cited window on a fixture run)"
         ),
     )
     return {
@@ -266,6 +286,8 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
         "determinism": determinism,
         "lock": lock,
         "receipts_gate": receipts_gate,
+        "audit_window": audit_window,
+        "fixture_scope_id": fixture_scope_id,
     }
 
 
@@ -341,6 +363,22 @@ def _run_standardize(entry: Mapping[str, Any]) -> dict[str, Any]:
         data_config=snapshot.data,
         aggregation_config_id=snapshot.hashes["data.yaml"][:12],
     )
+
+    # Option B reads-narrowing (CR-2026-09-13-000102-FIXTURE-WINDOW): on a fixture run
+    # every standardized row must lie inside the scope's cited window, asserted BEFORE
+    # any write so the aborted registry row stays honest. Released input files are
+    # hash-verified wholesale (R-44's carrier, the fluxtable nuance of the Stage-04
+    # precedent); the row bound is where an out-of-window input REFUSES — provider rows
+    # carry unix-second stamps, so the bound is asserted on the standardized rows'
+    # ISO `interval_start_utc` through R-31's ONE date reader, never a second parser.
+    audit_window = entry.get("audit_window")
+    if audit_window is not None:
+        assert_records_within_window(
+            result.rows,
+            start=audit_window[0],
+            end=audit_window[1],
+            timestamp_key="interval_start_utc",
+        )
 
     out_dir = Path(snapshot.resolved_roots["artifacts"]) / "prepared_target"
     target_path = write_target_rows_csv(out_dir / "hourly_target_phase1.csv", result.rows)

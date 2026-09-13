@@ -2044,7 +2044,11 @@ def test_control_counts_derived_from_business_rules_not_carried():
 #: repair that added it. Excluded from the 39/11 set-difference by construction (they extend
 #: the enumerated set; the enumeration itself is the practices gate's to amend).
 BEYOND_ENUMERATION_CONTROLS: dict[str, str] = {
-    "test_rec2_00_stage_entry_real_invocation_refuses_out_of_window": "Rec 2 (ML-01)",
+    "test_optionb_00_stage_entry_real_invocation": (
+        "Rec 2 (ML-01), MIGRATED for Option B (CR-2026-09-13-000102-FIXTURE-WINDOW): "
+        "was test_rec2_00_stage_entry_real_invocation_refuses_out_of_window; the config-"
+        "window must-fire is retired on the fixture path by the owner's ruling"
+    ),
     "test_rec2_00_out_of_window_acquisition_exemption_refuses": "Rec 2 (ML-01)",
     "test_rec2_01_out_of_window_inventory_and_audit_refuse": "Rec 2 (ML-01)",
     "test_rec2_02_out_of_window_standardization_exemption_refuses": "Rec 2 (ML-01)",
@@ -2095,50 +2099,97 @@ class _WindowSnapshot:
         self.data = {"acquisition": {"window_start": window_start, "window_end": window_end}}
 
 
-def _assert_entry_passes_declared_window(module: Any) -> None:
-    """STRUCTURAL wiring check: `_stage_entry` binds `declared_window` from its OWN
-    `_declared_data_window(...)` call, binds it exactly once, and hands THAT name to the
-    guard home.
+def _assert_entry_passes_declared_window(
+    module: Any, *, nonfixture_full_year: bool = False
+) -> None:
+    """STRUCTURAL wiring check, MIGRATED for Option B
+    (CR-2026-09-13-000102-FIXTURE-WINDOW; owner-ruled, Stage-04 precedent — re-pointed
+    per the CR-2026-09-10 pin-guard precedent, never deleted).
 
-    An AST assertion, not a source-text substring test. The substring form this replaces
-    (`"declared_window=declared_window" in source`) passed on a body that computed the
-    window and discarded it — a defect rebinding the name, or binding it from something
-    else, still contained the literal. Here the binding COUNT and the binding SOURCE are
-    both asserted, so "computed then thrown away" fails.
+    The pre-repair shape this helper used to pin — exactly one `declared_window` binding,
+    derived from the script's own `_declared_data_window(...)` config read — was the
+    DEADLOCK: D-11's and D-14's windows are disjoint, so no static config pair can serve
+    both fixtures, and 04's full-year declaration could never fit any scope. The repaired
+    shape this helper now pins:
 
-    This is a wiring check, deliberately weaker than an invocation. Script 00 additionally
-    carries a genuine end-to-end invocation of `_stage_entry`
-    (`test_rec2_00_stage_entry_real_invocation_refuses_out_of_window`); the sibling scripts
-    01/02/04 carry this structural check only, and that difference is stated rather than
-    blurred (adversarial re-review 2026-09-10, Finding 2).
+    * `_stage_entry` binds `declared_window` on exactly TWO branches — the fixture branch
+      from the scope loaded by its OWN `load_fixture_scope(...)` call (`scope.window`,
+      carried as `audit_window`), and the non-fixture branch as `None` — never a third
+      binding, never a rebinding;
+    * `_declared_data_window` is NEVER consulted on the fixture branch (that is the
+      deadlock reintroduced); with `nonfixture_full_year=True` (script 04) it must still
+      be consulted on the NON-fixture branch, where the full-year audit window lives;
+    * every `declared_window` keyword handed to the guard home is the bound name.
+
+    Still a wiring check, deliberately weaker than an invocation; script 00 additionally
+    carries the genuine end-to-end invocation
+    (`test_optionb_00_stage_entry_real_invocation`), and that difference stays stated.
     """
-    tree = ast.parse(textwrap.dedent(inspect.getsource(module._stage_entry)))
+    source = textwrap.dedent(inspect.getsource(module._stage_entry))
+    tree = ast.parse(source)
     bindings = [
         node
         for node in ast.walk(tree)
-        if isinstance(node, ast.Assign)
-        and any(isinstance(t, ast.Name) and t.id == "declared_window" for t in node.targets)
+        if (
+            isinstance(node, ast.Assign)
+            and any(isinstance(t, ast.Name) and t.id == "declared_window" for t in node.targets)
+        )
+        or (isinstance(node, ast.AnnAssign) and _binds(node.target))
     ]
     rebindings = [
         node
         for node in ast.walk(tree)
-        if (isinstance(node, ast.AnnAssign | ast.AugAssign) and _binds(node.target))
+        if (isinstance(node, ast.AugAssign) and _binds(node.target))
         or (isinstance(node, ast.NamedExpr) and _binds(node.target))
     ]
-    assert len(bindings) == 1 and not rebindings, (
+    assert len(bindings) == 2 and not rebindings, (
         f"{module.__name__}: declared_window is bound {len(bindings)} time(s) plus "
-        f"{len(rebindings)} rebinding(s); exactly one binding makes the source assertion "
-        f"below meaningful (board Rec 2 / ML-01)"
+        f"{len(rebindings)} rebinding(s); Option B binds it exactly twice — the fixture "
+        f"branch from the scope, the non-fixture branch as None "
+        f"(CR-2026-09-13-000102-FIXTURE-WINDOW)"
     )
-    derived_from = {
-        node.func.id
-        for node in ast.walk(bindings[0].value)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    binding_values = {
+        "audit_window": 0,  # the fixture branch: scope.window carried as audit_window
+        "none": 0,  # the non-fixture branch
     }
-    assert "_declared_data_window" in derived_from, (
-        f"{module.__name__}: declared_window is not bound from this script's own "
-        f"_declared_data_window(...) call (c59: each caller derives its own window)"
+    for node in bindings:
+        value = node.value
+        if isinstance(value, ast.Name) and value.id == "audit_window":
+            binding_values["audit_window"] += 1
+        elif isinstance(value, ast.Constant) and value.value is None:
+            binding_values["none"] += 1
+    assert binding_values == {"audit_window": 1, "none": 1}, (
+        f"{module.__name__}: declared_window bindings are {binding_values}; Option B "
+        f"requires one binding from audit_window (the scope's cited window) and one None"
     )
+    assert "load_fixture_scope" in source and "scope.window" in source, (
+        f"{module.__name__}: the fixture branch must derive its window from the scope "
+        f"loaded by this entry's own load_fixture_scope(...) call (Stage-04 precedent)"
+    )
+    # The fixture branch must never consult the full-year/config declaration — that is
+    # the disjoint-windows deadlock reintroduced. Locate the branch by its test.
+    fixture_ifs = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.If)
+        and "fixture_manifest" in (ast.get_source_segment(source, node.test) or "")
+    ]
+    assert fixture_ifs, f"{module.__name__}: _stage_entry lost its fixture branch"
+    fixture_body = "\n".join(
+        ast.get_source_segment(source, stmt) or "" for stmt in fixture_ifs[0].body
+    )
+    assert "_declared_data_window" not in fixture_body, (
+        f"{module.__name__}: the fixture branch consults _declared_data_window — the "
+        f"unconditional-refusal deadlock CR-2026-09-13-000102-FIXTURE-WINDOW repairs"
+    )
+    if nonfixture_full_year:
+        else_body = "\n".join(
+            ast.get_source_segment(source, stmt) or "" for stmt in fixture_ifs[0].orelse
+        )
+        assert "_declared_data_window" in else_body, (
+            f"{module.__name__}: the non-fixture branch must keep the full-year audit "
+            f"window (D-8's claim boundary; the 04 CR)"
+        )
     handed_on = [
         keyword
         for node in ast.walk(tree)
@@ -2151,7 +2202,7 @@ def _assert_entry_passes_declared_window(module: Any) -> None:
         for keyword in handed_on
     ), (
         f"{module.__name__}: the declared_window keyword handed to the guard home is not "
-        f"the name bound from _declared_data_window (board Rec 2 / ML-01)"
+        f"the bound name (board Rec 2 / ML-01 — the endpoint check stays load-bearing)"
     )
 
 
@@ -2241,54 +2292,54 @@ def _apparatus_parsers(monkeypatch, workspace: Path) -> None:
     (workspace / "requirements.txt").write_text("apparatus==0.0\n", encoding="utf-8")
 
 
-def test_rec2_00_stage_entry_real_invocation_refuses_out_of_window(tmp_path, monkeypatch):
-    """Rec 2, scripts/00 — the REAL invocation proof, replacing a source-text substring check.
+def test_optionb_00_stage_entry_real_invocation(tmp_path, monkeypatch):
+    """Option B, scripts/00 — the REAL invocation proof, MIGRATED from the Rec-2 config-pair
+    form (CR-2026-09-13-000102-FIXTURE-WINDOW; the pre-repair test asserted that a config
+    window outside the scope refuses — under Option B the config pair is not consulted on
+    fixture runs at all, which is exactly the deadlock's repair). Asserted consequences:
 
-    `scripts/00_acquire_prepared_vtec.py::_stage_entry` is driven with real arguments through
-    the actual code path, and the OBSERVABLE CONSEQUENCE is asserted rather than the presence
-    of a literal in its source:
-
-    1. must-fire — a run carrying a VALID fixture scope but a declared retrieval window
-       outside that scope's cited window REFUSES, and the refusal names this script's own
-       `declared_window_resource`, proving the value travelled from `_declared_data_window`
-       through `_stage_entry` into the guard home;
-    2. must-not-fire — an in-window declaration PROCEEDS, and the returned gate result echoes
-       the declared endpoints, proving the value was consumed rather than computed and
-       discarded (the exact defect the substring check could not see);
-    3. the undeclared case still refuses by field name at the script's own derivation;
-    4. a FULL-SCALE invocation (no `--fixture-manifest`) never reaches the exemption at all —
-       it refuses at the two-receipt gate, so the exemption is unreachable without a scope.
+    1. declaration-truth — a fixture run's gate result echoes the SCOPE's cited window as
+       the declared window, proving the declaration derives from `scope.window` and was
+       consumed rather than computed and discarded;
+    2. config independence — the same fixture run proceeds identically whether the config
+       carries NO acquisition window or a FULL-YEAR one: the pre-repair must-fire (refusal
+       on an out-of-scope config window) and the pre-repair undeclared-field refusal are
+       BOTH retired on the fixture path, asserted explicitly rather than silently dropped;
+    3. a FULL-SCALE invocation (no `--fixture-manifest`) never reaches the exemption at
+       all — it refuses at the two-receipt gate, exactly as before (ML-01 retained).
     """
     workspace = tmp_path / "workspace"
     _apparatus_parsers(monkeypatch, workspace)
     module = _load_script("00_acquire_prepared_vtec.py")
     scope = write_and_load(tmp_path / "scope", PLUMBING_FIXTURE_ID, status=CANDIDATE)
     scope_start, scope_end = scope.window
-
-    outside = _apparatus_config_tree(tmp_path / "outside", window=("2001-01-01", "2001-12-31"))
-    with pytest.raises(IntegrityError) as excinfo:
-        module._stage_entry(outside, fixture_manifest=scope.path)
-    assert "cited window" in str(excinfo.value)
-    assert "00_acquire_prepared_vtec.py: declared retrieval window" in str(excinfo.value)
-
-    inside_window = (scope_start.isoformat(), (scope_start + dt.timedelta(days=1)).isoformat())
-    inside = _apparatus_config_tree(tmp_path / "inside", window=inside_window)
-    entry = module._stage_entry(inside, fixture_manifest=scope.path)
-    gate = entry["receipts_gate"]
-    assert gate["exempt"] is True and gate["fixture_id"] == PLUMBING_FIXTURE_ID
-    assert gate["declared_window_checked"] == {
-        "declared_start": inside_window[0],
-        "declared_end": inside_window[1],
+    expected_check = {
+        "declared_start": scope_start.isoformat(),
+        "declared_end": scope_end.isoformat(),
         "scope_start": scope_start.isoformat(),
         "scope_end": scope_end.isoformat(),
     }
 
-    undeclared = _apparatus_config_tree(tmp_path / "undeclared", window=None)
-    with pytest.raises(IntegrityError, match="window_start"):
-        module._stage_entry(undeclared, fixture_manifest=scope.path)
+    # (2) config carries NO acquisition window: the fixture run proceeds — the pre-repair
+    # "refuses by field name" behaviour is retired on this path, by ruling.
+    no_window = _apparatus_config_tree(tmp_path / "no_window", window=None)
+    entry = module._stage_entry(no_window, fixture_manifest=scope.path)
+    gate = entry["receipts_gate"]
+    assert gate["exempt"] is True and gate["fixture_id"] == PLUMBING_FIXTURE_ID
+    assert gate["declared_window_checked"] == expected_check  # (1) declaration-truth
+    assert entry["audit_window"] == (scope_start, scope_end)
+    assert entry["fixture_scope_id"] == PLUMBING_FIXTURE_ID
 
+    # (2) config carries a FULL-YEAR window: identical outcome — the config pair is not
+    # consulted on the fixture path (the disjoint D-11/D-14 windows make any static pair
+    # unserviceable; the scope is the one source).
+    full_year = _apparatus_config_tree(tmp_path / "full_year", window=("2001-01-01", "2001-12-31"))
+    entry2 = module._stage_entry(full_year, fixture_manifest=scope.path)
+    assert entry2["receipts_gate"]["declared_window_checked"] == expected_check
+
+    # (3) full-scale: the non-exempt two-receipt gate still bites (ML-01 retained).
     with pytest.raises(IntegrityError) as full_scale:
-        module._stage_entry(inside)  # no fixture scope: the full-year path
+        module._stage_entry(full_year)  # no fixture scope: the full-year path
     refusal = str(full_scale.value)
     assert MANIFEST_NAME in refusal and "no fixture manifest exists at this path" in refusal, (
         f"a full-scale invocation must refuse in the NON-exempt branch of the two-receipt "
@@ -2301,9 +2352,12 @@ def test_rec2_00_stage_entry_real_invocation_refuses_out_of_window(tmp_path, mon
 
 
 def test_rec2_00_out_of_window_acquisition_exemption_refuses(tmp_path):
-    """Rec 2, scripts/00: a full-scale retrieval window declared against a valid fixture
-    scope refuses at the guard home; an in-window declaration passes; an UNDECLARED window
-    refuses at the script's own derivation (the exemption is never a bare flag)."""
+    """Rec 2, scripts/00 — MIGRATED for Option B. The guard home still refuses an
+    out-of-scope declaration and still passes an in-window one (ML-01's endpoint check is
+    untouched); `_declared_data_window` is KEPT as the non-fixture/DATA-07 config
+    declaration and still refuses undeclared or sentinel fields by name; and the wiring
+    check now pins the Option-B shape (fixture branch from scope.window, config never
+    consulted there)."""
     module = _load_script("00_acquire_prepared_vtec.py")
     scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
     declared = module._declared_data_window(_WindowSnapshot("2001-01-01", "2001-12-31"))
@@ -2320,11 +2374,23 @@ def test_rec2_00_out_of_window_acquisition_exemption_refuses(tmp_path):
     with pytest.raises(IntegrityError, match="window_start"):
         module._declared_data_window(_WindowSnapshot("TBD — freeze gate", "TBD — freeze gate"))
     _assert_entry_passes_declared_window(module)
+    # Option B reads-narrowing wiring (00): `_run` binds every retrieved record to the
+    # entry's audit_window through R-31's one reader — asserted structurally here because
+    # 00 retrieves nothing today by design (no live transport until DATA-07); the
+    # behavioural half lives in tests/test_acquisition.py against the shared predicate.
+    run_source = inspect.getsource(module._run)
+    assert "assert_records_within_window(" in run_source and "audit_window" in run_source, (
+        "scripts/00::_run lost its fixture-window record bound "
+        "(CR-2026-09-13-000102-FIXTURE-WINDOW)"
+    )
 
 
 def test_rec2_01_out_of_window_inventory_and_audit_refuse(tmp_path):
-    """Rec 2, scripts/01: the out-of-window refusal, plus the audit limb — `--audit` can
-    never ride the fixture exemption (December lies outside every fixture window)."""
+    """Rec 2, scripts/01 — MIGRATED for Option B. The audit limb is unchanged and stays
+    the reads-narrowing half for this stage: `--audit` can never ride the fixture
+    exemption (December lies outside every fixture window), so on a fixture run this
+    script's only month-record reading path refuses outright, and the inventory path
+    consumes release manifests by ID and hash, never records — asserted structurally."""
     module = _load_script("01_inventory_and_registry.py")
     scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
     declared = module._declared_data_window(_WindowSnapshot("2001-01-01", "2001-12-31"))
@@ -2340,10 +2406,27 @@ def test_rec2_01_out_of_window_inventory_and_audit_refuse(tmp_path):
     assert "_refuse_fixture_audit(audit, fixture_manifest)" in inspect.getsource(
         module._stage_entry
     )
+    # Option B reads-narrowing wiring (01): the inventory path reads NO month records —
+    # the month-dir walk belongs to the audit path alone, which the fixture refusal above
+    # gates. A month-read call appearing on the inventory path would silently widen the
+    # fixture read surface past the scope's window.
+    inventory_source = inspect.getsource(module._run_inventory)
+    assert "_month_dirs" not in inventory_source, (
+        "scripts/01::_run_inventory walks month directories; on a fixture run that would "
+        "read records outside the scope's cited window "
+        "(CR-2026-09-13-000102-FIXTURE-WINDOW)"
+    )
+    assert "_read_month_records" not in inventory_source, (
+        "scripts/01::_run_inventory reads month records; the audit path owns that read "
+        "and refuses under any fixture scope"
+    )
 
 
 def test_rec2_02_out_of_window_standardization_exemption_refuses(tmp_path):
-    """Rec 2, scripts/02: the out-of-window refusal through this script's own derivation."""
+    """Rec 2, scripts/02 — MIGRATED for Option B: the guard-home refusals and the kept
+    config derivation as before, plus the Option-B wiring pins — the fixture branch
+    derives from scope.window, and the target-producing run binds every standardized row
+    to the window BEFORE any write."""
     module = _load_script("02_standardize_prepared_target.py")
     scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
     declared = module._declared_data_window(_WindowSnapshot("2001-01-01", "2001-12-31"))
@@ -2354,13 +2437,30 @@ def test_rec2_02_out_of_window_standardization_exemption_refuses(tmp_path):
     with pytest.raises(IntegrityError, match="window_start"):
         module._declared_data_window(_WindowSnapshot(None, "2001-11-03"))
     _assert_entry_passes_declared_window(module)
+    # Option B reads-narrowing wiring (02): the row bound sits between standardization
+    # and the FIRST write, so a refusal leaves an honest aborted row and no artifact.
+    run_source = inspect.getsource(module._run_standardize)
+    bound_at = run_source.find("assert_records_within_window(")
+    first_write_at = run_source.find("write_target_rows_csv(")
+    assert bound_at != -1 and first_write_at != -1 and bound_at < first_write_at, (
+        "scripts/02::_run_standardize must assert every standardized row inside the "
+        "fixture window BEFORE the first write (CR-2026-09-13-000102-FIXTURE-WINDOW)"
+    )
+    assert 'timestamp_key="interval_start_utc"' in run_source, (
+        "the row bound must read the ISO interval_start_utc through R-31's one date "
+        "reader — provider rows carry unix-second stamps no second parser may interpret"
+    )
 
 
 def test_rec2_04_full_year_audit_exemption_refuses(tmp_path):
-    """Rec 2, scripts/04: the LIVE case — the migrated audit's own calendar-year window
-    (derived from `_AUDIT_YEAR`, this script's input declaration) can never fit inside a
-    fixture scope, so `04 --fixture-manifest <valid scope>` refuses instead of auditing the
-    full year under the exemption."""
+    """Rec 2, scripts/04 — MIGRATED. The pre-repair LIVE case (the full-year declaration
+    can never fit a fixture scope, so `04 --fixture-manifest` refused unconditionally) was
+    the DEADLOCK, repaired under CR-2026-09-13-04-FIXTURE-WINDOW: the fixture branch now
+    derives its window and its reads from the scope. What this control still pins: the
+    NON-fixture declaration is the full calendar year (D-8's claim boundary), the guard
+    home still refuses that declaration against any fixture scope (ML-01's endpoint check
+    is alive), and the Option-B wiring shape holds with the full-year window kept on the
+    non-fixture branch."""
     module = _load_script("04_build_external_products.py")
     scope = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
     declared = module._declared_data_window()
@@ -2369,7 +2469,7 @@ def test_rec2_04_full_year_audit_exemption_refuses(tmp_path):
         assert_declared_window_within_scope(
             scope, declared_start=declared[0], declared_end=declared[1], resource="rec2-04"
         )
-    _assert_entry_passes_declared_window(module)
+    _assert_entry_passes_declared_window(module, nonfixture_full_year=True)
 
 
 def _synthetic_mask(set_id: str, partition_id: str):

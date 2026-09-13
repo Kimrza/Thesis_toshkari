@@ -36,6 +36,7 @@ from src.data.acquisition import CredentialEgressError
 from src.data.config import (
     TBD_SENTINEL,
     AuditScopeError,
+    IntegrityError,
     InventoryError,
     LockedTestError,
     PreflightError,
@@ -823,3 +824,34 @@ def test_audit_entry_point_refuses_naming_blk07() -> None:
     message = str(excinfo.value)
     assert "BLK-07" in message
     assert "2022-12" in message
+
+
+def test_optionb_01_fixture_runs_read_no_month_records() -> None:
+    """CR-2026-09-13-000102-FIXTURE-WINDOW (owner-ruled Option B): on a fixture run this
+    script's declared window derives from the fixture scope, and its reads-narrowing half
+    is structural — the ONLY month-record reading path is the December audit, which
+    `_refuse_fixture_audit` refuses under ANY fixture scope, and the inventory path
+    consumes release manifests by ID and hash, never records. Out-of-window month
+    directories are therefore never read, counted, or required on a fixture run. This
+    control pins all three legs so none can silently widen."""
+    import inspect
+
+    stage01 = _load_stage_script()
+    # Leg 1: the audit limb refuses under any fixture scope (behavioural, unchanged).
+    with pytest.raises(IntegrityError, match="audit"):
+        stage01._refuse_fixture_audit(True, Path("any_scope.yaml"))
+    # Leg 2: the inventory path performs no month-record reads (structural).
+    inventory_source = inspect.getsource(stage01._run_inventory)
+    assert "_month_dirs" not in inventory_source
+    assert "_read_month_records" not in inventory_source
+    # Leg 3: the fixture branch derives its window from the scope, never the config pair
+    # (D-11's and D-14's windows are disjoint — no static pair can serve both fixtures).
+    entry_source = inspect.getsource(stage01._stage_entry)
+    fixture_at = entry_source.find("if fixture_manifest is not None")
+    assert fixture_at != -1, "the fixture branch is gone from _stage_entry"
+    assert "load_fixture_scope" in entry_source and "scope.window" in entry_source
+    fixture_body = entry_source[fixture_at:]
+    assert "_declared_data_window" not in fixture_body, (
+        "the fixture branch consults the config declaration — the disjoint-windows "
+        "deadlock CR-2026-09-13-000102-FIXTURE-WINDOW repairs"
+    )
