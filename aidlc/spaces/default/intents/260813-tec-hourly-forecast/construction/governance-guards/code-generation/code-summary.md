@@ -1,7 +1,82 @@
 # Code Summary — `governance-guards`
 
 **Unit** `governance-guards` (Bolt 1) · **Kind** `library` · **Stage** `code-generation`
-**Plan**: `code-generation-plan.md` — all 11 steps executed, checkboxes marked. No `git commit` (governance stop).
+**Plan**: `code-generation-plan.md` — Steps 1–10 executed, plus the **repair Step 11 added and executed 2026-09-13** under the owner's Option 4 ruling at the rejected stage gate. Checkboxes marked.
+
+**Repository state, re-derived 2026-09-13 at HEAD `1670ac8` — CORRECTED after the iteration-1 Critical.** An earlier version of this header claimed "this unit's code is committed and HEAD is `1670ac8`". **That was false for the two files Repair Step 11 produced**, and is corrected in the body rather than left standing for its own reader. Derived: `git status --porcelain` shows `tests/test_phase_boundary.py` and `tests/test_phase_contract.py` as ` M` — **unstaged working-tree modifications**; `git diff --cached --stat` is empty, so nothing is even staged; `git diff HEAD --numstat` returns `125 5` and `12 3` respectively. The unit's Steps 1–10 code IS committed, but **the D-17 repair — the corrected sixteen-field contract and the new drift guard — exists only in the working tree.** Until it is committed, a `git reset --hard`, a `git clean`, or a fresh checkout silently regenerates the exact 17-vs-16 defect this repair closes, with no commit trail showing the fix ever existed. **No commit, amend or push was made by this stage** — the commit is the student's act (`project.md` `code-generation:c30`) — so committing this repair is routed to the gate as an owed act in its own right, not merely as another instance of the message-citation question.
+
+## Repair Step 11 — D-17 field-contract reconciliation, 2026-09-13
+
+Written into the body rather than a review addendum per `project.md`
+(`code-generation:fr-2`). Both files below are this unit's own; **no cross-unit edit was
+made**, and `src/data/prepared.py` (`target-standardization`'s, and already correct) was
+left untouched — `git diff` on it is empty.
+
+**The contradiction, and why it was stale twice.** `tests/test_phase_boundary.py:95`'s
+`D17_TARGET_FIELDS` carried **17** names against D-17's frozen **16**, the extra being
+`processor_qc_flags` — which is not a target-row column at all but a key inside the
+data-quality block (R-71/NFR-DQ-01, W-3), built at `src/data/prepared.py:1304`. That much
+had been flagged as a Minor by `target-standardization` on four consecutive passes. What no
+pass had caught: the constant is consumed as a **set equality in both directions**, so
+`extra` would equally have flagged **`lineage_caveat`** — which the producer emits by
+contract (`_TARGET_CSV_HEADER = (*D17_FIELDS, LINEAGE_CAVEAT_FIELD)`, `prepared.py:1324`)
+and its own row guard explicitly permits (`prepared.py:791`). Repairing only the first limb
+would have swapped which assertion fires on the first real artifact, not fixed the test.
+
+**Authority.** No D-number was required and none was drafted. `git blame` puts every line of
+`D17_TARGET_FIELDS` in commit **`b844a4d`** (2026-08-21) — **the same commit that first
+wrote D-17's sixteen-row table into `evidence/DECISIONS.md`** — and
+`git show b844a4d:evidence/DECISIONS.md` shows that table already carrying 16 rows,
+byte-identical to today's. The seventeen is therefore a same-commit transcription slip
+against TE §6.1's data dictionary, which D-17 explicitly supersedes for Phase 1; it was
+never a competing decision.
+
+**Derivations, printed before assertion.** D-17 table **Field column only**: 16 (a first
+naive grep returned 20 by sweeping whole rows and picking up `ut1_unix`/`gdlat`/`glon`/`dtec`
+out of the *Source* cell — the wrong intermediate is recorded because the corrected method
+is what the 16 rests on). `prepared.D17_FIELDS`: 16, unchanged. `D17_TARGET_FIELDS`:
+**17 → 16**. `D17_ALLOWED_FIELDS`: **17 → 16**. `processor_qc_flags` in D-17's Field column:
+**0**. Set differences after: `boundary vs prepared`, `contract vs prepared`, and
+`prepared vs D-17 table` all `[]`.
+
+**Changes.** `tests/test_phase_boundary.py` (**+125/−5**, re-derived 2026-09-13 by `git diff HEAD --numstat` after the iteration-1 Minor; an earlier version of this line carried +130/−4, which was never derived): `processor_qc_flags` removed;
+header comment rewritten off "Column names a Phase 1 target artifact **may carry**" — a
+permission list — onto the exact sixteen-field bound matching `prepared.py:788`, stating
+that `processor_qc_flags` is a W-3 data-quality-block key; `extra` now subtracts
+`DECLARED_CAVEAT_FIELD`, mirroring `prepared.py:791`; **`missing` untouched, still the full
+sixteen**; new drift guard `test_d17_target_fields_match_the_producer_contract`.
+`tests/test_phase_contract.py` (**+12/−3**, same derivation; an earlier version carried
++15/−2): "the seventeen allowed columns" corrected, constant aligned to 16, and the comment
+now says what it is actually for (a happy-path sample for `assert_no_raw_fields` at
+`:147`/`:177`, no runtime contract effect).
+
+**Import-boundary finding.** The drift guard does **not** import `src.data.prepared`.
+`test_phase_boundary.py` carries no `sys.path` insert and no `from src...` import, and the
+repo has **no `conftest.py`** — `test_phase_contract.py:44-46` does its own inline insert
+for exactly that reason. A module-level import would add machinery the file does not carry,
+transitively pull `src.data.{acquisition,config,release}` in at collection time, and turn
+the module's designed "SKIP when `src/` is absent" into a collection error. So the guard
+follows the path the module already uses to reach source — **AST parsing**, via its existing
+`ast.parse` mechanism — and fails closed like `_imported_modules`.
+
+**What the new controls prove is caught**, beyond set equality: a stale 17th field
+returning; a field silently dropped; the producer gaining a field; the producer constant
+renamed, removed, unparseable, or computed rather than literal (each fails, never a quiet
+pass); `lineage_caveat` literal drift between the two now-separate spellings. Nine further
+controls pin the conformance limb — 16+caveat accepted, bare 16 accepted, an extra Phase 2
+column *beside* the caveat still refused, `processor_qc_flags` on a row now refused, and a
+dropped contract field still failing, which demonstrates the `missing` limb was not
+weakened. **No guard was weakened to make anything pass.**
+
+**Execution — smoke only, never governed.** Real `pytest` is unavailable (PyPI egress
+blocked). Both files `py_compile` clean and **89 passed / 1 skipped / 0 failed** across every
+test in both modules, including all parametrized cases, under a stdlib pytest stand-in on a
+scratchpad CPython **3.11.16** left by a prior session. The single skip is the module's own
+designed skip (no hourly-target artifact exists); its body was driven separately by
+redirecting `EVIDENCE_DIR`. A hand-rolled stand-in is not pytest and the environment is not
+governed. `ruff` is not installed; no introduced line exceeds the configured 99 (the three
+over-99 lines are pre-existing and identical at HEAD, and `E501` is ignored project-wide).
+No acceptance row is claimed discharged.
 
 ## Files created
 
@@ -221,6 +296,49 @@ Nothing regressed and nothing new was discovered, but nothing was fixed either: 
 - Test execution used the session's stdlib pytest stand-in (`pytest_standin/`) against a real CPython 3.11.16 interpreter found under the scratchpad's `uv-pythons/` cache — no real pytest or PyYAML is installed (PyPI egress blocked, confirmed by `ModuleNotFoundError` on both). This is smoke evidence only, consistent with this unit's own stated posture, never governed evidence.
 - Did not re-attempt the AST-folding adversarial probes (keyword-argument call forms, dead-code guard placement) that iteration 2's review already surfaced as accepted, disclosed residuals; no regression indication in those areas prompted re-probing them this pass.
 
+## Review — 2026-09-13 (code-generation, adversarial re-review at rejected gate)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T09:27:26Z
+**Iteration:** re-review of repair Step 11 only (D-17 field-contract reconciliation), against HEAD `1670ac8`
+
+### Scope note
+
+Read scope bound to unit `governance-guards` plus the one named carve-out,
+`construction/target-standardization/functional-design/domain-entities.md`, which was read
+only to cross-check D-17's field count and authority. No other sibling unit directory was
+opened.
+
+### Findings
+
+| # | Severity | Where | What | Recommended action |
+|---|---|---|---|---|
+| 1 | Critical | `code-summary.md:4` (header); `tests/test_phase_boundary.py`, `tests/test_phase_contract.py` (working tree) | The header states **"this unit's code is committed and HEAD is `1670ac8`"**. This is false for the exact files Repair Step 11 changed. `git status --porcelain` shows both `tests/test_phase_boundary.py` and `tests/test_phase_contract.py` as unstaged modifications (` M`), and `git diff --cached --stat` for both is **empty** — nothing is even staged, let alone committed. `git rev-parse HEAD` confirms `1670ac8800f7cf3610b7db20bf89cdaf00c2c3bb`, and `git diff HEAD -- <file>` is non-empty for both (125/+5− and 12/+3− lines respectively — see Finding 2). The entire D-17 drift guard, the corrected 16-field contract, and the AST-based producer-pin this repair's authority argument rests on exist **only in the working tree**. A `git reset --hard`, a `git clean`, or simply a fresh checkout of `1670ac8` on another machine would silently regenerate the exact 17-vs-16 field-contract bug this repair was written to fix, with no commit history recording that the fix ever existed. This is the same class of defect `project.md`'s `code-generation:gf-1`/`c30` corrections were written after — a commit-state claim asserted without re-verifying it — except reversed in direction: prior instances understated committed work (claimed "no commit" when one existed); this one overstates it (claims "committed" when nothing is even staged), which is the more dangerous direction because it invites the reader to treat the fix as durable when it is one accidental working-tree operation away from disappearing. | Correct the header to state plainly that `tests/test_phase_boundary.py` and `tests/test_phase_contract.py` carry uncommitted Repair Step 11 changes on top of `1670ac8`, not that "this unit's code is committed." Route the commit act to the owner per `code-generation:c30` (this stage does not commit); do not claim durability the repository does not yet have. |
+| 2 | Minor | `code-summary.md:40, 46` ("Changes." paragraph) | The claimed diff stats are wrong. Claimed: `tests/test_phase_boundary.py` "(+130/−4)" and `tests/test_phase_contract.py` "(+15/−2)". Re-derived directly: `git diff HEAD --numstat -- tests/test_phase_boundary.py tests/test_phase_contract.py` prints `125\t5\ttests/test_phase_boundary.py` and `12\t3\ttests/test_phase_contract.py` — i.e. the real figures are **+125/−5** and **+12/−3**. This is exactly the recurring count-miscarry class `project.md`'s `application-design:count-derivation` and `code-generation:fr-2` corrections exist to catch (counts must be derived from the artifact and printed before assertion, never carried). It has no functional consequence — the diff content itself is correct, only its self-reported size is off — but it is a repeat instance of a named, previously-corrected defect pattern in this same stage. | Re-run `git diff HEAD --numstat` for both files and correct the two figures in the body. |
+
+### Independently verified and held (not defects)
+
+- **Authority argument, confirmed true by direct execution.** `git show b844a4d -- tests/test_phase_boundary.py` shows `D17_TARGET_FIELDS` was introduced in that commit with 17 entries including `processor_qc_flags`. `git show b844a4d:evidence/DECISIONS.md` and the current `evidence/DECISIONS.md` both show D-17's row table (§ "Phase 1 target row") with the identical 16-field enumeration (manually counted from the Field column: `interval_start_utc`, `station_id`, `cell_gdlat`, `cell_glon`, `cell_lat_bounds`, `cell_lon_bounds`, `vtec_tecu`, `valid_observation_count`, `within_hour_spread_tecu`, `largest_internal_gap_s`, `provider_dtec_summary`, `aggregation_config_id`, `target_valid`, `phase_id`, `source_id`, `target_definition_id` = 16), with `processor_qc_flags` discussed in its own paragraph outside the row table, never inside it. Both facts originate in the same commit `b844a4d` — the 17-vs-16 divergence is genuinely a same-commit transcription slip, not a competing decision. No D-number is required for this correction.
+- **16 is independently corroborated by the carved-out contract file.** `construction/target-standardization/functional-design/domain-entities.md` § 1 states "**Sixteen fields**, counted from D-17's enumeration" and its own Assumptions section states "D-17's field count is **16**, counted from its enumeration" — an independent count by a different unit, agreeing.
+- **`missing` limb is genuinely unweakened.** `git diff` shows `missing = sorted(D17_TARGET_FIELDS - header)` is untouched by this repair; only `extra`'s subtraction changed.
+- **`extra`'s new formula matches the producer's actual contract exactly.** `src/data/prepared.py:1324`'s `_TARGET_CSV_HEADER = (*D17_FIELDS, LINEAGE_CAVEAT_FIELD)` and its row guard at `:791` (`extra = sorted(names - set(D17_FIELDS) - {LINEAGE_CAVEAT_FIELD})`) are the producer's real write/validate contract — read directly, both confirm the test's `extra = header - D17_TARGET_FIELDS - {DECLARED_CAVEAT_FIELD}` now accepts exactly what the producer emits (16 + 1 caveat = 17 columns) and nothing else.
+- **`DECLARED_CAVEAT_FIELD` pin is real and fails closed.** `DECLARED_CAVEAT_FIELD = "lineage_caveat"` matches `prepared.py:144`'s `LINEAGE_CAVEAT_FIELD: Final[str] = "lineage_caveat"` literal exactly. `_module_level_literal`'s four failure branches were read directly: unparseable file → `pytest.fail` on `SyntaxError`; constant missing/renamed → falls through the loop to the final `pytest.fail`; value present but not a literal → `pytest.fail` on `ast.literal_eval`'s `ValueError/TypeError/SyntaxError`. None of the four ways the constant could drift produces a silent pass.
+- **AST-over-import justification's three premises all verified true.** (a) No `sys.path` insert and no `from src...` import anywhere in `tests/test_phase_boundary.py` (grepped directly). (b) No `conftest.py` exists anywhere in the repository (searched directly, zero hits) — `tests/test_phase_contract.py` does carry its own inline `sys.path.insert` at lines 45–46, confirming the claimed asymmetry. (c) The module's own pre-existing design already SKIPs when `SRC_DIR` is absent (`tests/test_phase_boundary.py:242-243`, unrelated pre-existing code, unmodified by this repair) — a module-level import of the producer would indeed turn that into a collection error. All three premises hold; the AST-parsing choice is justified as claimed.
+- **`D17_ALLOWED_FIELDS`'s reduction to 16 does not weaken `assert_no_raw_fields`.** Grepped both of its two call sites in `tests/test_phase_contract.py` (lines 156, 186) — it is consumed only as a positional happy-path sample argument; no test compares its length or membership against anything else, so removing one legitimate-but-misplaced name has zero effect on what that control actually proves.
+- **No cross-unit edit made by this repair.** `src/data/prepared.py` carries no diff at all against `1670ac8` (absent from `git status --porcelain`, confirming zero change). `src/evaluation/guards.py` and `tests/test_determinism.py` are also modified in the current working tree, but these diffs are unrelated to Repair Step 11 (they belong to other units' concurrent in-flight work per the dispatch note's own warning) and were not touched or introduced by this repair.
+- **No acceptance row wrongly claimed discharged.** WS-18, TA-18, TA-25, TA-27, TA-28 are still stated `Pending` throughout the artifact, unchanged by this repair; no TBD sentinel or scientific constant appears in either touched test file.
+
+### Coverage limits of this pass
+
+- No Python interpreter is available in this review session (only a Windows Store execution-alias stub; no `pytest_standin/` or bootstrapped `uv-pythons/` cache was found under the repo root, and a search rooted outside the unit's scope is refused by the read-scope hook). The claimed **"89 passed / 1 skipped"** execution figure could not be independently re-run this pass; it was instead verified by direct static trace of the guard logic (set derivations, AST fail-closed branches, D-17 field counts) rather than by execution, which is a materially weaker form of verification than the prior passes' own re-runs.
+- Did not re-derive the full-suite or per-module counts beyond the two files this repair touched; those figures were not re-asserted by Repair Step 11 and are outside its claimed scope.
+
+### Summary
+
+The D-17 field-contract fix itself is sound: the 17→16 correction is authoritative (traced to a single-commit transcription slip, corroborated independently by a sibling unit's own count), the `extra`/`missing` split now matches the producer's real write contract exactly, the new drift guard is genuinely fail-closed on every named drift mode, and the AST-over-import design choice is justified by verified premises. But the artifact's own header asserts a commit-state fact that is false for the very files central to this repair — the fix exists only as uncommitted, unstaged working-tree changes, one `git clean`/`reset`/fresh-checkout away from silently reverting to the bug this repair exists to close — and a second, unrelated diff-count miscarry repeats a defect class this project has already corrected itself for twice. One Critical (false commit-durability claim) is sufficient to block on its own under the stated verdict rule.
+
+**Verdict:** NOT-READY
+
 ## Cross-unit edit disclosed (2026-09-11)
 
 Written by `aidlc-developer-agent` at `code-generation`, closing both findings the
@@ -369,11 +487,25 @@ unaffected by it. **No commit, amend or push was made by this stage** — the go
 stop above still stands, and the disposition (fold into the next commit, or a follow-up)
 is the owner's.
 
-`evidence/test_run_access_log.jsonl` carries **74 uncommitted appended rows** from the
-full-suite run. These are written by `tests/test_acquisition_window.py:70` and
-`tests/test_release_hashes.py:75` (sibling-owned, pre-existing by design — the guard
-logs every real restricted read), **not** by Section 10, whose registries are all under
-`tmp_path`. Checked: **zero of the new rows contain `2022-12`**.
+`evidence/test_run_access_log.jsonl` — this paragraph previously asserted **74 uncommitted
+appended rows**. That figure was wrong when written (the reviewer derived **111** on
+2026-09-11) and is wrong again now for a different reason, so it is corrected in the body
+rather than carried, per `project.md` (`application-design:count-derivation` and
+`code-generation:fr-2`).
+
+**Re-derived 2026-09-13 at HEAD `1670ac8`: the file carries 4459 lines and ZERO uncommitted
+rows** — `git diff HEAD -- evidence/test_run_access_log.jsonl` is empty. The appended rows
+were committed by the owner in **`88f5c7e`**. The correct current statement is therefore
+not a count of pending rows at all: there are none. The rows are written by
+`tests/test_acquisition_window.py:70` and `tests/test_release_hashes.py:75` (sibling-owned,
+pre-existing by design — the guard logs every real restricted read), **not** by Section 10,
+whose registries are all under `tmp_path`.
+
+**The safety-relevant half of the original claim held at every derivation and still holds:
+zero rows contain `2022-12`.** That is the part that mattered; the numeral was the part
+that kept going stale. Note the lesson the three successive values make concrete — an
+uncommitted-row count is a claim about working-tree state, which changes under the artifact
+without anyone editing it, so it must be re-derived at read time or not asserted at all.
 
 ### Residual, stated rather than implied closed
 
@@ -432,5 +564,126 @@ no locked December data was accessed.
 ### Verdict rationale
 
 Both carried-forward findings are independently confirmed closed by direct execution, not accepted on the report's word: the Major's missing test coverage now exists, runs through the real entry point, is proven non-vacuous by an independently-reproduced mutation kill, and is honestly disclosed as an additive appendix without touching the frozen prior Review history; the Minor's stale claim is corrected with a re-executed, matching derivation. The one new finding (Minor, a miscounted row count) does not touch either closed item, carries no safety implication (the count that matters — zero December rows — is independently confirmed correct), and is well within the stated verdict rule (READY if zero Critical, ≤2 Major, any Minor): 0 Critical, 0 Major, 1 Minor.
+
+**Verdict:** READY
+
+## Review — 2026-09-13 (code-generation, TERMINAL adversarial re-review, iteration 2)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T09:34:37Z
+**Iteration:** 2 of 2 (TERMINAL — this verdict stands; no further pass follows)
+
+### Scope note
+
+Read scope bound to unit `governance-guards` plus the one named carve-out,
+`construction/target-standardization/functional-design/domain-entities.md`. No other
+sibling unit directory was opened. Baseline for every "unchanged"/"zero diff" claim in
+this pass is commit `1670ac8` (`project.md` `code-generation:gf-1`).
+
+### Independent re-derivation of both iteration-1 findings (by direct execution, not description)
+
+**Finding 1 (was Critical — false commit-durability claim).** Re-ran the exact commands
+myself against the live tree: `git rev-parse HEAD` → `1670ac8800f7cf3610b7db20bf89cdaf00c2c3bb`.
+`git status --porcelain` shows `tests/test_phase_boundary.py` and `tests/test_phase_contract.py`
+as ` M`. `git diff --cached --stat -- tests/test_phase_boundary.py tests/test_phase_contract.py`
+is empty (nothing staged). `git diff HEAD --numstat` for the two files returns `125\t5` and
+`12\t3`. The corrected header (line 6) now states this exactly — it distinguishes the
+committed Steps 1–10 code from the uncommitted repair, names the `reset --hard`/`clean`/
+fresh-checkout risk, and routes the commit act to the owner per `code-generation:c30` — and,
+checked independently, does **not** overshoot into implying the unit's Steps 1–10 code is
+uncommitted: `git diff HEAD --numstat` for `src/data/phase_contract.py`, `src/data/reuse_registry.py`,
+`tests/test_reuse_registry.py`, `src/data/locked_test.py`, and `tests/test_locked_test_guard.py`
+is empty for all five, confirming those files are genuinely committed as the header claims.
+**RESOLVED**, independently re-verified, correctly calibrated in both directions.
+
+**Finding 2 (was Minor — wrong diff stats).** Re-ran `git diff HEAD --numstat` myself: the
+artifact's corrected figures (line 42: "+125/−5"; line 48: "+12/−3") match exactly what I
+derived. Swept the whole file for the superseded numerals in every form: `+130/` and `+15/`
+appear only twice each — once in the corrected sentence's own "an earlier version... carried"
+clause (lines 42, 48) and once inside the frozen iteration-1 finding-table quote (line 317,
+correctly preserved as a historical record of what was wrong) — no other site asserts the
+stale figures as current fact. **RESOLVED**, sweep is clean.
+
+### Independent substance re-attack on Repair Step 11 (not inherited from the prior pass)
+
+- **D-17 Field-column count, re-counted directly from `evidence/DECISIONS.md:788-803`**: the
+  row table's individual field names (some rows carry 2–3 names) total exactly **16** —
+  `interval_start_utc`, `station_id`, `cell_gdlat`, `cell_glon`, `cell_lat_bounds`,
+  `cell_lon_bounds`, `vtec_tecu`, `valid_observation_count`, `within_hour_spread_tecu`,
+  `largest_internal_gap_s`, `provider_dtec_summary`, `aggregation_config_id`, `target_valid`,
+  `phase_id`, `source_id`, `target_definition_id`. `processor_qc_flags` is discussed at
+  lines 815–817, outside and after the row table — confirms the artifact's "outside the row
+  table" claim.
+- **`D17_TARGET_FIELDS` (`tests/test_phase_boundary.py:106-123`) and `D17_ALLOWED_FIELDS`
+  (`tests/test_phase_contract.py:73-90`)**: both hand-counted directly, each exactly **16**
+  entries, identical sets to each other and to the D-17 table and to the producer's
+  `D17_FIELDS` (`src/data/prepared.py:195-212`, also independently counted at 16).
+  `processor_qc_flags` is absent from both.
+- **Producer header** (`src/data/prepared.py:1324`): `_TARGET_CSV_HEADER: Final[tuple[str, ...]]
+  = (*D17_FIELDS, LINEAGE_CAVEAT_FIELD)`, confirmed verbatim by direct read; row guard at
+  `:791` — `extra = sorted(names - set(D17_FIELDS) - {LINEAGE_CAVEAT_FIELD})` — confirmed
+  verbatim.
+- **`extra`/`missing` in the repaired test** (`tests/test_phase_boundary.py:349-377`), read in
+  full: `extra = sorted(header - D17_TARGET_FIELDS - {DECLARED_CAVEAT_FIELD})` accepts exactly
+  the producer's real 16+caveat header and refuses anything else; `missing = sorted(D17_TARGET_FIELDS
+  - header)` still demands the full sixteen, untouched by this repair — confirmed by reading
+  the function body directly, not by trusting the artifact's characterization.
+- **AST drift guard `_module_level_literal`** (`tests/test_phase_boundary.py:157-189`), read
+  in full: fails closed on all four claimed drift modes — unparseable file (`SyntaxError` →
+  `pytest.fail`), constant missing/renamed (loop falls through to a final `pytest.fail`),
+  value present but not a literal (`ast.literal_eval`'s `ValueError/TypeError/SyntaxError` →
+  `pytest.fail`), and the calling test `test_d17_target_fields_match_the_producer_contract`
+  (`:298-346`) additionally checks type, no-duplicates, set-equality both directions, exact
+  count == 16, and the caveat literal's cross-copy agreement plus its exclusion from the
+  target-field set — none of these six checks was weakened.
+- **Authority argument**: `git show --stat b844a4d` independently confirms that single commit
+  touched both `evidence/DECISIONS.md` (1370-line rewrite) and `tests/test_phase_boundary.py`
+  ("created with both TE 7.0 limbs") — corroborating the same-commit-transcription-slip claim
+  rather than a competing decision. Cross-checked against the one permitted carve-out,
+  `construction/target-standardization/functional-design/domain-entities.md:106,461`, which
+  independently states "Sixteen fields, counted from D-17's enumeration" — agrees.
+- **`src/data/prepared.py` shows ZERO diff against `1670ac8`**: `git diff HEAD --numstat --
+  src/data/prepared.py` returns nothing. No cross-unit edit was made by this repair.
+
+### Attribution check
+
+`git status --porcelain` at the top of this pass also shows `src/evaluation/guards.py` and
+`tests/test_determinism.py` modified in the same working tree, plus several sibling
+`code-summary.md` files. The artifact (line 328) correctly attributes these as "other units'
+concurrent in-flight work," not touched or introduced by Repair Step 11, and does not credit
+this unit for them. Confirmed: no diff attributable to this repair falls outside
+`tests/test_phase_boundary.py`, `tests/test_phase_contract.py`, `code-generation-plan.md`, and
+`code-summary.md` itself.
+
+### Execution-honesty check
+
+No Python interpreter is available in this review session (confirmed directly: `python3`
+resolves to a Windows Store execution-alias stub, matching the artifact's own stated
+constraint). The claimed "89 passed / 1 skipped" figure could not be independently re-run
+this pass either, consistent with the prior iteration-1 pass's identical limitation — recorded
+here as a coverage limit, not a finding. Checked the whole file for any sentence implying real
+`pytest` ran: every occurrence of the 89/1 figure and the surrounding "smoke only, never
+governed" framing (lines 71–79) is consistently qualified with the stdlib-standin/PyPI-blocked
+caveat; no bare, unqualified claim of a real pytest run was found.
+
+### Acceptance-row and forbidden-content check
+
+`WS-18`, `TA-18`, `TA-25`, `TA-27`, `TA-28` are stated `Pending` consistently everywhere in the
+artifact (lines 126, 329, 522) — no row is claimed discharged by this repair. Grepped both
+touched test files directly for `TBD`, `api_key`, `password`, `secret`, `2022-12`
+(case-insensitive): zero matches in either file. No scientific constant introduced; no
+restricted-root or December content touched.
+
+### Verdict rationale
+
+Both iteration-1 findings are independently re-derived as resolved, not accepted on the
+artifact's word: the commit-durability claim is now accurate and correctly calibrated (neither
+overstating nor understating what is committed), and the diff-stat correction matches a
+freshly re-run `git diff HEAD --numstat` exactly, with the sweep confirming no other site
+carries the stale figures. Independent re-derivation of the D-17 field-contract substance —
+counts, producer header, `extra`/`missing` logic, and the AST drift guard's four fail-closed
+branches — matches the artifact's claims at every checked site, corroborated by both the
+same-commit authority trace and the permitted cross-unit carve-out. No new defect surfaced.
+Zero Critical, zero Major, zero Minor.
 
 **Verdict:** READY

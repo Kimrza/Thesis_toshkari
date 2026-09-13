@@ -18,27 +18,48 @@ W-5/REQ-ENG-10 (the eight-item lock captured 8/8, and an incomplete lock FAILS),
 (`PlatformError` on any platform that is not exactly kaggle|local), and the
 governed-config hash-mismatch termination naming file + expectation.
 
+R-01's ENUMERATION CENSUS lives here too, in the final section: the control R-01's own
+text mandates, re-deriving every project-defined `*Error` name raised across the units'
+`functional-design` artifacts and failing when one is neither in R-01's enumeration nor
+disclosed under its any-future clause. It is homed in this module because
+`src/data/config.py` -- this module's subject -- is R-01's declaration site, and because
+this is already where the unit's static-scan controls (R-15, R-17) live. Neither R-01 nor
+`foundation`'s design names a module for it, and placing it here needs no TE 12 `tests/`
+naming amendment.
+
 Inputs
 ------
-`tmp_path` and `monkeypatch` only; the repository `configs/` tree is read but never
-written. No network. No restricted-root path is constructed (the static R-15 control
-scans source text, which is the sanctioned way to name the boundary without reaching it).
+`tmp_path` and `monkeypatch`; the repository `configs/` tree is read but never written.
+The R-01 census additionally READS (never writes) the record tree at
+`aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/*/functional-design/*.md`,
+and `src/data/config.py` as text. No network. No restricted-root path is constructed (the
+static R-15 control scans source text, which is the sanctioned way to name the boundary
+without reaching it).
 
 Re-run behaviour
 ----------------
 Deterministic and self-contained; every test builds its own config tree in `tmp_path`.
 The re-exec control runs a child interpreter via subprocess with a file handshake, so
 Windows `os.execv` (spawn-replacement) semantics do not race the assertion.
+
+The R-01 census is deterministic for a given record tree and asserts no numeral, so it
+re-runs unchanged as the artifact set grows: it reports a reconciliation, and the only
+event that turns it red is a project-defined `*Error` name that is neither enumerated by
+R-01 nor disclosed under R-01's any-future clause. Its own negative controls run entirely
+in `tmp_path` and never read the record tree.
 """
 
 from __future__ import annotations
 
+import builtins
 import json
 import os
+import re
 import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import NamedTuple
 
 import pytest
 
@@ -549,6 +570,107 @@ with open({str(out_file)!r}, "w", encoding="utf-8") as handle:
     assert json.loads(out_file.read_text(encoding="utf-8"))["reexec_performed"] is False
 
 
+# --- R-05 exit-code propagation (CR-2026-09-13-R05-WINDOWS-EXIT-CODE) --------------------
+# Before this repair, os.execv on Windows detached the child and terminated the parent
+# with exit code 0 unconditionally, so a genuine refusal reported success (observed
+# 2026-09-13: `run_walking_skeleton.py` printed `preflight refusal: …` and exited 0).
+# These controls pin the repaired contract on BOTH platforms: the caller of a
+# re-exec'd stage script observes exactly the child's exit code.
+
+
+def _reexec_exit_probe(tmp_path, exit_code: int) -> int:
+    """Run a stage-shaped script that re-execs (PYTHONHASHSEED unset) and then exits
+    with `exit_code`; return what the CALLER observes. The child also records
+    `reexec_performed` so a probe that silently skipped the re-exec cannot pass."""
+    script = tmp_path / "stage_script.py"
+    out_file = tmp_path / "result.json"
+    script.write_text(
+        f"""
+import json, os, sys
+sys.path.insert(0, {str(REPO_ROOT)!r})
+from src.data.config import ensure_process_determinism, reexec_performed
+
+ensure_process_determinism(sys.argv)  # FIRST statement, before any framework import
+with open({str(out_file)!r}, "w", encoding="utf-8") as handle:
+    json.dump({{"reexec_performed": reexec_performed()}}, handle)
+sys.exit({exit_code})
+""",
+        encoding="utf-8",
+    )
+    env = {k: v for k, v in os.environ.items() if k != "PYTHONHASHSEED"}
+    env.pop(REEXEC_SENTINEL_ENV, None)
+    proc = subprocess.run([sys.executable, str(script)], env=env, timeout=120, check=False)
+    assert out_file.exists(), "the re-exec'd child never ran to its exit statement"
+    assert json.loads(out_file.read_text(encoding="utf-8"))["reexec_performed"] is True
+    return proc.returncode
+
+
+def test_reexec_child_failure_exit_code_propagates_to_caller(tmp_path) -> None:
+    """R-05 negative control, the load-bearing one: a refusal/failure in the re-exec'd
+    child must reach the caller as a non-zero exit — it can NEVER become 0. On the
+    pre-repair code this test fails with observed exit 0 (the Windows detach); it must
+    fail again on any regression to detached spawning."""
+    observed = _reexec_exit_probe(tmp_path, 7)
+    assert observed == 7, (
+        f"caller observed exit {observed} where the re-exec'd child exited 7; a "
+        f"non-zero child exit converted to {observed} means integrity refusals report "
+        f"as success (TE 13.2 / TE 9.2; CR-2026-09-13-R05-WINDOWS-EXIT-CODE)"
+    )
+
+
+def test_reexec_child_success_exit_code_is_zero(tmp_path) -> None:
+    """The happy-path half: a successful re-exec'd child still yields exit 0 — the
+    repair must not manufacture spurious non-zero exits."""
+    observed = _reexec_exit_probe(tmp_path, 0)
+    assert observed == 0, f"successful child reported exit {observed}, expected 0"
+
+
+def test_r05_platform_split_is_exact_in_source() -> None:
+    """AST control on the mechanism itself: the `os.name == "nt"` branch spawns via
+    `subprocess.run` and raises `SystemExit` with its return code; the POSIX path still
+    calls `os.execv`; and there is no third relaunch path. Pins the repaired shape so a
+    later edit cannot silently reintroduce the detach or drop the POSIX exec."""
+    import ast as _ast
+
+    source = (REPO_ROOT / "src" / "data" / "config.py").read_text(encoding="utf-8")
+    tree = _ast.parse(source)
+    func = next(
+        node
+        for node in _ast.walk(tree)
+        if isinstance(node, _ast.FunctionDef) and node.name == "ensure_process_determinism"
+    )
+    dumped = _ast.dump(func)
+    # Windows branch: guarded on os.name == "nt", spawn-and-wait, SystemExit(rc).
+    assert "attr='name'" in dumped and "'nt'" in dumped, (
+        "the os.name == 'nt' platform guard is gone from ensure_process_determinism"
+    )
+    calls = {
+        f"{_ast.dump(node.func)}"
+        for node in _ast.walk(func)
+        if isinstance(node, _ast.Call)
+    }
+    assert any("attr='run'" in c and "id='subprocess'" in c for c in calls), (
+        "the Windows spawn-and-wait (subprocess.run) is gone"
+    )
+    assert any("attr='execv'" in c and "id='os'" in c for c in calls), (
+        "the POSIX os.execv relaunch is gone"
+    )
+    raises_systemexit = any(
+        isinstance(node, _ast.Raise)
+        and isinstance(node.exc, _ast.Call)
+        and isinstance(node.exc.func, _ast.Name)
+        and node.exc.func.id == "SystemExit"
+        for node in _ast.walk(func)
+    )
+    assert raises_systemexit, (
+        "the Windows branch no longer exits the parent with the child's return code"
+    )
+    # No shell anywhere in the relaunch (S603/S606 posture preserved).
+    func_source = _ast.get_source_segment(source, func) or ""
+    assert func_source, "could not extract ensure_process_determinism's source segment"
+    assert "shell=True" not in func_source, "relaunch must never use a shell"
+
+
 # --- W-5 / REQ-ENG-10: the eight-item environment lock ----------------------------------
 
 
@@ -640,3 +762,415 @@ def test_every_foundation_module_has_a_purpose_inputs_rerun_docstring() -> None:
         assert "purpose" in lowered, f"{module.name}: docstring lacks a Purpose section"
         assert "inputs" in lowered, f"{module.name}: docstring lacks an Inputs section"
         assert "re-run" in lowered, f"{module.name}: docstring lacks re-run behaviour"
+
+
+# --- R-01: the enumeration census over the units' functional-design artifacts ------------
+#
+# R-01's mandated control, quoted from its own text:
+#
+#   "**Negative control -- the enumeration itself, added 2026-08-28 per Recommendation 8.**
+#    A test **re-derives** the distinct project-defined `*Error` names raised across the
+#    twelve units' `functional-design` artifacts and **fails when a name is neither in
+#    R-01's fifteen nor disclosed by its raising unit under the any-future clause**. This
+#    is the control that catches the failure R-01 suffered twice: a subclass added later
+#    with nobody updating the enumeration. It asserts a **reconciliation**, not a number,
+#    so it does not itself go stale when the census legitimately grows."
+#
+# Two design consequences follow from that last sentence, and both are deliberate.
+#
+# 1. NO NUMERAL IS ASSERTED anywhere below. R-01 went stale on its own count twice (six ->
+#    fourteen, fourteen -> fifteen) and its standing obligation is to "re-run the
+#    derivation and print its output rather than trusting 'fifteen'". The unit directories
+#    are DERIVED (a `construction/` child is a unit iff it holds a `functional-design/`
+#    subdirectory, which excludes the stage directories `code-generation`,
+#    `functional-design`, `nfr-design` and `nfr-requirements`); the Python builtins to
+#    subtract are DERIVED from `builtins`; the any-future disclosures are DERIVED from the
+#    artifacts. Only R-01's fifteen is a fixed list, because it is an authored contract
+#    rather than a census output -- it is the thing being reconciled AGAINST -- and
+#    `test_r01s_fifteen_match_the_declaration_site` pins it to `src/data/config.py` so the
+#    two cannot drift apart silently.
+#
+# 2. DISCLOSURE IS READ WORKSPACE-WIDE, not per raising unit. R-01's control sentence says
+#    "disclosed by its raising unit", but foundation's own § Assumptions records the
+#    per-raising-unit declaration obligation as an OPEN cross-unit item that this unit
+#    "cannot do for them" -- so asserting it here would make foundation's census red on
+#    another unit's unfinished work, conflating two distinct failures. The census asserts
+#    the reconciliation it owns (is the name disclosed under the clause anywhere in the
+#    artifact set?); the per-unit declaration obligation stays where foundation recorded
+#    it, as an open item on the raising units.
+#
+# The disclosure scan is LINE-SCOPED: a name counts as disclosed when it shares a line
+# with any-future-clause language. That bound can only ever UNDER-detect disclosure, so
+# its failure mode is a false alarm that sends a reader to the artifact -- never a false
+# pass that lets an undisclosed subclass through. That is the safe direction for a guard.
+
+#: The construction record root the census walks. Unit directory names are derived from it.
+_CONSTRUCTION_ROOT = (
+    REPO_ROOT
+    / "aidlc"
+    / "spaces"
+    / "default"
+    / "intents"
+    / "260813-tec-hourly-forecast"
+    / "construction"
+)
+
+#: R-01's FIFTEEN, quoted from R-01's Rule paragraph in `foundation`'s `business-rules.md`:
+#: the six `foundation` raises, then the nine "raised by other units and derive from the
+#: same base". `PartitionError` is the fifteenth, promoted 2026-08-28 on the project
+#: decision owner's ruling on `GOV-2026-08-28-FD-01` Recommendation 8.
+R01_ENUMERATION = frozenset(
+    {
+        # foundation's own six
+        "ConfigError",
+        "PreflightError",
+        "PlatformError",
+        "DeterminismError",
+        "ReleaseError",
+        "RegistryError",
+        # raised by other units, same base
+        "PhaseBoundaryError",
+        "LockedTestError",
+        "LeakageError",
+        "AlignmentError",
+        "SeedError",
+        "FairnessError",
+        "BootstrapError",
+        "RegimeError",
+        "PartitionError",
+    }
+)
+
+#: Derived, never listed: whatever the running interpreter calls a builtin `*Error`.
+_PYTHON_BUILTIN_ERRORS = frozenset(
+    name for name in dir(builtins) if name.endswith("Error")
+)
+
+_ERROR_NAME_RE = re.compile(r"\b([A-Z][A-Za-z0-9]*Error)\b")
+
+#: The ways the artifact set spells R-01's "any future integrity-related exception" clause.
+_ANY_FUTURE_MARKERS = (
+    re.compile(r"any future integrity-related exception", re.IGNORECASE),
+    re.compile(r"any[- ]future clause", re.IGNORECASE),
+    re.compile(r"rid(?:e|es|ing)\s+R-01", re.IGNORECASE),
+    re.compile(r"R-01['’]?s?\s+(?:named\s+)?fifteen", re.IGNORECASE),
+)
+
+
+class _Census(NamedTuple):
+    """One run of R-01's enumeration census over a `construction/` tree."""
+
+    units: tuple[str, ...]
+    artifacts: int
+    raised: dict[str, set[str]]
+    disclosed: dict[str, set[str]]
+
+    def undisclosed(self) -> list[str]:
+        """Derived names in NEITHER R-01's fifteen NOR the any-future disclosures."""
+        return sorted(
+            name
+            for name in self.raised
+            if name not in R01_ENUMERATION and name not in self.disclosed
+        )
+
+    def unreached(self) -> list[str]:
+        """R-01's fifteen that the census did not reach (the anti-vacuity direction)."""
+        return sorted(R01_ENUMERATION - set(self.raised))
+
+
+def _derive_unit_dirs(construction_root: Path) -> list[Path]:
+    """A `construction/` child is a UNIT iff it holds a `functional-design/` directory.
+
+    Derived rather than listed, so a renamed, added or removed unit is picked up instead
+    of silently dropping out of the census.
+    """
+    return sorted(
+        child
+        for child in construction_root.iterdir()
+        if child.is_dir() and (child / "functional-design").is_dir()
+    )
+
+
+def _run_enumeration_census(construction_root: Path) -> _Census:
+    """Re-derive every project-defined `*Error` name across the units' artifacts.
+
+    Returns the raised names (name -> units mentioning it) and the subset disclosed on a
+    line carrying any-future-clause language (name -> units disclosing it).
+    """
+    raised: dict[str, set[str]] = {}
+    disclosed: dict[str, set[str]] = {}
+    unit_dirs = _derive_unit_dirs(construction_root)
+    artifacts = 0
+
+    for unit_dir in unit_dirs:
+        for artifact in sorted((unit_dir / "functional-design").glob("*.md")):
+            artifacts += 1
+            for line in artifact.read_text(encoding="utf-8").splitlines():
+                names = {match.group(1) for match in _ERROR_NAME_RE.finditer(line)}
+                names -= _PYTHON_BUILTIN_ERRORS
+                names.discard("IntegrityError")  # the base, not a subclass
+                if not names:
+                    continue
+                is_disclosure = any(marker.search(line) for marker in _ANY_FUTURE_MARKERS)
+                for name in names:
+                    raised.setdefault(name, set()).add(unit_dir.name)
+                    if is_disclosure:
+                        disclosed.setdefault(name, set()).add(unit_dir.name)
+
+    return _Census(
+        units=tuple(unit_dir.name for unit_dir in unit_dirs),
+        artifacts=artifacts,
+        raised=raised,
+        disclosed=disclosed,
+    )
+
+
+def _format_census(census: _Census) -> str:
+    """Render the derivation R-01's standing obligation requires printed, not trusted."""
+    subclasses = sorted(census.raised)
+    enumerated = sorted(name for name in subclasses if name in R01_ENUMERATION)
+    riding = sorted(
+        name for name in subclasses if name not in R01_ENUMERATION and name in census.disclosed
+    )
+    lines = [
+        "R-01 enumeration census -- derived, not carried",
+        f"  units derived from construction/*/functional-design/ : {len(census.units)}",
+    ]
+    lines += [f"      {name}" for name in census.units]
+    lines += [
+        f"  artifacts scanned .................................. : {census.artifacts}",
+        f"  distinct project-defined SUBCLASS names ............ : {len(subclasses)}",
+        f"    of which named in R-01's enumeration ............. : {len(enumerated)}",
+        f"    of which disclosed under the any-future clause ... : {len(riding)}",
+        "",
+        f"  R-01's enumeration ({len(R01_ENUMERATION)}):",
+    ]
+    for name in sorted(R01_ENUMERATION):
+        reached = "" if name in census.raised else "   <-- NOT reached by the census"
+        lines.append(f"      {name}{reached}")
+    lines += ["", "  disclosed under the any-future clause:"]
+    for name in riding:
+        lines.append(f"      {name}  [{', '.join(sorted(census.disclosed[name]))}]")
+    lines += [
+        "",
+        "  SET DIFFERENCE, direction 1 -- DERIVED but in NEITHER list:",
+    ]
+    undisclosed = census.undisclosed()
+    if undisclosed:
+        lines += [
+            f"      {name}  raised in: {', '.join(sorted(census.raised[name]))}"
+            for name in undisclosed
+        ]
+    else:
+        lines.append("      (none)")
+    lines += ["", "  SET DIFFERENCE, direction 2 -- in R-01's enumeration but NOT reached:"]
+    unreached = census.unreached()
+    lines += [f"      {name}" for name in unreached] if unreached else ["      (none)"]
+    return "\n".join(lines)
+
+
+def test_r01_enumeration_census_reconciles_every_derived_error_name() -> None:
+    """R-01's mandated control: no `*Error` name is raised across the units' artifacts
+    that is neither in R-01's fifteen nor disclosed under R-01's any-future clause.
+
+    This is the control that catches the failure R-01 suffered twice -- a subclass added
+    later with nobody updating the enumeration -- and it asserts a reconciliation rather
+    than a count, so it survives the census legitimately growing. The derivation is
+    PRINTED on every run, per R-01's standing obligation that whoever revisits the
+    hierarchy "re-runs the derivation above and prints its output".
+    """
+    census = _run_enumeration_census(_CONSTRUCTION_ROOT)
+    report = _format_census(census)
+    print("\n" + report)
+
+    undisclosed = census.undisclosed()
+    assert not undisclosed, (
+        f"{_CONSTRUCTION_ROOT}: R-01 reconciliation FAILED. These project-defined "
+        f"`*Error` names are raised in the units' functional-design artifacts but are "
+        f"neither in R-01's enumeration nor disclosed under its any-future clause: "
+        f"{', '.join(undisclosed)}. Each must be added to R-01's enumeration or "
+        f"disclosed by its raising unit as an `IntegrityError` subclass riding the "
+        f"any-future clause -- otherwise R-10's stage-entry catch lets it exit with no "
+        f"`aborted` registry row (NFR-AUD-01).\n\n{report}"
+    )
+
+
+def test_the_census_reaches_every_name_in_r01s_enumeration() -> None:
+    """Anti-vacuity guard, and the second direction of the set difference.
+
+    A census whose walk silently matched nothing would pass the reconciliation above by
+    finding no names at all. Every one of R-01's fifteen is raised somewhere in the
+    artifact set, so requiring the census to reach all of them detects a broken walk --
+    a moved record root, a renamed `functional-design/` directory, an artifact extension
+    change -- without asserting any numeral.
+    """
+    census = _run_enumeration_census(_CONSTRUCTION_ROOT)
+    unreached = census.unreached()
+    assert not unreached, (
+        f"the census reached {len(census.units)} unit(s) and {census.artifacts} "
+        f"artifact(s) but never saw {', '.join(unreached)} -- every name in R-01's "
+        f"enumeration is raised in the artifact set, so the walk is broken rather than "
+        f"the enumeration.\n\n{_format_census(census)}"
+    )
+
+
+def test_r01s_fifteen_match_the_declaration_site() -> None:
+    """R-01's enumeration and its declaration site must not drift apart.
+
+    `src/data/config.py` declares `IntegrityError` and, above the
+    "riding R-01's any-future clause" marker, exactly the subclasses R-01 enumerates.
+    Pinning the two together is what keeps `R01_ENUMERATION` above an authored contract
+    rather than a hand-copied list that can go stale a fourth time.
+    """
+    import ast
+
+    source = (REPO_ROOT / "src" / "data" / "config.py").read_text(encoding="utf-8")
+    marker = "# --- riding R-01's any-future clause"
+    assert marker in source, (
+        "src/data/config.py lost the any-future-clause section marker; the boundary "
+        "between R-01's enumeration and the riders is no longer expressed in the "
+        "declaration site"
+    )
+    marker_lineno = source[: source.index(marker)].count("\n") + 1
+
+    declared = {
+        node.name
+        for node in ast.parse(source).body
+        if isinstance(node, ast.ClassDef)
+        and node.lineno < marker_lineno
+        and any(
+            isinstance(base, ast.Name) and base.id == "IntegrityError"
+            for base in node.bases
+        )
+    }
+    assert declared == set(R01_ENUMERATION), (
+        "R-01's enumeration and src/data/config.py disagree. Declared above the "
+        f"any-future marker but not enumerated: {sorted(declared - R01_ENUMERATION)}; "
+        f"enumerated but not declared above the marker: "
+        f"{sorted(set(R01_ENUMERATION) - declared)}"
+    )
+
+
+def _write_synthetic_unit(root: Path, unit: str, body: str) -> None:
+    """Build one `<unit>/functional-design/business-rules.md` under a synthetic root."""
+    artifact_dir = root / unit / "functional-design"
+    artifact_dir.mkdir(parents=True)
+    (artifact_dir / "business-rules.md").write_text(body, encoding="utf-8")
+
+
+def test_census_catches_an_undisclosed_name(tmp_path) -> None:
+    """NEGATIVE CONTROL: the census FAILS on a subclass nobody disclosed.
+
+    This is the control that proves R-01's census does its job rather than that a clean
+    workspace happens to pass. A synthetic unit raises `WidgetError` with no any-future
+    disclosure anywhere; the reconciliation must name it. Without this, a census that
+    returned the empty set for every input would pass the live assertion above.
+    """
+    construction = tmp_path / "construction"
+    _write_synthetic_unit(
+        construction,
+        "synthetic-unit",
+        "RAISES `WidgetError` when the widget contract is violated.\n",
+    )
+
+    census = _run_enumeration_census(construction)
+
+    assert census.units == ("synthetic-unit",)
+    assert "WidgetError" in census.raised
+    assert census.undisclosed() == ["WidgetError"], (
+        "the census did not flag an undisclosed subclass -- R-01's mandated control is "
+        f"inert. Census said: {_format_census(census)}"
+    )
+
+
+def test_census_accepts_a_name_disclosed_under_the_any_future_clause(tmp_path) -> None:
+    """NEGATIVE CONTROL, the other way: a disclosed name must NOT be flagged.
+
+    A census that flagged everything would pass the test above for the wrong reason. The
+    same synthetic `WidgetError` is disclosed in R-01's own wording; it must drop out of
+    the undisclosed set while an adjacent undisclosed `GadgetError` stays in it, which
+    also proves the disclosure is attributed per name rather than blanket-applied to the
+    artifact.
+
+    The disclosure sentence is one LINE, not one paragraph: the scan is line-scoped, and
+    writing the fixture any other way would assert a proximity rule the census does not
+    implement. The wording is `external-products`' real disclosure of
+    `FeatureAvailabilityError`, with the name swapped.
+    """
+    construction = tmp_path / "construction"
+    _write_synthetic_unit(
+        construction,
+        "synthetic-unit",
+        "`WidgetError` derives from R-01's `IntegrityError` base under that rule's "
+        '"any future integrity-related exception" clause and is not claimed as one of '
+        "R-01's named fifteen.\n"
+        "RAISES `GadgetError` when the gadget contract is violated.\n",
+    )
+
+    census = _run_enumeration_census(construction)
+
+    assert census.disclosed.get("WidgetError") == {"synthetic-unit"}
+    assert census.undisclosed() == ["GadgetError"], (
+        "disclosure is not being attributed per name -- a disclosure on one line must "
+        f"not cover an undisclosed name elsewhere. Census said: {_format_census(census)}"
+    )
+
+
+def test_census_never_flags_a_name_in_r01s_enumeration(tmp_path) -> None:
+    """An enumerated name needs no any-future disclosure; it IS the enumeration."""
+    construction = tmp_path / "construction"
+    _write_synthetic_unit(
+        construction, "synthetic-unit", "RAISES `SeedError` on a defaulted seed.\n"
+    )
+
+    census = _run_enumeration_census(construction)
+
+    assert "SeedError" in census.raised
+    assert census.undisclosed() == []
+
+
+def test_census_unit_derivation_skips_a_directory_without_functional_design(
+    tmp_path,
+) -> None:
+    """EDGE CASE: the twelve unit names are derived, so stage directories drop out.
+
+    `construction/` also holds `code-generation`, `functional-design`, `nfr-design` and
+    `nfr-requirements`, which are stage directories rather than units and hold no
+    `functional-design/` child. Hardcoding twelve names would have hidden a renamed unit;
+    deriving them means only the shape of a unit directory decides membership.
+    """
+    construction = tmp_path / "construction"
+    _write_synthetic_unit(
+        construction, "real-unit", "RAISES `WidgetError` on a violated contract.\n"
+    )
+    stage_dir = construction / "a-stage-directory"
+    stage_dir.mkdir()
+    (stage_dir / "some-stage-artifact.md").write_text(
+        "RAISES `NeverCountedError` -- this file is not under a unit.\n", encoding="utf-8"
+    )
+
+    census = _run_enumeration_census(construction)
+
+    assert census.units == ("real-unit",)
+    assert "NeverCountedError" not in census.raised
+    assert census.artifacts == 1
+
+
+def test_python_builtin_errors_are_excluded_from_the_census(tmp_path) -> None:
+    """EDGE CASE: `TypeError` and `NotImplementedError` occur in the real artifacts.
+
+    They are not project-defined, so they must never reach the reconciliation. The
+    exclusion set is derived from `builtins` rather than listed, so a builtin added by a
+    later Python does not need this test changed.
+    """
+    construction = tmp_path / "construction"
+    _write_synthetic_unit(
+        construction,
+        "synthetic-unit",
+        "RAISES `TypeError` and `NotImplementedError`, neither project-defined.\n",
+    )
+
+    census = _run_enumeration_census(construction)
+
+    assert census.raised == {}
+    assert census.undisclosed() == []

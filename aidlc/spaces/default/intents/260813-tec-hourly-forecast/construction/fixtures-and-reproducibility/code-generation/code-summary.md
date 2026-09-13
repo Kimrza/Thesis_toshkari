@@ -5,6 +5,57 @@
 **Plan:** `code-generation-plan.md` (approved 2026-09-07; Q1–Q6 = A)
 **Sessions:** generation began 2026-09-07 (interrupted after Steps 1–5 and 7); resumed and completed 2026-09-09.
 
+## ⚠ CRITICAL, DISCLOSED 2026-09-13 — the fixture ladder cannot complete, and half the cause is this unit's code
+
+*Added after the rejected-gate re-review returned NOT-READY for the absence of this
+disclosure. The defect was found while reviewing `external-products`, but the review was
+right that this record's silence was the worse fault: this unit authored half the causal
+chain, and §11.5 of this unit's own change record is what introduced it.*
+
+**`scripts/04_build_external_products.py` can never complete inside a walking-skeleton
+fixture run, so the plumbing fixture's receipt is never written, and WS-20 and TA-17 are
+UNREACHABLE — not merely `Pending`.**
+
+The chain, every link re-derived at HEAD `1670ac8`, and three of the four links are this
+unit's modules:
+
+1. `scripts/run_walking_skeleton.py:184` — `PHASE1_SEQUENCE` includes
+   `("04_build_external_products.py", 1)`. **(this unit)**
+2. `scripts/run_walking_skeleton.py:529`, in `build_phase1_commands` — appends
+   `FIXTURE_SCOPE_OPTION` (`--fixture-manifest`) **unconditionally** to every script in that
+   sequence; `lifecycle_arguments` narrows only `05`/`06`/`07` and returns `[]` for `04`.
+   **(this unit)**
+3. `scripts/04_build_external_products.py:306` — receiving that flag is precisely what
+   **arms** the window check; `_declared_data_window()` (`:265-274`) then returns a
+   hardcoded full calendar year, with no CLI narrowing. *(`external-products`)*
+4. `src/data/fixture_gate.py:209-251`, `assert_declared_window_within_scope` — refuses
+   unless BOTH declared endpoints sit inside the fixture scope's cited window, and a scope
+   window is only ever 7 days or 1 month (`src/data/fixture_manifest.py:152-155`).
+   **(this unit)**
+
+The refusal is unconditional, not input-dependent: `04` emits no window narrower than a full
+year for any scope it is given.
+
+**This unit's §11.5 remediation is what re-created the deadlock.** `CHANGE_RECORD_2026-09-07_R133`
+§6.1 gave `04` the `--fixture-manifest` option specifically to break an earlier deadlock
+("the plumbing fixture would refuse on the receipts only it can write"); §11.5's later
+board-Rec-2 window binding describes itself only as making "out-of-window inputs refuse" and
+does not record that it makes `04` unreachable inside every fixture run. That description is
+corrected in the change record under a dated note.
+
+**Three remedies, all owner decisions** (TE §18.3 — stop and report, never choose a default):
+**(a)** genuinely window-parameterise `04` so its declaration is true under a fixture scope —
+a change to a governed script's data scope, wanting its own D-number, and `external-products`'
+call; **(b)** remove `04` from `PHASE1_SEQUENCE` — **this unit's call**, and it changes what
+TE §13.2's seven-invocation clean-run contract certifies; **(c)** accept that `04` cannot
+participate until (a). A fourth option — making `_declared_data_window()` merely *report* the
+scope's window while the audit still reads all twelve months (`_audit_dst` loops months 1-12;
+`_audit_f107` filters on `_AUDIT_YEAR`) — is a **false declaration**, worse than the refusal,
+and is rejected outright rather than offered.
+
+**The owner ruled on 2026-09-13: record it, rule on the remedy later. No code has moved.**
+Nothing here is closed by that deferral, and this section must not be read as a resolution.
+
 ## Files created
 
 | File | Plan step | Purpose |
@@ -651,3 +702,388 @@ prove what they claim without touching the existing 39/11 reconciliation. All fi
 body representations flagged by the dispatch are corrected accurately and in place, with no
 rewriting of prior signed review history. Full 1160-test suite green; no TBD filled, no
 credential, no guard weakened, no locked-December reachability introduced. **READY.**
+
+---
+
+## Terminal adversarial re-review (2026-09-13, iteration 2 — budget exhausted)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T11:13:45Z
+**Scope:** iteration 2 of the two-pass floor set by the 2026-09-13 "Adversarial re-review
+(rejected-gate revision 2)" above. That pass's mandate was verifying the two disclosure fixes
+(this artifact's `## ⚠ CRITICAL, DISCLOSED 2026-09-13` box; the change record's §11.5 dated
+correction) and re-deciding the verdict. HEAD `1670ac8`; no Python interpreter on this clone
+(`python`/`python3` resolve only to the Windows Store stub) and PyPI egress blocked, confirmed
+independently; every count below is a static/textual re-derivation, never a re-execution.
+
+### 1. Disclosure verification — both corrections checked at their named location, factually accurate
+
+- **The four-link chain in `code-summary.md`'s CRITICAL box (lines 8–58)** was independently
+  re-derived, link by link, against the current source, not accepted from the artifact's own
+  text:
+  - Link 1 — `scripts/run_walking_skeleton.py:184`: `PHASE1_SEQUENCE` tuple confirmed to read
+    `("04_build_external_products.py", 1)` at exactly that line.
+  - Link 2 — `scripts/run_walking_skeleton.py:529`, inside `build_phase1_commands`: confirmed
+    `argv += [FIXTURE_SCOPE_OPTION, str(scope_path)]` executes unconditionally for every
+    `(script, phase)` pair in `PHASE1_SEQUENCE`, with only the `--phase` argument gated; and
+    `lifecycle_arguments` (`:487–510`) returns `[]` for any script not prefixed `05_`/`06_`/`07_`
+    — `04` gets no narrowing. Matches the claim exactly.
+  - Link 3 (the one sanctioned sibling spot-check, resolved via this unit's own call contract) —
+    `scripts/04_build_external_products.py:306`: confirmed
+    `declared_window = _declared_data_window() if fixture_manifest is not None else None`, and
+    `_declared_data_window()` (`:265–274`) returns a hardcoded `(Jan 1, Dec 31)` of `_AUDIT_YEAR`
+    with no CLI narrowing. Matches exactly, including the line numbers.
+  - Link 4 — `src/data/fixture_gate.py:209–251`, `assert_declared_window_within_scope`: read in
+    full; confirmed it raises unless both `declared_start`/`declared_end` lie inside
+    `scope.window`, and that `require_fixture_receipts` (`:587–671`) calls it exactly when
+    `fixture_manifest is not None and declared_window is not None` — true on every fixture
+    invocation of `04` per Link 2/3. `FIXTURE_IDS` (`src/data/fixture_manifest.py:152–155`)
+    confirmed to be exactly `plumbing_7day`/`scientific_1month` — no full-year scope exists to
+    satisfy the containment check. Matches exactly.
+  - **Ownership split verified correct**: three of the four links (1, 2, 4) sit in
+    `scripts/run_walking_skeleton.py` and `src/data/fixture_gate.py`, both this unit's own F3/F4
+    modules per this artifact's own "Files created" table; link 3 sits in
+    `scripts/04_build_external_products.py`, owned by `external-products` per this artifact's own
+    "Files modified" table. The "three of the four links are this unit's modules" claim is
+    accurate, not inflated or understated in either direction.
+  - The claim that the refusal is **unconditional** (not merely "out-of-window inputs," as
+    §11.5's original bullet describes it) is correct: `_declared_data_window()` returns a
+    full-year window for every input, unconditionally, so every fixture invocation of `04`
+    fails the containment check regardless of what the fixture scope or its manifest contain.
+  - WS-20/TA-17 named **unreachable rather than `Pending`** is the accurate characterisation:
+    the plumbing-fixture receipt these rows depend on can never be written while `04` sits in
+    `PHASE1_SEQUENCE` under the current code, which is a stronger and different claim than "not
+    yet run."
+- **The change record's §11.5 correction** (`governance/CHANGE_RECORD_2026-09-07_R133_fixtures_
+  and_reproducibility.md`, re-read in full at lines 351–421): confirmed by direct diff
+  (`git diff HEAD`) to be a pure insertion — every changed line is a `+`, none is a `-`. The
+  original Rec. 2 bullet (lines 358–362, "the TE §9.2 receipt-gate exemption on
+  `scripts/00/01/02/04` is bound to the fixture scope's cited window... out-of-window inputs
+  refuses") stands **untouched**, exactly as before. The dated correction (lines 364–395) is
+  appended as a blockquote directly beneath it, states the same three remedies and the same
+  2026-09-13 owner deferral as the code-summary's box, and is internally consistent with it —
+  no drift between the two disclosures. This satisfies `project.md`'s "never edit a
+  human-signed record" correction discipline exactly as the artifact claims.
+- **`code-summary.md`'s own insertion is also purely additive** (`git diff HEAD`): the CRITICAL
+  box is inserted after line 6, before the pre-existing "Files created" section, and every
+  subsequent `## Review` block from iteration 1 onward is untouched byte-for-byte; the only
+  other change is the new appended "Adversarial re-review (2026-09-13, rejected-gate revision
+  2)" section at the end. No earlier `## Review` block's verdict, findings table, or prose was
+  rewritten.
+- **One residual disclosure-completeness gap, Minor, non-blocking**: the body sections written
+  before 2026-09-13 (§ Test results, line ~95: "WS-20/TA-09/TA-17/TA-21 stay `Pending`"; §
+  Routed to the stage gate, line ~111: "WS-20/TA-09/TA-17/TA-21 `Pending`") were not edited to
+  point at the new CRITICAL box or restate "unreachable." Neither statement is false — they are
+  pending, permanently — but the CRITICAL box's own text (line 813–814) itself observes this is
+  "true as far as it goes, but silent on *why* they can never leave `Pending`," and that
+  observation applies equally to these two untouched body mentions, which still carry only the
+  weaker framing. This is the same class of gap `project.md`'s sweep-every-representation
+  corrections target, at low consequence since the primary, first-encountered disclosure (the
+  top-of-file CRITICAL box) already states the true position accurately and prominently.
+
+### 2. Re-derived counts (independent, printed, never carried)
+
+- `grep -c "^def test_" tests/test_clean_run.py` → **64**, matching the artifact exactly
+  (`wc -l` on the same file: 2599 lines).
+- Negative-control/must-not-fire reconciliation, re-summed from `business-rules.md`'s own
+  printed derivation (line 861): `5+4+5+2+3+4+5+4+3+4 = 39` ✓; (line 860/870 area)
+  `1+1+1+1+2+2+1+1+1 = 11` ✓. Both match the artifact's repeated claim across every prior pass;
+  not re-executable (no interpreter) but internally consistent with the artifact's derivation
+  text, which is itself independently summed here rather than trusted.
+- Over-99-character-line count, re-derived character-aware via PowerShell `Get-Content
+  -Encoding UTF8` (`.Length` on a decoded string is character count, not byte count — avoids the
+  em-dash/UTF-8-byte trap the artifact's own text warns about): **0** across
+  `src/data/fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`,
+  `scripts/run_walking_skeleton.py`, `scripts/01_inventory_and_registry.py`, and
+  `tests/test_clean_run.py` — matches the artifact's claim in all six files.
+
+### 3. Repository state, re-derived
+
+`git log -1` confirms HEAD `1670ac8`. `git status --short` (25 total changed paths) shows: this
+unit's own `code-summary.md` and `governance/CHANGE_RECORD_2026-09-07_R133_...md` modified (the
+two disclosure edits, both verified above); four sibling-repair files
+(`tests/test_determinism.py`, `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`,
+`src/evaluation/guards.py`) modified, none of which this unit owns or is credited/blamed for
+here; a further ~18 other units' code-summaries/plans and workflow-state files modified,
+likewise out of this unit's lane. **None of this unit's own five owned modules
+(`src/data/fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`,
+`scripts/run_walking_skeleton.py`, `tests/test_clean_run.py`) shows any uncommitted diff** —
+confirmed by their absence from `git status --short`'s output. `tests/test_clean_run.py`'s
+2026-09-10 edit by the `acquisition` unit's repair (adding
+`test_rec2_00_stage_entry_real_invocation_refuses_out_of_window`) is already folded into HEAD
+`1670ac8` and is not a currently-uncommitted change; the artifact's own body correctly reflects
+the post-edit state (64 functions) rather than a stale pre-edit count. Owner commit `64c0551`
+(2026-09-07 12:21 +0400) reconfirmed present and unamended — `git log -1 --format="%B" 64c0551`
+still returns the unedited git placeholder text, no D-number cited — matching every prior pass.
+
+### 4. Standing invariants, re-confirmed
+
+- Both fixtures pass, in order, before any full-year job (still a hard pipeline rule; not
+  altered by this pass — its enforceability against `04` is exactly what Finding 1 below
+  concerns). Seven-day fixture never treated as scientific evidence anywhere in this artifact.
+- Record-date, not directory-name, exclusion of December 2022 from either fixture: unaffected
+  by anything touched this pass; no new acquisition code was written.
+- D-11's frozen window (2022-11-01..07) and its stated non-representativeness limitation:
+  untouched, not referenced by this pass's changes.
+- BLK-02 re-confirmed OPEN: `find . -iname fixture_manifest.yaml` → no hits anywhere in the
+  repository.
+- BLK-08's mechanism limb re-confirmed CLOSED by D-37 (reaffirming D-27, unreopened);
+  `evidence/DECISIONS.md` tail re-confirmed at **D-38**, with D-37 immediately before it — no
+  new D-number was minted for the 2026-09-13 deferral (correctly: recording a deferral to defer
+  a remedy choice is not itself a scientific-constant decision requiring a D-number).
+- `configs/experiment.yaml:20` (`folds`) and `configs/data.yaml:45` (`stations`) both
+  re-confirmed still the literal `TBD — freeze gate` sentinel; `embargo_hours`/`cell_rule`
+  remain resolved per D-38/D-33 — no convenience-fill introduced.
+- `_completion_preconditions`'s 2026-09-12 repair (`_scalar_on_key_line`, `_config_field_state`,
+  `_config_tbd_reason`) reconfirmed present and structurally unexercised against the real
+  `configs/` on this clone (the pyyaml-import precondition still short-circuits ahead of it) —
+  not claimed closed by this pass, consistent with the artifact's own Residual #1.
+- No acceptance row is wrongly claimed discharged: WS-20, TA-09, TA-17, TA-21 remain named
+  `Pending`/`unreachable` (never `PASS`) everywhere in this artifact; TA-03/TA-26 remain named
+  unproducible off Kaggle; TA-15 remains named as foundation's, not this unit's, to discharge.
+
+### 5. Execution honesty
+
+Confirmed: no Python interpreter resolves on this clone (`python`/`python3` are Microsoft Store
+App Execution Alias stubs), and PyPI egress remains blocked. No test in this pass was executed;
+every figure above is either a static textual/character derivation performed independently in
+this pass, or a re-statement of a prior pass's own already-bounded "smoke evidence only, never
+governed" claim. Nothing here upgrades any test result's evidentiary status.
+
+### Verdict rationale — reasoned explicitly per dispatch point 3
+
+The disclosure gap that drove iteration 1's NOT-READY is now closed, accurately, at the primary
+artifact's first-encountered location, and appended (not overwritten) into the change record at
+its point of origin — verified above rather than accepted. That leaves the question the dispatch
+poses directly: **does closing the disclosure gap change the verdict, or does an unremediated
+Critical in a unit's own modules block READY regardless of disclosure quality?**
+
+This pass adopts the second position, for reasons specific to this artifact's own history and
+this project's own stated rule, not as a default posture:
+
+1. **This artifact's own verdict rule, applied consistently across all seven prior review
+   passes recorded above, has never carried an exception for "disclosed Critical."** Every
+   prior pass that stated the rule stated it flatly: "any Critical blocks READY." Iteration 1 of
+   this pass introduced no new rule text — it is the same rule this document has applied
+   throughout. Reinterpreting it now, at the terminal pass, as "unless fully disclosed" would be
+   a rule change made unilaterally by a reviewer rather than by the practices-affirmation gate
+   that owns `team.md`/`project.md`.
+2. **The defect is not merely undocumented; it is a real, currently-true functional failure of
+   mandated acceptance evidence.** WS-20 is a named Phase 1 acceptance-set member
+   (`team.md` § Testing Posture: "WS-01 plus WS-09 through WS-20") and TA-17 is a named
+   test-bearing TA row feeding `G-07` reproducibility. Under the current code, in every fixture
+   run, stage `04` cannot complete and the plumbing-fixture receipt these rows require is never
+   written — not "not yet demonstrated," but structurally impossible without a code change none
+   of the three named remedies has yet received. Disclosing this precisely does not make WS-20/
+   TA-17 reachable; it only makes the unreachability visible.
+3. **Half the causal chain is this unit's own authored mechanism, introduced by this unit's own
+   remediation, not merely inherited territory.** Three of the four links (independently
+   re-verified above) sit in modules this unit wrote and owns outright, and the specific
+   mechanism that arms the deadlock (the unconditional `--fixture-manifest` append plus the
+   window-containment guard) is this unit's own board-authorised `§11.5` design choice. A unit
+   whose own remediation is the proximate mechanism of an unconditional deadlock in its own
+   mandated acceptance evidence is not in the same position as a unit merely downstream of a
+   sibling's defect and fully disclosing it — the `external-products` comparison this dispatch
+   raises is instructive on precisely this distinction, not a precedent this unit can borrow
+   wholesale.
+4. **TE §18.3's own operating principle — "stop and report, never choose a default" on an
+   unresolved P0 — describes a reporting obligation, not a substitute for the remedy.** The
+   owner's 2026-09-13 ruling ("record it, rule on the remedy later") is the correct discharge of
+   the reporting obligation, and this pass credits it as such; it is not, and does not purport to
+   be, a ruling that the code is now acceptable to build on. "No code has moved" is the artifact's
+   own words, twice.
+
+Disclosure quality therefore governs what reaches the human at the gate honestly — and it does,
+now, at both the code-summary and the change record — but it does not retroactively make WS-20/
+TA-17 reachable, and it does not by itself satisfy this artifact's own repeatedly-stated verdict
+rule that any Critical blocks READY. **This unit is NOT-READY.** The remedy is explicitly not
+this review's to select (the owner deferred it 2026-09-13, and one of the three candidates is
+this unit's own call to make later); this verdict records that the Critical remains open, not
+that a particular remedy was withheld.
+
+Zero new findings beyond the disclosure-completeness Minor in §1 above (the two untouched
+`Pending`-only body mentions). Every other item this pass re-checked — test-function and
+over-99 counts, the 39/11 reconciliation, repository state, the `_completion_preconditions`
+repair, BLK-02/BLK-08, TBD-sentinel discipline — reproduced exactly as claimed, with no new
+discrepancy. **This is the terminal pass; this verdict is what reaches the human gate.**
+
+---
+
+## Adversarial re-review (2026-09-13, rejected-gate revision 2)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T11:02:57Z
+**Scope:** the unremediated Critical carried into this pass by the dispatch brief (the
+fixture-ladder deadlock at `scripts/04_build_external_products.py`), re-verified independently
+from this unit's side of the boundary; full recount of every claimed figure; repository-state
+and commit re-verification; guard re-verification at real entry points. HEAD `1670ac8`; no
+Python interpreter installed on this clone (confirmed: `python`/`python3` both resolve to the
+Microsoft Store App Execution Alias stub, not a real interpreter) and PyPI egress is blocked,
+so no test result in this pass or any prior pass is executable here — every count below is
+either a static/textual derivation I ran myself or a re-statement of the artifact's own prior
+claim, never re-executed.
+
+### Finding 1 — Critical (independently re-confirmed from this unit's own modules)
+
+**The walking-skeleton fixture ladder cannot complete Phase 1 stage `04` in any fixture run,
+and no receipt is ever written — WS-20/TA-17/TA-09/TA-21 are structurally unreachable, not
+merely `Pending` — and this unit's own PRIMARY artifact and its own change record are
+completely silent about it.**
+
+Traced independently, in this unit's own three modules, without relying on the dispatch
+brief's account:
+
+1. `scripts/run_walking_skeleton.py:184` — `PHASE1_SEQUENCE` includes
+   `("04_build_external_products.py", 1)`, confirmed by direct read.
+2. `scripts/run_walking_skeleton.py:513-533` (`build_phase1_commands`) appends
+   `FIXTURE_SCOPE_OPTION` (`--fixture-manifest`) **unconditionally** to every script's argv
+   (`argv += [FIXTURE_SCOPE_OPTION, str(scope_path)]`, outside any per-script conditional),
+   confirmed by direct read. `lifecycle_arguments` (same file, `:487-509`) returns `[]` for
+   any script not prefixed `05_`/`06_`/`07_` — `04` receives no narrowing.
+3. `src/data/fixture_gate.py:683-706` (`require_receipts_for_snapshot`, this unit's own
+   exported call) forwards to `require_fixture_receipts` (`:587-671`), which — whenever
+   `fixture_manifest is not None` (true on every fixture invocation, per point 2) **and**
+   `declared_window is not None` — calls `assert_declared_window_within_scope` (`:209-251`),
+   confirmed by direct read of all three functions.
+4. `04_build_external_products.py:265-274` (`_declared_data_window`, external-products'
+   module — read as the one permitted spot-check of a named integration point, resolved via
+   this unit's own call contract rather than by browsing the sibling's directory) returns a
+   hardcoded `(Jan 1, Dec 31)` of `_AUDIT_YEAR` unconditionally; `04`'s `_stage_entry`
+   (`:277-306`) sets `declared_window = _declared_data_window() if fixture_manifest is not
+   None else None` — so on every fixture run, `declared_window` is always the full calendar
+   year, never narrowed by the fixture scope.
+5. `assert_declared_window_within_scope` (`fixture_gate.py:209-251`) refuses unless both
+   declared endpoints lie inside `scope.window` — which is only ever 7 days (plumbing) or one
+   month (scientific) per `src/data/fixture_manifest.py:152-155` (re-confirmed by direct
+   read: `FIXTURE_IDS`/scope definitions carry no full-year window anywhere).
+
+The chain is therefore **unconditional, not merely a corner case of "out-of-window inputs"**:
+every fixture invocation of `04` computes a full-year declared window and every full-year
+window fails the scope-containment check against a 7-day or 1-month scope, with no code path
+that ever narrows it. This is stronger than this unit's own `governance/CHANGE_RECORD_2026-
+09-07_R133...md` §11.5 describes Rec. 2's own remediation: §11.5 states the binding makes "a
+full-scale invocation carrying a valid scope but **out-of-window inputs** refuse[]" — phrasing
+that reads as a targeted leakage guard against genuinely out-of-window data, not as a rule that
+refuses **every** fixture invocation of `04` unconditionally, because `04` never emits any
+window narrower than the full year regardless of the scope it is handed. Re-verified this is
+not a stale reading: `git status --short` shows zero uncommitted diff on `run_walking_
+skeleton.py`, `fixture_gate.py`, or `fixture_manifest.py` — the code at HEAD `1670ac8` is
+exactly the code this trace is drawn from, and it is this unit's own, not a sibling's, on two
+of three points (1-3, 5) in the chain.
+
+**Disclosure status — the decisive fact for this unit's verdict.** I swept this unit's own
+artifacts for any trace of this failure mode: `code-summary.md` (the PRIMARY artifact, all 654
+lines, seven prior review passes), `functional-design/business-rules.md`,
+`functional-design/business-logic-model.md`, `functional-design/domain-entities.md`,
+`functional-design/functional-design-questions.md`, `nfr-design/security-design.md`,
+`code-generation/code-generation-plan.md`, and
+`governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md` in full (grep for
+`04_build_external_products`, `deadlock`, `declared_window`, `assert_declared_window`,
+`external-products`). Only two classes of hit exist: (a) routine Files-modified/owner-table
+rows naming `04` as a sibling edit, and (b) the change record's own §6.1 (a **different**,
+already-fixed deadlock — the original "00/01/02/04 refuse on receipts before any receipt
+exists" problem, closed by adding `--fixture-manifest` to those four scripts) and §11.5 (the
+Rec. 2 window-binding addition itself, described only in the "out-of-window inputs refuse"
+framing above, with no caveat that this makes `04` unconditionally unreachable). **Nowhere in
+this unit's own artifact set — not in the PRIMARY artifact, not in the change record whose own
+§11.5 addition is the proximate cause — is it stated that stage `04` can never complete inside
+a fixture run.** This is a materially different position from the sibling unit
+`external-products`, which (per this dispatch's calibration note) fully disclosed the same
+Critical in its own review record before returning NOT-READY.
+
+**Judgment on point 2 of the dispatch (reasoned explicitly).** An unremediated Critical that
+is fully disclosed, not introduced by the pass under review, and deferred by the decision
+owner with named remedies on the table is a defensible basis for READY-with-disclosure in the
+ordinary case — the artifact's claimed state would still be true and the defect would be
+routed rather than hidden. That is not this artifact's position. Two things push this unit past
+that ordinary case into NOT-READY:
+
+- **Half the causal chain is this unit's own code, not merely this unit's territory.** Points
+  1, 2, 3 and 5 of the chain above live in `run_walking_skeleton.py` and `fixture_gate.py` —
+  modules this unit authored and owns outright. The unconditional `--fixture-manifest`
+  append (point 2) and the window-binding enforcement mechanism (point 3/5) were both
+  introduced by this unit's own `§11.5` remediation, described in this unit's own change
+  record as a deliberate, owner-authorised design choice — not an accident inherited from a
+  sibling's independent decision. A unit whose own remediation is the proximate mechanism of
+  an unconditional deadlock is answerable for it in a different way than a unit merely
+  downstream of a sibling's defect.
+- **This unit's own governing artifacts assert a "resolved" narrative that the trace
+  contradicts, rather than disclosing the residual failure.** §11.5 states the exemption
+  "is bound to the fixture scope's cited window... out-of-window inputs refuse[]" as a closed
+  remediation item, with no caveat that fixture runs of `04` are now unconditionally
+  unreachable. `code-summary.md`'s own "Key implementation decisions" and "Test results"
+  sections assert `test_clean_run.py`'s reconciliation is "empty in both directions" and that
+  "WS-20/TA-09/TA-17/TA-21 stay `Pending`" — true as far as it goes, but silent on *why* they
+  can never leave `Pending` under the current code, which is a materially different claim than
+  "not yet run." READY certifies that the artifact's own claimed state is currently true and
+  buildable-on; an artifact that is silent about a defect half-seated in its own modules, where
+  the silence sits inside the very change record that introduced the mechanism, does not meet
+  that bar. Deferring the remedy choice does not defer the disclosure obligation, and here
+  the disclosure itself is missing, not merely the remedy.
+
+This is not a repair this unit is asked to make in this pass (the owner explicitly deferred
+the remedy choice on 2026-09-13, and none of the three candidate remedies is this review's to
+select) — it is a disclosure gap in the PRIMARY artifact and the change record, both squarely
+within this unit's write scope, that a re-review dispatched to look for exactly this defect
+must report as blocking.
+
+### Findings 2+ — none
+
+Every other item re-checked this pass held without a new finding:
+
+- **Test-function count**: `grep -c "^def test_" tests/test_clean_run.py` → **64**, matching
+  the artifact's claim exactly. `git status --short` on this file, this artifact, and this
+  unit's three `src/data/*.py` modules and `scripts/run_walking_skeleton.py` shows **zero
+  uncommitted diff** — the working tree exactly matches HEAD `1670ac8` for every file this
+  unit owns; none of the four sibling-repair files named in the dispatch
+  (`tests/test_determinism.py`, `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`,
+  `src/evaluation/guards.py`) touches a module this unit owns, confirmed by `git status
+  --short` showing them modified independent of anything in this unit's own paths.
+- **Pass/fail/skip figures (61/0/3 over 64; 1160/0/39 full suite)** cannot be re-executed on
+  this clone (no Python interpreter — `python`/`python3` resolve only to the Windows Store
+  stub) and are correctly bounded by the artifact itself as "smoke evidence only, never
+  governed" throughout; this pass adds no new execution and takes no position on them beyond
+  what every prior pass already disclosed.
+- **Over-99-character-line count**: re-derived character-aware (not byte-count) via
+  PowerShell string length over the same six files every prior derivation used
+  (`fixture_manifest.py`, `fixture_gate.py`, `fixture_evidence.py`, `run_walking_skeleton.py`,
+  `01_inventory_and_registry.py`, `test_clean_run.py`) → **0 in all six**, matching the
+  artifact exactly. (A first pass with `awk length()` returned false positives of 1-2 per file
+  because `awk` under this shell's `C.UTF-8` locale counts UTF-8 *bytes*, not characters — a
+  single em-dash reports as length 3 — reproducing exactly the false-positive trap the
+  artifact's own text warns about; discarded once traced to that cause.)
+- **Repository state**: HEAD is `1670ac8`; owner commit `64c0551` (2026-09-07 12:21 +0400,
+  unedited git template message, no D-number) confirmed present and unamended by `git log -1
+  --format="%B" 64c0551`, matching the artifact's claim. This unit's own files carry zero
+  uncommitted diff against HEAD, consistent with "nothing in this unit was changed" this
+  session (per the dispatch context) and with the artifact's own repository-state section.
+- **`_completion_preconditions` repair**: `_scalar_on_key_line`, `_config_field_state`,
+  `_config_tbd_reason` confirmed present in `tests/test_clean_run.py` (`:1587-1666`); the
+  import-check loop (`yaml`/`numpy`/`pandas`) still precedes the config-field loop
+  (`:1668-1699`), so the repaired path remains unexercised against real `configs/` on this
+  clone, exactly as Residual #1 states. `configs/experiment.yaml:20` (`folds`) and
+  `configs/data.yaml:45` (`stations`) both still carry the literal `TBD — freeze gate`
+  sentinel; `embargo_hours`/`cell_rule` remain resolved per D-38/D-33 — matches the artifact's
+  probe table exactly.
+- **BLK-02/BLK-08/D-37/D-38**: `find . -iname fixture_manifest.yaml` → no hits anywhere in the
+  repository (BLK-02 holds); `evidence/DECISIONS.md` tail confirmed at D-38 with D-37
+  immediately before it, text matching the artifact's quotations verbatim.
+- **39/11 negative-control reconciliation**: not re-executed (no interpreter), but
+  `business-rules.md`'s own printed derivation (`5+4+5+2+3+4+5+4+3+4=39`,
+  `1+1+1+1+2+2+1+1+1=11`) is internally consistent with the artifact's repeated claim across
+  five prior independent review passes; no new discrepancy found.
+
+### Verdict rationale
+
+**One Critical** (Finding 1: the unconditional `04` fixture-ladder deadlock, independently
+re-traced through this unit's own `run_walking_skeleton.py` and `fixture_gate.py`, undisclosed
+anywhere in this unit's PRIMARY artifact or in the change record whose own §11.5 addition is
+half its proximate cause). Per the stated verdict rule (any Critical blocks READY), and per the
+reasoning above (this unit is not a passive bystander to a sibling's defect: it authored the
+unconditional trigger and the enforcing guard, and its own governing record is silent about the
+consequence), this unit is **NOT-READY**. Every other invariant this re-review was dispatched
+to attack — test-function and over-99-line counts, commit state, the `_completion_
+preconditions` repair, BLK-02/BLK-08, the 39/11 reconciliation — re-verified exactly as
+claimed, with zero new findings beyond Finding 1.

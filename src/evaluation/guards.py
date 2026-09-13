@@ -356,10 +356,17 @@ def resolve_inverse(transform_id: str) -> Any:
     """R-103's `ABL-DIFF`-only resolver slot — REFUSES today, always, naming D-27.
 
     D-27 withheld the inverse mechanism (*"no import-boundary change is authorised by this
-    decision"*), `evidence/DECISIONS.md` ends at D-32 with D-27 unreopened (verified
-    2026-09-06), and the `src/evaluation` → `src/features` edge is unauthorised — so there is
-    NO registry to search and no persisted inverse to resolve. This function exists so the
-    refusal has one home and control (1) has a named surface; it never returns.
+    decision"*), and the `src/evaluation` → `src/features` edge is unauthorised — so there is
+    NO registry to search and no persisted inverse to resolve. `evidence/DECISIONS.md` now
+    carries 39 `## D-` headings, ending at D-38 plus a `## D-1 addendum` (re-derived
+    2026-09-13; the earlier "ends at D-32" reading was stale). D-27 remains unreopened, and
+    **D-37 (2026-09-10) affirms it permanently** — a reaffirmation, never a supersession —
+    resolving BLK-08's mechanism limb in D-27's identity form: the refusal IS the mechanism,
+    the primary path's citable route is `identity (D-27: primary target untransformed)`
+    because its output is already raw TECU, `ABL-DIFF` keeps the only real inverse, and no
+    generic inverse route and no import-boundary change are created. The refusal below is
+    therefore better supported now than when it was written, not weaker. This function exists
+    so the refusal has one home and control (1) has a named surface; it never returns.
 
     Raises
     ------

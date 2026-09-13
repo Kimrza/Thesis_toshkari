@@ -360,6 +360,39 @@ explicit ruling and flagged here for each owner's record):
   `assert_records_within_window`), no longer granted on a validating flag alone; one negative
   control per script proves a full-scale invocation carrying a valid scope but out-of-window
   inputs refuses.
+
+  > **Dated correction, 2026-09-13 — this bullet understates what Rec. 2 did to `scripts/04`,
+  > and the understatement was found only after the rejected stage gate.** Appended, not
+  > rewritten, per this record's dated-update convention.
+  >
+  > For `04` the binding is **not** a refusal on "out-of-window inputs". It is an
+  > **unconditional** refusal inside every fixture run. `04`'s `_declared_data_window()`
+  > (`scripts/04_build_external_products.py:265-274`) returns a hardcoded full calendar year
+  > with no CLI narrowing, and `assert_declared_window_within_scope`
+  > (`src/data/fixture_gate.py:209-251`) refuses unless both declared endpoints lie inside the
+  > scope's cited window — only ever 7 days or 1 month
+  > (`src/data/fixture_manifest.py:152-155`). Since `build_phase1_commands`
+  > (`scripts/run_walking_skeleton.py:529`) appends `--fixture-manifest` to **every** script in
+  > `PHASE1_SEQUENCE`, which includes `04` at `:184`, and `lifecycle_arguments` returns `[]`
+  > for `04`, the flag that §6.1 added to *break* a deadlock is now the flag that *arms* one.
+  >
+  > **Consequence: the plumbing fixture can never complete stage `04`, the receipt only that
+  > fixture can write is never written, and WS-20 and TA-17 are UNREACHABLE rather than
+  > `Pending`.** §6.1 installed the `--fixture-manifest` option precisely to prevent this
+  > class of deadlock ("the plumbing fixture would refuse on the receipts only it can write");
+  > §11.5 re-created it for `04` specifically.
+  >
+  > Three remedies, all owner decisions (TE §18.3 — stop and report, never choose a default):
+  > (a) genuinely window-parameterise `04` — `external-products`' call, wanting a D-number
+  > since it changes a governed script's declared data scope; (b) remove `04` from
+  > `PHASE1_SEQUENCE` — this unit's call, and it changes what TE §13.2's seven-invocation
+  > clean-run contract certifies; (c) accept that `04` cannot participate until (a). Making
+  > `_declared_data_window()` merely *report* the narrow window while the audit still reads all
+  > twelve months would be a **false declaration**, worse than the refusal, and is rejected
+  > rather than offered.
+  >
+  > **The owner ruled on 2026-09-13: record it, rule on the remedy later. No code has moved**,
+  > and this correction closes nothing.
 - **Rec. 3 (ML-02)** — `scripts/07`'s fixture path roots its mask registry under the fixture
   tree (`artifacts/walking_skeleton/<fixture_id>/mask_registry`) and stamps each apparatus
   registration; negative controls prove a post-fixture confirmatory registration succeeds and

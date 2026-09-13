@@ -1,8 +1,60 @@
 # Code Summary — `evaluation-and-comparison`
 
 **Unit** `evaluation-and-comparison` (Bolt 9) · **Kind** `library` · **Stage** `code-generation`
-**Plan**: `code-generation-plan.md` (10 steps; all 10 executed)
+**Plan**: `code-generation-plan.md` (Steps 1–11 executed, plus the **repair Step 12 added and executed 2026-09-13** under the owner's ruling at the rejected stage gate)
 **Receipted answers**: Q1 = A, Q2 = B, Q3 = A, Q4 = A, Q5 = A.
+
+## Repair Step 12 — the stale register claim in `resolve_inverse`, 2026-09-13
+
+Written into the body rather than a review addendum per `project.md`
+(`code-generation:fr-2`). **Docstring only — no executable line changed**, and the diff
+proves it: +11/−4 in one hunk spanning lines **359–369**, while the docstring runs 356–375
+and the first executable line, `raise InverseTransformError(`, is at **376**.
+`resolve_inverse` still refuses unconditionally, naming D-27.
+
+**What was stale.** The docstring asserted *"`evidence/DECISIONS.md` ends at D-32 with D-27
+unreopened (verified 2026-09-06)"* — a dated factual claim about the register, sitting
+inside a live guard module. Re-derived 2026-09-13: `grep -c "^## D-"` = **39**, running
+D-1…D-38 plus a `## D-1 addendum`, i.e. six decisions past what the comment claimed. This is
+the failure class `project.md`'s count-derivation correction exists to catch, and the one
+place it is most costly — a reader of a guard's own docstring has no reason to doubt it.
+
+**The conclusion is now better supported, not weaker.** `## D-37` (2026-09-10, "D-27 is
+affirmed; BLK-08's mechanism limb resolves in D-27's identity form") records the owner's
+Choice B and states in its own words: *"This is a REAFFIRMATION, not a supersession. D-27
+stands, unreopened and unamended"*, authorising *"no import-boundary change… no
+`src/evaluation` → `src/features` route is created and TE §12's allowlist is untouched."*
+So the refusal the docstring documents is affirmed permanently rather than merely
+un-overturned. The corrected text states the current register fact and cites D-37.
+
+**Sweep, derived rather than taken from the finding.** `D-32` occurs **exactly once** in
+the file — the line corrected — so there was no second representation to catch. The other
+thirteen `D-27` and ten `D-28` citations state what those decisions *say* (inverse withheld,
+import edge unauthorised, the scored window), not dated claims about register contents, and
+D-37 confirms each still true; `:418`'s "while D-27 stands unreopened" was verified correct
+and left alone. Remaining dated strings in the file are claims about governance events, not
+about the register.
+
+**Standing constraints re-affirmed, none relaxed.** D-27 unreopened; the
+`src/evaluation` → `src/features` edge unauthorised; no inverse mechanism added, restored or
+enabled; `evidence/DECISIONS.md` untouched; `src/evaluation/metrics.py` (shared with
+`statistical-inference`) untouched, `git diff` empty on both.
+
+**Repository state — the repair is UNCOMMITTED.** Derived 2026-09-13 at HEAD `1670ac8`:
+`git status --porcelain src/evaluation/guards.py` → ` M`, `git diff --cached --stat` empty
+(nothing staged), `git diff HEAD --numstat` → `11 4`. This docstring correction exists only
+in the working tree; a `git reset --hard`, a `git clean`, or a fresh checkout restores the
+stale "ends at D-32" claim with no trail that it was ever corrected. **No commit, amend or
+push was made by this stage** — the commit is the student's act (`project.md`
+`code-generation:c30`) — and committing this repair is routed to the gate as an owed act.
+Stated explicitly because the sibling `governance-guards` review returned a Critical on the
+conflation between "the unit's code is committed" and "this repair is committed": the first
+is true here, the second is not.
+
+**Execution: none, and none claimed.** No interpreter, no `pytest`, no `ruff` on this clone;
+PyPI egress blocked. **No smoke evidence and no governed evidence is claimed** for this
+change. That a docstring-only edit cannot alter runtime behaviour is static reasoning from
+the diff ranges above, not an executed test. No acceptance row is claimed discharged.
 
 ## Sources
 
@@ -14,16 +66,28 @@
 
 ## Files created (6) / modified (3)
 
+> **Line counts re-derived 2026-09-13 by `wc -l` at HEAD `1670ac8` plus working tree, after
+> the iteration-1 re-review returned three Majors on this table.** Four cells were stale and
+> one was made stale by Repair Step 12 itself. The prior "Summary accuracy (check 10)" claim
+> that all nine counts were exact is **superseded**: it was wrong for four of them, and one
+> — `metrics.py` — had never been right, since `git log` shows exactly one commit for that
+> file (`8a6cb61`, its creation) and it has never been 665 lines in history. Two of the
+> corrected values had already been derived correctly elsewhere **in this same document**
+> (the 2026-09-10 cross-unit edit record derived 774; the 2026-09-10 gate-floor re-review
+> derived 1250) and were never propagated to this table — the exact "correction filed where
+> its own reader never reaches it" failure `project.md` (`code-generation:fr-2`) names.
+> Superseded figures are kept beside the corrected ones rather than erased.
+
 | File | Lines | Content |
 |---|---|---|
 | `governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md` | 187 | Q1 = A membership confirmation (Vision §2.4/§8.4/§8.9), PROPOSED D-number text for `evidence/DECISIONS.md` (owner adopts or edits; no agent writes the register), the Q2 = B sibling-edit record, the Q4 = A race analysis, honest limits |
-| `configs/experiment.yaml` (modified) | 178 (was 150) | `comparison_sets`: primary {M-01, M-02, M-03, M-06, B-01}, gim {M-06, C-01}, tier3 {M-04, M-05, M-06}, each citing the Step 1 record; parse-verified member counts 5 / 2 / 3; nothing else touched |
-| `src/evaluation/guards.py` | 632 | The six SD-C-01 refusals as one failure domain — `require_stamps` (`LeakageError`), `require_partition_agreement` (`PartitionError`), `require_registered_mask` + `require_declared_membership` (`FairnessError`), `require_target_space` (`InverseTransformError`; `ABL-DIFF` refuses naming D-27), `require_locked_receipt` (`LockedTestError`, three ordered limbs: hash receipt, SD-C-02 containment, D-28 window), `require_mask_member_alignment` (`FairnessError`) — plus `resolve_inverse` (always refuses naming D-27) and `scored_window_statement` (D-28's sentence derived by date arithmetic, no constant in source) |
+| `configs/experiment.yaml` (modified) | **275 on disk** (re-derived 2026-09-13; the cell read `178 (was 150)`, which was this unit's own diff and is not the file's size — later sibling and owner commits transcribed D-33…D-38 into it) | `comparison_sets`: primary {M-01, M-02, M-03, M-06, B-01}, gim {M-06, C-01}, tier3 {M-04, M-05, M-06}, each citing the Step 1 record; parse-verified member counts 5 / 2 / 3; nothing else touched |
+| `src/evaluation/guards.py` | **639** (re-derived 2026-09-13; was 632 — the +7 net is **Repair Step 12's own docstring correction**, which left this cell stale in the very file it edited) | The six SD-C-01 refusals as one failure domain — `require_stamps` (`LeakageError`), `require_partition_agreement` (`PartitionError`), `require_registered_mask` + `require_declared_membership` (`FairnessError`), `require_target_space` (`InverseTransformError`; `ABL-DIFF` refuses naming D-27), `require_locked_receipt` (`LockedTestError`, three ordered limbs: hash receipt, SD-C-02 containment, D-28 window), `require_mask_member_alignment` (`FairnessError`) — plus `resolve_inverse` (always refuses naming D-27) and `scored_window_statement` (D-28's sentence derived by date arithmetic, no constant in source) |
 | `src/evaluation/masks.py` | 697 | `build_comparison_mask` (stamps first, exact declared membership, matched-window agreement, per-station surviving + exclusion counts, deterministic sha256 `mask_id`, full stamp set, the five exposed reporting values), `MaskRegistry` (once-only per set; write-once `frozen_bundle_manifest.json` via `.tmp` → fsync → `os.replace`, second write refuses — Q4 = A race analysis in the docstring), `read_comparison_sets` (refuses absent/TBD by name) |
-| `src/evaluation/metrics.py` | 665 | `paired_loss_differential` (guards first; squared errors per (`station`, hour) on masked rows only → per-station mean **benchmark minus model** → unweighted three-station mean), `EstimandResult` (orientation `benchmark_minus_model`, weighting `equal_station`, verbatim sign sentence, four stamps copied from the registered mask, disagreement fails), `build_metrics_artifact` (per-set completeness refusal; `beats_model` per benchmark; TEC-06 sentence on every IRI/GIM row; fail-closed GIM overlap disclosure with containment ordering; Phase-2 not-independent statement field), atomic refuse-overwrite writer |
+| `src/evaluation/metrics.py` | **731** (re-derived 2026-09-13; the cell read 665, which the file has **never** measured — `git log --oneline -- src/evaluation/metrics.py` returns one commit, `8a6cb61`, its creation. Four successive passes asserted this count "verified with `wc -l`, matches exactly"; none of them can have run it. The +66 is `statistical-inference`'s R-114 one-copy extraction, disclosed in that unit's record) | `paired_loss_differential` (guards first; squared errors per (`station`, hour) on masked rows only → per-station mean **benchmark minus model** → unweighted three-station mean), `EstimandResult` (orientation `benchmark_minus_model`, weighting `equal_station`, verbatim sign sentence, four stamps copied from the registered mask, disagreement fails), `build_metrics_artifact` (per-set completeness refusal; `beats_model` per benchmark; TEC-06 sentence on every IRI/GIM row; fail-closed GIM overlap disclosure with containment ordering; Phase-2 not-independent statement field), atomic refuse-overwrite writer |
 | `src/data/locked_test.py` (modified) | 546 (was 461) | **Q2 = B owner-instructed sibling edit, flagged for `governance-guards`' record and re-check**: `AccessRecord` + `mask_bundle_ids`/`mask_registry_hash` (additive, optional, existing callers verified unbroken); `open_restricted` populates both from a frozen-bundle manifest; a present-but-unparseable manifest aborts the read (`LockedTestError`) rather than logging `None` |
-| `scripts/07_evaluate_and_report.py` | 621 | Position 07; `--config configs/` `--phase 1|2`; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; predictions by manifest; per-set mask build/register, estimands, metrics artifact; honest `aborted` registry row on `IntegrityError`; **DEC unreachable** — enters only via `materialise_locked_partition(g05_signature=...)` + `open_restricted(purpose="locked_evaluation")`, G-05 `Blocked`; bootstrap intervals and breakdown tables NOT computed (other units') |
-| `tests/test_common_masks.py` | 1240 | 61 test functions (derived: `grep -c "def test_"`) — controls (1), (3)–(32) as owned here ((2) vacated per R-103), per-entry guard controls incl. the sixth guard, containment controls, second-manifest-write refusal, orientation/weighting fixtures, completeness/disclosure/`beats_model` presence tests, tier-3 matched-window instance (28), AST import-boundary tests, fresh-subclass `aborted`-row scan, the three must-NOT-fire controls; member counts re-read from config, synthetic year 2001 only |
+| `scripts/07_evaluate_and_report.py` | **774** (re-derived 2026-09-13; the cell read 621 — wrong by 153 lines, and this document's own 2026-09-10 cross-unit edit record already stated "Current size, derived: 774 lines (`wc -l`)" without the table ever being reconciled to it) | Position 07; `--config configs/` `--phase 1|2`; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; predictions by manifest; per-set mask build/register, estimands, metrics artifact; honest `aborted` registry row on `IntegrityError`; **DEC unreachable** — enters only via `materialise_locked_partition(g05_signature=...)` + `open_restricted(purpose="locked_evaluation")`, G-05 `Blocked`; bootstrap intervals and breakdown tables NOT computed (other units') |
+| `tests/test_common_masks.py` | **1250** (re-derived 2026-09-13; the cell read 1240, and this document's own 2026-09-10 gate-floor re-review already stated "the file is 1250 lines (was 1240 at the prior summary date)" without the table ever being reconciled to it) | 61 test functions (derived: `grep -c "def test_"`) — controls (1), (3)–(32) as owned here ((2) vacated per R-103), per-entry guard controls incl. the sixth guard, containment controls, second-manifest-write refusal, orientation/weighting fixtures, completeness/disclosure/`beats_model` presence tests, tier-3 matched-window instance (28), AST import-boundary tests, fresh-subclass `aborted`-row scan, the three must-NOT-fire controls; member counts re-read from config, synthetic year 2001 only |
 | `src/data/config.py` (modified) | 1276 | One `REQUIRED_FIELDS_MAP` entry `("evaluation-and-comparison", 1)` so script 07's refusal path can execute (the map's docstring anticipates per-stage additions; every prior unit did the same); `comparison_sets` deliberately NOT listed — enforced at `read_comparison_sets`, preserving the honest `aborted`-row path |
 
 ## Key implementation decisions
@@ -522,3 +586,251 @@ remains closed as this unit implements it. The one new finding — a stale "ends
 claim in `guards.py`'s docstring, six decisions behind the current register — is
 non-functional and does not block. READY stands on this pass's own independent
 re-derivation against `b0b7c1d`.
+
+### Adversarial re-review (2026-09-13) — Repair Step 12
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T09:42:29Z
+**Iteration:** 1 (adversarial re-review of Repair Step 12, at the REJECTED stage gate;
+baseline HEAD `1670ac8`; not a rubber-stamp of the four prior verdicts above)
+
+**Scope.** Verifies the Repair Step 12 docstring correction in `src/evaluation/guards.py`'s
+`resolve_inverse` and re-derives this unit's own standing Files-table and test-count claims
+per `project.md`'s `code-generation:fr-2` (re-derive counts at review time, correct in the
+artifact body). Per the read-scope bound, no sibling unit's `construction/<unit>/` content
+was read.
+
+**Repair Step 12 itself: verified correct.**
+1. **Docstring-only, no executable line changed.** `git diff HEAD -U5 -- src/evaluation/guards.py`
+   shows exactly one hunk, `@@ -354,14 +354,21 @@`, entirely inside the docstring (lines
+   356–375); the first executable statement, `raise InverseTransformError(` at line 376, is
+   unchanged (confirmed both by the diff and by reading lines 350–395 directly). `resolve_inverse`
+   still refuses unconditionally, naming D-27, exactly as before.
+2. **The corrected factual claim is itself correct.** `grep -c "^## D-" evidence/DECISIONS.md`
+   → **39**, confirmed running D-1…D-38 plus one `## D-1 addendum` at line 2041 — matches the
+   new docstring text exactly. `## D-37` (read at lines 1941–1969) states verbatim "This is a
+   REAFFIRMATION, not a supersession... D-27 stands, unreopened and unamended" and "authorises
+   no import-boundary change... no `src/evaluation` → `src/features` route is created" —
+   matches the docstring's citation exactly. D-27 remains unreopened; no `src/evaluation` →
+   `src/features` edge exists (unchanged).
+3. **Sweep of the stale claim's other representations: confirmed clean.** `grep -rn "D-32"
+   src/evaluation/*.py` → one hit in `guards.py` (the corrected line) and one in `metrics.py:75`
+   (`"row approved under D-32, never run"` — a live citation of D-32's still-true content, not
+   a dated "register ends at" claim; not a second representation of the stale claim).
+   `bootstrap.py:58`'s `"verified 2026-09-06"` concerns `BootstrapError`'s declaration site in
+   `src/data/config.py`, an unrelated fact, not the register's length. No spelled-out numeral
+   form found. `D-27` and `D-28` occurrence counts (14 and 10 respectively, post-repair) are
+   consistent with the artifact's "thirteen"/"ten" figures once the one corrected line's own
+   mentions are excluded.
+4. **Scope respected.** `evidence/DECISIONS.md` and `src/evaluation/metrics.py` both show
+   zero diff against `1670ac8` (`git diff HEAD --stat` empty for both) — confirmed. No other
+   unit's module or `code-summary.md` was touched by this repair.
+5. **Repository-state and execution-honesty claims: both accurate.** `git status --porcelain
+   src/evaluation/guards.py` → ` M`; `git diff --cached --stat` empty; `git diff HEAD --numstat`
+   → `11 4` — matches the artifact's claim exactly, and it correctly distinguishes "this repair
+   is uncommitted" from "the unit's code is committed" (the conflation the `governance-guards`
+   sibling review was cited as a Critical for). No Python interpreter exists on this clone
+   (confirmed: `python`/`python3` both fail) — the artifact's "no smoke, no governed evidence"
+   claim is correctly bounded and does not overclaim.
+6. **Attribution respected.** The other uncommitted files in this working tree
+   (`tests/test_determinism.py`, `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`,
+   several sibling `code-summary.md` files) are not mentioned anywhere in this unit's
+   `code-summary.md` — no credit or blame crossed the unit boundary.
+
+**New finding this pass — the Files table is stale for 5 of its 9 rows, one of which this
+repair itself left uncorrected.** Re-derived every row with `wc -l` against the current
+working tree (identical to HEAD for every row except `guards.py`, which carries this
+repair's uncommitted +7 net lines):
+
+| File | Table claims | Actual (`wc -l`) | Note |
+|---|---|---|---|
+| `src/evaluation/guards.py` | 632 | **639** | Stale by exactly this repair's own +7 net lines (`+11/−4`); Step 12 edited this file and never touched its own Files-table row. |
+| `src/evaluation/metrics.py` | 665 | **731** | Wrong by 66 lines. `git log --oneline -- src/evaluation/metrics.py` shows exactly one commit (`8a6cb61`, the file's creation) — the file has never been 665 lines in git history; this claim has been wrong since it was first written and was never caught by any of the four prior review passes' "Summary accuracy" checks. |
+| `scripts/07_evaluate_and_report.py` | 621 | **774** | Wrong by 153 lines. The artifact's own text at line 165, in this same document (the 2026-09-10 cross-unit edit record), already states "Current size, derived: 774 lines (`wc -l`)" — the primary Files table contradicts the artifact's own later prose. |
+| `tests/test_common_masks.py` | 1240 | **1250** | Wrong by 10 lines. The artifact's own text at line 350, in this same document (the 2026-09-10 gate-floor re-review), already states "the file is 1250 lines (was 1240 at the prior summary date)" — again, the primary table was never reconciled with the artifact's own later correction. |
+| `configs/experiment.yaml` | 178 (was 150) | **275** | Wrong by 97 lines; undisclosed anywhere else in the document (unlike the two rows above). |
+
+`masks.py` (697), `locked_test.py` (546), `src/data/config.py` (1276), and the change record
+(187) all check out exactly.
+
+This falsifies the artifact's own "Summary accuracy (check 10)" line (line 133): *"Every
+file's claimed line count was verified with `wc -l` and matches exactly... guards.py 632,
+masks.py 697, metrics.py 665, 07_evaluate_and_report.py 621, test_common_masks.py 1240,
+locked_test.py 546, config.py 1276, experiment.yaml 178, the change record 187 — all exact."*
+Four of those nine are not exact today, and one (`metrics.py`) appears never to have been
+exact. `project.md`'s `code-generation:fr-2` ("ALWAYS re-derive a unit's own counts... and
+write the correction into the artifact BODY rather than only into a review addendum") and
+`fr-1`/`sweep-derive-sites`/`sweep-numerals-and-surfaces` exist precisely to catch this
+class of defect, and this artifact — which has now been reviewed four times, twice of which
+(2026-09-10, 2026-09-11) independently re-derived the correct 774 and 1250 figures for two
+of these rows in their own prose — never propagated either correction back into the primary
+Files table that a reader meets first. This is the fifth documented recurrence in this
+project's memory of exactly this failure mode.
+
+**Severity.** Rated Major, not Critical: no runtime behaviour, guard logic, or scientific
+claim is affected, and this repair's own scope (the `resolve_inverse` docstring) was
+correctly and narrowly executed. But it is not one Major — it is at least three, each
+independently sufficient to block:
+
+1. **Major** — `guards.py`'s own Files-table row (632) is now wrong because of this very
+   repair, which touched the file and left the table uncorrected — the repair that exists to
+   fix one stale count introduced (left standing) another in the same file it edited.
+2. **Major** — the Files table self-contradicts the artifact's own later prose for two rows
+   (`scripts/07_evaluate_and_report.py`, `tests/test_common_masks.py`): the correct figures
+   are already written down elsewhere in this same document and were never reconciled.
+3. **Major** — `metrics.py`'s claimed count (665) has been wrong since the file's creation
+   commit and was never caught by four "verified... matches exactly" review passes;
+   `configs/experiment.yaml`'s claimed count (178) is wrong by 97 lines with no disclosure
+   anywhere in the document. Together these mean the artifact's explicit "all exact"
+   accuracy claim is false for a majority of the table it applies to.
+
+Three Majors exceeds this review's `>2 Major → NOT-READY` threshold.
+
+**What would clear this.** Re-derive and correct all nine Files-table rows (and the
+`(was N)` deltas where present) with `wc -l`, printed before assertion; state the correction
+in the table itself, not only in a new review block. No re-verification of Repair Step 12's
+own docstring correctness is needed — that finding stands as verified above and may be
+carried forward once the table is fixed.
+
+**Summary.** Repair Step 12's docstring correction is accurate, correctly scoped to
+non-executable text, correctly cites the current register state and D-37, and does not
+overclaim on execution or commit state. But the artifact's own Files table — the same class
+of defect this repair was created to fix — is stale or self-contradicted for 5 of 9 rows,
+including the very file this repair touched, and the artifact's own "all exact" accuracy
+claim is demonstrably false today. NOT-READY.
+
+### Terminal re-review (2026-09-13) — iteration 2, budget exhausted
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T09:48:57Z
+**Iteration:** 2 (TERMINAL — this is the final pass; the verdict below stands as recorded
+and reaches the human gate with no further review cycle behind it)
+
+**Scope and posture.** Adversarial re-verification, not a rubber-stamp of the fix. Re-ran
+every check the prior NOT-READY pass demanded, independently, against baseline HEAD
+`1670ac8`, plus re-attacked Repair Step 12's substance from scratch rather than inheriting
+the prior pass's clearance.
+
+**1. All nine Files-table counts re-derived with `wc -l`, printed before assertion:**
+
+| File | Table claims | `wc -l` (this pass) | Match |
+|---|---|---|---|
+| `src/evaluation/guards.py` | 639 | 639 | Yes |
+| `src/evaluation/masks.py` | 697 | 697 | Yes |
+| `src/evaluation/metrics.py` | 731 | 731 | Yes |
+| `scripts/07_evaluate_and_report.py` | 774 | 774 | Yes |
+| `tests/test_common_masks.py` | 1250 | 1250 | Yes |
+| `src/data/locked_test.py` | 546 | 546 | Yes |
+| `src/data/config.py` | 1276 | 1276 | Yes |
+| `configs/experiment.yaml` | 275 | 275 | Yes |
+| `governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md` | 187 | 187 | Yes |
+
+All nine rows now check out exactly, including the four previously unflagged rows
+(`masks.py`, `locked_test.py`, `config.py`, the change record) — none of these four was
+ever wrong; they were simply never independently confirmed by the prior NOT-READY pass
+either, and are confirmed now rather than inherited.
+
+**2. Attribution of the two disclosed deltas verified against git, not against prose.**
+`git diff HEAD -U5 -- src/evaluation/guards.py` shows exactly one hunk, `@@ -354,14
++354,21@@` (net `11 4`, i.e. +7), entirely inside `resolve_inverse`'s docstring (lines
+355–375); the first executable statement, `raise InverseTransformError(`, sits unchanged
+at line 376 (confirmed by direct read of lines 350–380). This is Step 12's own edit and
+nothing else — the +7 is correctly attributed to this repair and to no other unit's work.
+For `metrics.py`, `git log --oneline -- src/evaluation/metrics.py` returns exactly one
+commit, `8a6cb61` (the file's creation at 731 lines) — the file has never been 665 lines
+in history, so there is no "drift" to attribute, only an original miscount. The claimed
+`statistical-inference` R-114 attribution for the +66 is independently confirmed by
+reading the file's own docstring (`src/evaluation/metrics.py` lines ~10–18), which states
+in its own words that `paired_difference_series`/`equal_station_mean` were "Extracted
+2026-09-06 per `governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md` so
+`statistical-inference`'s `vector_block_bootstrap` resamples the same code path... its
+R-114 one-copy rule" — this is the module's own self-disclosure, not a claim taken on
+trust from a sibling summary (no sibling `code-summary.md` was read; the read-scope hook
+correctly refused that path when attempted).
+
+**3. Sweep for the five previously-stale figures (632/621/1240/665/178/150) as CURRENT
+fact anywhere in the document:** re-grepped the full artifact for each numeral. Every
+remaining occurrence is either (a) inside the corrected Files-table cells' own
+`(re-derived …; was N)` parenthetical, which correctly labels N as superseded, (b) inside
+a frozen, dated historical review block quoting the falsified "Summary accuracy (check
+10)" line verbatim in order to falsify it (lines 145, 658–660 — a correct record, not a
+live defect), or (c) inside the correction table added by the prior NOT-READY pass itself
+(lines 646–652), which is the record of the defect, not a recurrence of it. No stale
+figure is asserted as current fact anywhere outside these two sanctioned contexts. The
+"Summary accuracy (check 10)" superseding note's own arithmetic (four cells stale
+independent of the repair — `metrics.py`, `scripts/07…`, `test_common_masks.py`,
+`experiment.yaml` — plus one, `guards.py`, made stale by the repair itself = five total
+wrong today) reconciles exactly against the corrected table; the note neither overstates
+nor understates what was wrong.
+
+**4. Repair Step 12 re-attacked independently, not inherited:**
+- Hunk range vs. first executable line: confirmed above (docstring-only).
+- New register claim: `grep -c "^## D-" evidence/DECISIONS.md` → **39**, matching the
+  docstring's "39 `## D-` headings, ending at D-38 plus a `## D-1 addendum`" exactly.
+  `## D-37` read directly (lines 1941–1969 of `evidence/DECISIONS.md`): states verbatim
+  "This is a REAFFIRMATION, not a supersession... D-27 stands, unreopened and unamended"
+  and "authorises no import-boundary change... no `src/evaluation` → `src/features`
+  route is created" — matches the docstring's citation exactly.
+- D-27 stays unreopened: confirmed by direct read of D-37 and by the absence of any
+  `## D-39` or later heading reopening it.
+- The `src/evaluation` → `src/features` edge stays unauthorised: `grep -rn "from
+  src.features\|import src.features\|from src\.models\|import src\.models"
+  src/evaluation/*.py scripts/07_evaluate_and_report.py` returns nothing.
+- `ABL-DIFF` still refuses naming D-27: `resolve_inverse` (lines 355–388) raises
+  `InverseTransformError` unconditionally, citing D-27, unchanged from before the repair.
+- `evidence/DECISIONS.md` and `src/evaluation/metrics.py`: `git diff HEAD --stat` empty
+  for both — zero diff against `1670ac8`, confirmed.
+
+**5. Repository state and attribution, re-verified:** `git status --porcelain
+src/evaluation/guards.py` → ` M`; `git diff --cached --stat` empty (nothing staged);
+`git diff HEAD --numstat -- src/evaluation/guards.py` → `11 4` — matches the artifact's
+claim exactly. `git status --porcelain` (repo-wide) additionally lists
+`tests/test_determinism.py`, `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`
+and several sibling `code-summary.md` files as modified — none of these is named,
+credited, or blamed anywhere in this unit's `code-summary.md`, so no cross-unit
+conflation occurred in either direction. The artifact correctly distinguishes "this
+repair is uncommitted" from "the unit's code is committed" (the conflation a sibling
+review took a Critical for).
+
+**6. Execution honesty re-checked:** `python`/`python3` both fail to resolve on this
+clone (confirmed directly) — the artifact's "no smoke, no governed evidence" claim for
+this repair is correctly bounded, and "cannot alter behaviour" is presented as static
+reasoning from the diff's hunk range (docstring lines only, first executable line
+unchanged), not as a test result. No acceptance row (WS-16, TA-11, TA-18, FR-P1-05-7,
+FR-P1-05-17) is claimed discharged — the artifact states all of them `Pending`/rowless,
+confirmed by direct read of the Open-items line. No `TBD — freeze gate` sentinel was
+filled by convenience (`grep -rn "TBD"` over this unit's touched files shows only guard
+refusal logic, never a fill); no credential/secret pattern found
+(`grep -in "credential\|api_key\|password\|secret"` over the same files: no matches); no
+scientific constant introduced in source; no December/`locked_test_restricted` path
+touched by this repair.
+
+**Findings:** none survive verification at any severity. The prior pass's three Majors —
+all scoped to the Files table — are resolved: all nine rows now match `wc -l` exactly,
+the two rows that self-contradicted the artifact's own later prose (`07…` and
+`test_common_masks.py`) are reconciled, and the row this repair itself left stale
+(`guards.py`) is corrected. No new defect was introduced by the correction pass.
+
+**Coverage limits of this pass.** graphify CLI confirmed absent from PATH (per
+`CLAUDE.md`'s sanctioned fallback; direct reads/greps used throughout). Per the
+read-scope bound, no sibling unit's `construction/<unit>/` content was read; a `Grep`
+attempt against `statistical-inference/code-generation/code-summary.md` was correctly
+refused by the reviewer-scope hook, so the R-114 attribution was instead verified via
+`git log`/`git show` on the shared file itself and that file's own docstring — a
+workspace-code spot-check of a named integration point, not a sibling-directory sweep.
+No attempt was made to execute the test suite (no interpreter on this clone, confirmed).
+`evidence/locked_test_restricted/` and any December 2022 content were not read.
+
+**Summary.** Every one of the eight verification items in this pass's dispatch was
+carried out independently against the current working tree at HEAD `1670ac8`: all nine
+Files-table counts reproduce exactly under `wc -l`; the two disclosed deltas (guards.py
++7, metrics.py +66) are correctly attributed, the latter confirmed from the file's own
+docstring rather than trusted from prose; no stale figure survives as current fact
+outside its sanctioned historical or corrective context; Repair Step 12's docstring
+correction is independently re-verified as accurate, correctly scoped, and non-relaxing
+of D-27; repository state and attribution are both honestly and correctly stated;
+execution-honesty claims are correctly bounded; and no acceptance row, scientific
+constant, credential, or restricted-root touch was mishandled. READY, on this pass's own
+independent re-derivation, is the terminal verdict for this stage.

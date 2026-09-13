@@ -58,8 +58,18 @@ from src.data.phase_contract import (  # noqa: E402
 
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 
-#: The D-17 Phase 1 target-row contract (the seventeen allowed columns), used here as
-#: the happy-path control: the boundary must clear the frozen legitimate schema.
+#: D-17's sixteen Phase 1 target-row fields, used here ONLY as the happy-path control for
+#: `assert_no_raw_fields`: the field guard must clear the frozen legitimate schema without a
+#: false positive. It is a sample of legitimate column names, not a contract this module
+#: enforces -- the guard under test never checks membership, completeness or arity, and this
+#: constant reaches nothing but the two `assert_no_raw_fields` calls below. The exact
+#: sixteen-field contract is owned by `src/data/prepared.py`'s `D17_FIELDS` and pinned by
+#: `tests/test_phase_boundary.py`'s drift guard; the copy here is kept equal to it so a
+#: reader does not meet two different sixteens.
+#:
+#: `processor_qc_flags` is absent on purpose: it is a key inside the data-quality block
+#: (R-71 / NFR-DQ-01, W-3), never a row column. It was listed here in error from commit
+#: `b844a4d` (2026-08-21), with the count misdescribed as seventeen; removed 2026-09-13.
 D17_ALLOWED_FIELDS = (
     "interval_start_utc",
     "station_id",
@@ -72,7 +82,6 @@ D17_ALLOWED_FIELDS = (
     "within_hour_spread_tecu",
     "largest_internal_gap_s",
     "provider_dtec_summary",
-    "processor_qc_flags",
     "aggregation_config_id",
     "target_valid",
     "phase_id",

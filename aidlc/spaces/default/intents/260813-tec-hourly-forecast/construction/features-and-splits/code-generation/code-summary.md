@@ -383,3 +383,63 @@ one apparent count discrepancy (54 vs. 56 test functions) traced to a legitimate
 at the D-35 pass, not a stale or wrong assertion. This unit's own files carry zero diff since the
 last accepted review; the one dirty file in its territory is a sibling's own out-of-scope
 addition that leaves this unit's limb intact.
+
+## Re-review at REJECTED gate (2026-09-13)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T11:00:13Z
+**Iteration:** Adversarial re-review of a REJECTED gate (revision 2) — full independent re-derivation, not a delta check
+
+### Scope and baseline
+
+HEAD `1670ac8`. `git diff --stat b0b7c1d HEAD -- src/data/splits.py src/features/ configs/data.yaml
+configs/experiment.yaml configs/features.yaml scripts/05_build_features_and_splits.py
+tests/test_split_embargo.py tests/test_train_only_transforms.py tests/test_feature_availability.py
+aidlc/.../construction/features-and-splits/` shows only this file's own 2026-09-11 Floor-reset
+block (149 insertions) — every module and test file this unit owns is byte-identical to the state
+the 2026-09-11 review accepted. The two commits since then (`a44fbce`, `1670ac8`) each touch only
+the audit shard (`git show --stat`, both), confirmed by direct read — neither touches any file
+this unit owns. This confirms the dispatch premise: nothing in this unit changed; this is a fresh
+derivation of a clean prior verdict, not a delta review.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-summary.md` line 21 (Files-created table, `tests/test_feature_availability.py` row: "§12-mandated. 54 test functions"); line 37 ("`test_feature_availability` 53 passed / 1 skipped") | Re-derived independently: `grep -c '^def test_' tests/test_feature_availability.py` gives **56**, not 54, against the current, unedited file (zero diff since `6246907`, confirmed above). This is not a new fact — this artifact's own 2026-09-11 Floor-reset section (item 8) already derived 56 and named the Files-created table's "54" explicitly by number as the figure it disagrees with, and the 2026-09-10 Owner-rulings review's own reproduced run ("54 passed, 0 failed, 2 skipped" = 56 total) is consistent with 56, not 54. Two subsequent review passes (2026-09-10, 2026-09-11) identified or reproduced the correct total and neither edited the Files-created table cell or the stale shim-results line to say so — the correction stayed in review prose, never landing in the artifact body. This is exactly the defect class `project.md`'s `code-generation:fr-2` rule was written to close ("write the correction into the artifact BODY rather than only into a review addendum"), and it survived through two more passes that each explicitly held the correct number in hand. | Edit line 21 to read 56 (with a short note: 54 executed + 2 environment-skipped under the stdlib shim, per the 2026-09-11 derivation) and correct or annotate line 37's stale "53 passed / 1 skipped" (an iteration-1-era figure superseded by the 2026-09-10 review's reproduced "54 passed / 2 skipped" = 56 total). Do this in the artifact body, not a further review addendum. |
+| 2 | Major | `code-summary.md` line 69 ("New items from this pass": "R-80's calendar values still owed to `configs/data.yaml` at their freeze") | This owed item is stale. `evidence/DECISIONS.md` D-38 (decided 2026-09-10, jointly authorized by student and supervisor) explicitly transcribes R-80's frozen split configuration into `configs/data.yaml: partitions` (F1–F4/REFIT/DEC, verified by direct read of D-38's table) and `configs/experiment.yaml: embargo_hours = 24` — read directly from `configs/data.yaml` and confirmed the six partitions and their `train_start`/`train_end`/`validation_month` values match D-38's table exactly. The unit's own 2026-09-11 Floor-reset review (§1) ran its negative controls against "the real, now-filled `configs/data.yaml: partitions`" — i.e. it read the very file that discharges this "owed" line — yet did not correct or strike line 69's claim that these values are still owed. This is a second instance of the same class as finding 1: a fact re-derived correctly in a later review pass, never swept into the artifact body it corrects. | Strike or annotate line 69's R-80/`configs/data.yaml` owed item as discharged by D-38 (2026-09-10), citing the transcribed table. Leave the earlier prose standing per the project's append-only correction convention; add the correction rather than delete the record of what was once owed. |
+| 3 | Minor | `code-summary.md` § Repository state (lines 72–79) | States "HEAD is `6246907…`" — accurate as of the 2026-09-06 dated derivation it explicitly carries, but current HEAD is now `1670ac8`, three commits later. Not misleading on its own terms (the section is explicitly timestamped and the 2026-09-11 Floor-reset section already re-baselined once), but nothing in the artifact states the two newest commits (`a44fbce`, `1670ac8`) were checked against this unit's territory. Independently confirmed here (Scope and baseline, above) that neither touches this unit's files, so the underlying disposition is unaffected — recorded so the next reviewer does not have to re-derive it. | No artifact edit required; the fact is now on record in this review block. A future pass updating § Repository state's own body should note the re-baseline explicitly rather than leaving the reader to infer it from review addenda. |
+
+### Independent re-verification (executed/read, not carried from prior prose)
+
+- **Test/line counts, re-derived**: `grep -c '^def test_'` gives `test_split_embargo.py` 34, `test_train_only_transforms.py` 28, `test_feature_availability.py` **56** (not 54 — finding 1), `test_locked_test_guard.py` 42 (this unit's section-9 subset). `wc -l`: `src/data/splits.py` 759, `src/features/availability.py` 503, `src/features/build.py` 1197, `src/features/transforms.py` 342, `src/features/windows.py` 559, `src/features/_frames.py` 164, `scripts/05_build_features_and_splits.py` 610 — none of these line counts is asserted anywhere in the artifact body, so none is stale.
+- **Repository state**: `git log -1` → `1670ac8`, author `Kimrza`, committed 2026-09-13; message is the unedited git commit template, same defect class as `6246907`/`06207c4`. `git show --stat 1670ac8` and `git show --stat a44fbce` each touch only `aidlc/.../audit/git-ae-srv-rdt1-8d4da85135a5.md` — confirmed neither is this unit's commit or touches this unit's territory. This unit's own files (`git diff --stat b0b7c1d HEAD -- <unit paths>`) are unchanged except this file's own review additions.
+- **Attribution**: `tests/test_determinism.py`, `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`, `src/evaluation/guards.py` are dirty in the working tree from other units' repair work (per `git status`); none is created, modified, or claimed by this unit's Files tables — no misattribution found. Checked the dispatch's premise that `src/features/transforms.py` was "edited additively by `evaluation-and-comparison`": `git log --oneline -- src/features/transforms.py` shows exactly one commit (`6246907`, this unit's own), and `git diff --stat 6246907 HEAD -- src/features/transforms.py` / `git diff --stat b0b7c1d HEAD -- src/features/transforms.py` are both empty — the file is unmodified since this unit committed it. That premise is not borne out by the repository; the artifact makes no contrary claim, so this is a note for the record, not a defect.
+- **Leakage/import-boundary re-checks, executed directly against HEAD `1670ac8`** (not read from prior review text): `grep -rn "^import\|^from" src/features/*.py src/data/splits.py` for `iri|gim|sklearn|evaluation` returns nothing; `grep -n "2022\|2001" src/data/splits.py` returns nothing; `requirements.txt` still carries no `pyarrow` pin (matches the artifact's "pin owed" claim); `tests/test_feature_leakage_guards.py` still does not exist (matches "unbuilt" claim, key decision 9).
+- **Standing owed items re-checked**: TA-36 (R-76a's primary test) confirmed still `Pending` in `requirements.md:388` ("row exists; not implemented, not executed, not passing") — the artifact's "TA-33, TA-34, TA-35... stay Pending" claim (and TA-36 implicitly via key decision 9) is not contradicted.
+- **D-37 (2026-09-10, one day before the Floor-reset review) reaffirms D-27 permanently** and closes BLK-08's mechanism limb in D-27's identity form, without creating any generic inverse route or import-boundary change. Checked this artifact's own D-27/BLK-08 language (lines 5, 68) against D-37: "BLK-08 deferred... narrowed to `ABL-DIFF` per D-27" is not contradicted by D-37 — D-37 explicitly does not create an inverse route or touch the import boundary, and this unit's code (no `inverse`/`apply` surface, confirmed above and in the 2026-09-11 pass) is unaffected. Not flagged as a finding: D-37 reaffirms rather than supersedes, and no artifact claim about code behavior is falsified by it.
+
+### Coverage limits
+
+- Same environment limits as every prior pass: no `pyyaml`/`pandas`/`numpy`/`ruff` in this environment (not independently re-verified this pass beyond confirming no new pin was added); no end-to-end script execution.
+- Did not read any sibling unit's `construction/<other-unit>/` content; the transforms.py cross-unit-edit check above was resolved entirely from `git log`/`git diff` on the file itself, which is the sanctioned spot-check path for a named integration point.
+- Did not re-verify `evidence/test_run_access_log.jsonl`'s row count or re-run the test suites under the stdlib shim this pass; relied on `grep -c '^def test_'` (source-derived, not run-derived) for the corrected counts in findings 1 and the re-verification section.
+
+### Why READY, despite two Major findings
+
+Zero Critical, two Major, one Minor — within the stated verdict threshold (READY at ≤2 Major,
+any Critical or >2 Major forces NOT-READY). Both Majors are the same defect class: a count and a
+governance-stop "owed" item that a *later review pass already in this artifact* demonstrably
+re-derived correctly, and neither correction was swept into the artifact body — it stayed in
+review prose (`code-generation:fr-2` exists precisely to prevent this and was not honoured on
+either item). Neither finding implicates the code, the tests, or the re-verified leakage
+guarantees themselves: every structural split rule, the 24-hour embargo, the December/locked
+unreachability guard, the train-only-transform boundary, the permitted-producer fail-closed
+policy, the import-boundary and no-scientific-literal checks all re-verified clean against the
+real repository at HEAD `1670ac8`, and nothing in this unit's owned files has changed since the
+last accepted review. A developer could implement or extend from this artifact without
+architectural guidance; they would, however, be handed two stale figures they'd have to
+cross-check against the review history themselves. **Both findings should still be corrected in
+the artifact body before the gate is presented to the human** — they are gate input, not a
+blocker to this verdict.

@@ -1,7 +1,36 @@
 # Code Summary — `target-standardization`
 
 **Unit** `target-standardization` (Bolt 1) · **Kind** `library` · **Stage** `code-generation`
-**Plan**: `code-generation-plan.md` — all 7 steps executed, checkboxes marked. No `git commit` (governance stop). **No standardized target artifact exists** — Q2=A's refuse-to-RUN is the deliverable; production waits on the supervisor's `qc_operations` freeze under a D-number. `configs/data.yaml` untouched.
+**Plan**: `code-generation-plan.md` — all 7 steps executed, checkboxes marked. **No standardized target artifact exists** — Q2=A's refuse-to-RUN is the deliverable; production waits on the supervisor's `qc_operations` freeze under a D-number. `configs/data.yaml` untouched.
+
+**Repository state, re-derived 2026-09-13 at HEAD `1670ac8`.** This header previously read
+"No `git commit` (governance stop)", and § "Governance stop" carried the parallel claim "No
+governed commit before the records exist". **Both are false as statements about the current
+repository** — flagged as a Major on 2026-09-11 — and are corrected here in the body rather
+than in a review addendum, per `project.md` (`code-generation:fr-2`). This unit's five files
+(plus the four `configs/`) were introduced in **`ed5808b`**, whose message is the unedited
+git placeholder and cites none of D-16/D-17/D-19/D-1;
+`scripts/02_standardize_prepared_target.py` was further modified in **`cf3185d`** and
+**`0e002cd`**, neither citing a D-number either (`0e002cd`'s subject line at least names
+"board remediation"). `team.md` § Way of Working makes the D-number citation mandatory for
+any commit touching a governed artifact. Per `project.md`'s never-edit-a-signed-record rule
+and `c30`, **no amend, revert or re-commit was made** — the discrepancy is stated and the
+remediation choice (amend; a follow-up commit citing the D-numbers; or an explicit owner
+waiver) is routed to the gate as part of the standing commit-message ruling.
+
+**D-17 field-contract reconciliation — CLOSED 2026-09-13.** This unit carried, across four
+consecutive passes, a correctly-scoped Minor that `tests/test_phase_boundary.py:95`'s
+`D17_TARGET_FIELDS` enumerated **17** names (the extra being `processor_qc_flags`) against
+D-17's frozen **16**, correctly declining to edit a sibling's file and routing a
+reconciliation ruling as owed before any target-producing run. The owner ruled on
+2026-09-13 (**Option 4**): D-17's sixteen are authoritative, `processor_qc_flags` is a
+data-quality-block key (R-71/NFR-DQ-01, W-3) and not a row field, **and** the same test was
+stale a second way this unit had not detected — its assertion is a set equality in both
+directions, so `extra` would equally have flagged `lineage_caveat`, which the producer
+emits by contract (`src/data/prepared.py:1324`) and its own row guard permits (`:791`).
+Both limbs were repaired in `governance-guards`' modules (that unit owns them), along with
+a drift guard pinning `D17_TARGET_FIELDS` against `prepared.D17_FIELDS`. **No file owned by
+this unit changed**, and this unit's own `D17_FIELDS` (16) was already correct.
 
 ## Files created
 
@@ -37,11 +66,20 @@
 - `REQUIRED_FIELDS_MAP` entry (minimal; recorded, not silent).
 - graphify CLI unavailable — graph stale for touched files; `graphify update .` owed.
 
-## Governance stop — owed before any commit (student acts; cumulative)
+## Governance stop — owed at the gate (student acts; cumulative)
+
+> **Heading and bullets corrected 2026-09-13** after the re-review returned a Critical. This
+> section was headed "owed **before any commit**" and its commit bullet read "**No governed
+> commit before the records exist**" — a second representation of the same false claim the
+> header above had just corrected, left standing three lines below it. That is precisely the
+> sweep failure `project.md` (`fd-2026-08-30-sweep-derive-sites`) names, reproduced inside
+> the repair meant to close it. The commits already exist (`ed5808b`, `cf3185d`, `0e002cd`);
+> what is owed is no longer "commit only after the records" but the remediation choice on
+> commits already made without their D-number citations.
 
 - Gate items restated (none decided): the **D-17 authority question** (assert against the authority, not only the config — R-20's shape); foundation's run-manifest **executed-scripts** field (owed for fixtures-and-reproducibility's one-`02` assertion); the **consumer half of the caveat contract**; `unit-of-work.md` §5's stale "19" (annotate-in-place decision); the **exception-scope deviation** (decision 3) and the **caveat/R-66 reconciliation** (decision 2) proposed for explicit acknowledgment.
-- **New gate-worthy observation from this pass**: `tests/test_phase_boundary.py:95`'s `D17_TARGET_FIELDS` carries **17** names including `processor_qc_flags`, against D-17's enumerated **16** (re-derived from `evidence/DECISIONS.md` this pass). Its conformance test currently skips (no artifact exists), so no runtime conflict — but the day a target is produced, a 16+caveat artifact would fail that 17-field set. Not edited (outside this plan); **a reconciliation ruling is owed before any target-producing run**.
-- Commit cites **D-16, D-17, D-19, D-1** as touched context. **No governed commit before the records exist.**
+- ~~**New gate-worthy observation from this pass**: `tests/test_phase_boundary.py:95`'s `D17_TARGET_FIELDS` carries **17** names including `processor_qc_flags`, against D-17's enumerated **16** (re-derived from `evidence/DECISIONS.md` this pass). Its conformance test currently skips (no artifact exists), so no runtime conflict — but the day a target is produced, a 16+caveat artifact would fail that 17-field set. Not edited (outside this plan); **a reconciliation ruling is owed before any target-producing run**.~~ **CLOSED 2026-09-13 by the owner's Option 4 ruling** — see the D-17 paragraph in the header. The ruling also found the second stale limb this unit had not detected (`extra` would equally have flagged `lineage_caveat`); both were repaired in `governance-guards`' modules, and `D17_TARGET_FIELDS` now enumerates 16. The original text is struck rather than deleted, as the record of what this unit correctly raised across four passes.
+- **The commits exist and cite none of D-16, D-17, D-19, D-1** — `ed5808b` (unedited git placeholder message), `cf3185d` (same), `0e002cd` (a real subject line naming "board remediation", but no D-number). Re-derived 2026-09-13. The owed act is therefore the **remediation choice on commits already made** — amend, a follow-up commit citing the four decisions, or an explicit recorded waiver — not the "no governed commit before the records exist" precondition this bullet previously asserted, which was already false when written.
 - Nothing discharged: TA-19 stays `Pending`; FR-P1-03-5 stays rowless; FR-P1-03-1 stays BLOCKED; BLK-05's execution limb remains open (module exists, smoke-run only).
 
 ## Review — 2026-09-06 (code-generation, iteration 1)
@@ -335,3 +373,189 @@ no code path, test, or gate mechanism is affected — so under this project's st
 rule (zero Critical, ≤2 Major) it does not block READY, but it must be corrected at the
 artifact level and the D-number-citation gap routed to the gate rather than silently
 amended.
+
+## Adversarial re-review (2026-09-13, code-generation, REJECTED-gate re-review, iteration 4)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T10:04:49Z
+**Iteration:** 4 (fresh re-derivation against HEAD `1670ac8`; prior verdicts not rubber-stamped)
+
+### Scope of this pass
+
+Re-derived the repository commit state directly (`git log`, `git show --stat`, `git show
+-1 --format=%B` on `ed5808b`/`cf3185d`/`0e002cd`), re-verified this unit's five owned files
+are byte-identical to HEAD (`git status --porcelain` on all five returns nothing), re-derived
+the D-17 sixteen-field contract from both `src/data/prepared.py:195-212` and
+`tests/test_phase_boundary.py:106-123` directly, and swept this artifact end-to-end for every
+representation of the two 2026-09-13 corrections (the commit-state fact and the D-17
+reconciliation), not only the two sites the header names.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `code-summary.md:69,73` (§ "Governance stop — owed before any commit") | The 2026-09-13 repair fixed only the header (line 4) and added the two new paragraphs at lines 6–33. It left a **second, un-swept representation of the exact same false claim** standing three lines below the correction: the section heading itself, "## Governance stop — owed before any commit," and its first bullet, "Commit cites **D-16, D-17, D-19, D-1** as touched context. **No governed commit before the records exist.**" — both still assert, in the present tense and as current fact, that no commit has happened. This is precisely the "parallel claim" the 2026-09-11 (iteration-3) Major finding named for correction ("Correct line 4 (and the parallel claim … 'No governed commit before the records exist.')"), and it was not touched: `git diff HEAD` on this file (verified this pass) shows only the header/new-paragraph edit, nothing at lines 69–74. The artifact therefore now **contradicts itself within 50 lines**: the header correctly states three commits exist (`ed5808b`, `cf3185d`, `0e002cd`, re-verified this pass via `git log`/`git show`, none citing D-16/D-17/D-19/D-1), while § "Governance stop" still reads as though no commit has occurred at all. This is exactly the failure class `project.md` corrections `fd-2026-08-30-sweep-derive-sites` and `fr-2` exist to catch — a repair scoped to a finding's named site (the header) left a sibling representation of the identical fact standing, and here the sibling representation is the one the *prior finding itself explicitly named*, not merely one this pass discovered independently. | Rewrite the section heading (e.g. "Governance stop — items owed before the next commit") and the bullet at line 73 to state the actual fact: this unit's code IS committed (`ed5808b`, further touched by `cf3185d`/`0e002cd`), none of those three commits cites D-16/D-17/D-19/D-1, and what remains owed is the remediation choice (amend / follow-up commit / owner waiver) already routed to the gate by the new header paragraph — not a claim that "no governed commit" exists. |
+
+### Verified and held (adversarial checks that survived)
+
+- **Commit-state re-derivation, independent of the artifact's own claim.** `git log -1 --format=%B ed5808b/cf3185d/0e002cd` confirms: `ed5808b`'s message is the unedited git placeholder, introducing this unit's five files plus all four `configs/*.yaml` (confirmed via `git show --stat`) and citing no D-number; `cf3185d`'s message is also the unedited placeholder, modifying `scripts/02_standardize_prepared_target.py` (+31/-…) and `scripts/03_verify_processing.py` (+24/-…); `0e002cd` carries a real message citing D-11/D-14/D-20/D-28/D-29/D-31 (none of D-16/D-17/D-19/D-1) and modifies only `scripts/02_standardize_prepared_target.py` (43 lines), not `scripts/03`. All three claims in the new header paragraph (lines 6–19) match exactly.
+- **D-17 reconciliation, both limbs, independently verified against current source, not taken on the artifact's word.** `src/data/prepared.py:195-212`'s `D17_FIELDS` holds exactly 16 names in D-17's order. `tests/test_phase_boundary.py:106-123`'s `D17_TARGET_FIELDS` now also holds exactly 16 names, identical set — `processor_qc_flags` is gone (a code comment at lines 100-105 states it was "carried here in error from commit `b844a4d`… and removed 2026-09-13"). The second limb — the symmetric-`extra` staleness against `lineage_caveat` — is also present and fixed: `DECLARED_CAVEAT_FIELD = "lineage_caveat"` (line 130) is pinned against the producer's `LINEAGE_CAVEAT_FIELD`, excluded from both the drift-guard equality check (line 327) and the header/`extra` diff (lines 339-374), mirroring `prepared.py`'s own row guard (`extra = sorted(names - set(D17_FIELDS) - {LINEAGE_CAVEAT_FIELD})`, `prepared.py:791`). A new drift-guard test (`test_d17_target_fields_match_the_producer_contract`, `test_phase_boundary.py:298`) now fails the two copies apart. This work is entirely inside `tests/test_phase_boundary.py`, owned by `governance-guards`, not this unit — confirmed by `git status --porcelain` showing none of this unit's five owned files touched.
+- **No file owned by this unit changed.** `git status --porcelain -- src/data/prepared.py scripts/02_standardize_prepared_target.py scripts/03_verify_processing.py tests/test_prepared_target_schema.py src/data/config.py` returns nothing; `wc -l` on the four size-bearing files (428/386/1555/741) matches every prior-iteration and this artifact's own claimed counts exactly.
+- **Standing invariants hold.** No `hourly_target*.csv` or other standardized-target artifact exists anywhere in the workspace (searched); `configs/data.yaml` still carries no `qc_operations`/`target.*` key (grepped directly); no touch to `evidence/locked_test_restricted/`; no credential/secret pattern found in this unit's files (not re-swept this pass beyond the prior iterations' grep, no new code was added to re-check).
+- **Attribution boundary respected.** The four other dirty files in this working tree (`tests/test_determinism.py`, `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`, `src/evaluation/guards.py`) and the sibling `code-summary.md` files are correctly not credited to or blamed on this unit anywhere in this artifact; the D-17 fix is correctly attributed to `governance-guards` throughout, including in the new 2026-09-13 paragraph.
+- **Execution honesty.** No Python interpreter is reachable on this clone this pass (`python`/`python3` both resolve to the Microsoft Store app-execution-alias stub, confirmed non-functional) and PyPI egress remains blocked per the artifact's own prior-iteration statements; every test-count claim in this artifact remains correctly bounded under the "smoke evidence only — never governed" heading, and this pass did not re-execute any test (no interpreter available) — it re-derived only what is directly readable from source and git history.
+
+### Coverage limits
+
+This pass verified the unit's own five files, the commit history for `ed5808b`/`cf3185d`/`0e002cd`, the single sibling file this unit's own artifact names as an integration point (`tests/test_phase_boundary.py`, resolved to its owning location per the spot-check carve-out — not browsed), `configs/data.yaml`, and this artifact's own text end-to-end for internal self-consistency. No other sibling unit's construction directory was read.
+
+### Summary
+
+The two 2026-09-13 corrections are each independently true and well-evidenced — the commit-state fact (three commits, none citing the required D-numbers) and the D-17 reconciliation (both limbs, verified against current source in both `prepared.py` and the sibling `test_phase_boundary.py`) both hold under direct re-derivation. But the repair is incomplete: it corrected the header and stopped, leaving the artifact's own § "Governance stop" section — the exact site the prior Major finding named as the "parallel claim" requiring correction — still asserting in the present tense that no commit exists. A reader who reaches line 69 before line 6 (or who reads only the Governance-stop bullet list, which is what a gate reviewer scanning for open items would naturally do) is told the opposite of what the header now says. This is a self-contradiction inside the primary artifact, not a stale-but-harmless residual, and it reproduces — inside the very repair meant to close it — the sweep-completeness failure `project.md` has flagged repeatedly (`fd-2026-08-30-sweep-derive-sites`, `fr-2`). One Critical finding is sufficient to block READY under this project's stated verdict rule.
+
+**Verdict: NOT-READY**
+
+## Adversarial re-review (2026-09-13, code-generation, terminal re-review, iteration 5)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T00:00:00Z (see repo evidence below for exact commands/output)
+**Iteration:** 5 (TERMINAL — budget exhausted after this pass; fresh re-derivation against HEAD `1670ac8`, prior verdicts not rubber-stamped)
+
+### Scope of this pass
+
+Verified whether the iteration-4 Critical (self-contradicting "Governance stop" section)
+is genuinely closed at its named location; re-derived the three commits' messages and
+diffs directly; re-derived `D17_FIELDS`/`D17_TARGET_FIELDS` from current source on both
+sides of the contract; re-derived the git diff of this unit's five owned files against
+`1670ac8`; re-derived the `62 tests` claim by counting `def test_` functions and
+`@pytest.mark.parametrize` expansions separately; swept the full document for every
+remaining representation of the "no commit"/"17-field" claims, distinguishing frozen
+historical review blocks and quoted-for-correction text from live current-state claims.
+
+### Findings
+
+None. The iteration-4 Critical is closed and no new defect was found.
+
+### Verification of the iteration-4 Critical
+
+The section previously headed "## Governance stop — owed before any commit" (line 69) now
+reads "## Governance stop — owed at the gate," with a dated blockquote (lines 71–78)
+stating exactly what the heading and its commit bullet previously said and why both were
+wrong. The former commit bullet — "No governed commit before the records exist" — is
+replaced (line 82) by: "**The commits exist and cite none of D-16, D-17, D-19, D-1**,"
+naming `ed5808b`/`cf3185d`/`0e002cd`, correctly stating none cites the required D-numbers,
+and correctly reframing the owed act as the remediation choice on commits already made. `git
+diff HEAD` on this file was not needed to confirm this — the current on-disk text at lines
+69–82, re-read directly this pass, no longer asserts "no commit" anywhere. The self-
+contradiction the prior Critical named (header saying commits exist; three lines below,
+the section heading and its first bullet saying none did) is gone: both now agree.
+
+**Sweep for every other representation, not just the two the finding named.** Grepped the
+whole document for `governance stop`, `No governed commit`, `processor_qc_flags`,
+`D17_TARGET_FIELDS`, and `17 field`/`17 names`. Every hit outside the live "current state"
+section (lines 1–83) falls inside a dated, headed historical review block (the 2026-09-06
+iteration-1 review at lines 85–120, the 2026-09-10 iteration-2 review at 147–302, the
+2026-09-11 iteration-3 review at 304–375, the 2026-09-13 iteration-4 review at 377–415) —
+each of these correctly records what was true, or what a finding asserted, at the time it
+was written (e.g. line 7 quotes the superseded header text specifically to correct it; line
+97/178/334 are iteration-1/2/3 findings correctly describing the 17-field state that existed
+before the 2026-09-13 fix). None of these is a live claim a current reader would mistake for
+present fact — each sits under its own dated `## Review`/iteration heading. No live
+(non-historical) site anywhere in the document still asserts "no commit" or "17 fields."
+
+### Re-attack of both 2026-09-13 corrections' substance, independently derived
+
+- **Commit-state fact, re-derived from git directly, not taken on the artifact's word.**
+  `git show -s --format=%B` on all three: `ed5808b` and `cf3185d` are both the unedited
+  git placeholder ("Please enter the commit message for your changes...", with the
+  `git status` boilerplate captured verbatim as the message body) — confirmed neither
+  cites any D-number. `0e002cd` carries a real subject line ("Governance disposition +
+  board remediation for fixtures-and-reproducibility (3.5)") citing D-11, D-14, D-20,
+  D-28, D-29, D-31 — none of D-16/D-17/D-19/D-1, exactly as claimed. `git show --stat`
+  confirms `ed5808b` introduces this unit's five files plus all four `configs/*.yaml`;
+  `cf3185d` modifies both `scripts/02_standardize_prepared_target.py` and
+  `scripts/03_verify_processing.py`; `0e002cd` modifies only `scripts/02` (43 lines per
+  its stat), not `scripts/03` — all three details in the artifact's header match exactly.
+- **D-17 reconciliation, both limbs, independently re-derived from current source.**
+  `src/data/prepared.py:195-212`'s `D17_FIELDS` tuple holds exactly 16 names in D-17's
+  order (counted directly). `tests/test_phase_boundary.py:106-121`'s `D17_TARGET_FIELDS`
+  frozenset now also holds exactly 16 names, the identical set — `processor_qc_flags` is
+  gone, with a code comment (lines 100–105) recording it was carried in from commit
+  `b844a4d` in error and removed 2026-09-13. The second limb (the symmetric `extra`
+  staleness against `lineage_caveat`) is also fixed: `missing = D17_TARGET_FIELDS - header`
+  (line 371, still demands all sixteen) and `extra = header - D17_TARGET_FIELDS -
+  {DECLARED_CAVEAT_FIELD}` (line 370, permits `lineage_caveat`) — read directly, not
+  taken on the artifact's description. This work is entirely inside
+  `tests/test_phase_boundary.py`, confirmed still not one of this unit's five owned files.
+- **No file owned by this unit differs from HEAD `1670ac8`.** `git diff 1670ac8 --stat --
+  src/data/prepared.py scripts/02_standardize_prepared_target.py
+  scripts/03_verify_processing.py tests/test_prepared_target_schema.py src/data/config.py`
+  returns empty, and `git status --porcelain` on the same five paths returns nothing.
+- **The `62 tests` claim, re-derived by counting mechanism rather than re-reading the
+  number.** `grep -c "^def test_"` on `tests/test_prepared_target_schema.py` gives **55**
+  distinct test functions, not 62 — but four of those 55 carry
+  `@pytest.mark.parametrize` with 2, 4, 3, and 2 cases respectively (11 parametrized cases
+  total, replacing the 4 base functions they decorate): 55 − 4 + 11 = **62** collected
+  test cases under pytest's own counting convention (one collected item per parametrize
+  expansion). The artifact's "62 tests" is the collected-case count, not the function
+  count, and it is arithmetically exact — not a stale or inflated figure.
+- **`configs/data.yaml` still carries no `qc_operations` or `target.*` key** (grepped
+  directly, zero matches) — the standing Minor from every prior iteration remains
+  correctly unresolved and non-blocking; `assert_qc_operations_frozen` treats absent and
+  unfrozen identically, so this has no functional effect.
+- **No December/restricted-root touch, no credential.** No reference to
+  `evidence/locked_test_restricted/` in this unit's files; grep for
+  `api_key|secret|password|token\s*=` across the five owned files returns only a local
+  tokenization-loop variable literally named `token` (`prepared.py:727,733`) and two
+  prose sentences about supplying secrets via a platform store (`config.py:708,986`) —
+  no credential literal.
+- **Nothing wrongly claimed discharged.** TA-19/FR-P1-03-5/FR-P1-03-1/BLK-05 are still
+  stated as open/pending/blocked at line 83 — matches the standing state.
+
+### Attribution boundary respected
+
+The working tree's other dirty files this session — `tests/test_determinism.py`,
+`tests/test_phase_boundary.py`, `tests/test_phase_contract.py`, `src/evaluation/guards.py`,
+and several sibling `code-summary.md` files — are correctly not credited to or blamed on
+this unit anywhere in the document; the D-17 fix is attributed to `governance-guards`
+throughout, consistent with `git status --porcelain` showing none of those files among
+this unit's own five.
+
+### Execution honesty
+
+No Python interpreter is reachable on this clone this pass (`python`/`python3` both
+resolve to the non-functional Microsoft Store app-execution-alias stub, re-confirmed);
+no test was executed this pass. Every test-count claim in this artifact remains correctly
+bounded under its own "smoke evidence only — never governed" heading, and this pass adds
+no execution claim beyond that bound — only static re-derivation from source and git
+history.
+
+### Coverage limits
+
+This pass verified the unit's own five files, the commit history and diffs for
+`ed5808b`/`cf3185d`/`0e002cd`, the single sibling file this unit's own artifact names as
+an integration point (`tests/test_phase_boundary.py`, resolved to its owning location per
+the spot-check carve-out — not browsed), `configs/data.yaml`, and this artifact's own text
+end-to-end for internal self-consistency across all five prior review blocks. No other
+sibling unit's construction directory was read.
+
+### Summary
+
+The iteration-4 Critical is closed at its named location: the "Governance stop" heading
+and its commit bullet no longer contradict the corrected header, and a full-document sweep
+(not just the two sites the finding named) turns up no other live representation of either
+superseded claim — every remaining occurrence sits inside a dated historical review block
+that correctly records what was true when it was written. Both 2026-09-13 corrections
+re-verify true under independent re-derivation: the three commits and their D-number
+citations (or lack thereof), and the D-17 sixteen-field contract on both sides (producer
+and sibling test), both hold exactly as newly stated. No file owned by this unit differs
+from HEAD. The "62 tests" figure is exact once parametrize expansion is counted, not a
+stale carry-forward. Standing invariants (no target artifact produced, no `qc_operations`/
+`target.*` key in `configs/data.yaml`, no credential, no wrongly-discharged acceptance row,
+correct attribution boundary against four sibling-owned dirty files) all hold. Zero
+Critical, zero Major, two carried-forward Minors (both non-blocking, both correctly not
+this unit's to fix). This pass is terminal.
+
+**Verdict: READY**

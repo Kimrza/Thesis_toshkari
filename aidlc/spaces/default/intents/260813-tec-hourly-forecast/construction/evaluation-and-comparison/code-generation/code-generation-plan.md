@@ -155,3 +155,34 @@ The vector time-block bootstrap (`statistical-inference`); breakdown tables, fig
 results table (`regimes-diagnostics-reporting`); any `Transform.inverse` (D-27 unreopened);
 executing `DEC` or any real December read; freezing G-05; any acceptance-row discharge;
 `test_release_hashes.py` (exists, foundation's).
+
+---
+
+## Repair step added 2026-09-13 — owner ruling at the rejected stage gate
+
+The project owner selected **Request Changes** at the `code-generation` approval gate on
+2026-09-13, which lifts the reviewer receipt freeze and authorises the step below. This
+step is plan INPUT for the repair pass, not a retroactive summary.
+
+- [x] **Step 12 — Correct the stale register claim in `resolve_inverse`'s docstring**
+  [D-27; D-37; `src/evaluation/guards.py`]
+
+  `resolve_inverse`'s docstring (around `src/evaluation/guards.py:355-359`) asserts:
+  *"`evidence/DECISIONS.md` ends at D-32 with D-27 unreopened (verified 2026-09-06)"*.
+
+  Verified 2026-09-13: the register carries **39** `## D-` headings and ends at `## D-38`
+  plus a `## D-1 addendum`; and **`## D-37` affirms D-27** and resolves BLK-08's mechanism
+  limb in D-27's identity form. So the docstring's factual claim is stale while its
+  **conclusion** — the resolver refuses, naming D-27 — is now more strongly supported than
+  when it was written. This is the failure class `project.md`'s count-derivation correction
+  exists to catch, sitting inside a live guard module rather than a record.
+
+  Correct the docstring to state the current register fact and cite D-37's affirmation,
+  keeping the refusal behaviour and the D-27 citation exactly as they are. **No code in
+  that function changes.** The executor re-derives the register's end point itself rather
+  than copying the figures quoted here.
+
+  **Out of scope for this step**: no `code-summary.md` edit (the orchestrator owns the
+  artifact corrections in this pass), no write to `evidence/DECISIONS.md`, no commit, no
+  behavioural change anywhere in `guards.py`. D-27 stays unreopened; the R-103 import edge
+  stays unauthorised. No acceptance row is claimed discharged.

@@ -440,8 +440,10 @@ GOVERNED_CONFIG_FILES: Final[tuple[str, ...]] = (
 
 #: The re-exec sentinel environment variable (R-05). An implementation identifier, not a
 #: scientific constant or governed config field: set by the parent immediately before
-#: `os.execv`, read ONCE by the child in `ensure_process_determinism` and immediately
-#: removed, so a subprocess of a re-exec'd script never inherits it.
+#: the relaunch (`os.execv` on POSIX; spawn-and-wait on Windows —
+#: `CR-2026-09-13-R05-WINDOWS-EXIT-CODE`), read ONCE by the child in
+#: `ensure_process_determinism` and immediately removed, so a subprocess of a re-exec'd
+#: script never inherits it.
 REEXEC_SENTINEL_ENV: Final[str] = "TEC_FOUNDATION_REEXEC"
 
 #: The PYTHONHASHSEED value the re-exec establishes (WS-17 precondition; engineering
@@ -995,7 +997,7 @@ def ensure_process_determinism(argv: Sequence[str]) -> None:
     """FU-1 = D: establish `PYTHONHASHSEED` before any framework import (R-05).
 
     The FIRST statement of every stage script's `main()`. When `PYTHONHASHSEED` is
-    unset, sets it to "0", sets the re-exec sentinel, and re-execs the current
+    unset, sets it to "0", sets the re-exec sentinel, and relaunches the current
     interpreter with the same argv, so the guarantee holds for a directly invoked
     script. When already set, reads the sentinel ONCE, records it in module-level state
     (read later by `seed_everything` into `DeterminismRecord.reexec_performed`) and
@@ -1003,10 +1005,23 @@ def ensure_process_determinism(argv: Sequence[str]) -> None:
     re-exec'd script would inherit the sentinel and record `True` for a process that
     never re-exec'd (R-05: the pop is load-bearing, not hygiene).
 
-    Returns `None` by approved contract; nothing crosses the `exec` boundary in a
-    return value. On Windows, `os.execv` spawns a replacement process and the parent
-    exits — callers observe one logical run either way, and the re-exec is recorded so
-    it is never mistaken for a double run.
+    Returns `None` by approved contract; nothing crosses the relaunch boundary in a
+    return value. The relaunch is platform-split (`CR-2026-09-13-R05-WINDOWS-EXIT-CODE`):
+
+    * **POSIX** — `os.execv` genuinely replaces the process image; there is one
+      process, and its exit code propagates natively.
+    * **Windows** — `os.execv` would spawn a DETACHED child and terminate this parent
+      with exit code 0 WITHOUT awaiting it, discarding the child's own exit code (a
+      genuine refusal would report success — observed 2026-09-13; the previous
+      docstring's "callers observe one logical run either way" was false). So on
+      Windows the parent spawns the replacement interpreter, WAITS for it, and exits
+      with exactly the child's return code — no detach, no swallowing, no
+      normalisation.
+
+    Either way the child sees the same environment (`PYTHONHASHSEED` + sentinel),
+    pops the sentinel exactly once, and exactly one logical run is recorded — the
+    re-exec is never mistaken for a double run, and the caller-visible exit code is
+    the child's on both platforms.
     """
     global _REEXEC_PERFORMED
     if os.environ.get("PYTHONHASHSEED"):
@@ -1014,7 +1029,15 @@ def ensure_process_determinism(argv: Sequence[str]) -> None:
         return
     os.environ["PYTHONHASHSEED"] = _PYTHONHASHSEED_VALUE
     os.environ[REEXEC_SENTINEL_ENV] = "1"
-    # The R-05 re-exec IS the mechanism; sys.executable, no shell.
+    if os.name == "nt":
+        # R-05 on Windows: spawn-and-wait, then exit with the child's exact return
+        # code. os.execv here would detach the child and report 0 unconditionally
+        # (CR-2026-09-13-R05-WINDOWS-EXIT-CODE); sys.executable, no shell, and the
+        # child inherits the two environment writes above exactly as under execv.
+        rc = subprocess.run([sys.executable, *argv], check=False).returncode  # noqa: S603
+        raise SystemExit(rc)
+    # The R-05 relaunch IS the mechanism; on POSIX, exec-replacement carries the exit
+    # code natively; sys.executable, no shell.
     os.execv(sys.executable, [sys.executable, *argv])  # noqa: S606
 
 

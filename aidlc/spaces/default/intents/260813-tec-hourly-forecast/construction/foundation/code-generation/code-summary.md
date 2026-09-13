@@ -1,7 +1,69 @@
 # Code Summary — `foundation`
 
 **Unit** `foundation` (Bolt 1) · **Kind** `library` · **Stage** `code-generation`
-**Plan**: `code-generation-plan.md` — all 12 steps executed, checkboxes marked. No `git commit` was made (Step 12 governance stop).
+**Plan**: `code-generation-plan.md` — Steps 1–12 executed, plus **Step 13 (added and executed 2026-09-13)** under the owner's ruling at the rejected stage gate. Checkboxes marked.
+
+**Repository state, re-derived 2026-09-13 at HEAD `1670ac8`.** This header previously read
+"No `git commit` was made (Step 12 governance stop)". **No commit was made by this stage** —
+that part remains true and is the claim the header was making — but a reader should not
+infer this unit's code is uncommitted: it is committed, most recently in **`715f392`**,
+which also carried the `acquisition` repair's egress edit to this unit's
+`src/data/experiment_registry.py`. The commit is a human act outside the stage
+(`project.md` `code-generation:c30`); the commit-message disposition is routed to the gate.
+
+## Step 13 — the R-01 enumeration census, built 2026-09-13
+
+Flagged Major by this unit's adversarial reviewer on **2026-09-05, 2026-09-10 and
+2026-09-11** and absent each time. Built on the owner's Request Changes ruling, which lifted
+the receipt freeze. Written into the body rather than a review addendum per `project.md`
+(`code-generation:fr-2`).
+
+**What it does.** `tests/test_determinism.py` (+436 lines; **35 → 43 test functions**) now
+carries the control R-01's own text mandates: it walks
+`construction/*/functional-design/` with the twelve unit directory names **derived, never
+hardcoded** (a child counts as a unit iff it holds `functional-design/`), derives every
+project-defined `*Error` name those artifacts raise, reconciles the derived set against
+R-01's fifteen plus the any-future disclosures, and fails naming any name in neither. It
+prints its derivation on every run, as R-01's standing obligation requires.
+
+**Home, and why.** Neither R-01's text nor this unit's design names a module, so it went
+where this unit's other `src/data/config.py` static-scan controls live (R-15, R-17) — which
+also avoids a TE §12 `tests/` naming amendment that a new module would need. R-01's *other*
+control sits in `tests/test_common_masks.py`, which is `evaluation-and-comparison`'s file;
+putting foundation's census there would have been an unruled cross-unit edit.
+
+**First-run derivation: 12 units, 48 artifacts, 34 distinct project-defined subclass names
+— 15 enumerated, 19 riding the any-future clause. Set difference EMPTY in both directions.
+No violation exists on disk.**
+
+**One finding, and it is a stale record rather than a defect.** R-01's 2026-08-28 derivation
+recorded **33** subclasses (15 + 18); the census derives **34**. The extra is
+`FeatureAvailabilityError`, raised by `external-products`, **absent from R-01's eighteen-name
+box** — but properly disclosed under the any-future clause at three sites in that unit and
+declared at `src/data/config.py:358` below the any-future marker. The NFR-AUD-01 hazard R-01
+exists to prevent is **not** realised; what went stale is the hand-maintained enumeration,
+for the third time. The census is immune to this by construction — it derives the
+disclosures and never reads that box, so it absorbed the new name with no edit, satisfying
+R-01's requirement that the control assert a reconciliation and not a number. On the owner's
+explicit approval of 2026-09-13, `functional-design/business-rules.md` carries a dated
+annotation recording 33 → 34 and eighteen → nineteen; nothing above it was rewritten.
+
+**Open item this does not close.** R-01's control sentence says a name must be disclosed
+"by its raising unit". Measured: **13 of the 19** riders are disclosed only by foundation's
+own box and never by the unit that raises them. The strict reading is unsatisfiable today
+and would make this unit's census permanently red on other units' unfinished work — which
+this unit's § Assumptions already records ("This unit cannot declare any of the eighteen for
+their owners"). The census reads disclosure workspace-wide; the per-raising-unit obligation
+stays open and is carried to the gate, not closed here.
+
+**Execution.** **Not executed — no Python interpreter exists on this clone** (`python`,
+`python3`, `py` all resolve to Store alias stubs; no `pytest`, `ruff` or `pip`; PyPI egress
+blocked). The census algorithm and every negative-control fixture were cross-checked under
+`bun` — the same runtime R-01's own 2026-08-28 derivation used — at 17/17, reproducing the
+live-tree population exactly. **This is smoke evidence only, never governed**: it validates
+the algorithm and fixtures, not the pytest module, and cannot catch a Python syntax, import
+or fixture-wiring fault. The module still needs one real `pytest` run on a Python 3.11 host
+before any governed claim rests on it. No acceptance row is claimed discharged.
 
 ## Files created
 
@@ -280,5 +342,44 @@ top-of-diff).
 ### Summary
 
 One Major survives, unresolved for the third consecutive review pass: R-01's own mandated reconciliation negative control (the enumeration census) is still absent from the suite, though the hierarchy it would check is today correctly declared and no live violation exists. The cross-unit edit to `src/data/experiment_registry.py` is genuinely additive and fail-closed — verified by direct read of call order (guard before any `os.write`), by independent reproduction of the byte-identical-on-refusal and must-not-fire tests, and by the derived-coverage test that pins the routed-column set exactly to `REDACTED_FREE_TEXT_FIELDS`; it does not newly refuse any row this unit's own writers legitimately produce. The one disclosed record-staleness item (this file not describing that edit) is recorded per dispatch instruction rather than newly discovered, and is not treated as a code defect. D-38's config additions are genuine transcriptions with no TBD weakened and no machine path introduced. All re-run test counts (49 / 12+23 / 149 / 1144 total) reproduce exactly under independent execution. Per this stage's stated verdict rule (NOT-READY only on any Critical or more than two Major findings), one Major with zero Critical does not cross the threshold.
+
+**Verdict: READY**
+
+## Adversarial re-review — Step 13, the R-01 census (2026-09-13)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T09:18:42Z
+**Iteration:** Re-review at the REJECTED stage gate, after Step 13 (the census) was added under the owner's Request Changes ruling. Re-derived against the current working tree at HEAD `1670ac8` with this unit's Step-13 changes uncommitted; every count below is independently re-derived, not carried from the artifact's own claim.
+
+### Findings
+
+| # | Severity | Where | What | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `functional-design/business-rules.md` line 1855 (`## Assumptions & Open Questions`, "OPEN — the same declaration obligation on the eighteen exceptions…") | This bullet still asserts the **superseded** figures — "**33** distinct… **15**… **18** riding" — and enumerates only the pre-census eighteen rider names (no `FeatureAvailabilityError`), directly contradicted by the fresh annotation this same Step 13 added forty lines earlier in the identical file (34/15/**19**, `FeatureAvailabilityError` named as the new rider). This is exactly the "sweep every representation of a corrected fact" defect class `project.md` records twice already (`fd-2026-08-30-sweep-derive-sites`, `fd-2026-08-30-sweep-numerals-and-surfaces`) — and this exact document already shows the correct fix pattern one bullet above, at line 1853 ("(Amended 2026-08-28 per Recommendation 8 — the bullet above says eight and fourteen; it is now NINE and FIFTEEN.)"), so the annotate-in-place convention needed here was already in active use two lines up and was not extended to its neighbour. Confirmed by `git diff` (the 2026-09-13 annotation is 40 pure insertions after line 227, touching nothing at line 1855) and by independently re-deriving the workspace-wide grep myself (below) rather than trusting either figure. | Extend the same annotate-in-place treatment already used at line 1853 to the line-1855 bullet: 33→34, 18→19, add `FeatureAvailabilityError` to the enumerated list — on the same or a fresh owner approval, at the next touch of this file. |
+| 2 | Minor | `code-summary.md` § "Step 13" | The Step 13 narrative does not disclose that the disclosure scan is **line-scoped** (a name and an any-future marker must co-occur on the same physical line) or the directional safety argument for that bound (under-detection → false alarm sending a reader to the artifact, never a false pass letting an undisclosed name through). This is fully documented in `tests/test_determinism.py`'s own module comments but is not surfaced in the primary artifact a gate reader is pointed to. | Add one sentence to the Step 13 section stating the line-scoping bound and its safe-direction argument, mirroring the test module's own disclosure. |
+
+### Verification performed (independently re-derived, not trusted)
+
+- **Unit derivation (12).** Listed `construction/*/` myself and confirmed exactly twelve children hold a `functional-design/` subdirectory: `acquisition`, `evaluation-and-comparison`, `external-products`, `features-and-splits`, `fixtures-and-reproducibility`, `foundation`, `governance-guards`, `inventory-and-registry`, `models-and-baselines`, `regimes-diagnostics-reporting`, `statistical-inference`, `target-standardization`.
+- **Artifact count (48).** Counted `*.md` files under each of those twelve `functional-design/` directories: **48**, matching the claim exactly.
+- **Distinct subclass count (34) and the 15/19 split.** Ran my own `grep -rohE '\b[A-Z][A-Za-z0-9]*Error\b'` over all 48 artifacts, excluded the Python builtins (`NotImplementedError`, `TypeError`) and the base `IntegrityError`: **34** distinct project-defined names, independently reproducing the census's first-run figure exactly. Checked all 15 of `R01_ENUMERATION` are present in that set (yes); the remaining 19 are the riders. This directly falsifies the stale "33… 18" still standing at business-rules.md line 1855 (finding #1).
+- **The 13-of-19 "disclosed only by foundation's own box" claim.** For each of the 19 riders, derived independently which unit(s) raise it and which unit(s) disclose it under an any-future marker on the same line. Reproduced the **exact same thirteen names** the annotation lists: `AcquisitionError`, `AuditScopeError`, `BenchmarkError`, `BudgetError`, `ComparatorError`, `CredentialEgressError`, `DriverError`, `GateError`, `ImportBoundaryError`, `InventoryError`, `SchemaError`, `StandardizationError`, `TargetQualityError`. The other six (`EvidenceScanError`, `FeatureAvailabilityError`, `FixtureError`, `InverseTransformError`, `ManifestError`, `ReuseError`) are disclosed by at least one unit that actually raises them (e.g. `FeatureAvailabilityError` disclosed only by `external-products`, never by `foundation`) — the claim is exactly right, not approximately right.
+- **R01_ENUMERATION pinned to its declaration site.** Read `src/data/config.py` directly: the marker `# --- riding R-01's any-future clause` sits at line 289; every `class *(IntegrityError)` above it (lines 164–279) is exactly the 15 names in `R01_ENUMERATION` — `ConfigError`, `PreflightError`, `PlatformError`, `DeterminismError`, `ReleaseError`, `RegistryError`, `PhaseBoundaryError`, `LockedTestError`, `LeakageError`, `AlignmentError`, `SeedError`, `FairnessError`, `BootstrapError`, `RegimeError`, `PartitionError` — matching `test_r01s_fifteen_match_the_declaration_site`'s AST-based assertion; `src/data/config.py` itself carries no diff in the working tree, confirming these were already committed and Step 13 only added the reconciliation test against them.
+- **Test count (43).** `grep -c "^def test_" tests/test_determinism.py` → **43**, matching the claimed 35→43.
+- **Anti-vacuity and negative controls read as genuine, not decorative.** Direct read of `test_the_census_reaches_every_name_in_r01s_enumeration` (fails if any of R-01's fifteen is unreached — catches a moved root, renamed directory, or extension change), `test_census_catches_an_undisclosed_name` (a synthetic undisclosed name must be flagged), `test_census_accepts_a_name_disclosed_under_the_any_future_clause` (a disclosed name must NOT be flagged, and an adjacent undisclosed name in the same synthetic artifact must still be — proving per-name, not per-artifact, attribution), and `test_census_unit_derivation_skips_a_directory_without_functional_design` (stage directories don't inflate the unit count). All four are structurally sound controls against the failure modes named in the dispatch.
+- **Annotation is pure append.** `git diff -- .../foundation/functional-design/business-rules.md` shows **40 insertions, 0 deletions** — nothing above the annotation was rewritten, consistent with the owner's annotate-in-place approval being scoped to adding new text, not editing the 2026-08-28 record.
+- **Execution honesty.** `which python python3 pytest` on this clone resolves only to Windows Store alias stubs (no real interpreter); `bun` is genuinely present. This independently corroborates the artifact's own "Not executed — no Python interpreter exists on this clone… cross-checked under `bun`… smoke evidence only" claim; no sentence in the artifact overstates this into a governed pytest run.
+- **Commit-state header, re-verified against `1670ac8` (this pass's baseline).** `git log` on `src/data/config.py`, `src/data/release.py`, `src/data/experiment_registry.py` shows `715f392` as the most recent commit touching any of them, with zero commits between `715f392` and HEAD `1670ac8` touching these files — the header's "committed, most recently in `715f392`" and "no commit was made by this stage" both hold.
+- **Scope.** `git status`/`git diff --stat` over the whole working tree shows a wide set of uncommitted changes (other units' `code-summary.md`/`code-generation-plan.md` files, `src/evaluation/guards.py`, `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`) that are **not** referenced anywhere in `foundation`'s plan or summary as Step 13 work — attributed to concurrent sibling-unit activity in the same tree, not to this unit, per the dispatch's own caution. This unit's actual footprint for Step 13 is exactly the four files the artifact claims: `code-generation-plan.md` (+34), `code-summary.md` (this file), `functional-design/business-rules.md` (+40/-0), and `tests/test_determinism.py` (+436/-3).
+
+### Coverage limits of this pass
+
+- Read scope: this unit's own artifacts and the 48 `functional-design/*.md` files across all twelve units (read only for the purpose of independently re-running the census by hand, which the dispatch's carve-out for a named cross-unit integration point covers — R-01's enumeration is explicitly a workspace-wide reconciliation this unit's own control depends on, not a sweep of sibling units' unrelated design content). No sibling unit's `code-generation` artifacts, source modules, or test files were read.
+- Did not execute `tests/test_determinism.py` under a real interpreter (none exists on this clone, confirmed above) — this pass verifies the census algorithm and its counts by independent manual derivation, not by running the module.
+
+### Summary
+
+Step 13 closes the Major that recurred across three prior passes (2026-09-05, 2026-09-10, 2026-09-11): the R-01 enumeration census now exists, is genuinely derived (units, artifacts, builtins, disclosures all computed rather than hardcoded), is pinned to its declaration site by an AST test, carries a real anti-vacuity guard and per-name negative controls, and its every headline count (12 units, 48 artifacts, 34 subclasses, 15 enumerated, 19 riders, the 13-of-19 foundation-only-disclosure figure, 43 test functions) reproduces exactly under my own independent derivation rather than the artifact's say-so. The one new defect this repair introduces is a documentation-sweep gap of the kind this project has hit twice before in this same file: the fresh 34/15/19 correction was not propagated to the `## Assumptions & Open Questions` bullet at line 1855, which still asserts 33/15/18 and omits `FeatureAvailabilityError` — a Major, but a single one, with zero Critical findings and no functional or test defect behind it. Per this stage's stated verdict rule (NOT-READY only on any Critical or more than two Major findings), one Major with zero Critical does not cross the threshold.
 
 **Verdict: READY**

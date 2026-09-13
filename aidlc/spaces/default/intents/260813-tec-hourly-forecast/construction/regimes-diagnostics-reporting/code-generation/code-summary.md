@@ -16,17 +16,17 @@
 
 | File | Lines | Content |
 |---|---|---|
-| `governance/CHANGE_RECORD_2026-09-06_R123_regimes_and_reporting.md` | 197 | Q1 transcription record; Q2 decision (notebook-name divergence from R-131's indicative names recorded); Q3's PROPOSED D-number text quoting the coverage notebook's Cell-3 constants verbatim (ARUC 40.286/44.086, BSHM 32.778987/35.022987, NICO 35.140989/33.396450; floor half-open cell rule), IGS-site-log validation named as the post-freeze obligation; honest limits |
+| `governance/CHANGE_RECORD_2026-09-06_R123_regimes_and_reporting.md` | **237** (re-derived 2026-09-13 by `wc -l` at HEAD `1670ac8`; the cell read 197 — the record grew when its own later sections were appended) | Q1 transcription record; Q2 decision (notebook-name divergence from R-131's indicative names recorded); Q3's PROPOSED D-number text quoting the coverage notebook's Cell-3 constants verbatim (ARUC 40.286/44.086, BSHM 32.778987/35.022987, NICO 35.140989/33.396450; floor half-open cell rule), IGS-site-log validation named as the post-freeze obligation; honest limits |
 | `configs/experiment.yaml` (modified) | 247 (was 212) | ONE `regimes` block: thresholds quiet `Kp<4` / disturbed `Kp>=4` / storm `Kp>=5`, window −12/+24 h, contiguous-`Kp>=5` event definition, ≥24 h-of-`Kp<4` independence, D-13 demotion threshold, `count_source` GFZ (D-11), `december_day_range: "TBD — freeze gate"` (Rec 15 — Student+Supervisor), `d17_quality_strata` citing D-17; nothing else touched; copy exactness test-asserted |
 | `src/evaluation/regimes.py` | 607 | ONE classifier (`classify_hours`, December-blind by signature — params exactly `{kp, config}`), `count_storm_events` with the approved signature (`source`/`release_grade` required; non-GFZ / absent-or-TBD grade / Dst-derived input each raise `RegimeError` naming `.dst_summary.json`/D-11); registered-audit read path with the control-(31) divergence raise; `read_december_day_range` refuses on the TBD sentinel by field name |
-| `src/evaluation/report_guards.py` | 519 (unchanged at iteration 2; 522 from the 2026-09-10 gate-reopened repair — see § Gate-reopened repair) | The TEN SD-R-01 guards exactly as reviewed READY (incl. `require_provenance_block` on W-3 AND W-5, presence then agreement; `require_lineage_caveat` on W-3/W-5/W-7, figure-"present" = caption/metadata — **the W-5 half of this claim was FALSE at iteration 1 and is true from iteration 2**: the call at `diagnostics.py:662` was added on the reviewer's Critical, see § Iteration 2 changes); `ConclusionSurfaceRegistry` fail-closed, write-once atomic; `emit_registered_artifact` as one register-then-write transaction |
-| `src/evaluation/diagnostics.py` | 1434 (was 1394 at iteration 1; +41/−1; 1596 from the 2026-09-10 gate-reopened repair — see § Gate-reopened repair) | Primary table (three difficulty controls co-reported by construction; `beats_model` printed never judged; R-108 fields asserted present, never restated; TEC-06 caveat on IRI/GIM rows; tier-3 row; provenance block; `derived: true` on the §5.5 percentage reduction); breakdown family (D-17 bound from config; top-1%-removed sensitivity labelled; driver-identity caveat; machine-readable shortfalls; **from iteration 2:** TECU units asserted from the metrics artifact's metadata and printed as `units`, and the TEC-06 lineage caveat asserted on every IRI/GIM item in the payload tree, both at the W-5 producing path); DEC regime breakdown (registered count governs; computed count for divergence only); practical relevance (both §5.3 conjuncts, PC-09 ordering, honest demotion per R-128); Dst/RF quarantine (`authoritative = false` render refusal); claims-and-limitations checklist over the registered surface set (D-8/D-7/TC-12 prohibited rows, D-28 disclosure, Phase-2 replication statement, hand-authored-prose residual STATED, never claimed enforced), itself a registered surface |
+| `src/evaluation/report_guards.py` | **522 on disk, re-derived 2026-09-13** by `wc -l` at HEAD `1670ac8`; the cell led with 519 (its iteration-2 size) and disclosed 522 only in a parenthetical, so the figure a reader meets first was the superseded one | The TEN SD-R-01 guards exactly as reviewed READY (incl. `require_provenance_block` on W-3 AND W-5, presence then agreement; `require_lineage_caveat` on W-3/W-5/W-7, figure-"present" = caption/metadata — **the W-5 half of this claim was FALSE at iteration 1 and is true from iteration 2**: the call at `diagnostics.py:662` was added on the reviewer's Critical, see § Iteration 2 changes); `ConclusionSurfaceRegistry` fail-closed, write-once atomic; `emit_registered_artifact` as one register-then-write transaction |
+| `src/evaluation/diagnostics.py` | **1611 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`); 1434 at iteration 2 (was 1394 at iteration 1; +41/−1); 1596 after the 2026-09-10 gate-reopened repair, then +~15 from the W-4 addition — see § Gate-reopened repair. The **1596** carried in this cell was correct only for the state immediately after that repair and has been flagged as a Minor on two consecutive passes; corrected here in the body per `project.md` (`code-generation:fr-2`) | Primary table (three difficulty controls co-reported by construction; `beats_model` printed never judged; R-108 fields asserted present, never restated; TEC-06 caveat on IRI/GIM rows; tier-3 row; provenance block; `derived: true` on the §5.5 percentage reduction); breakdown family (D-17 bound from config; top-1%-removed sensitivity labelled; driver-identity caveat; machine-readable shortfalls; **from iteration 2:** TECU units asserted from the metrics artifact's metadata and printed as `units`, and the TEC-06 lineage caveat asserted on every IRI/GIM item in the payload tree, both at the W-5 producing path); DEC regime breakdown (registered count governs; computed count for divergence only); practical relevance (both §5.3 conjuncts, PC-09 ordering, honest demotion per R-128); Dst/RF quarantine (`authoritative = false` render refusal); claims-and-limitations checklist over the registered surface set (D-8/D-7/TC-12 prohibited rows, D-28 disclosure, Phase-2 replication statement, hand-authored-prose residual STATED, never claimed enforced), itself a registered surface |
 | `src/evaluation/plots.py` | 271 | Presentation-only BY SIGNATURE (AST-verified: zero aggregation calls, zero arithmetic BinOps); source-data IDs stamped; lineage caveats carried into captions; WS-19-schema manifest through `require_registered_surface`; matplotlib lazy, absence refuses naming the pin surface |
 | `notebooks/01_data_and_target_audit.ipynb` | 130 | Governed skeleton: declaration cell first, `src/` imports only, stop on missing inputs, registered conclusion cell, never-executed limit in cell 1 |
 | `notebooks/02_processing_and_features_review.ipynb` | 119 | Same discipline |
 | `notebooks/03_model_training_review.ipynb` | 120 | Same discipline |
 | `notebooks/04_results_and_claims_review.ipynb` | 134 | Same discipline |
-| `tests/test_regimes_and_reporting.py` | 1653 (was 1599 at iteration 1; +57/−3; 1810 with 88 test functions from the 2026-09-10 gate-reopened repair — see § Gate-reopened repair) | 82 test functions at iteration 2 (derived: `grep -c "def test_"` → 82; was 81) — classifier boundary controls; counting-path refusals; audit-divergence raise; December-blind signature control; the per-entry render-guard set for W-3/W-5/W-7/W-4; provenance-on-breakdown and scored-window-agreement controls; quarantine controls; checklist controls incl. planted-phrase prohibited-class detection and the stated residual; notebook static scans; AST no-threshold-literal / plots-compute-nothing / no-new-import-edge controls; must-NOT-fire controls; config re-read, never literal; synthetic year 2001 only |
+| `tests/test_regimes_and_reporting.py` | **1833 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`); 1653 at iteration 2 (was 1599 at iteration 1; +57/−3); 1810 with 88 test functions after the 2026-09-10 gate-reopened repair, then +23 from the W-4 addition — see § Gate-reopened repair. The **1810** carried in this cell was correct only for the state immediately after that repair and has been flagged as a Minor on two consecutive passes; corrected here in the body per `project.md` (`code-generation:fr-2`) | 82 test functions at iteration 2 (derived: `grep -c "def test_"` → 82; was 81) — classifier boundary controls; counting-path refusals; audit-divergence raise; December-blind signature control; the per-entry render-guard set for W-3/W-5/W-7/W-4; provenance-on-breakdown and scored-window-agreement controls; quarantine controls; checklist controls incl. planted-phrase prohibited-class detection and the stated residual; notebook static scans; AST no-threshold-literal / plots-compute-nothing / no-new-import-edge controls; must-NOT-fire controls; config re-read, never literal; synthetic year 2001 only |
 
 ## Key implementation decisions
 
@@ -1061,3 +1061,167 @@ credential is present, no scientific constant is hidden in source, and no new lo
 reachability channel exists. The sole finding is the same Minor stale-line-count pair the
 prior review already identified, still unresolved and still without functional consequence.
 Verdict: READY.
+
+## Adversarial re-review at REJECTED gate (2026-09-13)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T10:21:28Z
+**Iteration:** fresh adversarial pass against the CURRENT on-disk state at the 2026-09-13
+REJECTED-gate reopening, re-derived from scratch per the dispatch brief; no prior verdict in
+this file is rubber-stamped.
+
+**Scope and repo-state reconciliation.** Repo `HEAD` = `1670ac8` (`git rev-parse HEAD`, run
+directly). `git diff --stat b0b7c1d 1670ac8 -- src/evaluation/diagnostics.py
+src/evaluation/report_guards.py src/evaluation/regimes.py src/evaluation/plots.py
+tests/test_regimes_and_reporting.py` → **empty** — no code or test change to this unit's
+surface since the "Floor-reset re-review (2026-09-11)" pass above. `git status --short`
+confirms the only entry under this unit's tree is this file itself
+(`.../regimes-diagnostics-reporting/code-generation/code-summary.md`); none of
+`src/evaluation/{regimes,diagnostics,report_guards,plots}.py`,
+`tests/test_regimes_and_reporting.py`, or `configs/experiment.yaml` is modified in the
+working tree. **What changed since the last READY is documentation-only**: the Files table
+corrected four stale line-count cells (`governance/CHANGE_RECORD_2026-09-06_R123_…`
+197→237; `report_guards.py` 519(522)→522; `diagnostics.py` 1596→1611; `test_regimes_and_reporting.py`
+1810→1833), each stated "re-derived 2026-09-13 by `wc -l` at HEAD `1670ac8`."
+
+**Re-derivation of every count in the artifact (not trusted from the corrected cells):**
+
+```
+wc -l src/evaluation/diagnostics.py src/evaluation/report_guards.py src/evaluation/regimes.py \
+      src/evaluation/plots.py tests/test_regimes_and_reporting.py configs/experiment.yaml \
+      governance/CHANGE_RECORD_2026-09-06_R123_regimes_and_reporting.md \
+      notebooks/0{1,2,3,4}_*.ipynb
+  → 1611 / 522 / 607 / 271 / 1833 / 275 / 237 / 130 / 119 / 120 / 134
+grep -c "^def test_" tests/test_regimes_and_reporting.py → 88
+grep -c "@pytest.mark.parametrize\|parametrize(" tests/test_regimes_and_reporting.py → 0
+  (no parametrize expansion in this file — 88 `def test_` functions is also 88 executed
+  cases; the def-count/executed-case distinction the dispatch brief asked to watch for
+  does not arise here)
+```
+
+All four corrected cells (237/522/1611/1833) match `wc -l` exactly, and `regimes.py` (607)
+and `plots.py` (271) — the two cells the correction pass did NOT touch and did NOT need to
+— also match exactly. The four notebook cells (130/119/120/134) match exactly. **One cell
+was not re-derived and is wrong: `configs/experiment.yaml` states "247 (was 212)" in the
+Files table; the file is 275 lines on disk.** See Finding 1.
+
+**Sweep for every representation of the four corrected figures** (`1596`, `1810`, `1434`,
+`1653`, `519`, `197` as CURRENT-fact claims, per `project.md`
+`fd-2026-08-30-sweep-numerals-and-surfaces`): grepped the whole file for each numeral.
+Every remaining occurrence of `1596`/`1810`/`519`/`197` is inside a historical delta
+statement ("1596 after the 2026-09-10 gate-reopened repair, then +~15…", "88 test
+functions, was 82", the `git diff --numstat` blocks under § Iteration 2 changes/§
+Gate-reopened repair, and frozen review bodies dated 2026-09-06/09-10/09-11) — i.e. a
+correctly-scoped historical record of what the count *was* at an earlier point, not an
+assertion of the current count. None of the six superseded numerals is asserted as
+*current* fact anywhere outside the four now-corrected Files-table cells. This sweep is
+clean.
+
+**Re-verification of the two previously terminal closures, at the real entry points, not
+by reading the claim or calling the bare guard** (code is unchanged since 2026-09-11, so
+this re-confirms rather than re-fixes):
+
+- `grep -n "require_lineage_caveat\|require_registered_surface\|require_derived_label\|require_estimand_fields\|_register_reported_artifact(" src/evaluation/diagnostics.py`
+  shows `require_lineage_caveat` called inside `build_primary_table` (:471, W-3) and inside
+  the breakdown builder's payload walk (:737, W-5); `require_derived_label` called at :477
+  (W-3), :806 (`build_member_metrics_breakdown`, W-5), and :983 (W-6); `require_estimand_fields`
+  at :470 (W-3) and :800 (W-5); `_register_reported_artifact` called at the end of
+  `build_primary_table` (:522), `build_breakdown_artifact` (:741), and `build_claims_checklist`
+  (:1510) — no producing function returns an artifact bypassing it. This matches, by direct
+  read rather than by trusting the prior review's narrative, every closure the 2026-09-06/
+  09-10/09-11 passes verified; nothing has drifted.
+- `src/evaluation/regimes.py:267` (`classify_hours`) and `:422-437`
+  (`read_december_day_range`) read directly: the classifier signature and the TBD-sentinel
+  refusal are unchanged. `src/evaluation/diagnostics.py:1130-1150`
+  (`rf_importance_figure_source`) read directly: still raises unless
+  `metadata.get("authoritative") is False` — RF importance stays non-authoritative and
+  unreachable as a selection input. `git diff 8a6cb61 HEAD -- configs/experiment.yaml`
+  restricted to the `regimes:` block shows **zero diff** — the transcribed thresholds
+  (`quiet_kp_below: 4`, `disturbed_kp_min: 4`, `storm_kp_min: 5`, window ±12/24h, D-13
+  independence/threshold, `count_source`) and the `december_day_range: "TBD — freeze gate"`
+  sentinel are byte-identical to this unit's own commit.
+
+**Finding 1 (Minor) — `configs/experiment.yaml`'s Files-table cell is stale and was not
+re-derived in this pass, though the pass demonstrably had the methodology in hand.** The
+cell reads "247 (was 212)"; `wc -l configs/experiment.yaml` on the current tree returns
+**275**. `git show 8a6cb61:configs/experiment.yaml | wc -l` → 247 — the figure is correct
+for this unit's own code-generation commit, but two later commits grew the file: `17e0767`
+and `8efdfb5` (+21/−1 net; both are 2026-09-10 owner-ruling-adoption commits annotating
+`practical_relevance_threshold`, a field this unit's own R-128 design consumes, but not part
+of this stage's own delivery) and `f0d9e49` (+9/−0 net; "Transcribe embargo_hours = 24;
+record D-38," a sibling split-configuration concern, not this unit's). `git diff 8a6cb61 HEAD
+-- configs/experiment.yaml`, restricted to the `regimes:` block, is empty — the content this
+unit actually owns is untouched, so this is a documentation staleness, not a functional
+defect, matching the class of finding the 2026-09-10/09-11 reviews already carried for the
+other three files. It is flagged now, rather than left silent, because the 2026-09-13
+correction pass corrected four sibling cells in the same table with the identical `wc -l`
+methodology and the dispatch brief for this pass named this exact cell by number — leaving
+it uncorrected here is a second instance of the gap `project.md` (`fd-2026-08-30-sweep-derive-sites`,
+`code-generation:fr-2`) already named this unit for. **Recommendation:** update the cell to
+275 (or state "247 as delivered by this unit's own commit `8a6cb61`; grew to 275 under two
+subsequent owner-ruling and sibling-unit commits outside this stage — see `git diff 8a6cb61
+HEAD` for the delta") on the next touch of this document; no code change needed.
+
+**Finding 2 (Minor) — Step 8's gate-precondition description is now imprecise given the
+register's growth to D-38.** § Deviations states: "Step 8 NOT executed... no D-number dated
+on/after 2026-09-06 freezing the coverage notebook's constants exists." Read
+`evidence/DECISIONS.md` D-33 directly (dated 2026-09-10, after 2026-09-06): D-33 **does**
+freeze part of the coverage notebook's constants — "the coordinate-to-cell rule... Its
+source text is `notebooks/madrigal_phase1_coverage_audit.ipynb` cell 4... reproduced above
+without alteration" — and transcribes it into `configs/data.yaml: cell_rule` and
+`src/data/registry.py: CELL_RULE_ID` (confirmed present: `cell_rule: "floor-half-open-d1"
+# D-33` in `configs/data.yaml:58`). D-33 explicitly does **not** freeze the station
+coordinates — "does NOT move a station... does not resolve `stations`, which stays `TBD —
+freeze gate` with its coordinates still PROVISIONAL" — so the full precondition this unit's
+Step 8 needs (both halves of the notebook's constants frozen, per `team.md` § Code Style's
+migration obligation) remains unmet, and Step 8 correctly stays unexecuted: read
+`notebooks/madrigal_phase1_coverage_audit.ipynb` cell 4 directly — the inline
+"PROVISIONAL"/"DEFAULT convention adopted here" station-coordinate literals are unchanged,
+and `configs/data.yaml: stations` is still the literal `"TBD — freeze gate"` sentinel. So
+**the gated behaviour (no migration) is still correct** — this is not a Critical (no
+premature fill of a TBD-freeze-gate value occurred), but the artifact's blanket claim that
+*no* D-number freezing the notebook's constants exists is no longer accurate: one now exists
+for the cell-rule half. **Recommendation:** on the next touch, narrow the precondition
+statement to "the station-coordinate half of the notebook's constants remains unfrozen (D-33
+froze only the cell-selection rule, 2026-09-10); Step 8's migration needs both halves and
+stays gated."
+
+**Attribution and commit-state checks (no findings):** `src/evaluation/guards.py`,
+`tests/test_determinism.py`, `tests/test_phase_boundary.py`, and `tests/test_phase_contract.py`
+(uncommitted, sibling-owned per `git status`) are not credited, blamed, or otherwise
+referenced anywhere in this artifact as this unit's work — the one mention of a sibling test
+name (`test_determinism`, § Gate-reopened repair) correctly frames it as "pre-existing on
+`main`... owned by other units' lanes, not introduced or touched here." `src/evaluation/`
+is correctly treated as shared territory: this artifact only ever describes
+`regimes.py`/`diagnostics.py`/`report_guards.py`/`plots.py` as its own, never `guards.py` or
+`metrics.py`/`masks.py`/`bootstrap.py` (owned elsewhere). Every HEAD reference in the four
+corrected Files-table cells (`1670ac8`) matches `git rev-parse HEAD` exactly; no stale commit
+hash (e.g. the historical `0e002cd`/`f0d9e49`/`b0b7c1d`/`715f392` progression, or `c7e7a05`
+from an unrelated intent) is asserted as current anywhere in the document.
+
+**Standing invariants, re-checked directly:** Dst quarantine (`build_dst_diagnostic`,
+`_refuse_dst_derived` in `regimes.py`) intact and unchanged; RF-importance non-authoritative
+refusal intact; no practical-relevance threshold introduced (`practical_relevance_threshold`
+stays the `TBD — freeze gate` sentinel this unit's own code reads, D-34 only records that
+the sentinel IS the decided state — no numeral written); `december_day_range` TBD sentinel
+still refuses by field name; no scientific threshold literal in `regimes.py` (grep for
+`3|4|5|12|24` outside docstrings/citations returns nothing, unchanged); no credential
+pattern in `src/evaluation/*.py`; WS-19/TA-16/TA-20 still stated `Pending` (not claimed
+discharged) in § Open items.
+
+**Findings summary:** 0 Critical, 0 Major, 2 Minor (both pre-existing-class documentation
+staleness, no functional or scientific consequence, both newly named at their exact site and
+cause rather than left to a future pass to rediscover).
+
+### Verdict
+
+**READY.** No code, test, or configuration content this unit owns has changed since the
+"Floor-reset re-review (2026-09-11)" READY verdict; the 2026-09-13 correction pass fixed four
+of six stale Files-table cells it should have fixed, verified here against `wc -l` at the
+actual current `HEAD` (`1670ac8`); the two it missed (`configs/experiment.yaml`'s line count,
+and Step 8's now-imprecise precondition narrative) are documentation-only Minors carrying no
+functional consequence — the unit's own transcribed config content, the two previously
+Critical/Major-repaired producing paths, the fail-closed registration wiring, and every
+standing invariant re-verified independently in this pass. Both Minors are routed to the next
+touch of this document rather than blocking the gate.

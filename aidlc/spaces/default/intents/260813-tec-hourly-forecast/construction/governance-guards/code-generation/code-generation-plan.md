@@ -48,3 +48,60 @@ Two scope-limited verification Minors ride this unit's terminal READY review: th
 ## Out of scope
 
 The eight Phase 1 producing scripts (owned by their units), `src/data/registry.py` (inventory-and-registry), fixture manifests, any scientific computation, running the gate scan, and every acceptance-row discharge (WS-18, TA-18, TA-25, TA-27, TA-28 all stay `Pending`).
+
+---
+
+## Repair step added 2026-09-13 — owner ruling at the rejected stage gate
+
+The project owner selected **Request Changes** at the `code-generation` approval gate on
+2026-09-13 and ruled **Option 4** on the D-17 field-contract contradiction. That lifts the
+reviewer receipt freeze and authorises the step below. This step is plan INPUT for the
+repair pass, not a retroactive summary.
+
+- [x] **Step 11 — D-17 field-contract reconciliation in this unit's two test modules**
+  [D-17; R-66/R-67; `tests/test_phase_boundary.py`, `tests/test_phase_contract.py`]
+
+  **Established by investigation 2026-09-13; not to be re-litigated in this step.**
+  `evidence/DECISIONS.md` D-17's frozen table enumerates exactly **sixteen** target-row
+  fields. `processor_qc_flags` is **not** a target-row column — it is a key inside the
+  data-quality block (R-71 / NFR-DQ-01, W-3), built at `src/data/prepared.py:1304` as
+  `{"aggregation_flags": [...], "not_applicable_classes": [...]}`. The authoritative
+  in-code contract is `src/data/prepared.py:195` `D17_FIELDS` (16), already pinned by
+  `tests/test_prepared_target_schema.py:196-202`, which asserts `processor_qc_flags` is
+  not among them. The producer's header is
+  `_TARGET_CSV_HEADER = (*D17_FIELDS, LINEAGE_CAVEAT_FIELD)` (`prepared.py:1324`) and the
+  row guard at `prepared.py:791` permits `LINEAGE_CAVEAT_FIELD` (`"lineage_caveat"`) as
+  the one field beyond the sixteen. The seventeen entered in commit `b844a4d`
+  (2026-08-21) — the same commit that first wrote D-17's sixteen-row table — so it is a
+  transcription slip against TE §6.1's data dictionary, not a competing decision, and no
+  D-number is required to correct it.
+
+  `tests/test_phase_boundary.py:95` `D17_TARGET_FIELDS` carries seventeen and is consumed
+  as a **set equality in both directions** at `:253-256`, so it is stale twice: `missing`
+  would flag `processor_qc_flags`, and `extra` would flag `lineage_caveat`. Fixing only
+  the first would swap which assertion fires on the first real artifact.
+
+  1. Remove `"processor_qc_flags"` from `D17_TARGET_FIELDS`, leaving sixteen. Correct its
+     header comment — "Column names a Phase 1 target artifact may carry" misdescribes an
+     exact contract — to match D-17 and `prepared.py:788` ("exactly sixteen fields — not
+     fifteen, not seventeen"), stating that `processor_qc_flags` is a data-quality-block
+     key (W-3), not a row field.
+  2. In `test_target_artifact_conforms_to_d17_when_it_exists`, permit the declared caveat
+     column in the `extra` computation, mirroring `prepared.py:791` exactly. The `missing`
+     check is not weakened. Update the docstring to state D-17's sixteen plus the declared
+     lineage-caveat column.
+  3. `tests/test_phase_contract.py:61-63` — correct "the seventeen allowed columns" and
+     align `D17_ALLOWED_FIELDS` to sixteen. That constant is only ever passed to
+     `assert_no_raw_fields` as a happy-path control (`:147`, `:177`), so it carries no
+     runtime contract effect; the comment states what it is actually for.
+  4. Drift guard: assert `set(D17_TARGET_FIELDS) == set(prepared.D17_FIELDS)` so the
+     test-side and producer-side constants cannot silently diverge again. If reaching
+     `src/data/prepared.py` from that module would breach an import boundary or add a
+     dependency the file does not already carry, the executor says so and follows the path
+     that module already uses to reach source — never a new import invented silently.
+
+  Every constant length touched is derived and printed, before and after.
+
+  **Out of scope for this step**: no `code-summary.md` edit (the orchestrator owns the
+  artifact corrections in this pass), no write to `evidence/DECISIONS.md`, no commit, no
+  change to `src/data/prepared.py`. No acceptance row is claimed discharged.

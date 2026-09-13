@@ -21,10 +21,10 @@
 | `src/models/ridge.py` | 145 | M-04 Ridge over the D-121 six-value `alpha` grid; lazy `scikit-learn` import, absence refuses naming the `requirements.txt` pin |
 | `src/models/random_forest.py` | 188 | M-05 RF (direct only) over the 18-combination grid; importance emitted only as diagnostic-marked `ImportanceFigure`, never on a selection path |
 | `src/models/checkpoint.py` | 182 | Backend-neutral checkpoint SELECTION on lowest validation RMSE over a recorded epoch history; restore returns that checkpoint (last-epoch restore fails) |
-| `src/models/lstm.py` | 367 | M-06 against the tf.keras 2.21.0 candidate API; every `tensorflow` import inside `_require_frozen_pin()`-guarded code refusing while `requirements.txt` carries no frozen `tensorflow==` line (FU-1 = C); 16-combination grid and seven §8.6 settings asserted from config, never in source |
+| `src/models/lstm.py` | **373** (re-derived 2026-09-13 by `wc -l` at HEAD `1670ac8`; the cell read 367) | M-06 against the tf.keras 2.21.0 candidate API; every `tensorflow` import inside `_require_frozen_pin()`-guarded code refusing while `requirements.txt` carries no frozen `tensorflow==` line (FU-1 = C); 16-combination grid and seven §8.6 settings asserted from config, never in source |
 | `src/models/train.py` | 1487 | `fit_predict` (closed M-01…M-06 set), `assert_stamp_match` (R-90, named function, three checks), `three_seed_mean` (all four limbs; `expected_seeds` from `ConfigSnapshot.seeds`, never inlined), `tune` (January–November only; `TuningRecord` seven fields + three attestation fields, attestation UNCONDITIONAL per SD-M-01 Q1 = C), R-96 grid content+hash freeze, `select` (R-101, refit changes no hyperparameter), five-ablation registry from `experiment.yaml` (R-97: `ABL-HIST48` refuses before primary freeze; `ABL-DIFF` refuses naming D-27), `HorizonSpec` config-only (R-99) |
-| `scripts/06_train_and_predict.py` | 741 | Position 06; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; `assert_stamp_match` before EVERY scoring path; three-seed run per fitting-capable partition; W-12/R-102a one-shot `DEC` write path in full (write once → sha256 → `PredictionHashReceipt` → `.tmp`→fsync→rename → registry column 18 → refuse-to-exit) and UNREACHABLE today behind `materialise_locked_partition`'s G-05 signature guard; honest `aborted` registry row on `IntegrityError`; `prior_period_exposure` never written |
-| `tests/test_models_smoke.py` | 1221 | 54 test functions (count derived: `grep -c "def test_"`) — closed-set refusal, residual/GRU/PyTorch absence scan, M-01…M-03 happy paths + training-only control, M-04/M-05 refusal-by-name + grid-content controls (6/18/16 re-read from config), four R-90 controls (control 3 by enumeration over R-80's six ids) + must-not-fire control, the full `three_seed_mean` negative-control set (incl. wrong-but-distinct triple built from config at test time, never literal), tuning refusals (December partition, criterion-hash mismatch, missing attestation), ablation registration + refusals, horizon config-only, RF importance marker, M-06 pin-guard refusal + seven-settings-from-config, `06` receipt controls through a synthetic non-`DEC` fixture with the `DEC` guard asserted to refuse |
+| `scripts/06_train_and_predict.py` | **999** (re-derived 2026-09-13 by `wc -l`; the cell read 741, and this unit has carried a Minor on this figure since iteration 2 — the summary said 741 → 794 while numstat gave 806, and later sibling/owner edits have since taken it to 999) | Position 06; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; `assert_stamp_match` before EVERY scoring path; three-seed run per fitting-capable partition; W-12/R-102a one-shot `DEC` write path in full (write once → sha256 → `PredictionHashReceipt` → `.tmp`→fsync→rename → registry column 18 → refuse-to-exit) and UNREACHABLE today behind `materialise_locked_partition`'s G-05 signature guard; honest `aborted` registry row on `IntegrityError`; `prior_period_exposure` never written |
+| `tests/test_models_smoke.py` | **1393** (re-derived 2026-09-13 by `wc -l`; the cell read 1221) | **56** test functions (re-derived 2026-09-13: `grep -c "^def test_"` = 56; the cell read 54, the same stale figure the § "Test coverage summary" correction above addresses) — closed-set refusal, residual/GRU/PyTorch absence scan, M-01…M-03 happy paths + training-only control, M-04/M-05 refusal-by-name + grid-content controls (6/18/16 re-read from config), four R-90 controls (control 3 by enumeration over R-80's six ids) + must-not-fire control, the full `three_seed_mean` negative-control set (incl. wrong-but-distinct triple built from config at test time, never literal), tuning refusals (December partition, criterion-hash mismatch, missing attestation), ablation registration + refusals, horizon config-only, RF importance marker, M-06 pin-guard refusal + seven-settings-from-config, `06` receipt controls through a synthetic non-`DEC` fixture with the `DEC` guard asserted to refuse |
 | `tests/test_checkpoint_restore.py` | 209 | 12 test functions — lowest-validation-RMSE selection, restore-returns-that-checkpoint, last-epoch restore fails, tie and NaN handling, fake-backend round trip |
 | `requirements.txt` (modified) | +6 | `scikit-learn==1.4.2` added under the scientific-base block citing the change record (Q3 = A); TensorFlow EXCLUDED with a comment naming the `TBD — freeze gate` rule |
 | `configs/experiment.yaml` (modified) | +133/− | D-121 grids transcribed verbatim (Ridge 6, RF 18, LSTM 16, each block citing D-121/Vision §8.6), `models.lstm_fixed_settings` (seven §8.6 settings, `source_text` quoted), `ablations` as the five TE §7.2 named entries; nothing D-121/§8.6/§7.2 does not fix was written (Q5 = A) |
@@ -41,7 +41,13 @@ Plus Step 1's governance record: `governance/CHANGE_RECORD_2026-09-06_BLK03_conf
 
 ## Test coverage summary
 
-66 test functions total (54 + 12, derived by count). Every hard rule carries a negative control (team.md mandated practice): pin guard, closed model set, stamp match ×4, seed limbs, tuning attestation, ablation refusals, `DEC` guard, receipt failure modes. Full suite ran in the generating session (2026-09-06T14:01Z; `evidence/test_run_access_log.jsonl` rows for `test_release_hashes` in the same run) — **smoke evidence only, never governed** (stdlib stand-in; pins not installable there).
+**68 test functions total (56 + 12)**, re-derived 2026-09-13 at HEAD `1670ac8`:
+`grep -c "^def test_" tests/test_models_smoke.py` = **56**,
+`tests/test_checkpoint_restore.py` = **12**. This line previously read "66 test functions
+total (54 + 12, derived by count)" — stale, and stale in a way the 2026-09-10 correction
+box missed: that pass corrected one representation of the `test_models_smoke.py` figure and
+left this one asserting 54. Corrected in the body rather than in a review addendum, per
+`project.md` (`code-generation:fr-2`). Every hard rule carries a negative control (team.md mandated practice): pin guard, closed model set, stamp match ×4, seed limbs, tuning attestation, ablation refusals, `DEC` guard, receipt failure modes. Full suite ran in the generating session (2026-09-06T14:01Z; `evidence/test_run_access_log.jsonl` rows for `test_release_hashes` in the same run) — **smoke evidence only, never governed** (stdlib stand-in; pins not installable there).
 
 ## Deviations from the plan
 
@@ -267,3 +273,101 @@ hygiene — all check out against the code at HEAD `b0b7c1d`, not merely against
 prose. The one Minor finding is a stale total in this artifact's own "Test coverage summary"
 section, left unfixed by the 2026-09-10 correction that fixed the same fact elsewhere in the
 file; it does not affect any executable behavior, governed artifact, or test result.
+
+### Adversarial re-review at REJECTED gate (2026-09-13)
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T10:15:11Z
+**Iteration:** Adversarial re-review at REJECTED gate (2026-09-13), fresh verdict against HEAD `1670ac8`
+
+#### Scope and method
+
+Re-derived every count in this artifact independently against HEAD `1670ac8` before
+reading any prior review's conclusion, per `project.md` (`code-generation:fr-2`). No
+`graphify` executable is on PATH on this clone (verified again today); direct reads/greps
+used as the sanctioned fallback per `CLAUDE.md`. No Python interpreter is installed on
+this clone and PyPI is unreachable — no test was (re-)executed this pass; every test
+result cited anywhere in this artifact is bounded as smoke evidence only, never governed,
+consistent with prior passes.
+
+#### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-summary.md:60` ("TensorFlow pin unfrozen") and `code-summary.md:29` (`requirements.txt` Files-table cell: "TensorFlow EXCLUDED with a comment naming the `TBD — freeze gate` rule") | Both are stale, current-body (non-historical) claims. `requirements.txt:36` carries `tensorflow==2.21.0` as a non-comment pin, and `evidence/DECISIONS.md` `## D-36` (decided 2026-09-10) states verbatim: "`requirements.txt` carries **`tensorflow==2.21.0`**... This supersedes the earlier `TBD — freeze gate` state." This artifact's own "Owner-rulings implementation review (2026-09-10)" section (line ~150) already independently confirmed the frozen, non-conflicting pin — but that finding was never swept into the "Open items" line or the Files table's description of `requirements.txt`, both of which still assert the pre-freeze (Step-6-time) state. Traced via `git log -- requirements.txt`: commit `17e0767` ("Implement owner rulings: ... TF pin ...") is this unit's own edit that added the pin, so the Files-table `+6` cell for `requirements.txt` (Step 6 only) was never updated to reflect this unit's own later self-edit either. This is the same "sweep every REPRESENTATION" failure mode `project.md` names repeatedly (`fd-2026-08-30-sweep-derive-sites`, `code-generation:fr-2`): one representation of the TF-pin fact was corrected (the 2026-09-10 review prose), two others were not (Open items; Files table). Note `TA-26 Pending` in the same Open-items clause is NOT stale — D-36 itself states the pin freeze "does not make the environment exist... TA-26 stays `Pending`," so only the "unfrozen" characterization is wrong, not the surrounding Pending status. | Rewrite `code-summary.md:60` to read "TensorFlow pin frozen at `tensorflow==2.21.0` (D-36); installability/Kaggle-compatibility verification owed, TA-26 `Pending`" and rewrite the Files-table `requirements.txt` cell to state the pin is now frozen (citing D-36), noting the freeze landed via a later self-edit (`17e0767`) after the original Step 6 `+6`. |
+| 2 | Major | `code-summary.md:54` ("Deviations from the plan" — "`evidence/DECISIONS.md` ends at D-32 (2026-08-28)") | Stale current-body claim. `evidence/DECISIONS.md`'s tail is now **D-38** (`## D-38 — The split configuration is transcribed into the live configs`), with `## D-33` through `## D-38` added after 2026-08-28 — including `## D-37` (2026-09-10, "D-27 is affirmed; BLK-08's mechanism limb resolves in D-27's identity form"), which is exactly the D-27-adjacent decision this Deviations paragraph is about. The artifact's own "Floor-reset re-review (2026-09-11)" section (line ~244) already independently re-derived the correct tail ("`evidence/DECISIONS.md`'s final entry is **D-38**") but that correction was never swept back into the primary Deviations paragraph two review iterations later. The paragraph's *conclusion* is still correct in substance — no entry among D-33…D-38 reopens D-27; D-37 reaffirms it as permanently withheld, so Step 7 remains correctly unexecuted — but the artifact now contradicts itself between its own sections about how many decisions exist. | Update `code-summary.md:54` to state the current tail (D-38) and cite D-37 by name as the reaffirmation that keeps Step 7 gated, rather than restating the 2026-08-28 snapshot as if current. |
+
+No further Critical, Major, or Minor finding survives verification. Every count and
+commit-state claim in the artifact was re-derived, not carried:
+
+- **Every Files-table line count matches exactly at HEAD `1670ac8`** (re-derived via `wc -l`,
+  not carried from any prior review): `persistence.py`=135, `climatology.py`=235,
+  `ridge.py`=145, `random_forest.py`=188, `checkpoint.py`=182, `lstm.py`=**373**,
+  `train.py`=1487, `scripts/06_train_and_predict.py`=**999**,
+  `tests/test_models_smoke.py`=**1393**, `tests/test_checkpoint_restore.py`=209. All ten
+  match the table's current (non-superseded) cell values exactly.
+- **Test-function counts**, distinguished from executed-case counts as the dispatch
+  requires: `grep -c "^def test_" tests/test_models_smoke.py` = **56** (a `def test_`
+  count, not a parametrized-case count — no `@pytest.mark.parametrize` collection
+  expansion is claimed anywhere in this artifact for this file);
+  `tests/test_checkpoint_restore.py` = **12**. Total **68** (56+12), matching the
+  "Test coverage summary" section's already-corrected line 44 exactly — the 66/54 figures
+  appearing at lines 44 (quoted, as superseded), 46-47 (quoted, as superseded), 93 and 179
+  (both inside frozen 2026-09-06/2026-09-11 historical review blocks, correctly describing
+  those blocks' own point-in-time derivations) are all either explicit corrections quoting
+  the old figure to fix it, or frozen historical record — none asserts 66/54/367/741/1221/794
+  as CURRENT fact. This sweep is clean.
+- **Repository/commit state, re-derived, not carried**: `git status` shows this
+  `code-summary.md` itself as the only uncommitted change touching this unit's own
+  directory (this pass's in-progress edit); no other file this unit owns is uncommitted.
+  `da6cb7b` (2026-09-06, unedited template commit message) is confirmed via
+  `git show --stat` to carry `scripts/06_train_and_predict.py` (new), all six
+  `src/models/*.py` files (new), both test files (new), plus modified `requirements.txt`
+  and `configs/experiment.yaml` (governed) — with no D-number cited in the message,
+  matching the artifact's own claim exactly. The uncommitted sibling-owned files visible in
+  `git status` (`tests/test_determinism.py`, `tests/test_phase_boundary.py`,
+  `tests/test_phase_contract.py`, `src/evaluation/guards.py`, and other units'
+  `code-summary.md` files) belong to other units' in-flight work and are not attributed to
+  this unit anywhere in this artifact — correctly.
+- **Gated Step 7**: confirmed still unexecuted. `src/features/transforms.py` carries no
+  `inverse`/`apply` method on any transform (grep confirms only `apply_fitted_transform`,
+  the forward path); `ABL-DIFF`'s refusal in `src/models/train.py` still names D-27; no
+  entry in `evidence/DECISIONS.md` after 2026-09-06 reopens D-27 — `## D-37` (2026-09-10)
+  explicitly reaffirms it as permanent ("the refusal IS the mechanism"), and `## D-38`
+  (split-configuration transcription) is unrelated to D-27.
+- **TensorFlow pin substance** (distinct from the stale-claim finding above): the pin is
+  genuinely frozen (`requirements.txt:36`, `tensorflow==2.21.0`, D-36) and genuinely
+  unverified (no install has ever succeeded on either governed platform per D-36's own
+  text) — both facts hold simultaneously and the code (`_require_frozen_pin()` guard,
+  no module-scope `tensorflow` import) is unaffected by the artifact's stale prose.
+- **Grids re-confirmed**: `configs/experiment.yaml` `combinations:` fields read 6 / 18 / 16
+  for Ridge/RF/LSTM, matching the Files table and the D-121 citation.
+- **Standing invariants held**: no `GRU`/`residual`/`torch` identifier anywhere under
+  `src/models/`; no credential/secret/API-key pattern in `src/models/`,
+  `scripts/06_train_and_predict.py`, or `requirements.txt` (the only "secret" hits are a
+  comment header and a cross-reference to the separate secret-scanning script); no
+  December 2022 data content in either test file (only test names/comments describing the
+  exclusion control); `configs/experiment.yaml`'s three freeze-gate fields
+  (`declared_baseline_per_track`, `selection`, `selected`) still read literal
+  `"TBD — freeze gate"`, unfilled by convenience; WS-14, WS-15, TA-12, TA-13, TA-26 remain
+  named `Pending` and are not claimed discharged anywhere in the artifact.
+
+#### Summary
+
+Two Major findings survive this pass, both of the same class this project's memory
+repeatedly names (`project.md` `fd-2026-08-30-sweep-derive-sites`,
+`code-generation:fr-2`): a fact was corrected in one representation of this artifact (the
+2026-09-10 and 2026-09-11 review sections) and never swept into the primary,
+currently-read body (the "Open items" line, the Files table, and the "Deviations"
+paragraph). Both are documentation-accuracy defects that misstate governance-critical
+state at the point a human reads this artifact to approve the gate — one understates
+progress already made (the TensorFlow pin IS frozen under D-36, only its installability
+is outstanding), the other understates how many decisions have since been recorded (the
+register runs to D-38, not D-32, and D-37 is the specific reaffirmation that keeps Step 7
+correctly gated). Neither affects executable code, a test result, or a governed artifact's
+content — every count, grid value, commit attribution, and standing invariant re-derived
+this pass matches the artifact's current claims exactly, and Step 7 remains correctly
+unexecuted. With 0 Critical and exactly 2 Major findings, this clears the stated
+verdict bar (`≤2 Major` is READY) but both should be corrected before the next reader
+relies on this artifact's "Open items" or "Deviations" sections at face value.

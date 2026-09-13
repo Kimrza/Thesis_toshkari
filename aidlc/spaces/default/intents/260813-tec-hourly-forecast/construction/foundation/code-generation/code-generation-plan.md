@@ -58,3 +58,37 @@ Foundation's terminal READY review carries three **record-only** Minors: (1) pro
 ## Out of scope for this unit
 
 Stage scripts (`scripts/NN_*.py` belong to their owning units), `src/data/registry.py`/`reuse_registry.py` (`inventory-and-registry`), locked-test guard changes (`governance-guards`), fixture manifests (`fixtures-and-reproducibility`), any scientific computation. No acceptance row is claimed discharged: TA rows move only on governed evidence, and the governed 3.11 environment does not exist here.
+
+---
+
+## Repair step added 2026-09-13 — owner ruling at the rejected stage gate
+
+The project owner selected **Request Changes** at the `code-generation` approval gate on
+2026-09-13, which lifts the reviewer receipt freeze and authorises the step below. This
+step is plan INPUT for the repair pass, not a retroactive summary of work already done.
+
+- [x] **Step 13 — R-01 enumeration census (the control R-01's own text mandates)**
+  [R-01; flagged Major by this unit's adversarial reviewer on 2026-09-05, 2026-09-10 and
+  2026-09-11 and still absent — verified 2026-09-13: no test under `tests/` performs this
+  census]
+
+  R-01's rule text mandates a test that re-derives every project-defined `*Error` name
+  raised across the twelve units' `functional-design` artifacts and FAILS when a derived
+  name is neither among R-01's fifteen nor disclosed under R-01's any-future clause. The
+  governance closure evidence asked for *"one programmatic derivation… reconciled against
+  R-01's list and printed in `foundation`'s artifact"*. R-01 exists, in its own words,
+  *"to catch the failure R-01 suffered twice."*
+
+  The census walks `aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/*/functional-design/`
+  with the twelve unit directory names DERIVED, never hardcoded; reconciles the derived
+  name set against R-01's fifteen plus the any-future disclosures; and fails naming any
+  name in neither. The derivation — derived set, R-01's fifteen, and the set difference in
+  BOTH directions — is printed and carried into the code-summary. A genuine violation found
+  on disk is reported and stopped on, never absorbed by widening the expected set.
+
+  Negative control (team.md mandated practice): a test proving the census catches an
+  undisclosed name, not only that a clean workspace passes.
+
+  **Out of scope for this step**: no `code-summary.md` edit (the orchestrator owns the
+  artifact corrections in this pass), no write to `evidence/DECISIONS.md`, no commit. No
+  acceptance row is claimed discharged by this step.

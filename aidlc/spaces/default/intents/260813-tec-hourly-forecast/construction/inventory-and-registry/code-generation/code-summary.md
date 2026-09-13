@@ -373,3 +373,152 @@ not reviewed as this unit's content). Ran this unit's four test modules and the 
 26-module suite directly via the stdlib stand-in. Did not re-read
 `governance-guards`/`acquisition`/`foundation`/`external-products` `construction/`
 directories, per the per-unit read-scope bound.
+
+## Review
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T10:55:06Z
+**Iteration:** 4 (adversarial re-review at the REJECTED stage gate, revision 2 — no
+change made to this unit; a fresh per-unit receipt was required by the engine)
+
+### What changed since the 2026-09-11 verdict, verified against disk
+
+`git log --oneline b0b7c1d..HEAD -- src/data/inventory.py src/data/registry.py
+scripts/01_inventory_and_registry.py src/data/config.py
+tests/test_import_boundary.py tests/test_station_registry.py
+tests/test_december_audit.py governance/CHANGE_RECORD_2026-09-05_import_boundary_matrix.md`
+returns empty, and `git diff --stat` against the same baseline for the same path set
+is also empty. HEAD is now `1670ac8` (three commits past `b0b7c1d`: `c8c63d2`,
+`88f5c7e`, `a44fbce`, `1670ac8`); `git show --stat` on each of the three real commits
+(`a44fbce` and `1670ac8` are audit-shard-only) shows none touches any file this unit
+owns — `c8c63d2` and `88f5c7e` touch `aidlc-state.md`, the audit shard,
+`evidence/test_run_access_log.jsonl`, `tests/test_clean_run.py`, `tests/test_locked_test_guard.py`,
+and other units' `code-summary.md` files only. `git status --porcelain` today shows
+four uncommitted files from sibling repair work — `tests/test_determinism.py`,
+`tests/test_phase_boundary.py`, `tests/test_phase_contract.py`,
+`src/evaluation/guards.py` — none owned by this unit and none credited or blamed to
+it here. **This unit's owned code is byte-identical to the 2026-09-11 pass.** Every
+attack point below was re-derived fresh against current disk, not carried forward.
+
+### Attack-point findings (re-derived fresh)
+
+1. **Registry refusal ordering, re-traced against today's actual `configs/data.yaml`.**
+   Read `configs/data.yaml` directly: `stations: "TBD — freeze gate"` (unchanged),
+   `cell_rule: "floor-half-open-d1"` (D-33, supervisor countersignature still "NOT YET
+   GIVEN" per the file's own comment and `evidence/DECISIONS.md:2124`). Read
+   `src/data/registry.py:250-311` (`load_registry`) directly: the `stations` block is
+   checked first and raises `RegistryError("configs/data.yaml:stations", ...)`
+   unconditionally while the sentinel stands, before `cell_rule` is read at line ~288.
+   No path resolves the registry today; the refusal names the correct field. No
+   regression.
+
+2. **Governance/change-record status re-verified.** Read
+   `governance/CHANGE_RECORD_2026-09-05_import_boundary_matrix.md` directly: header
+   states "Status: DRAFT — NOT APPLIED." Read
+   `inception/application-design/component-dependency.md` row 33
+   (`scripts/*` (all others)): still carries no carve-out for
+   `scripts/01_inventory_and_registry.py` — the three proposed edits are not present
+   in the matrix. `git status --porcelain` and `git log -1` on both files (last touch
+   `ed5808b`) show no change since drafting. The claim holds.
+
+3. **December-membership and record-date routing, re-verified by direct code read
+   (not by re-reading a prior review's grep results).** Read
+   `src/data/inventory.py:762-925` directly: `is_december_bearing` and
+   `attribute_records_by_month` decide membership strictly from a parsed `timestamp`
+   field (`_record_date`), never a path, directory, or filename; `route_audit_path`
+   treats restricted-root residency as the routing HYPOTHESIS computed before any
+   read, and `assert_record_date_class_agreement` verifies by record date AFTER the
+   read, raising `LockedTestError` naming the file on either direction of
+   disagreement. Confirmed these are wired into the REAL script entry point, not
+   merely unit-tested standalone: `grep` of `scripts/01_inventory_and_registry.py`
+   shows `route_audit_path`, `assert_record_date_class_agreement`, and
+   `attribute_records_by_month` are all imported and called inside `_run_audit`
+   (lines 502, 541, 614), with `_require_december_authorization()` (BLK-07) as the
+   unconditional first statement (line 577). This satisfies `project.md`
+   `nfr-design:c58`/`c59`'s bar: the guard is exercised through its real caller, not
+   only through a direct call to the bare function.
+
+4. **Standing Minor #1 (`cell_rule` docstring vs. disk) — still live, now unaddressed
+   across four consecutive passes (2026-09-05, 09-10, 09-11, this pass).** Re-read
+   all three sites directly: `src/data/registry.py:14-20`,
+   `scripts/01_inventory_and_registry.py:21-23`, and `src/data/config.py:561-568`
+   still describe "the coordinate-to-cell rule" as grouped with stations/IGRF under
+   `configs/data.yaml`'s "`TBD — freeze gate`" sentinels. This remains factually wrong
+   for `cell_rule` specifically since D-33 (2026-09-10): only `stations` and
+   `igrf_version` are still TBD. Re-confirmed functionally inert (finding 1 above:
+   `stations` blocks unconditionally before `cell_rule` is ever read), so no runtime
+   consequence and no change to the READY verdict — but this is the fourth
+   consecutive pass carrying an unresolved documentation-vs-disk drift with no fix
+   applied at any of the three sites, which is close to the exact failure mode
+   `project.md` `code-generation:fr-2` names ("stale claims... flagged across three
+   consecutive passes while remaining unfixed"). Recorded here as a Minor with
+   elevated visibility rather than re-filed as new.
+
+5. **Standing Minor #2 (script-00-vs-01/02/04 test-coverage asymmetry disclosure) —
+   unchanged.** `tests/test_clean_run.py` is untouched since 2026-09-11 for this
+   unit's concern (confirmed by the empty diff above); the asymmetry remains
+   disclosed only in that test file's own docstring, not in this unit's own
+   code-summary body outside the review-block restatement at finding 3/iteration 2.
+   No worse than the last pass.
+
+6. **Test/function counts re-derived directly, `wc -l`/`grep -c` printed before
+   assertion.** This unit's three genuinely-created test modules (the Files-created
+   table lists `tests/test_import_boundary.py`, `tests/test_station_registry.py`,
+   `tests/test_december_audit.py` — `test_experiment_registry.py` is NOT in this
+   unit's Files table and belongs to `foundation`): `grep -c "^    def test_\|^def
+   test_"` gives `test_import_boundary.py` 6, `test_station_registry.py` 29,
+   `test_december_audit.py` 62 — matching the file's own "New modules: 97 passed"
+   claim (6+29+62=97) exactly at the `def test_` level. No interpreter exists on this
+   clone (`python`/`python3` both resolve to the Microsoft Store stub, confirmed by
+   direct invocation) and PyPI egress is blocked, so none of this unit's own or any
+   prior pass's "N passed" pytest-execution claims are independently re-executable by
+   this review; they are re-derivable only at the `def test_`-count level, which
+   matches. This bounds every pass/fail number in this artifact as smoke evidence
+   never governed — consistent with the artifact's own repeated framing and with the
+   dispatch's execution-honesty requirement.
+   One imprecision worth naming, Minor and non-blocking: the iteration-2 (2026-09-10)
+   review's "This unit's modules: ... `test_experiment_registry` 49 passed ..." line
+   labels a `foundation`-owned test file as one of "this unit's modules." The file is
+   read there for a real reason (verifying the free-text egress guard's interaction
+   with this unit's registry-row writes) but is not created or owned by this unit,
+   and grouping it under "this unit's modules" overstates ownership. No action
+   needed; noted for precision only.
+
+7. **Standing invariants re-checked, none violated.** `grep` across this unit's six
+   owned/touched files for `locked_test_restricted`/`audit_evidence_2022-FULL`: zero
+   hits. `grep` for credential-shaped literals (`api[_-]?key|password|secret|kaggle\.json|\.netrc`)
+   across `inventory.py`/`registry.py`/`01_inventory_and_registry.py`: zero hits. No
+   `TBD — freeze gate` value filled by this unit's code (`stations` still TBD,
+   confirmed above). `FR-P1-02-7` and `FR-P1-02-8` re-confirmed rowless in
+   `functional-design/business-logic-model.md` (`⚠ NO ACCEPTANCE ROW` for both).
+   `FR-P1-01-1`'s (recorded in this unit's files as `FR-P1-01-2`'s) `suffix_mismatch`
+   surfacing re-confirmed `⚠ PROPOSED`, deferred to `acquisition` R-34, consistently
+   at all three sites. The code-summary's "WS-01, TA-04, TA-25 stay Pending" claim is
+   directionally accurate (none is marked as a Phase-1-passing acceptance result by
+   this unit's own work) even though `requirements.md`'s own defect-10 entry states
+   TA-25's independent status as `Blocked` rather than the word `Pending` — both
+   words describe "not yet discharged," so this is not a contradiction, only a
+   terminology looseness not worth a separate finding.
+
+### Verdict
+
+**READY.** Zero Critical, zero Major. Three Minor findings stand: the `cell_rule`
+docstring-vs-disk gap in three files (now unaddressed across four consecutive
+passes — flagged with elevated visibility, still no runtime consequence, re-traced
+and re-confirmed inert this pass), the script-00-vs-01/02/04 coverage-asymmetry
+disclosure gap (unchanged), and the `test_experiment_registry.py`
+ownership-labelling imprecision in the 2026-09-10 review block (newly noted, purely
+editorial). This unit's owned files (`src/data/inventory.py`, `src/data/registry.py`,
+`scripts/01_inventory_and_registry.py`, `src/data/config.py`'s
+`REQUIRED_FIELDS_MAP` entry, and its four test modules) are byte-identical to the
+2026-09-11 floor-reset pass, confirmed via `git log`/`git diff` against `b0b7c1d`
+and `1670ac8`. The registry still refuses on `stations` before `cell_rule` is ever
+read, naming the correct field. The December-audit membership and routing guards are
+genuinely wired into the real script entry point (`_run_audit`), not merely
+unit-tested in isolation. The DRAFT change record remains unapplied and the approved
+`component-dependency.md` matrix is unchanged. No credential, no scientific constant,
+no filled TBD sentinel, and no restricted-root literal found in any file this unit
+owns. No Python interpreter exists on this clone, so every pass/fail count in this
+artifact — this pass's included — is bounded as smoke evidence only, never governed;
+`def test_`-level counts were independently re-derived and match.

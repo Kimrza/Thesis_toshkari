@@ -6,7 +6,7 @@
 - **Scope**: research-pipeline-governed
 - **Start Date**: 2026-08-13T07:22:54Z
 - **State Version**: 7
-- **Active Agent**: aidlc-developer-agent
+- **Active Agent**: aidlc-quality-agent
 - **Worktree Path**:
 - **Bolt Refs**:
 - **Practices Affirmed Timestamp**: 2026-08-16T16:12:50Z
@@ -67,11 +67,11 @@
 
 ## Execution Plan Summary
 - **Total Stages**: 17
-- **Completed**: 14
-- **In Progress**: code-generation
+- **Completed**: 15
+- **In Progress**: build-and-test
 
 ## Runtime State
-- **Revision Count**: 31
+- **Revision Count**: 33
 
 - **Skeleton Stance**: off
 ## Phase Progress
@@ -116,8 +116,8 @@ Per unit: [TBD]
 - [x] nfr-requirements — EXECUTE
 - [x] nfr-design — EXECUTE
 - [ ] infrastructure-design — SKIP
-- [?] code-generation — EXECUTE
-- [ ] build-and-test — EXECUTE
+- [x] code-generation — EXECUTE
+- [-] build-and-test — EXECUTE
 - [ ] ci-pipeline — SKIP
 
 ### OPERATION PHASE
@@ -131,12 +131,12 @@ Per unit: [TBD]
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: code-generation
-- **Next Stage**: build-and-test
+- **Current Stage**: build-and-test
+- **Next Stage**: performance-validation
 - **Status**: Running
-- **Last Updated**: 2026-09-12T11:51:39Z
+- **Last Updated**: 2026-09-13T11:25:53Z
 
 ## Session Resume Point
-- **Last Completed Stage**: nfr-design
-- **Next Action**: Execute Code Generation
+- **Last Completed Stage**: code-generation
+- **Next Action**: Execute Build and Test
 - **Pending Artifacts**: none

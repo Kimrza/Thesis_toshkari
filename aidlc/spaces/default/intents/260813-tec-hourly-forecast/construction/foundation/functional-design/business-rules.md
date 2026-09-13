@@ -227,6 +227,46 @@ other units and derive from the same base**: `PhaseBoundaryError` and `LockedTes
 > `FixtureError`, `GateError`, `ImportBoundaryError`, `InventoryError`, `InverseTransformError`,
 > `ManifestError`, `ReuseError`, `SchemaError`, `StandardizationError`, `TargetQualityError`.
 >
+> ### Annotation, 2026-09-13 — the eighteen went stale a third time, and the control now exists
+>
+> *Added in place on the project decision owner's explicit approval for this specific item at the
+> rejected `code-generation` gate of 2026-09-13, per `governance/CHANGE_RECORD_PROCEDURE.md`'s
+> annotate-in-place provision. Nothing above is rewritten; the superseded figures stand as the
+> record of what was derived on 2026-08-28.*
+>
+> **The census mandated by this rule was built on 2026-09-13** (`tests/test_determinism.py`,
+> `foundation` code-generation Step 13) and its first run derives **34** distinct project-defined
+> subclass names against the **33** recorded above — **+1 / −0**, set difference empty in the other
+> direction. The one name is **`FeatureAvailabilityError`**, raised by `external-products` and
+> **absent from the eighteen enumerated above**, which are therefore now **nineteen**.
+>
+> **This is not a violation.** `external-products` discloses the name under the any-future clause
+> in this rule's own words, at three sites (`business-logic-model.md:782`, `business-rules.md:936`,
+> `domain-entities.md:506`), and `src/data/config.py:358` declares it as an `IntegrityError`
+> subclass below the any-future marker with the docstring line *"Rides R-01's any-future clause
+> (nfr-design Q2 = A; Q1 = A, 2026-09-05); not an enumeration entry."* The NFR-AUD-01 hazard this
+> rule exists to prevent — an exception escaping R-10's stage-entry catch with no `aborted`
+> registry row — is not realised. What went stale is the hand-maintained enumeration, exactly as
+> the standing obligation below predicted: fourteen → fifteen for the named set, and now
+> eighteen → nineteen for the riders.
+>
+> **The census does not read this box.** It derives the any-future disclosures from the artifacts,
+> so it absorbed `FeatureAvailabilityError` with no edit — satisfying this rule's requirement that
+> the control *"asserts a reconciliation, not a number, so it does not itself go stale when the
+> census legitimately grows."* Hardcoding the eighteen would have reproduced this rule's own
+> failure inside the control meant to catch it.
+>
+> **One open item this annotation does not close.** This rule's control sentence says a name must
+> be disclosed *"by its raising unit"*. Measured 2026-09-13: **13 of the 19** riders are disclosed
+> only by this box and never by the unit that raises them — `AcquisitionError`, `AuditScopeError`,
+> `BenchmarkError`, `BudgetError`, `ComparatorError`, `CredentialEgressError`, `DriverError`,
+> `GateError`, `ImportBoundaryError`, `InventoryError`, `SchemaError`, `StandardizationError`,
+> `TargetQualityError`. Only six are disclosed by a raising unit. The census therefore reads
+> disclosure workspace-wide, which is what makes it satisfiable today; the per-raising-unit
+> declaration obligation stays open where § Assumptions already records it (*"This unit cannot
+> declare any of the eighteen for their owners"*), and is carried to the gate rather than closed
+> here.
+>
 > **Standing obligation, so the numeral cannot go stale a third time.** Whoever revisits this
 > hierarchy **re-runs the derivation above and prints its output** rather than trusting "fifteen".
 > The base-class relation is what the stage-entry catch in R-10 depends on, and it holds whatever

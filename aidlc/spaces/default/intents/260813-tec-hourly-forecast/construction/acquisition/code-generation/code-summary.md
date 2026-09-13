@@ -1,7 +1,19 @@
 # Code Summary — `acquisition`
 
 **Unit** `acquisition` (Bolt 1) · **Kind** `library` · **Stage** `code-generation`
-**Plan**: `code-generation-plan.md` — all 9 steps executed, checkboxes marked. No `git commit` (governance stop). No December content, restricted-root path, or live network call anywhere in this pass.
+**Plan**: `code-generation-plan.md` — all 9 steps executed, checkboxes marked. No December content, restricted-root path, or live network call anywhere in this pass.
+
+**Repository state, re-derived 2026-09-13 at HEAD `1670ac8`.** This header previously read
+"No `git commit` (governance stop)", and § "Files created" line ~142 read "no commit and no
+push was made by this pass". **Both are false as statements about the current repository**,
+were flagged as a Major on 2026-09-11, and are corrected here in the body — not in a review
+addendum — per `project.md` (`code-generation:fr-2`): a correction filed only at the foot
+leaves the stale claim standing for its own reader. This unit's code IS committed:
+`src/data/acquisition.py` and this unit's other four touched files landed in **`715f392`**
+("Close code-generation: acquisition repair + gate-floor re-review of all 12 units", 642
+insertions). **No commit, amend, revert or re-commit was made by this stage** — the commit
+is a human act outside it (`project.md` `code-generation:c30`), and the amend-or-follow-up
+disposition is routed to the gate as part of the standing commit-message ruling.
 
 ## Files created
 
@@ -141,6 +153,15 @@ stand as written, and nothing in this file's earlier sections is edited. Reposit
 re-verified at the moment of writing (`project.md` c30): HEAD is still `f0d9e49`, and every
 change below is UNCOMMITTED working-tree state — no commit and no push was made by this
 pass. The governance stop above is unchanged and still owed.
+
+> **Dated note, 2026-09-13 — the paragraph above is true of 2026-09-10 and stale as a
+> statement about the repository today.** Added on the adversarial reviewer's own
+> recommendation ("add a dated note stating `715f392` without editing the original
+> claims"); nothing above is rewritten. The changes described in this section were
+> subsequently committed by the owner in **`715f392`**, and HEAD is now **`1670ac8`**
+> (re-derived 2026-09-13). It remains true that **no commit was made by this stage** — the
+> commit is a human act outside it. The header at the top of this file carries the current
+> repository fact; the commit-message disposition is routed to the gate.
 
 ### Finding 1 (Major, carried forward) — egress gap: CLOSED by routing, not by narrowing
 
@@ -379,6 +400,54 @@ end-to-end test (I reproduced the mutation-catch myself and confirmed the byte-i
 revert independently); and the test-count correction is derivable, was independently
 re-derived here to the same figures, and was appended without disturbing the signed prior
 review history. Zero Critical, zero Major, zero Minor findings against this remediation.
+
+**Verdict: READY**
+
+## Review — 2026-09-13 (adversarial re-review of the 2026-09-13 artifact correction)
+
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T09:57:19Z
+**Class:** ADVERSARIAL, re-review at the REJECTED stage gate. Scope: the 2026-09-13 header
+correction and the two named sites it fixed (lines 6-16, 157-164 as of the prior revision).
+Independently re-derived against HEAD `1670ac8` (this repository's current HEAD; confirmed
+`git rev-parse HEAD`).
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `## Floor-reset re-review (2026-09-11)` section below, "Test counts, re-derived" bullet: "`tests/test_locked_test_guard.py` **at its committed HEAD content** (34 `def test_`, unchanged since commit `6246907`, well before `f0d9e49`/`715f392`/`b0b7c1d` — confirmed by `git log --oneline -- tests/test_locked_test_guard.py`)" | **False at current HEAD `1670ac8`.** `git show HEAD:tests/test_locked_test_guard.py \| grep -c "^def test_"` = **42**, not 34. The claim was true when written (HEAD was `b0b7c1d` on 2026-09-11, and the file's own `git log` at that moment indeed stopped at `6246907`), but commit `c8c63d2` ("Floor-reset re-review: all 12 units re-verified READY on the current floor", 2026-09-12T15:30:02+04:00 — an ancestor of current HEAD, confirmed by `git merge-base --is-ancestor`) added `governance-guards`' Section 10 (13 new controls, +362 insertions, `def test_` count 34→42) to this exact file. That same commit `c8c63d2` is also the commit that *landed* this unit's own "Floor-reset re-review (2026-09-11)" section into the repository (`git show c8c63d2 --stat` shows `+59` lines to this unit's `code-summary.md`, matching the section's length exactly) — so the claim was already false the instant it was committed, and nobody re-checked before committing. This is the identical failure class `project.md`'s `code-generation:fr-2` names ("re-derive a unit's own counts... at review time, and write the correction into the artifact BODY"), and the 2026-09-13 correction pass in this same file — which explicitly invoked `fr-2` and re-derived the *commit-existence* half of the artifact's stale claims — did not re-check the *count* half in the same section, even though both false claims sit within four paragraphs of each other. Downstream: the section's own "guard trio... 109 executed cases" total and its footnote distinguishing "committed HEAD content" (34, this unit's basis) from "the working-tree's 42-def/57-passed figure [that] belongs to `governance-guards`' uncommitted Section 10" are both now stale in the same way — the 42-def figure it labels "working-tree" and "uncommitted" is, as of `1670ac8`, the committed content. | Add a dated note (2026-09-13, same non-destructive convention already used for the commit-existence correction) beneath the "Floor-reset re-review (2026-09-11)" section's "Test counts" bullet, stating that `tests/test_locked_test_guard.py` is now 42 `def test_` at HEAD `1670ac8` (committed in `c8c63d2`, not `governance-guards`' working-tree state as originally described), without editing the 2026-09-11 text itself. |
+| 2 | Major | `## Files created` table, line 24: "`tests/test_acquisition.py` \| 47 tests — every Step 1–4 negative control + R-31 reaffirmation..." | **Stale since 2026-09-10 and never swept.** Unlike Finding 1, this claim was already wrong the moment the 2026-09-10 remediation added 9 controls (47→56, confirmed: `git show HEAD:tests/test_acquisition.py \| grep -c "^def test_"` = 56) and was never corrected in this table, even though this same file's own later sections (line 195: "47 -> 56"; line 296: "**56 passed** ... 47 before; +9 new controls") both correctly state 56. This is the primary, top-of-document "Files created" table — the summary a gate reader consults first — silently continuing to assert the pre-remediation figure across three subsequent review passes (2026-09-10 iterations 1 and 2, 2026-09-11 floor-reset) while every one of those passes correctly restated 56 elsewhere in the document. This is `project.md`'s `fr-2`/`sweep-derive-sites` pattern in canonical form: a correction landed in later sections while the artifact's own primary table, reached before any dated review section, was left standing uncorrected. | Update the `## Files created` table's `tests/test_acquisition.py` row to read "56 tests (47 original + 9 added by the 2026-09-10 egress-redaction remediation)," matching every other current count in the file. |
+
+### Verified and held (re-derived against HEAD `1670ac8`, no defect found)
+
+- **The header correction is true and complete.** `715f392` ("Close code-generation: acquisition repair + gate-floor re-review of all 12 units") is an ancestor of HEAD `1670ac8` (`git merge-base --is-ancestor`, confirmed) and `git diff f0d9e49 715f392 --stat -- src/data/acquisition.py src/data/experiment_registry.py scripts/00_acquire_prepared_vtec.py tests/test_acquisition.py tests/test_clean_run.py` shows exactly "5 files changed, 642 insertions(+), 17 deletions(-)" — matching the header's "five touched files... 642 insertions" claim exactly. No sentence anywhere in the file still asserts "no commit exists" as a **current** fact: the two original false claims (header line, and the 2026-09-10 remediation-section line) are either replaced (header) or left standing under an accurate, clearly-dated correcting note immediately beneath them (2026-09-10 section) — the same non-destructive pattern this project's memory mandates for signed/dated records.
+- **No overshoot in either direction.** The header's "No commit, amend, revert or re-commit was made **by this stage**" is correct and precisely scoped: it does not deny that `715f392` exists, and it does not claim the generation work caused a commit. The commit-message/D-number disposition is correctly routed to the gate rather than acted on unilaterally, per `project.md` `code-generation:c30`.
+- **This unit's own five files are unchanged from HEAD.** `git diff HEAD --stat -- src/data/acquisition.py src/data/experiment_registry.py scripts/00_acquire_prepared_vtec.py tests/test_acquisition.py tests/test_clean_run.py` is empty — the "no code changed, only the artifact correction" premise holds.
+- **This unit's own test counts (excluding the guard-trio cross-reference above) are all current.** `tests/test_acquisition.py` — 56 `def test_` at HEAD, matches the claimed "47 → 56." `tests/test_acquisition_window.py` — 7 `def test_` at HEAD, unchanged since `e25855c` (predates this unit's own work), matches the claimed 29 executed cases derivation. `tests/test_phase_contract.py` — 23 `def test_` at HEAD, matches; the file shows an uncommitted 15-line working-tree diff (a docstring correction removing a mislabeled `processor_qc_flags` field reference, dated 2026-09-13 in its own comment) that does **not** change the `def test_` count and belongs to a sibling unit's concurrent, unrelated work — correctly out of this artifact's scope. `tests/test_experiment_registry.py` — 26 `def test_` at HEAD, unchanged since `ed5808b` (predates this unit's work entirely), so the claimed "49 passed, unchanged by the edit" is not falsified by the same staleness mechanism as Finding 1.
+- **Attribution is otherwise correct.** `tests/test_determinism.py`, `tests/test_phase_boundary.py`, `src/evaluation/guards.py`, and the several sibling `code-summary.md` files that `git status` shows modified in the working tree are not referenced, credited, or blamed anywhere in this unit's artifact.
+- **Standing invariants hold.** No diff on this unit's own files introduces a December-2022 literal outside the guard's own docstrings/negative-control test data, a restricted-root literal, a live network call, a credential value, or a `TBD — freeze gate` fill (`configs/data.yaml` still carries no `acquisition:` block, grep, zero hits). No acceptance row is claimed discharged: TA-16, TA-31, TA-32, TA-08, TA-15 are explicitly stated `Pending`.
+- **Execution honesty.** No real Python interpreter exists on this clone — `python --version` resolves to the Windows App-execution-alias stub ("Python was not found; run without arguments to install from the Microsoft Store", exit 49), confirming rather than contradicting the artifact's own "no python on system PATH" claim. Every test-result claim in the file is explicitly labelled "smoke evidence only, never governed," and no sentence in the file reads as though a governed run occurred.
+
+### Summary
+
+The 2026-09-13 correction fixed exactly the false claim it targeted (the "no commit" header
+and remediation-section text) and did so cleanly, completely, and without overshoot in
+either direction — that repair is sound, and is VERIFIED AND HELD above. But it is not the
+only stale factual claim standing in this artifact. Two Majors survive, both instances of
+the same named, previously-learned failure mode (`project.md` `fr-2`) recurring inside the
+very file whose most recent correction cited that rule by name: (1) a cross-reference test
+count that went stale *after* the correction pass's own re-derivation, because a later
+commit (`c8c63d2`) changed the referenced file in the same commit that landed the claim; and
+(2) a primary "Files created" table count that has been stale since 2026-09-10 and was never
+swept, despite three subsequent review passes correctly restating the current figure
+elsewhere in the same document. Neither finding touches this unit's own code correctness,
+its governance-stop discipline, or any of the previously-verified behavioural claims (egress
+redaction, invocation proof, phase/December discipline), all of which were independently
+re-confirmed above. Two Major, zero Critical: within the ≤2-Major threshold for READY, but
+the recurrence of this exact failure class for a third time in one artifact's history is
+flagged for the gate as a pattern, not a one-off, and both stale counts should be corrected
+before the human approves this stage.
 
 **Verdict: READY**
 

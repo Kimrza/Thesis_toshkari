@@ -1,7 +1,39 @@
 # Code Summary — `external-products`
 
 **Unit** `external-products` (Bolt 1) · **Kind** `library` · **Stage** `code-generation`
-**Plan**: `code-generation-plan.md` — all 10 steps executed, checkboxes marked. No `git commit` (governance stop). **No IRI benchmark and no GIM comparator generated** — the gate refusals are the deliverable. No December/restricted-root touch; no scientific value decided.
+**Plan**: `code-generation-plan.md` — Steps 1–9 executed, checkboxes marked; **Step 10 (added 2026-09-13) was WITHDRAWN as already-discharged and never executed** — see § "Correction, 2026-09-13" below. **No IRI benchmark and no GIM comparator generated** — the gate refusals are the deliverable. No December/restricted-root touch; no scientific value decided.
+
+**Repository state, re-derived 2026-09-13 at HEAD `1670ac8`** — this header previously read "No `git commit` (governance stop)", which is **false as a statement about the current repository** and is corrected here rather than left for a reader of the header to trust. This unit's code IS committed: `src/external/iri.py` and `src/external/gim.py` in **`ed5808b`** (unedited git template message, no D-number), `scripts/04_build_external_products.py` most recently in **`0e002cd`** ("Governance disposition + board remediation…" — a real subject line, but citing no D-number), `tests/test_iri_denial.py` in **`cdc61f7`**. `team.md` § Way of Working requires any commit touching a governed artifact to cite its D-number. **No commit, amend or revert was made by this stage** — the commit is the student's act, and the amend-or-follow-up disposition is routed to the gate as part of the standing commit-message ruling.
+
+## Correction, 2026-09-13 — the `test_iri_denial.py` count, and Step 10's withdrawal
+
+*Written into the body rather than filed as a review addendum, per `project.md`
+(`code-generation:fr-2`): a correction filed only at the foot leaves the stale claim
+standing for its own reader.*
+
+**The count.** The Files-created row for `tests/test_iri_denial.py` asserted **19 tests**.
+Re-derived 2026-09-13: `grep -c "^def test_" tests/test_iri_denial.py` = **22**. The file
+has carried 22 since commit `cdc61f7` (2026-09-10 11:41:01), which added a scope-aware
+containment-scan narrowing for `src/evaluation/metrics.py`'s deferred import — a commit
+that landed **eight minutes after** the review then verifying the figure, and was never
+reflected here. That commit's message records that dated cross-unit edit records were
+appended to eight other owners' code-summaries; **no equivalent disclosure was made to
+this unit's own code-summary for the edit to its own owned test file.** The Files row is
+corrected above. The two verification rows in § "Independent verification" that record
+"19" are left standing unedited — they truthfully record what was counted on the date
+those passes ran, and `project.md` forbids editing a signed record to match a later
+derivation. Read them as historical, not current: **the current figure is 22.**
+
+**Step 10.** Added to the plan on 2026-09-13 to route the non-fixture subprocess
+invocations through `--fixture-manifest`, then **withdrawn the same day** on the owner's
+ruling that **Q5 = Choice B stands** (ruled 2026-09-10, already implemented). Zero files
+were modified by it. The plan's § "Step 10 withdrawal" carries the full grounds, the
+corrected call-site derivation (**11 non-fixture invocations, not nine** — `--evidence-root`
+is an input-path option, not a fixture scope), and a **new CRITICAL gate finding**: script
+`04` cannot pass the walking-skeleton fixture ladder at all, so the plumbing fixture's
+receipt can never be written and **WS-20 and TA-17 are unreachable rather than merely
+`Pending`**. The owner ruled on 2026-09-13 to record that finding and rule on the remedy
+later; no code moved on it.
 
 ## Files created
 
@@ -11,7 +43,7 @@
 | `src/external/iri.py` | R-59's four limbs: refuses without a passing **pre-declared** validation report; tolerance timestamp must precede comparison; field-by-field report assertion (2000 km, 5–10 official-interface samples, no-future-centering); never silently switched; D-25 carried AS STANDING (amendment not treated as granted); `iricore` import inside the gated path only |
 | `src/external/gim.py` | Q-15 refusal (rule UNSET, no default); hand-check + overlap-audit timestamps must precede generation; map-to-map + spatial-mismatch statements emitted by the reporting path itself; comparison with no registered `gim_network_overlap_flag` fails; outside-tuning residual named open |
 | `scripts/04_build_external_products.py` | Position 04; six-step entry; `audit_ec1_drivers.py` logic migrated in — the `:184` unconditional `return 0` closed onto the two-tier posture (missing months = machine-readable field naming WHICH months, non-fatal; hash mismatch vs recorded `ec1-audit-report.json` hashes terminates naming file + expectation); registry rows via foundation's writer; `--attempt-benchmark`/`--attempt-comparator`/`--gate-state`/`--render-comparison` paths; original script untouched |
-| `tests/test_iri_denial.py` | §12-mandated, **19 tests** — ordered switch (`failed` outranks; unresolved edge → skipped w/ edge; both limbs populated → `passed`; empty limb → `skipped` naming which, JSON-structured reason); complement-defined candidate set over `.py` + ast-parsed `.ipynb` cells; `__init__.py` walked/count-subtracted; transitive; content limb (`iri_*` name fails; **absent provenance fails**). Negative controls: injected field/direct import/transitive import/stripped stamp all caught |
+| `tests/test_iri_denial.py` | §12-mandated, **22 tests** (re-derived 2026-09-13: `grep -c "^def test_" tests/test_iri_denial.py` = 22; **was 19** here and at the two verification rows below, stale since commit `cdc61f7`, 2026-09-10 11:41:01, which added a scope-aware containment-scan narrowing for `src/evaluation/metrics.py`'s deferred import and landed eight minutes after this file's then-latest review — see § "Correction, 2026-09-13" below) — ordered switch (`failed` outranks; unresolved edge → skipped w/ edge; both limbs populated → `passed`; empty limb → `skipped` naming which, JSON-structured reason); complement-defined candidate set over `.py` + ast-parsed `.ipynb` cells; `__init__.py` walked/count-subtracted; transitive; content limb (`iri_*` name fails; **absent provenance fails**). Negative controls: injected field/direct import/transitive import/stripped stamp all caught |
 | `tests/test_external_drivers.py` | **51 tests** — every refusal negative-controlled incl. centered-mean caught by the shift property, 4 h gap excluded, per-cell join refused, mixed grades refused, TBD-composition stop, both-injection exit-code pair, and 11 subprocess controls exercising the IRI/GIM refusals **through the allowlisted script** (tests never import iri/gim) |
 | `governance/CHANGE_RECORD_2026-09-05_R55_external_contracts.md` | DRAFT — boundary-contract blocks for the three modules; applied only on owner approval; no application-design artifact edited |
 
@@ -91,6 +123,10 @@ None survived adversarial verification.
 Every adversarial angle in the dispatch — containment evasions, the provenance flip, the trailing-mean/carry-forward/grade rules, both refusal gates' ordering checks, the migrated audit's two-tier posture, and the governance/authority-honesty claims — was traced against the actual source and, where a test existed, re-run rather than taken on faith. The full suite count (664 passed / 2 skipped) and ruff-clean claim both reproduced exactly under independent execution. No discrepancy between what the plan/summary claims and what is on disk was found; the one initial suspicion (an "R-28 one-door test green" claim for a script with no test of its own naming it) resolved in the artifact's favor once the repo-wide `test_locked_test_guard.py` scan was traced to confirm it does cover `scripts/04_build_external_products.py`. This is an unusually well self-verified unit.
 
 **Verdict: READY**
+
+<!-- superseded by the dated review blocks below; left standing per project.md's
+never-edit-a-signed-record correction -->
+
 
 ### Cross-unit edit record (2026-09-10) — edits made by `fixtures-and-reproducibility`, owner-authorised
 
@@ -262,3 +298,271 @@ favorable than what is claimed, not less. One Major does not, on its own, move t
 unit's stage output to NOT-READY.
 
 **Verdict: READY**
+
+## Adversarial re-review (2026-09-13) — against the rejected stage gate
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T10:35:01Z
+**Iteration:** Adversarial re-review at the REJECTED `code-generation` gate, HEAD `1670ac8`
+
+Re-derived every load-bearing claim from the three 2026-09-13 changes (the 19→22 count
+closure, the header commit-state correction, Step 10's withdrawal) against source and git
+history directly; nothing here is taken on the artifact's word.
+
+### Verification performed
+
+- **Commit-state header.** `git log -- src/external/iri.py src/external/gim.py` = `ed5808b`
+  only; `git log -- scripts/04_build_external_products.py` = `0e002cd, cf3185d, ed5808b`
+  (most recent `0e002cd`); `git log -- tests/test_iri_denial.py` = `cdc61f7, ed5808b` (most
+  recent `cdc61f7`). All three match the corrected header exactly. Confirmed against
+  baseline `1670ac8`.
+- **The 22-count closure.** `grep -c "^def test_" tests/test_iri_denial.py` = **22** today;
+  `git show ed5808b:tests/test_iri_denial.py | grep -c "^def test_"` = **19** at creation;
+  `git show cdc61f7:tests/test_iri_denial.py | grep -c "^def test_"` = **22**. The Files-created
+  row (line 46) states 22 correctly. The two historical rows under "Independent verification"
+  (2026-09-05 pass, 2026-09-10T11:33:57Z pass) still read "19" — swept for every other site:
+  no other representation in this artifact, the plan, or the functional-design/nfr-design
+  files asserts "19" as a *current* fact (all other "test_iri_denial.py" hits in
+  `nfr-design/*` and `nfr-requirements/*` predate the file's existence and correctly assert
+  it did not yet exist at that stage). **Leaving the two historical rows unedited, marked
+  historical, is the right call** under `project.md`'s never-edit-a-signed-record correction:
+  each is a dated, already-signed verification record of what a specific pass counted on its
+  date, and the reader-facing authoritative row (the Files-created table) carries the current
+  figure. This is not the `code-generation:fr-2` failure mode (a correction filed only at the
+  foot while the body keeps asserting the stale fact) — here the body's own primary table
+  was corrected; only the dated historical records were left standing, which is what the
+  never-edit-a-signed-record rule asks for.
+- **`test_external_drivers.py`: 51 tests**, confirmed by `grep -c "^def test_"` today and at
+  `ed5808b`.
+- **Step 10 withdrawal's Q5 grounds.** Read `governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md`
+  §0 row 1 and §1 directly: both quotations in the withdrawal (`"Q5 = Choice B"`, the
+  fails-closed contract description, and the Board-Rec-2 foreclosure of option 1) match the
+  source verbatim. `_assert_gate_fails_closed` occurs **12** times in
+  `tests/test_external_drivers.py` — one definition (`:789`) and **11 call sites** — confirmed
+  by direct grep; read the definition in full: it asserts `returncode != 0` and a specific
+  marker-set match on stderr, a genuine fail-closed check, not a loosened one. None of the 11
+  call sites pass `--fixture-manifest` (confirmed: zero hits for that string in the file), so
+  all 11 are genuine non-fixture invocations already asserting the refusal — **the negative
+  control Step 10's item 5 asked for already exists**, exactly as claimed; adding one would
+  duplicate it. **Grounds for the withdrawal hold.**
+- **The corrected call-site count (11, not nine).** `grep -c "_run_script("
+  tests/test_external_drivers.py` = 12, less the definition at `:725` = **11 call sites**,
+  matching the withdrawal's own list of line numbers exactly
+  (`:839,:862,:877,:889,:985,:999,:1012,:1041,:1065,:1079,:1101`). `--evidence-root` (script
+  04, `:197-202`) is confirmed to be a distinct, ordinary input-path option — not
+  `--fixture-manifest` (`:251`) — and `_stage_entry` calls `require_receipts_for_snapshot`
+  unconditionally regardless of which is passed (confirmed by reading
+  `scripts/04_build_external_products.py:277-320` and
+  `src/data/fixture_gate.py:683-706`), so all 11, including the two `--evidence-root`
+  invocations, do reach the gate. **The "11, not nine" correction itself is right.**
+- **The withdrawal's stated REASON for the nine/eleven mismatch is wrong** — see Finding 2
+  below. This does not disturb the 11-count's correctness or the CRITICAL finding.
+- **The CRITICAL gate finding, independently re-derived link by link:**
+  `scripts/run_walking_skeleton.py:184` — confirmed `("04_build_external_products.py", 1)`
+  sits in `PHASE1_SEQUENCE`. `build_phase1_commands` (`:513-533`) — confirmed line 529,
+  `argv += [FIXTURE_SCOPE_OPTION, str(scope_path)]`, executes unconditionally inside the
+  `for script, phase in PHASE1_SEQUENCE` loop, for every script including "04".
+  `lifecycle_arguments` (`:487-510`) — confirmed it returns `[]` for any script not prefixed
+  `05_`/`06_`/`07_`, so nothing narrows "04"'s invocation. `_declared_data_window()`
+  (`04:265-274`) — confirmed it returns a hardcoded `(Jan 1, Dec 31)` of `_AUDIT_YEAR` with no
+  CLI-supplied narrowing, and is only engaged (`04:306`) when `fixture_manifest is not None`
+  — which, per the chain above, is now always true on the walking-skeleton ladder.
+  `assert_declared_window_within_scope` (`src/data/fixture_gate.py:209-251`) — confirmed it
+  raises `IntegrityError` unless both declared endpoints lie inside the fixture scope's cited
+  window via `assert_records_within_window`. The fixture scopes are `plumbing_7day` (7 days)
+  and `scientific_1month` (1 month; both identities confirmed in
+  `src/data/fixture_manifest.py:152-155`), and neither can contain a full calendar year.
+  **Every link in the chain verifies.** The conclusion follows: on the walking-skeleton
+  ladder, "04" is armed with `--fixture-manifest` unconditionally, its declared window is
+  always the full year, and the window-scope check always fails — so "04" can never
+  complete inside either fixture run, no plumbing-fixture receipt is ever written, and
+  **WS-20 and TA-17 are correctly stated as unreachable, not merely `Pending`.** This is a
+  real, currently-unremediated Critical against the project's own reproducibility gate
+  (G-07) and TE §13.2's seven-invocation clean-run contract, independent of who authored the
+  conflicting pieces (board Rec 2 vs. CR-2026-09-07 §6.1) or which unit owns the remedy.
+- **IRI/GIM invariants, spot-checked directly**: `grep -rln "iri_" src/features src/models`
+  hits only `src/features/build.py`, and reading those hits (`:17,:272,:331,:334`) shows they
+  are the denial guard's own refusal logic (`if lowered.startswith("iri_")... raise`), not a
+  leaked field. `grep -rn "^\s*from src.external import\|^\s*import src.external" src`
+  returns exactly one hit, `src/evaluation/metrics.py:477`, a deferred `gim` import inside a
+  function body — matching the claimed single, evaluation-time-only integration point. No
+  import of `src.external.iri` exists anywhere in `src/`.
+- **Attribution.** `tests/test_determinism.py`, `tests/test_phase_boundary.py`,
+  `tests/test_phase_contract.py`, `src/evaluation/guards.py`, and sibling `code-summary.md`
+  files appear modified in `git status` but are not referenced anywhere in this unit's
+  `code-summary.md` or plan — confirmed no credit or blame is misattributed here.
+- **Execution honesty.** No verification in this pass ran a real interpreter; every count
+  above is a static `grep`/`git show` derivation, and every test-execution figure quoted from
+  the artifact (22/0, 51/0, 664/2) is carried as the artifact's own claim, re-derived here
+  only for function counts, not re-executed. Bounded as smoke evidence only, consistent with
+  the artifact's own framing.
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Critical | `code-generation-plan.md` "Gate finding, raised 2026-09-13" | Independently re-verified and CONFIRMED: `scripts/04_build_external_products.py` cannot pass the walking-skeleton fixture ladder. `run_walking_skeleton.py:529` appends `--fixture-manifest` unconditionally to every `PHASE1_SEQUENCE` script including "04" (`:184`); `lifecycle_arguments` (`:487-510`) does not narrow "04"'s invocation; `_declared_data_window()` (`04:265-274`) returns a hardcoded full-calendar-year window, engaged whenever `fixture_manifest is not None` (`04:306`); `assert_declared_window_within_scope` (`fixture_gate.py:209-251`) refuses unless both endpoints lie inside the fixture scope's window (7 days or 1 month). No remedy has been applied — the owner ruled "record it, rule later" on 2026-09-13, and zero code has moved. As things stand, no plumbing-fixture receipt can ever be written while "04" is in the ladder, so **WS-20 and TA-17 remain unreachable** and `team.md`'s "both fixtures must pass, in order, before any full-year job" cannot currently be satisfied end-to-end. A verified, currently-open Critical against the pipeline's own reproducibility gate blocks READY regardless of how well-scoped the disclosure is. | Owner selects one of the three named remedies (parameterize "04"'s window under a fixture scope with its own D-number; drop "04" from the fixture ladder, which changes what TE §13.2's clean-run contract certifies; or accept "04" cannot participate until (a) lands) before this unit can be re-scored READY. |
+| 2 | Major | `code-generation-plan.md` "Step 10 withdrawal", the count-correction paragraph beginning "**Count correction, derived and printed.**" | The stated REASON for the nine-vs-eleven mismatch — *"the nine traces to CR-2026-09-07 §6.2 counting test functions (9 functions, 11 invocations, three functions calling twice or in multi-line form)"* — does not hold. Re-derived directly: `tests/test_external_drivers.py` has had exactly **11 distinct functions**, each calling `_run_script` **exactly once**, at every commit from its creation (`ed5808b`, 2026-09-06) through `17e0767` (2026-09-10) and today — confirmed by re-running the same `awk`-based function/call-site mapping against `git show ed5808b:...` and the working tree, both times yielding the identical 11 function names with no duplicates. There is no function calling `_run_script` twice, at any point in this file's history. `governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md` §6.2 itself says "9 tests via its `_run_script`" against a file that, on the date §6.2 was written (after `ed5808b`, 2026-09-06), already had 11 call sites in 11 functions — so §6.2's "9" was a plain miscount at the time it was written, not a functions-vs-invocations artifact. This does not change the correct headline figure (11, independently confirmed above) or the CRITICAL finding, which stands on its own chain of evidence unrelated to this count. It is exactly the failure mode `project.md`'s count-derivation rule exists to catch — a specific, checkable "why" is asserted with the same confidence as the (correct) "what," in a passage whose entire purpose is to model careful count derivation, and it does not hold up. | Drop the "three functions calling twice or in multi-line form" explanation; state plainly that CR-2026-09-07 §6.2 miscounted at the time it was written (11 call sites existed in the file from its creation, before §6.2 was authored). |
+
+### Coverage limits (this pass did not additionally verify)
+
+- Did not re-execute any test suite; all figures above are static derivations (`grep`,
+  `git show`), consistent with "no Python interpreter on this clone" and the standing
+  smoke-only bound.
+- Did not re-open `component-dependency.md`'s `tests/*` blanket-row discrepancy (owned by
+  `inception/application-design`, outside this unit's read scope) beyond confirming this
+  artifact discloses it as gate-routed rather than claiming it resolved.
+- Did not re-verify the ~10 SD-E-00…SD-E-07 coverage-table rows beyond the prior passes'
+  spot-checks; nothing in the 2026-09-13 changes touches that surface.
+
+### Summary
+
+The withdrawal of Step 10 is correctly grounded: Q5 = Choice B is genuinely already
+implemented (12 `_assert_gate_fails_closed` sites covering all 11 non-fixture invocations,
+none of which pass `--fixture-manifest`), and Step 10's own item-5 negative control would
+have duplicated existing coverage. The 19→22 count closure is correct and completely swept;
+leaving the two historical verification rows unedited is the right call under the
+never-edit-a-signed-record rule. But the newly-raised CRITICAL gate finding is independently
+verified true and unremedied — "04" cannot currently complete inside the walking-skeleton
+ladder, so the plumbing fixture's receipt can never be written and WS-20/TA-17 are
+unreachable — and that alone is sufficient to withhold READY no matter how honestly it is
+disclosed. A second, narrower defect survives in the withdrawal's own reasoning: its
+explanation for why CR-2026-09-07 counted "nine" is fabricated rather than derived, though it
+does not affect the correct 11-count or the CRITICAL finding.
+
+**Verdict: NOT-READY**
+
+## Adversarial re-review (2026-09-13) — iteration 2, TERMINAL (budget exhausted)
+
+**Verdict:** NOT-READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-13T10:41:19Z
+**Iteration:** 2 (terminal — this verdict stands as recorded and is what reaches the human gate)
+
+Re-derived, from scratch and independently of the artifact's own text, both items iteration 1
+left to verify: the Major's correction and the Critical's chain. Also re-swept counts,
+repository state/attribution, and the standing invariants named in the dispatch.
+
+### Verification performed
+
+- **The Major's correction, independently re-derived.** Wrote a function-body-scoped scan of
+  `tests/test_external_drivers.py` (tracking indentation via "next top-level `def` closes the
+  previous function's scope," since a naive per-`def test_` reset mis-attributes the
+  module-level `_run_script` helper definition itself, line 725, to whichever test function
+  happened to be open before it — a bug in a first attempt, caught and corrected before
+  trusting the result). Corrected scan: **51 test functions total, 11 `_run_script(` call
+  sites, each attributed to a distinct function, zero functions calling it more than once** —
+  at both `ed5808b` (creation) and HEAD. This independently confirms the artifact's corrected
+  text: the withdrawal's replacement explanation ("CR-2026-09-07 §6.2 miscounted at the time
+  it was written") is the only claim now standing, the invented "three functions calling
+  twice" explanation is gone, and no second wrong derivation was installed in its place.
+- **The Critical, independently re-traced link by link, reading each cited line directly**
+  (not taking the artifact's line numbers on faith):
+  `scripts/run_walking_skeleton.py` — `PHASE1_SEQUENCE` (~line 184) includes
+  `("04_build_external_products.py", 1)`; `build_phase1_commands` appends
+  `FIXTURE_SCOPE_OPTION` (`--fixture-manifest`) unconditionally inside the `for script, phase
+  in PHASE1_SEQUENCE` loop, for every script; `lifecycle_arguments` returns `[]` for any
+  script not prefixed `05_`/`06_`/`07_`, so "04" gets no narrowing.
+  `scripts/04_build_external_products.py` — `_declared_data_window()` returns a hardcoded
+  `(Jan 1, Dec 31)` of `_AUDIT_YEAR` with no CLI-supplied narrowing; `_stage_entry` computes
+  `declared_window = _declared_data_window() if fixture_manifest is not None else None` — read
+  directly, confirming the window is engaged exactly when a fixture manifest is passed, which
+  the ladder now always does for every Phase-1 script.
+  `src/data/fixture_gate.py` — `require_receipts_for_snapshot` forwards to
+  `require_fixture_receipts`, which calls `assert_declared_window_within_scope` whenever
+  `declared_window is not None`; that function raises `IntegrityError` unless both declared
+  endpoints lie inside `scope.window`.
+  `src/data/fixture_manifest.py` — the only two fixture scopes are `plumbing_7day` (7 days)
+  and `scientific_1month` (1 month); neither can contain a full calendar year.
+  **Every link verifies independently.** The conclusion holds exactly as stated: "04" is
+  armed with the full-year window on every walking-skeleton invocation and the window check
+  always fails, so no plumbing-fixture receipt can ever be written and WS-20/TA-17 are
+  correctly stated as unreachable rather than merely `Pending`.
+- **Counts re-swept.** `tests/test_iri_denial.py`: `grep -c "^def test_"` = **22** today;
+  `git show ed5808b:...` = **19** (at creation); `git show cdc61f7:...` = **22** — matches the
+  artifact's Files-created row exactly, and the two historical "19" rows remain correctly
+  marked as dated historical records rather than current fact. `tests/test_external_drivers.py`
+  = **51** `def test_` functions at both `ed5808b` and HEAD, matching every claimed instance.
+  No site outside the two marked-historical rows asserts "19" as current, and no "9" appears
+  anywhere in the artifact as a current call-site count — every instance of "nine" is inside
+  the withdrawn Step 10 text or the correction narrative that supersedes it.
+- **Repository state and attribution, re-derived at HEAD `1670ac8`.** `git log --oneline` on
+  `src/external/iri.py`/`gim.py` = `ed5808b` only; on `scripts/04_build_external_products.py`
+  = `0e002cd, cf3185d, ed5808b` (latest `0e002cd`); on `tests/test_iri_denial.py` =
+  `cdc61f7, ed5808b` (latest `cdc61f7`) — all three match the header exactly.
+  `git status --porcelain` confirms `tests/test_determinism.py`, `tests/test_phase_boundary.py`,
+  `tests/test_phase_contract.py`, `src/evaluation/guards.py`, and several sibling
+  `code-summary.md` files (foundation, acquisition, evaluation-and-comparison,
+  governance-guards, models-and-baselines, regimes-diagnostics-reporting,
+  statistical-inference, target-standardization) are modified in the working tree — none of
+  them is referenced anywhere in this unit's own `code-summary.md` or plan, so no credit or
+  blame is misattributed to this unit for a sibling's uncommitted diff.
+- **Standing invariants, spot-checked directly.** `grep -rn "iri_" src/features src/models`
+  hits only `src/features/build.py`'s own denial-guard logic (raises on `iri_*`), not a leaked
+  field. `grep -rn "^\s*from src.external import\|^\s*import src.external" src` returns exactly
+  one hit, `src/evaluation/metrics.py:477` (`from src.external import gim`, deferred,
+  evaluation-time-only) — no import of `src.external.iri` anywhere in `src/`.
+  `src/external/spaceweather.py`'s `trailing_mean` docstring and window arithmetic
+  (`[end_day-(window_days-1), end_day]`) confirm the trailing-only construction; no `centered`
+  implementation exists. No acceptance row (WS-09, WS-10, WS-11, TA-07, TA-36) is claimed
+  discharged anywhere in the artifact — the "Nothing discharged" line still lists all five as
+  `Pending`.
+
+### Judgment on the disposition (point 3 of the dispatch)
+
+The competing reading — that a fully-disclosed, not-self-caused, not-remediable-within-this-unit
+Critical that the decision owner has explicitly deferred becomes a gate item rather than an
+artifact defect — is a real and defensible position, and I considered adopting it. I do not
+adopt it, for a reason specific to what READY certifies in this framework: READY is not a
+statement about this unit's authorial diligence (which is exemplary here — the finding was
+self-discovered, fully chained, honestly disclosed, and the owner was given real remedy
+options rather than a false one). READY is a statement that "a developer could build from
+this without guessing" and, by the chain this artifact's own text draws, that the pipeline's
+own reproducibility gate (G-07) and TE §13.2's seven-invocation clean-run contract are
+currently satisfiable end-to-end. They are not: the artifact itself proves that no plumbing-
+fixture receipt can be written today. Deferring the remedy does not defer the fact — WS-20 and
+TA-17 remain genuinely unreachable at this exact moment, not "reachable once the owner rules."
+A gate is exactly where the owner's three-way choice belongs; a READY verdict a few lines above
+that choice would misstate, to any later reader of this file who does not also read the gate
+transcript, that the construction-stage artifact is currently sound end-to-end. It is not —
+by its own, independently-verified admission. NOT-READY is therefore the correct record of the
+artifact's current state; it is not a verdict on whether the owner handled the finding well
+(they did), and it does not imply this unit's own authored code is defective (it is not — no
+new finding touches `spaceweather.py`, `iri.py`, `gim.py`, or either owned test file this pass).
+It is scoped precisely to the one thing READY asserts that is not yet true: the pipeline can
+complete its mandated fixture ladder.
+
+### Disclosure check (point 4)
+
+Confirmed honest and complete: the artifact states unreachability, not `Pending`, in three
+places (code-summary.md's own Step-10 correction section, the plan's Step 10 withdrawal, and
+the plan's "Gate finding" section); names all three remedies as owner decisions with their
+respective costs (a D-numbered scope change, a fixtures-and-reproducibility-owned ladder
+change, or indefinite non-participation); and states plainly that "no code moves on it in this
+pass." Nothing reads as resolved.
+
+### Coverage limits (this pass did not additionally verify)
+
+- Did not re-execute any test suite (no interpreter on this clone, PyPI egress blocked); every
+  figure above is a static `grep`/`git show`/`git log` derivation, per the standing smoke-only
+  bound.
+- Did not re-open `component-dependency.md`'s `tests/*` blanket-row discrepancy or the ~10
+  SD-E-00…SD-E-07 coverage-table rows beyond the prior passes' spot-checks; nothing in this
+  iteration's changes touches that surface.
+
+### Summary
+
+Both open items from iteration 1 hold under independent re-derivation: the Major's correction
+is right (11 call sites, 11 distinct functions, none calling twice, at both the creation
+commit and HEAD), and the Critical is right (the full five-link chain from
+`run_walking_skeleton.py`'s unconditional `--fixture-manifest` injection through
+`assert_declared_window_within_scope`'s scope-window refusal verifies exactly as stated). The
+Critical remains unremedied — the owner deferred the remedy choice, and zero code has moved on
+it. Disclosure is honest and complete: unreachability is stated plainly in three places, not
+softened to `Pending`, and the deferral is not presented as a resolution. This is a well-run,
+exemplary self-review process wrapped around a genuinely open Critical; the process quality
+does not convert an unresolved end-to-end reproducibility gap into a closed one. NOT-READY
+stands, as the terminal verdict for this budget.
+
+**Verdict: NOT-READY**

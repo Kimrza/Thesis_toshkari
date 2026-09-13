@@ -91,7 +91,18 @@ FORBIDDEN_FIELD_FRAGMENTS = (
     "ipp",
 )
 
-# The D-17 Phase 1 target-row contract. Column names a Phase 1 target artifact may carry.
+# The D-17 Phase 1 target-row contract: EXACTLY these sixteen row fields -- not fifteen,
+# not seventeen. This is an exact contract, not a permission list: a conforming row carries
+# all sixteen and nothing else (beyond DECLARED_CAVEAT_FIELD below). The producer states the
+# same bound at `src/data/prepared.py:788`, and D-17's frozen table in `evidence/DECISIONS.md`
+# enumerates these sixteen and no more.
+#
+# `processor_qc_flags` is NOT a row field and is deliberately absent. It is a key inside the
+# data-quality block (R-71 / NFR-DQ-01, W-3), built as a nested mapping of `aggregation_flags`
+# and `not_applicable_classes` -- D-17 discusses it in its own paragraph, outside the row
+# table, for exactly that reason. It was carried here in error from commit `b844a4d`
+# (2026-08-21) and removed 2026-09-13; `test_d17_target_fields_match_the_producer_contract`
+# below now makes that divergence un-repeatable.
 D17_TARGET_FIELDS = frozenset({
     "interval_start_utc",
     "station_id",
@@ -104,13 +115,23 @@ D17_TARGET_FIELDS = frozenset({
     "within_hour_spread_tecu",
     "largest_internal_gap_s",
     "provider_dtec_summary",
-    "processor_qc_flags",
     "aggregation_config_id",
     "target_valid",
     "phase_id",
     "source_id",
     "target_definition_id",
 })
+
+# The ONE column a written target artifact may carry beyond D-17's sixteen: the lineage
+# caveat the producer attaches to every write (SD-T-02). Mirrors `LINEAGE_CAVEAT_FIELD` in
+# `src/data/prepared.py`, whose row guard at `:791` subtracts exactly this one name before
+# computing `extra`. Pinned against the producer's literal by the drift guard below, so the
+# two spellings cannot part company.
+DECLARED_CAVEAT_FIELD = "lineage_caveat"
+
+# The producer-side home of the contract this module's copy must equal. Read STATICALLY
+# (see `_module_level_literal`), never imported -- see the drift guard's docstring.
+PREPARED_MODULE = SRC_DIR / "data" / "prepared.py"
 
 
 def _python_files(root: Path) -> list[Path]:
@@ -131,6 +152,41 @@ def _imported_modules(path: Path) -> set[str]:
             names.add(node.module)
             names.update(f"{node.module}.{alias.name}" for alias in node.names)
     return names
+
+
+def _module_level_literal(path: Path, name: str) -> object:
+    """Read a module-level constant's literal value from a file's AST, without importing it.
+
+    This module reaches source by PARSING it (`_imported_modules` above), never by importing
+    it: it carries no `sys.path` insert and no `from src...` import, there is no `conftest.py`
+    to supply one, and its contract is to stay collectible and to SKIP with a named reason
+    when `src/` is absent. A module-level import of the producer would turn that explicit
+    skip into a collection error and would drag in `src.data.acquisition`, `src.data.config`
+    and `src.data.release` transitively. So the drift guard uses the mechanism already here.
+
+    Fail-closed, matching `_imported_modules`: a file that will not parse, or a constant that
+    is missing or is not a literal, cannot be cleared.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except SyntaxError as exc:
+        pytest.fail(f"{path} does not parse, so its {name} cannot be read: {exc}")
+    for node in tree.body:
+        targets = (
+            [node.target] if isinstance(node, ast.AnnAssign) else getattr(node, "targets", [])
+        )
+        if not any(isinstance(t, ast.Name) and t.id == name for t in targets):
+            continue
+        if node.value is None:
+            pytest.fail(f"{path} declares {name} without a value")
+        try:
+            return ast.literal_eval(node.value)
+        except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError) as exc:
+            pytest.fail(f"{path}'s {name} is not a literal, so it cannot be compared: {exc}")
+    pytest.fail(
+        f"{path} no longer defines a module-level {name}; the D-17 contract's producer-side "
+        f"home moved or was renamed, and this test cannot confirm the two copies agree"
+    )
 
 
 def _csv_header(path: Path) -> list[str]:
@@ -239,8 +295,69 @@ def test_d17_contract_excludes_every_phase2_quantity() -> None:
     )
 
 
+def test_d17_target_fields_match_the_producer_contract() -> None:
+    """This module's D-17 copy equals the producer's, field for field.
+
+    The drift guard. `D17_TARGET_FIELDS` here and `D17_FIELDS` in `src/data/prepared.py` are
+    two copies of one frozen contract, and they DID silently diverge: this copy carried a
+    seventeenth name, `processor_qc_flags`, from commit `b844a4d` (2026-08-21) until
+    2026-09-13 -- a transcription slip against a data-quality-block key, invisible because
+    nothing compared the two. Divergence is now a failure rather than a discovery made on the
+    first real artifact.
+
+    The producer is read statically, not imported (`_module_level_literal`). The caveat
+    literal is pinned in the same test because it is the same failure mode: a second copied
+    spelling, whose drift would silently widen or narrow the `extra` computation below.
+    """
+    if not PREPARED_MODULE.is_file():
+        pytest.skip(
+            f"{PREPARED_MODULE.relative_to(REPO_ROOT)} does not exist, so there is no "
+            f"producer-side D17_FIELDS to compare against (REQ-ENG-1)"
+        )
+    producer_fields = _module_level_literal(PREPARED_MODULE, "D17_FIELDS")
+    assert isinstance(producer_fields, (tuple, list, frozenset, set)), (
+        f"{PREPARED_MODULE.name}'s D17_FIELDS is a {type(producer_fields).__name__}, not an "
+        f"enumeration of field names"
+    )
+    producer_set = set(producer_fields)
+    assert len(producer_set) == len(tuple(producer_fields)), (
+        f"{PREPARED_MODULE.name}'s D17_FIELDS repeats a field name: "
+        f"{sorted(producer_fields)}"
+    )
+    assert set(D17_TARGET_FIELDS) == producer_set, (
+        f"the D-17 contract has drifted between its two copies. Only here: "
+        f"{sorted(set(D17_TARGET_FIELDS) - producer_set)}; only in "
+        f"{PREPARED_MODULE.name}: {sorted(producer_set - set(D17_TARGET_FIELDS))}. D-17 "
+        f"freezes exactly sixteen row fields and neither copy may be edited alone."
+    )
+    assert len(D17_TARGET_FIELDS) == 16, (
+        f"D17_TARGET_FIELDS holds {len(D17_TARGET_FIELDS)} fields; D-17's frozen table "
+        f"enumerates exactly sixteen -- not fifteen, not seventeen"
+    )
+
+    producer_caveat = _module_level_literal(PREPARED_MODULE, "LINEAGE_CAVEAT_FIELD")
+    assert DECLARED_CAVEAT_FIELD == producer_caveat, (
+        f"the declared lineage-caveat column name has drifted: {DECLARED_CAVEAT_FIELD!r} "
+        f"here against {producer_caveat!r} in {PREPARED_MODULE.name}"
+    )
+    assert DECLARED_CAVEAT_FIELD not in D17_TARGET_FIELDS, (
+        "the lineage-caveat column is the one field permitted BEYOND D-17's sixteen, so it "
+        "must not also be counted as one of them"
+    )
+
+
 def test_target_artifact_conforms_to_d17_when_it_exists() -> None:
-    """A produced hourly target conforms to D-17 exactly: no extra field, none missing."""
+    """A produced hourly target carries D-17's sixteen fields, plus only the caveat column.
+
+    Exact in both directions. `missing` is the full sixteen: every one must be present, and
+    that limb is not relaxed. `extra` permits exactly one name beyond them --
+    `DECLARED_CAVEAT_FIELD` -- mirroring the producer's own row guard at
+    `src/data/prepared.py:791`, which subtracts `{LINEAGE_CAVEAT_FIELD}` before computing its
+    own `extra`. The producer's write path is `(*D17_FIELDS, LINEAGE_CAVEAT_FIELD)`
+    (`prepared.py:1324`), so without that allowance this test would reject every artifact the
+    pipeline legitimately writes. Any OTHER additional field still fails: an extra column is
+    where a Phase 2 quantity would appear (R-66, R-67).
+    """
     candidates = sorted(EVIDENCE_DIR.rglob("hourly_target*.csv")) if EVIDENCE_DIR.is_dir() else []
     candidates += sorted((REPO_ROOT / "artifacts").rglob("hourly_target*.csv")) if (REPO_ROOT / "artifacts").is_dir() else []
     if not candidates:
@@ -250,9 +367,12 @@ def test_target_artifact_conforms_to_d17_when_it_exists() -> None:
         )
     for artifact in candidates:
         header = set(_csv_header(artifact))
-        extra = sorted(header - D17_TARGET_FIELDS)
+        extra = sorted(header - D17_TARGET_FIELDS - {DECLARED_CAVEAT_FIELD})
         missing = sorted(D17_TARGET_FIELDS - header)
-        assert not extra, f"{artifact.name} carries fields outside the D-17 contract: {extra}"
+        assert not extra, (
+            f"{artifact.name} carries fields beyond D-17's sixteen and the declared "
+            f"lineage-caveat column: {extra}"
+        )
         assert not missing, f"{artifact.name} is missing D-17 contract fields: {missing}"
 
 
