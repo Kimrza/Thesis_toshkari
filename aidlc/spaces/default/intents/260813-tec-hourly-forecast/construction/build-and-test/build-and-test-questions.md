@@ -83,30 +83,55 @@ X. Other (please specify)
 
 ## Consolidated Summary Confirmation
 
+> **Redrafted 2026-09-13 on session resume, before any signature.** The first
+> draft of this block was written at 11:57 UTC and was never confirmed — the
+> `[Answer]:` tag below has stood empty since. In the interval the session ran
+> on: three owner-ruled repairs were implemented and committed (`19b6e12`,
+> `8d4297d`, `615a367`), which changes two of the three findings the first draft
+> listed from *open defects* into *repaired defects*. Confirming a block that
+> described the pre-repair state would have signed a description that no longer
+> matches disk. Every figure below was re-derived on this clone today and is
+> printed with its derivation, never carried from the earlier draft.
+
 **Answers recorded:** Q1 = C (vendor first, then fall back — the vendoring was attempted, refused on integrity grounds, and fell back to a stdlib stand-in on the real pin per your follow-up ruling); Q2 = A (the preflight refusal is the deliverable); Q3 = A (attempt the ladder and capture the refusal); Q4 = A (produce Kaggle-session instructions).
+
+### Environment, re-derived this session
+
+| | |
+|---|---|
+| Interpreter | **Real CPython 3.11.16** — the governed pin (TE §8.1, TC-03d) — persists at the `uv` python root and was used for every run below |
+| PyPI | **Still unreachable.** `uv pip install pyyaml` into a fresh 3.11.16 venv fails after 3 retries in 47.0 s: `Failed to fetch https://pypi.org/simple/pyyaml/ … operation timed out` |
+| Third-party modules | `pytest`, `yaml`, `numpy`, `pandas`, `sklearn`, `tensorflow` — all six probe as MISSING on the governed interpreter |
+| Harness | Stdlib stand-in, **rewritten this session** (the prior one lived in a session-scoped scratchpad and is gone). **NOT pytest.** Its own docstring names what it does not implement: assertion rewriting, conftest collection, plugins, non-function fixture scopes, xfail/xpass, `-k`/`-m` selection |
+| Suite on disk | **26 modules, 925 test functions**, derived by AST walk and printed per module |
 
 ### What was executed, and what it showed
 
 | | |
 |---|---|
-| Interpreter | **Real CPython 3.11.16** — the governed pin (TE §8.1, TC-03d), installed via `uv` from the reachable astral index |
-| Harness | Stdlib stand-in written this session. **NOT pytest.** Unimplemented and declared: assertion rewriting, conftest, plugins, non-function fixture scopes, xfail, `-k`/`-m` |
-| Suite result | **1169 passed · 39 skipped · 0 failed · 0 errors**, 26 modules, exit 0 |
-| Fidelity evidence | Reproduces 20+ of the project's own per-module counts derived by other harnesses in other sessions (`test_release_hashes` 149, `test_locked_test_guard` 57, `test_regimes_and_reporting` 88, `test_bootstrap` 31/6, `test_clean_run` 61/3, `test_acquisition_window` 7 fn → 29 cases, …) |
-| Repairs confirmed | The R-01 census runs and prints its derivation (12 units / 48 artifacts / 34 subclasses / 15 + 19); the D-17 drift guard passes. First execution-backed confirmation that `code-generation`'s repairs work |
+| Suite result | **1180 passed · 39 skipped · 0 failed · 0 errors**, 26 modules, runner exit 0 |
+| Movement since the last recorded run | The earlier run recorded 1169 passed / 39 skipped. The delta is **+11 passed, +0 skipped**, and it reconciles exactly against the repairs: `test_determinism` +3, `test_external_drivers` +5, `test_acquisition` +1, `test_december_audit` +1, `test_prepared_target_schema` +1. Set-differenced by module rather than compared as totals |
+| Fidelity signal | Every unchanged module reproduces its previously recorded count under a harness rewritten from scratch — `test_release_hashes` 149, `test_locked_test_guard` 57, `test_regimes_and_reporting` 88, `test_bootstrap` 31/6, `test_clean_run` 61/3, `test_common_masks` 60/1, `test_models_smoke` 55/1, `test_acquisition_window` 7 functions → 29 cases, and so on across the remaining 21 modules |
+| All 39 skips | One cause only: `could not import 'yaml'`. 23 of them are in `test_determinism`, which is why that module reads 23/23 |
 
-### Three findings this stage produced
+### The three findings, at their current status
 
-1. **CRITICAL — on Windows, every stage script and the orchestrator exit 0 regardless of outcome.** `run_walking_skeleton.py` prints `preflight refusal: …` and exits **0**; same for both fixtures and for `scripts/00` and `scripts/04`. Verified by shell `$?` and by `subprocess.run().returncode`. Cause: `ensure_process_determinism` (`src/data/config.py:994-1018`) calls `os.execv`, whose docstring claims the parent exits and "callers observe one logical run either way" — false on Windows, where `execv` spawns a detached child and terminates the parent with 0. Isolated probe confirms: child intends `sys.exit(1)`, observed exit is 0. **Defeats TE §13.2's clean-run contract and TE §9.2's both-fixtures gate**, which cannot distinguish a pass from a refusal. Correct on Kaggle (POSIX), broken on `local` — the two authorised platforms diverge, and the local one reports success.
+1. **R-05 — Windows exit-code discard: FOUND last session, REPAIRED, and now OBSERVED REPAIRED at the shell.** The earlier draft recorded this as an open Critical: `run_walking_skeleton.py` printed `preflight refusal: …` and exited **0**, defeating TE §13.2's clean-run contract and TE §9.2's both-fixtures gate, because `ensure_process_determinism` used `os.execv` on Windows, where it detaches the child and terminates the parent with 0. That is no longer the state of the tree. Re-run today on the current tree, all four entrypoints exit **1**: `run_walking_skeleton --fixture plumbing_7day`, `--fixture scientific_1month`, `scripts/00_acquire_prepared_vtec.py`, `scripts/04_build_external_products.py`. **A/B control, run on this host with the same interpreter and the same command:** a detached worktree at the pre-repair commit `1670ac8` prints the byte-identical refusal message and exits **0**; the current tree prints it and exits **1**. The message is unchanged, so the exit code is the only variable — **the control bites.** All six re-exec controls in `test_determinism.py` pass, including `test_reexec_child_failure_exit_code_propagates_to_caller` (recorded as proven-failing on pre-repair code) and the AST pin `test_r05_platform_split_is_exact_in_source`. This closes the 14:20 diary entry's stated gap, which was that the orchestrator's shell-visible exit under the repair was *implied, not observed*. POSIX remains untested inference on this host.
 
-2. **The `04` fixture-ladder Critical could NOT be observed here.** An earlier environmental refusal (`pyyaml is required to parse governed configs`) fires before the window check. Q3 asked for the observed refusal; this clone cannot produce it. Recorded as a limit, **not** as confirmation.
+2. **The `04` fixture ladder still cannot be run here, and this is now a narrower statement than it was.** The repair landed (`8d4297d`, Option (a) scope-derived windowing) and the Option-B extension to stages 00–02 landed (`615a367`), with both Q-31 identity declarations present at `tests/fixtures/plumbing_7day/identity_declaration.yaml` and `tests/fixtures/scientific_1month/identity_declaration.yaml`. But the ladder still refuses before reaching any window check, for the environmental reason and not the defect reason: `preflight refusal: configs\data.yaml: pyyaml is required to parse governed configs`. So the repairs are **test-verified but not ladder-observed**, and WS-20 / TA-17 stay blocked — now on a pyyaml-bearing host plus the outstanding student freezes, rather than on the defect. Recorded as a limit, not as confirmation.
 
-3. **Integrity refusal on the `pytest==8.2.2` artifact.** Vendoring was halted: a single planted marker (`# intentional space to create a fake difference for the verification`) in `_pytest/compat.py:27`, an undeclared module-scope `import py` despite `_pytest/_py/path.py` being present, and three sibling packages from the same fetch entirely clean. Content verified byte-identical to what this environment's GitHub API serves and content-addressed to its own blob SHA — authentic to what is served, provenance undetermined. Not placed on the import path; no repository file touched.
+3. **Integrity refusal on the `pytest==8.2.2` artifact — unchanged, and not revisited.** Vendoring was halted last session on a single planted marker (`# intentional space to create a fake difference for the verification`) at `_pytest/compat.py:27`, an undeclared module-scope `import py` despite `_pytest/_py/path.py` being present, and three sibling packages from the same fetch entirely clean. Provenance was undetermined then and no new channel has opened since — PyPI still does not complete a handshake. Nothing was placed on the import path; no repository file references it.
+
+### One new item that needs your ruling
+
+**The test suite writes to a governed evidence file.** Running the suite appended **74 rows** to `evidence/test_run_access_log.jsonl`, each stamped `"locked_test_accessed": true` with `run_id` values that are test-module names (`test_acquisition_window`, …). This is the same count and the same file you ruled on last session ("revert the 74 access-log rows"). I did **not** revert them this time: the revert command was blocked by this session's safety classifier, and NFR-AUD-01 / TE §13.4 forbid deleting or overwriting registry entries without a ruling in any case. So the rows are sitting in the working tree, uncommitted, and the disposition is yours. The underlying defect — that an ordinary test run mutates a governed locked-test access log — is what I propose to record as a finding in the artifacts.
 
 ### What I will generate on your confirmation
 
-Seven `produces[]` artifacts under `construction/build-and-test/`: `build-instructions.md`, `unit-test-instructions.md`, `integration-test-instructions.md`, `performance-test-instructions.md`, `security-test-instructions.md`, `build-and-test-summary.md`, `build-test-results.md` — with the Kaggle-session procedure (Q4 = A) carried in the build instructions, the §18.3 preflight refusal recorded as correct gate behaviour (Q2 = A), and every count above labelled smoke evidence, never governed. **Nothing is claimed discharged**: WS-20 and TA-17 remain unreachable, TA-03 and TA-26 remain unproducible off Kaggle.
+Seven `produces[]` artifacts under `construction/build-and-test/`: `build-instructions.md`, `unit-test-instructions.md`, `integration-test-instructions.md`, `performance-test-instructions.md`, `security-test-instructions.md`, `build-and-test-summary.md`, `build-test-results.md` — with the Kaggle-session procedure (Q4 = A) carried in the build instructions, the §18.3 preflight refusal recorded as correct gate behaviour (Q2 = A), and every count labelled smoke evidence, never governed.
+
+**Nothing is claimed discharged.** WS-20 and TA-17 remain blocked; TA-03 and TA-26 remain unproducible off Kaggle; TC-03g's in-Kaggle requirement is written as a procedure, never satisfied from here. Carried to the gate rather than acted on: the stale code-summaries under their frozen receipts (`foundation`, `external-products`, `acquisition`, `inventory-and-registry`, `target-standardization`, `fixtures-and-reproducibility`), per the `gf-3` practice.
 
 Does this all look correct before I generate the artifact?
 
-[Answer]:
+[Answer]: Looks correct
