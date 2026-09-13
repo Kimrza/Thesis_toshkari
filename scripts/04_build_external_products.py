@@ -107,6 +107,10 @@ from src.data.experiment_registry import (  # noqa: E402
     record_abort_honestly,
 )
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import (  # noqa: E402
+    WALKING_SKELETON_ROOT,
+    load_fixture_scope,
+)
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
 from src.external.spaceweather import write_driver_manifest  # noqa: E402
@@ -114,10 +118,16 @@ from src.external.spaceweather import write_driver_manifest  # noqa: E402
 STAGE = "external-products"
 PHASE_DEFAULT = 1
 
-#: The audit window: calendar 2022, migrated unchanged from `audit_ec1_drivers.py` and
-#: matching D-8's frozen claim boundary ("calendar year 2022"). The migration preserves
-#: the original's window identity; it decides no new scientific value.
+#: The NON-FIXTURE audit window: calendar 2022, migrated unchanged from
+#: `audit_ec1_drivers.py` and matching D-8's frozen claim boundary ("calendar year
+#: 2022"). The migration preserves the original's window identity; it decides no new
+#: scientific value. On a fixture run the audit window is the fixture scope's cited
+#: window instead (CR-2026-09-13-04-FIXTURE-WINDOW, owner-ruled Option a): the
+#: declaration is made true by narrowing the READS, never by narrowing the report.
 _AUDIT_YEAR = 2022
+
+#: The non-fixture default manifest path (the pre-repair `--out` default, unchanged).
+_DEFAULT_OUT = Path("artifacts/external/ec1_driver_audit_manifest.json")
 
 #: The F10.7 outage-window start the ORIGINAL audit measured and recorded
 #: (2022-03-18); preserved by the migration as the recorded fact it is (TC-20's
@@ -164,6 +174,12 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "source",
     "stamp_class",
     "stamped_at_utc",
+    # CR-2026-09-13-04-FIXTURE-WINDOW: fixture-run labelling fields (TC-03f — plumbing
+    # evidence, never scientific governed-run evidence).
+    "evidence_class",
+    "audit_window",
+    "fixture_scope_id",
+    "plumbing_statement",
 )
 
 
@@ -203,8 +219,14 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--out",
         type=Path,
-        default=Path("artifacts/external/ec1_driver_audit_manifest.json"),
-        help="workspace-relative driver-manifest output path",
+        default=None,
+        help=(
+            "workspace-relative driver-manifest output path. When absent: the standing "
+            "full-year path on a non-fixture run; on a fixture run, "
+            "artifacts/walking_skeleton/<fixture_id>/external/… so a plumbing artifact "
+            "never lands on the governed manifest path "
+            "(CR-2026-09-13-04-FIXTURE-WINDOW)"
+        ),
     )
     parser.add_argument(
         "--code-commit",
@@ -264,13 +286,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 def _declared_data_window() -> tuple[dt.date, dt.date]:
     """Board Rec 2 (ML-01, owner-authorised per CR-2026-09-07 §11.5; flagged for
-    `external-products`' record): the data window THIS run declares — the migrated audit's
-    own calendar-year window, derived from `_AUDIT_YEAR` (the constant the migration
-    preserved from `audit_ec1_drivers.py`, matching D-8's frozen claim boundary; c59 — this
-    script's own input declaration, not narrative). On a fixture run the TE 9.2 exemption
-    is bound to the fixture scope's cited window, so this FULL-YEAR declaration refuses
-    against any fixture scope — a full-scale invocation cannot ride the exemption on a
-    validating flag alone."""
+    `external-products`' record): the data window a NON-FIXTURE run declares and audits —
+    the migrated audit's own calendar-year window, derived from `_AUDIT_YEAR` (the
+    constant the migration preserved from `audit_ec1_drivers.py`, matching D-8's frozen
+    claim boundary; c59 — this script's own input declaration, not narrative).
+
+    On a fixture run this function is NOT the declaration: per the owner's Option (a)
+    ruling (CR-2026-09-13-04-FIXTURE-WINDOW) the declared window IS the fixture scope's
+    cited window, and the audit's reads are bounded to it, so the declaration is true by
+    construction. The earlier state — declaring this full year under any fixture scope —
+    made the ladder's `04` step refuse unconditionally (the deadlock that ruling
+    resolves)."""
     return (dt.date(_AUDIT_YEAR, 1, 1), dt.date(_AUDIT_YEAR, 12, 31))
 
 
@@ -294,7 +320,12 @@ def _stage_entry(
        has nothing to check and nothing is silently skipped -- this line records it.
     6. Seed, capture the eight-item environment lock, open the run record, then
        `require_receipts_for_snapshot` (TE 9.2: both fixtures pass before any full-year
-       job; exempt on a fixture run carrying `--fixture-manifest`, Q5 = A).
+       job; exempt on a fixture run carrying `--fixture-manifest`, Q5 = A). On a fixture
+       run the declared window IS the scope's cited window and the audit reads only that
+       window (CR-2026-09-13-04-FIXTURE-WINDOW, Option a) -- the declaration is made
+       true by narrowing the reads, never by narrowing the report. The scope is loaded
+       through the same one loader the gate uses; the gate itself is unmodified and
+       re-validates the manifest internally.
     """
     snapshot = load_configs(config_dir, phase=phase)
     assert_no_tbd(snapshot, required=required_fields_for(STAGE, PHASE_DEFAULT))
@@ -303,14 +334,27 @@ def _stage_entry(
     determinism = seed_everything(snapshot, stage=STAGE)
     lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
-    declared_window = _declared_data_window() if fixture_manifest is not None else None
+    if fixture_manifest is not None:
+        # Option (a): the fixture scope's cited window is BOTH the declaration and the
+        # audit's read bound. `_declared_data_window()` (full year) is deliberately not
+        # consulted on this path -- declaring it under a 7-day/1-month scope is the
+        # unconditional refusal the owner's ruling repairs.
+        scope = load_fixture_scope(fixture_manifest)
+        audit_window: tuple[dt.date, dt.date] = scope.window
+        fixture_scope_id: str | None = scope.fixture_id
+        declared_window: tuple[dt.date, dt.date] | None = audit_window
+    else:
+        audit_window = _declared_data_window()
+        fixture_scope_id = None
+        declared_window = None
     receipts_gate = require_receipts_for_snapshot(
         snapshot,
         lock,
         fixture_manifest=fixture_manifest,
         declared_window=declared_window,
         declared_window_resource=(
-            "scripts/04_build_external_products.py: declared audit window (calendar year)"
+            "scripts/04_build_external_products.py: declared audit window "
+            "(fixture scope's cited window on a fixture run; calendar year otherwise)"
         ),
     )
     return {
@@ -318,6 +362,8 @@ def _stage_entry(
         "determinism": determinism,
         "lock": lock,
         "receipts_gate": receipts_gate,
+        "audit_window": audit_window,
+        "fixture_scope_id": fixture_scope_id,
     }
 
 
@@ -370,8 +416,60 @@ def _registry_row(
 # =======================================================================================
 
 
-def _verify_recorded_hashes(evidence_root: Path) -> None:
+def _months_in_window(window: tuple[dt.date, dt.date]) -> list[tuple[int, int]]:
+    """The (year, month) pairs intersecting `window`, in calendar order.
+
+    CR-2026-09-13-04-FIXTURE-WINDOW: the audit's month iteration derives from the run's
+    audit window (the fixture scope's cited window on a fixture run; `_AUDIT_YEAR`'s
+    calendar year otherwise). For the full-year window this yields exactly the twelve
+    months the pre-repair loop hardcoded.
+    """
+    start, end = window
+    if start > end:
+        raise IntegrityError(
+            "audit window",
+            f"window {start}..{end} is inverted; an inverted window audits nothing and "
+            f"refuses rather than reporting vacuous coverage",
+        )
+    months: list[tuple[int, int]] = []
+    cursor = dt.date(start.year, start.month, 1)
+    while cursor <= end:
+        months.append((cursor.year, cursor.month))
+        cursor = (
+            dt.date(cursor.year + 1, 1, 1)
+            if cursor.month == 12
+            else dt.date(cursor.year, cursor.month + 1, 1)
+        )
+    return months
+
+
+def _dst_month_from_name(file_name: str) -> tuple[int, int] | None:
+    """Parse (year, month) from a recorded `dst_provisional_YYYYMM.html` name, else None."""
+    match = re.match(r"^dst_provisional_(\d{4})(\d{2})\.html$", file_name)
+    if not match:
+        return None
+    year, month = int(match.group(1)), int(match.group(2))
+    if not 1 <= month <= 12:
+        return None
+    return (year, month)
+
+
+def _verify_recorded_hashes(
+    evidence_root: Path,
+    *,
+    window: tuple[dt.date, dt.date],
+    fixture_scoped: bool,
+) -> None:
     """The integrity tier: current bytes must match the previously recorded audit hashes.
+
+    CR-2026-09-13-04-FIXTURE-WINDOW: on a fixture run (`fixture_scoped=True`) the checks
+    are bounded to the window — a recorded dst entry for an out-of-window month is
+    neither read nor required (a fixture run touches only its cited window, board
+    Rec 2), while a recorded dst entry whose month cannot be parsed from its filename
+    REFUSES fail-closed (it cannot be proven out-of-window). The recorded fluxtable
+    entry keeps full semantics on both paths: it is the carrier file for in-window F10.7
+    days, so recorded-but-missing stays a violation. On a non-fixture run the checked
+    set is byte-identical to the pre-repair behaviour.
 
     The original run's `ec1-audit-report.json` records a sha256 per evidence file; a
     file whose current bytes do not match is evidence altered since the run, and the
@@ -398,11 +496,25 @@ def _verify_recorded_hashes(evidence_root: Path) -> None:
             f"integrity record terminates the run rather than being skipped",
         ) from exc
 
+    in_window_months = set(_months_in_window(window))
     checks: list[tuple[Path, str]] = []
     dst_months = recorded.get("obligation_1_kyoto_dst", {})
     if isinstance(dst_months, Mapping):
         for info in dst_months.values():
             if isinstance(info, Mapping) and "sha256" in info and "file" in info:
+                if fixture_scoped:
+                    parsed = _dst_month_from_name(str(info["file"]))
+                    if parsed is None:
+                        raise IntegrityError(
+                            evidence_root / "kyoto_dst" / str(info["file"]),
+                            "recorded dst entry whose month cannot be parsed from its "
+                            "filename; on a fixture run the integrity checks are bounded "
+                            "to the scope's cited window, and an unattributable entry "
+                            "cannot be proven out-of-window -- fail closed "
+                            "(CR-2026-09-13-04-FIXTURE-WINDOW)",
+                        )
+                    if parsed not in in_window_months:
+                        continue  # neither read nor required: out of the cited window
                 checks.append(
                     (evidence_root / "kyoto_dst" / str(info["file"]), str(info["sha256"]))
                 )
@@ -429,21 +541,30 @@ def _verify_recorded_hashes(evidence_root: Path) -> None:
             )
 
 
-def _audit_dst(kyoto_dir: Path) -> tuple[list[dict[str, Any]], list[str]]:
-    """Obligation 1 (migrated): per-month Dst coverage, missing months NAMED.
+def _audit_dst(
+    kyoto_dir: Path, *, window: tuple[dt.date, dt.date]
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Obligation 1 (migrated): per-month Dst coverage over the audit window, missing
+    months NAMED.
 
     Returns (per-month coverage records, missing-month names). A month whose file was
     never retrieved is a COMPLETENESS shortfall: named machine-readably, non-fatal --
     the closure of the original's `:184` unconditional `return 0` is that the fact is
     recorded where a consumer reads it, not that the run aborts (R-61: making an
     ordinary partial retrieval abort the run is how a guard gets worked around).
+
+    CR-2026-09-13-04-FIXTURE-WINDOW: iteration, day expectations, parsed-row counting
+    and missing-day accounting are all bounded to `window`. A monthly file for an
+    out-of-window month is neither opened, hashed, counted, nor required. For the
+    full-year window this is byte-identical to the pre-repair twelve-month loop.
     """
+    start, end = window
     coverage: list[dict[str, Any]] = []
     missing_months: list[str] = []
-    for month in range(1, 13):
-        path = kyoto_dir / f"dst_provisional_{_AUDIT_YEAR}{month:02d}.html"
+    for year, month in _months_in_window(window):
+        path = kyoto_dir / f"dst_provisional_{year}{month:02d}.html"
         if not path.is_file():
-            missing_months.append(f"{_AUDIT_YEAR}-{month:02d} (dst: file not retrieved)")
+            missing_months.append(f"{year}-{month:02d} (dst: file not retrieved)")
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
         day_rows: set[int] = set()
@@ -451,32 +572,44 @@ def _audit_dst(kyoto_dir: Path) -> tuple[list[dict[str, Any]], list[str]]:
             match = re.match(r"^\s*(\d{1,2})((?:\s+-?\d+){24})\s*$", line)
             if match:
                 day_rows.add(int(match.group(1)))
+        month_start = dt.date(year, month, 1)
         next_month_start = (
-            dt.date(_AUDIT_YEAR, month + 1, 1) if month < 12 else dt.date(_AUDIT_YEAR + 1, 1, 1)
+            dt.date(year + 1, 1, 1) if month == 12 else dt.date(year, month + 1, 1)
         )
-        expected_days = (next_month_start - dt.date(_AUDIT_YEAR, month, 1)).days
+        # The in-window slice of this month (whole month on a full-year window).
+        lo = max(month_start, start)
+        hi = min(next_month_start - dt.timedelta(days=1), end)
+        expected_days = (hi - lo).days + 1
+        in_window_days = set(range(lo.day, hi.day + 1))
         coverage.append(
             {
-                "month": f"{_AUDIT_YEAR}-{month:02d}",
+                "month": f"{year}-{month:02d}",
                 "file": path.name,
                 "sha256": sha256_of_file(path),
                 "expected_days": expected_days,
-                "day_rows_parsed": len(day_rows),
-                "missing_days": sorted(set(range(1, expected_days + 1)) - day_rows),
+                "day_rows_parsed": len(day_rows & in_window_days),
+                "missing_days": sorted(in_window_days - day_rows),
             }
         )
     return coverage, missing_months
 
 
-def _audit_f107(flux_path: Path) -> dict[str, Any]:
-    """Obligation 2 (migrated): F10.7 archive coverage over the audit year.
+def _audit_f107(flux_path: Path, *, window: tuple[dt.date, dt.date]) -> dict[str, Any]:
+    """Obligation 2 (migrated): F10.7 archive coverage over the audit window.
 
     An absent `fluxtable.txt` is a completeness shortfall for the SERIES (recorded by
-    the caller); missing days inside the year are recorded machine-readably, with the
+    the caller); missing days inside the window are recorded machine-readably, with the
     outage-window subset named separately, exactly as the original reported them.
+
+    CR-2026-09-13-04-FIXTURE-WINDOW: row counting and missing-day accounting are bounded
+    to `window`. `fluxtable.txt` stays the carrier file (it is read if present — it
+    holds the in-window days); only its ACCOUNTING is window-bounded. For the full-year
+    window the date-range filter is extensionally identical to the pre-repair
+    `date.year == _AUDIT_YEAR` filter.
     """
     if not flux_path.is_file():
         return {"present": False}
+    start, end = window
     by_day: dict[dt.date, int] = {}
     unparsed = 0
     with flux_path.open("r", encoding="utf-8", errors="replace") as handle:
@@ -489,9 +622,8 @@ def _audit_f107(flux_path: Path) -> dict[str, Any]:
                 unparsed += 1
                 continue
             date = dt.datetime.strptime(match.group("date"), "%Y%m%d").date()
-            if date.year == _AUDIT_YEAR:
+            if start <= date <= end:
                 by_day[date] = by_day.get(date, 0) + 1
-    start, end = dt.date(_AUDIT_YEAR, 1, 1), dt.date(_AUDIT_YEAR, 12, 31)
     all_days = [start + dt.timedelta(days=i) for i in range((end - start).days + 1)]
     missing = [day for day in all_days if day not in by_day]
     return {
@@ -517,10 +649,19 @@ def _combined_digest(hashes: list[str]) -> str:
 
 
 def _run_driver_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
-    """W-8: the migrated EC-1 audit, closed onto the two-tier posture (R-61)."""
+    """W-8: the migrated EC-1 audit, closed onto the two-tier posture (R-61).
+
+    CR-2026-09-13-04-FIXTURE-WINDOW: both tiers and all accounting run over
+    `entry["audit_window"]` — the fixture scope's cited window on a fixture run, the
+    calendar year otherwise. Fixture-run artifacts are plumbing evidence (TC-03f),
+    written under the walking-skeleton root, never onto the governed manifest path.
+    """
     _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
 
     snapshot = entry["snapshot"]
+    window: tuple[dt.date, dt.date] = entry["audit_window"]
+    fixture_scope_id = entry.get("fixture_scope_id")
+    window_label = f"{window[0]:%Y-%m}..{window[1]:%Y-%m}"
     workspace = Path(snapshot.resolved_roots["workspace"])
     evidence_root = workspace / args.evidence_root
     if not evidence_root.is_dir():
@@ -531,10 +672,12 @@ def _run_driver_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dic
         )
 
     # Integrity tier FIRST: a failed hash invalidates everything downstream of it.
-    _verify_recorded_hashes(evidence_root)
+    _verify_recorded_hashes(
+        evidence_root, window=window, fixture_scoped=fixture_scope_id is not None
+    )
 
-    dst_coverage, missing_months = _audit_dst(evidence_root / "kyoto_dst")
-    f107 = _audit_f107(evidence_root / "nrcan_f107" / "fluxtable.txt")
+    dst_coverage, missing_months = _audit_dst(evidence_root / "kyoto_dst", window=window)
+    f107 = _audit_f107(evidence_root / "nrcan_f107" / "fluxtable.txt", window=window)
 
     # The retrieval date is the evidence set's own recorded identity (the dated
     # directory name of the one-time 2026-08-15 retrieval), not a value chosen here.
@@ -573,7 +716,7 @@ def _run_driver_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dic
             }
         )
     else:
-        missing_months.append(f"{_AUDIT_YEAR}-01..{_AUDIT_YEAR}-12 (dst: no file retrieved)")
+        missing_months.append(f"{window_label} (dst: no file retrieved)")
 
     if f107.get("present"):
         series_entries.append(
@@ -603,33 +746,71 @@ def _run_driver_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dic
             }
         )
     else:
-        missing_months.append(
-            f"{_AUDIT_YEAR}-01..{_AUDIT_YEAR}-12 (f107: fluxtable.txt not retrieved)"
-        )
+        missing_months.append(f"{window_label} (f107: fluxtable.txt not retrieved)")
 
     # The two GFZ series have NEVER been retrieved (re-inspected 2026-08-28: no GFZ
     # directory exists in the evidence set). A completeness fact, named per series
     # across the whole window -- never console text only, and never fatal (R-61).
     for gfz_series in ("kp_ap3", "hp60_ap60"):
         missing_months.append(
-            f"{_AUDIT_YEAR}-01..{_AUDIT_YEAR}-12 ({gfz_series}: never retrieved -- no "
+            f"{window_label} ({gfz_series}: never retrieved -- no "
             f"GFZ directory in the evidence set; acquisition retrieves BOTH the "
             f"near-real-time and definitive products when it lands, per R-63's "
             f"cross-assertion specification)"
         )
 
-    out_path = workspace / args.out
+    if fixture_scope_id is not None:
+        # TC-03f: a fixture-scoped audit artifact is plumbing evidence, never scientific
+        # governed-run evidence. Labelled on every series entry, and written under the
+        # walking-skeleton root so it cannot land on (or divergently collide with) the
+        # governed full-year manifest path (CR-2026-09-13-04-FIXTURE-WINDOW).
+        plumbing_label = {
+            "evidence_class": "fixture_plumbing",
+            "fixture_scope_id": fixture_scope_id,
+            "audit_window": {
+                "start": window[0].isoformat(),
+                "end": window[1].isoformat(),
+            },
+        }
+        for series_entry in series_entries:
+            series_entry.update(plumbing_label)
+
+    if args.out is not None:
+        out_rel = args.out
+    elif fixture_scope_id is not None:
+        out_rel = (
+            Path(WALKING_SKELETON_ROOT)
+            / fixture_scope_id
+            / "external"
+            / "ec1_driver_audit_manifest.json"
+        )
+    else:
+        out_rel = _DEFAULT_OUT
+    out_path = workspace / out_rel
     manifest_path = write_driver_manifest(
         out_path,
         series_entries=series_entries,
         missing_months=missing_months,
         produced_by="scripts/04_build_external_products.py",
     )
-    return {
+    summary: dict[str, Any] = {
         "driver_manifest": str(manifest_path),
         "missing_month_entries": len(missing_months),
         "series_audited": len(series_entries),
     }
+    if fixture_scope_id is not None:
+        summary["evidence_class"] = "fixture_plumbing"
+        summary["fixture_scope_id"] = fixture_scope_id
+        summary["audit_window"] = {
+            "start": window[0].isoformat(),
+            "end": window[1].isoformat(),
+        }
+        summary["plumbing_statement"] = (
+            "fixture-scoped driver audit: plumbing/fixture evidence only, never "
+            "scientific governed-run evidence (TC-03f; the seven-day fixture is a smoke "
+            "test, TE 9.2)"
+        )
+    return summary
 
 
 # =======================================================================================

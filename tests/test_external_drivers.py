@@ -1110,3 +1110,177 @@ def test_comparison_report_emits_statements_and_flag_itself(tmp_path: Path) -> N
         # reporting path runs. The emitted-statement contract stays covered at function
         # level by this module's render tests over the allowlisted importer.
         _assert_gate_fails_closed(result)
+
+
+# ------------------------------------------------------------------------------------------
+# CR-2026-09-13-04-FIXTURE-WINDOW (owner-ruled Option a): scope-derived windowing of the
+# driver audit on fixture runs. The invariant under test: on a fixture run the declared
+# window IS the scope's cited window and every audit read, count, and requirement is
+# bounded to it — the declaration is made true by narrowing the READS, never the report.
+# On a non-fixture run behaviour is unchanged (full calendar year, non-exempt gate).
+# These controls import the stage script by path (module-level code is import-only; main()
+# is __main__-guarded) and exercise the audit tiers in-process — no configs, no yaml.
+# ------------------------------------------------------------------------------------------
+
+
+def _load_stage_04():
+    """Load scripts/04_build_external_products.py as a module, by path (digit-prefixed
+    stage-script names are not importable; the script's module level only imports)."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("stage_04_under_test", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["stage_04_under_test"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_NOVEMBER_WEEK = (dt.date(2022, 11, 1), dt.date(2022, 11, 7))  # D-11's frozen shape
+_FULL_YEAR = (dt.date(2022, 1, 1), dt.date(2022, 12, 31))
+
+
+def _dst_html(days: range) -> str:
+    """Minimal Kyoto-shaped monthly table: one parseable row per day (24 hourly ints)."""
+    return "\n".join(f" {day} " + " ".join(["-12"] * 24) for day in days) + "\n"
+
+
+def test_fixture_scoped_dst_audit_reads_only_in_window_evidence(tmp_path) -> None:
+    """LOAD-BEARING negative control: under a fixture window, an out-of-window monthly
+    file is neither opened, hashed, counted, nor required. The out-of-window artifact is
+    a POISON — a directory named like the January file, so any open/hash attempt raises
+    (a stronger proof than mere absence from the result). Pre-repair `_audit_dst` walks
+    all twelve months and both trips the poison and counts ten absent months missing —
+    this control fails on that code (verified against HEAD in the CR's results)."""
+    mod = _load_stage_04()
+    kyoto = tmp_path / "kyoto_dst"
+    kyoto.mkdir()
+    (kyoto / "dst_provisional_202211.html").write_text(
+        _dst_html(range(1, 8)), encoding="utf-8"
+    )
+    (kyoto / "dst_provisional_202201.html").mkdir()  # poison: reading/hashing raises
+    coverage, missing = mod._audit_dst(kyoto, window=_NOVEMBER_WEEK)
+    assert [record["month"] for record in coverage] == ["2022-11"]
+    assert missing == [], (
+        f"a fixture-scoped audit must not count out-of-window months missing: {missing}"
+    )
+    november = coverage[0]
+    assert november["expected_days"] == 7  # the in-window slice, not the 30-day month
+    assert november["day_rows_parsed"] == 7
+    assert november["missing_days"] == []
+
+
+def test_fixture_scoped_f107_accounting_is_window_bounded(tmp_path) -> None:
+    """The carrier file is read, but counting/missing accounting covers only the window."""
+    mod = _load_stage_04()
+    flux = tmp_path / "fluxtable.txt"
+    rows = []
+    for day in (1, 2, 3):  # in-window observations
+        rows.append(
+            f"202211{day:02d} 170000 2459000.000 2290.000 100.0 101.0 99.0"
+        )
+    rows.append("20220615 170000 2459000.000 2290.000 100.0 101.0 99.0")  # out-of-window
+    flux.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    result = mod._audit_f107(flux, window=_NOVEMBER_WEEK)
+    assert result["present"] is True
+    assert result["days_present_2022"] == 3  # the June row is not counted
+    assert result["records_2022"] == 3
+    assert len(result["days_missing_2022"]) == 4  # 7-day window minus 3 observed
+    assert all(day.startswith("2022-11") for day in result["days_missing_2022"])
+
+
+def test_fixture_scoped_integrity_tier_neither_reads_nor_requires_out_of_window(
+    tmp_path,
+) -> None:
+    """Narrowest integration control on the two-tier ordering: a recorded out-of-window
+    dst entry that is MISSING on disk does not refuse under the fixture scope, while the
+    identical recording refuses on the non-fixture path — both directions asserted. An
+    unattributable recorded name refuses fail-closed under the scope."""
+    mod = _load_stage_04()
+    root = tmp_path / "audit_ec1_2026-01-01"
+    (root / "kyoto_dst").mkdir(parents=True)
+    november = root / "kyoto_dst" / "dst_provisional_202211.html"
+    november.write_text(_dst_html(range(1, 8)), encoding="utf-8")
+    from src.data.release import sha256_of_file
+
+    report = {
+        "obligation_1_kyoto_dst": {
+            "2022-11": {"file": november.name, "sha256": sha256_of_file(november)},
+            "2022-01": {"file": "dst_provisional_202201.html", "sha256": "0" * 64},
+        }
+    }
+    (root / "ec1-audit-report.json").write_text(json.dumps(report), encoding="utf-8")
+    # Fixture-scoped: the recorded January entry (missing on disk) is out-of-window —
+    # neither read nor required.
+    mod._verify_recorded_hashes(root, window=_NOVEMBER_WEEK, fixture_scoped=True)
+    # Non-fixture: the identical recording refuses on the missing January file.
+    with pytest.raises(IntegrityError, match="missing on disk"):
+        mod._verify_recorded_hashes(root, window=_FULL_YEAR, fixture_scoped=False)
+    # Fail-closed: a recorded name whose month cannot be parsed refuses under the scope.
+    report["obligation_1_kyoto_dst"]["weird"] = {
+        "file": "dst_weird.html",
+        "sha256": "0" * 64,
+    }
+    (root / "ec1-audit-report.json").write_text(json.dumps(report), encoding="utf-8")
+    with pytest.raises(IntegrityError, match="cannot be parsed"):
+        mod._verify_recorded_hashes(root, window=_NOVEMBER_WEEK, fixture_scoped=True)
+
+
+def test_full_year_audit_behaviour_is_unchanged_without_a_fixture_scope(tmp_path) -> None:
+    """Full-year invariance: the non-fixture window still iterates exactly the twelve
+    2022 months with full-month day expectations, names absent months exactly as before,
+    and the year filter is extensionally the pre-repair `date.year == 2022` filter."""
+    mod = _load_stage_04()
+    kyoto = tmp_path / "kyoto_dst"
+    kyoto.mkdir()
+    (kyoto / "dst_provisional_202203.html").write_text(
+        _dst_html(range(1, 32)), encoding="utf-8"
+    )
+    coverage, missing = mod._audit_dst(kyoto, window=_FULL_YEAR)
+    assert [record["month"] for record in coverage] == ["2022-03"]
+    assert coverage[0]["expected_days"] == 31 and coverage[0]["missing_days"] == []
+    assert len(missing) == 11  # the other eleven months, named individually
+    assert missing[0] == "2022-01 (dst: file not retrieved)"  # pre-repair label, exact
+    assert all("(dst: file not retrieved)" in entry for entry in missing)
+    # The default full-year window constant is unchanged.
+    assert mod._declared_data_window() == _FULL_YEAR
+    # And the months helper yields exactly the pre-repair twelve for the full year.
+    assert mod._months_in_window(_FULL_YEAR) == [(2022, month) for month in range(1, 13)]
+
+
+def test_fixture_declaration_derives_from_the_scope_never_the_full_year() -> None:
+    """Declaration-truth control (AST, repo style): on `_stage_entry`'s fixture branch
+    the declared window comes from `load_fixture_scope(...).window`, and
+    `_declared_data_window()` — the full-year constant — is NOT consulted on that
+    branch. Pins the repaired shape so the unconditional-refusal deadlock cannot be
+    silently reintroduced."""
+    source = SCRIPT.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    stage_entry = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_stage_entry"
+    )
+    branches = [node for node in ast.walk(stage_entry) if isinstance(node, ast.If)]
+    fixture_branch = None
+    for node in branches:
+        test_src = ast.get_source_segment(source, node.test) or ""
+        if "fixture_manifest" in test_src:
+            fixture_branch = node
+            break
+    assert fixture_branch is not None, "_stage_entry lost its fixture branch"
+    body_src = "\n".join(
+        ast.get_source_segment(source, stmt) or "" for stmt in fixture_branch.body
+    )
+    assert "load_fixture_scope" in body_src and "scope.window" in body_src, (
+        "the fixture branch must derive the declared window from the scope's cited window"
+    )
+    assert "_declared_data_window" not in body_src, (
+        "the fixture branch must never consult the full-year declaration — that is the "
+        "unconditional-refusal deadlock CR-2026-09-13-04-FIXTURE-WINDOW repairs"
+    )
+    else_src = "\n".join(
+        ast.get_source_segment(source, stmt) or "" for stmt in fixture_branch.orelse
+    )
+    assert "_declared_data_window" in else_src, (
+        "the non-fixture branch must keep the full-year window (D-8's claim boundary)"
+    )
