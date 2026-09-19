@@ -527,6 +527,16 @@ Build a derived tensor from such a field → raises. Place the window length in 
 none has been executed, and none has passed.** FR-P1-04-10's longitude limb has **no row at
 all**.
 
+> **Amended 2026-09-19 — R-76a's raise in two forms (D-44; `CR-2026-09-19-SCI-DECISIONS`
+> §2).** `build_features` keeps the own-interval `AlignmentError` for a RAW series and adds
+> the lagged-selection form for a `*_safe` series carrying `attrs["selection"]`
+> (`rule = latest_completed_interval_plus_lag`, `safe_lag_hours`): rows must carry the
+> source interval and `available_at_utc`, `external-products`' `assert_lagged_selection`
+> is the assertion, and a selection lag that differs from the availability matrix's
+> `safe_lag_hours` is refused — the lag is applied once by the producer, never here.
+> Forecast-origin timestamps are never relabelled as raw observations. Negative controls
+> in `tests/test_feature_availability.py::test_lagged_safe_series_passes_through_build_features_with_no_second_lag`.
+
 ## R-77 — Two carry-forward rules, opposite behaviour, one partition
 
 **Rule (FR-P1-04-13 against FR-P1-04-3, Q7 = D).**

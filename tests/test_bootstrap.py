@@ -178,11 +178,12 @@ def _prediction(
     error: float = 0.0,
     attrs: dict[str, Any] | None = None,
     per_row_error: dict[tuple[str, int, int], float] | None = None,
+    month: int = 4,
 ) -> LoadedPrediction:
     frame = RecordFrame(
         {
             "station": station,
-            "interval_start_utc": _ts(day, hour),
+            "interval_start_utc": _ts(day, hour, month=month),
             "y_hat": _truth(station, day, hour)
             + (per_row_error or {}).get((station, day, hour), error),
         }
@@ -1061,14 +1062,15 @@ def test_real_config_confirmatory_shape_rereads_never_literal(tmp_path: Path) ->
     days = list(range(2, 32))
     keys = [(s, d, 0) for s in STATIONS for d in days]
     per_row = {k: 1.0 + 0.1 * k[1] for k in keys}  # day-varying planted differences
+    # Built directly in the December month (G-8, 2026-09-19): the fixture's default is
+    # April, whose 30 days cannot hold day 31, and the earlier post-hoc timestamp rewrite
+    # ran only after construction had already raised. A fixture date bug, reachable only
+    # once pyyaml/numpy let this test run (it skipped by name on every earlier host).
     members = [
-        _prediction("M-A", keys, per_row_error=per_row),
-        _prediction("M-B", keys, error=1.0),
-        _prediction("M-C", keys, error=0.0),
+        _prediction("M-A", keys, per_row_error=per_row, month=12),
+        _prediction("M-B", keys, error=1.0, month=12),
+        _prediction("M-C", keys, error=0.0, month=12),
     ]
-    for member in members:
-        for row in member.frame:
-            row["interval_start_utc"] = ts(int(row["interval_start_utc"][8:10]))
     target = RecordFrame(
         {"station_id": s, "interval_start_utc": ts(d), "vtec_tecu": _truth(s, d, 0)}
         for s, d, _ in keys

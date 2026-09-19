@@ -178,28 +178,60 @@ def test_a_missing_bound_or_kind_refuses(field: str) -> None:
     assert f"partitions.F2.{field}" in str(excinfo.value)
 
 
-def test_real_repository_configs_refuse_today() -> None:
-    """The repository's own `configs/` carries no partition block yet: the refusal fires.
+def test_real_repository_configs_carry_the_d38_transcription() -> None:
+    """The repository's own `configs/` carry the D-38 transcription (2026-09-10): exactly
+    the six partitions of R-80's closed space with TE §7.1's bounds and `embargo_hours`
+    = 24. SUPERSEDES the pre-D-38 form of this test ("configs refuse today"), which was
+    written while the block was `TBD` and could never run here (pyyaml absent until the
+    governed environment of 2026-09-18/19 — G-9). The refusal path it used to exercise
+    is preserved below on the same real files with the block removed, and on synthetic
+    blocks by the tests above.
 
-    Reads the real files through a bare YAML parse (no snapshot directory is written): this
-    is a test of the refusal path, not a governed run.
+    Reads the real files through a bare YAML parse (no snapshot directory is written): a
+    test of the transcription, not a governed run.
     """
     yaml = pytest.importorskip("yaml")
     configs = REPO_ROOT / "configs"
     data = yaml.safe_load((configs / "data.yaml").read_text(encoding="utf-8"))
     experiment = yaml.safe_load((configs / "experiment.yaml").read_text(encoding="utf-8"))
-    snapshot = ConfigSnapshot(
-        data=data,
-        features={},
-        experiment=experiment,
-        seeds={},
-        hashes={},
-        snapshot_dir=Path("."),
-        resolved_roots={},
-        platform="local",
-    )
+
+    def snap(data_block, experiment_block):
+        return ConfigSnapshot(
+            data=data_block,
+            features={},
+            experiment=experiment_block,
+            seeds={},
+            hashes={},
+            snapshot_dir=Path("."),
+            resolved_roots={},
+            platform="local",
+        )
+
+    partitions = build_partitions(snap(data, experiment))
+    by_id = {p.partition_id: p for p in partitions}
+    # D-38's table, verbatim (evidence/DECISIONS.md § D-38): six ids, these bounds.
+    expected = {
+        "F1": ("fold", "2022-01-01", "2022-03-31"),
+        "F2": ("fold", "2022-01-01", "2022-06-30"),
+        "F3": ("fold", "2022-01-01", "2022-09-30"),
+        "F4": ("fold", "2022-01-01", "2022-10-31"),
+        "REFIT": ("refit", "2022-01-01", "2022-11-30"),
+        "DEC": ("locked", "2022-01-01", "2022-11-30"),
+    }
+    assert sorted(by_id) == sorted(expected)
+    for pid, (kind, start, end) in expected.items():
+        part = by_id[pid]
+        assert str(getattr(part.kind, "value", part.kind)) == kind, pid
+        assert part.train_start.isoformat() == start and part.train_end.isoformat() == end, pid
+    assert int(experiment["embargo_hours"]) == 24
+
+    # the refusal path this test used to own, kept on the SAME real files: no block → refuse;
+    # a TBD embargo → refuse (never defaulted).
+    without_block = {k: v for k, v in data.items() if k != "partitions"}
     with pytest.raises(PartitionError):
-        build_partitions(snapshot)
+        build_partitions(snap(without_block, experiment))
+    with pytest.raises(PartitionError):
+        build_partitions(snap(data, {**experiment, "embargo_hours": TBD_SENTINEL}))
 
 
 # --- six partitions, five rows (ADR-11 M5) ----------------------------------------------

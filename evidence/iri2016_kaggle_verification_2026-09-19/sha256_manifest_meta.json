@@ -1,0 +1,13 @@
+{
+  "bundle_zip_sha256": "3a0723a1ff70c213ed3cb7139cbfc02e4495d04888a00136c3e5a6c9afa6d508",
+  "extracted_members_verified_byte_identical_to_zip": true,
+  "hash_count": 5,
+  "manifest": "sha256_manifest.json",
+  "producing_notebook": "kaggle/kaggle_iri2016_verification.ipynb",
+  "producing_notebook_sha256": "b8399c98f248749fca3b6e5acebec9543c262ec0cc83dde2dab0042460d564fa",
+  "producing_platform": "Kaggle, CPU, Internet ON; kernel Python 3.12.13; isolated venv Python 3.10.12 (see verification_report.json[\"runtime\"] and [\"environment_strategy\"])",
+  "provenance_class": "student-returned diagnostic bundle (NOT a producer release, NOT a registered benchmark artifact)",
+  "recording_interpreter": "3.14.7",
+  "returned_by": "project owner / student (Kimia Rezaei), 2026-09-19, as iri_verification_bundle.zip downloaded from the Kaggle output pane",
+  "schema": "TE-13.3 path-to-sha256; metadata sidecar v1"
+}

@@ -1,0 +1,130 @@
+{
+  "notebook": "kaggle_iri2016_verification.ipynb",
+  "purpose": "diagnostic installation/runtime verification only -- NOT a producer release or registered benchmark artifact",
+  "generated_at_utc": "2026-09-19T17:35:33.100406+00:00",
+  "boundaries": {
+    "gnss_vtec_target_data_accessed": false,
+    "full_year_benchmark_run": false,
+    "producer_artifact_registered": false,
+    "g04_passed": false
+  },
+  "runtime": {
+    "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+    "python_version_info": [
+      3,
+      12,
+      13,
+      "final",
+      0
+    ],
+    "python_executable": "/usr/bin/python3",
+    "platform_platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "platform_machine": "x86_64",
+    "platform_system": "Linux",
+    "in_kaggle": true
+  },
+  "environment_strategy": {
+    "kernel_python_minor": [
+      3,
+      12
+    ],
+    "strategy": "found_existing_python3.10_isolate_via_venv",
+    "venv_python_source": "/usr/bin/python3.10",
+    "venv_python_version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]\nLinux-6.12.90+-x86_64-with-glibc2.35",
+    "isolated_env_mechanism": "virtualenv against the image python3.10"
+  },
+  "installation": {
+    "isolated_env_creation": [
+      {
+        "attempt": "rung1: pip install virtualenv into kernel python",
+        "cmd": "/usr/bin/python3 -m pip install --quiet --no-input virtualenv",
+        "timed_out": false,
+        "returncode": 0,
+        "stdout_tail": "   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 5.3/5.3 MB 46.7 MB/s eta 0:00:00\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 470.6/470.6 kB 19.7 MB/s eta 0:00:00\n",
+        "stderr_tail": ""
+      },
+      {
+        "attempt": "rung1: probe the image python3.10 itself",
+        "cmd": "/usr/bin/python3.10 -c import sys, sysconfig; print(sys.version); print(sysconfig.get_paths()[\"stdlib\"])",
+        "timed_out": false,
+        "returncode": 0,
+        "stdout_tail": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]\n/usr/lib/python3.10\n",
+        "stderr_tail": ""
+      },
+      {
+        "attempt": "rung1: virtualenv -p python3.10",
+        "cmd": "/usr/bin/python3 -m virtualenv -p /usr/bin/python3.10 /kaggle/working/iri_venv",
+        "timed_out": false,
+        "returncode": 0,
+        "stdout_tail": "created virtual environment CPython3.10.12.final.0-64-x86_64 in 1156ms\n  creator CPython3Posix(dest=/kaggle/working/iri_venv, clear=False, no_vcs_ignore=False, global=False)\n  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, via=copy, app_data_dir=/root/.cache/virtualenv)\n    added seed packages: pip==26.2.1, setuptools==84.0.0\n  activators BashActivator,CShellActivator,FishActivator,NushellActivator,PowerShellActivator,PythonActivator,XonshActivator\n",
+        "stderr_tail": ""
+      }
+    ],
+    "pip_install": {
+      "cmd": "/kaggle/working/iri_venv/bin/python -m pip install --no-deps --require-hashes -r /kaggle/working/iri_verification_bundle/requirements-iri.txt",
+      "timed_out": false,
+      "returncode": 0,
+      "stdout_tail": "Collecting numpy==1.26.4 (from -r /kaggle/working/iri_verification_bundle/requirements-iri.txt (line 1))\n  Downloading numpy-1.26.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.2 MB)\n     \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 18.2/18.2 MB 80.9 MB/s  0:00:00\nCollecting fortranformat==2.0.3 (from -r /kaggle/working/iri_verification_bundle/requirements-iri.txt (line 2))\n  Downloading fortranformat-2.0.3-py3-none-any.whl (23 kB)\nCollecting pymap3d==3.2.0 (from -r /kaggle/working/iri_verification_bundle/requirements-iri.txt (line 3))\n  Downloading pymap3d-3.2.0-py3-none-any.whl (64 kB)\nCollecting iricore==1.8.0 (from -r /kaggle/working/iri_verification_bundle/requirements-iri.txt (line 4))\n  Downloading iricore-1.8.0-cp310-cp310-manylinux_2_35_x86_64.whl (3.8 MB)\n     \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 3.8/3.8 MB 24.1 MB/s  0:00:00\nInstalling collected packages: pymap3d, numpy, iricore, fortranformat\n\nSuccessfully installed fortranformat-2.0.3 iricore-1.8.0 numpy-1.26.4 pymap3d-3.2.0\n",
+      "stderr_tail": ""
+    },
+    "pip_freeze": "fortranformat==2.0.3\niricore==1.8.0\nnumpy==1.26.4\npymap3d==3.2.0\n"
+  },
+  "verification_process": {
+    "returncode": 0,
+    "stdout_tail": "{\"ok\": true, \"python\": {\"version\": \"3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]\", \"executable\": \"/kaggle/working/iri_venv/bin/python\"}, \"_stage\": \"done\", \"iricore_import_path\": \"/kaggle/working/iri_venv/lib/python3.10/site-packages/iricore/__init__.py\", \"iricore_version_dist\": \"1.8.0\", \"iricore_version_attr\": null, \"installed_default_iri_version\": 20, \"reconciliation\": {\"expected_default_from_source_inspection\": 20, \"installed_default_matches_expectation\": true}, \"index_files\": {\"directory\": \"/kaggle/working/iri_venv/lib/python3.10/site-packages/iricore/data/index\", \"sha256_before\": {\"apf107.dat\": \"cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674\", \"ig_rz.dat\": \"fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486\"}, \"last_covered_date_in_apf107\": \"2024-03-06\", \"sha256_after\": {\"apf107.dat\": \"cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674\", \"ig_rz.dat\": \"fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486\"}, \"unchanged_after_smoke_test\": true}, \"smoke_test_timestamp_utc\": \"2024-01-06T12:00:00\", \"integration_settings\": {\"lat\": 40.286, \"lon\": 44.086, \"station\": \"ARUC (D-1 frozen coordinate; coordinate only, no target data read)\", \"hbot_km\": 90.0, \"htop_km\": 2000.0, \"htop_km_is_te_vision_frozen\": true, \"hstep_km\": 0.5, \"hstep_km_is_frozen\": false, \"hbot_km_is_frozen\": false, \"iri_version_requested\": 16, \"iri_version_is_default\": false, \"output_unit\": \"TECU (verified from iricore.tec._integrate_ne: sums Ne*step_km, converts km->m (*1e3) then to TECU (*1e-16))\"}, \"smoke_test\": {\"call_1_tecu\": 37.373754526924806, \"call_2_tecu\": 37.373754526924806, \"finite\": true, \"physically_plausible_0_to_200_tecu\": true, \"repeatable_bit_identical\": true}}\n",
+    "stderr_tail": ""
+  },
+  "verification": {
+    "ok": true,
+    "python": {
+      "version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+      "executable": "/kaggle/working/iri_venv/bin/python"
+    },
+    "_stage": "done",
+    "iricore_import_path": "/kaggle/working/iri_venv/lib/python3.10/site-packages/iricore/__init__.py",
+    "iricore_version_dist": "1.8.0",
+    "iricore_version_attr": null,
+    "installed_default_iri_version": 20,
+    "reconciliation": {
+      "expected_default_from_source_inspection": 20,
+      "installed_default_matches_expectation": true
+    },
+    "index_files": {
+      "directory": "/kaggle/working/iri_venv/lib/python3.10/site-packages/iricore/data/index",
+      "sha256_before": {
+        "apf107.dat": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+        "ig_rz.dat": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486"
+      },
+      "last_covered_date_in_apf107": "2024-03-06",
+      "sha256_after": {
+        "apf107.dat": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+        "ig_rz.dat": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486"
+      },
+      "unchanged_after_smoke_test": true
+    },
+    "smoke_test_timestamp_utc": "2024-01-06T12:00:00",
+    "integration_settings": {
+      "lat": 40.286,
+      "lon": 44.086,
+      "station": "ARUC (D-1 frozen coordinate; coordinate only, no target data read)",
+      "hbot_km": 90.0,
+      "htop_km": 2000.0,
+      "htop_km_is_te_vision_frozen": true,
+      "hstep_km": 0.5,
+      "hstep_km_is_frozen": false,
+      "hbot_km_is_frozen": false,
+      "iri_version_requested": 16,
+      "iri_version_is_default": false,
+      "output_unit": "TECU (verified from iricore.tec._integrate_ne: sums Ne*step_km, converts km->m (*1e3) then to TECU (*1e-16))"
+    },
+    "smoke_test": {
+      "call_1_tecu": 37.373754526924806,
+      "call_2_tecu": 37.373754526924806,
+      "finite": true,
+      "physically_plausible_0_to_200_tecu": true,
+      "repeatable_bit_identical": true
+    }
+  },
+  "reconciliation_passed": true,
+  "ok": true
+}

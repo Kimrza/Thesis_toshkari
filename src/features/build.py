@@ -72,6 +72,7 @@ from typing import Any, Final, Literal
 
 from src.data.config import (
     TBD_SENTINEL,
+    AlignmentError,
     ConfigSnapshot,
     IntegrityError,
     LeakageError,
@@ -88,7 +89,13 @@ from src.data.splits import (
     training_range,
     validation_month_range,
 )
-from src.external.spaceweather import align_interval_series, assert_alignment
+from src.external.spaceweather import (
+    SELECTION_FIELDS,
+    SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG,
+    align_interval_series,
+    assert_alignment,
+    assert_lagged_selection,
+)
 from src.features._frames import (
     columns_of,
     frame_attrs,
@@ -658,24 +665,96 @@ def _hourly_series(frame: Any, *, series: str) -> dict[dt.datetime, float | None
 
 
 def _assert_driver_alignment(
-    frame: Any, *, series: str, hourly: Mapping[dt.datetime, float | None]
+    frame: Any,
+    *,
+    series: str,
+    hourly: Mapping[dt.datetime, float | None],
+    declared_safe_lag_hours: float | None = None,
+    declared_selection_rule: str | None = None,
+    declared_lag_reference_instant: str | None = None,
 ) -> None:
-    """R-76a's enforcement raise: a driver value repeated outside its interval or shifted to a
-    neighbouring hour raises `AlignmentError`, through `external-products`' own assertion."""
-    observations = frame_attrs(frame).get("observations")
+    """R-76a's enforcement raise, in its two forms (D-44 amends the contract explicitly):
+
+    * a RAW aligned series (no `selection` attribute): a value repeated outside its own
+      interval or shifted to a neighbouring hour raises `AlignmentError`
+      (`assert_alignment`, R-58 limbs 1-2);
+    * a LAGGED `*_safe` series (`attrs["selection"]` naming the rule and the lag, rows
+      carrying `SELECTION_FIELDS`): every present value traces to the observation on its
+      recorded SOURCE interval, its `available_at` is that interval's END plus the lag and
+      is at or before the origin, and the latest eligible interval was chosen
+      (`assert_lagged_selection`). The lag is applied by the producer ONCE; this
+      function shifts nothing and refuses a series whose declared selection lag differs
+      from the availability matrix's `safe_lag_hours` for the feature (no double lag,
+      no shortfall).
+
+    `declared_selection_rule` and `declared_lag_reference_instant`, when given (from the
+    availability matrix row's `selection_rule`/`lag_reference_instant`, D-43/D-44), cross-
+    check the driver's ACTUAL `attrs["selection"]` against what `configs/features.yaml`
+    declares for the feature -- carrying these fields through the config reader is not
+    the same as a consumer applying them, so this is where they are actually applied.
+
+    Both need `attrs["observations"]`; a series without them is not checked here (the
+    matrix limbs still apply), never relabelled.
+    """
+    attrs = frame_attrs(frame)
+    observations = attrs.get("observations")
     if not observations:
         return
     normalised = [
         {
-            "value": float(o["value"]),
+            "value": (None if o.get("value") is None else float(o["value"])),
             "interval_start": _as_utc(o["interval_start"], resource=f"{series} observation"),
             "interval_end": _as_utc(o["interval_end"], resource=f"{series} observation"),
         }
         for o in observations
     ]
-    align_interval_series(normalised)  # overlapping or off-hour intervals raise here
-    present = {epoch: value for epoch, value in hourly.items() if value is not None}
-    assert_alignment(series, present, normalised)
+    selection = attrs.get("selection")
+    if not selection:
+        align_interval_series(
+            [o for o in normalised if o["value"] is not None]
+        )  # overlapping or off-hour intervals raise here
+        present = {epoch: value for epoch, value in hourly.items() if value is not None}
+        assert_alignment(series, present, normalised)
+        return
+    rule = str(selection.get("rule", ""))
+    if rule != SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG:
+        raise AlignmentError(
+            f"driver series {series!r}",
+            f"selection rule {rule!r} is not recognised "
+            f"({SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG!r} is the only lagged-selection rule; D-44)",
+        )
+    if declared_selection_rule is not None and rule != declared_selection_rule:
+        raise AlignmentError(
+            f"driver series {series!r}",
+            f"selection rule {rule!r} differs from configs/features.yaml's declared "
+            f"selection_rule {declared_selection_rule!r} for this feature; the producer's "
+            f"actual mechanism and the frozen configuration must agree (D-44)",
+        )
+    lag = selection.get("safe_lag_hours")
+    if lag is None or isinstance(lag, bool):
+        raise AlignmentError(f"driver series {series!r}", "selection carries no safe_lag_hours")
+    if declared_safe_lag_hours is not None and float(lag) != float(declared_safe_lag_hours):
+        raise AlignmentError(
+            f"driver series {series!r}",
+            f"selection lag {lag!r} h differs from the availability matrix's declared "
+            f"safe_lag_hours {declared_safe_lag_hours!r}; the lag is applied once by the "
+            f"producer and asserted here, never applied twice (D-44)",
+        )
+    rows = records_of(frame)
+    for index, row in enumerate(rows):
+        for selection_field in SELECTION_FIELDS:
+            if selection_field not in row:
+                raise AlignmentError(
+                    f"driver series {series!r} row {index}",
+                    f"lagged selection rows carry {SELECTION_FIELDS}; {selection_field!r} is absent",
+                )
+    assert_lagged_selection(
+        series,
+        rows,
+        normalised,
+        safe_lag_hours=float(lag),
+        expected_reference_instant=declared_lag_reference_instant,
+    )
 
 
 def _read_carry_forward_bound(snapshot: ConfigSnapshot) -> int:
@@ -806,9 +885,7 @@ def build_features(
     sequence_fields = {
         n: e for n, e in feature_set.items() if str(e["dictionary_row"]) == "vtec_seq_24"
     }
-    lag_fields = {
-        n: e for n, e in feature_set.items() if str(e["dictionary_row"]) == "vtec_lag"
-    }
+    lag_fields = {n: e for n, e in feature_set.items() if str(e["dictionary_row"]) == "vtec_lag"}
     step_counts = {int(e["sequence_steps"]) for e in sequence_fields.values()}
     if len(step_counts) != 1:
         raise LeakageError(
@@ -873,7 +950,17 @@ def build_features(
             frame = drivers[series]
             driver_producers[name] = _producer_of(frame, resource=f"driver series {series!r}")
             hourly = _hourly_series(frame, series=series)
-            _assert_driver_alignment(frame, series=series, hourly=hourly)
+            matrix_row = next((r for r in matrix if r.feature == name), None)
+            _assert_driver_alignment(
+                frame,
+                series=series,
+                hourly=hourly,
+                declared_safe_lag_hours=None if matrix_row is None else matrix_row.safe_lag_hours,
+                declared_selection_rule=None if matrix_row is None else matrix_row.selection_rule,
+                declared_lag_reference_instant=(
+                    None if matrix_row is None else matrix_row.lag_reference_instant
+                ),
+            )
             carried = carry_forward(
                 hourly, field_class=FieldClass.driver, bound_h=bound, feature=name
             )

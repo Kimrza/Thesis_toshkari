@@ -45,10 +45,12 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 from src.data.config import AlignmentError, FeatureAvailabilityError, IntegrityError
 from src.external.spaceweather import (
+    F107Selection,
     align_interval_series,
     apply_carry_forward,
     assert_alignment,
@@ -56,12 +58,16 @@ from src.external.spaceweather import (
     assert_gfz_cross_products,
     assert_grade_eligible,
     assert_identical_across_cells,
+    assert_lagged_selection,
     assert_series_provenance,
     assert_single_grade,
     assert_time_indexed_shape,
+    availability_rows_from_selection,
+    daily_medians_from_readings,
     provenance_stamp,
     refuse_divergent_rerun,
     resolve_f107_at_origin,
+    select_lagged_series,
     trailing_mean,
     write_driver_manifest,
 )
@@ -165,14 +171,15 @@ def _f107_availability(day: dt.date) -> dt.datetime:
 def test_f107_previous_day_available_resolves() -> None:
     origin = dt.datetime(2022, 6, 10, 12, 0, tzinfo=UTC)
     medians = {dt.date(2022, 6, n): 100.0 + n for n in range(1, 10)}
-    day, value = resolve_f107_at_origin(
+    sel = resolve_f107_at_origin(
         medians,
         origin=origin,
         availability_ts=_f107_availability,
         features={"carry_forward_composition": "TBD — freeze gate"},
     )
-    assert day == dt.date(2022, 6, 9)
-    assert value == 109.0
+    assert sel.source_day == dt.date(2022, 6, 9)
+    assert sel.value == 109.0
+    assert not sel.carried_forward and not sel.excluded and sel.staleness_hours == 0.0
 
 
 def test_f107_unavailable_with_tbd_composition_stops_naming_both_units() -> None:
@@ -208,9 +215,9 @@ def test_f107_absent_composition_field_stops_identically() -> None:
 
 
 def test_f107_filled_composition_is_not_interpreted_here() -> None:
-    """A filled composition field is NOT silently applied: its vocabulary and its
-    application are the G-04 freeze plus features-and-splits' boundary, and this
-    module refuses to interpret it (stop-and-report, never guess)."""
+    """A composition value outside the frozen vocabulary (`clock_hours`, D-46) is NOT
+    interpreted: this module applies the Student's freeze only, never a reading of its
+    own (stop-and-report, never guess)."""
     origin = dt.datetime(2022, 6, 10, 12, 0, tzinfo=UTC)
     with pytest.raises(IntegrityError, match="carry_forward_composition"):
         resolve_f107_at_origin(
@@ -219,6 +226,294 @@ def test_f107_filled_composition_is_not_interpreted_here() -> None:
             availability_ts=_f107_availability,
             features={"carry_forward_composition": "A"},
         )
+
+
+# =========================================================================================
+# D-46 (A3 = reading B): the missing-update composition in CLOCK HOURS, inclusive boundary
+# =========================================================================================
+
+_B = {"carry_forward_composition": "clock_hours", "carry_forward_bound_hours": 3}
+
+
+def test_f107_ordinary_reuse_of_the_designated_value_is_not_carry_forward() -> None:
+    """median(D-1) at every origin hour of D: source_day D-1, not carried, staleness 0."""
+    medians = {dt.date(2022, 3, 13): 110.0, dt.date(2022, 3, 14): 120.0}
+    for hour in range(24):
+        sel = resolve_f107_at_origin(
+            medians,
+            origin=dt.datetime(2022, 3, 15, hour, tzinfo=UTC),
+            availability_ts=_f107_availability,
+            features=_B,
+        )
+        assert sel == F107Selection(dt.date(2022, 3, 14), 120.0, False, False, 0.0)
+
+
+def test_f107_missing_update_allows_three_clock_hours_inclusive_then_excludes() -> None:
+    """The designated median(03-15) is absent at 00:00 03-16: median(03-14) is carried
+    at 00:00, 01:00, 02:00 and 03:00 (INCLUSIVE boundary, clock from the EXPECTED
+    availability instant 00:00 03-16), origins 04:00 … 23:00 are excluded — 20 of 24
+    rows; a valid update (median(03-16)) restores ordinary reuse on 03-17."""
+    medians = {dt.date(2022, 3, 14): 120.0, dt.date(2022, 3, 16): 130.0}
+    kept, excluded = [], []
+    for hour in range(24):
+        sel = resolve_f107_at_origin(
+            medians,
+            origin=dt.datetime(2022, 3, 16, hour, tzinfo=UTC),
+            availability_ts=_f107_availability,
+            features=_B,
+        )
+        if sel.excluded:
+            excluded.append(hour)
+            assert sel.value is None and sel.source_day is None and not sel.carried_forward
+        else:
+            kept.append(hour)
+            assert sel == F107Selection(dt.date(2022, 3, 14), 120.0, True, False, float(hour))
+    assert kept == [0, 1, 2, 3] and excluded == list(range(4, 24))
+    restored = resolve_f107_at_origin(
+        medians,
+        origin=dt.datetime(2022, 3, 17, 5, tzinfo=UTC),
+        availability_ts=_f107_availability,
+        features=_B,
+    )
+    assert restored == F107Selection(dt.date(2022, 3, 16), 130.0, False, False, 0.0)
+
+
+def test_f107_clock_starts_at_the_expected_instant_not_the_carried_value() -> None:
+    """Two consecutive missing days: on 03-17 the clock restarts at 00:00 03-17 for the
+    missing median(03-16), so median(03-14) is carried again at 00:00-03:00 of 03-17
+    (staleness measured from 00:00 03-17), then excluded — the bound is on the
+    missing-update clock, not on the carried value's age. A NaN median counts as
+    missing (D-5); no median at all → excluded."""
+    medians = {dt.date(2022, 3, 14): 120.0, dt.date(2022, 3, 16): float("nan")}
+    sel = resolve_f107_at_origin(
+        medians,
+        origin=dt.datetime(2022, 3, 17, 3, tzinfo=UTC),
+        availability_ts=_f107_availability,
+        features=_B,
+    )
+    assert sel == F107Selection(dt.date(2022, 3, 14), 120.0, True, False, 3.0)
+    assert resolve_f107_at_origin(
+        medians,
+        origin=dt.datetime(2022, 3, 17, 4, tzinfo=UTC),
+        availability_ts=_f107_availability,
+        features=_B,
+    ).excluded
+    assert resolve_f107_at_origin(
+        {},
+        origin=dt.datetime(2022, 3, 17, 1, tzinfo=UTC),
+        availability_ts=_f107_availability,
+        features=_B,
+    ).excluded
+
+
+def test_f107_frozen_composition_needs_the_configured_bound_and_refuses_other_vocab() -> None:
+    medians = {dt.date(2022, 3, 14): 120.0}
+    origin = dt.datetime(2022, 3, 16, 1, tzinfo=UTC)
+    with pytest.raises(FeatureAvailabilityError, match="carry_forward_bound_hours"):
+        resolve_f107_at_origin(
+            medians,
+            origin=origin,
+            availability_ts=_f107_availability,
+            features={"carry_forward_composition": "clock_hours"},
+        )
+    with pytest.raises(IntegrityError, match="clock_hours"):
+        resolve_f107_at_origin(
+            medians,
+            origin=origin,
+            availability_ts=_f107_availability,
+            features={"carry_forward_composition": "daily_step", "carry_forward_bound_hours": 3},
+        )
+
+
+# =========================================================================================
+# D-21 / D-22: the project-derived daily median
+# =========================================================================================
+
+
+def test_daily_median_is_the_median_of_slot_values_after_duplicate_averaging() -> None:
+    """Three slots → the middle value; a duplicated slot is averaged first (D-22) and
+    counted; a high-spread day is flagged and RETAINED (D-23); no reading is dropped."""
+    readings = [
+        {"day": dt.date(2022, 3, 26), "time": "170000", "value": 100.0},
+        {"day": dt.date(2022, 3, 26), "time": "200000", "value": 102.0},
+        {"day": dt.date(2022, 3, 26), "time": "230000", "value": 104.0},
+        {"day": dt.date(2022, 3, 26), "time": "230000", "value": 106.0},  # duplicate slot
+        {"day": dt.date(2022, 3, 31), "time": "170000", "value": 148.7},
+        {"day": dt.date(2022, 3, 31), "time": "200000", "value": 239.5},
+        {"day": dt.date(2022, 3, 31), "time": "230000", "value": 149.8},
+    ]
+    out = daily_medians_from_readings(readings)
+    assert out["medians"][dt.date(2022, 3, 26)] == 102.0
+    assert out["duplicate_days"] == {dt.date(2022, 3, 26): 1}
+    assert out["medians"][dt.date(2022, 3, 31)] == 149.8
+    assert set(out["high_spread_days"]) == {dt.date(2022, 3, 31)}
+
+
+# =========================================================================================
+# D-43 / D-44: lagged selection for interval-valued indices — the ONE owner of the lag
+# =========================================================================================
+
+
+def _kp_obs(day: dt.date, *, missing_slot: int | None = None) -> list[dict[str, Any]]:
+    """Eight 3-hour Kp intervals of `day`, value = 10 + slot; provider boundaries kept."""
+    base = dt.datetime.combine(day, dt.time(0), tzinfo=UTC)
+    return [
+        {
+            "value": (None if k == missing_slot else 10.0 + k),
+            "interval_start": base + dt.timedelta(hours=3 * k),
+            "interval_end": base + dt.timedelta(hours=3 * k + 3),
+        }
+        for k in range(8)
+    ]
+
+
+def _hp_obs(day: dt.date) -> list[dict[str, Any]]:
+    base = dt.datetime.combine(day, dt.time(0), tzinfo=UTC)
+    return [
+        {
+            "value": 1.0 + h / 10.0,
+            "interval_start": base + dt.timedelta(hours=h),
+            "interval_end": base + dt.timedelta(hours=h + 1),
+        }
+        for h in range(24)
+    ]
+
+
+def _epochs(day: dt.date) -> list[dt.datetime]:
+    base = dt.datetime.combine(day, dt.time(0), tzinfo=UTC)
+    return [base + dt.timedelta(hours=h) for h in range(24)]
+
+
+def test_kp_selection_at_and_before_the_availability_boundary() -> None:
+    """Kp [00,03) completes at 03:00; with the 3 h margin it is eligible at 06:00 and not
+    at 05:00; [03,06) is eligible from 09:00. Each selected value keeps its provider
+    interval boundaries and its available_at = end + 3 h; the value is unchanged."""
+    day = dt.date(2022, 6, 10)
+    rows = {
+        r["interval_start_utc"]: r
+        for r in select_lagged_series(_kp_obs(day), epochs=_epochs(day), safe_lag_hours=3)
+    }
+    at = lambda h: rows[dt.datetime.combine(day, dt.time(h), tzinfo=UTC).isoformat()]  # noqa: E731
+    assert at(5)["value"] is None and at(5)["source_interval_end_utc"] is None
+    assert at(6)["value"] == 10.0
+    assert at(6)["source_interval_start_utc"] == f"{day}T00:00:00+00:00"
+    assert at(6)["source_interval_end_utc"] == f"{day}T03:00:00+00:00"
+    assert at(6)["available_at_utc"] == f"{day}T06:00:00+00:00"
+    assert at(8)["value"] == 10.0  # [03,06) ended 06:00: not yet 3 h old
+    assert at(9)["value"] == 11.0 and at(9)["source_interval_end_utc"] == f"{day}T06:00:00+00:00"
+    assert at(23)["value"] == 15.0  # [15,18) ends 18:00, +3 h = 21:00 ≤ 23:00; [18,21) not yet
+    assert_lagged_selection("kp", list(rows.values()), _kp_obs(day), safe_lag_hours=3)
+
+
+def test_hp60_selection_at_and_before_the_availability_boundary() -> None:
+    day = dt.date(2022, 6, 10)
+    rows = select_lagged_series(_hp_obs(day), epochs=_epochs(day), safe_lag_hours=1)
+    by = {r["interval_start_utc"]: r for r in rows}
+    five = by[f"{day}T05:00:00+00:00"]
+    six = by[f"{day}T06:00:00+00:00"]
+    assert five["source_interval_end_utc"] == f"{day}T04:00:00+00:00"  # [03,04) at 05:00
+    assert six["source_interval_end_utc"] == f"{day}T05:00:00+00:00"  # [04,05) at 06:00
+    assert six["value"] == 1.4 and six["available_at_utc"] == f"{day}T06:00:00+00:00"
+    assert_lagged_selection("hp60", rows, _hp_obs(day), safe_lag_hours=1)
+
+
+def test_lagged_selection_rejects_open_later_double_lag_and_wrong_source() -> None:
+    """Negative controls on the alignment contract: an OPEN or not-yet-available interval
+    at the origin; a stale selection when a later interval is eligible; a double-applied
+    lag (available_at = end + 6 h) or a shortfall (end + 0 h); a value that does not trace
+    to its recorded source interval; a dropped present value."""
+    day = dt.date(2022, 6, 10)
+    obs = _kp_obs(day)
+    rows = select_lagged_series(obs, epochs=_epochs(day), safe_lag_hours=3)
+    by = {r["interval_start_utc"]: r for r in rows}
+
+    def variant(hour: int, **changes: Any) -> list[dict[str, Any]]:
+        key = dt.datetime.combine(day, dt.time(hour), tzinfo=UTC).isoformat()
+        return [{**r, **changes} if r["interval_start_utc"] == key else r for r in rows]
+
+    # open interval [03,06) presented at 04:00
+    with pytest.raises(AlignmentError, match="after the origin"):
+        assert_lagged_selection(
+            "kp",
+            variant(
+                4,
+                value=11.0,
+                source_interval_start_utc=f"{day}T03:00:00+00:00",
+                source_interval_end_utc=f"{day}T06:00:00+00:00",
+                available_at_utc=f"{day}T09:00:00+00:00",
+            ),
+            obs,
+            safe_lag_hours=3,
+        )
+    # stale: [00,03) presented at 09:00 while [03,06) is eligible
+    with pytest.raises(AlignmentError, match="LATEST eligible"):
+        assert_lagged_selection(
+            "kp",
+            variant(
+                9,
+                **{
+                    k: by[f"{day}T06:00:00+00:00"][k]
+                    for k in (
+                        "value",
+                        "source_interval_start_utc",
+                        "source_interval_end_utc",
+                        "available_at_utc",
+                    )
+                },
+            ),
+            obs,
+            safe_lag_hours=3,
+        )
+    # double lag / shortfall
+    with pytest.raises(AlignmentError, match="applied exactly once"):
+        assert_lagged_selection(
+            "kp", variant(9, available_at_utc=f"{day}T12:00:00+00:00"), obs, safe_lag_hours=3
+        )
+    with pytest.raises(AlignmentError, match="applied exactly once"):
+        assert_lagged_selection(
+            "kp", variant(9, available_at_utc=f"{day}T06:00:00+00:00"), obs, safe_lag_hours=3
+        )
+    # value not traceable to the recorded source interval
+    with pytest.raises(AlignmentError, match="does not trace"):
+        assert_lagged_selection("kp", variant(9, value=99.0), obs, safe_lag_hours=3)
+    # a present source value dropped
+    with pytest.raises(AlignmentError, match="never dropped"):
+        assert_lagged_selection("kp", variant(9, value=None), obs, safe_lag_hours=3)
+    # the same rows re-checked under a different lag fail (no silent re-lagging)
+    with pytest.raises(AlignmentError):
+        assert_lagged_selection("kp", rows, obs, safe_lag_hours=6)
+
+
+def test_lagged_selection_composes_with_missing_data_and_carry_forward() -> None:
+    """A missing source interval keeps its identity: at origins 09:00-11:00 the eligible
+    [03,06) value is missing, so the rows are missing (never the older [00,03) value —
+    that would be an unrecorded carry-forward); the epoch-axis carry-forward then fills at
+    most bound_h hours and excludes beyond (R-57a), with the fill RECORDED."""
+    day = dt.date(2022, 6, 10)
+    obs = _kp_obs(day, missing_slot=1)
+    rows = select_lagged_series(obs, epochs=_epochs(day), safe_lag_hours=3)
+    by = {r["interval_start_utc"]: r for r in rows}
+    for hour in (9, 10, 11):
+        row = by[f"{day}T{hour:02d}:00:00+00:00"]
+        assert row["value"] is None
+        assert row["source_interval_end_utc"] == f"{day}T06:00:00+00:00"
+    assert_lagged_selection("kp", rows, obs, safe_lag_hours=3)
+    hourly = {dt.datetime.fromisoformat(r["interval_start_utc"]): r["value"] for r in rows}
+    carried = apply_carry_forward(hourly, bound_h=3)
+    base = dt.datetime.combine(day, dt.time(0), tzinfo=UTC)
+    assert carried["carried_forward_epochs"] == [base + dt.timedelta(hours=h) for h in (9, 10, 11)]
+    assert carried["values"][base + dt.timedelta(hours=11)] == 10.0
+    assert carried["values"][base + dt.timedelta(hours=12)] == 12.0  # [06,09) eligible at 12:00
+    tight = apply_carry_forward(hourly, bound_h=1)
+    assert tight["excluded_epochs"] == [
+        base + dt.timedelta(hours=h) for h in (0, 1, 2, 3, 4, 5, 10, 11)
+    ]
+    matrix_rows = availability_rows_from_selection(rows, release_status="nowcast")
+    assert all(
+        r["observation_timestamp"] + dt.timedelta(hours=3) <= r["forecast_origin"]
+        for r in matrix_rows
+    )
+    assert len(matrix_rows) == 24 - 6 - 3  # 00-05 no eligible interval; 09-11 missing value
 
 
 # =========================================================================================
@@ -1154,15 +1449,13 @@ def test_fixture_scoped_dst_audit_reads_only_in_window_evidence(tmp_path) -> Non
     mod = _load_stage_04()
     kyoto = tmp_path / "kyoto_dst"
     kyoto.mkdir()
-    (kyoto / "dst_provisional_202211.html").write_text(
-        _dst_html(range(1, 8)), encoding="utf-8"
-    )
+    (kyoto / "dst_provisional_202211.html").write_text(_dst_html(range(1, 8)), encoding="utf-8")
     (kyoto / "dst_provisional_202201.html").mkdir()  # poison: reading/hashing raises
     coverage, missing = mod._audit_dst(kyoto, window=_NOVEMBER_WEEK)
     assert [record["month"] for record in coverage] == ["2022-11"]
-    assert missing == [], (
-        f"a fixture-scoped audit must not count out-of-window months missing: {missing}"
-    )
+    assert (
+        missing == []
+    ), f"a fixture-scoped audit must not count out-of-window months missing: {missing}"
     november = coverage[0]
     assert november["expected_days"] == 7  # the in-window slice, not the 30-day month
     assert november["day_rows_parsed"] == 7
@@ -1175,9 +1468,7 @@ def test_fixture_scoped_f107_accounting_is_window_bounded(tmp_path) -> None:
     flux = tmp_path / "fluxtable.txt"
     rows = []
     for day in (1, 2, 3):  # in-window observations
-        rows.append(
-            f"202211{day:02d} 170000 2459000.000 2290.000 100.0 101.0 99.0"
-        )
+        rows.append(f"202211{day:02d} 170000 2459000.000 2290.000 100.0 101.0 99.0")
     rows.append("20220615 170000 2459000.000 2290.000 100.0 101.0 99.0")  # out-of-window
     flux.write_text("\n".join(rows) + "\n", encoding="utf-8")
     result = mod._audit_f107(flux, window=_NOVEMBER_WEEK)
@@ -1232,9 +1523,7 @@ def test_full_year_audit_behaviour_is_unchanged_without_a_fixture_scope(tmp_path
     mod = _load_stage_04()
     kyoto = tmp_path / "kyoto_dst"
     kyoto.mkdir()
-    (kyoto / "dst_provisional_202203.html").write_text(
-        _dst_html(range(1, 32)), encoding="utf-8"
-    )
+    (kyoto / "dst_provisional_202203.html").write_text(_dst_html(range(1, 32)), encoding="utf-8")
     coverage, missing = mod._audit_dst(kyoto, window=_FULL_YEAR)
     assert [record["month"] for record in coverage] == ["2022-03"]
     assert coverage[0]["expected_days"] == 31 and coverage[0]["missing_days"] == []
@@ -1271,9 +1560,9 @@ def test_fixture_declaration_derives_from_the_scope_never_the_full_year() -> Non
     body_src = "\n".join(
         ast.get_source_segment(source, stmt) or "" for stmt in fixture_branch.body
     )
-    assert "load_fixture_scope" in body_src and "scope.window" in body_src, (
-        "the fixture branch must derive the declared window from the scope's cited window"
-    )
+    assert (
+        "load_fixture_scope" in body_src and "scope.window" in body_src
+    ), "the fixture branch must derive the declared window from the scope's cited window"
     assert "_declared_data_window" not in body_src, (
         "the fixture branch must never consult the full-year declaration — that is the "
         "unconditional-refusal deadlock CR-2026-09-13-04-FIXTURE-WINDOW repairs"
@@ -1281,6 +1570,6 @@ def test_fixture_declaration_derives_from_the_scope_never_the_full_year() -> Non
     else_src = "\n".join(
         ast.get_source_segment(source, stmt) or "" for stmt in fixture_branch.orelse
     )
-    assert "_declared_data_window" in else_src, (
-        "the non-fixture branch must keep the full-year window (D-8's claim boundary)"
-    )
+    assert (
+        "_declared_data_window" in else_src
+    ), "the non-fixture branch must keep the full-year window (D-8's claim boundary)"

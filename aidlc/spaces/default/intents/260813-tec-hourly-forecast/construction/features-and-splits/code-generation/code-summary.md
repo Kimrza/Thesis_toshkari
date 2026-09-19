@@ -443,3 +443,88 @@ architectural guidance; they would, however, be handed two stale figures they'd 
 cross-check against the review history themselves. **Both findings should still be corrected in
 the artifact body before the gate is presented to the human** — they are gate input, not a
 blocker to this verdict.
+
+---
+
+## Post-receipt amendment — 2026-09-18 (D-25 Route 1 reconstruction; gate item G-5)
+
+*Appended under `project.md` `code-generation:gf-3` ("update the owning unit's
+code-summary when a repair edits a module that unit owns"). Nothing above is rewritten;
+the READY receipt and the review sections stand as history. Authority:
+`governance/CHANGE_RECORD_2026-09-16_d25_availability_rule.md` (owner ruling, Route 1),
+reconstructed in this clone on 2026-09-18.*
+
+| Module | What changed (measured, `git diff --numstat` vs `18843aa`) |
+|---|---|
+| `src/features/availability.py` | +143 / −13. `AvailabilityRow` gains a THIRD additive field `availability_rule: str | None`; `safe_lag_hours` is `float | None`, `None` exactly when a recognised rule is recorded. Closed rule set `AVAILABILITY_RULE_KINDS = {"previous_day_median_midnight_utc"}` (D-25). `read_availability_lags`: a rule entry must be in the closed set, must not also declare `safe_lag_hours`, must not also declare a `window`; a feature with neither fails naming both; block-level fail-closed unchanged. `build_availability_matrix`: rule instant = midnight UTC of observation day + 1, combined by `max` with the observation/publication instant; a negative lag under a rule is refused at build (`LeakageError`). `assert_lags_safe`: rule rows pass on non-negative lag + recognised rule; a row with neither scalar nor rule fails. |
+| `tests/test_feature_availability.py` | +202 / 0 — **54 → 66 test functions** (12 new: next-day-midnight availability, origin-hour independence, same-day and future anchoring refused, unknown rule kind, rule+scalar, rule+window, neither, later publication governs, scalar rows unchanged, fail-closed with a rule present, `assert_lags_safe` negative/neither). None removed or weakened. 8/8 mutation controls killed (scratchpad, restore SHA-verified). |
+| `scripts/05_build_features_and_splits.py` | +1 / 0 — `PRODUCED_FIELDS` gains `"availability_rule"` (R-24 produced-field guard). |
+
+Runs (supplemental, NOT governed: real `pytest 9.1.1` on CPython 3.14.7; the 3.11
+governed environment was prepared later the same day, see `CR-2026-09-18-GATE-PREP`):
+module 66 passed / 2 skipped (yaml absent); whole tree 1192 passed / 39 skipped / 0
+failed; `compileall` 0.
+
+**Known limit of the scalar-plus-window shape under D-25 (recorded here, not
+resolved):** `f107_81_trailing` cannot carry the rule (Route 1 item 6), so its limb-1
+lag is measured from whatever `observation_timestamp` the driver rows record; the
+fixture convention (anchor-day 00:00, scalar 24 h) passes, while the honest constituent
+instant (median(D−1) completes ~23 UT on D−1, available 00:00 D under D-25) fails limb 1
+at 23 of 24 origin hours. Counterexample and proposed repair: `CR-2026-09-18-GATE-PREP`
+§2. No semantic change made.
+
+## Post-receipt amendment — 2026-09-19 (D-43/D-44/D-46/D-47 scientific decisions; config transcription; `CR-2026-09-19-SCI-DECISIONS`, item 6 of the 2026-09-19 owner authorization)
+
+*Appended under `project.md` `code-generation:gf-3`. Nothing above is rewritten. Authority:
+`evidence/DECISIONS.md` D-43, D-44, D-46, D-47 (D-42/D-43/D-46 are TE §18.2 Student +
+Supervisor items: supervisor approval REPORTED by the student 2026-09-19, countersignature
+artifact PENDING — `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`).*
+
+| Module | What changed (measured, `git diff --numstat` vs `18843aa`) |
+|---|---|
+| `src/features/availability.py` | +337 / −40 (cumulative this session). This pass adds `recomputation_tolerance_bound` (D-47's a-priori float64 error bound, `(N+1)·ε·B`) and `assert_recomputation_domain` (the certified-input-domain check: a constituent above the applicability bound fails the certification clearly and is never clipped); `assert_anchor_recomputed` gains an optional `input_bound` parameter that invokes the domain check before recomputing. Docstrings corrected to state a rule in `AVAILABILITY_RULES_WITH_WINDOW` MAY carry a window (A2), and the per-constituent loop in the anchor limb carries a comment naming the monotonicity invariant that makes it redundant under the supported contract (the surviving A2 mutant's disposition). |
+| `src/features/build.py` | +72 / −13. `_assert_driver_alignment` gains a second explicit form for a LAGGED `*_safe` series (`attrs["selection"]`): checked by `external-products`' `assert_lagged_selection` instead of the raw own-interval check; a selection lag disagreeing with the availability matrix's declared `safe_lag_hours` for that feature is refused (`AlignmentError`, "applied once") — no double lag, no shortfall. The raw own-interval path is unchanged. |
+| `src/external/spaceweather.py` | +342 / −33. New: `select_lagged_series` (the ONE place a lag is applied to an interval-valued index — D-43/D-44), `assert_lagged_selection` (the alignment contract for a lagged series), `availability_rows_from_selection` (matrix rows derived from a selection), `daily_medians_from_readings` (D-21/D-22/D-23's project-derived daily F10.7 value). `resolve_f107_at_origin` now returns `F107Selection` (a dataclass: `source_day`, `value`, `carried_forward`, `excluded`, `staleness_hours`) instead of a bare tuple, and implements D-46's reading B (`CARRY_FORWARD_COMPOSITION_CLOCK_HOURS`): ordinary reuse vs a missing-update clock measured from the designated value's EXPECTED availability instant, inclusive boundary. **Breaking return-type change**, callers updated in the same pass (`tests/test_external_drivers.py`). |
+| `configs/features.yaml` | +80 / −1. `availability_lags` transcribed from `TBD — freeze gate` to the six §6.2 driver rows (D-25 rule on the two F10.7 rows; scalar `safe_lag_hours` on the four GFZ rows; D-47's tolerance/domain on `f107_81_trailing`'s window); `carry_forward_bound_hours: 3` and `carry_forward_composition: "clock_hours"` added (D-46). `feature_set_id`, `feature_dictionary`, `normalization`, `permitted_producers` untouched — no feature-dictionary freeze, no producer entries. |
+| `tests/test_feature_availability.py` | +775 / −3 (cumulative). This pass: `test_d25_constituent_availability_is_monotone_so_the_anchor_bounds_the_window`, `test_trailing_window_membership_is_exactly_the_declared_days_ending_at_the_anchor`, `test_real_fluxtable_carries_every_day_of_the_window_ending_before_2022`, `test_interval_end_observation_timestamps_make_the_lag_a_post_completion_margin`, `test_d47_tolerance_derivation_against_an_exact_reference_and_the_certified_domain`, `test_lagged_safe_series_passes_through_build_features_with_no_second_lag`, `test_prepared_six_entry_availability_lags_load_without_error` (the real `configs/features.yaml` read through `read_availability_lags` unmodified — 81 test functions total). |
+| `tests/test_external_drivers.py` | +313 / −24 (cumulative). D-46 composition tests (`test_f107_ordinary_reuse_...`, `test_f107_missing_update_allows_three_clock_hours_inclusive_then_excludes`, `test_f107_clock_starts_at_the_expected_instant_not_the_carried_value`, `test_f107_frozen_composition_needs_the_configured_bound_and_refuses_other_vocab`), D-21/D-22/D-23 daily-median test, D-43/D-44 selection tests (boundary cases at and before availability, open/stale/double-lag/shortfall/untraceable/dropped-value refusals, composition with carry-forward) — 65 test functions total. |
+
+Runs (governed pin, conda `tec-thesis-311`, CPython 3.11.16): module-scoped focused runs
+green throughout implementation; combined `test_feature_availability.py` +
+`test_external_drivers.py` + `test_iri_denial.py` + `test_locked_test_guard.py`: see
+`governance/CHANGE_RECORD_2026-09-19_scientific_decisions_p2.md` for the exact count.
+`ruff check`: 5 pre-existing findings in `test_feature_availability.py`, unchanged from
+before this pass (68 at HEAD before this session's work); none introduced by this pass's
+own diff hunks were left unaddressed (checked individually).
+
+**What this amendment does NOT do.** It does not certify any `*_safe` feature leakage-free,
+does not pass G-04, and the `lag_reference_instant`/`selection_rule`/
+`recomputation_input_bound_sfu` fields transcribed into `configs/features.yaml` are carried
+by the reader but not yet asserted by it — a reviewed reader change is owed before they are
+enforced.
+
+## Post-receipt amendment — 2026-09-19 (D-43/D-44/D-47 configuration validation and real-consumer enforcement; `CR-2026-09-19-SCI-DECISIONS-P3`)
+
+*Appended under `project.md` `code-generation:gf-3`. Nothing above is rewritten; the
+"carried but not yet asserted" limit recorded above is CLOSED by this amendment.
+Authority: owner instruction 2026-09-19 item 2 ("Complete configuration validation and
+enforcement... Verify that downstream consumers actually apply these settings").*
+
+| Module | What changed (measured, `git diff --numstat` vs `18843aa`) |
+|---|---|
+| `src/features/availability.py` | +435 / −41 (cumulative this session). `read_availability_lags`: `lag_reference_instant`/`selection_rule` now REQUIRED on every scalar-lag row (closed sets `LAG_REFERENCE_INSTANT_KINDS`/`SELECTION_RULE_KINDS`, the latter imported from `spaceweather.SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG` — one source of truth) and FORBIDDEN on a rule row; `_validate_window_fields` requires `recomputation_input_bound_sfu` as a positive number. `AvailabilityRow` gains `lag_reference_instant`/`selection_rule` (populated by `build_availability_matrix` from the validated entry). **The real gap closed**: `build_availability_matrix` now reads `window["recomputation_input_bound_sfu"]` and passes it to `assert_anchor_recomputed`'s `input_bound=` on every real call — previously this parameter was only ever exercised by a test calling the function directly. |
+| `src/features/build.py` | +100 / −13 (cumulative). `_assert_driver_alignment` gains `declared_selection_rule`/`declared_lag_reference_instant` parameters, cross-checking a driver's ACTUAL `attrs["selection"]` against the availability matrix row's config-derived fields (not only the hardcoded module constant); `build_features` now looks the matrix row up per feature and threads both new fields through. |
+| `src/external/spaceweather.py` | +367 / −33 (cumulative). `assert_lagged_selection` gains `expected_reference_instant`: since the selector only ever implements `LAG_REFERENCE_INSTANT_INTERVAL_END` (hardcoded, D-43), any other declared value is refused as a config-vs-implementation drift guard rather than silently miscomputed. |
+| `tests/test_feature_availability.py` | +957 / −3 (cumulative). 4 new test functions this pass (81 → 85): reader-level required/closed-set/bounds checks for both new fields plus the window bound (positive + 4×negative + rule-row-forbidden controls each); an integration test proving `build_availability_matrix` actually applies the configured bound (same constituents pass at 400 sfu, fail at a lowered 5 sfu bound); an end-to-end `build_features` integration test proving a `selection_rule`/`lag_reference_instant` mismatch between config and driver is refused. 26 pre-existing tests updated for the newly-required fields (fixture `_lags()` and one inline dict) — none weakened, none skipped. |
+
+Runs (governed pin, conda `tec-thesis-311`, CPython 3.11.16): module 85 passed / 0
+failed; combined with `test_external_drivers.py`/`test_iri_denial.py`/
+`test_locked_test_guard.py`: all green. **Full governed suite: 1278 passed / 4 skipped /
+0 failed** (was 1274/4 the prior pass; +4 net, matching the 4 new tests). `ruff
+check`/`ruff format`: clean; `tests/test_feature_availability.py` at 4 pre-existing
+findings, unchanged from the pre-pass baseline.
+
+**What this amendment does NOT do.** It does not change any scientific decision or
+configuration value (every field the prior pass transcribed already satisfied the
+stricter reader — checked directly, no contradiction found); does not certify any
+`*_safe` feature leakage-free; does not pass G-04.

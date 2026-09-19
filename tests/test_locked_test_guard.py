@@ -120,12 +120,15 @@ from src.data.experiment_registry import (  # noqa: E402
     reconcile_access_records,
 )
 from src.data.locked_test import (  # noqa: E402
+    DECEMBER_DRIVER_EXCLUSION_CLASSES,
     PURPOSES,
     RESTRICTED_LITERAL_EXEMPT_MODULES,
     RESTRICTED_ROOT,
     AccessRecord,
     EvidenceScanError,
     assert_no_december_outside_restricted,
+    december_custody_inventory,
+    december_driver_exclusion_class,
     fail_unparseable,
     open_restricted,
 )
@@ -775,6 +778,268 @@ def test_december_bearing_json_outside_the_restricted_root_is_found(tmp_path: Pa
     )
 
 
+def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path) -> None:
+    """G-4 (2026-09-19) + D-48: R-26's four enumerated driver exclusions plus the class 5
+    the project decision owner adopted for the GFZ captures. (i) the enumeration is
+    pinned at EXACTLY five classes with exact path patterns; (ii) eligibility needs BOTH
+    the class path AND content that validates as that class's driver-only schema: a
+    target-bearing or mixed JSON at an excluded path is still flagged, as is any
+    December-bearing JSON outside the classes; (iii) the real evidence tree scans clean
+    with every excluded file INVENTORIED with its reason (exposure, never a licence)."""
+    assert [c[0] for c in DECEMBER_DRIVER_EXCLUSION_CLASSES] == [1, 2, 3, 4, 5]
+    assert [c[2] for c in DECEMBER_DRIVER_EXCLUSION_CLASSES] == [
+        ("audit_ec1_2026-08-15/kyoto_dst/dst_provisional_*.html",),
+        ("audit_ec1_2026-08-15/nrcan_f107/fluxtable.txt",),
+        ("audit_ec1_2026-08-15/ec1-audit-report.json",),
+        ("audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json",),
+        (
+            "audit_gfz_*/Kp_*.wdc",
+            "audit_gfz_*/hp60ap60doi_*.txt",
+            "audit_gfz_*/gfz-comparison-report.json",
+        ),
+    ]
+    evidence = tmp_path / "evidence"
+    (evidence / "locked_test_restricted").mkdir(parents=True)
+    ec1 = evidence / "audit_ec1_2026-08-15"
+    (ec1 / "kyoto_dst").mkdir(parents=True)
+    # driver-only content at the class-3 path: excluded
+    (ec1 / "ec1-audit-report.json").write_text(
+        '{"obligation_2_canadian_f107": {"last_2022_date": "2022-12-31", "days_present_2022": 365}}',
+        encoding="utf-8",
+    )
+    # driver-only content at the class-4 path: excluded
+    (ec1 / "kyoto_dst" / ".dst_summary.json").write_text(
+        '{"12": {"days_parsed": 31, "daily_min": {"2022-12-01": -30}}}', encoding="utf-8"
+    )
+    assert assert_no_december_outside_restricted(evidence) == []
+    # MIXED content at the class-3 path (a target aggregate rides along): flagged
+    (ec1 / "ec1-audit-report.json").write_text(
+        '{"obligation_2_canadian_f107": {"last_2022_date": "2022-12-31"},'
+        ' "december_coverage_pct": 96.4}',
+        encoding="utf-8",
+    )
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == [
+        "ec1-audit-report.json"
+    ]
+    (ec1 / "ec1-audit-report.json").write_text(
+        '{"obligation_2_canadian_f107": {"last_2022_date": "2022-12-31"}, "vtec_tecu": [1.0]}',
+        encoding="utf-8",
+    )
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == [
+        "ec1-audit-report.json"
+    ]
+    # a December-bearing JSON anywhere OUTSIDE the four classes: flagged, driver or not
+    (ec1 / "kyoto_dst" / "dst_extract.json").write_text('{"hour": "2022-12-05T10:00:00Z"}')
+    gfz = evidence / "audit_gfz_2026-09-18"
+    gfz.mkdir()
+    (gfz / "driver_epochs.json").write_text('{"epoch": "2022-12-05T03:00:00Z", "kp": 2.0}')
+    (ec1 / "ec1-audit-report.json").write_text(
+        '{"obligation_2_canadian_f107": {"last_2022_date": "2022-12-31"}}', encoding="utf-8"
+    )
+    flagged = sorted(p.name for p in assert_no_december_outside_restricted(evidence))
+    assert flagged == ["driver_epochs.json", "dst_extract.json"]
+    # the REAL evidence tree: clean, and every December-bearing file is inventoried
+    assert assert_no_december_outside_restricted(REPO_ROOT / "evidence") == []
+    assert december_driver_exclusion_class(
+        REPO_ROOT / "evidence" / "audit_ec1_2026-08-15" / "ec1-audit-report.json",
+        REPO_ROOT / "evidence",
+    ) == (3, "Derived driver audit report")
+    inventory = december_custody_inventory(REPO_ROOT / "evidence")
+    excluded = {e.path: e.exclusion_class for e in inventory if e.disposition == "excluded"}
+    assert excluded == {
+        "audit_ec1_2026-08-15/ec1-audit-report.json": 3,
+        "audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json": 4,
+        "audit_ec1_2026-08-15/kyoto_dst/dst_provisional_202211.html": 1,
+        "audit_ec1_2026-08-15/nrcan_f107/fluxtable.txt": 2,
+        "audit_gfz_2026-09-18/Kp_def2022.wdc": 5,
+        "audit_gfz_2026-09-18/Kp_now2022.wdc": 5,
+        "audit_gfz_2026-09-18/gfz-comparison-report.json": 5,
+        "audit_gfz_2026-09-18/hp60ap60doi_2022_v2.txt": 5,
+        "audit_gfz_2026-09-18/hp60ap60doi_2022_v3.txt": 5,
+    }
+    assert all(e.reason for e in inventory if e.disposition == "excluded")
+    outside = {e.path for e in inventory if e.disposition == "outside_automated_inspection"}
+    assert outside == {
+        "CORRECTION_2026-08-16_acquisition_window.md",
+        "DECISIONS.md",
+        "experiment_registry.md",
+        "audit_ec1_2026-08-15/EC1-AUDIT.md",
+        "audit_gfz_2026-09-18/GFZ-AUDIT.md",
+    }
+    assert not [e for e in inventory if e.disposition == "flagged"]
+
+
+def test_december_detection_is_structural_not_lexical(tmp_path: Path) -> None:
+    """P-4a (D-48): December is detected by STRUCTURE — integer `{y, m}` records at any
+    depth, month-number keys, compact `202212` literals, WDC and Hpo line layouts, isprint
+    endpoint epochs and Madrigal `ut1_unix` epochs — so an encoding chosen to dodge a
+    quoted-literal scan no longer passes. Each shape is flagged when no class covers it."""
+    evidence = tmp_path / "evidence"
+    (evidence / "locked_test_restricted").mkdir(parents=True)
+    other = evidence / "other"
+    other.mkdir()
+    (other / "int_keys.json").write_text(
+        '{"epochs": [{"y": 2022, "m": 11, "d": 30, "h": 23}, {"y": 2022, "m": 12, "d": 1, "h": 0}]}'
+    )
+    (other / "month_keys.json").write_text('{"1": {"n": 31}, "12": {"n": 31}}')
+    (other / "compact.json").write_text('{"stamp": "20221201"}')
+    (other / "nested_year_month.json").write_text(
+        '{"a": {"b": [{"year": "2022", "month": "12", "v": 1.0}]}}'
+    )
+    (other / "records.wdc").write_text("# header\n2212 1" + "0" * 60 + "\n")
+    (other / "hp60ap60doi_x.txt").write_text(
+        "# h\n2022 12 01 00.0 00.50 33207.00000 33207.02083  1.667    6 0\n"
+    )
+    cache = other / "raw_isprint_cache"
+    cache.mkdir()
+    (cache / "day.txt").write_text(
+        "1669852800.000  32.0 33.0 1.0 0.1\n1669939200.000  32.0 33.0 1.0 0.1\n"
+    )
+    (other / "records.csv").write_text("ut1_unix,tec\n1669856400.0,5.0\n")
+    (other / "november.csv").write_text("ut1_unix,tec\n1667260800.0,5.0\n")
+    (other / "notes.md").write_text("December 2022 is the locked month.\n")
+    flagged = sorted(p.name for p in assert_no_december_outside_restricted(evidence))
+    assert flagged == [
+        "compact.json",
+        "day.txt",
+        "hp60ap60doi_x.txt",
+        "int_keys.json",
+        "month_keys.json",
+        "nested_year_month.json",
+        "records.csv",
+        "records.wdc",
+    ]
+    rows = {e.path: e for e in december_custody_inventory(evidence)}
+    assert rows["other/notes.md"].disposition == "outside_automated_inspection"
+    assert rows["other/november.csv"].disposition == "no_december_content"
+    assert rows["other/raw_isprint_cache/day.txt"].detection == "isprint-endpoint"
+
+
+def _gfz_fixture(evidence: Path) -> Path:
+    """A synthetic `audit_gfz_*` directory whose files satisfy class 5's content AND
+    provenance conditions (sha256 recorded in a sibling retrieval record)."""
+    import hashlib as _hashlib
+    import json as _json
+
+    gfz = evidence / "audit_gfz_2030-01-01"
+    gfz.mkdir(parents=True)
+    wdc = gfz / "Kp_now2022.wdc"
+    wdc.write_text("# DOI\n2212 1" + "0" * 60 + "\n", encoding="utf-8")
+    hpo = gfz / "hp60ap60doi_2022_v2.txt"
+    hpo.write_text(
+        "# h\n2022 12 01 00.0 00.50 33207.00000 33207.02083  1.667    6 0\n", encoding="utf-8"
+    )
+    report = gfz / "gfz-comparison-report.json"
+    report.write_text(
+        _json.dumps(
+            {
+                "run_id": "r1",
+                "december_custody": "driver records only",
+                "provider_limitations": {"kp_ap3": "settled nowcast"},
+                "validation": {"Kp_now2022.wdc": {"coverage": "2920 epochs"}},
+                "comparisons": {
+                    "kp_ap3": {"differing_epochs": [{"y": 2022, "m": 12, "d": 1, "h": 0}]}
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (gfz / "retrieval_record.json").write_text(
+        _json.dumps(
+            {
+                "run_id": "r1",
+                "provider_files": [
+                    {"logical_name": p.name, "sha256": _hashlib.sha256(p.read_bytes()).hexdigest()}
+                    for p in (wdc, hpo)
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return gfz
+
+
+def test_class_5_excludes_only_validated_driver_captures_with_provenance(tmp_path: Path) -> None:
+    """D-48's conditions as negative controls: (a) the validated fixture is excluded and
+    inventoried; (b) a target key inside the report → flagged; (c) a `y` outside an epoch
+    key or a `coverage` outside `validation` → flagged; (d) an extra column in a raw
+    line → flagged; (e) a raw file whose sha256 is not in the retrieval record, or no
+    retrieval record at all → flagged; (f) a prediction file placed in the directory →
+    flagged. The directory name alone never qualifies."""
+    import json as _json
+
+    evidence = tmp_path / "evidence"
+    (evidence / "locked_test_restricted").mkdir(parents=True)
+    gfz = _gfz_fixture(evidence)
+    assert assert_no_december_outside_restricted(evidence) == []
+    inv = {e.path: e for e in december_custody_inventory(evidence)}
+    assert inv["audit_gfz_2030-01-01/Kp_now2022.wdc"].exclusion_class == 5
+    assert "exposure recorded" in inv["audit_gfz_2030-01-01/gfz-comparison-report.json"].reason
+    # (b) target key in the report
+    report = gfz / "gfz-comparison-report.json"
+    good = _json.loads(report.read_text(encoding="utf-8"))
+    bad = dict(good)
+    bad["comparisons"] = {
+        "kp_ap3": {"vtec_tecu": [1.0], "differing_epochs": [{"y": 2022, "m": 12, "d": 1, "h": 0}]}
+    }
+    report.write_text(_json.dumps(bad), encoding="utf-8")
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == [
+        "gfz-comparison-report.json"
+    ]
+    # (c) y outside an epoch key; coverage outside validation
+    bad = dict(good)
+    bad["comparisons"] = {
+        "kp_ap3": {"y": [1.0, 2.0], "epoch": {"y": 2022, "m": 12, "d": 1, "h": 0}}
+    }
+    report.write_text(_json.dumps(bad), encoding="utf-8")
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == [
+        "gfz-comparison-report.json"
+    ]
+    bad = dict(good)
+    bad["comparisons"] = {
+        "kp_ap3": {"coverage": 0.96, "epoch": {"y": 2022, "m": 12, "d": 1, "h": 0}}
+    }
+    report.write_text(_json.dumps(bad), encoding="utf-8")
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == [
+        "gfz-comparison-report.json"
+    ]
+    report.write_text(_json.dumps(good), encoding="utf-8")
+    assert assert_no_december_outside_restricted(evidence) == []
+    # (d) an extra column in a raw Hpo line
+    hpo = gfz / "hp60ap60doi_2022_v2.txt"
+    original = hpo.read_bytes()
+    hpo.write_text(
+        "# h\n2022 12 01 00.0 00.50 33207.00000 33207.02083  1.667    6 0 7.5\n", encoding="utf-8"
+    )
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == [
+        "hp60ap60doi_2022_v2.txt"
+    ]
+    hpo.write_bytes(original)
+    assert assert_no_december_outside_restricted(evidence) == []
+    # (e) bytes not matching the recorded sha256; then no retrieval record at all
+    wdc = gfz / "Kp_now2022.wdc"
+    original = wdc.read_bytes()
+    wdc.write_text("# DOI\n2212 2" + "0" * 60 + "\n", encoding="utf-8")
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == ["Kp_now2022.wdc"]
+    wdc.write_bytes(original)
+    record = gfz / "retrieval_record.json"
+    saved = record.read_bytes()
+    record.unlink()
+    assert sorted(p.name for p in assert_no_december_outside_restricted(evidence)) == [
+        "Kp_now2022.wdc",
+        "gfz-comparison-report.json",
+        "hp60ap60doi_2022_v2.txt",
+    ]
+    record.write_bytes(saved)
+    # (f) a prediction file dropped into the directory: the name never qualifies it
+    (gfz / "predictions_december.json").write_text(
+        '{"y_hat": [1.0], "epoch": {"y": 2022, "m": 12, "d": 1, "h": 0}}'
+    )
+    assert [p.name for p in assert_no_december_outside_restricted(evidence)] == [
+        "predictions_december.json"
+    ]
+
+
 def test_unreadable_evidence_file_fails_the_residency_scan(tmp_path: Path) -> None:
     """R-27's negative control on the residency scan: unreadable bytes are a failure."""
     evidence = tmp_path / "evidence"
@@ -962,19 +1227,19 @@ if str(_TESTS_DIR) not in sys.path:
 
 import hashlib  # noqa: E402
 
-from test_split_embargo import (  # noqa: E402
-    SYNTH_EMBARGO_HOURS,
-    SYNTH_YEAR,
-    synthetic_partitions,
-    synthetic_snapshot,
-)
-
 from src.data.config import PartitionError  # noqa: E402
 from src.data.splits import (  # noqa: E402
     LOCKED_ID,
     materialise_locked_partition,
     partition_by_id,
     verify_g05_signature,
+)
+
+from test_split_embargo import (  # noqa: E402
+    SYNTH_EMBARGO_HOURS,
+    SYNTH_YEAR,
+    synthetic_partitions,
+    synthetic_snapshot,
 )
 
 _SYNTH_SIGNATURE = "synthetic G-05 signature artifact -- never a real one"
@@ -1085,9 +1350,7 @@ def test_limb1_rows_outside_the_locked_month_are_refused_by_timestamp() -> None:
 
     def loader(partition):
         rows = _synthetic_locked_loader(partition)
-        rows.append(
-            {"interval_start_utc": f"{SYNTH_YEAR}-11-05T00:00:00+00:00", "vtec_tecu": 1.0}
-        )
+        rows.append({"interval_start_utc": f"{SYNTH_YEAR}-11-05T00:00:00+00:00", "vtec_tecu": 1.0})
         return rows
 
     with pytest.raises(PartitionError):

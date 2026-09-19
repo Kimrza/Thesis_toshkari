@@ -449,6 +449,21 @@ the three artifacts — W-5, where the requirement-to-workflow map routed it, di
 *(Constraint added 2026-08-28 on Recommendation 13; the daily composition remains an **open
 G-04 freeze item** and is reported as such, not closed here.)*
 
+> **Amended 2026-09-19 — the daily-cadence composition is FROZEN as reading B (D-46;
+> `CR-2026-09-19-SCI-DECISIONS` §4; student freeze, supervisor countersignature OPEN under
+> TE §18.2 Q-16/Q-17).** The Constraint above ("this stage adopts neither") is superseded
+> for the F10.7 rows: `carry_forward_composition: clock_hours`. Ordinary reuse of
+> `median(D−1)` at every origin of day *D* is NOT carry-forward. When the designated
+> `median(D−1)` is absent or not yet available at 00:00 UTC on *D*, the last available
+> median is carried for origins with `t − 00:00 UTC D ≤ carry_forward_bound_hours`
+> (inclusive: 00:00 … 03:00 under the 3 h bound) and origins from 04:00 are EXCLUDED until
+> a valid update becomes available; the clock starts at the EXPECTED availability instant
+> of the missing value. `f107_81_trailing` keeps its exact window ending at the eligible
+> anchor and is unavailable for the whole affected day (no imputation, no older window).
+> Implemented in `spaceweather.resolve_f107_at_origin` (returns `F107Selection`).
+> Measured on the held file for 1 Jan–30 Nov 2022: 8016 origins, 0 carried, 0 excluded.
+> The field values enter `configs/features.yaml` only with the six-entry transcription.
+
 ## R-58 — Driver alignment, and its three limbs
 
 **Rule (FR-P1-04-17, D-10.2, Q5 = D).** How a **present** value maps onto the hourly grid:
@@ -795,6 +810,19 @@ diagnostic-only.
 
 **Acceptance.** Contributes to WS-11 and TA-08 (both owned by `features-and-splits`).
 
+> **Amended 2026-09-19 — interval semantics and the lagged-selection owner (D-43, D-44;
+> `CR-2026-09-19-SCI-DECISIONS` §1–2).** For an interval-valued index the safe lag is
+> measured from the interval END (completion); Kp/ap `available_at = end + 3 h`, Hp60/ap60
+> `= end + 1 h` (assumptions for retrospective evaluation, D-42). The ONE place the lag is
+> applied is `spaceweather.select_lagged_series`, which records per origin the selected
+> source interval (both provider boundaries preserved), `available_at_utc`, the origin and
+> the value. Limbs 1–2 above govern RAW own-interval series unchanged; a LAGGED `*_safe`
+> series is checked by `assert_lagged_selection` (value traces to its recorded source
+> interval; `available_at` = source end + lag ≤ origin; the latest eligible interval was
+> chosen; no present value dropped). A missing selected value keeps its interval identity
+> and composes with the epoch-axis carry-forward of R-57a. Matrix rows come from
+> `availability_rows_from_selection` (observation timestamp = source END).
+
 ## R-63 — Driver series are time-indexed only
 
 **Rule (FR-P1-04-4, TC-12).** One value per epoch, **identical across all three cells**.
@@ -876,6 +904,32 @@ undetectable failure is how a requirement reads as designed while remaining unen
 | 3 | Record a status for a file carrying **no provenance column** *without* the documented-absence and unverified-status statement → | **FAILS.** The absence must be **stated**, not implied by silence |
 | 4 | Mix two release grades within one series → | **FAILS at construction** (D-10.1, already asserted at R-62) |
 | 5 | **GFZ only:** supply a value matching the **definitive** product where the **near-real-time** product for that epoch differs → | **FAILS.** The one substantive backfill detection this design can offer |
+
+> **Amended 2026-09-18 — control 5 as executed, mirrored from `acquisition` R-40** (the
+> authoritative site for the check's definition; `CR-2026-09-18-GFZ-DRIVER-PAIR-AUDIT`;
+> `CR-2026-09-18-GFZ-RELEASE-GRADE-RULINGS`; owner rulings of 2026-09-18). **Kp/ap3:**
+> control 5 is satisfied literally — GFZ's archived 2022 nowcast (`Kp_now2022.wdc`) and
+> definitive (`Kp_def2022.wdc`) products, DOI 10.5880/Kp.0001, were retrieved and compared
+> value by value (1,046 / 2,920 epochs differ); the nowcast is the SELECTED
+> historical product (D-39, student decision; supervisor status open) and the definitive
+> the audit comparator only; the archived nowcast is the settled final-stage nowcast,
+> includes post-issue revisions, does not reconstruct first-issued values, and is not
+> labelled proven-available at every forecast origin — the availability rule is owed from
+> evidence (or the limitation documented) before producer release.
+> **Hp60/ap60:** control 5 is impossible as written — no provider-native NRT/definitive
+> pair exists — and the owner formally accepts (D-40) a **documented substitute control** for
+> Hp60/ap60 ONLY, labelled exactly "Contemporaneous V2.0 versus later algorithm-recomputed
+> V3.0": 1,790 / 8,760 epochs differ (a product-version difference, not a model error and
+> not proof of leakage), never described as NRT versus definitive, demonstrating
+> sensitivity to later algorithmic recomputation and establishing neither first-issue
+> availability nor absence of information leakage. `assert_gfz_cross_products` is unchanged: on Hp60 its `near_real_time` argument
+> is the V2.0 series and its `definitive` argument the V3.0 series, and every artifact
+> that reports it must carry the substitute label. Evidence:
+> `evidence/audit_gfz_2026-09-18/`. **D-42 (2026-09-19, student acceptance; supervisor
+> countersignature OPEN):** the approved 3 h / 1 h floors are the availability assumptions
+> for these two series — project assumptions, not demonstrated bounds — and every result
+> claim using them states that they establish neither exact operational replay nor
+> absence of revision-related look-ahead (mirrored from `acquisition` R-40).
 
 > **Stated as a residual, not discharged.** For **F10.7 and Dst** the rule's own failure mode —
 > a reanalysed value that satisfies every lag, alignment and carry-forward assertion — remains

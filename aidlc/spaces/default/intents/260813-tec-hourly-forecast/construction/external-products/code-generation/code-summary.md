@@ -566,3 +566,88 @@ does not convert an unresolved end-to-end reproducibility gap into a closed one.
 stands, as the terminal verdict for this budget.
 
 **Verdict: NOT-READY**
+
+## Post-receipt amendment — 2026-09-19 (D-43/D-44/D-45 scientific decisions; `CR-2026-09-19-SCI-DECISIONS`, item 6 of the 2026-09-19 owner authorization)
+
+*Appended under `project.md` `code-generation:gf-3` ("update the owning unit's
+code-summary when a repair edits a module that unit owns"). Nothing above is rewritten;
+the NOT-READY verdict and its rationale stand as history — this amendment does not touch
+the Critical it names, does not change the terminal verdict, and does not claim
+readiness. Authority: `evidence/DECISIONS.md` D-43, D-44, D-45; D-43/D-45 are Student +
+Supervisor items (TE §18.2 Q-16; TE §18.3 "the IRI role"): supervisor approval REPORTED
+by the student 2026-09-19, countersignature artifact PENDING
+(`governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`).*
+
+| Module | What changed (measured, `git diff --numstat` vs `18843aa`) |
+|---|---|
+| `src/external/spaceweather.py` | +342 / −33 (cumulative this session; this pass's share: the lagged-selection machinery). New: `select_lagged_series` (D-43/D-44 — the single place a safe lag is applied to an interval-valued index: Kp/ap at completion + 3 h, Hp60/ap60 at completion + 1 h, both provider interval boundaries preserved on every row), `assert_lagged_selection` (traceability, no double lag, latest-eligible-interval, no dropped present value), `availability_rows_from_selection`, `daily_medians_from_readings` (D-21/D-22/D-23's project-derived F10.7 daily value; this module owns the driver-product arithmetic, `features-and-splits` owns the enforcement raise — R-54a's allocation, unchanged). `resolve_f107_at_origin` implements D-46's reading B and now returns `F107Selection`, a breaking return-type change from the prior bare tuple. |
+| `src/external/iri.py` | +48 / −16. `assert_benchmark_drivers_in_matrix`'s R-59 limb-4 driver-input check replaced per the PREPARED-then-APPLIED D-45 patch (`governance/proposed/P-3_iri_report_confirmations.patch`, applied 2026-09-19 on the recorded decision owner's explicit authorisation after verifying it matches D-45): the old `no_future_centering_confirmed`/`available_at_target_time_confirmed` pair (both `True` required) is replaced by `index_inputs_retrospective_centered` (`True` required — a recorded disclosure, not a false confirmation), a refusal if `no_future_centering_confirmed` is still `True` for a standard-index run, and three new required fields (`index_files_sha256`, `iri_version` must equal 16, `oarr_overrides` must be empty). Module docstring and error text (already corrected 2026-09-19 P-5 for the EV-12 grant status) updated again to state the D-45 status accurately: reported approval, countersignature pending, this patch's application does not itself pass G-04. `generate_benchmark`/R-59 limbs 1–3 unchanged; `iricore` remains uninstalled in the governed environment (see `governance/CHANGE_RECORD_2026-09-19_scientific_decisions_p2.md` §2 for the exhaustive Windows-wheel/build-toolchain diagnosis) so no benchmark can be generated regardless of this patch. |
+| `scripts/audit_gfz_drivers.py` | Docstring only (part of the +217/-line design-and-script sweep this session): the `gfz-comparison-report.json` integer-key rationale corrected to state that D-48's structural December detection, not the integer encoding, is what now keeps the file out of custody by validated content and provenance (R-26 class 5). No behaviour change. |
+
+Runs (governed pin, conda `tec-thesis-311`, CPython 3.11.16): `tests/test_external_drivers.py`
+(65 tests) and `tests/test_iri_denial.py` (22 tests) green; combined focused run with
+`test_feature_availability.py`/`test_locked_test_guard.py` (228 tests total) green, 0
+failed. `ruff check`/`ruff format` clean on both touched modules.
+
+**What this amendment does NOT do.** It does not discharge the Critical this unit's
+terminal NOT-READY verdict names; does not generate an IRI benchmark (still blocked at
+R-59 limb 1: no passing validation report exists, and `iricore` cannot be installed in
+this environment — see the pip-failure diagnosis); does not pass G-04; does not create a
+producer artifact.
+
+## Post-receipt amendment — 2026-09-19 (2) (D-43 drift guard; Kaggle IRI-2016 verification notebook; `CR-2026-09-19-SCI-DECISIONS-P3`)
+
+*Appended under `project.md` `code-generation:gf-3`. Nothing above is rewritten.
+Authority: owner instruction 2026-09-19, items 2 (configuration enforcement) and 3–5
+(Kaggle notebook).*
+
+| Module | What changed (measured, `git diff --numstat` vs `18843aa`) |
+|---|---|
+| `src/external/spaceweather.py` | +367 / −33 (cumulative this session; this pass's share: the drift guard). `assert_lagged_selection` gains `expected_reference_instant`: the function only ever implements `LAG_REFERENCE_INSTANT_INTERVAL_END` (D-43, hardcoded); a caller-declared value that differs is refused rather than silently miscomputed, closing the enforcement loop for `configs/features.yaml`'s `lag_reference_instant` field (D-43's countersignature: reported 2026-09-19 in the prior pass, countersigned 2026-09-19 later the same day — see `evidence/DECISIONS.md` D-43). |
+| `kaggle/kaggle_iri2016_verification.ipynb` (new) | Self-contained Kaggle notebook (17 cells) verifying the D-45-selected `iricore` release actually installs and runs on Kaggle's Linux/CPU environment. Selects `iricore==1.8.0` — re-verified exhaustively against PyPI as the newest release with a Linux wheel (1.8.1–1.9.0 publish macOS-arm64 only); detects Kaggle's real Python before installing anything; isolates into a Python-3.10 venv (creating one via `apt-get` if needed) *[superseded 2026-09-19 by the second revision: a three-rung ladder — `virtualenv` against the image `python3.10`, then `uv`-managed CPython 3.10.21, then `apt-get` + stdlib `venv`; rung 1 is what succeeded on Kaggle, see amendment (3) below]* to protect the pinned `numpy==1.26.4`/`fortranformat==2.0.3`/`pymap3d==3.2.0`; installs via `pip --require-hashes` against real PyPI-published SHA-256 hashes; runs one reusable inner verification script (provenance, index-file hashing before/after, a single non-December ARUC-coordinate smoke-test call repeated once for repeatability, reconciliation against the earlier source inspection); packages a diagnostic-only report+logs+hashes bundle under `/kaggle/working`. Stops with a precise diagnosis if Python 3.10 cannot be obtained — no from-source build attempted. |
+| `kaggle/HOW_TO_RUN.md` (new) | Upload/settings/run/return instructions, and an explicit list of what this session verified locally (syntax, structure, date-parsing logic against a real index file, the failure-reporting path) versus what remains pending actual Kaggle execution. *[2026-09-19, amendment (3): Kaggle execution is no longer pending — see below.]* |
+
+**Local validation performed (no Kaggle access in this session):** notebook parses as
+valid nbformat 4 JSON; every code cell and the embedded inner script parse as valid
+Python independently; the inner script's coverage-parsing/date-selection logic was run
+against a real `apf107.dat`; the `vtec()` call signature was cross-checked against
+`iricore`'s own upstream test suite; the failure-reporting path was executed end to end
+locally (with `iricore` genuinely absent) and confirmed to produce a well-formed JSON
+diagnosis with exit code 1.
+
+**What this amendment does NOT do.** It does not claim Kaggle execution, a successful
+install, or a verified IRI runtime — all of that is explicitly marked pending in
+`kaggle/HOW_TO_RUN.md` until the student runs the notebook. It does not discharge this
+unit's terminal NOT-READY verdict; does not pass G-04; does not register a producer
+artifact or a benchmark result.
+
+## Post-receipt amendment — 2026-09-19 (3) (Kaggle IRI-2016 verification executed — PASS; `CR-2026-09-19-SCI-DECISIONS-P3` §3.6)
+
+*Appended under `project.md` `code-generation:gf-3` and `code-generation:fr-2` (the
+stale "pending" claims in amendment (2)'s table are corrected in place above, not only
+here). Nothing else above is rewritten.*
+
+**Files changed by this amendment (measured):** none under `src/`, `scripts/`, `tests/`
+or `configs/`. `kaggle/kaggle_iri2016_verification.ipynb` is **unchanged** (SHA-256
+`b8399c98f248749fca3b6e5acebec9543c262ec0cc83dde2dab0042460d564fa`, frozen as the
+producer of the returned evidence). `kaggle/HOW_TO_RUN.md` gains the third/fourth-run
+account. New evidence directory `evidence/iri2016_kaggle_verification_2026-09-19/`
+(returned zip, its three members, `sha256_manifest.json`, `sha256_manifest_meta.json`,
+`RETURN_RECORD.md`).
+
+**What the fourth Kaggle run established** (all values from the returned
+`verification_report.json`; runs 1–3 stopped in Step 3 — run 1 a notebook defect since
+fixed, runs 2–3 the Kaggle Internet toggle OFF): kernel Python 3.12.13 on glibc 2.35;
+`virtualenv` against the image `python3.10` (3.10.12) succeeded at rung 1;
+`iricore==1.8.0`, `numpy==1.26.4`, `fortranformat==2.0.3`, `pymap3d==3.2.0` installed
+under `--require-hashes`, exit 0; installed `DEFAULT_IRI_VERSION == 20` (explicit
+`version=16` remains necessary); `vtec()` at the D-1 ARUC coordinate, `htop=2000`,
+`version=16`, on 2024-01-06T12:00Z = `37.373754526924806` TECU, bit-identical on repeat;
+shipped `apf107.dat` (`cdf4d5df…`) and `ig_rz.dat` (`fbbed304…`) unchanged after the
+calls; `apf107.dat` ends **2024-03-06** — not the 2024-06-17 the earlier `master`-branch
+inspection recorded, so the D-45 freeze pins are the 1.8.0 wheel's hashes (proposed D-45
+annotation routed to the owner in `CR-…-P3` §3.6; D-45 not edited).
+
+**What this amendment does NOT do.** It does not discharge this unit's terminal
+NOT-READY verdict; does not pass G-04; does not touch R-59 limb 1; does not register a
+producer artifact, a `permitted_producers` entry or a benchmark result; makes no commit.

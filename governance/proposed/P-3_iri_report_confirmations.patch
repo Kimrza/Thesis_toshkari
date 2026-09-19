@@ -1,0 +1,45 @@
+--- a/src/external/iri.py
++++ b/src/external/iri.py
+@@ -162,14 +162,37 @@
+             f"driver_inputs is {type(drivers).__name__}, not a mapping of the "
+             f"coordinate, time, solar and geomagnetic inputs",
+         )
+-    for confirmation in ("no_future_centering_confirmed", "available_at_target_time_confirmed"):
+-        if drivers.get(confirmation) is not True:
++    # D-45 (PROPOSED, applies only once the supervisor approves the IRI role): IRI-2016
++    # is run with its standard index files, whose inputs are retrospective and centered
++    # by construction. The report therefore RECORDS and DISCLOSES that fact instead of
++    # confirming its absence; a report that still claims "not future-centered" for a
++    # standard-index run is refused as a false confirmation.
++    if drivers.get("index_inputs_retrospective_centered") is not True:
++        raise BenchmarkError(
++            report_name,
++            "driver_inputs.index_inputs_retrospective_centered is not True; under D-45 the "
++            "benchmark is a retrospective climatological reference whose index inputs "
++            "(adjusted target-day F10.7, centered 81-/365-day means, centered IG12/Rz12, "
++            "target-day ap) are recorded and disclosed, never confirmed absent "
++            "(Vision 6.11 as amended; FR-P1-04-15 area 5)",
++        )
++    if drivers.get("no_future_centering_confirmed") is True:
++        raise BenchmarkError(
++            report_name,
++            "driver_inputs.no_future_centering_confirmed is True for a standard-index IRI "
++            "run; that confirmation is false by construction (D-45)",
++        )
++    for field in ("index_files_sha256", "iri_version", "oarr_overrides"):
++        if field not in drivers:
+             raise BenchmarkError(
+                 report_name,
+-                f"driver_inputs.{confirmation} is not True; the report must confirm "
+-                f"that no driver is future-centered or unavailable at target time "
+-                f"(FR-P1-04-15 area 5)",
++                f"driver_inputs.{field} is absent; D-45 pins the shipped index files by hash, "
++                f"requires version=16 and records that no oarr override is used",
+             )
++    if drivers.get("iri_version") != 16 or drivers.get("oarr_overrides") not in ({}, [], None):
++        raise BenchmarkError(
++            report_name, "D-45 requires IRI-2016 (version=16) and no oarr overrides"
++        )
+     samples = report["samples"]
+     if not isinstance(samples, Sequence) or isinstance(samples, str):
+         raise BenchmarkError(report_name, "samples is not a sequence of sample records")

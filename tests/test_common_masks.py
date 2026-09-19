@@ -66,6 +66,7 @@ from src.evaluation.guards import (  # noqa: E402
     scored_window_statement,
 )
 from src.evaluation.masks import (  # noqa: E402
+    _rows_of,
     ComparisonMask,
     LoadedPrediction,
     MaskRegistry,
@@ -306,6 +307,31 @@ def test_controls_8_9_10_membership_missing_extra_duplicate() -> None:
     ):
         with pytest.raises(FairnessError):
             require_declared_membership(member_ids, set_id="setA", declared_sets=SYNTH_SETS)
+
+
+def test_a_missing_member_prediction_is_excluded_whether_none_or_nan() -> None:
+    """G-10 (2026-09-19): a member whose y_hat is missing at one epoch — as `None` (record
+    sequence) OR as `NaN` (a pandas float column) — never contributes that epoch to the
+    comparison-wide intersection; the pre-repair `is not None` test admitted NaN rows."""
+    full = _mask()
+    for missing_value in (None, float("nan")):
+        keys = list(KEYS)
+        station, day, hour = keys[0]
+        broken = _prediction("M-A", keys)
+        rows = [dict(r) for r in _rows_of(broken.frame)]
+        for row in rows:
+            if (row["station"], row["interval_start_utc"]) == (station, _ts(day, hour)):
+                row["y_hat"] = missing_value
+        broken = LoadedPrediction(
+            model_id="M-A", seed=None, frame=RecordFrame(rows),
+            target_definition_id=IDENTITY["target_definition_id"], phase_id=IDENTITY["phase_id"],
+            source_id=IDENTITY["source_id"], partition_id="F1", transform_id="T-F1",
+        )
+        mask = _mask(members=_members("setA", **{"M-A": broken}))
+        assert len(mask.masked_rows) == len(full.masked_rows) - 1, missing_value
+        assert (station, _ts(day, hour)) not in {
+            (r["station"], r["interval_start_utc"]) for r in mask.masked_rows
+        }
 
 
 def test_control_11_two_declared_sets_merged_raises() -> None:

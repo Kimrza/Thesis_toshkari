@@ -1,0 +1,15 @@
+{
+  "derived_artifact_count": 4,
+  "hash_count": 8,
+  "manifest": "sha256_manifest.json",
+  "producing_interpreter": "3.11.16",
+  "provenance_class": "full",
+  "provider_file_count": 4,
+  "provider_files": {
+    "Kp_def2022.wdc": "Kp_def2022.wdc (DOI 10.5880/Kp.0001, folder Kp_definitive)",
+    "Kp_now2022.wdc": "Kp_now2022.wdc (DOI 10.5880/Kp.0001, folder Kp_nowcast)",
+    "hp60ap60doi_2022_v2.txt": "Hp60ap60doi_2022.txt (DOI 10.5880/Hpo.0002, folder Hpo60)",
+    "hp60ap60doi_2022_v3.txt": "Hp60ap60doi_2022.txt (DOI 10.5880/Hpo.0003, folder Hpo60)"
+  },
+  "schema": "TE-13.3 path-to-sha256; metadata sidecar v1"
+}

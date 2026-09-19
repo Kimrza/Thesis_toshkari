@@ -748,15 +748,19 @@ def _run_driver_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dic
     else:
         missing_months.append(f"{window_label} (f107: fluxtable.txt not retrieved)")
 
-    # The two GFZ series have NEVER been retrieved (re-inspected 2026-08-28: no GFZ
-    # directory exists in the evidence set). A completeness fact, named per series
-    # across the whole window -- never console text only, and never fatal (R-61).
+    # The two GFZ series were retrieved on 2026-09-18 into
+    # evidence/audit_gfz_2026-09-18/ (scripts/audit_gfz_drivers.py; D-39, D-40; R-63
+    # control 5 executed literally for Kp/ap and as the accepted substitute for Hp60/ap60)
+    # but are NOT YET CONSUMED by this stage: no driver product is built from them here
+    # and no producer artifact exists (D-41 identities only). Recorded as a completeness
+    # fact, named per series across the whole window -- never console text only, and
+    # never fatal (R-61). Wording updated 2026-09-18 (gate item G-6); the superseded text
+    # read "never retrieved -- no GFZ directory in the evidence set".
     for gfz_series in ("kp_ap3", "hp60_ap60"):
         missing_months.append(
-            f"{window_label} ({gfz_series}: never retrieved -- no "
-            f"GFZ directory in the evidence set; acquisition retrieves BOTH the "
-            f"near-real-time and definitive products when it lands, per R-63's "
-            f"cross-assertion specification)"
+            f"{window_label} ({gfz_series}: retrieved 2026-09-18 into "
+            f"evidence/audit_gfz_2026-09-18/ but not yet consumed by this stage; no "
+            f"driver product built from it here -- integration owed under D-39/D-40/D-41)"
         )
 
     if fixture_scope_id is not None:

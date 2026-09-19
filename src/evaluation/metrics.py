@@ -105,6 +105,7 @@ __all__ = [
     "SIGN_CONVENTION_SENTENCE",
     "SPATIAL_REPRESENTATIVENESS_SENTENCE",
     "PHASE2_NOT_INDEPENDENT_STATEMENT",
+    "DRIVER_AVAILABILITY_LIMITATION_STATEMENT",
     "EXTERNAL_COMPARATOR_IDS",
     "LockedContext",
     "EstimandResult",
@@ -139,6 +140,18 @@ PHASE2_NOT_INDEPENDENT_STATEMENT: str = (
     "Phase 2 is a fixed-protocol replication on a new target lineage, not a second "
     "statistically independent blind test, because it reuses the December timestamps after "
     "Phase 1 has already reported them"
+)
+
+#: D-42's mandated limitation on the GFZ driver archives (student decision 2026-09-19;
+#: A1, `CR-2026-09-19-GATE-PREP-2`): carried as an artifact FIELD so the reporting unit
+#: asserts presence on the limitations surface instead of prose. The lags it names are the
+#: project's APPROVED floors (TE §6.2; D-116; D-10.3), not demonstrated publication bounds.
+DRIVER_AVAILABILITY_LIMITATION_STATEMENT: str = (
+    "Kp/ap and Hp60/ap60 are taken from GFZ's archived settled nowcast and Hpo.0002 V2.0 "
+    "products under the project's approved 3-hour and 1-hour availability floors, which are "
+    "assumptions, not demonstrated publication or revision-completion bounds; results using "
+    "these archives do not establish exact operational replay or absence of "
+    "revision-related look-ahead"
 )
 
 #: The two externally generated comparison members (identities, not values): B-01 is the

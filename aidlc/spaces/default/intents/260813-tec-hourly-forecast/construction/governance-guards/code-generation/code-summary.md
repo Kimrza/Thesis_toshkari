@@ -687,3 +687,25 @@ same-commit authority trace and the permitted cross-unit carve-out. No new defec
 Zero Critical, zero Major, zero Minor.
 
 **Verdict:** READY
+
+## Post-receipt amendment — 2026-09-19 (D-48 structural December detection and class 5; `CR-2026-09-19-SCI-DECISIONS`, item 6 of the 2026-09-19 owner authorization)
+
+*Appended under `project.md` `code-generation:gf-3`. Nothing above is rewritten; the
+READY receipt stands as history. Authority: `evidence/DECISIONS.md` D-48 (no supervisor
+approval required — R-26's class list amended by the owner under the D-30 precedent; no
+target value involved).*
+
+| Module | What changed (measured, `git diff --numstat` vs `18843aa`) |
+|---|---|
+| `src/data/locked_test.py` | +447 / −31. `DECEMBER_DRIVER_EXCLUSION_CLASSES` widened from four to five (paths now tuples, allowing class 5's three patterns). New: structural December detection per format (`_json_december` — string literals, `{y, m}` records at any depth, month-number-keyed per-month mappings; `_detect_december` dispatches by suffix/filename to JSON, WDC-line, Hpo-line, isprint-endpoint, CSV-`ut1_unix`-epoch or literal detection), content validators per class (`_class_content_ok`, `_gfz_report_ok` — a schema-validated check admitting `y`/`coverage` tokens ONLY in their structurally valid positions), provenance check for class 5 (`_gfz_provenance` — a sibling `retrieval_record.json` SHA-256 or `run_id` match), `DecemberCustodyEntry`/`december_custody_inventory` (every file outside the restricted root inventoried with its detection method and disposition — `flagged`/`excluded`/`no_december_content`/`outside_automated_inspection`), `_read_text` (UTF-8 with a Latin-1 fallback for non-JSON text formats only — JSON stays strict). `december_driver_exclusion_class` now needs BOTH the path AND the validated content (and, for class 5, provenance); `assert_no_december_outside_restricted` is reimplemented as a filter over `december_custody_inventory`, same public contract (empty sequence = pass), same recursive/unparseable-is-failure behaviour. |
+| `tests/test_locked_test_guard.py` | +273 / −10. `test_r26_driver_exclusions_are_exactly_four_and_content_gated` renamed/extended to `..._exactly_five_and_content_gated` (five-class enumeration, full real-tree inventory assertion — 9 excluded files with their exact class, 5 files outside automated inspection, 0 flagged); new `test_december_detection_is_structural_not_lexical` (eight synthetic shapes: integer `{y,m}` records, month-number keys, compact literals, nested year/month strings, WDC/Hpo line layouts, isprint endpoint epochs, `ut1_unix` CSV epochs, Markdown outside-scope reporting — all flagged where no class covers them, proving the widened scan is no longer defeated by dodging a quoted literal); new `test_class_5_excludes_only_validated_driver_captures_with_provenance` (six negative controls: target key inside the report, `y`/`coverage` outside their valid structural position, an extra column in a raw line, bytes not matching the recorded SHA-256, no retrieval record at all, a prediction file dropped into the directory — every one flagged, proving the directory name alone never qualifies content). 60 test functions total. |
+
+Runs (governed pin, conda `tec-thesis-311`, CPython 3.11.16): `tests/test_locked_test_guard.py`
+(60 tests) green; the real evidence tree scan (`december_custody_inventory`, 369 files,
+~0.9 s) reproduced 0 flagged, 9 excluded, 5 outside automated inspection. `ruff
+check`/`ruff format` clean.
+
+**What this amendment does NOT do.** It does not relocate or reserialise any evidence
+file; it does not widen custody beyond the five classes' exact content-and-provenance
+conditions; it does not certify holdout independence "unaffected" (exposure is recorded,
+never asserted away); it does not pass G-04.

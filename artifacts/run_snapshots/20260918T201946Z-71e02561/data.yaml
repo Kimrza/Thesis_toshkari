@@ -1,0 +1,130 @@
+# configs/data.yaml — one of the four governed configs (TE §12; TC-03e).
+#
+# Only values frozen under an approved D-number are transcribed here, citing
+# that D-number. Every unfrozen scientific field carries the literal sentinel
+# `TBD — freeze gate` — writing a sentinel is not choosing a value (W-9), and
+# no implementer may fill one by convenience (Vision §1.2; TE §1.1). The
+# owning unit's Bolt transcribes its own frozen values (station coordinates,
+# cell bounds, target contract, support thresholds) with their D-numbers;
+# foundation does not transcribe values it does not own.
+#
+# No machine path may appear in this file (R-16, ADR-07): all roots below are
+# RELATIVE and are resolved against the platform workspace root at run time by
+# resolve_platform_roots (W-8). Relocating the workspace never changes this
+# file's hash.
+
+schema_version: "1.0.0"
+
+# --- repository-layout roots (engineering values, not scientific constants) -----------
+roots:
+  # The SINGLE authoritative release root D-29's verify-on-write check
+  # enumerates (SD-04, Q2=A — owner decision at a §18.3 stop-and-report point).
+  # Relative to the platform workspace root; a write_release that cannot reach
+  # the resolved root REFUSES rather than treating it as empty.
+  release_root: "artifacts/releases"
+  # Where per-run config snapshots are written (W-2 step 3).
+  snapshot_root: "artifacts/run_snapshots"
+  # The experiment registry directory (TE §13.4).
+  registry_root: "artifacts/registry"
+
+# --- release identity (mechanism frozen by D-29, 2026-08-28) ---------------------------
+release:
+  # dataset_version = first 12 hex characters of content_hash, verify-on-write
+  # uniqueness over the single authoritative release root. D-29.
+  version_encoding: "sha256-prefix-12hex" # D-29
+  decision: "D-29"
+
+# --- scientific fields owned by downstream units (unfrozen HERE by design) -------------
+# Station registry, coordinate-to-cell rule and cell bounds: frozen by D-1/D-8
+# in evidence/DECISIONS.md, but their config transcription is
+# inventory-and-registry's migration obligation (team.md § Code Style, Q11=B)
+# and is validated against the official IGS site logs before being treated as
+# final. They are NOT transcribed by foundation. (Updated 2026-09-10: `cell_rule` HAS
+# since been transcribed — by the project decision owner's ruling, not by foundation —
+# see the note at the field itself; `stations` is unchanged and still unresolved.)
+stations: "TBD — freeze gate"
+# cell_rule — FROZEN as the EXISTING convention by the project decision owner's ruling of
+# 2026-09-10, ADOPTED as **D-33** (2026-09-10). Prepared at
+# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
+# evidence/DECISIONS.md. TE §18.2 assigns this rule to Student + Supervisor, so a
+# SUPERVISOR COUNTERSIGNATURE IS REQUIRED AND NOT YET GIVEN. The value is the identifier
+# already declared in
+# src/data/registry.py (CELL_RULE_ID) for the convention already in use — a 1° × 1° cell
+# identified by its lower-left (floor) corner, half-open in both axes:
+#   cell = [floor(lat), floor(lat)+1) × [floor(lon), floor(lon)+1)
+# (notebooks/madrigal_phase1_coverage_audit.ipynb cell 4, verbatim). No grid was invented
+# and no station was moved. The notebook's own caveat is NOT discharged by this freeze:
+# confirm the convention against the real bin edges Madrigal returns before relying on it.
+cell_rule: "floor-half-open-d1" # D-33 (2026-09-10); TE §18.2 countersignature NOT YET GIVEN
+
+# --- the six frozen partitions (ADR-11; R-80's closed six-value space) -------------------
+# TRANSCRIPTION into the live source of truth, approved by the project decision owner on
+# 2026-09-10. This is NOT a new split calendar: `src/data/splits.py: build_partitions` is the
+# only consumer, `configs/experiment.yaml: folds` is inert (no reader) and is deliberately
+# left unresolved so no second source of truth exists.
+#
+# PROVENANCE, kept distinct per the owner's ruling:
+#   * F1-F4 and REFIT — train_start, train_end and validation_month are specified DIRECTLY by
+#     TE §7.1's split-configuration table ("1 January-31 March 2022 | 24 hours | April 2022",
+#     and so on; final refit "1 January-30 November 2022", evaluated nowhere per FR-P1-04-14).
+#   * DEC — TE §7.1 shows "—" for the locked row's TRAINING interval, so its bounds are NOT
+#     transcribed from it. They are DETERMINED by existing constraints the validator enforces:
+#     `train_start == study_start` (TE §7.1's expanding window from one origin, D-8) and
+#     `DEC.train_end == REFIT.train_end` (R-80, Recommendation 25 — a locked-month fit is
+#     unrepresentable by the field). Exactly one value is admissible for each.
+# The embargo is NOT repeated here: its single home is `configs/experiment.yaml:
+# embargo_hours`, read by `build_partitions` and applied to every partition (TE §7.1's
+# "24 hours" column). No validator or split rule is altered by this transcription.
+partitions:
+  F1:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-03-31
+    validation_month: 2022-04-01
+  F2:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-06-30
+    validation_month: 2022-07-01
+  F3:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-09-30
+    validation_month: 2022-10-01
+  F4:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-10-31
+    validation_month: 2022-11-01
+  REFIT:
+    kind: "refit"
+    train_start: 2022-01-01
+    train_end: 2022-11-30
+    validation_month: null # scored nowhere (FR-P1-04-14; ADR-11 M5 — only REFIT carries null)
+  DEC:
+    kind: "locked"
+    train_start: 2022-01-01 # determined: study start (expanding window, D-8)
+    train_end: 2022-11-30 # determined: == REFIT.train_end (R-80)
+    validation_month: 2022-12-01
+
+# The D-144-frozen Madrigal acquisition identity (transcribed 2026-09-13 on the owner's
+# FINAL RULING, CR-2026-09-13-000102-FIXTURE-WINDOW). Values are register-derived only:
+# instrument and kindat verbatim from D-3/D-144 (kindat 3505 line-of-sight and 3506 site
+# list are EXCLUDED by the same decision); the parameter list is the EXECUTED five-column
+# identity D-17 records as "confirmed identical across all twelve monthly request
+# manifests" — the owner ruled AGAINST D-4's nine-parameter list, whose four-driver limb
+# was superseded by D-10 (drivers come from their governed external sources, never the
+# Madrigal request). Read by REQUIRED_FIELDS_MAP[("acquisition", 1)]'s TE 18.3 preflight;
+# scripts RESOLVE these, never choose them (R-30).
+# window_start/window_end are DELIBERATELY ABSENT: fixture runs derive their window from
+# the fixture scope (Option B, same CR), and this pair stays reserved for the future real
+# re-acquisition window (DATA-07 work) so the field's meaning is never overloaded.
+acquisition:
+  experiment: 8000 # D-3/D-144: Madrigal instrument 8000, World-wide GNSS Receiver Network
+  kindat: 3500 # D-3/D-144: "TEC binned 1 degree by 1 degree by 5 min"
+  parameters: [ut1_unix, gdlat, glon, tec, dtec] # executed five (D-17; D-10) — not D-4's nine
+
+# Declared input sources with hashes (assert_declared_sources_exist walks these;
+# a declared hash that does not resolve is a failure, never a warning). Empty:
+# nothing is declared yet; acquisition declares its inputs when it lands.
+declared_sources: []

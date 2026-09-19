@@ -1645,7 +1645,7 @@ satisfied.** TE §18.3 states three preconditions and a decision criterion. As o
 
 | §18.3 precondition | State on 2026-08-28 | Evidence |
 |---|---|---|
-| 1. All P0 decision-register entries for the affected component resolved and recorded | **Partially met.** D-1…D-31 exist and the register is maintained, but freeze-gate holes remain open by design — D-17's four support thresholds, D-25's requested §15.2 amendment, D-26's UNRESOLVED provenance, and the nine unfrozen scientific values this stage routed to G-04/G-05 rather than defaulting | `evidence/DECISIONS.md`; stage 3.1 gate items |
+| 1. All P0 decision-register entries for the affected component resolved and recorded | **Partially met.** D-1…D-31 exist and the register is maintained, but freeze-gate holes remain open by design — D-17's four support thresholds, D-25's requested §15.2 amendment *[granted and applied 2026-08-22, `CR-2026-08-22-EV-12`; annotated 2026-09-19, P-5]*, D-26's UNRESOLVED provenance, and the nine unfrozen scientific values this stage routed to G-04/G-05 rather than defaulting | `evidence/DECISIONS.md`; stage 3.1 gate items |
 | 2. An automated preflight asserts no required field in `data.yaml`, `features.yaml`, `experiment.yaml` or `seeds.yaml` is `TBD`, that every declared source and hash exists, **and that all gate tests pass** | **NOT MET — the assertion cannot run.** `configs/` does not exist; none of the four config files exists; `src/` does not exist; `pyproject.toml` does not exist. There is no preflight to run and nothing for it to assert over | Workspace inspection 2026-08-28 |
 | 3. The supervisor has signed the scientific hierarchy, IRI role, horizons, estimand, seeds and locked-test protocol | **Met only under the recorded authority equivalence.** No independent supervisor signature artifact exists for any of the six, and none is claimed. G-05 and G-06 remain `Blocked` | `evidence/DECISIONS.md` D-1 addendum; Vision §13.1 gate table |
 | **Decision criterion:** zero unresolved P0 fields **and no failing critical test** | **NOT VERIFIABLE in this environment.** The ten named critical tests cannot be executed: no Python interpreter is installed (`python.exe` is a zero-byte Windows Store stub; no registry entry; no interpreter on disk). "No failing critical test" is therefore **unproven, not proven** — an absence of executions, not an absence of failures | Environment inspection 2026-08-28 |
@@ -2038,6 +2038,630 @@ owed in a governed environment.
 
 ---
 
+## D-39 — Kp/ap 2022 driver product: GFZ archived settled nowcast selected; definitive retained as audit comparator (freeze, with binding limitation)
+
+**Decision date:** 2026-09-18. **Authorized by:** **Kimia Rezaei (project owner / student)**,
+in-session, as a **student decision** — recorded verbatim in substance from the owner's
+approval ("I approve D-39 and D-40 with the following binding qualifications. This
+authorizes recording my student decisions, not passing G-04 or releasing producer
+artifacts."). **No supervisor approval exists or is claimed for this entry.** Whether a
+separate supervisor countersignature is required before the series enters a governed
+feature release is **left open** (TE §6.2 `kp_safe`/`ap_safe` row; G-04). Appended by the
+implementing agent on the owner's explicit instruction of 2026-09-18; the drafted text is
+`governance/CHANGE_RECORD_2026-09-18_gfz_release_grade_rulings.md` §4, adopted here with
+the owner's qualifications applied.
+**Authority:** TE §6.2 (`kp_safe`/`ap_safe`: "observation + publication timestamps",
+safe lag ≥ 3 h); TE §10 driver table ("never backfill from future final values");
+`project.md` § Forbidden; **D-10.1** (provider GFZ Potsdam); `acquisition` R-40 and
+`external-products` R-63 as amended 2026-09-18.
+**Evidence:** `evidence/audit_gfz_2026-09-18/` (`retrieval_record.json`,
+`gfz-comparison-report.json`, `GFZ-AUDIT.md`, `sha256_manifest.json`), produced by
+`scripts/audit_gfz_drivers.py`; change records `CR-2026-09-18-GFZ-DRIVER-PAIR-AUDIT` and
+`CR-2026-09-18-GFZ-RELEASE-GRADE-RULINGS`.
+
+**Decision.**
+
+1. The **selected historical Kp/ap product** for the 2022 driver series consumed by
+   `kp_safe` and `ap_safe` is GFZ's **archived settled nowcast**, `Kp_now2022.wdc`, under
+   DOI 10.5880/Kp.0001 (folder `Kp_nowcast`), SHA-256
+   `7929d16aa1a14d35dff6759c02367746438b09dd084fdc731a4052af5a7475a4`, 23,581 bytes,
+   provider Last-Modified 2023-01-24 06:57:38 GMT, retrieved 2026-09-18. Its
+   `release_status` is recorded as **`nowcast (archived, settled)`**.
+2. The **definitive** product `Kp_def2022.wdc` (same DOI, folder `Kp_definitive`, SHA-256
+   `c1d9030254e5b1e9581065166ab501b7aad9f2e07756551aefa8b18302c2b829`, 23,581 bytes) is
+   **retained only as the audit comparator** for R-63 control 5. It is **not** substituted
+   for forecast-time features.
+3. **Binding limitation.** The archived nowcast is the provider's **settled, final-stage
+   nowcast**: it **includes post-issue revisions** made during the provider's approximately
+   1–2-day revision period and **does not reconstruct the first-issued values**. It is
+   **NOT labelled, and must never be described, as proven available at every 2022
+   forecast origin.** No first-issue reconstruction is claimed.
+4. **Obligation before producer release.** The applicable feature-availability rule for
+   this series must be **established from evidence** (provider release documentation or
+   equivalent), **or** the unresolved limitation and its implications for forecast claims
+   must be **explicitly documented** in the availability matrix and every dependent claim.
+   **No publication lag may be invented and no configuration may be changed silently**:
+   `configs/features.yaml: availability_lags` keeps `TBD — freeze gate` until that rule is
+   established and transcribed under its own record.
+
+**Measured for the record (a product-version difference, not a model error and not
+proof of leakage):** 1,046 of 2,920 three-hourly 2022 epochs differ between the nowcast
+and definitive products (max |ΔKp| 0.667, max |Δap| 17); coverage of both files is
+complete (2,920 epochs, no gaps, no missing symbols).
+
+**What this decision does NOT do.** It passes no gate (G-04 not passed); releases no
+producer artifact (`gfz_kp_ap_3h_2022_v1` does not exist); writes no
+`permitted_producers` entry; sets no `safe_lag_hours`; and creates no supervisor
+approval.
+
+---
+
+## D-40 — Hp60/ap60 2022 driver product: Hpo.0002 V2.0 selected; Hpo.0003 V3.0 retained as later-recomputed comparator; substitute control for R-63 control 5 (freeze, with binding limitation)
+
+**Decision date:** 2026-09-18. **Authorized by:** **Kimia Rezaei (project owner / student)**,
+in-session, as a **student decision** (same approval as D-39). **No supervisor approval
+exists or is claimed for this entry.** Whether a separate supervisor countersignature is
+required before the series enters a governed feature release is **left open** (TE §6.2
+`hp60_safe`/`ap60_safe` row: "GFZ or approved"; G-04). Appended by the implementing agent
+on the owner's explicit instruction of 2026-09-18; drafted text at
+`CR-2026-09-18-GFZ-RELEASE-GRADE-RULINGS` §4, adopted here with the owner's
+qualifications applied.
+**Authority:** TE §6.2 (`hp60_safe`/`ap60_safe`, safe lag ≥ 1 h); `project.md`
+§ Forbidden; `acquisition` R-40 and `external-products` R-63 as amended 2026-09-18; GFZ
+`format_description_doi_10.5880.Hpo.0003.txt` and `version_history_doi_10.5880.Hpo.0003.txt`.
+**Evidence:** as for D-39.
+
+**Decision.**
+
+1. The **selected historical Hp60/ap60 version** for the 2022 driver series consumed by
+   `hp60_safe` and `ap60_safe` is `Hp60ap60doi_2022.txt` under **DOI 10.5880/Hpo.0002
+   (V2.0)** — the DOI in force from 2022-03-26 to 2024-06-17 — SHA-256
+   `0ad71bf0eab1412852dd57ade1f7e2fdf5ff18f1cf9d20ebab8babc1fe471ad6`, 527,283 bytes,
+   provider Last-Modified 2023-01-24 06:57:43 GMT, retrieved 2026-09-18 (held as
+   `hp60ap60doi_2022_v2.txt`). Its `release_status` is recorded as **`contemporaneous V2.0`**.
+2. The same filename under **DOI 10.5880/Hpo.0003 (V3.0)** — the 2024 algorithm
+   recomputation — SHA-256
+   `a689ddef5590bf9cb6cc32cf72817921c93bf7e40d658b9181e2b5a3f665d461`, 527,342 bytes,
+   provider Last-Modified 2025-04-03 09:28:21 GMT (held as `hp60ap60doi_2022_v3.txt`), is
+   retained **only as the later-recomputed comparator**.
+3. **Substitute control, accepted for Hp60/ap60 only.** GFZ publishes no definitive
+   Hp60/ap60 and no archived Hp60 nowcast (Hpo is a single near-real-time-algorithm
+   product; `D` "Currently always 0, reserved"), so the literal R-63 control 5 comparison is
+   impossible for this series. The comparison of the two held files is accepted as the
+   **documented substitute** for R-63 control 5, under exactly this label:
+   **"Contemporaneous V2.0 versus later algorithm-recomputed V3.0."**
+4. **Binding limitation.** This is **not** an NRT-versus-definitive comparison. It
+   demonstrates sensitivity to later algorithmic recomputation and **does not establish
+   first-issue availability, and does not establish absence of information leakage**. The
+   availability-rule obligation stated in D-39 item 4 applies to this series equally.
+
+**Measured for the record (a product-version difference, not a model error and not
+proof of leakage):** 1,790 of 8,760 hourly 2022 epochs differ between V2.0 and V3.0
+(max |ΔHp60| 0.667, max |Δap60| 31); coverage of both files is complete.
+
+**What this decision does NOT do.** Passes no gate; releases no producer artifact
+(`gfz_hp60_ap60_1h_2022_v1` does not exist); writes no `permitted_producers` entry; sets
+no `safe_lag_hours`; creates no supervisor approval; decides nothing for Kp/ap (D-39) or
+F10.7 (D-21/D-22/D-23/D-25).
+
+---
+
+## D-41 — Q4/Q5 disposition: Hp60/ap60 provider is GFZ Potsdam; the three driver producer-artifact identities and their source/comparator roles (freeze of identities and roles only)
+
+**Decision date:** 2026-09-18. **Authorized by:** **Kimia Rezaei (project owner / student)**,
+in-session, as a **student decision** ("I approve the D-41 producer identities and
+source/comparator roles … subject to the following checks before adoption"; checks 3 and
+4 below were performed against the existing approved contracts and agreed, so the entry
+is adopted). **No supervisor approval exists or is claimed for this entry.** Appended by
+the implementing agent on the owner's explicit instruction of 2026-09-18 after confirming
+the identifier `D-41` was unused; drafted text at
+`governance/CHANGE_RECORD_2026-09-18_gfz_release_grade_rulings.md` §4b.
+**Authority:** TE §6.2 (`hp60_safe`/`ap60_safe`: "GFZ or approved source"; `f107_safe`,
+`f107_81_trailing` rows); **D-10.1** (driver sources); **D-35** limb 3 (a
+`permitted_producers` entry is a producing-ARTIFACT identity, owed only when the artifact
+exists); **D-39**, **D-40**; **D-21/D-22/D-23/D-25** (F10.7);
+`CR-2026-09-16-D25-AVAILABILITY-RULE` (Route 1 contract).
+
+**Decision.**
+
+**Q4 — provider.** The Hp60/ap60 provider is **GFZ Potsdam** (GFZ Helmholtz Centre for
+Geosciences, Geomagnetic Observatory Niemegk), narrowing TE §6.2's "GFZ or approved
+source" to its named default; no alternative source is approved. Kp/ap3 → GFZ Potsdam,
+Dst → Kyoto WDC and F10.7 → NRCan SRMP observed flux are unchanged from D-10.1.
+
+**Q5 — exactly three driver producer artifacts**, with these identities, roles and
+sources. Every hash in the "Source SHA-256" column is an **existing, measured** SHA-256 of
+a held input file. **No output hash exists**: the "Output" column is empty by decision and
+is filled only by `src/data/release.py:write_release` when each artifact is actually
+released under TE §13.3, in its own owner-approved step.
+
+| Producer artifact id | Serves (§6.2 rows) | Source product (selected version) | Source SHA-256 (existing, measured) | Output SHA-256 / `dataset_version` |
+|---|---|---|---|---|
+| `gfz_kp_ap_3h_2022_v1` | `kp_safe`, `ap_safe` | `Kp_now2022.wdc`, DOI 10.5880/Kp.0001, folder `Kp_nowcast` — the D-39 selected settled-nowcast product; 3-hourly, 2,920 epochs; 23,581 bytes | `7929d16aa1a14d35dff6759c02367746438b09dd084fdc731a4052af5a7475a4` | *(unset — assigned at release)* |
+| *(audit comparator, NOT a producer input)* | — | `Kp_def2022.wdc`, same DOI, folder `Kp_definitive`; 23,581 bytes | `c1d9030254e5b1e9581065166ab501b7aad9f2e07756551aefa8b18302c2b829` | — |
+| `gfz_hp60_ap60_1h_2022_v1` | `hp60_safe`, `ap60_safe` | `Hp60ap60doi_2022.txt`, DOI 10.5880/Hpo.0002 (V2.0), folder `Hpo60` — the D-40 selected version; hourly, 8,760 epochs; 527,283 bytes; held as `hp60ap60doi_2022_v2.txt` | `0ad71bf0eab1412852dd57ade1f7e2fdf5ff18f1cf9d20ebab8babc1fe471ad6` | *(unset — assigned at release)* |
+| *(recomputed comparator, NOT a producer input)* | — | same filename, DOI 10.5880/Hpo.0003 (V3.0); 527,342 bytes; held as `hp60ap60doi_2022_v3.txt` | `a689ddef5590bf9cb6cc32cf72817921c93bf7e40d658b9181e2b5a3f665d461` | — |
+| `srmp_f107_observed_daily_2022_v1` | `f107_safe`; **`f107_81_trailing` is DERIVED from this daily producer and is not a separate raw-source artifact** | NRCan SRMP `fluxtable.txt` (observed flux, not 1-AU-adjusted), `evidence/audit_ec1_2026-08-15/nrcan_f107/`, retrieved 2026-08-15, 2,170,350 bytes, 23,848 records / 1,101 in 2022 / 365 days; daily value per D-21, duplicate-UT per D-22, high-spread days per D-23, availability per D-25 | `4b7fbfde3b9d0140ef43e7487f5986fe18f93182dac5e1ee37a93fb6ebd690b9` | *(unset — assigned at release)* |
+
+**Check 3 — `f107_81_trailing` as a derived feature, verified against the approved
+definition (agrees; nothing new introduced).** TE §6.2 row `f107_81_trailing`:
+"**Trailing** 81-day F10.7 mean", "Approved source" (the same source as `f107_safe`),
+"Trailing window ending at the safe-lagged day", "Trailing mean only", "Carry-forward
+≤ 3 h, then exclude", "**The centered 81-day mean is prohibited — it uses future
+days.**" D-25: "The trailing 81-day mean is computed over daily medians ending at the
+safe-lagged day, never centered." `project.md` § Forbidden and § Mandated state the same.
+Implementation of record: `src/external/spaceweather.py:trailing_mean` — window
+`[end_day − (window_days − 1), end_day]` by construction, raising `IntegrityError` when
+any window day is missing (TC-20: never filled); `src/features/availability.py` limb 2
+`assert_trailing_not_centered` (kind must be `trailing`) and limb 3
+`assert_anchor_recomputed` (the recorded anchor IS the safe-lagged day and the mean is
+recomputed from it). Constituent observations obey the applicable availability rule: the
+window ends at the safe-lagged day D−1, whose daily median is available at 00:00 UTC on
+D (D-25) — at or before every origin on day D. **Preserved, not decided here:** the window
+length (81) and `recomputation_tolerance` stay configuration under `TBD — freeze gate`;
+the carry-forward composition on a 24-hour cadence stays the open G-04 freeze item
+(`external-products` R-57a); no missing-data rule is added. **Transcription constraint
+recorded, no value chosen:** under the Route 1 contract a rule-bearing feature may not
+carry a trailing window, so `f107_81_trailing` keeps the scalar-lag-plus-window shape and
+`f107_safe` carries the rule; at transcription the scalar chosen for `f107_81_trailing`
+must place the anchor at D−1 for every origin hour on day D, consistent with D-25.
+
+**Check 4 — the D-25 Route 1 `availability_rule` contract, cited exactly for the F10.7
+manifest (agrees; scope bounded).** `src/features/availability.py`:
+`AVAILABILITY_RULE_PREVIOUS_DAY_MEDIAN_MIDNIGHT_UTC = "previous_day_median_midnight_utc"`
+(the sole member of the closed set `AVAILABILITY_RULE_KINDS`), applied by
+`_rule_available_at` as midnight UTC of the observation day plus one day and combined
+with the observation/publication instant by `max` in `build_availability_matrix`;
+authority `CR-2026-09-16-D25-AVAILABILITY-RULE` §2 items 1–8, transcribing **D-25**
+(`availability_ts(median(D-1)) = 00:00 UTC on D`). The F10.7 producer's manifest cites
+that identifier and D-25. **This contract resolves F10.7 only**: D-25 supplements D-21
+and names no other series; Kp/ap and Hp60/ap60 remain on scalar `safe_lag_hours` with
+observation and publication timestamps (TE §6.2, D-10.3: ≥ 3 h, ≥ 1 h), and the D-39
+item-4 / D-40 availability obligation for those two series is **not** discharged by it.
+
+**What this decision does NOT do.** It approves **identities and roles only**. It does
+**not** approve temporal availability for any series; does **not** certify any `*_safe`
+feature as leakage-free; does **not** authorize producer release; does **not** pass G-04;
+sets no `safe_lag_hours`, window value or missing rule; writes no `permitted_producers`
+entry (owed only when each artifact exists, D-35 limb 3); changes no configuration.
+
+**Countersignature — governing provision, stated without adding a requirement.** TE §18.2
+lists "Any feature, its safe lag, or its missing rule — Student + Supervisor (Q-16,
+Q-17)"; it lists **no** row for a driver source product, its version or a producer-artifact
+identity, and D-10.1 (driver sources) was taken sole-signed on that basis. D-41 therefore
+**requires no supervisor countersignature under §18.2**. The availability obligations
+D-39 item 4 / D-40 carry ARE §18.2 Q-16 items and G-04's evidence ("Supervisor for
+ambiguous inputs", Vision §13.1), so **supervisor involvement is required there**, and the
+settled-nowcast limitation may make Kp/ap an "ambiguous input" for G-04 — recorded as
+open, not resolved.
+
+---
+
+## D-42 — GFZ driver availability floors accepted as project assumptions for a retrospective study, with a binding scientific limitation (student acceptance; supervisor countersignature OPEN)
+
+**Decision date:** 2026-09-19. **Authorized by:** **Kimia Rezaei (project owner / student)**,
+in-session, as a **qualified student acceptance** (item A1 of the 2026-09-19 scoped
+authorization: "I accept the proposed GFZ availability assumptions for a retrospective
+study … These are project assumptions, not demonstrated publication or revision-completion
+bounds … Record my student acceptance through the existing decision process. Do not
+fabricate a supervisor countersignature or mark any required approval complete."). **No
+supervisor approval exists or is claimed.** TE §18.2 lists "Any feature, its safe lag, or
+its missing rule — Student + Supervisor (Q-16, Q-17)", so the supervisor's countersignature
+of this acceptance is **REQUIRED and OPEN**; until it is given, this entry records the
+student's position and binds the project's wording, not the G-04 outcome. Appended by the
+implementing agent on the owner's explicit instruction.
+**Authority:** TE §6.2 rows 307–308 (`kp_safe`/`ap_safe` ≥ 3 h; `hp60_safe`/`ap60_safe`
+≥ 1 h); Vision D-116 (Q-16, Approved); D-10.3; **D-39**, **D-40**, **D-41**;
+`acquisition` R-40 and `external-products` R-63 as amended 2026-09-18; the D-25/EV-12
+evidence pattern (`CR-2026-08-22-EV-12`).
+**Evidence:** `evidence/audit_gfz_2026-09-18/` (provider files, hashes, comparison
+report); GFZ `kp_index_data_description_20210311.pdf` §4 (nowcast "can change for some
+time (typically a day or two)" and is archived at its final stage);
+`format_description_doi_10.5880.Hpo.0003.txt` and `version_history_doi_10.5880.Hpo.0003.txt`
+(single near-real-time-algorithm grade, no publication timestamp, V3.0 recomputation);
+`CR-2026-09-18-GATE-PREP` §1.1 (the six-entry availability table);
+`CR-2026-09-19-GATE-PREP-2` §A1.
+
+**Decision.**
+
+1. For the 2022 driver series consumed by `kp_safe` and `ap_safe` (D-39's archived
+   settled-nowcast product) the project's **existing approved 3-hour floor** is accepted
+   as the availability assumption; for `hp60_safe` and `ap60_safe` (D-40's Hpo.0002 V2.0
+   product) the **existing approved 1-hour floor** is accepted. Both are the values TE
+   §6.2 and D-116 already froze as "≥"; nothing numerical is chosen here.
+2. **These are project assumptions for a retrospective study**, not demonstrated
+   publication or revision-completion bounds. The provider archives no per-value
+   publication timestamp for either series; "typically a day or two" is a provider
+   characterisation of nowcast revision, not a maximum; and a version label (Hpo.0002)
+   proves which algorithm produced the held values, not when a 2022 origin could have
+   seen them. **The floors do not make settled archive values historically available at
+   those lags.**
+3. **Binding scientific limitation, propagated to every method description and result
+   claim that uses these series:** *results using these archives do not establish exact
+   operational replay or absence of revision-related look-ahead.* The statement is
+   carried as an artifact field (`src/evaluation/metrics.py:
+   DRIVER_AVAILABILITY_LIMITATION_STATEMENT`) and asserted on the limitations surface by
+   the claims checklist (`src/evaluation/diagnostics.py`, row "D-42"; negative control
+   `tests/test_regimes_and_reporting.py::test_d42_driver_availability_limitation_row_fails_when_absent`);
+   it is recorded in `acquisition` R-40's and `external-products` R-63's amendment blocks,
+   and it must accompany any lag cited for these series in the thesis.
+4. **The evidence form for the availability record** is the D-25/EV-12 pattern: the
+   approved floor recorded together with a per-series `publication_latency_statement`
+   naming the absence of publication timestamps and the settled-nowcast / version-label
+   limitation. **No configuration is transcribed by this decision**:
+   `configs/features.yaml: availability_lags` stays `TBD — freeze gate` until all six
+   entries can be written together under their own record, after the supervisor's
+   countersignature and the R-57a composition freeze (A3).
+
+**Reported supervisor approval, annotated 2026-09-19 (recording date; not an earlier date).** The project owner / student, Kimia Rezaei, stated in-session on 2026-09-19: "I confirm that my supervisor has approved the scientific decisions covered by the latest handoff, including D-42, D-43, D-45, and D-46." This is recorded here as **student-reported supervisor approval** — a report by the recorded decision owner that the approval occurred, not a supervisor-signed artifact, not a directly observed supervisor communication, and not an earlier approval date than today. No signature, communication, or date is invented beyond what was stated. **Prescribed evidence still outstanding**, per TE §18.2's Student + Supervisor bar and the project's own countersignature practice (`governance/COUNTERSIGNATURE_REQUEST_2026-08-16.md`, `governance/COUNTERSIGNATURE_REQUEST_2026-08-21.md`): a supervisor-signed or otherwise directly-recorded countersignature artifact closing this item, exactly as items 1 and 2 of the 2026-08-16 letter were closed. Drafted and awaiting that signature: `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`. Until that artifact exists, this entry's status is **reported, not verified** — it does not, by itself, satisfy TE §18.2 and does not pass G-04. **Update, later the same day (2026-09-19).** The project owner / student stated: "supervisor has approved and countersigned." Recorded, as this register records every prior owner statement in this single-operator project (see e.g. the many "no supervisor signature artifact exists and none is claimed" entries above): as the recorded decision owner's own statement of the countersignature, not as a signature this session independently observed. `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`'s status line is updated to record the same statement. On that basis this entry's TE §18.2/§18.3 item is treated as closed; it still does not, by itself, pass G-04.
+
+**What this decision does NOT do.** It does not pass G-04; does not certify any `*_safe`
+feature as leakage-free; does not authorize a producer release or a `permitted_producers`
+row; does not transcribe a lag; does not resolve the F10.7 trailing-row shape (A2, applied
+the same day under `CR-2026-09-19-GATE-PREP-2` as an implementation of D-25, not as a new
+decision), R-57a (A3) or the recomputation tolerance (A4); and does not create or imply a
+supervisor approval.
+
+---
+
+## D-43 — Interval semantics of the GFZ lag floors: margins after interval COMPLETION (clarification; student decision; supervisor countersignature OPEN)
+
+**Decision date:** 2026-09-19. **Authorized by:** **Kimia Rezaei (project owner /
+student)**, in-session ("P-1 — adopt explicit interval semantics … I approve interpreting
+the GFZ lag floors as margins after interval completion"). **This is a NEW clarification,
+not something D-42 or TE §6.2 had already unambiguously specified**: Vision §7.3 defines
+the observation timestamp as *"time represented by the value"*, which for an
+interval-valued index names neither start nor end; D-10.3 fixes only that the value's
+availability instant is *"the instant its value could actually have been known"*. Because
+the reference instant of a safe lag is part of the lag's meaning, TE §18.2 ("Any feature,
+its safe lag, or its missing rule — Student + Supervisor, Q-16/Q-17") applies: the
+supervisor's countersignature is **REQUIRED and OPEN**; nothing here claims it. Appended
+by the implementing agent on the owner's explicit instruction. **Authority:** D-10.3;
+TE §6.2 rows 307–308 ("last **completed** 3-hour interval"); Vision §7.3/§7.5; D-42;
+`CR-2026-09-19-SCI-REVIEW` §1; `CR-2026-09-19-SCI-DECISIONS` §1.
+
+**Decision.**
+
+1. For an interval-valued index the **observation interval** is the provider's own
+   `[start, end)` in UT — Hpo rows are labelled by their start (`hh.h`, file header),
+   WDC slots by position (`[3k, 3k+3)`); **both boundaries are preserved** in every
+   derived row (`source_interval_start_utc`, `source_interval_end_utc`) and the
+   provider's label is never overwritten or concealed by the reference instant.
+2. The **reference instant** of the safe lag is the interval **END** (completion), the
+   earliest instant the value could have existed. The availability matrix's
+   `observation_timestamp` for such a series is that end.
+3. The floors are therefore **margins after completion**: Kp/ap `available_at = end +
+   3 h`; Hp60/ap60 `available_at = end + 1 h`. A value is eligible at a forecast origin
+   *T* iff `available_at ≤ T`. Boundary cases (UT): Kp `[00,03)` is unavailable at 05:00
+   and eligible at 06:00; Kp `[03,06)` is eligible from 09:00; Hp60 `[04,05)` is
+   unavailable at 05:00 and eligible at 06:00.
+4. **These margins remain assumptions for retrospective evaluation** (D-42 unchanged).
+   They establish neither historical first-issue publication times nor
+   revision-completion times, and they do not make the settled archive values
+   historically available at those instants.
+
+---
+
+## D-44 — One authoritative lagged-selection owner per driver kind; the alignment contract for `*_safe` series (student decision; implementation)
+
+**Decision date:** 2026-09-19. **Authorized by:** the project owner / student ("P-2 —
+implement one authoritative availability-selection mechanism"). A mechanism decision
+implementing D-43 and D-10.3; no lag, definition or provider changes. No supervisor
+countersignature is required for the mechanism itself (no TE §18.2 row covers a
+selection routine); the reference-instant semantics it applies are D-43's and carry
+D-43's open countersignature. **Authority:** D-10.3, D-25, D-43; `features-and-splits`
+R-76a (amended below); `external-products` R-58.
+
+**Decision.**
+
+1. **Owners.** Interval-valued indices (Kp/ap, Hp60/ap60): `src/external/spaceweather.py:
+   select_lagged_series` is the ONLY place the safe lag is applied — at each origin *T*
+   it selects the LATEST source interval with `end + lag ≤ T` and records the source
+   interval (both boundaries), the assumed `available_at_utc` (= end + lag), the origin
+   (`interval_start_utc`) and the selected value, each in its own field. The daily F10.7
+   series: `resolve_f107_at_origin` (D-25 rule; D-46 composition) remains its only owner.
+   `build_features` shifts nothing and refuses a series whose declared selection lag
+   differs from the availability matrix's `safe_lag_hours` (no double lag, no shortfall).
+2. **Alignment contract, amended explicitly (R-76a / R-58 limbs 1–2).** A raw
+   own-interval series keeps the existing check (a value repeats only inside its own
+   interval). A lagged `*_safe` series carries `attrs["selection"] = {rule:
+   "latest_completed_interval_plus_lag", safe_lag_hours}` and is checked by
+   `assert_lagged_selection`: every present value traces to the observation on its
+   recorded source interval with equal value; `available_at` equals source end + lag and
+   is at or before the origin; no later interval is also eligible; a present source value
+   is never dropped. Forecast-origin timestamps are never relabelled as observations.
+3. **Missing data compose on the epoch axis.** A selected interval whose value is missing
+   yields a missing row that keeps the interval's identity; the ≤ 3 h carry-forward
+   (R-57a, `apply_carry_forward`) then applies on the origin axis and is recorded; the
+   selector never reaches back to an older interval.
+4. **Matrix rows** for a lagged series are derived from the selection
+   (`availability_rows_from_selection`): `observation_timestamp` = selected source END
+   (D-43); `publication_timestamp` empty with the documented-absence statement.
+
+**Reported supervisor approval, annotated 2026-09-19 (recording date; not an earlier date).** The project owner / student, Kimia Rezaei, stated in-session on 2026-09-19: "I confirm that my supervisor has approved the scientific decisions covered by the latest handoff, including D-42, D-43, D-45, and D-46." This is recorded here as **student-reported supervisor approval** — a report by the recorded decision owner that the approval occurred, not a supervisor-signed artifact, not a directly observed supervisor communication, and not an earlier approval date than today. No signature, communication, or date is invented beyond what was stated. **Prescribed evidence still outstanding**, per TE §18.2's Student + Supervisor bar and the project's own countersignature practice (`governance/COUNTERSIGNATURE_REQUEST_2026-08-16.md`, `governance/COUNTERSIGNATURE_REQUEST_2026-08-21.md`): a supervisor-signed or otherwise directly-recorded countersignature artifact closing this item, exactly as items 1 and 2 of the 2026-08-16 letter were closed. Drafted and awaiting that signature: `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`. Until that artifact exists, this entry's status is **reported, not verified** — it does not, by itself, satisfy TE §18.2 and does not pass G-04. **Update, later the same day (2026-09-19).** The project owner / student stated: "supervisor has approved and countersigned." Recorded, as this register records every prior owner statement in this single-operator project (see e.g. the many "no supervisor signature artifact exists and none is claimed" entries above): as the recorded decision owner's own statement of the countersignature, not as a signature this session independently observed. `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`'s status line is updated to record the same statement. On that basis this entry's TE §18.2/§18.3 item is treated as closed; it still does not, by itself, pass G-04.
+
+Verified by synthetic tests (`tests/test_external_drivers.py`,
+`tests/test_feature_availability.py`) covering the D-43 boundaries, open and
+not-yet-available intervals, stale selection, double lag and shortfall, source
+traceability, dropped values, missing-value composition with carry-forward, and the
+end-to-end `build_features` path with source values unchanged.
+
+---
+
+## D-45 — IRI-2016 benchmark: standard index inputs, disclosed as a retrospective climatological reference (student selection; supervisor approval REQUIRED and OPEN)
+
+**Decision date:** 2026-09-19. **Selected by:** the project owner / student ("P-3 — adopt
+standard IRI as a retrospective reference … preserving its documented index semantics").
+**Approval status:** TE §18.3 makes *"the IRI role"* a supervisor sign-off item and Vision
+§6.11 freezes the benchmark's driver inputs at a supervisor gate (G-03/G-05 rows of TE
+§4); this entry records the student's selection and leaves **that supervisor approval
+outstanding**; the dependent patch to `src/external/iri.py`'s report confirmations is
+PREPARED (`governance/proposed/P-3_iri_report_confirmations.patch`) and NOT applied.
+**Authority:** Vision §6.11, §7.2; TE §6.2 row `iri2016_t_plus_1_tecu`; D-114;
+`external-products` R-59; `CR-2026-09-19-SCI-DECISIONS` §3 (the verified execution path).
+
+**Decision.**
+
+1. The benchmark is IRI-2016 via `iricore` (`version=16` passed explicitly — the
+   package's default is IRI-2020), electron density integrated by `iricore.vtec` with
+   `htop = 2000` km, run with IRI's **standard shipped index files** (`apf107.dat`,
+   `ig_rz.dat`, pinned by SHA-256 at freeze; `iricore.update()` is never run after the
+   pin) and **no `oarr` overrides** of F10.7 daily/81-day, Rz12 or IG12.
+2. Its index inputs are therefore, as documented and verified from the shipped source and
+   data: daily F10.7 = the **1-AU-adjusted 20 UT reading** of the **target day**
+   (`apf107.dat`; IRI: *"F10.7 should be adjusted … not observed"*); F10.7_81 = the 81-day
+   average **centered** on the target day; F10.7_365 centered; IG12/Rz12 = 12-month
+   running means **centered** on the month (final values for 2022, the file being updated
+   2024-06); 3-hourly ap of the **target day** up to the target hour (foF2 storm model,
+   `jf(26)` default on). None of these is forecast-safe at the model's origin, and the
+   centered/adjusted inputs are **not replaced** to resemble the ML pipeline.
+3. **Purpose and disclosure.** IRI is a **retrospective climatological reference**, not
+   an operational forecast and not a competitor with identical information
+   availability. Every table or interpretation of the LSTM/baseline-vs-IRI comparison
+   states: same target, `target_definition_id`, locations, units, target times and
+   comparison-wide scoring rows; the model's inputs are lagged to the forecast origin
+   under D-25/D-42/D-43, the reference's index inputs are retrospective, centered and
+   same-day; outperforming the reference establishes no operational superiority; the
+   2000 km ceiling/plasmasphere mismatch (Vision §6.11) is disclosed alongside.
+**Reported supervisor approval, annotated 2026-09-19 (recording date; not an earlier date).** The project owner / student, Kimia Rezaei, stated in-session on 2026-09-19: "I confirm that my supervisor has approved the scientific decisions covered by the latest handoff, including D-42, D-43, D-45, and D-46." This is recorded here as **student-reported supervisor approval** — a report by the recorded decision owner that the approval occurred, not a supervisor-signed artifact, not a directly observed supervisor communication, and not an earlier approval date than today. No signature, communication, or date is invented beyond what was stated. Item 4 below ("What changes when approved") applies only once that artifact exists. **Prescribed evidence still outstanding**, per TE §18.2's Student + Supervisor bar and the project's own countersignature practice (`governance/COUNTERSIGNATURE_REQUEST_2026-08-16.md`, `governance/COUNTERSIGNATURE_REQUEST_2026-08-21.md`): a supervisor-signed or otherwise directly-recorded countersignature artifact closing this item, exactly as items 1 and 2 of the 2026-08-16 letter were closed. Drafted and awaiting that signature: `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`. Until that artifact exists, this entry's status is **reported, not verified** — it does not, by itself, satisfy TE §18.2 and does not pass G-04. **Update, later the same day (2026-09-19).** The project owner / student stated: "supervisor has approved and countersigned." Recorded, as this register records every prior owner statement in this single-operator project (see e.g. the many "no supervisor signature artifact exists and none is claimed" entries above): as the recorded decision owner's own statement of the countersignature, not as a signature this session independently observed. `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`'s status line is updated to record the same statement. On that basis this entry's TE §18.2/§18.3 item is treated as closed; it still does not, by itself, pass G-04.
+
+4. **What changes when approved:** `iri.py`'s R-59 limb-3 confirmations
+   `no_future_centering_confirmed` / `available_at_target_time_confirmed` (both `True`
+   required today) become a **recorded disclosure** — `index_inputs_retrospective_centered
+   = True` with the list in item 2 — and Vision §6.11 / TE §6.2 wording "must not be
+   future-centered" is amended to "future-centered index inputs recorded and disclosed";
+   R-59 limb 4 records the IRI index rows in the availability matrix as
+   `hindcast-only` grade rows, never as forecast-safe rows.
+
+**Annotation, 2026-09-19 — verified runtime and bundled index files (owner-authorized; original text above preserved unchanged).**
+*Authorization:* the project owner / student, Kimia Rezaei, instructed in-session on
+2026-09-19: "I approve a dated D-45 annotation identifying the actual verified runtime and
+its bundled index files, subject to the evidence checks below." This paragraph is that
+annotation, recorded on the student's authority as decision owner. **No supervisor
+signature is claimed for it**; D-45's supervisor status stays exactly as the paragraphs
+above record it (student-reported approval and countersignature, 2026-09-19).
+*Evidence:* `evidence/iri2016_kaggle_verification_2026-09-19/` (returned Kaggle bundle,
+zip SHA-256 `3a0723a1ff70c213ed3cb7139cbfc02e4495d04888a00136c3e5a6c9afa6d508`, produced
+by `kaggle/kaggle_iri2016_verification.ipynb` revision 2, SHA-256
+`b8399c98f248749fca3b6e5acebec9543c262ec0cc83dde2dab0042460d564fa`, preserved beside the
+bundle) and `governance/CHANGE_RECORD_2026-09-19_scientific_decisions_p3.md` §3.6–3.7.
+
+1. **Verified runtime (the executable benchmark configuration).** `iricore==1.8.0` from
+   the PyPI wheel `iricore-1.8.0-cp310-cp310-manylinux_2_35_x86_64.whl`, SHA-256
+   `f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874` (PyPI upload
+   2024-04-02; the newest release publishing a Linux wheel). Installed on Kaggle
+   2026-09-19 with `pip install --no-deps --require-hashes` into a `virtualenv` at
+   CPython **3.10.12** (`/usr/bin/python3.10` of the Kaggle image; kernel Python 3.12.13;
+   `Linux-6.12.90+-x86_64-with-glibc2.35`, i.e. exactly the `manylinux_2_35` floor),
+   together with `numpy==1.26.4` (`ffa75af20b44f8dba823498024771d5ac50620e6915abac414251bd971b4529f`),
+   `fortranformat==2.0.3` (`88c8e7a3eac16c23420e8a1c4b21ddc7108f48e8dcbd2e0da6c8ecc48b051bb2`),
+   `pymap3d==3.2.0` (`fccd44f2f6021a95adec19771c603b8dac104eab120d863c463d76b9bc298669`).
+   `version=16` is passed **explicitly** on every call; the installed
+   `iricore.config.DEFAULT_IRI_VERSION` is 20 (verified at runtime), so item 1's "passed
+   explicitly" is necessary, not decorative.
+2. **Bundled index files — the D-45 item 1 freeze pins, for release 1.8.0.**
+   `apf107.dat` SHA-256 **`cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674`**
+   (1,329,460 bytes; 24,172 contiguous daily rows 1958-01-01 → **2024-03-06**);
+   `ig_rz.dat` SHA-256 **`fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486`**
+   (9,815 bytes; header `3,7,2024` = update date **2024-03-07** in the file's
+   month-day-year convention; declared range 1958-01 → 2024-10; 804 IG12 and 804 Rz12
+   values, i.e. one edge value before and after the range, as `tcon` indexes them). Both
+   hashes were measured on Kaggle before and after the smoke-test calls (unchanged) and
+   re-measured locally on the same wheel bytes. `iricore.update()` is never run after
+   this pin (item 1).
+3. **Support for every 2022 target time, verified from the compiled sources in the wheel
+   (`irifun.for`: `readapf107`, `read_ig_rz`, `tcon`, `APF`, `APF_ONLY`) and the installed
+   files.** `apf107.dat` is read directly for rows 2021-12-30 → 2022-12-31 (`APF` takes ap
+   back to UT−39 h, `APF_ONLY` the previous day's F10.7): all 367 rows present, none
+   carrying a negative missing sentinel. The file's centered F10.7_81 / F10.7_365 columns
+   need daily data 2021-11-22 → 2023-02-09 and 2021-07-03 → 2023-07-01 respectively: both
+   windows lie inside the file, and every 2022 row's two columns recompute from the same
+   file's daily column within 0.05 (F5.1 rounding), i.e. they are full-window values, not
+   edge-truncated ones. `ig_rz.dat` is read for months 2021-12 → 2023-01 (day < 15 uses
+   the previous month, day ≥ 15 the next): all 14 present and non-negative; the centered
+   12-month window of the last of them ends 2023-07, before the file's 2024-03-07 update
+   date. The file itself does not label values observed versus predicted, so
+   "final" here means "computed from a window the file's update date covers"; the
+   provider's grade is not asserted beyond that. **Executable-path facts not in the
+   earlier inspection:** (a) the compiled library reads both files itself; the Python
+   `read_iri_data.readapf107` is commented out in 1.8.0 (`# IRI_DATA = readapf107()`,
+   "TODO: Fix data reading from Python") and carries a column bug (its 81-day slot is
+   overwritten by the 365-day values) that would matter only if a future release
+   activated it — a reason the pin is on this exact wheel; (b) `read_ig_rz` multiplies
+   Rz12 by **0.7** for every month from 2014-01 when the header date is after 2016-09
+   (new sunspot-number series), so the Rz12 IRI-2016 uses for 2022 is 0.7 × the file
+   value (e.g. 2022-06: file 81.1, used 56.77); IG12 is used as stored.
+4. **Reconciliation with the source inspection that item 2 cites — supersession.** Item 2
+   and `CR-2026-09-19-SCI-DECISIONS` §3 read `apf107.dat` ending 2024-06-17 and
+   `ig_rz.dat` "updated 6/2024" from the GitHub `master` snapshot (commit
+   `92c6d8c727b0300d8bd61e7e8e91dd97514256a7`) and the PyPI 1.9.0 sdist (SHA-256
+   `6f1503716f5f8ba3e48038a4cade9310d396ee2dce299ac841824a054b595e35`), whose index files
+   are identical to each other (`apf107.dat` `4de3bfa2d3b488e61477cf7bfb9ec1d9ca891b265694752b20e7b320f9657e82`,
+   `ig_rz.dat` `e688620c6ac25dec6cf31ebd4afe091a6a083c4e1d50f22c68d096474944e1a8`; both
+   archives retained from the 2026-09-19 session and re-hashed). **For the executable
+   benchmark configuration the installed wheel's evidence (items 1–3) supersedes that
+   inspection**; the inspection's semantic findings (adjusted 20 UT daily F10.7,
+   centered 81-/365-day means, centered IG12/Rz12, target-day ap, no `oarr` overrides)
+   stand and were re-verified on the installed file (the four spot values 239.0, 144.5,
+   257.0, 133.1 are unchanged). Value comparison, done separately from length/date
+   differences: `apf107.dat` — 24,172 common dates, 176 differ, the earliest
+   **2023-09-08**, none in 2021-07-02 → 2023-07-01; `ig_rz.dat` — 804 common values,
+   15 months differ (2023-09 → 2024-11), none in 2021-12 → 2023-01. **Every index value
+   IRI-2016 reads for any 2022 target time is therefore identical in the two copies**;
+   the historical description was of newer files whose extra rows revise only a
+   post-2023-09 tail the benchmark never reads. No performance effect is claimed or
+   measurable from this; none is needed, since the inputs are equal.
+5. **Smoke test and its limits.** One `iricore.vtec(2024-01-06T12:00Z, 40.286, 44.086,
+   hbot=90, htop=2000, hstep=0.5, version=16)` call at the D-1 ARUC coordinate returned
+   `37.373754526924806` TECU, finite, bit-identical on the repeated call. It establishes
+   installation and runtime only: a single point at a synthetic non-December date, no
+   GNSS/VTEC target read, no 2022 target time evaluated, no comparison, **not a
+   scientific result and not validation of the 2022 benchmark**.
+6. **Material-change assessment.** This annotation changes no decision: the release and
+   the pin values are the concrete form of item 1's "standard shipped index files,
+   pinned by SHA-256 at freeze", and item 4 shows the 2022 inputs equal the copies the
+   original text described. TE §18.2 therefore requires no additional approval for it.
+   What remains supervisor-gated is unchanged: Vision §6.11 freezes the benchmark's
+   driver inputs at G-03/G-05, and the two hashes in item 2 are presented there as part
+   of D-45. G-04 is not passed by this annotation.
+
+---
+
+## D-46 — F10.7 missing-update composition: reading B, clock hours from the expected availability instant, inclusive 3-hour boundary (freeze; Student + Supervisor item — countersignature OPEN)
+
+**Decision date:** 2026-09-19. **Decided by:** the project owner / student ("A3 — adopt
+option B … I select the three-hour missing-update allowance, not the daily-step
+extension"). TE §18.2 Q-16/Q-17 ("its missing rule") makes this a Student + Supervisor
+item: the student's freeze is recorded; **supervisor countersignature OPEN**.
+**Authority:** TE §6.2 ("Carry-forward ≤ 3 h, then exclude"); TC-09; D-21; D-25;
+`external-products` R-57a; `CR-2026-09-19-SCI-REVIEW` §4.
+
+**Decision.**
+
+1. **Ordinary reuse is not carry-forward.** `median(D−1)` is the designated value for
+   every origin on day *D* (available at 00:00 UTC on *D* under D-25); its use at
+   00:00 … 23:00 of *D* is normal use within its validity period — staleness 0, not
+   carried, not counted.
+2. **Missing update.** When the designated `median(D−1)` is absent (no readings, NaN) or
+   not yet available at 00:00 UTC on *D*, the previously available median is carried
+   forward for origins *t* with `t − 00:00 UTC D ≤ 3 h` — **inclusive**: 00:00, 01:00,
+   02:00 and 03:00 keep the carried value; origins **from 04:00 are excluded** (the row's
+   F10.7 limb is unavailable) until a valid update becomes available. The clock starts at
+   the EXPECTED availability instant of the missing value, never at the carried value's
+   own availability or observation instant; on a second consecutive missing day the clock
+   restarts at 00:00 of that day. The bound is `configs/features.yaml:
+   carry_forward_bound_hours` (TC-09), never a literal; the vocabulary is
+   `carry_forward_composition: clock_hours`.
+3. **`f107_81_trailing`** keeps its exact 81-day window ending at the eligible anchor
+   (*D*−1); a missing constituent is never imputed and no older window is substituted, so
+   the derived feature is **unavailable for the whole affected day**, including the four
+   origins where `f107_safe` is carried. Under the established feature-completeness rule
+   (a row missing any driver value is excluded, `build_features`), a feature set carrying
+   both rows loses all 24 origins of an affected day; a set carrying `f107_safe` alone
+   loses 20. This distinction is documented, not smoothed over.
+4. **Measured on the held file (Jan–Nov 2022, D-21/D-22/D-23 applied, December readings
+   never read):** 365/365 days 2021-12-01 … 2022-11-30 carry a median (four duplicate
+   days and four high-spread days reproduce D-22/D-23 exactly); over the **8016** hourly
+   origins of 1 Jan–30 Nov 2022, **0** are carried and **0** excluded — every origin is
+   ordinary reuse. The A3 sensitivity protocol therefore **stops at Step 0** (no affected
+   origin); no model experiment is run. The result would change only if D-26's
+   provenance resolution removed days.
+**Reported supervisor approval, annotated 2026-09-19 (recording date; not an earlier date).** The project owner / student, Kimia Rezaei, stated in-session on 2026-09-19: "I confirm that my supervisor has approved the scientific decisions covered by the latest handoff, including D-42, D-43, D-45, and D-46." This is recorded here as **student-reported supervisor approval** — a report by the recorded decision owner that the approval occurred, not a supervisor-signed artifact, not a directly observed supervisor communication, and not an earlier approval date than today. No signature, communication, or date is invented beyond what was stated. **Prescribed evidence still outstanding**, per TE §18.2's Student + Supervisor bar and the project's own countersignature practice (`governance/COUNTERSIGNATURE_REQUEST_2026-08-16.md`, `governance/COUNTERSIGNATURE_REQUEST_2026-08-21.md`): a supervisor-signed or otherwise directly-recorded countersignature artifact closing this item, exactly as items 1 and 2 of the 2026-08-16 letter were closed. Drafted and awaiting that signature: `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`. Until that artifact exists, this entry's status is **reported, not verified** — it does not, by itself, satisfy TE §18.2 and does not pass G-04. **Update, later the same day (2026-09-19).** The project owner / student stated: "supervisor has approved and countersigned." Recorded, as this register records every prior owner statement in this single-operator project (see e.g. the many "no supervisor signature artifact exists and none is claimed" entries above): as the recorded decision owner's own statement of the countersignature, not as a signature this session independently observed. `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md`'s status line is updated to record the same statement. On that basis this entry's TE §18.2/§18.3 item is treated as closed; it still does not, by itself, pass G-04.
+
+5. Implemented in `spaceweather.resolve_f107_at_origin` (returns `F107Selection` with
+   `source_day`, `value`, `carried_forward`, `excluded`, `staleness_hours`); the field
+   values themselves are transcribed with the six-entry configuration under item 9 of
+   `CR-2026-09-19-SCI-DECISIONS`, not by this entry.
+
+---
+
+## D-47 — `f107_81_trailing` recomputation tolerance: 8.0e-12 sfu, certified for constituents |value| ≤ 400 sfu (freeze; conditional approval verified)
+
+**Decision date:** 2026-09-19. **Decided by:** the project owner / student ("A4 —
+conditionally approve 8.0e-12 sfu … only after verifying the proposed derivation"); the
+verification is `CR-2026-09-19-SCI-DECISIONS` §5 and
+`tests/test_feature_availability.py::test_d47_tolerance_derivation_against_an_exact_reference_and_the_certified_domain`.
+Q6 (TE §18.2) is a numerical-reproducibility parameter of the Student's window contract;
+no supervisor row covers it. **Authority:** D-21/D-22 (the constituents' grid); TE §6.2
+`f107_81_trailing`; `CR-2026-09-19-SCI-REVIEW` §5.
+
+**Decision.**
+
+1. `window.recomputation_tolerance = 8.0e-12` sfu, **absolute**, for
+   `|mean_recorded − mean_recomputed|` at every scored origin; derived as
+   (N+1)·ε·B = 82 × 2⁻⁵² × 400 = 7.28 × 10⁻¹² rounded UP to one significant figure (the
+   only adjustment; never a decade multiplier). ε = 2⁻⁵² is machine epsilon = 2u (u the
+   unit round-off); the count (N+1) covers one rounding per parsed constituent, N−1
+   sequential additions and one division; the ε-for-u substitution gives a factor ≈ 2 of
+   margin, which makes the bound rigorous rather than first-order.
+2. **Applicability condition:** the certificate holds for constituents with
+   |value| ≤ **B = 400 sfu** (`window.recomputation_input_bound_sfu: 400`). B is a stated
+   numerical domain, **not** a physical maximum; a reading or median above it is never
+   deleted, clipped or declared invalid. If any constituent exceeds B the numerical
+   certification **fails clearly** (`assert_recomputation_domain`, `IntegrityError`) and a
+   justified wider bound under its own decision — or a more accurate implementation — is
+   required; the tolerance is never raised silently. Held daily medians (2004–2026,
+   December 2022 excluded) reach 311.7 sfu.
+3. **Verified** against an exact rational reference (`Fraction`, no floating point):
+   max |float − exact| = 1.9 × 10⁻¹³ over synthetic 0.05-sfu-grid windows (the
+   project's own constituent grid: D-21 medians of 0.1-sfu readings, D-22 half-grid
+   means); `json` `repr` round trip exact; a 6-decimal writer breaks the certificate
+   (must be refused at freeze); 80-day and shifted-anchor perturbations differ by
+   ≥ 10⁻³ sfu (≫ tolerance). Summation is plain sequential on the governed CPython 3.11;
+   compensated summation on later interpreters only reduces the error.
+4. **Numerical agreement only** — the tolerance says nothing about F10.7 measurement
+   accuracy (readings are quantised at 0.1 sfu; flare-contaminated readings are retained
+   under D-23). Transcription of the two values into `configs/features.yaml` is part of
+   the six-entry configuration diff (item 9), not of this entry.
+
+---
+
+## D-48 — December custody scan: structural detection; driver-exclusion class 5 for the GFZ captures with content and provenance conditions (freeze; student decision under the D-30 precedent)
+
+**Decision date:** 2026-09-19. **Decided by:** the project owner / student ("G-3/P-4 —
+resolve December scanning transparently … I approve an additional driver-audit exclusion
+only within this explicit scope"). **Authority to decide:** `governance-guards` R-26/R-27
+are design rules whose class list the project decision owner already amended by D-30
+(class 4, 2026-08-28, under the recorded authority equivalence); the same authority
+applies. No target value is involved, so no locked-test access provision is engaged.
+**Authority:** R-26, R-27, D-15, D-30, `project.md` § Forbidden (December-blind rule);
+`CR-2026-09-19-SCI-REVIEW` §6; `CR-2026-09-19-SCI-DECISIONS` §6.
+
+**Decision.**
+
+1. **Detection is structural, per format** (`src/data/locked_test.py`): JSON by parsed
+   structure — any string carrying `2022-12`/`202212`, any record with year 2022 and
+   month 12 under `y`/`year` and `m`/`month` at any depth, any per-month mapping keyed by
+   month numbers that carries `"12"`; WDC and Hpo files by their own date layouts;
+   isprint tables by first/last record epoch; Madrigal CSVs by `ut1_unix` epochs or
+   literals; other text by literal; Markdown = outside automated inspection, reported as
+   such and never labelled clean. Every file outside the restricted root is inventoried
+   with its detection method and disposition (`december_custody_inventory`); scanner
+   coverage is reported separately from compliance.
+2. **Class 5** — *raw GFZ geomagnetic-index captures and their source-version audit
+   summary*: `audit_gfz_*/Kp_*.wdc`, `audit_gfz_*/hp60ap60doi_*.txt`,
+   `audit_gfz_*/gfz-comparison-report.json`. Eligibility = exact path pattern **and**
+   validated content (every raw data line parses as the provider format with no extra
+   column; the report's schema is fixed and carries no target/prediction/metric key —
+   `y` admitted only inside `{y, m, d, h}` epoch keys, `coverage` only under
+   `validation`) **and** documented provenance (a sibling `retrieval_record.json` listing
+   the raw file with a matching SHA-256, or the report's `run_id`). Mixed, unknown or
+   unclassifiable content **fails closed** (flagged for review). This is **narrower**
+   than the class 5 prepared on 2026-09-19 (which also named `GFZ-AUDIT.md`,
+   `retrieval_record.json`, the manifests and `environment_supplemental.json` — files
+   with no December content, now simply inventoried as such).
+3. Classes 1–4 keep their paths and gain the same content validation (Dst pages must be
+   Dst pages without target words; `fluxtable.txt` lines must parse; classes 3/4 remain
+   key-token gated). No evidence file is relocated or reserialised.
+4. **Excluded files are custody exclusions only**: inventoried with their reason and
+   recorded as **exposure** — the December values in them were read for identification,
+   parsing validation and version comparison; none informed a method, feature,
+   threshold, lag, missingness-policy or model decision (`CR-2026-09-19-SCI-DECISIONS`
+   §6.4). Holdout independence is not asserted "unaffected"; the December-blind rule is
+   evidenced by the absence of any December-derived choice in the records.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -2113,7 +2737,7 @@ exposed to challenge and should be read first.
 | D-22 F10.7 duplicate-UT handling | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Mean of duplicates with count logging and a QC flag; provider-correction precedence recorded as a standing rule but **currently unexercisable** — the file carries no correction or provenance column. No day discarded. |
 | D-23 F10.7 high-spread handling | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Flag-and-retain on four measured dates; median is the representative value; the QC flag is **not** a model feature without separate approval and a causality check. |
 | D-24 Canonical protected set | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Deduplicated union of TE §2.2 (12) and §7.0B (16) with `history window`, `station encoding` and `baselines` added explicitly; **cardinality 17, calculated from the enumeration**. Closes BLK-06's enumeration limb; triggers a Vision §15.2 amendment to FR-P1-06-1 (14 → 17). Implementation stays gated by G-09. |
-| D-25 F10.7 availability convention | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Conservative convention: a daily median becomes available no earlier than `00:00 UTC` on the following day. **An explicit project assumption, not a demonstrated publication latency**; no operational real-time availability is claimed. **Requests, but does not take,** a §15.2 amendment to TE §7.0A stage 4 and EV-12; until granted, EV-12's F10.7 limb is unmet at G-04. |
+| D-25 F10.7 availability convention | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Conservative convention: a daily median becomes available no earlier than `00:00 UTC` on the following day. **An explicit project assumption, not a demonstrated publication latency**; no operational real-time availability is claimed. **Requests, but does not take,** a §15.2 amendment to TE §7.0A stage 4 and EV-12; until granted, EV-12's F10.7 limb is unmet at G-04. *[Annotated 2026-09-19 (P-5, `CR-2026-09-19-SCI-DECISIONS`, owner-authorised): the amendment was GRANTED AND APPLIED 2026-08-22 under `CR-2026-08-22-EV-12` — see the D-25 body; the "requests, but does not take" wording is the pre-grant state and is kept as history. The grant covers the EV-12 row shape only.]* |
 | D-26 F10.7 March–April provenance | **Yes** | 2026-08-22 | Approved by the project owner under the recorded authority equivalence. Provenance recorded **UNRESOLVED**; data retained; measured / reconstructed / interpolated / provider-corrected asserted in **no** direction. Carries a thesis reporting obligation. Identifies two clarification routes and an `ABL-NOSW`-style sensitivity — **none approved or scheduled** by this decision. |
 | D-27 Primary target untransformed; inverse is ABL-DIFF's | **Yes** | 2026-08-24 | Approved by the project owner under the recorded authority equivalence, at the delivery-planning approval gate. **A reading of frozen text, not a new scientific value.** The primary train-only transform touches target-derived inputs, not the target, which stays **raw TECU** (TE §7.2 `ABL-DIFF`: *Primary remains, Raw TECU*). Primary path needs no inverse; `ABL-DIFF` alone transforms the target and keeps its inverse-before-metrics obligation with error propagation recorded. Raised by blocker BLK-08; narrows but does not close its mechanism limb, which stays with `functional-design`. |
 | D-28 G-06 locked-test scored set = 2–31 Dec (30 d) | **Yes** | 2026-08-28 | Approved by the project owner under the recorded authority equivalence, at the `functional-design` (3.1) governance gate on `GOV-2026-08-28-FD-01` Rec 6. **Ratifies FU-7 = A (2026-08-26), already built upon by eight units.** Basis is `requirements.md` FR-P1-04-5 + ADR-11's `lead_in_hours` removal; **discloses that Vision §8.2 and TE §7.1 both carry `—` in the Locked-test Embargo column**, so a level-4 paraphrase is the sole textual basis — conflict recorded, not resolved, and carried to G-05. Accepted on three grounds: 1 Dec is furthest from solstice; the bootstrap loses 1 of 31 blocks (conservative); and 720 h divides by 48 where 744 h does not, so the mandatory 48-h sensitivity would have raised under the 31-day reading. **No supervisor signature exists or is claimed.** A revised split manifest is owed at G-05. |
@@ -2127,3 +2751,13 @@ exposed to challenge and should be read first.
 | D-36 TensorFlow pin `tensorflow==2.21.0` | **Yes** | 2026-09-10 | Adopted as drafted (§5, draft D-D); the owner selected the version. `requirements.txt` carries `tensorflow==2.21.0`, the CPU wheel (TC-01), the ONE neural stack (TE §8.3), matching the tf.keras 2.21.0 candidate API `src/models/lstm.py` was written against. **PINNING IS NOT VERIFICATION**: installation, import and API-compatibility checks have **NEVER BEEN EXECUTED** (PyPI unreachable, verified 2026-09-10); no TensorFlow import has ever succeeded here; **TE §8.1's both-platform (Kaggle AND local) condition is UNMET and the Kaggle compatibility check is OWED**. The guard now passes on the governed file; its refusal of an absent or commented-out pin is unchanged. No M-06 fit has run; TA-26 stays `Pending`. No supervisor signature exists or is claimed. |
 | D-38 Split configuration transcribed (`partitions` + `embargo_hours`) | **Yes — jointly authorized by Kimia Rezaei (owner/student) and Dr. Reza Saraf Shirazi (supervisor), 2026-09-10; joint instruction of record, no separately signed artifact exists or is claimed** | 2026-09-10 | Transcription only; **no scientific value chosen**. `configs/data.yaml: partitions` takes the six ids of R-80's closed space (F1 2022-01-01→2022-03-31/Apr; F2 →2022-06-30/Jul; F3 →2022-09-30/Oct; F4 →2022-10-31/Nov; REFIT →2022-11-30/null, scored nowhere per FR-P1-04-14; DEC →2022-11-30/Dec), and `configs/experiment.yaml: embargo_hours` takes **24** from TE §7.1's Embargo column. **Provenance kept distinct:** F1–F4 and REFIT are specified DIRECTLY by TE §7.1; **DEC's training bounds are NOT** — TE §7.1 shows "—" there, so they are DETERMINED by `train_start == study_start` (D-8) and `DEC.train_end == REFIT.train_end` (R-80), one admissible value each. **`experiment.yaml: folds` stays `TBD — freeze gate` deliberately** (no reader exists anywhere; populating it would create a second source of truth for the same calendar). Verified against the project's own unmodified `build_partitions` — six accepted, every structural rule exercised, and a control with an unresolved embargo still refused. `pyyaml` uninstallable here (PyPI egress blocked), so a full `load_configs` run is **owed in a governed environment**. Discharges no gate: **BLK-02 OPEN**, the two Q-31 freeze acts remain the owner's, WS-20/TA-09/TA-17/TA-21 `Pending`. |
 | D-37 D-27 affirmed; BLK-08 mechanism limb closed | **Yes** | 2026-09-10 | Adopted as drafted (§6, draft D-E); the owner chose Choice B, affirm the withholding. **A REAFFIRMATION, never a supersession — D-27 stands, unreopened and unamended.** D-27's withholding of a general inverse route is affirmed permanently: **the refusal IS the mechanism** (R-139 control 25 preserved at full strength); **R-103's joint contract is adopted in D-27's identity form**, the primary path's citable route being **`identity (D-27: primary target untransformed)`** because its output is already raw TECU; **`ABL-DIFF` keeps the only real inverse** with error propagation recorded (TE §7.2). **No generic inverse-transform route is created, no `inverse`/`apply` added to any transform, and no import-boundary change is authorised.** **BLK-08's mechanism limb is CLOSED by this decision; BLK-02 stays OPEN.** No supervisor signature exists or is claimed. |
+| D-39 Kp/ap product: archived settled nowcast selected; definitive = audit comparator | **No — student decision only; supervisor countersignature status OPEN** | 2026-09-18 | Approved by Kimia Rezaei (owner/student) in-session with binding qualifications, recorded as a student decision: `Kp_now2022.wdc` (DOI 10.5880/Kp.0001, sha256 `7929d16a…7475a4`) is the selected historical product; `Kp_def2022.wdc` (`c1d90302…c2b829`) is the audit comparator only and never a forecast-time feature. **Limitation binding:** the archived nowcast is the settled final-stage nowcast, includes post-issue revisions, does not reconstruct first-issued values, and is **not** labelled proven-available at every forecast origin. **Before producer release** the availability rule must be established from evidence or the limitation explicitly documented with its implications; no publication lag invented, no silent config change (`availability_lags` stays `TBD`). Measured 1,046/2,920 epochs differ — a product-version difference, not model error, not proof of leakage. **G-04 NOT passed; no producer artifact; no `permitted_producers` row. No supervisor approval exists or is claimed.** |
+| D-40 Hp60/ap60 product: Hpo.0002 V2.0 selected; Hpo.0003 V3.0 = recomputed comparator; substitute control | **No — student decision only; supervisor countersignature status OPEN** | 2026-09-18 | Same approval as D-39. `Hp60ap60doi_2022.txt` under DOI 10.5880/Hpo.0002 (V2.0, sha256 `0ad71bf0…471ad6`) is the selected historical version; under DOI 10.5880/Hpo.0003 (V3.0, `a689ddef…65d461`) the later-recomputed comparator only. Their comparison is the accepted **documented substitute** for R-63 control 5 for Hp60/ap60 ONLY, labelled exactly "Contemporaneous V2.0 versus later algorithm-recomputed V3.0" — **not** NRT versus definitive; establishes neither first-issue availability nor absence of leakage. Measured 1,790/8,760 epochs differ — product-version difference only. **G-04 NOT passed; no producer artifact; no `permitted_producers` row. No supervisor approval exists or is claimed.** |
+| D-41 Q4/Q5: Hp60/ap60 provider GFZ Potsdam; three producer-artifact identities and roles | **Not required under TE §18.2 (no row covers a driver source version or producer identity; D-10.1 precedent, sole-signed) — student decision** | 2026-09-18 | Approved by Kimia Rezaei (owner/student) in-session after checks 3 and 4 agreed with the existing contracts. Identities `gfz_kp_ap_3h_2022_v1` (from D-39's `Kp_now2022.wdc`, `7929d16a…7475a4`), `gfz_hp60_ap60_1h_2022_v1` (from D-40's Hpo.0002 V2.0, `0ad71bf0…471ad6`), `srmp_f107_observed_daily_2022_v1` (from `fluxtable.txt`, `4b7fbfde…d690b9`); definitive Kp/ap and Hpo V3.0 are audit comparators only; `f107_81_trailing` is DERIVED (trailing, never centered; anchor at the safe-lagged day; TC-20 never filled), not a raw artifact; the F10.7 manifest cites `availability_rule = previous_day_median_midnight_utc` (D-25 Route 1), which resolves F10.7 only. **Output hashes UNSET until the outputs exist.** **Identities and roles only: no temporal availability approved, no `*_safe` feature certified leakage-free, no producer release, no `permitted_producers` row, G-04 NOT passed.** Availability obligations (D-39 item 4 / D-40) are TE §18.2 Q-16 Student + Supervisor items and stay open. |
+| D-42 GFZ driver availability floors accepted as project assumptions (retrospective study) | **Student states supervisor countersigned, 2026-09-19** (`COUNTERSIGNATURE_REQUEST_2026-09-19.md`) — TE §18.2 Q-16/Q-17 | 2026-09-19 | Qualified student acceptance (A1): the existing approved floors — Kp/ap 3 h, Hp60/ap60 1 h — are the availability assumptions for the D-39/D-40 archives; they are project assumptions, not demonstrated publication or revision-completion bounds, and do not make settled archive values historically available at those lags. **Binding limitation propagated to methods and result claims:** results using these archives do not establish exact operational replay or absence of revision-related look-ahead (`DRIVER_AVAILABILITY_LIMITATION_STATEMENT`; claims-checklist row D-42). Evidence form = D-25/EV-12 pattern. **G-04 NOT passed; no producer release; no leakage-free certification.** *[Corrected 2026-09-19, `CR-2026-09-19-SCI-DECISIONS-P2`: "No config transcribed" and "No supervisor approval exists or is claimed" described the pre-2026-09-19 state. The six-entry `availability_lags`/`carry_forward_*` configuration was transcribed 2026-09-19 (item 6), and supervisor approval was REPORTED (later, the student stated the countersignature itself) by the student 2026-09-19 (`COUNTERSIGNATURE_REQUEST_2026-09-19.md`) — see this row's status column.]* |
+| D-43 Interval semantics of the GFZ lag floors: margins after interval COMPLETION | **Student states supervisor countersigned, 2026-09-19** (`COUNTERSIGNATURE_REQUEST_2026-09-19.md`) — TE §18.2 Q-16 | 2026-09-19 | New clarification (P-1), not a restatement of D-42: observation interval = provider `[start, end)` with both boundaries preserved; safe-lag reference instant = interval END (completion); Kp/ap available at end + 3 h, Hp60/ap60 at end + 1 h; assumptions for retrospective evaluation, establishing no historical publication or revision-completion time. |
+| D-44 One lagged-selection owner per driver kind; alignment contract for `*_safe` series | **Not required for the mechanism (no TE §18.2 row); applies D-43's semantics, countersigned 2026-09-19** | 2026-09-19 | `select_lagged_series` applies the lag once; source interval, `available_at`, origin and value kept in separate fields; `assert_lagged_selection` amends R-76a for lagged series; `build_features` shifts nothing and refuses a lag mismatch. Verified by synthetic tests. |
+| D-45 IRI-2016 benchmark: standard index inputs, disclosed retrospective climatological reference | **Student states supervisor countersigned, 2026-09-19** (`COUNTERSIGNATURE_REQUEST_2026-09-19.md`) — TE §18.3 "the IRI role"; Vision §6.11 | 2026-09-19 | `iricore` `version=16`, `vtec(htop=2000)`, shipped `apf107.dat`/`ig_rz.dat` pinned by hash, no `oarr` overrides; inputs verified: adjusted 20 UT target-day F10.7, centered 81-/365-day means, centered IG12/Rz12, target-day ap. Not a forecast; comparison on identical targets/rows with the information asymmetry disclosed; no operational-superiority claim. *[Corrected 2026-09-19, `CR-2026-09-19-SCI-DECISIONS-P2`: the dependent patch (`governance/proposed/P-3_iri_report_confirmations.patch`) was APPLIED 2026-09-19 to `src/external/iri.py`, verified to match this decision; benchmark generation itself stays blocked at R-59 limb 1 (no passing validation report exists) and `iricore` remains uninstallable in this local environment (see the same change record).]* *[Annotated 2026-09-19 on owner authorization: runtime verified on Kaggle — `iricore==1.8.0` wheel `f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874`, CPython 3.10.12; index-file pins `apf107.dat` `cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674` (to 2024-03-06), `ig_rz.dat` `fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486` (updated 2024-03-07); 2022 inputs identical to the earlier-inspected copies; no supervisor signature claimed; G-04 not passed — see the D-45 annotation.]* |
+| D-46 F10.7 missing-update composition: reading B (clock hours, inclusive 3 h from the expected availability instant) | **Student states supervisor countersigned, 2026-09-19** (`COUNTERSIGNATURE_REQUEST_2026-09-19.md`) — TE §18.2 Q-16/Q-17 | 2026-09-19 | Ordinary reuse of `median(D−1)` on day D is not carry-forward; missing update → carried at 00–03 inclusive, excluded from 04:00 until a valid update; clock from 00:00 D; `f107_81_trailing` never imputed → whole affected day lost when both rows are present. Measured Jan–Nov 2022: 8016 origins, 0 affected; sensitivity protocol stops at Step 0. Implemented. *[Corrected 2026-09-19, `CR-2026-09-19-SCI-DECISIONS-P2`: "config transcription pending (item 9)" described the pre-2026-09-19 state; the six-entry configuration was transcribed 2026-09-19 (item 6 of that record) — `carry_forward_bound_hours`/`carry_forward_composition` are now set in `configs/features.yaml`.]* |
+| D-47 Recomputation tolerance 8.0e-12 sfu, certified for constituents ≤ 400 sfu | **Not required (Q6 numerical parameter of the Student's window contract)** | 2026-09-19 | (N+1)·2⁻⁵²·B = 7.28e-12 rounded up; ε = 2u explained; verified against an exact `Fraction` reference (max 1.9e-13), repr round trip, must-fail perturbations; B = 400 is an applicability condition — out-of-domain constituents fail the certification clearly and are never clipped. *[Corrected 2026-09-19, `CR-2026-09-19-SCI-DECISIONS-P2`: "transcription pending (item 9)" described the pre-2026-09-19 state; `window.recomputation_tolerance` and `window.recomputation_input_bound_sfu` were transcribed into `configs/features.yaml`'s `f107_81_trailing` row 2026-09-19 (item 6 of that record).]* |
+| D-48 December custody scan: structural detection; driver-exclusion class 5 with content + provenance conditions | **Not required — R-26 class list amended by the owner under the D-30 precedent; no target value involved** | 2026-09-19 | Structural detection for JSON (`{y, m}`, month keys, literals), WDC/Hpo/isprint/CSV formats; Markdown reported as outside automated inspection; class 5 = `audit_gfz_*` raw captures + comparison report, content-validated and provenance-checked, fail-closed on mixed content; narrower than the prepared text; excluded files inventoried as exposure, never licensed for use. Implemented and verified. |

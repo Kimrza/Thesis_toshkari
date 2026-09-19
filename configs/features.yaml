@@ -20,8 +20,90 @@ schema_version: "1.0.0"
 
 feature_set_id: "TBD — freeze gate"
 feature_dictionary: "TBD — freeze gate"
-availability_lags: "TBD — freeze gate"
+availability_lags:
+  # Transcribed 2026-09-19 (CR-2026-09-19-SCI-DECISIONS §6/§9, item 6 of the owner's
+  # 2026-09-19 authorization) per D-25 (rule), D-42 (floors as project assumptions),
+  # D-43 (interval-END reference instant), D-46 (composition, reading B), D-47
+  # (tolerance and domain). D-42/D-43/D-46 are TE §18.2 Student + Supervisor items:
+  # supervisor countersigned 2026-09-19 per the student's report
+  # (governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md). This transcription does not
+  # by itself pass G-04 or certify any *_safe feature leakage-free.
+  #
+  # lag_reference_instant, selection_rule and window.recomputation_input_bound_sfu are
+  # REQUIRED fields (D-43/D-44/D-47), validated by the reader
+  # (src/features/availability.py:read_availability_lags) against closed sets and,
+  # for selection_rule/lag_reference_instant, cross-checked at build_features time
+  # against the driver's actual attrs["selection"] (src/features/build.py); for
+  # recomputation_input_bound_sfu, wired into the real build_availability_matrix call
+  # to assert_anchor_recomputed (CR-2026-09-19-SCI-DECISIONS-P3,
+  # tests/test_feature_availability.py::test_build_availability_matrix_actually_applies_the_configured_input_bound
+  # and ::test_config_declared_selection_mechanics_are_cross_checked_against_the_driver).
+  kp_safe:
+    safe_lag_hours: 3                        # D-10.3 / D-116; D-42 floor accepted as an assumption
+    lag_reference_instant: "interval_end_utc"   # D-43: completion + 3 h
+    selection_rule: "latest_completed_interval_plus_lag"   # D-44 (spaceweather.select_lagged_series)
+    release_status_required: "nowcast"       # D-39: archived settled nowcast (Kp_now2022.wdc)
+    publication_latency_statement: >-
+      GFZ Kp_now2022.wdc (DOI 10.5880/Kp.0001) carries no per-value publication timestamp; the
+      3-hour floor after interval completion is a project assumption for a retrospective study
+      (D-42, D-43), not a demonstrated publication or revision-completion bound; results using
+      this archive do not establish exact operational replay or absence of revision-related
+      look-ahead.
+  ap_safe:
+    safe_lag_hours: 3
+    lag_reference_instant: "interval_end_utc"
+    selection_rule: "latest_completed_interval_plus_lag"
+    release_status_required: "nowcast"
+    publication_latency_statement: >-
+      GFZ Kp_now2022.wdc (DOI 10.5880/Kp.0001) carries no per-value publication timestamp; the
+      3-hour floor after interval completion is a project assumption for a retrospective study
+      (D-42, D-43), not a demonstrated publication or revision-completion bound; results using
+      this archive do not establish exact operational replay or absence of revision-related
+      look-ahead.
+  hp60_safe:
+    safe_lag_hours: 1
+    lag_reference_instant: "interval_end_utc"   # D-43: completion + 1 h
+    selection_rule: "latest_completed_interval_plus_lag"
+    release_status_required: "hpo_v2.0_contemporaneous"   # D-40: Hpo.0002 V2.0; V3.0 is a comparator only
+    publication_latency_statement: >-
+      GFZ Hp60ap60doi_2022.txt V2.0 (DOI 10.5880/Hpo.0002) carries no publication timestamp and no
+      definitive grade; the 1-hour floor after interval completion is a project assumption for a
+      retrospective study (D-42, D-43); V3.0 (DOI 10.5880/Hpo.0003) is a later algorithm-recomputed
+      comparator, never an input.
+  ap60_safe:
+    safe_lag_hours: 1
+    lag_reference_instant: "interval_end_utc"
+    selection_rule: "latest_completed_interval_plus_lag"
+    release_status_required: "hpo_v2.0_contemporaneous"
+    publication_latency_statement: >-
+      GFZ Hp60ap60doi_2022.txt V2.0 (DOI 10.5880/Hpo.0002) carries no publication timestamp and no
+      definitive grade; the 1-hour floor after interval completion is a project assumption for a
+      retrospective study (D-42, D-43); V3.0 (DOI 10.5880/Hpo.0003) is a later algorithm-recomputed
+      comparator, never an input.
+  f107_safe:
+    availability_rule: "previous_day_median_midnight_utc"   # D-25 (Route 1); no scalar lag
+    release_status_required: "observed"      # NRCan fluxobsflux; project-derived daily median (D-21/D-22/D-23)
+    publication_latency_statement: >-
+      fluxtable.txt carries no publication timestamp; availability_ts(median(D-1)) = 00:00 UTC on D is
+      an explicit project assumption (D-25), 1-2 h after the day's last reading (23 UT Mar-Oct, 22 UT
+      Nov-Feb); publication latency unverified (EC1-R-4 open).
+  f107_81_trailing:
+    availability_rule: "previous_day_median_midnight_utc"   # A2: window end day derived from the rule
+    release_status_required: "observed"
+    window:
+      kind: "trailing"                       # never centered (TE §6.2)
+      days: 81
+      source: "f107_daily_median"            # the D-21 series the producer releases
+      recomputation_tolerance: 8.0e-12       # D-47, sfu, absolute
+      recomputation_input_bound_sfu: 400     # D-47 applicability condition (not a physical maximum)
+    publication_latency_statement: >-
+      fluxtable.txt carries no publication timestamp; availability_ts(median(D-1)) = 00:00 UTC on D is
+      an explicit project assumption (D-25); the window's constituents are the same daily medians.
 normalization: "TBD — freeze gate"
+
+# D-46 (reading B; supervisor countersigned 2026-09-19 per the student's report).
+carry_forward_bound_hours: 3                 # TE §6.2 / TC-09 (D-116)
+carry_forward_composition: "clock_hours"     # D-46; inclusive boundary, clock from the missing value's expected availability instant
 
 # --- permitted-producer list (POLICY frozen; 11 of 18 rows transcribed) ----------------
 # features-and-splits SD-F-01 (Q1 = A) / code-generation Q3 = A (2026-09-05): per §6.2

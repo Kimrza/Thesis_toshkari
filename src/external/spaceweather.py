@@ -59,6 +59,7 @@ import datetime as dt
 import json
 import math
 from collections.abc import Callable, Collection, Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -78,6 +79,15 @@ __all__ = [
     "GRADE_USES",
     "trailing_mean",
     "resolve_f107_at_origin",
+    "F107Selection",
+    "CARRY_FORWARD_COMPOSITION_CLOCK_HOURS",
+    "SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG",
+    "SELECTION_FIELDS",
+    "select_lagged_series",
+    "LAG_REFERENCE_INSTANT_INTERVAL_END",
+    "assert_lagged_selection",
+    "availability_rows_from_selection",
+    "daily_medians_from_readings",
     "align_interval_series",
     "assert_alignment",
     "apply_carry_forward",
@@ -171,45 +181,78 @@ def trailing_mean(
 # --- R-57a: the daily-cadence composition raise -----------------------------------------
 
 
+#: The composition vocabulary the Student froze at G-04 (D-46, 2026-09-19, reading B):
+#: the TE 6.2 "<= 3 h, then exclude" bound is applied in CLOCK HOURS from the expected
+#: availability instant of the missing daily update. Any other value is refused.
+CARRY_FORWARD_COMPOSITION_CLOCK_HOURS: str = "clock_hours"
+
+
+@dataclass(frozen=True)
+class F107Selection:
+    """The F10.7 value resolved at one forecast origin, with its provenance kept apart:
+    `source_day` (the UT day whose median is used, or None when excluded), `value`,
+    `carried_forward` (True only for a MISSING-update carry, never for ordinary reuse of
+    the designated previous-day value), `excluded` (the row's F10.7 limb is unavailable
+    under the frozen composition), and `staleness_hours` measured from the expected
+    availability instant of the designated value (0.0 for ordinary reuse)."""
+
+    source_day: dt.date | None
+    value: float | None
+    carried_forward: bool
+    excluded: bool
+    staleness_hours: float
+
+
 def resolve_f107_at_origin(
     daily_medians: Mapping[dt.date, float],
     *,
     origin: dt.datetime,
     availability_ts: Callable[[dt.date], dt.datetime],
     features: Mapping[str, Any],
-) -> tuple[dt.date, float]:
-    """The F10.7 previous-day observed value usable at `origin`, or the R-57a stop.
+) -> F107Selection:
+    """The F10.7 previous-day observed value usable at `origin` (D-10.3, D-25) — the ONE
+    owner of F10.7 selection at an origin — and, when the designated value is missing,
+    the frozen missing-update composition (D-46, reading B).
 
-    The value usable at a forecast origin is the PREVIOUS DAY's observed median
-    (D-10.3), available only once `availability_ts(day)` has passed (for F10.7 that
-    convention is D-25's 00:00 UTC on day D+1 -- supplied by the CALLER as a callable,
-    because the convention is a decision record's, not this module's). When the
-    previous-day median is available, it is returned with no carry-forward.
+    ORDINARY REUSE is not carry-forward: `median(D-1)` is the designated value for every
+    origin on day *D* (available at `availability_ts(D-1)` = 00:00 UTC on *D* under
+    D-25); using it at 00:00 … 23:00 of *D* is normal use of a daily value within its
+    validity period, `carried_forward=False`, staleness 0.
 
-    When it is NOT available, what a "<= 3 h" carry-forward bound means on a series
-    whose native step is 24 h is the G-04 freeze item D-21 governs, and this function
-    NEVER adopts a reading:
+    MISSING UPDATE (the designated `median(D-1)` is absent or not yet available at the
+    origin): with `features["carry_forward_composition"] == "clock_hours"` (D-46) the
+    last previously available median is carried forward while
+    `origin - availability_ts(D-1) <= features["carry_forward_bound_hours"]` (the TE 6.2
+    bound, read from configuration, never a literal here) — the boundary is INCLUSIVE,
+    so with a 3-hour bound origins 00:00, 01:00, 02:00 and 03:00 of *D* keep the carried
+    value and origins from 04:00 are EXCLUDED (`excluded=True`, `value=None`) until a
+    valid update becomes available. The clock starts at the EXPECTED availability
+    instant of the missing value, never at the carried value's own availability or
+    observation instant. Where no median is available at all the row is excluded.
 
     Raises
     ------
     FeatureAvailabilityError
-        while `features["carry_forward_composition"]` is absent or carries the literal
-        `TBD -- freeze gate` sentinel -- naming the origin timestamp, the last available
-        median's day, and the elapsed staleness in BOTH units (clock hours and whole
-        daily steps). TE 18.3: stop and report, never default.
+        while the composition field is absent or `TBD -- freeze gate` (the R-57a stop,
+        naming the origin, the last available median's day and the staleness in BOTH
+        units), or while `carry_forward_bound_hours` is absent/TBD under a frozen
+        composition. TE 18.3: stop and report, never default.
     IntegrityError
-        when the field carries any other value: the adopted reading's vocabulary and
-        its application are the Student's G-04 freeze plus `features-and-splits`'
-        enforcement boundary (R-57a's negative controls are specified for
-        `test_feature_availability.py`, sited there). Applying an unrecognised
-        composition value here would be this module choosing the semantics of a frozen
-        field it does not own -- refused, naming the field.
+        when the composition field carries any value other than `clock_hours` — this
+        module applies the frozen vocabulary only, never an interpretation of its own.
     """
     previous_day = origin.date() - dt.timedelta(days=1)
-    if previous_day in daily_medians and availability_ts(previous_day) <= origin:
-        return previous_day, float(daily_medians[previous_day])
+    expected_instant = availability_ts(previous_day)
+    if previous_day in daily_medians and expected_instant <= origin:
+        value = float(daily_medians[previous_day])
+        if not math.isnan(value):
+            return F107Selection(previous_day, value, False, False, 0.0)
 
-    available = sorted(day for day in daily_medians if availability_ts(day) <= origin)
+    available = sorted(
+        day
+        for day in daily_medians
+        if availability_ts(day) <= origin and not math.isnan(float(daily_medians[day]))
+    )
     last_available = available[-1] if available else None
 
     composition = features.get("carry_forward_composition")
@@ -237,13 +280,31 @@ def resolve_f107_at_origin(
             f"agent filling a TE 18.2 item by convenience. The freeze is the "
             f"Student's, at G-04 (R-57a): stop and report, never default",
         )
-    raise IntegrityError(
-        "configs/features.yaml: carry_forward_composition",
-        f"the field carries {composition!r}; the adopted reading's application is the "
-        f"Student's G-04 freeze plus features-and-splits' enforcement boundary "
-        f"(R-57a), and this module refuses to interpret a composition vocabulary it "
-        f"does not own -- {staleness_text}",
-    )
+    if composition != CARRY_FORWARD_COMPOSITION_CLOCK_HOURS:
+        raise IntegrityError(
+            "configs/features.yaml: carry_forward_composition",
+            f"the field carries {composition!r}; the frozen vocabulary is "
+            f"{CARRY_FORWARD_COMPOSITION_CLOCK_HOURS!r} (D-46, reading B) and this module "
+            f"refuses to interpret any other composition -- {staleness_text}",
+        )
+    bound = features.get("carry_forward_bound_hours")
+    if bound is None or (isinstance(bound, str) and bound.strip() == TBD_SENTINEL):
+        raise FeatureAvailabilityError(
+            "configs/features.yaml: carry_forward_bound_hours",
+            "absent or TBD while carry_forward_composition is frozen; the <= 3 h bound is "
+            "configuration (TC-09), never a literal here",
+        )
+    if isinstance(bound, bool) or not isinstance(bound, int | float) or bound < 0:
+        raise IntegrityError(
+            "configs/features.yaml: carry_forward_bound_hours",
+            f"{bound!r} is not a non-negative number",
+        )
+    staleness = (origin - expected_instant).total_seconds() / 3600.0
+    if last_available is not None and staleness <= float(bound):
+        return F107Selection(
+            last_available, float(daily_medians[last_available]), True, False, staleness
+        )
+    return F107Selection(None, None, False, True, staleness)
 
 
 # --- W-5 / R-58: alignment of a PRESENT value onto the hourly grid ----------------------
@@ -324,6 +385,279 @@ def assert_alignment(
                 f"within its own defined interval and is never shifted to a "
                 f"neighbouring hour for convenience (D-10.2, FR-P1-04-17)",
             )
+
+
+# --- P-2 / D-44: the ONE lagged-selection owner for interval-valued indices ---------------
+
+#: The selection rule identity a lagged `*_safe` series carries in its frame attributes
+#: (`attrs["selection"]["rule"]`): at every epoch T the value of the LATEST source
+#: interval whose completion instant (`interval_end`) plus the declared safe lag is at or
+#: before T. D-43 fixes the reference instant (interval END, the completion instant —
+#: D-10.3's "instant the value could first have been known"); D-44 fixes that this
+#: function is the single place the lag is applied, once. `build_features` shifts nothing.
+SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG: str = "latest_completed_interval_plus_lag"
+
+#: The per-row fields a lagged selection carries BESIDE the hourly `interval_start_utc` /
+#: `value` pair: the selected source interval (its own start AND end, preserved from the
+#: provider record, never overwritten) and the assumed availability instant.
+SELECTION_FIELDS: tuple[str, ...] = (
+    "source_interval_start_utc",
+    "source_interval_end_utc",
+    "available_at_utc",
+)
+
+
+def _validated_intervals(observations: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Whole-hour, non-overlapping, end-after-start intervals sorted by end; values may be
+    missing (None/NaN) — a missing observation keeps its interval identity."""
+    norm: list[dict[str, Any]] = []
+    for record in observations:
+        start, end = record["interval_start"], record["interval_end"]
+        if end <= start:
+            raise AlignmentError(
+                f"driver observation at {start.isoformat()}",
+                "interval_end is not after interval_start",
+            )
+        for stamp in (start, end):
+            if stamp.minute or stamp.second or stamp.microsecond:
+                raise AlignmentError(
+                    f"driver observation at {start.isoformat()}",
+                    "interval boundaries are not whole hours (D-10.2)",
+                )
+        raw = record.get("value")
+        value = None if raw is None or math.isnan(float(raw)) else float(raw)
+        norm.append({"interval_start": start, "interval_end": end, "value": value})
+    norm.sort(key=lambda r: r["interval_end"])
+    for earlier, later in zip(norm, norm[1:], strict=False):
+        if later["interval_start"] < earlier["interval_end"]:
+            raise AlignmentError(
+                f"driver observation at {later['interval_start'].isoformat()}",
+                "overlaps the preceding interval; one epoch would carry two values (D-10.2)",
+            )
+    return norm
+
+
+def select_lagged_series(
+    observations: Sequence[Mapping[str, Any]],
+    *,
+    epochs: Sequence[dt.datetime],
+    safe_lag_hours: float,
+) -> list[dict[str, Any]]:
+    """Build a `*_safe` hourly series from interval-valued observations: for each forecast
+    origin `epoch`, the value of the LATEST observation whose `interval_end + safe_lag`
+    is at or before the origin (D-43/D-44). The lag is applied HERE and nowhere else.
+
+    Four things are kept distinct in every row: the source observation interval
+    (`source_interval_start_utc`, `source_interval_end_utc` — the provider's own
+    boundaries, unchanged), the assumed availability instant (`available_at_utc` =
+    source end + lag; an assumption for retrospective evaluation, never a publication
+    time), the forecast origin (`interval_start_utc`, the hourly epoch the row serves),
+    and the selected value (`value`). A row whose selected interval carries a missing
+    value keeps that interval's identity with `value` None — the ≤ 3 h carry-forward rule
+    (R-57a) then applies downstream on the EPOCH axis; this function never reaches back
+    to an older interval, which would be an unrecorded carry-forward. An origin before
+    which no interval is eligible yields a row with `value` None and no source fields.
+
+    Raises
+    ------
+    IntegrityError
+        on a negative lag or a non-UTC-aware epoch.
+    AlignmentError
+        on overlapping or off-hour observation intervals.
+    """
+    if safe_lag_hours < 0:
+        raise IntegrityError(
+            "select_lagged_series", f"safe_lag_hours must be >= 0, got {safe_lag_hours!r}"
+        )
+    lag = dt.timedelta(hours=float(safe_lag_hours))
+    intervals = _validated_intervals(observations)
+    rows: list[dict[str, Any]] = []
+    cursor = -1
+    for epoch in sorted(epochs):
+        if epoch.tzinfo is None:
+            raise IntegrityError("select_lagged_series", f"epoch {epoch!r} is not timezone-aware")
+        while cursor + 1 < len(intervals) and intervals[cursor + 1]["interval_end"] + lag <= epoch:
+            cursor += 1
+        if cursor < 0:
+            rows.append(
+                {
+                    "interval_start_utc": epoch.isoformat(),
+                    "value": None,
+                    "source_interval_start_utc": None,
+                    "source_interval_end_utc": None,
+                    "available_at_utc": None,
+                }
+            )
+            continue
+        chosen = intervals[cursor]
+        rows.append(
+            {
+                "interval_start_utc": epoch.isoformat(),
+                "value": chosen["value"],
+                "source_interval_start_utc": chosen["interval_start"].isoformat(),
+                "source_interval_end_utc": chosen["interval_end"].isoformat(),
+                "available_at_utc": (chosen["interval_end"] + lag).isoformat(),
+            }
+        )
+    return rows
+
+
+#: D-43's only implemented reference instant: this function ALWAYS measures a selected
+#: interval's `available_at` from its END (`source_interval_end_utc` + lag). There is no
+#: parameter that changes this -- it is the function's actual behaviour, not a choice.
+LAG_REFERENCE_INSTANT_INTERVAL_END: str = "interval_end_utc"
+
+
+def assert_lagged_selection(
+    series_id: str,
+    rows: Sequence[Mapping[str, Any]],
+    observations: Sequence[Mapping[str, Any]],
+    *,
+    safe_lag_hours: float,
+    expected_reference_instant: str | None = None,
+) -> None:
+    """The alignment contract for a LAGGED series (amends R-58 limbs 1–2 for `*_safe`
+    series, D-44): every present value traces to an observation whose interval equals the
+    row's recorded source interval and whose value it equals; `available_at_utc` equals
+    that interval's end plus the declared lag and is at or before the origin (no double
+    lag, no shortfall); and NO observation with a later end is also eligible at that
+    origin (the latest eligible one was selected). A missing row is admissible only when
+    no interval is eligible or the eligible one's value is missing.
+
+    `expected_reference_instant`, when given (from the availability matrix row's
+    `lag_reference_instant`, D-43), is a config-vs-implementation DRIFT GUARD: this
+    function only ever implements `LAG_REFERENCE_INSTANT_INTERVAL_END` (interval END), so
+    any other declared value cannot be honoured and is refused here rather than silently
+    computed as if it had been — configuration cannot rewrite what the code actually does.
+
+    Raises
+    ------
+    AlignmentError
+        naming the series and the first offending origin, or (drift guard) naming a
+        declared reference instant this function does not implement.
+    """
+    if expected_reference_instant is not None and (
+        expected_reference_instant != LAG_REFERENCE_INSTANT_INTERVAL_END
+    ):
+        raise AlignmentError(
+            f"driver series {series_id!r}",
+            f"lag_reference_instant {expected_reference_instant!r} is declared, but this "
+            f"selector only ever measures available_at from the interval END "
+            f"({LAG_REFERENCE_INSTANT_INTERVAL_END!r}, D-43); configuration cannot silently "
+            f"change what the producer code actually computes",
+        )
+    lag = dt.timedelta(hours=float(safe_lag_hours))
+    intervals = _validated_intervals(observations)
+    by_bounds = {(r["interval_start"], r["interval_end"]): r for r in intervals}
+    for row in rows:
+        origin = dt.datetime.fromisoformat(str(row["interval_start_utc"]))
+        eligible = [r for r in intervals if r["interval_end"] + lag <= origin]
+        latest = eligible[-1] if eligible else None
+        raw = row.get("value")
+        present = raw is not None and not (isinstance(raw, float) and math.isnan(raw))
+        if not present:
+            if latest is not None and latest["value"] is not None:
+                raise AlignmentError(
+                    f"{series_id} at {origin.isoformat()}",
+                    f"value is missing while the interval ending {latest['interval_end'].isoformat()} "
+                    f"is eligible with value {latest['value']!r}; a present source value is never dropped",
+                )
+            continue
+        src = (
+            dt.datetime.fromisoformat(str(row["source_interval_start_utc"])),
+            dt.datetime.fromisoformat(str(row["source_interval_end_utc"])),
+        )
+        source = by_bounds.get(src)
+        if source is None or source["value"] != float(raw):
+            raise AlignmentError(
+                f"{series_id} at {origin.isoformat()}",
+                f"value {raw!r} does not trace to an observation on the recorded source interval "
+                f"{src[0].isoformat()}..{src[1].isoformat()} (D-44: every selected value keeps its source identity)",
+            )
+        available_at = dt.datetime.fromisoformat(str(row["available_at_utc"]))
+        if available_at != src[1] + lag:
+            raise AlignmentError(
+                f"{series_id} at {origin.isoformat()}",
+                f"available_at {available_at.isoformat()} is not source end + {safe_lag_hours} h "
+                f"({(src[1] + lag).isoformat()}); the lag is applied exactly once (D-44)",
+            )
+        if available_at > origin:
+            raise AlignmentError(
+                f"{series_id} at {origin.isoformat()}",
+                f"selected interval becomes available at {available_at.isoformat()}, after the origin "
+                f"(open or not-yet-available interval; D-10.3, D-43)",
+            )
+        if latest is None or latest["interval_end"] != src[1]:
+            raise AlignmentError(
+                f"{series_id} at {origin.isoformat()}",
+                f"a later interval (ending {latest['interval_end'].isoformat() if latest else 'n/a'}) "
+                f"is eligible at this origin; the LATEST eligible interval is selected (D-44)",
+            )
+
+
+def availability_rows_from_selection(
+    rows: Sequence[Mapping[str, Any]], *, release_status: str
+) -> list[dict[str, Any]]:
+    """The availability-matrix rows (W-1; `build_availability_matrix`) for a lagged
+    series, derived from the selection so the matrix measures the SAME instants the
+    producer used: `forecast_origin` = the row's epoch, `observation_timestamp` = the
+    selected source interval's END (D-43), `publication_timestamp` empty (no provider
+    publication timestamp is held — the row's `publication_latency_statement` records the
+    absence). Rows without a selected value carry no matrix row."""
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        if row.get("source_interval_end_utc") is None or row.get("value") is None:
+            continue
+        out.append(
+            {
+                "forecast_origin": dt.datetime.fromisoformat(str(row["interval_start_utc"])),
+                "observation_timestamp": dt.datetime.fromisoformat(
+                    str(row["source_interval_end_utc"])
+                ),
+                "publication_timestamp": None,
+                "release_status": release_status,
+            }
+        )
+    return out
+
+
+# --- D-21 / D-22: the project-derived daily F10.7 value ------------------------------------
+
+
+def daily_medians_from_readings(
+    readings: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """The daily F10.7 value as the project derives it (D-21: the MEDIAN of the UT day's
+    observed readings; D-22: readings sharing one UT timestamp are first averaged, the
+    duplicate count logged and the day flagged; D-23: high-spread days — range > 20 % of
+    the median — are flagged and RETAINED). Each reading carries `day` (date), `time`
+    (str, the provider's UT stamp) and `value` (observed flux, sfu). Readings are never
+    dropped, clipped or reconstructed; a day with no reading is simply absent.
+
+    Returns `{"medians": {day: float}, "duplicate_days": {day: count}, "high_spread_days":
+    {day: spread_pct}}`.
+    """
+    by_day: dict[dt.date, dict[str, list[float]]] = {}
+    for record in readings:
+        by_day.setdefault(record["day"], {}).setdefault(str(record["time"]), []).append(
+            float(record["value"])
+        )
+    medians: dict[dt.date, float] = {}
+    duplicate_days: dict[dt.date, int] = {}
+    high_spread: dict[dt.date, float] = {}
+    for day, slots in sorted(by_day.items()):
+        values: list[float] = []
+        for _stamp, readings_at in sorted(slots.items()):
+            if len(readings_at) > 1:
+                duplicate_days[day] = duplicate_days.get(day, 0) + len(readings_at) - 1
+            values.append(sum(readings_at) / len(readings_at))
+        values.sort()
+        n = len(values)
+        median = values[n // 2] if n % 2 else (values[n // 2 - 1] + values[n // 2]) / 2.0
+        medians[day] = median
+        if median > 0 and (max(values) - min(values)) / median > 0.20:
+            high_spread[day] = 100.0 * (max(values) - min(values)) / median
+    return {"medians": medians, "duplicate_days": duplicate_days, "high_spread_days": high_spread}
 
 
 # --- R-57a / R-58 limb 3: carry-forward, and the conservation invariant ----------------

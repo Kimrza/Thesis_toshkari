@@ -712,6 +712,21 @@ named here so the exclusion is never read as clearing the file for use.
 **Acceptance.** ⚠ None — see R-27's box. This rule shares FR-P1-02-6's missing
 acceptance row.
 
+> **Amended 2026-09-19 — structural detection and class 5 (D-48; `CR-2026-09-19-SCI-DECISIONS`
+> §6; owner decision under the D-30 precedent).** A December hit is decided by record
+> STRUCTURE per format (JSON `{y: 2022, m: 12}` records at any depth, month-number keys,
+> `2022-12`/`202212` literals; WDC and Hpo date layouts; isprint endpoint epochs;
+> Madrigal `ut1_unix` epochs), never by a quoted literal alone. The driver exclusion gains
+> **class 5** — `audit_gfz_*/Kp_*.wdc`, `audit_gfz_*/hp60ap60doi_*.txt`,
+> `audit_gfz_*/gfz-comparison-report.json` — eligible only by exact path AND validated
+> driver-only content AND a sibling `retrieval_record.json` provenance record (SHA-256 /
+> `run_id`); classes 1–4 gain the same content validation; mixed or unclassifiable content
+> fails closed. Every file outside the restricted root is inventoried with its detection
+> method and disposition (`december_custody_inventory`); Markdown is reported as outside
+> automated inspection, never as clean. Excluded files are custody exclusions recorded as
+> exposure — never a licence to use. Enumeration pinned at five in
+> `tests/test_locked_test_guard.py`.
+
 ## R-27 — The guard walks every file, dispatched per artifact class, and an unparseable file is a failure
 
 **Rule (Q4 = C).** `assert_no_december_outside_restricted` walks `evidence/`

@@ -624,6 +624,63 @@ nothing specified now and everything retrofitted after acquisition.
 > **Student + Supervisor** items — and **EC1-R-4's provider-documentation limb is owned
 > outside this project**. TE §18.3 bars this stage from filling either.
 
+> **Amended 2026-09-18 — the GFZ two-grade constraint, as executed, and the owner's
+> release-grade rulings** (`CR-2026-09-18-GFZ-DRIVER-PAIR-AUDIT`;
+> `CR-2026-09-18-GFZ-RELEASE-GRADE-RULINGS`; project decision owner, in-session,
+> 2026-09-18). The retrieval this constraint anticipated has happened for the two GFZ
+> series (`evidence/audit_gfz_2026-09-18/`, `scripts/audit_gfz_drivers.py`), and the
+> provider's product family turned out to differ between them:
+>
+> - **Kp/ap3 — the literal constraint is SATISFIED.** GFZ archives a distinct 2022 nowcast
+>   product (`Kp_now2022.wdc`) beside the definitive one (`Kp_def2022.wdc`), both under DOI
+>   10.5880/Kp.0001; both were retrieved and asserted against each other value by value
+>   (1,046 of 2,920 epochs differ — a product-version difference, not a model error and not
+>   proof of leakage). **Owner ruling, adopted as D-39 (student decision, 2026-09-18;
+>   supervisor countersignature status OPEN):** `Kp_now2022.wdc` is the SELECTED
+>   historical Kp/ap product for the 2022 driver series; `Kp_def2022.wdc` is retained ONLY
+>   as the definitive audit comparator and is never substituted for forecast-time
+>   features. **Limitation, binding:** the archived nowcast is the provider's SETTLED,
+>   final-stage nowcast after its ~1–2-day revision period — it includes post-issue
+>   revisions, does not reconstruct first-issued values, and is **not labelled proven
+>   available at every forecast origin**. Before producer release the availability rule is
+>   established from evidence or the unresolved limitation is documented with its
+>   implications for forecast claims; no publication lag is invented and
+>   `availability_lags` is not changed silently (D-39 item 4).
+> - **Hp60/ap60 — the literal constraint is IMPOSSIBLE and a SUBSTITUTE control is
+>   formally accepted.** GFZ publishes no definitive Hp60/ap60 and no archived Hp60
+>   nowcast (Hpo is a single near-real-time-algorithm product; `D` is "always 0, reserved").
+>   **Owner ruling, adopted as D-40 (student decision, 2026-09-18; supervisor
+>   countersignature status OPEN):** Hpo.0002 V2.0 (`Hp60ap60doi_2022.txt`, the DOI in
+>   force throughout 2022) is the SELECTED historical version; Hpo.0003 V3.0 is ONLY a
+>   later algorithm-recomputed comparator. Their comparison (1,790 of 8,760 epochs differ —
+>   a product-version difference, not a model error and not proof of leakage) is the
+>   accepted documented substitute for control 5 **for Hp60/ap60 only**, under exactly the
+>   label **"Contemporaneous V2.0 versus later algorithm-recomputed V3.0"**, and is NEVER
+>   described as NRT versus definitive. It demonstrates sensitivity to later algorithmic
+>   recomputation; it establishes **neither first-issue availability nor absence of
+>   information leakage**, and the reanalysed-value check stays bounded by that
+>   substitute.
+>
+> The constraint's text above ("re-acquired in BOTH grades … a mismatch raises") is left
+> standing as the specification that governed the retrieval; this block records how it
+> resolved per series. Mirrored in `external-products` R-63 on the same day, per the
+> coordination clause above. D-39 and D-40 were adopted into `evidence/DECISIONS.md` on
+> 2026-09-18 as student decisions with the qualifications above; **G-04 is NOT passed**,
+> no producer artifact or `permitted_producers` entry exists, and D-41 (Q4/Q5) remains a
+> proposal.
+>
+> **Amended 2026-09-19 — D-42 (student acceptance, A1; supervisor countersignature OPEN
+> under TE §18.2 Q-16).** The availability assumptions for the two GFZ series are the
+> project's already-frozen floors — Kp/ap **3 h**, Hp60/ap60 **1 h** — accepted for a
+> retrospective study as **project assumptions, not demonstrated publication or
+> revision-completion bounds**; they do not make settled archive values historically
+> available at those lags. Every method description and result claim that uses these
+> series carries: *results using these archives do not establish exact operational replay
+> or absence of revision-related look-ahead* (`metrics.DRIVER_AVAILABILITY_LIMITATION_STATEMENT`,
+> asserted by the claims checklist). The availability record takes the D-25/EV-12 form
+> (approved floor + per-series `publication_latency_statement`); `availability_lags` is
+> still not transcribed.
+
 **Constraint — two citation obligations discharged before G-P1A, not left uncollected**:
 the **Kyoto non-commercial-use notice recorded verbatim** (D-6, EC1-R-1) and the **CEDAR
 rules-of-the-road and acknowledgment** attached to `madrigalWeb`. **A notice recorded by

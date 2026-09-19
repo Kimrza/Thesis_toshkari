@@ -1,0 +1,12 @@
+{
+  "code_commit": "18843aa7b5da1bf28c903c54155b4187910bbe43",
+  "implementation": "CPython",
+  "lock_class": "supplemental-stdlib (not capture_environment_lock)",
+  "machine": "AMD64",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.16 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:36:16) [MSC v.1942 64 bit (AMD64)]",
+  "script": "scripts/audit_gfz_drivers.py",
+  "script_sha256": "7794af2706e5a5878e0f9dd8619dbb5f828217c88f2942541c109749783a23c3",
+  "sha256": "0d530a5d6761099188b7f4707078824940255997d3108f8d8fbb2c7ac90f95ff",
+  "working_tree_dirty": true
+}

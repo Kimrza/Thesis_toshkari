@@ -29,9 +29,12 @@ checks:
    states the obligation and does not own the row). Where a provider supplies no
    publication timestamp, the row admits the approved conservative convention plus the
    documented absence and an unverified-latency statement -- for F10.7 that convention
-   is **D-25, carried AS STANDING**: D-25 *requests, but does not take*, a TE 15.2
-   amendment, and until granted EV-12's F10.7 limb is UNMET at G-04. Nothing here
-   treats the amendment as granted or the limb as satisfiable today.
+   is **D-25**, whose authorising TE 15.2 amendment was **GRANTED AND APPLIED
+   2026-08-22** (`CR-2026-08-22-EV-12`: TE EV-12 row and section 7.0A stage 4). The
+   earlier wording here ("requests, but does not take ... UNMET at G-04") described the
+   pre-grant state and was corrected 2026-09-19 (P-5, `CR-2026-09-19-SCI-DECISIONS`);
+   the grant's scope is exactly the EV-12 row shape and no wider -- it does not certify
+   any lag, producer or G-04 outcome.
 
 On validation failure the implementation is NEVER silently switched (R-59): a switch
 made because the first implementation failed validation is a scientific change wearing
@@ -122,8 +125,10 @@ def assert_validation_report(report: Mapping[str, Any], *, report_name: str) -> 
     ------
     BenchmarkError
         naming the report and the first violated expectation: a non-`passed` status; a
-        missing content area; a ceiling not stated as 2000 km; driver inputs without
-        the no-future-centering and available-at-target-time confirmations; a sample
+        missing content area; a ceiling not stated as 2000 km; driver inputs that omit
+        the D-45 retrospective-centered-index disclosure, still claim
+        `no_future_centering_confirmed`, or omit the pinned index/version/override
+        fields; a sample
         set outside 5-10 or not spanning sites, day and night, quiet and disturbed, or
         not validated against the official IRI interface; a tolerance without a frozen
         value; or a tolerance timestamp that does not PRECEDE the comparison.
@@ -159,14 +164,41 @@ def assert_validation_report(report: Mapping[str, Any], *, report_name: str) -> 
             f"driver_inputs is {type(drivers).__name__}, not a mapping of the "
             f"coordinate, time, solar and geomagnetic inputs",
         )
-    for confirmation in ("no_future_centering_confirmed", "available_at_target_time_confirmed"):
-        if drivers.get(confirmation) is not True:
+    # D-45 (student selection recorded 2026-09-19; supervisor approval REPORTED by the
+    # student 2026-09-19, countersignature artifact PENDING --
+    # governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md -- applied here on the recorded
+    # decision owner's explicit authorisation to apply this patch; it does not itself
+    # pass G-04 or certify the IRI role closed). IRI-2016 is run with its standard
+    # index files, whose inputs are retrospective and centered by construction. The
+    # report therefore RECORDS and DISCLOSES that fact instead of confirming its
+    # absence; a report that still claims "not future-centered" for a standard-index
+    # run is refused as a false confirmation.
+    if drivers.get("index_inputs_retrospective_centered") is not True:
+        raise BenchmarkError(
+            report_name,
+            "driver_inputs.index_inputs_retrospective_centered is not True; under D-45 the "
+            "benchmark is a retrospective climatological reference whose index inputs "
+            "(adjusted target-day F10.7, centered 81-/365-day means, centered IG12/Rz12, "
+            "target-day ap) are recorded and disclosed, never confirmed absent "
+            "(Vision 6.11 as amended; FR-P1-04-15 area 5)",
+        )
+    if drivers.get("no_future_centering_confirmed") is True:
+        raise BenchmarkError(
+            report_name,
+            "driver_inputs.no_future_centering_confirmed is True for a standard-index IRI "
+            "run; that confirmation is false by construction (D-45)",
+        )
+    for field in ("index_files_sha256", "iri_version", "oarr_overrides"):
+        if field not in drivers:
             raise BenchmarkError(
                 report_name,
-                f"driver_inputs.{confirmation} is not True; the report must confirm "
-                f"that no driver is future-centered or unavailable at target time "
-                f"(FR-P1-04-15 area 5)",
+                f"driver_inputs.{field} is absent; D-45 pins the shipped index files by hash, "
+                f"requires version=16 and records that no oarr override is used",
             )
+    if drivers.get("iri_version") != 16 or drivers.get("oarr_overrides") not in ({}, [], None):
+        raise BenchmarkError(
+            report_name, "D-45 requires IRI-2016 (version=16) and no oarr overrides"
+        )
     samples = report["samples"]
     if not isinstance(samples, Sequence) or isinstance(samples, str):
         raise BenchmarkError(report_name, "samples is not a sequence of sample records")
@@ -245,9 +277,9 @@ def assert_benchmark_drivers_in_matrix(
     run. The matrix is `features-and-splits`' artifact: this function states the
     obligation against rows it is handed; it does not own or build the row.
 
-    D-25 standing (SD-E-04): the F10.7 convention this limb admits rests on a TE 15.2
-    amendment D-25 *requests but does not take*; until granted, EV-12's F10.7 limb is
-    UNMET at G-04, and nothing here treats it as granted.
+    D-25 standing (SD-E-04): the F10.7 convention this limb admits rests on the TE 15.2
+    amendment granted and applied 2026-08-22 (`CR-2026-08-22-EV-12`); the pre-grant
+    wording was corrected 2026-09-19 (P-5). The row shape is the whole of the grant.
 
     Raises
     ------
@@ -291,9 +323,9 @@ def assert_benchmark_drivers_in_matrix(
                 f"missing {problems}; the CR-2026-08-22-EV-12 row shape admits a "
                 f"documented absence only WITH the convention and the "
                 f"unverified-latency statement (R-59 limb 4; for F10.7 the convention "
-                f"is D-25, whose authorising TE 15.2 amendment is NOT granted -- "
-                f"EV-12's F10.7 limb is unmet at G-04 and is not treated as "
-                f"satisfiable here)",
+                f"is D-25, whose authorising TE 15.2 amendment was granted and applied "
+                f"2026-08-22 under CR-2026-08-22-EV-12 -- the row shape is the whole "
+                f"of that grant)",
             )
 
 

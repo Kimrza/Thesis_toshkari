@@ -28,7 +28,10 @@ a `params` argument is refused.
 
 Re-run behaviour
 ----------------
-Pure functions; deterministic; nothing persisted. A missing source value yields `y_hat = None`
+Pure functions; deterministic; nothing persisted. A missing source value (absent row, `None`, or
+an explicit `NaN` gap per D-5) yields a MISSING `y_hat` — `None` in a record sequence, `NaN` once
+pandas materialises the frame (a float column cannot hold `None`); consumers test the VALUE for
+missingness, never `is None` alone (G-10, 2026-09-19) —
 and is COUNTED on the prediction frame's attrs (`missing_source_values`) — a completeness
 shortfall recorded machine-readably, never console text (team.md two-tier posture).
 
@@ -90,8 +93,9 @@ def persistence_rows(
     offset = dt.timedelta(hours=lag_hours)
     for station, stamp in bundle_index(score_bundle):
         value = series.get((station, stamp - offset))
-        if value is None:
+        if value is None or (isinstance(value, float) and value != value):  # None or NaN
             missing += 1
+            value = None
         rows.append({"station": station, "interval_start_utc": stamp, "y_hat": value})
     return rows, missing
 

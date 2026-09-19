@@ -381,9 +381,24 @@ def _prediction_keys(prediction: Any) -> dict[tuple[str, str], Any]:
                 "carries no (station, interval_start_utc) key; the alignment key is the "
                 "ordered pair R-92 fixed",
             )
-        if row.get("y_hat") is not None:
+        if not _is_missing(row.get("y_hat")):
             keyed[(str(station), str(stamp))] = row["y_hat"]
     return keyed
+
+
+def _is_missing(value: Any) -> bool:
+    """A missing prediction in EITHER frame representation: `None` in a record sequence,
+    `NaN` in a DataFrame (pandas coerces `None` to `NaN` in a float column). The rule is
+    over the VALUE: a missing member prediction never enters the intersection mask
+    (NFR-FAIR-01; D-5's explicit-NaN gaps). Added 2026-09-19 (G-10) after the governed
+    environment — pandas installed for the first time — showed `is not None` admitting
+    `NaN` rows as present."""
+    if value is None:
+        return True
+    try:
+        return isinstance(value, float) and value != value  # NaN is the only value != itself
+    except TypeError:  # pragma: no cover — exotic objects are "present"
+        return False
 
 
 def _window_attrs(prediction: Any) -> tuple[Any, Any]:

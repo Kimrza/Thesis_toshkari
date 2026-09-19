@@ -93,6 +93,7 @@ from src.data.acquisition import (  # noqa: E402
     store_gaps_as_nan,
     write_request_manifest,
     write_sha256_manifest,
+    SHA256_MANIFEST_META_NAME,
 )
 from src.data.config import IntegrityError, RegistryError, ReleaseError  # noqa: E402
 from src.data.experiment_registry import (  # noqa: E402
@@ -167,6 +168,47 @@ def test_legitimate_hash_uuid_and_prose_pass_via_the_allowlist() -> None:
     assert guard_egress_value("hourly VTEC forecasting, calendar 2022", context="c")
     assert guard_egress_value("2026-09-05T12:00:00+00:00", context="c")
     assert guard_egress_value("aruc011a.22g.002", context="c") == "aruc011a.22g.002"
+
+
+def test_provider_data_filenames_pass_via_the_structural_allowlist_entry() -> None:
+    """G-2 (2026-09-18): the five shapes that were refused as false positives during the
+    GFZ driver-pair audit are ordinary provider filenames and pass; every one is a
+    3-class token of 20+ chars that the entropy tier alone would refuse."""
+    for name in (
+        "Hp60ap60doi_2022.txt",
+        "Hp60ap60doi_2022_v2.txt",
+        "Kp_ap_Ap_SN_F107_since_1932.txt",
+        "dst_provisional_202211.html",
+        "madrigal_coverage_summary_2022-FULL.csv",
+        "Hp60ap60doi_1985-2024.txt",
+        "Kp_ap_Ap_SN_F107_since_1932_reissued_v2_fina.txt",  # exactly 48 chars: boundary passes
+    ):
+        assert guard_egress_value(name, context="c") == name
+    assert len("Kp_ap_Ap_SN_F107_since_1932_reissued_v2_fina.txt") == 48
+
+
+def test_structural_filename_entry_does_not_open_the_known_prefix_or_token_paths() -> None:
+    """Negative controls on the same entry: a known credential prefix is refused even when
+    dressed as a filename (prefix check precedes the allowlist); a 3-class token without
+    an extension, an over-long 'filename', a stem without a separator and a signed URL are
+    all still refused."""
+    for bad in (
+        "AKIAIOSFODNN7EXAMPLE_2022.txt",  # known prefix, dressed as a file
+        "ghp_ABCdef0123456789XYZabc_notes.md",  # known prefix, dressed as a file
+        "xoxb-1234-ABCDEFghijkl_2022.txt",  # known prefix with the filename separators
+        "Hp60ap60doi2022V3ReCompUted",  # 3-class token, no extension
+        "A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8S9t0U1v2W3x4Y5z6_aa.txt",  # over 48 chars
+        "Kp_ap_Ap_SN_F107_since_1932_reissued_v2_final.txt",  # 49 chars: boundary refused
+        "Q7r8S9t0U1v2W3x4Y5z6A1b2C3d4E5.txt",  # 3-class run, no separator
+        "Q7r8S9t0U1v2_W3x4Y5z6A1b2.txt",  # 3-class runs WITH a separator: run rule refuses
+        "wJalrXUtnFEMI_K7MDENG_bPxRfiCYEXAMPLEKEY.dat",  # AWS-secret-shaped runs
+        "Hp60ap60doi__2022.txt",  # consecutive separators
+        "evidence/audit_gfz_2026-09-18/Kp_now2022.wdc",  # path-like, mixed case: not a filename
+    ):
+        with pytest.raises(CredentialEgressError):
+            guard_egress_value(bad, context="c")
+    with pytest.raises(CredentialEgressError):
+        guard_egress_value(f"https://x.example.org/f.txt?sig={SHA64}", context="c")
 
 
 def test_guard_egress_walks_nested_payloads() -> None:
@@ -790,11 +832,41 @@ def test_sha256_manifest_arithmetic_holds_and_refuses_a_hashless_provider_row(
         producing_interpreter="Python 3.11.9",
     )
     manifest = json.loads(path.read_text(encoding="utf-8"))
-    assert (
-        manifest["hash_count"]
-        == 2
-        == len(manifest["provider_files"]) + len(manifest["derived_artifacts"])
-    )
+    meta = json.loads((path.parent / SHA256_MANIFEST_META_NAME).read_text(encoding="utf-8"))
+    # G-1 (2026-09-19): the manifest IS the flat TE 13.3 {path: sha256} mapping (what the
+    # twelve monthly manifests, write_release's output_files and TA-15's reader share);
+    # W-4's arithmetic and the provider identities live in the metadata sidecar.
+    assert set(manifest) == {"aruc011a.22g.002", "coverage_summary.csv"}
+    assert all(len(v) == 64 for v in manifest.values())
+    assert meta["hash_count"] == 2 == len(manifest)
+    assert meta["provider_file_count"] + meta["derived_artifact_count"] == meta["hash_count"]
+    assert meta["provider_files"] == {"aruc011a.22g.002": "aruc011a.22g.002"}
+    # ambiguous mappings and malformed digests are refused, never written
+    with pytest.raises(AcquisitionError, match="AMBIGUOUS"):
+        write_sha256_manifest(
+            tmp_path / "dup.json",
+            provider_files=[_provider_record(), _provider_record()],
+            derived_artifacts={},
+            provenance_class="full",
+            producing_interpreter="Python 3.11.9",
+        )
+    with pytest.raises(AcquisitionError, match="AMBIGUOUS"):
+        write_sha256_manifest(
+            tmp_path / "dup2.json",
+            provider_files=[_provider_record()],
+            derived_artifacts={"aruc011a.22g.002": SHA64},
+            provenance_class="full",
+            producing_interpreter="Python 3.11.9",
+        )
+    with pytest.raises(AcquisitionError, match="64 lower-case hex"):
+        write_sha256_manifest(
+            tmp_path / "bad.json",
+            provider_files=[_provider_record()],
+            derived_artifacts={"x.csv": "not-a-digest"},
+            provenance_class="full",
+            producing_interpreter="Python 3.11.9",
+        )
+    assert not (tmp_path / "dup.json").exists() and not (tmp_path / "bad.json").exists()
     incomplete = _provider_record(status="incomplete")
     del incomplete["sha256"]
     with pytest.raises(AcquisitionError) as excinfo:
@@ -1175,9 +1247,12 @@ def test_optionb_00_record_window_bound_behavioural_and_wired(tmp_path) -> None:
 
     window = (dt.date(2022, 11, 1), dt.date(2022, 11, 7))
     inside = [{"timestamp": "2022-11-03T10:00:00"}, {"timestamp": "2022-11-07T23:59:59"}]
-    assert assert_records_within_window(
-        inside, start=window[0], end=window[1], timestamp_key="timestamp"
-    ) == 2
+    assert (
+        assert_records_within_window(
+            inside, start=window[0], end=window[1], timestamp_key="timestamp"
+        )
+        == 2
+    )
     outside = [*inside, {"timestamp": "2022-03-15T00:00:00"}]
     with pytest.raises(AcquisitionError, match="2022-03-15"):
         assert_records_within_window(

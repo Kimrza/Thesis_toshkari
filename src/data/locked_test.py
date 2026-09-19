@@ -70,9 +70,11 @@ Governance
 from __future__ import annotations
 
 import datetime as _dt
+import fnmatch
 import hashlib
 import json
 import os
+import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
@@ -95,9 +97,86 @@ __all__ = [
     "open_restricted",
     "write_restricted",
     "assert_no_december_outside_restricted",
+    "DECEMBER_DRIVER_EXCLUSION_CLASSES",
+    "TARGET_INDICATOR_KEYS",
+    "december_driver_exclusion_class",
+    "DecemberCustodyEntry",
+    "december_custody_inventory",
 ]
 
 RESTRICTED_ROOT: Final[str] = "evidence/locked_test_restricted"
+
+#: R-26's ENUMERATED driver-exclusion classes (governance-guards business-rules R-26,
+#: "the four excluded driver classes, enumerated exhaustively", 2026-08-28; class 4
+#: unconditional since D-30), implemented 2026-09-19 (G-4, `CR-2026-09-19-GATE-PREP-2`),
+#: PLUS class 5 adopted by the project decision owner as **D-48** (2026-09-19,
+#: `CR-2026-09-19-SCI-DECISIONS`): raw external-driver captures and their source-version
+#: audit summary under `evidence/audit_gfz_*/`, with documented provenance. Membership is an
+#: exact (class, label, evidence-relative path patterns) list, never a directory
+#: predicate, and the path match is only HALF of eligibility: the file's CONTENT must
+#: validate as that class's driver-only schema (`_class_content_ok`), and class 5 must
+#: also carry a provenance record. Mixed or unclassifiable content fails closed. A
+#: custody exclusion is never a licence to use; excluded files stay inventoried with
+#: their reason (`december_custody_inventory`).
+DECEMBER_DRIVER_EXCLUSION_CLASSES: Final[tuple[tuple[int, str, tuple[str, ...]], ...]] = (
+    (
+        1,
+        "Raw provisional-Dst monthly capture",
+        ("audit_ec1_2026-08-15/kyoto_dst/dst_provisional_*.html",),
+    ),
+    (2, "Raw F10.7 flux table", ("audit_ec1_2026-08-15/nrcan_f107/fluxtable.txt",)),
+    (3, "Derived driver audit report", ("audit_ec1_2026-08-15/ec1-audit-report.json",)),
+    (4, "Derived driver summary", ("audit_ec1_2026-08-15/kyoto_dst/.dst_summary.json",)),
+    (
+        5,
+        "Raw GFZ geomagnetic-index capture or source-version audit summary (D-48)",
+        (
+            "audit_gfz_*/Kp_*.wdc",
+            "audit_gfz_*/hp60ap60doi_*.txt",
+            "audit_gfz_*/gfz-comparison-report.json",
+        ),
+    ),
+)
+
+#: Key tokens whose presence anywhere in a JSON artifact marks TARGET, PREDICTION,
+#: EVALUATION or mixed content — such a file is NEVER excluded, whatever its path. Token
+#: match is on the lower-cased key split at `_`/`-`, so `december_days_present`,
+#: `vtec_tecu`, `y_hat`, `paired_error` all hit. Widening this set is a reviewed edit.
+TARGET_INDICATOR_KEYS: Final[frozenset[str]] = frozenset(
+    {
+        "vtec",
+        "tec",
+        "tecu",
+        "target",
+        "y",
+        "yhat",
+        "prediction",
+        "predictions",
+        "forecast",
+        "metric",
+        "metrics",
+        "rmse",
+        "mae",
+        "mse",
+        "loss",
+        "paired",
+        "estimand",
+        "residual",
+        "residuals",
+        "coverage",
+        "madrigal",
+        "station",
+        "stations",
+        "cell",
+        "cells",
+        "aruc",
+        "bshm",
+        "nico",
+        "mask",
+        "fold",
+        "model",
+    }
+)
 
 #: R-28's enumerated exemption: the ONLY modules permitted to hold the restricted-root
 #: literal, INCLUDING the chokepoint itself (the design's prose counts "five members in
@@ -151,6 +230,7 @@ def fail_unparseable(artifact: object, reason: str) -> None:
         f"record would hide, and passing it requires an explicit recorded exclusion, "
         f"never silence",
     )
+
 
 #: The three purposes Vision 8.3 distinguishes — `coverage_audit` and `regime_audit`
 #: are performance-blind and permitted before G-05; `locked_evaluation` is the
@@ -382,9 +462,7 @@ def open_restricted(
     # derived from the completed registration, which is the ordering proof.
     bundle_ids, registry_hash = _containment_fields(mask_bundle_manifest)
     if bundle_ids is not None:
-        record = replace(
-            record, mask_bundle_ids=bundle_ids, mask_registry_hash=registry_hash
-        )
+        record = replace(record, mask_bundle_ids=bundle_ids, mask_registry_hash=registry_hash)
 
     try:
         _append_and_flush(Path(registry), record)
@@ -398,9 +476,7 @@ def open_restricted(
     return resolved
 
 
-def write_restricted(
-    path: Path, payload: bytes, *, record: AccessRecord, registry: Path
-) -> Path:
+def write_restricted(path: Path, payload: bytes, *, record: AccessRecord, registry: Path) -> Path:
     """Log durably FIRST, then write `payload` under the restricted root (R-33, Q2 = C).
 
     The write-side sibling of `open_restricted`, added under the R-33/BLK-07 interface
@@ -501,26 +577,377 @@ def write_restricted(
     return resolved
 
 
+def _key_tokens(obj: object, acc: set[str]) -> set[str]:
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            for token in str(key).lower().replace("-", "_").split("_"):
+                if token:
+                    acc.add(token)
+            _key_tokens(value, acc)
+    elif isinstance(obj, list):
+        for value in obj:
+            _key_tokens(value, acc)
+    return acc
+
+
+# --- December detection: STRUCTURAL, per format (D-48; P-4a) ------------------------------
+
+#: December 2022 as a unix-epoch range [start, end) — isprint extractions and the Madrigal
+#: record CSVs carry `ut1_unix`, not a calendar string.
+_DECEMBER_2022_UNIX: Final[tuple[int, int]] = (1669852800, 1672531200)
+_DEC_TEXT = re.compile(r"2022-12|202212")
+_DEC_WDC_LINE = re.compile(r"^2212[ \d]\d", re.M)
+_DEC_HPO_LINE = re.compile(r"^2022 12 \d\d", re.M)
+_MONTH_KEYS: Final[frozenset[str]] = frozenset(str(m) for m in range(1, 13))
+_DETECT_STRING_FIELDS: Final[frozenset[str]] = frozenset({"y", "year", "m", "month"})
+
+
+def _json_december(obj: object) -> str | None:
+    """Why a parsed JSON payload is December-bearing, or None. Structural: (a) any string
+    (key or value) carrying `2022-12` / `202212`; (b) any record with year 2022 and month
+    12 under `y`/`year` and `m`/`month` (integer or string), at any depth; (c) a mapping
+    keyed by month numbers that carries `"12"` (a per-month summary)."""
+    if isinstance(obj, dict):
+        keys = {str(k) for k in obj}
+        if "12" in keys and len(keys) >= 2 and keys <= _MONTH_KEYS:
+            return "month-number key '12' in a per-month mapping"
+        year = None
+        month = None
+        for key, value in obj.items():
+            skey = str(key).lower()
+            if _DEC_TEXT.search(str(key)):
+                return f"key {key!r} carries a December-2022 literal"
+            if skey in ("y", "year"):
+                year = value
+            elif skey in ("m", "month"):
+                month = value
+        if str(year) == "2022" and str(month) == "12":
+            return "record with year 2022 and month 12"
+        for value in obj.values():
+            found = _json_december(value)
+            if found:
+                return found
+    elif isinstance(obj, list):
+        for value in obj:
+            found = _json_december(value)
+            if found:
+                return found
+    elif isinstance(obj, str) and _DEC_TEXT.search(obj):
+        return "string value carries a December-2022 literal"
+    return None
+
+
+def _endpoint_epochs(candidate: Path) -> tuple[float, float] | None:
+    """First and last leading numeric field of a large whitespace table (isprint output),
+    read from the file's two ends only — an O(1) endpoint inspection, disclosed as such."""
+    size = candidate.stat().st_size
+    if size == 0:
+        return None
+    with candidate.open("rb") as handle:
+        head = handle.read(min(size, 4096)).decode("utf-8", errors="replace")
+        handle.seek(max(0, size - 4096))
+        tail = handle.read().decode("utf-8", errors="replace")
+    first = next((ln for ln in head.splitlines() if ln.strip()), "")
+    last = next((ln for ln in reversed(tail.splitlines()) if ln.strip()), "")
+    try:
+        return float(first.split()[0]), float(last.split()[0])
+    except (ValueError, IndexError):
+        return None
+
+
+def _detect_december(candidate: Path, text: str | None) -> tuple[str, str | None]:
+    """(detection method, reason-or-None) for one file, by format."""
+    suffix = candidate.suffix.lower()
+    name = candidate.name
+    if suffix == ".json":
+        payload = json.loads(text if text is not None else candidate.read_text(encoding="utf-8"))
+        return "json-structural", _json_december(payload)
+    if suffix == ".wdc":
+        body = text if text is not None else candidate.read_text(encoding="utf-8")
+        hits = _DEC_WDC_LINE.findall(body)
+        return "wdc-line", (f"{len(hits)} December-2022 day line(s)" if hits else None)
+    if name.startswith("hp60ap60doi") or name.startswith("Hp60ap60doi"):
+        body = text if text is not None else candidate.read_text(encoding="utf-8")
+        hits = _DEC_HPO_LINE.findall(body)
+        return "hpo-line", (f"{len(hits)} December-2022 hourly line(s)" if hits else None)
+    if candidate.parent.name == "raw_isprint_cache":
+        ends = _endpoint_epochs(candidate)
+        if ends is None:
+            fail_unparseable(candidate, "no leading numeric field at either end")
+        lo, hi = _DECEMBER_2022_UNIX
+        first, last = ends  # type: ignore[misc]
+        spans = first < hi and last >= lo
+        return "isprint-endpoint", (
+            f"record epochs {first:.0f}..{last:.0f} overlap December 2022" if spans else None
+        )
+    if suffix == ".md":
+        return "outside-automated-inspection", None
+    body = text if text is not None else candidate.read_text(encoding="utf-8")
+    hits = _DEC_TEXT.findall(body)
+    if not hits and suffix == ".csv" and "ut1_unix" in body[:400]:
+        lo, hi = _DECEMBER_2022_UNIX
+        for line in body.splitlines()[1:]:
+            field = line.split(",", 1)[0]
+            try:
+                epoch = float(field)
+            except ValueError:
+                continue
+            if lo <= epoch < hi:
+                return "csv-epoch", f"ut1_unix {epoch:.0f} in December 2022"
+    return "text-literal", (f"{len(hits)} December-2022 literal(s)" if hits else None)
+
+
+# --- exclusion classes: content validators ------------------------------------------------
+
+_FLUX_LINE = re.compile(r"^\d{8}\s+\d{6}\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s*$")
+_WDC_LINE = re.compile(r"^[0-9 .+\-]{62,}$")
+_TARGET_WORDS = re.compile(r"\b(vtec|tecu|madrigal|aruc|bshm|nico|prediction|rmse)\b", re.I)
+
+
+def _lines(text: str, *, comment: str = "#") -> list[str]:
+    return [ln for ln in text.splitlines() if ln.strip() and not ln.lstrip().startswith(comment)]
+
+
+def _driver_only_json(text: str) -> bool:
+    return not (_key_tokens(json.loads(text), set()) & TARGET_INDICATOR_KEYS)
+
+
+def _gfz_provenance(candidate: Path, text: str) -> bool:
+    """D-48's provenance condition: a sibling `retrieval_record.json` documents the file —
+    for a raw capture, a `provider_files` entry with this on-disk name and a sha256 equal
+    to the file's bytes; for the comparison report, the same `run_id`."""
+    record_path = candidate.with_name("retrieval_record.json")
+    if not record_path.is_file():
+        return False
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    if candidate.name == "gfz-comparison-report.json":
+        return bool(record.get("run_id")) and json.loads(text).get("run_id") == record.get(
+            "run_id"
+        )
+    for entry in record.get("provider_files", []):
+        if entry.get("logical_name") == candidate.name:
+            digest = hashlib.sha256(candidate.read_bytes()).hexdigest()
+            return entry.get("sha256") == digest
+    return False
+
+
+_GFZ_REPORT_KEYS: Final[frozenset[str]] = frozenset(
+    {"comparisons", "december_custody", "provider_limitations", "run_id", "validation"}
+)
+_EPOCH_KEYS: Final[frozenset[str]] = frozenset({"y", "m", "d", "h"})
+
+
+def _gfz_report_ok(payload: object) -> bool:
+    """Schema-validated driver-only content for the GFZ source-version audit summary
+    (D-48). Two `TARGET_INDICATOR_KEYS` tokens occur in this report with a non-target
+    meaning and are admitted ONLY in their validated structural position: `y` as the
+    year of an epoch key `{y, m, d, h}` (integer values, no other sibling), and
+    `coverage` as the epoch-count statement under `validation.<file>`. Any other target
+    token anywhere, any other top-level key, or either token elsewhere fails closed."""
+    if not isinstance(payload, dict) or not set(payload) <= _GFZ_REPORT_KEYS:
+        return False
+
+    def walk(obj: object, path: tuple[str, ...]) -> bool:
+        if isinstance(obj, dict):
+            keys = {str(k) for k in obj}
+            if "y" in keys:
+                if not keys <= _EPOCH_KEYS or not all(
+                    isinstance(v, int) and not isinstance(v, bool) for v in obj.values()
+                ):
+                    return False
+                return True
+            for key, value in obj.items():
+                tokens = {tok for tok in str(key).lower().replace("-", "_").split("_") if tok}
+                if "coverage" in tokens:
+                    if not (len(path) == 2 and path[0] == "validation"):
+                        return False
+                    tokens.discard("coverage")
+                if tokens & TARGET_INDICATOR_KEYS:
+                    return False
+                if not walk(value, (*path, str(key))):
+                    return False
+            return True
+        if isinstance(obj, list):
+            return all(walk(v, path) for v in obj)
+        return True
+
+    return walk(payload, ())
+
+
+def _class_content_ok(number: int, candidate: Path, text: str) -> bool:
+    """The CONTENT half of eligibility per class — validated schema, never a path alone.
+    Anything unexpected returns False (fail closed for review)."""
+    if number == 1:
+        return "dst" in text.lower() and not _TARGET_WORDS.search(text)
+    if number == 2:
+        body = [ln for ln in text.splitlines() if ln.strip()]
+        data = [ln for ln in body if not ln.lstrip().startswith(("fluxdate", "---"))]
+        return bool(data) and all(_FLUX_LINE.match(ln) for ln in data)
+    if number in (3, 4):
+        return _driver_only_json(text)
+    if number == 5:
+        if candidate.suffix.lower() == ".wdc":
+            data = _lines(text)
+            ok = bool(data) and all(_WDC_LINE.match(ln) for ln in data)
+        elif candidate.suffix.lower() == ".txt":
+            data = _lines(text)
+            ok = bool(data) and all(
+                len(ln.split()) == 10 and all(_numeric(tok) for tok in ln.split()) for ln in data
+            )
+        elif candidate.name == "gfz-comparison-report.json":
+            ok = _gfz_report_ok(json.loads(text))
+        else:
+            return False
+        return ok and _gfz_provenance(candidate, text)
+    return False
+
+
+def _numeric(token: str) -> bool:
+    try:
+        float(token)
+    except ValueError:
+        return False
+    return True
+
+
+def december_driver_exclusion_class(
+    candidate: Path, evidence_root: Path, *, text: str | None = None
+) -> tuple[int, str] | None:
+    """The R-26/D-48 driver-exclusion class `candidate` belongs to, or None when it is
+    subject to the December custody scan.
+
+    Eligibility is TWO conditions, both required: (a) the evidence-relative path matches
+    one of the enumerated class patterns exactly (`fnmatch`, no directory predicate); and
+    (b) the file's CONTENT validates as that class's driver-only schema
+    (`_class_content_ok`) — for JSON, no key token in `TARGET_INDICATOR_KEYS` at any
+    depth; for raw captures, every data line parses as the provider's format; for class 5
+    additionally a documented provenance record (D-48). Mixed, unknown or unclassifiable
+    content returns None — flagged for review, never excluded. An unparseable JSON is not
+    "excluded": the caller's unparseable-file failure stands.
+    """
+    try:
+        rel = candidate.resolve().relative_to(Path(evidence_root).resolve()).as_posix()
+    except ValueError:
+        return None
+    for number, label, patterns in DECEMBER_DRIVER_EXCLUSION_CLASSES:
+        if not any(fnmatch.fnmatch(rel, pattern) for pattern in patterns):
+            continue
+        body = text if text is not None else candidate.read_text(encoding="utf-8")
+        if _class_content_ok(number, candidate, body):
+            return number, label
+        return None  # path matched, content did not: fail closed
+    return None
+
+
+@dataclass(frozen=True)
+class DecemberCustodyEntry:
+    """One inventory row of the custody scan: WHAT was inspected, HOW, and its disposition.
+    `disposition` is one of `flagged` (December-bearing, no exclusion applies — an
+    offender), `excluded` (December-bearing, class content validated — inventoried with
+    its reason; exposure, never a licence to use), `no_december_content`, or
+    `outside_automated_inspection` (governance prose; handled by review, never labelled
+    clean)."""
+
+    path: str
+    detection: str
+    disposition: str
+    exclusion_class: int | None
+    reason: str
+
+
+def _read_text(candidate: Path) -> str:
+    """UTF-8, else — for NON-JSON text formats only — Latin-1, which decodes every byte
+    and leaves the ASCII date patterns intact (a provider HTML page in a legacy encoding
+    is readable for detection, not "unreadable"). JSON must be UTF-8 (R-27: failure)."""
+    raw = candidate.read_bytes()
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        if candidate.suffix.lower() == ".json":
+            raise
+        return raw.decode("latin-1")
+
+
+def december_custody_inventory(evidence_root: Path) -> list[DecemberCustodyEntry]:
+    """FR-P1-02-6 / R-27: walk `evidence/` recursively and inventory EVERY file outside the
+    restricted root with its December detection method and disposition. Scanner
+    COVERAGE (which formats are inspected how) is reported by `detection`, separately
+    from policy COMPLIANCE (`disposition`): an inspection method that reads only a file's
+    endpoints says so, and a format no method reads is `outside_automated_inspection`.
+
+    Detection is structural per format (D-48, P-4a): JSON by parsed structure (string
+    literals, `{y: 2022, m: 12}` records at any depth, month-number keys), WDC and Hpo
+    lines by their own date layout, isprint tables by endpoint epochs, Madrigal CSVs by
+    `ut1_unix` epochs or literals, other text by literal. Membership is decided by record
+    content, never by directory name (`project.md` § Forbidden).
+
+    Raises
+    ------
+    EvidenceScanError
+        when a candidate cannot be read or decoded (R-27: unreadable is a failure).
+    """
+    root = Path(evidence_root).resolve()
+    if not root.is_dir():
+        return []
+    restricted = (root / "locked_test_restricted").resolve()
+    rows: list[DecemberCustodyEntry] = []
+    for candidate in sorted(p for p in root.rglob("*") if p.is_file()):
+        if candidate.is_relative_to(restricted):
+            continue
+        rel = candidate.relative_to(root).as_posix()
+        text: str | None = None
+        try:
+            if candidate.parent.name != "raw_isprint_cache":
+                text = _read_text(candidate)
+            detection, reason = _detect_december(candidate, text)
+        except EvidenceScanError:
+            raise
+        except (OSError, UnicodeDecodeError, ValueError) as exc:
+            fail_unparseable(candidate, str(exc))
+            raise AssertionError("unreachable: fail_unparseable always raises") from exc
+        if detection == "outside-automated-inspection":
+            rows.append(
+                DecemberCustodyEntry(
+                    rel,
+                    detection,
+                    "outside_automated_inspection",
+                    None,
+                    "governance prose; reviewed by a person, never labelled clean",
+                )
+            )
+            continue
+        if reason is None:
+            rows.append(DecemberCustodyEntry(rel, detection, "no_december_content", None, ""))
+            continue
+        try:
+            excluded = december_driver_exclusion_class(candidate, root, text=text)
+        except ValueError as exc:
+            fail_unparseable(candidate, str(exc))
+            raise AssertionError("unreachable: fail_unparseable always raises") from exc
+        if excluded is None:
+            rows.append(DecemberCustodyEntry(rel, detection, "flagged", None, reason))
+        else:
+            rows.append(
+                DecemberCustodyEntry(
+                    rel,
+                    detection,
+                    "excluded",
+                    excluded[0],
+                    f"{reason}; class {excluded[0]} ({excluded[1]}) — content validated; exposure recorded",
+                )
+            )
+    return rows
+
+
 def assert_no_december_outside_restricted(evidence_root: Path) -> Sequence[Path]:
     """FR-P1-02-6's regression guard: December-bearing artifacts outside the restricted root.
 
-    Walks `evidence/` **recursively** and returns every December-bearing artifact found
-    outside the restricted root. An empty sequence is the pass condition.
-
-    Recursive by construction: `DATA-01` showed a non-recursive glob silently stopped
-    checking the artifacts that matter most, and D-15 relocated 21 files, so a guard that
-    only looks one level down would report clean while missing the relocation entirely.
-
-    Membership is decided by **record date**, never by directory name -- `project.md`
-    forbids deriving partition membership from a path, after a year-blind acquisition
-    predicate filed locked-month records into `audit_evidence_2022-01/`.
-
-    An unreadable file is a **failure**, not a pass (R-27, via the shared
-    `fail_unparseable` helper): a file this scan cannot read is exactly where a
-    December record would hide. Known narrowing, disclosed not closed: the scan reads
-    `*.json` only, while R-27 specifies a per-class walk of every file -- widening it
-    is this unit's change to make and is not made at this step (recorded by
-    `inventory-and-registry` and in `nfr-design/security-design.md`'s banner).
+    Returns every `flagged` entry of `december_custody_inventory` as a path; an empty
+    sequence is the pass condition. Recursive by construction (`DATA-01`); membership by
+    record content, never by directory name; unreadable is a failure (R-27). The
+    inventory itself — including the `excluded` files with their reasons and the formats
+    outside automated inspection — is the coverage record a reviewer reads beside the
+    pass/fail result.
 
     Raises
     ------
@@ -528,19 +955,8 @@ def assert_no_december_outside_restricted(evidence_root: Path) -> Sequence[Path]
         when a candidate file cannot be read or decoded.
     """
     root = Path(evidence_root).resolve()
-    if not root.is_dir():
-        return []
-    restricted = (root / "locked_test_restricted").resolve()
-
-    offenders: list[Path] = []
-    for candidate in sorted(root.rglob("*.json")):
-        if candidate.is_relative_to(restricted):
-            continue
-        try:
-            text = candidate.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError) as exc:
-            fail_unparseable(candidate, str(exc))
-            raise AssertionError("unreachable: fail_unparseable always raises") from exc
-        if '"2022-12' in text or "'2022-12" in text:
-            offenders.append(candidate)
-    return offenders
+    return [
+        root / entry.path
+        for entry in december_custody_inventory(root)
+        if entry.disposition == "flagged"
+    ]

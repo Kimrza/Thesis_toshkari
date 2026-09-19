@@ -66,6 +66,9 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+if str(REPO_ROOT / "tests") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "tests"))
+from _fresh_process import in_fresh_process  # noqa: E402
 
 from src.data.config import (  # noqa: E402
     CREDENTIAL_NAME_MAP,
@@ -457,6 +460,7 @@ def test_seed_everything_raises_when_tensorflow_already_initialised(
     assert "tensorflow" in str(excinfo.value)
 
 
+@in_fresh_process
 def test_seed_everything_applies_the_frozen_development_seed(snapshot) -> None:
     record = seed_everything(snapshot, stage="test")
     assert record.seeds_applied["python"] == 42
@@ -467,6 +471,7 @@ def test_seed_everything_applies_the_frozen_development_seed(snapshot) -> None:
     assert record.measurement_status in ("partial", "not-yet-measured")
 
 
+@in_fresh_process
 def test_seed_everything_refuses_a_missing_or_tbd_seed(tmp_path, monkeypatch) -> None:
     config_dir = _write_config_tree(tmp_path)
     (config_dir / "seeds.yaml").write_text(
@@ -480,6 +485,7 @@ def test_seed_everything_refuses_a_missing_or_tbd_seed(tmp_path, monkeypatch) ->
     assert "seeds.yaml" in str(excinfo.value)
 
 
+@in_fresh_process
 def test_declared_vs_observed_mismatches_surface_both_ways(
     tmp_path, monkeypatch
 ) -> None:
@@ -674,6 +680,7 @@ def test_r05_platform_split_is_exact_in_source() -> None:
 # --- W-5 / REQ-ENG-10: the eight-item environment lock ----------------------------------
 
 
+@in_fresh_process
 def test_environment_lock_captures_eight_of_eight(snapshot, tmp_path) -> None:
     """Happy path + the plan's 8/8 completeness control."""
     (tmp_path / "requirements.txt").write_text("numpy==1.26.4\n", encoding="utf-8")
@@ -692,6 +699,7 @@ def test_environment_lock_captures_eight_of_eight(snapshot, tmp_path) -> None:
     assert len(lock_hash) == 64 and environment_lock_hash(record) == lock_hash
 
 
+@in_fresh_process
 def test_missing_requirements_file_is_an_integrity_failure(snapshot, tmp_path) -> None:
     determinism = seed_everything(snapshot, stage="test")
     with pytest.raises(IntegrityError) as excinfo:
@@ -704,6 +712,7 @@ def test_missing_requirements_file_is_an_integrity_failure(snapshot, tmp_path) -
     assert "requirements" in str(excinfo.value)
 
 
+@in_fresh_process
 def test_incomplete_lock_fails_rather_than_completing_silently(snapshot, tmp_path) -> None:
     """REQ-ENG-10 negative control: an unpopulated field is a named failure."""
     (tmp_path / "requirements.txt").write_text("numpy==1.26.4\n", encoding="utf-8")

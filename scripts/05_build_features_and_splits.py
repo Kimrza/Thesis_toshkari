@@ -167,6 +167,7 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "actual_lag_hours",
     "anchor_policy",
     "latency_statement",
+    "availability_rule",
 )
 
 

@@ -50,6 +50,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 if str(REPO_ROOT / "tests") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "tests"))
+from _fresh_process import in_fresh_process  # noqa: E402
+if str(REPO_ROOT / "tests") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "tests"))
 
 from test_split_embargo import (  # noqa: E402
     SYNTH_YEAR,
@@ -392,6 +395,7 @@ def test_src_models_never_imports_iri_gim_or_evaluation_and_frameworks_only_lazi
                     assert name.split(".")[0] not in ("tensorflow", "sklearn"), (path, name)
 
 
+@in_fresh_process
 def test_importing_src_models_loads_neither_tensorflow_nor_sklearn() -> None:
     assert "tensorflow" not in sys.modules
     assert "sklearn" not in sys.modules
@@ -457,7 +461,11 @@ def test_persistence_counts_a_missing_source_value_and_refuses_hyperparameters()
         "M-01", bundle=score, partition=_p("F1"), snapshot=SNAPSHOT, target=target
     )
     assert frame_attrs(prediction.frame)["missing_source_values"] == 1
-    assert records_of(prediction.frame)[0]["y_hat"] is None
+    y_hat = records_of(prediction.frame)[0]["y_hat"]
+    # MISSING in either representation: None (record sequence) or NaN (DataFrame — pandas
+    # coerces None to NaN in a float column). Asserting `is None` alone was a
+    # representation assumption that only held while pandas was absent (G-10).
+    assert y_hat is None or (isinstance(y_hat, float) and y_hat != y_hat), y_hat
     with pytest.raises(IntegrityError):
         fit_predict(
             "M-01", bundle=score, partition=_p("F1"), snapshot=SNAPSHOT, target=target,
@@ -1034,6 +1042,7 @@ def test_no_importance_score_reaches_the_fit_or_selection_path() -> None:
 # =======================================================================================
 
 
+@in_fresh_process
 def test_the_pin_guard_refuses_an_absent_or_commented_pin_and_reads_the_frozen_one(
     tmp_path: Path,
 ) -> None:
@@ -1071,6 +1080,7 @@ class _NullBackend:
         return None
 
 
+@in_fresh_process
 def test_m06_fit_refuses_at_the_guard_before_any_tensorflow_import(tmp_path: Path) -> None:
     """The guard fires BEFORE any TensorFlow import — proved against a synthetic
     requirements file carrying no pin (re-pointed 2026-09-10: the real file now carries
@@ -1106,11 +1116,22 @@ def test_m06_fit_refuses_at_the_guard_before_any_tensorflow_import(tmp_path: Pat
             settings=SYNTH_SETTINGS,
             requirements_path=unpinned,
         )
-    # With the owner's frozen pin the guard PASSES and the next obstacle is the absent
-    # TensorFlow module itself — an environment fact, not a guard failure. Asserted so the
-    # distinction is explicit and the "no import before the guard" property stays proved.
-    with pytest.raises(ModuleNotFoundError):
-        lstm.build_keras_model(params, n_features=1, window_steps=3, settings=SYNTH_SETTINGS)
+    # With the owner's frozen pin the guard PASSES; what happens next is an environment
+    # fact, asserted in BOTH supported states so the "no import before the guard" property
+    # stays proved either way (G-11, `CR-2026-09-19-GATE-PREP-2`): with the pinned
+    # TensorFlow installed (the governed environment) the model builds and the import is
+    # observed to have happened ONLY after the guard; without it, the next obstacle is the
+    # absent module itself, not a guard failure.
+    import importlib.util
+
+    if importlib.util.find_spec("tensorflow") is None:
+        with pytest.raises(ModuleNotFoundError):
+            lstm.build_keras_model(params, n_features=1, window_steps=3, settings=SYNTH_SETTINGS)
+        assert "tensorflow" not in sys.modules
+    else:
+        model = lstm.build_keras_model(params, n_features=1, window_steps=3, settings=SYNTH_SETTINGS)
+        assert model is not None and "tensorflow" in sys.modules
+        assert model.name == "m06_compact_direct_lstm"
 
 
 def test_the_seven_fixed_settings_are_asserted_from_config() -> None:

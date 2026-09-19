@@ -48,7 +48,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from src.data.config import FairnessError, RegimeError, TBD_SENTINEL  # noqa: E402
+from src.data.config import TBD_SENTINEL, FairnessError, RegimeError  # noqa: E402
 from src.data.splits import RecordFrame  # noqa: E402
 from src.evaluation import diagnostics, plots, regimes, report_guards  # noqa: E402
 from src.evaluation.diagnostics import (  # noqa: E402
@@ -78,6 +78,7 @@ from src.evaluation.diagnostics import (  # noqa: E402
     top1pct_sensitivity_block,
 )
 from src.evaluation.metrics import (  # noqa: E402
+    DRIVER_AVAILABILITY_LIMITATION_STATEMENT,
     PHASE2_NOT_INDEPENDENT_STATEMENT,
     SIGN_CONVENTION_SENTENCE,
     SPATIAL_REPRESENTATIVENESS_SENTENCE,
@@ -367,7 +368,8 @@ def _conclusion(registry: ConclusionSurfaceRegistry) -> dict[str, Any]:
         "conclusion": "Conclusion bounded to the frozen scope.",
         "limitations": (
             f"Limitations: plasmaspheric contribution; target lineage mismatch "
-            f"(grid-cell vs IPP population); scored set {SCORED_STATEMENT}."
+            f"(grid-cell vs IPP population); scored set {SCORED_STATEMENT}. "
+            f"{DRIVER_AVAILABILITY_LIMITATION_STATEMENT}."
         ),
     }
     artifact = {
@@ -1570,6 +1572,27 @@ def test_control_39_missing_val05_sentence_fails(tmp_path: Path) -> None:
     )
     val_rows = _rows_by_ref(checklist, "VAL-05")
     assert val_rows and val_rows[0]["status"] == "FAILED"
+
+
+def test_d42_driver_availability_limitation_row_fails_when_absent(tmp_path: Path) -> None:
+    """A1 / D-42 (2026-09-19): the limitations surface must carry the GFZ driver-archive
+    limitation (approved floors, not demonstrated bounds; no exact operational replay, no
+    absence of revision-related look-ahead); a limitations text without it FAILS the row."""
+    registry = _registry(tmp_path)
+    conclusion = _conclusion(registry)
+    conclusion["surfaces"]["limitations"] = (
+        f"Limitations: plasmaspheric contribution; target lineage mismatch; scored set "
+        f"{SCORED_STATEMENT}."
+    )
+    checklist = build_claims_checklist(
+        registry=registry,
+        conclusion_surface=conclusion,
+        table=_table(_Mask()),
+        notebook_captions={"04": "caption"},
+    )
+    rows = _rows_by_ref(checklist, "D-42")
+    assert rows and rows[0]["status"].startswith("FAILED")
+    assert rows[0]["statement"] == DRIVER_AVAILABILITY_LIMITATION_STATEMENT
 
 
 def test_d28_row_one_denominator_and_fails_when_absent(tmp_path: Path) -> None:

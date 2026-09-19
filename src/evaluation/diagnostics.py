@@ -87,6 +87,7 @@ from typing import Any
 from src.data.config import RegimeError
 from src.data.splits import LOCKED_ID
 from src.evaluation.metrics import (
+    DRIVER_AVAILABILITY_LIMITATION_STATEMENT,
     EXTERNAL_COMPARATOR_IDS,
     PHASE2_NOT_INDEPENDENT_STATEMENT,
     SPATIAL_REPRESENTATIVENESS_SENTENCE,
@@ -232,6 +233,10 @@ PROHIBITED_CLASS_ROWS: tuple[Mapping[str, Any], ...] = (
 #: VAL-05's key fragment, detected inside the abstract-level interpretation (the full
 #: statement is `metrics.PHASE2_NOT_INDEPENDENT_STATEMENT`).
 _VAL05_FRAGMENT: str = "not a second statistically independent blind test"
+
+#: D-42's key fragment, detected on the limitations surface (the full statement is
+#: `metrics.DRIVER_AVAILABILITY_LIMITATION_STATEMENT`).
+_D42_FRAGMENT: str = "revision-related look-ahead"
 
 #: FR-P1-05-19's detection token (the sentence's frozen wording lives upstream; detection
 #: catches the obvious wording, human_residue recorded).
@@ -1348,6 +1353,28 @@ def build_claims_checklist(
             "reference": "VAL-05 (Phase 2 fixed-protocol replication, not independent)",
             "required_location": "abstract-level interpretation",
             "statement": PHASE2_NOT_INDEPENDENT_STATEMENT,
+            "found_at": found,
+            "status": status,
+            "human_residue": "fragment detection; meaning stays a human check",
+        }
+    )
+
+    # D-42 driver-availability limitation on the limitations surface (A1, 2026-09-19):
+    # the GFZ archives are consumed under APPROVED floors, never demonstrated bounds, and
+    # every result claim must say so — fragment detection, meaning stays a human check.
+    found, status = _found(
+        _D42_FRAGMENT in surfaces["limitations"].lower()
+        or DRIVER_AVAILABILITY_LIMITATION_STATEMENT.lower() in surfaces["limitations"].lower(),
+        f"{conclusion_id}/limitations",
+    )
+    rows.append(
+        {
+            "row_kind": "disclosure",
+            "reference": "D-42 (GFZ driver archives: approved availability floors, not "
+            "demonstrated bounds; no exact operational replay, no absence of "
+            "revision-related look-ahead)",
+            "required_location": "limitations surface",
+            "statement": DRIVER_AVAILABILITY_LIMITATION_STATEMENT,
             "found_at": found,
             "status": status,
             "human_residue": "fragment detection; meaning stays a human check",

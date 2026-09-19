@@ -145,6 +145,7 @@ __all__ = [
     "assert_single_release_grade",
     "write_request_manifest",
     "write_sha256_manifest",
+    "SHA256_MANIFEST_META_NAME",
     "assert_release_free_of_unresolved_mismatch",
     "assert_derived_release_provenance",
     "partition_by_locked_month",
@@ -292,6 +293,30 @@ REDACTION_ALLOWLIST: Final[tuple[tuple[str, re.Pattern[str]], ...]] = (
         ),
     ),
     ("git commit hex (environment lock code_commit)", re.compile(r"^[0-9a-f]{40}$")),
+    # Added 2026-09-18 under the owner's G-2 instruction (CR-2026-09-18-GFZ-DRIVER-PAIR-AUDIT
+    # §5.3), NARROWED 2026-09-19 on review (CR-2026-09-19-GATE-PREP-2 § G-2): a PROVIDER
+    # DATA FILENAME — a stem of at least two runs joined by `.`/`_`/`-`, a known data-file
+    # extension, ≤ 48 characters, where every run is a lower-case word/number, an
+    # upper-case acronym/number (`SN`, `F107`, `FULL`), or a capitalised word with at most
+    # one further capital (`Hp60ap60doi`, `Kp`). The shape the five recorded false positives
+    # share and that no published credential format shares; the run rule is what refuses a
+    # secret dressed with a separator and an extension (`Q7r8S9t0U1v2_W3x4Y5z6.txt`,
+    # `wJalrXUtnFEMI_K7MDENG_bPxRfiCYEXAMPLEKEY.dat`). Known credential PREFIXES are checked
+    # BEFORE the allowlist (see `_heuristic_reason`), so `AKIA…_2022.txt` is still refused.
+    # Stated residual: a secret composed ONLY of lower-case+digit runs, joined by
+    # separators, under 48 chars, with a data extension, would pass — no known provider
+    # issues secrets of that shape, and the two structural carriers (signed URL, auth
+    # header) are refused before this list is read.
+    (
+        "provider data filename (word-shaped runs joined by separators, data extension, <= 48 chars)",
+        re.compile(
+            r"^(?=.{1,48}$)"
+            r"(?:[a-z0-9]+|[A-Z0-9]+|[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]+)?)"
+            r"(?:[._\-](?:[a-z0-9]+|[A-Z0-9]+|[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]+)?))+"
+            r"\.(?:txt|wdc|csv|tsv|json|jsonl|html|htm|hdf5|h5|nc|dat|zip|gz|tar|tgz|"
+            r"yaml|yml|md|log|xml|parquet|npy|ipynb|pdf)$"
+        ),
+    ),
 )
 
 #: Heuristic token charset and thresholds. A guess, stated rather than hidden
@@ -343,12 +368,17 @@ def _heuristic_reason(text: str) -> str | None:
     review; a false negative is caught by nothing else in-process (SD-A-02).
     """
     candidate = text.strip()
-    for _allow_name, pattern in REDACTION_ALLOWLIST:
-        if pattern.match(candidate):
-            return None  # legitimate high-entropy shape, named on the allowlist
+    # Known credential PREFIXES first (2026-09-18, G-2): a published prefix is a positive
+    # identification and must not be reachable through any allowlisted shape — the
+    # filename entry above could otherwise pass `AKIA…_2022.txt`. The four earlier
+    # allowlist shapes (hex digests, UUID, git hex) never start with a listed prefix, so
+    # their acceptance is unchanged by the reordering.
     for name, prefix in _KNOWN_CREDENTIAL_PREFIXES:
         if candidate.startswith(prefix):
             return f"known credential prefix {prefix!r} ({name})"
+    for _allow_name, pattern in REDACTION_ALLOWLIST:
+        if pattern.match(candidate):
+            return None  # legitimate high-entropy shape, named on the allowlist
     if _TOKEN_CHARSET_RE.match(candidate):
         classes = sum(
             1
@@ -959,6 +989,10 @@ def write_request_manifest(
     return _write_json(Path(path), payload)
 
 
+SHA256_MANIFEST_META_NAME = "sha256_manifest_meta.json"
+_HEX64 = re.compile(r"^[0-9a-f]{64}$")
+
+
 def write_sha256_manifest(
     path: Path,
     *,
@@ -967,20 +1001,28 @@ def write_sha256_manifest(
     provenance_class: str,
     producing_interpreter: str,
 ) -> Path:
-    """Write `sha256_manifest.json` (W-4): one entry per provider file PLUS one per
-    derived artifact, and the arithmetic holds by construction.
+    """Write `sha256_manifest.json` (W-4): one entry per provider file PLUS one per derived
+    artifact, in the CANONICAL TE §13.3 representation — a flat `{relative path: sha256}`
+    mapping, exactly the shape the twelve pre-TC-06 monthly manifests carry, that
+    `src/data/release.py:write_release` emits as `output_files`, and that TA-15's reader
+    (`tests/test_release_hashes.py`) verifies. Provider METADATA — the full provider
+    filename with its version suffix per file, the provenance class, the producing
+    interpreter and W-4's hash-count arithmetic — is written beside it to
+    `sha256_manifest_meta.json`, never mixed into the hash mapping (G-1, 2026-09-19,
+    `CR-2026-09-19-GATE-PREP-2`; the earlier nested payload failed the governed reader
+    on its own metadata keys, observed on the GFZ driver-pair audit).
 
-    A provider record without a `sha256` (an incomplete retrieval) is REFUSED here:
-    admitting it would make the month's hash count silently omit a provider file,
-    which is FR-P1-01-4's negative control. `derived_only` months honestly carry an
-    empty provider list (DATA-07: no provider byte stream exists for the twelve
-    pre-TC-06 months); a `full` month with zero provider entries is refused.
+    Provider entries are keyed by the file's ON-DISK name (`logical_name`, falling back
+    to `provider_filename` when no logical name was recorded), so the mapping resolves
+    against the directory it sits in.
 
-    Raises
-    ------
-    AcquisitionError
-        on a hash-less provider record, an unknown provenance class, an empty
-        `producing_interpreter`, or a `full` month with no provider entries.
+    Refusals (all `AcquisitionError`, naming the file and the expectation): a provider
+    record without a `sha256` (incomplete or divergent retrieval — admitting it would make
+    the month's hash count silently omit a provider file, FR-P1-01-4's negative control);
+    an unknown provenance class; an empty `producing_interpreter`; a `full` month with no
+    provider entries (the twelve pre-TC-06 months are `derived_only` and say so, R-36,
+    Q5=C); a digest that is not 64 lower-case hex characters; an AMBIGUOUS mapping (two
+    records or a record and a derived artifact resolving to one path).
     """
     if provenance_class not in PROVENANCE_CLASSES:
         raise AcquisitionError(
@@ -991,9 +1033,10 @@ def write_sha256_manifest(
     if not str(producing_interpreter).strip():
         raise AcquisitionError(str(path), "producing_interpreter must be recorded (R-36)")
 
-    provider_entries: dict[str, str] = {}
+    mapping: dict[str, str] = {}
+    provider_identity: dict[str, str] = {}
     for record in provider_files:
-        name = str(record.get("provider_filename", "") or record.get("logical_name", ""))
+        name = str(record.get("logical_name", "") or record.get("provider_filename", ""))
         digest = str(record.get("sha256", "") or "")
         if not digest:
             raise AcquisitionError(
@@ -1004,24 +1047,49 @@ def write_sha256_manifest(
                 "provider-file count plus its derived-artifact count (FR-P1-01-4, "
                 "R-36), and a partial file is never promoted (SD-A-01)",
             )
-        provider_entries[name] = digest
-    if provenance_class == "full" and not provider_entries:
+        if not name.strip():
+            raise AcquisitionError(str(path), "provider file record carries no on-disk name")
+        if not _HEX64.match(digest):
+            raise AcquisitionError(name, f"sha256 {digest!r} is not 64 lower-case hex characters")
+        if name in mapping:
+            raise AcquisitionError(
+                name, "AMBIGUOUS manifest mapping: two provider records resolve to one path"
+            )
+        mapping[name] = digest
+        provider_identity[name] = str(record.get("provider_filename", "") or name)
+    if provenance_class == "full" and not provider_identity:
         raise AcquisitionError(
             str(path),
             "a 'full'-provenance month with zero provider-file hashes contradicts "
             "its own class; the twelve pre-TC-06 months are 'derived_only' and say "
             "so (R-36, Q5=C)",
         )
+    for name, digest in derived_artifacts.items():
+        name = str(name)
+        digest = str(digest)
+        if not _HEX64.match(digest):
+            raise AcquisitionError(name, f"sha256 {digest!r} is not 64 lower-case hex characters")
+        if name in mapping:
+            raise AcquisitionError(
+                name,
+                "AMBIGUOUS manifest mapping: a derived artifact collides with a provider file",
+            )
+        mapping[name] = digest
 
-    payload: dict[str, Any] = {
-        "provider_files": provider_entries,
-        "derived_artifacts": dict(derived_artifacts),
-        "hash_count": len(provider_entries) + len(derived_artifacts),
+    meta: dict[str, Any] = {
+        "schema": "TE-13.3 path-to-sha256; metadata sidecar v1",
+        "manifest": Path(path).name,
+        "hash_count": len(mapping),
+        "provider_file_count": len(provider_identity),
+        "derived_artifact_count": len(derived_artifacts),
+        "provider_files": provider_identity,
         "provenance_class": provenance_class,
         "producing_interpreter": producing_interpreter,
     }
-    guard_egress(payload, context=f"sha256_manifest[{Path(path).name}]")
-    return _write_json(Path(path), payload)
+    guard_egress(mapping, context=f"sha256_manifest[{Path(path).name}]")
+    guard_egress(meta, context=f"sha256_manifest_meta[{Path(path).name}]")
+    _write_json(Path(path).with_name(SHA256_MANIFEST_META_NAME), meta)
+    return _write_json(Path(path), mapping)
 
 
 def assert_release_free_of_unresolved_mismatch(

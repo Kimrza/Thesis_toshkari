@@ -1,0 +1,118 @@
+{
+  "authorisation": "owner qualified approval 2026-09-18 (governance/CHANGE_RECORD_2026-09-18_gfz_driver_pair_audit.md; build-and-test diary)",
+  "driver_inventory": [
+    {
+      "checksum": "nowcast 7929d16aa1a14d35dff6759c02367746438b09dd084fdc731a4052af5a7475a4; definitive c1d9030254e5b1e9581065166ab501b7aad9f2e07756551aefa8b18302c2b829",
+      "consuming_configuration": "none yet — configs/features.yaml availability_lags remains 'TBD — freeze gate'",
+      "coverage": "calendar 2022, 3-hourly, both grades, 2920 epochs each (measured; see validation)",
+      "licence_access_notes": "CC BY 4.0; cite Matzka et al. 2021 (Space Weather, doi:10.1029/2020SW002641) and the data DOI",
+      "provider": "GFZ Helmholtz Centre for Geosciences, Geomagnetic Observatory Niemegk",
+      "provider_product_identity": "Kp_now2022.wdc (DOI 10.5880/Kp.0001, folder Kp_nowcast) + Kp_def2022.wdc (DOI 10.5880/Kp.0001, folder Kp_definitive) (DOI 10.5880/Kp.0001, V. 1.0)",
+      "release_status": "nowcast (archived, settled) SELECTED per D-39 (student decision; supervisor status open); definitive held as audit comparator only; not proven available at every forecast origin; availability rule owed from evidence before producer release",
+      "retrieval_date": "2026-09-18",
+      "role": "primary driver candidate (kp_safe, ap_safe) — NOT yet a producer artifact; no permitted_producers entry",
+      "series": "kp_ap3"
+    },
+    {
+      "checksum": "V2.0 0ad71bf0eab1412852dd57ade1f7e2fdf5ff18f1cf9d20ebab8babc1fe471ad6; V3.0 a689ddef5590bf9cb6cc32cf72817921c93bf7e40d658b9181e2b5a3f665d461",
+      "consuming_configuration": "none yet — configs/features.yaml availability_lags remains 'TBD — freeze gate'",
+      "coverage": "calendar 2022, hourly, both DOI versions, 8760 epochs each (measured; see validation)",
+      "licence_access_notes": "CC BY 4.0; cite Yamazaki et al. 2024 and the data DOIs 10.5880/Hpo.0002, 10.5880/Hpo.0003",
+      "provider": "GFZ Helmholtz Centre for Geosciences, Geomagnetic Observatory Niemegk",
+      "provider_product_identity": "Hp60ap60doi_2022.txt (DOI 10.5880/Hpo.0002, folder Hpo60) (V2.0) + Hp60ap60doi_2022.txt (DOI 10.5880/Hpo.0003, folder Hpo60) (V3.0)",
+      "release_status": "contemporaneous V2.0 SELECTED per D-40 (student decision; supervisor status open); V3.0 held as later-recomputed comparator only; single provider grade, no definitive exists; substitute control establishes neither first-issue availability nor absence of leakage",
+      "retrieval_date": "2026-09-18",
+      "role": "primary driver candidate (hp60_safe, ap60_safe) — NOT yet a producer artifact; no permitted_producers entry",
+      "series": "hp60_ap60"
+    }
+  ],
+  "environment_supplemental": {
+    "file": "environment_supplemental.json",
+    "sha256": "0d530a5d6761099188b7f4707078824940255997d3108f8d8fbb2c7ac90f95ff"
+  },
+  "provider_files": [
+    {
+      "attempts": 1,
+      "divergence": null,
+      "grade": "nowcast",
+      "location_date": "Tue, 24 Jan 2023 06:57:38 GMT",
+      "logical_name": "Kp_now2022.wdc",
+      "permanent_citation": "https://doi.org/10.5880/Kp.0001",
+      "provider": "GFZ Helmholtz Centre for Geosciences, Geomagnetic Observatory Niemegk",
+      "provider_filename": "Kp_now2022.wdc (DOI 10.5880/Kp.0001, folder Kp_nowcast)",
+      "retrieval_date": "2026-09-18",
+      "series": "kp_ap3",
+      "server_content_length": "23581",
+      "server_etag": "\"5c1d-5f2fd07ffdf58\"",
+      "server_last_modified": "Tue, 24 Jan 2023 06:57:38 GMT",
+      "sha256": "7929d16aa1a14d35dff6759c02367746438b09dd084fdc731a4052af5a7475a4",
+      "status": "complete",
+      "suffix_mismatch": null,
+      "url": "https://datapub.gfz.de/download/10.5880.Kp.0001/Kp_nowcast/Kp_now2022.wdc"
+    },
+    {
+      "attempts": 1,
+      "divergence": null,
+      "grade": "definitive",
+      "location_date": "Tue, 24 Jan 2023 06:57:38 GMT",
+      "logical_name": "Kp_def2022.wdc",
+      "permanent_citation": "https://doi.org/10.5880/Kp.0001",
+      "provider": "GFZ Helmholtz Centre for Geosciences, Geomagnetic Observatory Niemegk",
+      "provider_filename": "Kp_def2022.wdc (DOI 10.5880/Kp.0001, folder Kp_definitive)",
+      "retrieval_date": "2026-09-18",
+      "series": "kp_ap3",
+      "server_content_length": "23581",
+      "server_etag": "\"5c1d-5f2fd0808a23c\"",
+      "server_last_modified": "Tue, 24 Jan 2023 06:57:38 GMT",
+      "sha256": "c1d9030254e5b1e9581065166ab501b7aad9f2e07756551aefa8b18302c2b829",
+      "status": "complete",
+      "suffix_mismatch": null,
+      "url": "https://datapub.gfz.de/download/10.5880.Kp.0001/Kp_definitive/Kp_def2022.wdc"
+    },
+    {
+      "attempts": 1,
+      "divergence": null,
+      "grade": "contemporaneous V2.0",
+      "location_date": "Tue, 24 Jan 2023 06:57:43 GMT",
+      "logical_name": "hp60ap60doi_2022_v2.txt",
+      "permanent_citation": "https://doi.org/10.5880/Hpo.0002",
+      "provider": "GFZ Helmholtz Centre for Geosciences, Geomagnetic Observatory Niemegk",
+      "provider_filename": "Hp60ap60doi_2022.txt (DOI 10.5880/Hpo.0002, folder Hpo60)",
+      "retrieval_date": "2026-09-18",
+      "series": "hp60_ap60",
+      "server_content_length": "527283",
+      "server_etag": "\"80bb3-5f2fd084aeb03\"",
+      "server_last_modified": "Tue, 24 Jan 2023 06:57:43 GMT",
+      "sha256": "0ad71bf0eab1412852dd57ade1f7e2fdf5ff18f1cf9d20ebab8babc1fe471ad6",
+      "status": "complete",
+      "suffix_mismatch": null,
+      "url": "https://datapub.gfz.de/download/10.5880.HPO.0002/Hpo60/Hp60ap60doi_2022.txt"
+    },
+    {
+      "attempts": 1,
+      "divergence": null,
+      "grade": "recomputed V3.0",
+      "location_date": "Thu, 03 Apr 2025 09:28:21 GMT",
+      "logical_name": "hp60ap60doi_2022_v3.txt",
+      "permanent_citation": "https://doi.org/10.5880/Hpo.0003",
+      "provider": "GFZ Helmholtz Centre for Geosciences, Geomagnetic Observatory Niemegk",
+      "provider_filename": "Hp60ap60doi_2022.txt (DOI 10.5880/Hpo.0003, folder Hpo60)",
+      "retrieval_date": "2026-09-18",
+      "series": "hp60_ap60",
+      "server_content_length": "527342",
+      "server_etag": "\"80bee-631dc640e3486\"",
+      "server_last_modified": "Thu, 03 Apr 2025 09:28:21 GMT",
+      "sha256": "a689ddef5590bf9cb6cc32cf72817921c93bf7e40d658b9181e2b5a3f665d461",
+      "status": "complete",
+      "suffix_mismatch": null,
+      "url": "https://datapub.gfz.de/download/10.5880.HPO.0003/Hpo60/Hp60ap60doi_2022.txt"
+    }
+  ],
+  "provider_limitations": {
+    "hp60_ap60": "No provider-native NRT/definitive pair exists: GFZ publishes Hpo as a single near-real-time-algorithm product with no definitive grade and no archived nowcast. The comparison performed is 'contemporaneous V2.0 (DOI 10.5880/Hpo.0002, in force 2022-03-26 to 2024-06-17) versus later algorithm-recomputed V3.0 (DOI 10.5880/Hpo.0003, 2024-06-17)'. It tests sensitivity to later algorithmic recomputation and does NOT demonstrate definitive backfill; the literal R-63 control 5 comparison is impossible for this series.",
+    "kp_ap3": "Historical nowcast and definitive variants exist for 2022 under DOI 10.5880/Kp.0001 (Kp_nowcast/Kp_now2022.wdc, Kp_definitive/Kp_def2022.wdc). The archived nowcast is the SETTLED, final-stage nowcast after its approximately 1-2-day revision period, not the first-issued value available at each 2022 forecast origin; exact first-issue reconstruction is not claimed."
+  },
+  "run_id": "gfz-driver-audit-20260918-211729",
+  "started_utc": "2026-09-18T21:17:29.490975+00:00",
+  "transport": "stdlib urllib injected into src.data.acquisition.RetrievalClient (TS-A-01); scripts/00 _build_transport unchanged"
+}

@@ -59,6 +59,9 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+if str(REPO_ROOT / "tests") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "tests"))
+from _fresh_process import in_fresh_process  # noqa: E402
 
 from src.data.acquisition import (  # noqa: E402
     assert_no_locked_month_records,
@@ -2044,10 +2047,20 @@ def test_control_counts_derived_from_business_rules_not_carried():
 #: repair that added it. Excluded from the 39/11 set-difference by construction (they extend
 #: the enumerated set; the enumeration itself is the practices gate's to amend).
 BEYOND_ENUMERATION_CONTROLS: dict[str, str] = {
-    "test_optionb_00_stage_entry_real_invocation": (
-        "Rec 2 (ML-01), MIGRATED for Option B (CR-2026-09-13-000102-FIXTURE-WINDOW): "
-        "was test_rec2_00_stage_entry_real_invocation_refuses_out_of_window; the config-"
-        "window must-fire is retired on the fixture path by the owner's ruling"
+    # Rec 2 (ML-01), MIGRATED for Option B (CR-2026-09-13-000102-FIXTURE-WINDOW): was
+    # test_rec2_00_stage_entry_real_invocation_refuses_out_of_window; the config-window
+    # must-fire is retired on the fixture path by the owner's ruling. SPLIT 2026-09-19 into
+    # three one-process tests (G-7, CR-2026-09-19-GATE-PREP-2): each `_stage_entry` call
+    # seeds its process exactly as a stage script does, and R-05 refuses a second seed
+    # once the pinned TensorFlow is installed — three consequences, three processes.
+    "test_optionb_00_stage_entry_real_invocation_no_window": (
+        "Rec 2 (ML-01), Option B migration; consequences (1) declaration-truth and (2a)"
+    ),
+    "test_optionb_00_stage_entry_real_invocation_full_year_window": (
+        "Rec 2 (ML-01), Option B migration; consequence (2b) config independence"
+    ),
+    "test_optionb_00_stage_entry_real_invocation_full_scale_refuses": (
+        "Rec 2 (ML-01), Option B migration; consequence (3) full-scale refusal retained"
     ),
     "test_rec2_00_out_of_window_acquisition_exemption_refuses": "Rec 2 (ML-01)",
     "test_rec2_01_out_of_window_inventory_and_audit_refuse": "Rec 2 (ML-01)",
@@ -2123,7 +2136,8 @@ def _assert_entry_passes_declared_window(
 
     Still a wiring check, deliberately weaker than an invocation; script 00 additionally
     carries the genuine end-to-end invocation
-    (`test_optionb_00_stage_entry_real_invocation`), and that difference stays stated.
+    (`test_optionb_00_stage_entry_real_invocation_*`, three one-process tests since
+    2026-09-19), and that difference stays stated.
     """
     source = textwrap.dedent(inspect.getsource(module._stage_entry))
     tree = ast.parse(source)
@@ -2292,22 +2306,7 @@ def _apparatus_parsers(monkeypatch, workspace: Path) -> None:
     (workspace / "requirements.txt").write_text("apparatus==0.0\n", encoding="utf-8")
 
 
-def test_optionb_00_stage_entry_real_invocation(tmp_path, monkeypatch):
-    """Option B, scripts/00 — the REAL invocation proof, MIGRATED from the Rec-2 config-pair
-    form (CR-2026-09-13-000102-FIXTURE-WINDOW; the pre-repair test asserted that a config
-    window outside the scope refuses — under Option B the config pair is not consulted on
-    fixture runs at all, which is exactly the deadlock's repair). Asserted consequences:
-
-    1. declaration-truth — a fixture run's gate result echoes the SCOPE's cited window as
-       the declared window, proving the declaration derives from `scope.window` and was
-       consumed rather than computed and discarded;
-    2. config independence — the same fixture run proceeds identically whether the config
-       carries NO acquisition window or a FULL-YEAR one: the pre-repair must-fire (refusal
-       on an out-of-scope config window) and the pre-repair undeclared-field refusal are
-       BOTH retired on the fixture path, asserted explicitly rather than silently dropped;
-    3. a FULL-SCALE invocation (no `--fixture-manifest`) never reaches the exemption at
-       all — it refuses at the two-receipt gate, exactly as before (ML-01 retained).
-    """
+def _optionb_00_apparatus(tmp_path, monkeypatch):
     workspace = tmp_path / "workspace"
     _apparatus_parsers(monkeypatch, workspace)
     module = _load_script("00_acquire_prepared_vtec.py")
@@ -2319,9 +2318,34 @@ def test_optionb_00_stage_entry_real_invocation(tmp_path, monkeypatch):
         "scope_start": scope_start.isoformat(),
         "scope_end": scope_end.isoformat(),
     }
+    return module, scope, expected_check
 
-    # (2) config carries NO acquisition window: the fixture run proceeds — the pre-repair
-    # "refuses by field name" behaviour is retired on this path, by ruling.
+
+# Option B, scripts/00 — the REAL invocation proof, MIGRATED from the Rec-2 config-pair form
+# (CR-2026-09-13-000102-FIXTURE-WINDOW). Asserted consequences, ONE PER PROCESS: each
+# `_stage_entry` call seeds the process (R-05: `seed_everything` first, once, before any
+# framework import — the stage script's own model), so the three consequences below run as
+# three tests, each in a fresh interpreter (`in_fresh_process`; G-7, 2026-09-19). The
+# pre-split single test called `_stage_entry` three times in one process, which R-05
+# correctly refuses once the pinned TensorFlow is installed.
+#
+# 1. declaration-truth — a fixture run's gate result echoes the SCOPE's cited window as the
+#    declared window, proving the declaration derives from `scope.window` and was consumed
+#    rather than computed and discarded;
+# 2. config independence — the same fixture run proceeds identically whether the config
+#    carries NO acquisition window or a FULL-YEAR one: the pre-repair must-fire (refusal on
+#    an out-of-scope config window) and the pre-repair undeclared-field refusal are BOTH
+#    retired on the fixture path, asserted explicitly rather than silently dropped;
+# 3. a FULL-SCALE invocation (no `--fixture-manifest`) never reaches the exemption at all —
+#    it refuses at the two-receipt gate, exactly as before (ML-01 retained).
+
+
+@in_fresh_process
+def test_optionb_00_stage_entry_real_invocation_no_window(tmp_path, monkeypatch):
+    """(1) declaration-truth and (2a): config carries NO acquisition window — the fixture
+    run proceeds; the pre-repair "refuses by field name" behaviour is retired, by ruling."""
+    module, scope, expected_check = _optionb_00_apparatus(tmp_path, monkeypatch)
+    scope_start, scope_end = scope.window
     no_window = _apparatus_config_tree(tmp_path / "no_window", window=None)
     entry = module._stage_entry(no_window, fixture_manifest=scope.path)
     gate = entry["receipts_gate"]
@@ -2330,14 +2354,23 @@ def test_optionb_00_stage_entry_real_invocation(tmp_path, monkeypatch):
     assert entry["audit_window"] == (scope_start, scope_end)
     assert entry["fixture_scope_id"] == PLUMBING_FIXTURE_ID
 
-    # (2) config carries a FULL-YEAR window: identical outcome — the config pair is not
-    # consulted on the fixture path (the disjoint D-11/D-14 windows make any static pair
-    # unserviceable; the scope is the one source).
+
+@in_fresh_process
+def test_optionb_00_stage_entry_real_invocation_full_year_window(tmp_path, monkeypatch):
+    """(2b) config carries a FULL-YEAR window: identical outcome — the config pair is not
+    consulted on the fixture path (the disjoint D-11/D-14 windows make any static pair
+    unserviceable; the scope is the one source)."""
+    module, scope, expected_check = _optionb_00_apparatus(tmp_path, monkeypatch)
     full_year = _apparatus_config_tree(tmp_path / "full_year", window=("2001-01-01", "2001-12-31"))
     entry2 = module._stage_entry(full_year, fixture_manifest=scope.path)
     assert entry2["receipts_gate"]["declared_window_checked"] == expected_check
 
-    # (3) full-scale: the non-exempt two-receipt gate still bites (ML-01 retained).
+
+@in_fresh_process
+def test_optionb_00_stage_entry_real_invocation_full_scale_refuses(tmp_path, monkeypatch):
+    """(3) full-scale: the non-exempt two-receipt gate still bites (ML-01 retained)."""
+    module, _scope, _expected = _optionb_00_apparatus(tmp_path, monkeypatch)
+    full_year = _apparatus_config_tree(tmp_path / "full_year", window=("2001-01-01", "2001-12-31"))
     with pytest.raises(IntegrityError) as full_scale:
         module._stage_entry(full_year)  # no fixture scope: the full-year path
     refusal = str(full_scale.value)
