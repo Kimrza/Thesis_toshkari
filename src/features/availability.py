@@ -24,6 +24,24 @@ contemporaneous grade was required — never backfill from future final values),
 diagnostic/hindcast-only, and the documented-absence limb for a series whose archive carries
 no publication timestamp (recorded WITH an unverified-latency statement, never as a blank).
 
+**D-10.1's single-grade rule: the boundary split, stated in both homes.** One binding rule
+(never mix Kyoto Dst release grades within one series) has two implementations in this
+codebase, so which one runs where is DECLARED rather than left to drift — a guard module
+alone fails open on a forgotten call, and inline copies drift (`nfr-design:c58`; the
+R-105-vs-R-92 exception mismatch was that drift realised):
+
+* CONSUMPTION side — HERE. `build_availability_matrix` checks the grades of the driver rows
+  it is HANDED, inline, raising `FeatureAvailabilityError`. This is the one that actually
+  runs today, via `scripts/05_build_features_and_splits.py`.
+* PRODUCTION side — `src/external/spaceweather.py::assert_single_grade`, raising
+  `IntegrityError`, at the point a driver series is CONSTRUCTED from provider material.
+  That call site belongs to the driver-producing path, which does not exist yet; see that
+  module's "Boundary split" section, which carries the reciprocal statement.
+
+The two are not redundant and must not be collapsed: one governs bytes this project writes,
+the other rows this project is handed. The exception classes differ on purpose, and a caller
+must not catch one expecting the other.
+
 Every lag VALUE (3 h, 1 h, previous-day, 81 days) is `configs/features.yaml` content
 (`availability_lags`), never a literal here (TC-03e; D-10.3). While the block is absent or
 `TBD — freeze gate` this module REFUSES, naming the field (TE 18.3).

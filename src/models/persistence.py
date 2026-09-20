@@ -26,6 +26,25 @@ A consumable score-role `FeatureBundle`, the `Partition` being scored, the `Conf
 (for the horizon only), the D-17 target frame, and the horizon in hours. No hyperparameters:
 a `params` argument is refused.
 
+Target history before the scored window — the locked partition's shortfall
+--------------------------------------------------------------------------
+Both families read target history STRICTLY BEFORE the row they forecast: M-01 needs
+`y(t - h)` and M-02 needs `y(t - 24 h)`, so the earliest scored hour of any window needs
+values from before that window's start. On the locked partition that history is NOT supplied
+today. `materialise_locked_partition` hands back the December frame with its first
+`embargo_hours` excluded (D-28), so the series this module reads begins at 2 December 00:00:
+at `h = 1` M-01 has nothing to read for 2 December 00:00, and M-02 has nothing to read for
+any of the twenty-four hours of 2 December. Those rows carry a MISSING `y_hat`, drop out of
+the comparison-wide intersection mask, and shorten the scored set by a day against the thirty
+days D-28 discloses.
+
+This module does not close that gap and must not: whether the two persistence families may
+read 1 December history for a 2 December forecast origin is a supervisor question about the
+locked-test boundary, routed separately. What detects the shortfall is the mask-coverage
+assertion in `require_locked_receipt` (`src/evaluation/guards.py`), which compares the scored
+set against the disclosed window rather than trusting it. The lookup behaviour here is
+deliberately unchanged: a missing source value stays missing and stays counted.
+
 Re-run behaviour
 ----------------
 Pure functions; deterministic; nothing persisted. A missing source value (absent row, `None`, or
@@ -87,7 +106,14 @@ def persistence_rows(
     series: Mapping[tuple[str, dt.datetime], float],
     lag_hours: int,
 ) -> tuple[list[dict[str, Any]], int]:
-    """`y_hat(t) = y(t - lag_hours)` for every row of the scored bundle; misses counted."""
+    """`y_hat(t) = y(t - lag_hours)` for every row of the scored bundle; misses counted.
+
+    The lookup reaches STRICTLY BEFORE the scored window's start for its earliest rows. Where
+    the caller's `series` does not carry that history — the locked partition today, whose
+    frame begins after the D-28 embargo — those rows are MISSING and counted here, and the
+    resulting scored-set shortfall is detected by the mask-coverage assertion in
+    `require_locked_receipt`, not by this function.
+    """
     rows: list[dict[str, Any]] = []
     missing = 0
     offset = dt.timedelta(hours=lag_hours)
@@ -111,8 +137,13 @@ def fit_predict_rows(
     seed: int | None,
     params: Mapping[str, Any] | None,
     horizon_hours: int,
+    validation_bundle: FeatureBundle | None = None,
 ) -> Prediction:
-    """The family entry `train.fit_predict` dispatches to for M-01 and M-02."""
+    """The family entry `train.fit_predict` dispatches to for M-01 and M-02.
+
+    `validation_bundle` is accepted for a uniform family signature and is unused: neither
+    family fits, so neither has an epoch loop or a checkpoint to select.
+    """
     if model_id not in ("M-01", "M-02"):
         raise IntegrityError(f"model_id {model_id!r}", "persistence.py serves M-01 and M-02 only")
     if params is not None:

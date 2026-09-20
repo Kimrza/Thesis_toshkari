@@ -24,7 +24,11 @@ check, so drift between two copies of one rule — the R-105-vs-R-92 defect clas
   `mask_registry_hash`, the frozen bundle's manifest re-hashes to the recorded hash, and the
   scored mask's `mask_id` is in `mask_bundle_ids`;
   (3) the D-28 scored window — "2–31 December 2022, 30 days, first 24 h excluded and
-  counted": a row inside the excluded first 24 h raises (R-109, W-5).
+  counted": a row inside the excluded first 24 h raises, AND (Recommendation 15,
+  2026-09-20) the window must be fully POPULATED — the per-station recorded counters must
+  account for every hour of the stated span and must agree with the masked rows, so a
+  scored set silently shorter than the stated 30 days refuses instead of being disclosed
+  as 30 days (R-109, W-5).
 * ``require_mask_member_alignment`` — `FairnessError` when the mask's RECORDED `partition_id`
   disagrees with any member's: a self-consistent member set scored against a mask built for a
   different partition refuses (W-4's third failure, W-2 step 1; the sixth guard added at the
@@ -505,9 +509,12 @@ def require_locked_receipt(
     never produces one (control 23; R-28's one door).
 
     Limb 3 — the D-28 window: the mask's scored-window statement equals the one DERIVED from
-    the locked partition's month and embargo, and no masked row lies inside the excluded
+    the locked partition's month and embargo; no masked row lies inside the excluded
     first `embargo_hours` — a 1 December row raises, so the 30-day ruling cannot be silently
-    widened back to 31 at implementation.
+    widened back to 31 at implementation; and the window is fully POPULATED, per
+    ``_require_window_fully_populated`` (Recommendation 15) — the stated span cannot be
+    disclosed as 30 days while the scored set is shorter. Read that helper's docstring for
+    the exact derivation and for the stated residual it does not cover.
 
     Raises
     ------
@@ -591,6 +598,7 @@ def require_locked_receipt(
             f"{embargo_hours} h, exactly (D-28; R-107 limb 6; R-109 limb 3)",
         )
     scored_start = month_start + dt.timedelta(hours=embargo_hours)
+    hours_by_station: dict[str, set[dt.datetime]] = {}
     for row in getattr(mask, "masked_rows", ()):
         stamp = _as_utc(
             row.get("interval_start_utc"), resource=f"mask {mask_id} row"
@@ -602,6 +610,117 @@ def require_locked_receipt(
                 f"[{scored_start.isoformat()}, {month_end.isoformat()}); a day-1 row in the "
                 f"locked month's excluded first {embargo_hours} h raises — the 30-day "
                 f"ruling cannot be silently widened back (D-28; R-109 limb 3)",
+            )
+        hours_by_station.setdefault(str(row.get("station")), set()).add(stamp)
+    _require_window_fully_populated(
+        mask,
+        hours_by_station=hours_by_station,
+        scored_start=scored_start,
+        month_end=month_end,
+    )
+
+
+def _require_window_fully_populated(
+    mask: Any,
+    *,
+    hours_by_station: Mapping[str, set[dt.datetime]],
+    scored_start: dt.datetime,
+    month_end: dt.datetime,
+) -> None:
+    """Limb 3's second half (Recommendation 15, 2026-09-20): the window is POPULATED.
+
+    Limb 3 used to check only that every masked row lies INSIDE the stated window. It
+    never checked that the window is fully covered, so a scored set silently short of the
+    stated span still passed and was then DISCLOSED as the full span by
+    ``scored_window_statement`` — which derives the day count from the partition bounds
+    and has no knowledge of what actually survived. One denominator must exist in one
+    place, and the place has to be checkable.
+
+    The derivation, per station:
+
+        window_hours          = (month_end - scored_start) in whole hours
+        recorded_exclusions   = mask.exclusion_counts[station]
+        expected_scored_hours = window_hours - recorded_exclusions
+        actual_scored_hours   = |distinct masked hours for that station|
+
+    and both of the following must hold:
+
+    * ``row_counts[station] + exclusion_counts[station] == window_hours`` — the recorded
+      counters account for EVERY hour of the stated window. This is the limb that bites a
+      universe short of the disclosed span: an hour present in neither counter is an hour
+      the disclosure silently dropped.
+    * ``actual_scored_hours == expected_scored_hours`` — the rows and the counters agree.
+
+    The station set is checked too: a station in the counters with no masked hour, or a
+    masked hour for a station the counters do not carry, is a disclosure that does not
+    describe its own data.
+
+    RESIDUAL, stated rather than implied. A member whose prediction is simply absent for
+    an hour is absorbed into `exclusion_counts` by ``masks.build_comparison_mask`` (the
+    intersection's own accounting), so the identity above stays true and this limb does
+    NOT catch that case. Catching it needs either a per-hour exclusion ATTRIBUTION on the
+    mask (target-caused versus member-caused) or a full-population requirement; both are
+    behaviour changes beyond this remediation's approved scope and are routed to the gate.
+
+    Raises
+    ------
+    LockedTestError
+        an unhoured window; a station-set disagreement; either arithmetic failure.
+    """
+    mask_id = str(getattr(mask, "mask_id", "?"))
+    span = month_end - scored_start
+    window_hours, remainder = divmod(span, dt.timedelta(hours=1))
+    if remainder or window_hours <= 0:
+        raise LockedTestError(
+            f"mask {mask_id}",
+            f"limb 3: the stated scored window [{scored_start.isoformat()}, "
+            f"{month_end.isoformat()}) is not a positive whole number of hours ({span}); "
+            f"an hourly scored set over a fractional window has no checkable denominator "
+            f"(D-28; R-109 limb 3)",
+        )
+    row_counts = getattr(mask, "row_counts", None)
+    exclusion_counts = getattr(mask, "exclusion_counts", None)
+    if not isinstance(row_counts, Mapping) or not isinstance(exclusion_counts, Mapping):
+        raise LockedTestError(
+            f"mask {mask_id}",
+            "limb 3: the mask carries no per-station row_counts/exclusion_counts, so the "
+            "disclosed scored span cannot be reconciled against what was actually scored "
+            "(R-107 limb 6's reporting surface; D-28; Recommendation 15)",
+        )
+    counted = sorted(set(map(str, row_counts)) | set(map(str, exclusion_counts)))
+    present = sorted(hours_by_station)
+    if counted != present:
+        raise LockedTestError(
+            f"mask {mask_id}",
+            f"limb 3: the reporting surface counts stations {counted} but the masked rows "
+            f"carry {present}; a scored-set disclosure that does not describe its own "
+            f"data is not a disclosure (D-28; R-107 limb 6; Recommendation 15)",
+        )
+    for station in counted:
+        surviving = int(row_counts.get(station, 0))
+        excluded = int(exclusion_counts.get(station, 0))
+        if surviving + excluded != window_hours:
+            raise LockedTestError(
+                f"mask {mask_id} station {station}",
+                f"limb 3: the recorded counters account for {surviving + excluded} h "
+                f"({surviving} surviving + {excluded} excluded) of the stated "
+                f"{window_hours}-hour scored window "
+                f"[{scored_start.isoformat()}, {month_end.isoformat()}); "
+                f"{window_hours - surviving - excluded} h of the disclosed window appear "
+                f"in NEITHER counter, so the scored set is silently shorter than the "
+                f"window it is disclosed as. One denominator exists in one place — a "
+                f"shrunk scored set refuses rather than being reported as the full span "
+                f"(D-28; R-109 limb 3; Recommendation 15)",
+            )
+        actual = len(hours_by_station.get(station, set()))
+        expected = window_hours - excluded
+        if actual != expected:
+            raise LockedTestError(
+                f"mask {mask_id} station {station}",
+                f"limb 3: {actual} distinct scored hour(s) present, but the stated "
+                f"{window_hours}-hour window less the {excluded} recorded exclusion(s) is "
+                f"{expected}; the masked rows and the disclosed exclusion counts describe "
+                f"different scored sets (D-28; R-109 limb 3; Recommendation 15)",
             )
 
 

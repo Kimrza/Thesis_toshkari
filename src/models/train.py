@@ -68,7 +68,7 @@ import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Protocol
 
 from src.data.config import (
     TBD_SENTINEL,
@@ -83,7 +83,7 @@ from src.data.config import (
     SeedError,
 )
 from src.data.release import sha256_of_file
-from src.data.splits import LOCKED_ID, PARTITION_IDS, REFIT_ID, Partition
+from src.data.splits import LOCKED_ID, PARTITION_IDS, REFIT_ID, Partition, PartitionKind
 from src.features._frames import frame_attrs, frame_from_records, records_of
 from src.features.build import FeatureBundle
 from src.features.transforms import assert_consumable, transform_id_for
@@ -91,6 +91,9 @@ from src.features.transforms import assert_consumable, transform_id_for
 __all__ = [
     "MODEL_IDS",
     "SEEDED_MODEL_IDS",
+    "FITTED_MODEL_IDS",
+    "FOLD_PARTITION_IDS",
+    "REFIT_EPOCH_RULE_ID",
     "PREDICTION_COLUMNS",
     "TARGET_TIMESTAMP_COLUMN",
     "TARGET_STATION_COLUMN",
@@ -115,7 +118,19 @@ __all__ = [
     "prediction_index",
     "expected_transform_id",
     "assert_stamp_match",
+    "assert_validation_bundle",
+    "assert_not_locked_fit",
     "fit_predict",
+    "refit_epoch_count",
+    "read_refit_epochs",
+    "assert_refit_epochs_match_rule",
+    "FittedModelRecord",
+    "FittedStateBackend",
+    "JsonStateBackend",
+    "fit_and_persist",
+    "load_fitted_model",
+    "assert_fitted_payload_unchanged",
+    "predict_from_fitted",
     "three_seed_mean",
     "criterion_hash",
     "record_tuning",
@@ -143,6 +158,24 @@ MODEL_IDS: Final[tuple[str, ...]] = ("M-01", "M-02", "M-03", "M-04", "M-05", "M-
 #: Only M-06 is seeded; `Prediction.seed is None` is CORRECT for the other five
 #: (`domain-entities.md` section 1).
 SEEDED_MODEL_IDS: Final[tuple[str, ...]] = ("M-06",)
+#: The families that FIT. M-01 and M-02 carry no fitted state, so they are the only two that
+#: may be evaluated on the locked partition directly; every id here is refused there and must
+#: be loaded from the REFIT-persisted model instead (`predict_from_fitted`). Derived from the
+#: closed set minus the two unfitted families, never carried as a second list.
+FITTED_MODEL_IDS: Final[tuple[str, ...]] = tuple(
+    mid for mid in MODEL_IDS if mid not in ("M-01", "M-02")
+)
+#: The fold partitions of R-80's closed space -- derived, not carried: everything that is
+#: neither the refit nor the locked month. A validation bundle must be one of these.
+FOLD_PARTITION_IDS: Final[tuple[str, ...]] = tuple(
+    pid for pid in PARTITION_IDS if pid not in (REFIT_ID, LOCKED_ID)
+)
+#: The FROZEN RULE that produces the refit's epoch count. The rule is the object that is
+#: frozen before G-05; the VALUE it produces cannot exist until the folds have run, and lives
+#: in `configs/experiment.yaml` `models.refit.epochs` under its own D-number.
+REFIT_EPOCH_RULE_ID: Final[str] = (
+    "median_best_validation_epoch_across_folds_and_seeds_round_half_up"
+)
 #: The family module each id dispatches to (lazy import inside `fit_predict`).
 _FAMILY_MODULE: Final[Mapping[str, str]] = {
     "M-01": "persistence",
@@ -569,6 +602,19 @@ def assert_stamp_match(
 # --- W-2: fit and predict over six families -------------------------------------------------
 
 
+def _family_module(model_id: str, attribute: str) -> Any:
+    """Lazily import the family module for `model_id` (no cycle: families import this one)."""
+    module_name = _FAMILY_MODULE[model_id]
+    module = __import__(f"src.models.{module_name}", fromlist=[attribute])
+    if not hasattr(module, attribute):
+        raise IntegrityError(
+            f"src/models/{module_name}.py",
+            f"exposes no {attribute!r}; {model_id} cannot take this path and the caller is not "
+            f"offered a substitute",
+        )
+    return module
+
+
 def _assert_fit_bundle_for_partition(bundle: FeatureBundle, partition: Partition) -> None:
     """The bundle a model is fitted on belongs to `partition`: same id, or the refit's
     train bundle under the locked partition (the G-06 apply, mirroring R-74's exception)."""
@@ -585,6 +631,106 @@ def _assert_fit_bundle_for_partition(bundle: FeatureBundle, partition: Partition
     )
 
 
+def assert_not_locked_fit(model_id: str, partition: Partition) -> None:
+    """December is INFERENCE-ONLY: no fitted family may be fitted on the locked partition.
+
+    The defence-in-depth limb of the owner ruling of 2026-09-20 ("Retrain from scratch on
+    January-November, save and hash the models, and make December strictly inference-only").
+    The structural limb is that `06` never calls a fit on the locked branch at all; this
+    check makes the violation impossible rather than merely absent, so a future caller that
+    reaches for `fit_predict` on `DEC` fails instead of quietly selecting an epoch, a
+    checkpoint or a fitted table with December in the loop.
+
+    Raises
+    ------
+    LeakageError
+        naming the partition and the violated rule.
+    """
+    locked = partition.partition_id == LOCKED_ID or partition.kind is PartitionKind.locked
+    if not locked or model_id not in FITTED_MODEL_IDS:
+        return
+    raise LeakageError(
+        f"fit_predict({model_id}) on partition {partition.partition_id}",
+        f"{model_id} is a fitted family and the locked partition {LOCKED_ID} is "
+        f"INFERENCE-ONLY: December must never influence training or model selection "
+        f"(Vision 8.3; project.md Forbidden). The confirmatory model is fitted on "
+        f"{REFIT_ID} (January-November), persisted and hashed; the locked iteration LOADS "
+        f"that model and predicts — `predict_from_fitted`, never a fit here",
+    )
+
+
+def assert_validation_bundle(
+    validation_bundle: FeatureBundle | None, *, model_id: str, partition: Partition
+) -> None:
+    """The fit surface's explicit validation bundle: what early stopping may look at.
+
+    `lstm.py` previously took its per-epoch validation RMSE, its `should_stop` decision and
+    its restored checkpoint from the SCORED bundle. On the locked iteration the scored bundle
+    is December, so December selected the stopping epoch and the restored weights of the
+    confirmatory model. The validation bundle is therefore named explicitly and constrained
+    here, in one place, rather than implied by whatever the caller happened to be scoring.
+
+    * A validation bundle is REQUIRED for M-06 on a FOLD partition: that is where early
+      stopping runs. On a fold the validation bundle and the scored bundle legitimately
+      coincide — which is exactly why the defect was invisible for F1..F4 and catastrophic
+      for `DEC`, where they diverge.
+    * On a REFIT partition there is no validation bundle by design — the refit trains for the
+      frozen epoch count that `REFIT_EPOCH_RULE_ID` produced from the FOLDS, so nothing is
+      selected at refit time. Passing one there is refused.
+    * A bundle for the locked partition, for a non-fold frozen partition, or under a
+      train role, is refused outright.
+
+    Partition KIND, not partition id, decides which limb applies, so the fixture path's
+    apparatus partitions (R-137: ids quarantined from the six frozen ids) are governed by the
+    same rule as the frozen ones.
+
+    Raises
+    ------
+    LeakageError
+        a locked-partition validation bundle; a frozen partition that is not a fold; a
+        non-score role; a validation bundle offered for a refit fit.
+    IntegrityError
+        M-06 fitted on a fold with no validation bundle named.
+    """
+    if validation_bundle is None:
+        if model_id in SEEDED_MODEL_IDS and partition.kind is PartitionKind.fold:
+            raise IntegrityError(
+                f"fit_predict({model_id}) on partition {partition.partition_id}",
+                "no validation_bundle was named; M-06's early stopping and its "
+                "lowest-validation-RMSE checkpoint restore select on a validation set, and "
+                "leaving that set implicit is what let the SCORED bundle become it "
+                "(Vision 8.6 settings 5-7; Vision 8.3)",
+            )
+        return
+    spec = validation_bundle.spec
+    if partition.kind is PartitionKind.refit:
+        raise LeakageError(
+            f"fit({model_id}) on refit partition {partition.partition_id}",
+            f"was handed a validation bundle {spec.partition_id}/{spec.role}; the refit "
+            f"selects nothing — it trains for the frozen epoch count that "
+            f"{REFIT_EPOCH_RULE_ID} produced from the pre-December folds "
+            f"(configs/experiment.yaml: models.refit)",
+        )
+    if spec.partition_id == LOCKED_ID:
+        raise LeakageError(
+            f"validation bundle {spec.partition_id}/{spec.role}",
+            f"is the locked partition {LOCKED_ID}; December must never select a stopping "
+            f"epoch, a checkpoint, a hyperparameter or a model (Vision 8.3; R-95)",
+        )
+    if spec.partition_id in PARTITION_IDS and spec.partition_id not in FOLD_PARTITION_IDS:
+        raise LeakageError(
+            f"validation bundle {spec.partition_id}/{spec.role}",
+            f"is not one of the fold partitions {list(FOLD_PARTITION_IDS)}; validation runs "
+            f"on a pre-December fold and nowhere else (Vision 8.3)",
+        )
+    if spec.role != "score":
+        raise LeakageError(
+            f"validation bundle {spec.partition_id}/{spec.role}",
+            "is not a score-role bundle; a training frame's in-sample error is not a "
+            "validation metric and cannot stop an epoch loop honestly",
+        )
+
+
 def fit_predict(
     model_id: str,
     *,
@@ -593,6 +739,7 @@ def fit_predict(
     snapshot: ConfigSnapshot,
     target: Any = None,
     score_bundle: FeatureBundle | None = None,
+    validation_bundle: FeatureBundle | None = None,
     seed: int | None = None,
     params: Mapping[str, Any] | None = None,
     horizon_hours: int | None = None,
@@ -601,19 +748,29 @@ def fit_predict(
 
     `bundle` is the bundle the family is fitted on (role `train` for M-03..M-06);
     `score_bundle` is the bundle predicted on (default: `bundle` itself, an in-sample
-    prediction); `target` is the D-17 target frame supplying labels and the raw-TECU series
-    the two persistence families read (the bundle's lag columns are standardised under
-    `transform_id` and no inverse exists, D-27); `seed` is required for M-06 and refused for
-    every other family; `params` names the grid point for M-04..M-06 and is asserted to lie
-    in the config grid (R-96); `horizon_hours` defaults to the single default-list entry.
+    prediction); `validation_bundle` is the bundle early stopping and checkpoint selection
+    may look at — named explicitly, constrained by `assert_validation_bundle`, and NEVER
+    inferred from the scored bundle; `target` is the D-17 target frame supplying labels and
+    the raw-TECU series the two persistence families read (the bundle's lag columns are
+    standardised under `transform_id` and no inverse exists, D-27); `seed` is required for
+    M-06 and refused for every other family; `params` names the grid point for M-04..M-06 and
+    is asserted to lie in the config grid (R-96); `horizon_hours` defaults to the single
+    default-list entry.
+
+    This call FITS. It is therefore refused outright for a fitted family on the locked
+    partition (`assert_not_locked_fit`): December is inference-only and the confirmatory
+    model reaches it through `predict_from_fitted`, loaded from the REFIT persist.
 
     Raises
     ------
     IntegrityError
-        a `model_id` outside the closed set M-01..M-06 (FR-P1-05-1, R-102); a missing target.
+        a `model_id` outside the closed set M-01..M-06 (FR-P1-05-1, R-102); a missing target;
+        M-06 fitted on a fold with no `validation_bundle`.
     LeakageError
         `bundle.transform_id is None` (the approved raise); a fitted family offered a
-        score-role bundle to fit on; `score_bundle.transform_id != bundle.transform_id`.
+        score-role bundle to fit on; `score_bundle.transform_id != bundle.transform_id`; a
+        fitted family on the locked partition; a validation bundle that is the locked month,
+        a non-fold partition, a train-role frame, or offered for the refit fit.
     PartitionError
         the fit bundle does not belong to `partition`; the score bundle names another.
     SeedError
@@ -625,6 +782,8 @@ def fit_predict(
             f"is outside the closed model set {list(MODEL_IDS)} (FR-P1-05-1; R-102); the two "
             f"removed architectures of D-120 are absent by design",
         )
+    assert_not_locked_fit(model_id, partition)  # December is inference-only (Vision 8.3)
+    assert_validation_bundle(validation_bundle, model_id=model_id, partition=partition)
     assert_consumable(bundle)  # LeakageError: transform_id is None
     _assert_fit_bundle_for_partition(bundle, partition)
     scored = score_bundle if score_bundle is not None else bundle
@@ -669,8 +828,7 @@ def fit_predict(
             f"{model_id} is fitted on a train-role bundle only; fitting on a score-role bundle "
             f"is fitting on the validation month (NFR-LEAK-01)",
         )
-    module_name = _FAMILY_MODULE[model_id]
-    family = __import__(f"src.models.{module_name}", fromlist=["fit_predict_rows"])
+    family = _family_module(model_id, "fit_predict_rows")
     return family.fit_predict_rows(
         model_id,
         bundle=bundle,
@@ -681,6 +839,7 @@ def fit_predict(
         seed=seed,
         params=params,
         horizon_hours=horizon,
+        validation_bundle=validation_bundle,
     )
 
 
@@ -1485,3 +1644,425 @@ def assert_locked_exit_allowed(
         )
     if receipt.partition_id not in PARTITION_IDS:
         raise LockedTestError(receipt_path, f"partition_id {receipt.partition_id!r} is unknown")
+
+
+# --- the refit epoch count: the RULE is frozen, the value is measured ----------------------
+
+
+def refit_epoch_count(best_validation_epochs: Sequence[int]) -> int:
+    """`REFIT_EPOCH_RULE_ID`, implemented: the median best-validation epoch across the
+    pre-December folds and the final seeds, rounding half UPWARD.
+
+    The owner's ruling of 2026-09-20 froze this RULE, not a number: "Determine the final
+    epoch count from the median best-validation epoch across the predefined pre-December
+    folds and seeds, rounding half upward." The inputs are the epochs the fold fits actually
+    restored (`Checkpoint.epoch`, the lowest-validation-RMSE epoch, R-94) — one per (fold,
+    seed) pair, all pre-December. December contributes nothing: the refit is then trained for
+    exactly this many epochs with no validation set and no early stopping, so no December row
+    can reach a stopping decision.
+
+    Rounding is half UP by arithmetic on integers, not by `round()` (which rounds half to
+    even and would give 4 for a 4.5 median and 4 for a 3.5 one).
+
+    Raises
+    ------
+    IntegrityError
+        an empty input (a median over nothing is not a median); a non-integer or
+        non-positive epoch. Nothing is defaulted.
+    """
+    epochs = list(best_validation_epochs)
+    if not epochs:
+        raise IntegrityError(
+            "refit_epoch_count",
+            f"received no best-validation epochs; {REFIT_EPOCH_RULE_ID} is a median over the "
+            f"pre-December folds and the final seeds, and a median over an empty set is not a "
+            f"value — the folds must have run first",
+        )
+    for epoch in epochs:
+        if isinstance(epoch, bool) or not isinstance(epoch, int) or epoch <= 0:
+            raise IntegrityError(
+                "refit_epoch_count", f"best-validation epoch {epoch!r} is not a positive integer"
+            )
+    ordered = sorted(epochs)
+    middle = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[middle]
+    lower, upper = ordered[middle - 1], ordered[middle]
+    return -(-(lower + upper) // 2)  # ceiling of the mean of two integers == round half up
+
+
+def read_refit_epochs(snapshot: ConfigSnapshot) -> int:
+    """`models.refit`: the rule identifier (frozen now) and the epoch count it produced.
+
+    Raises
+    ------
+    IntegrityError
+        the block absent; `rule` naming anything but `REFIT_EPOCH_RULE_ID`; `epochs` absent,
+        `TBD — freeze gate`, or not a positive integer. The value cannot be computed until
+        the folds have run, so the pipeline REFUSES rather than defaulting an epoch count
+        (TE 18.3; Vision 1.2).
+    """
+    models = snapshot.experiment.get("models")
+    block = models.get("refit") if isinstance(models, Mapping) else None
+    if _is_tbd(block) or not isinstance(block, Mapping):
+        raise IntegrityError(
+            "configs/experiment.yaml: models.refit",
+            f"absent or unresolved (TBD — freeze gate); the refit's epoch count is produced by "
+            f"the frozen rule {REFIT_EPOCH_RULE_ID} once the pre-December folds have run, and "
+            f"is transcribed there under its own D-number — never chosen here",
+        )
+    rule = block.get("rule")
+    if _is_tbd(rule) or str(rule) != REFIT_EPOCH_RULE_ID:
+        raise IntegrityError(
+            "configs/experiment.yaml: models.refit.rule",
+            f"is {rule!r}, not {REFIT_EPOCH_RULE_ID!r}; the rule is the frozen object and this "
+            f"module implements exactly one",
+        )
+    epochs = block.get("epochs")
+    if _is_tbd(epochs):
+        raise IntegrityError(
+            "configs/experiment.yaml: models.refit.epochs",
+            f"is TBD — freeze gate: the value {REFIT_EPOCH_RULE_ID} produces does not exist "
+            f"until the pre-December fold fits have recorded their restored epochs. The "
+            f"pipeline refuses here rather than defaulting a number (TE 18.3; TE 1.1: no "
+            f"implementer or coding agent fills such a value by convenience)",
+        )
+    if isinstance(epochs, bool) or not isinstance(epochs, int) or epochs <= 0:
+        raise IntegrityError(
+            "configs/experiment.yaml: models.refit.epochs", f"{epochs!r} is not a positive integer"
+        )
+    return epochs
+
+
+def assert_refit_epochs_match_rule(
+    snapshot: ConfigSnapshot, best_validation_epochs: Sequence[int]
+) -> None:
+    """The transcribed value must be the one the frozen rule produces from the fold record."""
+    configured = read_refit_epochs(snapshot)
+    derived = refit_epoch_count(best_validation_epochs)
+    if configured != derived:
+        raise IntegrityError(
+            "configs/experiment.yaml: models.refit.epochs",
+            f"is {configured}, but {REFIT_EPOCH_RULE_ID} over the recorded fold/seed epochs "
+            f"{sorted(best_validation_epochs)} produces {derived}; the value is the rule's "
+            f"output, never a separate choice",
+        )
+
+
+# --- the fitted-model persist / load surface: REFIT fits, DEC predicts --------------------
+
+
+class FittedStateBackend(Protocol):
+    """Where a fitted family's state is persisted, and what its bytes hash to.
+
+    The caller supplies it. The serialization FORMAT of a fitted model is a governed choice
+    (TS-M-01 makes the Keras checkpoint format version-dependent and freezes it at pin-freeze;
+    pickling a fitted scikit-learn estimator is likewise not an implementer's decision), so
+    this module owns the record and the hash and never the format.
+    """
+
+    def save_state(self, *, model_id: str, seed: int | None, state: Any) -> tuple[str, str]:
+        """Persist `state`; return `(payload_ref, sha256 of the persisted bytes)`."""
+        ...
+
+    def load_state(self, payload_ref: str) -> Any:
+        """Return the state persisted under `payload_ref`."""
+        ...
+
+
+@dataclass(frozen=True)
+class FittedModelRecord:
+    """What a persisted fit is: the model, the partition it was fitted on, and its hash."""
+
+    model_id: str
+    seed: int | None
+    fitted_partition_id: str
+    transform_id: str
+    payload_ref: str
+    payload_sha256: str
+    fitted_at_utc: str
+    hyperparameters: Mapping[str, Any]
+    attrs: Mapping[str, Any]
+
+
+class JsonStateBackend:
+    """A JSON `FittedStateBackend`: durable, write-once, hashed as written.
+
+    Serves any family whose fitted state is JSON-serialisable (M-03's mean table is). A state
+    that is not refuses BY NAME rather than reaching for pickle: choosing a binary
+    serialization format for a fitted estimator or for Keras weights is a governed decision
+    this module does not make (TS-M-01).
+    """
+
+    def __init__(self, root: Path) -> None:
+        self.root = Path(root)
+
+    def _path(self, model_id: str, seed: int | None) -> Path:
+        suffix = "" if seed is None else f"_seed{seed}"
+        return self.root / f"{model_id}{suffix}.fitted.json"
+
+    def save_state(self, *, model_id: str, seed: int | None, state: Any) -> tuple[str, str]:
+        path = self._path(model_id, seed)
+        if path.exists():
+            raise IntegrityError(
+                path,
+                "a persisted fitted model already exists at this path; a fitted model is "
+                "written once and never overwritten (TE 13.3)",
+            )
+        try:
+            payload = (json.dumps(state, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        except TypeError as exc:
+            raise IntegrityError(
+                f"fitted state for {model_id}",
+                f"is not JSON-serialisable ({exc}); the serialization format for this family's "
+                f"fitted model is a governed choice that does not exist yet (TS-M-01 freezes "
+                f"the Keras checkpoint format at pin-freeze; a pickled scikit-learn estimator "
+                f"is not an implementer's decision either) — supply a FittedStateBackend that "
+                f"implements the frozen format, refused rather than defaulted",
+            ) from exc
+        _durable_write_bytes(path, payload)
+        return str(path), sha256_of_file(path)
+
+    def load_state(self, payload_ref: str) -> Any:
+        path = Path(payload_ref)
+        if not path.is_file():
+            raise IntegrityError(path, "no persisted fitted model at this path")
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise IntegrityError(path, f"persisted fitted model is malformed ({exc})") from exc
+
+
+def _durable_write_bytes(path: Path, payload: bytes) -> None:
+    """`.tmp` -> fsync -> atomic rename; a reader never sees a partial file (SD-M-04)."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
+        try:
+            written = os.write(fd, payload)
+            if written != len(payload):
+                raise IntegrityError(tmp, f"wrote {written} of {len(payload)} bytes")
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        os.replace(tmp, path)
+    except OSError as exc:
+        raise IntegrityError(path, f"durable write failed ({exc}); nothing is recorded") from exc
+
+
+def fit_and_persist(
+    model_id: str,
+    *,
+    bundle: FeatureBundle,
+    partition: Partition,
+    snapshot: ConfigSnapshot,
+    target: Any,
+    backend: FittedStateBackend,
+    record_path: Path,
+    validation_bundle: FeatureBundle | None = None,
+    seed: int | None = None,
+    params: Mapping[str, Any] | None = None,
+    horizon_hours: int | None = None,
+    **family_kwargs: Any,
+) -> FittedModelRecord:
+    """FIT a family and PERSIST it, hashed, without predicting on anything.
+
+    The REFIT half of the locked path (owner ruling 2026-09-20: "Retrain from scratch on
+    January-November, save and hash the models, and make December strictly inference-only").
+    The locked partition is refused here as a fitting partition, and so is any unfitted
+    family: M-01 and M-02 carry no state to persist.
+
+    Raises
+    ------
+    LeakageError
+        a fit on the locked partition; a validation bundle that is not a pre-December fold.
+    IntegrityError
+        an unfitted family; a family exposing no `fit_state`; a record file that already
+        exists (write-once); a state the backend cannot persist.
+    """
+    if model_id not in MODEL_IDS:
+        raise IntegrityError(
+            f"model_id {model_id!r}", f"is outside the closed model set {list(MODEL_IDS)}"
+        )
+    if model_id not in FITTED_MODEL_IDS:
+        raise IntegrityError(
+            f"fit_and_persist({model_id})",
+            f"{model_id} carries no fitted state; only {list(FITTED_MODEL_IDS)} are persisted, "
+            f"and the two persistence families are recomputed from the target series wherever "
+            f"they are scored (domain-entities section 1)",
+        )
+    assert_not_locked_fit(model_id, partition)
+    assert_validation_bundle(validation_bundle, model_id=model_id, partition=partition)
+    assert_consumable(bundle)
+    _assert_fit_bundle_for_partition(bundle, partition)
+    if bundle.spec.role != "train":
+        raise LeakageError(
+            f"bundle {bundle.spec.partition_id}/{bundle.spec.role}",
+            f"{model_id} is fitted on a train-role bundle only (NFR-LEAK-01)",
+        )
+    if target is None:
+        raise IntegrityError(f"fit_and_persist({model_id})", "the D-17 target frame is required")
+    record_path = Path(record_path)
+    if record_path.exists():
+        raise IntegrityError(
+            record_path,
+            "a fitted-model record already exists; a persisted fit is written once and never "
+            "overwritten (TE 13.3; NFR-AUD-01)",
+        )
+    horizon = resolve_horizon(snapshot, horizon_hours)
+    family = _family_module(model_id, "fit_state")
+    state, attrs = family.fit_state(
+        model_id,
+        bundle=bundle,
+        partition=partition,
+        snapshot=snapshot,
+        target=target,
+        seed=seed,
+        params=params,
+        horizon_hours=horizon,
+        validation_bundle=validation_bundle,
+        **family_kwargs,
+    )
+    payload_ref, payload_sha256 = backend.save_state(model_id=model_id, seed=seed, state=state)
+    record = FittedModelRecord(
+        model_id=model_id,
+        seed=seed,
+        fitted_partition_id=partition.partition_id,
+        transform_id=str(bundle.transform_id),
+        payload_ref=payload_ref,
+        payload_sha256=payload_sha256,
+        fitted_at_utc=dt.datetime.now(_UTC).isoformat(),
+        hyperparameters=dict(params or {}),
+        attrs=dict(attrs),
+    )
+    _durable_write_bytes(
+        record_path,
+        (json.dumps(_record_payload(record), indent=2, sort_keys=True) + "\n").encode("utf-8"),
+    )
+    return record
+
+
+def _record_payload(record: FittedModelRecord) -> dict[str, Any]:
+    return {
+        "model_id": record.model_id,
+        "seed": record.seed,
+        "fitted_partition_id": record.fitted_partition_id,
+        "transform_id": record.transform_id,
+        "payload_ref": record.payload_ref,
+        "payload_sha256": record.payload_sha256,
+        "fitted_at_utc": record.fitted_at_utc,
+        "hyperparameters": dict(record.hyperparameters),
+        "attrs": dict(record.attrs),
+    }
+
+
+def load_fitted_model(record_path: Path) -> FittedModelRecord:
+    """Read a fitted-model record. An absent record RAISES — never a silent refit."""
+    path = Path(record_path)
+    if not path.is_file():
+        raise LockedTestError(
+            path,
+            "no persisted fitted-model record exists. The locked iteration LOADS the model "
+            f"fitted on {REFIT_ID} and predicts; it never falls back to fitting, because a fit "
+            f"reached from the locked branch is December in the training loop (Vision 8.3)",
+        )
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return FittedModelRecord(
+            model_id=str(payload["model_id"]),
+            seed=payload["seed"],
+            fitted_partition_id=str(payload["fitted_partition_id"]),
+            transform_id=str(payload["transform_id"]),
+            payload_ref=str(payload["payload_ref"]),
+            payload_sha256=str(payload["payload_sha256"]),
+            fitted_at_utc=str(payload["fitted_at_utc"]),
+            hyperparameters=dict(payload.get("hyperparameters") or {}),
+            attrs=dict(payload.get("attrs") or {}),
+        )
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise LockedTestError(path, f"fitted-model record is malformed ({exc})") from exc
+
+
+def assert_fitted_payload_unchanged(record: FittedModelRecord) -> None:
+    """The persisted weights must still hash to what the record recorded when they were
+    written; a mismatch RAISES naming the file and the violated expectation."""
+    path = Path(record.payload_ref)
+    if not path.is_file():
+        raise IntegrityError(
+            path,
+            f"the persisted model {record.model_id} named by the fitted-model record is "
+            f"absent; the locked prediction is computed from the model that was hashed",
+        )
+    actual = sha256_of_file(path)
+    if actual != record.payload_sha256:
+        raise IntegrityError(
+            path,
+            f"sha256 {actual[:12]}… does not match the fitted-model record's "
+            f"{record.payload_sha256[:12]}…; the model on disk is not the one that was fitted "
+            f"on {record.fitted_partition_id} and hashed",
+        )
+
+
+def predict_from_fitted(
+    record: FittedModelRecord,
+    *,
+    score_bundle: FeatureBundle,
+    partition: Partition,
+    snapshot: ConfigSnapshot,
+    backend: FittedStateBackend,
+    target: Any = None,
+    horizon_hours: int | None = None,
+    **family_kwargs: Any,
+) -> Prediction:
+    """LOAD a persisted fit and PREDICT. Nothing here fits, on any partition.
+
+    The locked half of the path. The record's `transform_id` must equal the scored bundle's:
+    the December bundle carries the REFIT transform (`expected_transform_id`, R-74's one
+    enumerated apply), so a model fitted under any other transform is refused rather than
+    applied to rows it was not fitted for.
+    """
+    assert_consumable(score_bundle)
+    assert_fitted_payload_unchanged(record)
+    if record.fitted_partition_id == LOCKED_ID:
+        raise LeakageError(
+            f"fitted-model record {record.model_id}",
+            f"records fitted_partition_id {LOCKED_ID}; no model is ever fitted on the locked "
+            f"partition (Vision 8.3)",
+        )
+    if record.transform_id != score_bundle.transform_id:
+        raise LeakageError(
+            f"fitted-model record {record.model_id}/{record.transform_id}",
+            f"disagrees with the scored bundle's transform "
+            f"{score_bundle.transform_id!r}; the rows scored must have been transformed by the "
+            f"same fitted state the model was fitted under (R-74 element 4)",
+        )
+    horizon = resolve_horizon(snapshot, horizon_hours)
+    family = _family_module(record.model_id, "predict_rows_from_state")
+    state = backend.load_state(record.payload_ref)
+    rows, attrs = family.predict_rows_from_state(
+        state,
+        record.model_id,
+        score_bundle=score_bundle,
+        partition=partition,
+        snapshot=snapshot,
+        target=target,
+        horizon_hours=horizon,
+        **family_kwargs,
+    )
+    return new_prediction(
+        record.model_id,
+        seed=record.seed,
+        rows=rows,
+        bundle=score_bundle,
+        partition=partition,
+        attrs={
+            **dict(attrs),
+            "role": score_bundle.spec.role,
+            "horizon_hours": horizon,
+            "inference_only": True,
+            "fitted_model_partition_id": record.fitted_partition_id,
+            "fitted_model_sha256": record.payload_sha256,
+            "hyperparameters": dict(record.hyperparameters) or None,
+        },
+    )

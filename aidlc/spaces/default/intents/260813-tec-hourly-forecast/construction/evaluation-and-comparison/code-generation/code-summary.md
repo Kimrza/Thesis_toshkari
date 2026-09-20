@@ -4,6 +4,15 @@
 **Plan**: `code-generation-plan.md` (Steps 1–11 executed, plus the **repair Step 12 added and executed 2026-09-13** under the owner's ruling at the rejected stage gate)
 **Receipted answers**: Q1 = A, Q2 = B, Q3 = A, Q4 = A, Q5 = A.
 
+> ⚠ **This record was reopened 2026-09-20** to carry the `GOV-2026-09-20-CG-01` remediation
+> of Recommendations **15, 16, 18, 19** (owner dispositions
+> `CR-2026-09-20-GOV-CG-01-DISPOSITIONS` §2). Five of this unit's files changed; the
+> `Files` table's counts and the `Test coverage summary` are **re-derived below in the body**
+> and the superseded figures named, per `project.md` (`code-generation:fr-2`). **No code was
+> executed** and **the tree is uncommitted at `HEAD ff5c683`.** The READY verdict of
+> 2026-09-06 predates all of it and is **not** revalidated by this pass. See
+> § GOV-CG-01 remediation (2026-09-20).
+
 ## Repair Step 12 — the stale register claim in `resolve_inverse`, 2026-09-13
 
 Written into the body rather than a review addendum per `project.md`
@@ -77,18 +86,29 @@ the diff ranges above, not an executed test. No acceptance row is claimed discha
 > derived 1250) and were never propagated to this table — the exact "correction filed where
 > its own reader never reaches it" failure `project.md` (`code-generation:fr-2`) names.
 > Superseded figures are kept beside the corrected ones rather than erased.
+>
+> **RE-DERIVED AGAIN 2026-09-20**, in the working tree, after the `GOV-2026-09-20-CG-01`
+> remediation (§ GOV-CG-01 remediation below) rewrote five of the nine files. Every `Lines`
+> cell below now carries its **2026-09-20 working-tree** value from `wc -l`, printed before
+> assertion, with the `HEAD ff5c683` value beside it so the remediation's own contribution
+> is separable from a sibling's. Three cells were **already stale at `HEAD ff5c683`**,
+> before this remediation touched anything — `masks.py` (cell 697, HEAD 712),
+> `metrics.py` (cell 731, HEAD 744) and `tests/test_common_masks.py` (cell 1250, HEAD 1276)
+> — which is the fourth consecutive pass on which this table has carried a stale figure.
+> **The entire working tree is UNCOMMITTED: `HEAD` is `ff5c683`, `git diff --cached` is
+> empty (0 staged paths), and none of these values exists in any commit.**
 
 | File | Lines | Content |
 |---|---|---|
 | `governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md` | 187 | Q1 = A membership confirmation (Vision §2.4/§8.4/§8.9), PROPOSED D-number text for `evidence/DECISIONS.md` (owner adopts or edits; no agent writes the register), the Q2 = B sibling-edit record, the Q4 = A race analysis, honest limits |
-| `configs/experiment.yaml` (modified) | **275 on disk** (re-derived 2026-09-13; the cell read `178 (was 150)`, which was this unit's own diff and is not the file's size — later sibling and owner commits transcribed D-33…D-38 into it) | `comparison_sets`: primary {M-01, M-02, M-03, M-06, B-01}, gim {M-06, C-01}, tier3 {M-04, M-05, M-06}, each citing the Step 1 record; parse-verified member counts 5 / 2 / 3; nothing else touched |
-| `src/evaluation/guards.py` | **639** (re-derived 2026-09-13; was 632 — the +7 net is **Repair Step 12's own docstring correction**, which left this cell stale in the very file it edited) | The six SD-C-01 refusals as one failure domain — `require_stamps` (`LeakageError`), `require_partition_agreement` (`PartitionError`), `require_registered_mask` + `require_declared_membership` (`FairnessError`), `require_target_space` (`InverseTransformError`; `ABL-DIFF` refuses naming D-27), `require_locked_receipt` (`LockedTestError`, three ordered limbs: hash receipt, SD-C-02 containment, D-28 window), `require_mask_member_alignment` (`FairnessError`) — plus `resolve_inverse` (always refuses naming D-27) and `scored_window_statement` (D-28's sentence derived by date arithmetic, no constant in source) |
-| `src/evaluation/masks.py` | 697 | `build_comparison_mask` (stamps first, exact declared membership, matched-window agreement, per-station surviving + exclusion counts, deterministic sha256 `mask_id`, full stamp set, the five exposed reporting values), `MaskRegistry` (once-only per set; write-once `frozen_bundle_manifest.json` via `.tmp` → fsync → `os.replace`, second write refuses — Q4 = A race analysis in the docstring), `read_comparison_sets` (refuses absent/TBD by name) |
-| `src/evaluation/metrics.py` | **731** (re-derived 2026-09-13; the cell read 665, which the file has **never** measured — `git log --oneline -- src/evaluation/metrics.py` returns one commit, `8a6cb61`, its creation. Four successive passes asserted this count "verified with `wc -l`, matches exactly"; none of them can have run it. The +66 is `statistical-inference`'s R-114 one-copy extraction, disclosed in that unit's record) | `paired_loss_differential` (guards first; squared errors per (`station`, hour) on masked rows only → per-station mean **benchmark minus model** → unweighted three-station mean), `EstimandResult` (orientation `benchmark_minus_model`, weighting `equal_station`, verbatim sign sentence, four stamps copied from the registered mask, disagreement fails), `build_metrics_artifact` (per-set completeness refusal; `beats_model` per benchmark; TEC-06 sentence on every IRI/GIM row; fail-closed GIM overlap disclosure with containment ordering; Phase-2 not-independent statement field), atomic refuse-overwrite writer |
-| `src/data/locked_test.py` (modified) | 546 (was 461) | **Q2 = B owner-instructed sibling edit, flagged for `governance-guards`' record and re-check**: `AccessRecord` + `mask_bundle_ids`/`mask_registry_hash` (additive, optional, existing callers verified unbroken); `open_restricted` populates both from a frozen-bundle manifest; a present-but-unparseable manifest aborts the read (`LockedTestError`) rather than logging `None` |
-| `scripts/07_evaluate_and_report.py` | **774** (re-derived 2026-09-13; the cell read 621 — wrong by 153 lines, and this document's own 2026-09-10 cross-unit edit record already stated "Current size, derived: 774 lines (`wc -l`)" without the table ever being reconciled to it) | Position 07; `--config configs/` `--phase 1|2`; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; predictions by manifest; per-set mask build/register, estimands, metrics artifact; honest `aborted` registry row on `IntegrityError`; **DEC unreachable** — enters only via `materialise_locked_partition(g05_signature=...)` + `open_restricted(purpose="locked_evaluation")`, G-05 `Blocked`; bootstrap intervals and breakdown tables NOT computed (other units') |
-| `tests/test_common_masks.py` | **1250** (re-derived 2026-09-13; the cell read 1240, and this document's own 2026-09-10 gate-floor re-review already stated "the file is 1250 lines (was 1240 at the prior summary date)" without the table ever being reconciled to it) | 61 test functions (derived: `grep -c "def test_"`) — controls (1), (3)–(32) as owned here ((2) vacated per R-103), per-entry guard controls incl. the sixth guard, containment controls, second-manifest-write refusal, orientation/weighting fixtures, completeness/disclosure/`beats_model` presence tests, tier-3 matched-window instance (28), AST import-boundary tests, fresh-subclass `aborted`-row scan, the three must-NOT-fire controls; member counts re-read from config, synthetic year 2001 only |
-| `src/data/config.py` (modified) | 1276 | One `REQUIRED_FIELDS_MAP` entry `("evaluation-and-comparison", 1)` so script 07's refusal path can execute (the map's docstring anticipates per-stage additions; every prior unit did the same); `comparison_sets` deliberately NOT listed — enforced at `read_comparison_sets`, preserving the honest `aborted`-row path |
+| `configs/experiment.yaml` (modified) | **384** working tree 2026-09-20 (HEAD `ff5c683` = 371; the +13 is the features worker's Rec 17 `window_length_hours` sentinel, **not this unit's**. Prior cell values 275 and `178 (was 150)` superseded). ⚠ **This file is MISSING the `reporting.top1pct_sensitivity` block Rec 21's new reader requires** — see § GOV-CG-01 remediation, owed item 1 | `comparison_sets`: primary {M-01, M-02, M-03, M-06, B-01}, gim {M-06, C-01}, tier3 {M-04, M-05, M-06}, each citing the Step 1 record; parse-verified member counts 5 / 2 / 3; nothing else touched |
+| `src/evaluation/guards.py` | **758** working tree 2026-09-20 (HEAD `ff5c683` = 639; +119 net is Recommendation 15's `_require_window_fully_populated`. Prior cell values 639, 632 both superseded) | The six SD-C-01 refusals as one failure domain — `require_stamps` (`LeakageError`), `require_partition_agreement` (`PartitionError`), `require_registered_mask` + `require_declared_membership` (`FairnessError`), `require_target_space` (`InverseTransformError`; `ABL-DIFF` refuses naming D-27), `require_locked_receipt` (`LockedTestError`, three ordered limbs: hash receipt, SD-C-02 containment, D-28 window), `require_mask_member_alignment` (`FairnessError`) — plus `resolve_inverse` (always refuses naming D-27) and `scored_window_statement` (D-28's sentence derived by date arithmetic, no constant in source) |
+| `src/evaluation/masks.py` | **801** working tree 2026-09-20 (HEAD `ff5c683` = 712; +89 net is Recommendation 16's membership floor. The cell read **697**, which was already wrong by 15 lines at HEAD and had survived four passes) | `assert_mandatory_controls_declared` (the Rec 16 membership floor, fired from `read_comparison_sets`; `PRIMARY_SET_ID`, `MANDATORY_DIFFICULTY_CONTROL_IDS`), `build_comparison_mask` (stamps first, exact declared membership, matched-window agreement, per-station surviving + exclusion counts, deterministic sha256 `mask_id`, full stamp set, the five exposed reporting values), `MaskRegistry` (once-only per set; write-once `frozen_bundle_manifest.json` via `.tmp` → fsync → `os.replace`, second write refuses — Q4 = A race analysis in the docstring), `read_comparison_sets` (refuses absent/TBD by name) |
+| `src/evaluation/metrics.py` | **829** working tree 2026-09-20 (HEAD `ff5c683` = 744; +85 net is Recommendation 19's `resolve_target_units` and the emitted `units` field. The cell read **731**, already wrong by 13 at HEAD; and before that 665, which the file has **never** measured — `git log --oneline -- src/evaluation/metrics.py` returns one commit, `8a6cb61`, its creation. Four successive passes asserted this count "verified with `wc -l`, matches exactly"; none of them can have run it. The +66 is `statistical-inference`'s R-114 one-copy extraction, disclosed in that unit's record) | `paired_loss_differential` (guards first; squared errors per (`station`, hour) on masked rows only → per-station mean **benchmark minus model** → unweighted three-station mean), `EstimandResult` (orientation `benchmark_minus_model`, weighting `equal_station`, verbatim sign sentence, four stamps copied from the registered mask, disagreement fails), `build_metrics_artifact` (per-set completeness refusal; `beats_model` per benchmark; TEC-06 sentence on every IRI/GIM row; fail-closed GIM overlap disclosure with containment ordering; Phase-2 not-independent statement field), atomic refuse-overwrite writer |
+| `src/data/locked_test.py` (modified) | **1008** working tree 2026-09-20 (HEAD `ff5c683` = 962; cell read 546, superseded — the growth is **sibling-owned**, not this unit's: `8a6cb61` and the 2026-09-20 custody worker. This unit changed nothing in this file on 2026-09-20) | **Q2 = B owner-instructed sibling edit, flagged for `governance-guards`' record and re-check**: `AccessRecord` + `mask_bundle_ids`/`mask_registry_hash` (additive, optional, existing callers verified unbroken); `open_restricted` populates both from a frozen-bundle manifest; a present-but-unparseable manifest aborts the read (`LockedTestError`) rather than logging `None` |
+| `scripts/07_evaluate_and_report.py` | **1423** working tree 2026-09-20 (HEAD `ff5c683` = 774; **+649 net**, the largest single change in this remediation — Recommendation 18's inference-and-reporting wiring, `_report_set` plus eleven new CLI inputs. Prior cell values 774 and 621 superseded) | Position 07; `--config configs/` `--phase 1|2`; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; predictions by manifest; per-set mask build/register, estimands, metrics artifact; honest `aborted` registry row on `IntegrityError`; **DEC unreachable** — enters only via `materialise_locked_partition(g05_signature=...)` + `open_restricted(purpose="locked_evaluation")`, G-05 `Blocked`; **and since 2026-09-20 (Rec 18) the inference and reporting layer runs in the same `--set` loop via `_report_set`** — the vector time-block bootstrap per pair, the one primary table, the breakdown family (member metrics, per-station, D-17 quality strata, the top-fraction sensitivity), the DEC regime breakdown on the locked partition, the practical-relevance record and the claims checklist. **The superseded cell text "bootstrap intervals and breakdown tables NOT computed (other units')" is the exact claim Rec 18 was raised against** and is no longer true; no tenth stage script was added, TE §13.2's nine-script sequence is untouched, and the two units run inside this script under R-56's path grant |
+| `tests/test_common_masks.py` | **1661** working tree 2026-09-20 (HEAD `ff5c683` = 1276; +385 net for Recommendations 15, 16 and 19/20. The cell read **1250**, already wrong by 26 at HEAD; 1240 before that) | **73 test functions** (derived 2026-09-20: `grep -c "^def test_"` → 73; HEAD = 62, so **+11**), **75 collected cases** (one `@pytest.mark.parametrize` over the three `MANDATORY_DIFFICULTY_CONTROL_IDS`, so +2 over the function count; there is exactly one parametrize decorator in the file). The superseded **61** stands corrected. The eleven added: three for Rec 16's membership floor (the real-config must-NOT-fire, the per-control negative control, the scope/omission limb), four for Rec 15's limb-3 population half (full-window pass, short-window refusal, counter-disagreement refusal, and one pinning the KNOWN member-absence gap), four for Recs 19/20's § 7b producer/consumer contract — controls (1), (3)–(32) as owned here ((2) vacated per R-103), per-entry guard controls incl. the sixth guard, containment controls, second-manifest-write refusal, orientation/weighting fixtures, completeness/disclosure/`beats_model` presence tests, tier-3 matched-window instance (28), AST import-boundary tests, fresh-subclass `aborted`-row scan, the three must-NOT-fire controls; member counts re-read from config, synthetic year 2001 only |
+| `src/data/config.py` (modified) | **1337** working tree 2026-09-20, unchanged from HEAD `ff5c683` (cell read 1276, superseded; the growth is sibling-owned and this remediation did not touch the file) | One `REQUIRED_FIELDS_MAP` entry `("evaluation-and-comparison", 1)` so script 07's refusal path can execute (the map's docstring anticipates per-stage additions; every prior unit did the same); `comparison_sets` deliberately NOT listed — enforced at `read_comparison_sets`, preserving the honest `aborted`-row path |
 
 ## Key implementation decisions
 
@@ -100,7 +120,18 @@ the diff ranges above, not an executed test. No acceptance row is claimed discha
 
 ## Test coverage summary
 
-61 test functions in `tests/test_common_masks.py`. Smoke run on this clone (Q5 = A): winget Python download failed (`InternetOpenUrl() failed. 0x80072ee2`, recorded verbatim), uv installed Python 3.11.16 into the session scratchpad; PyPI unreachable so pytest/pyyaml uninstallable — the suite ran under a scratchpad pytest shim on the real 3.11.16: **60 passed, 1 skipped (yaml unavailable), 0 failed**. `compileall src scripts tests` exit 0. **Smoke evidence only, never governed.** Owed: full-pytest suite + ruff once PyPI is reachable (stdlib lint substitute ran clean on touched files; pre-existing `src/data/config.py:1` overlong line reported, not repaired — foundation's).
+**73 test functions / 75 collected cases** in `tests/test_common_masks.py`, derived
+2026-09-20 in the working tree (`grep -c "^def test_"` → 73; one parametrize over three
+ids → 75). The **61** previously asserted here is superseded. ⚠ **NONE of the 73 has been
+executed.** The 2026-09-20 remediation added eleven test functions and not one of them has
+run: no usable Python interpreter exists on this clone (`python.exe` is a zero-byte Windows
+Store alias stub) and PyPI is unreachable, so the scratchpad route that produced the older
+smoke figures below is itself no longer available. Every claim about the new code's
+behaviour in this record is **STATIC**, read from source. Nothing is "verified passing".
+
+The prior smoke record, which describes the **pre-2026-09-20** file and is retained
+unaltered rather than restated as current: 61 test functions in
+`tests/test_common_masks.py`. Smoke run on this clone (Q5 = A): winget Python download failed (`InternetOpenUrl() failed. 0x80072ee2`, recorded verbatim), uv installed Python 3.11.16 into the session scratchpad; PyPI unreachable so pytest/pyyaml uninstallable — the suite ran under a scratchpad pytest shim on the real 3.11.16: **60 passed, 1 skipped (yaml unavailable), 0 failed**. `compileall src scripts tests` exit 0. **Smoke evidence only, never governed.** Owed: full-pytest suite + ruff once PyPI is reachable (stdlib lint substitute ran clean on touched files; pre-existing `src/data/config.py:1` overlong line reported, not repaired — foundation's).
 
 ## Deviations from the plan
 
@@ -834,3 +865,191 @@ of D-27; repository state and attribution are both honestly and correctly stated
 execution-honesty claims are correctly bounded; and no acceptance row, scientific
 constant, credential, or restricted-root touch was mishandled. READY, on this pass's own
 independent re-derivation, is the terminal verdict for this stage.
+
+## GOV-CG-01 remediation (2026-09-20) — Recommendations 15, 16, 18, 19
+
+Owner dispositions: `governance/CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md` §2.
+Findings and their printed derivations:
+`governance/reviews/GOV-2026-09-20-CG-01.md` §§ Recommendation 15, 16, 18, 19.
+Recommendations 13–60 were authorised as *"the board's preferred option in each block"*,
+so each block's own preferred option is the instruction executed here.
+
+**This section does not revalidate the 2026-09-06 READY verdict.** That verdict was given
+on a codebase five files smaller than the one now on disk. Nothing below is reviewed.
+
+### Repository state, re-derived at writing time
+
+`git rev-parse --short HEAD` → **`ff5c683`**. `git diff --cached --numstat` → **0 paths
+staged**. Every change described here exists **only in the working tree**. No commit,
+`add`, `amend`, `rebase`, `checkout`, `restore` or `config` was run by this pass; the
+commit is the student's act (`project.md` `code-generation:c30`) and is routed to the gate.
+`git diff HEAD --numstat` for this unit's five changed files, printed:
+
+| Path | + | − |
+|---|---|---|
+| `scripts/07_evaluate_and_report.py` | 653 | 4 |
+| `tests/test_common_masks.py` | 389 | 4 |
+| `src/evaluation/guards.py` | 122 | 3 |
+| `src/evaluation/masks.py` | 92 | 3 |
+| `src/evaluation/metrics.py` | 86 | 1 |
+
+### Recommendation 15 — the locked scored set silently falls a day short of D-28's 30 days
+
+Board's preferred remediation: **solution (2)** — make the disclosure derived from the
+mask — with **solution (1)**, supplying the persistence families with 1 December history,
+**routed to the supervisor as a separate ruling.** Both halves are honoured exactly.
+
+**(2), implemented.** `require_locked_receipt` limb 3 previously checked only that every
+masked row lies *inside* the stated window, while `scored_window_statement` derived
+"30 days" from the partition bounds and had no knowledge of what survived — so a 29-day
+scored set was disclosed as 30 and nothing compared the two.
+`guards._require_window_fully_populated` now reconciles the disclosed denominator against
+the recorded counters, per station:
+
+```
+window_hours = (month_end - scored_start) in whole hours
+row_counts[st] + exclusion_counts[st] == window_hours        # every hour accounted for
+|distinct masked hours for st| == window_hours - exclusion_counts[st]
+```
+
+plus a station-set agreement check and a refusal on a fractional window. Four test
+functions in `tests/test_common_masks.py` cover limb 3's population half: the must-NOT-fire
+full-window case, the negative control (the whole first block absent — the reviewer's own
+derived case — asserting that `limb 3` and the 24 unaccounted hours are named), a
+counter-tampering control, and a fourth that **pins a known gap**.
+
+**The known gap, stated and not papered over.** When the target carries an hour but a
+*member's* prediction does not, `build_comparison_mask` books the row into
+`exclusion_counts`, so the identity above stays true by construction and the new limb does
+**not** fire, even though the scored set really is short. Closing it needs either per-hour
+exclusion *attribution* (target-caused versus member-caused) or a full-population
+requirement — both behaviour changes beyond this remediation's approved scope.
+`test_rec15_residual_member_absence_absorbed_by_exclusion_counts_is_not_caught` pins the
+current behaviour so that the day a ruling lands, the test **fails** and must be rewritten
+rather than quietly passing. Routed to the gate.
+
+**(1) — NOT decided here, and not pre-empted.** Whether M-01 and M-02 may read 1 December
+history for a 2 December forecast origin is a **Supervisor ruling owed before G-05**
+(dispositions §5 item 13). No code in this unit reads 1 December, no default was chosen,
+and the new limb makes the shortfall **refuse loudly** rather than be silently disclosed
+as 30 days — which is precisely the state that keeps the question visible until it is
+ruled on. Proposed D-number text is drafted for the owner in the worker manifest; nothing
+was written to `evidence/DECISIONS.md`.
+
+### Recommendation 16 — the declared comparison set is never checked to CONTAIN the controls
+
+Board's preferred: **(1)** a membership floor in `read_comparison_sets`, plus one negative
+control. Implemented as `masks.assert_mandatory_controls_declared`, called from
+`read_comparison_sets` so it fires on **every** entry point rather than at one call site.
+
+It refuses when the declared `primary` set's `benchmark_ids` omit any of
+`MANDATORY_DIFFICULTY_CONTROL_IDS = ("M-01", "M-02", "M-03")`, citing PC-03/PC-04 and
+Vision §2.4's binding honesty rule by name; it **also refuses when no `primary` set is
+declared at all**, so the floor cannot be evaded by omission. Scoped to `primary` only —
+`gim` and `tier3` are separate comparisons with their own memberships.
+
+On **TC-03e**: the three are **identity tokens**, the same kind as the already-present
+`metrics.EXTERNAL_COMPARATOR_IDS`, expressing a required-membership *floor*. The scientific
+content — what each control *is* — remains in `configs/experiment.yaml`. The board's own
+comparison reached this conclusion and it is recorded here rather than assumed.
+
+Three test functions: the must-NOT-fire case reading the **real** `configs/experiment.yaml`
+(which declares `benchmark_ids: ["B-01", "M-01", "M-02", "M-03"]`, so the floor passes
+today), a parametrized negative control dropping each control in turn (3 collected cases),
+and a scope/omission limb.
+
+**One gloss corrected, and it matters.** The predecessor worker wrote M-03's key into
+`masks.py` as *"station x month x hour climatology"* at two sites on 2026-09-20 — the same
+day the owner ruled (Rec 2) that the key is **redefined** to station × hour, with the
+replacement drafted at dispositions §4.1 awaiting its D-number and a supervisor
+countersignature. Both sites now state the **identity only** and point at the pending
+ruling: repeating the superseded key would mislead, and writing the new one would assert
+an unadopted scientific definition. The definition's home stays `configs/experiment.yaml`
+and the register.
+
+### Recommendation 18 — the inference and reporting layer has no production caller
+
+Board's preferred: **(1)** wire the calls into `scripts/07_evaluate_and_report.py`, **not**
+a tenth stage script. Implemented in `_report_set`, called per declared set from
+`_evaluate_partition`, so both the real path and the fixture path
+(`evaluation_mode="fixture"`) now reach it. **TE §13.2's nine-script ordered sequence is
+untouched.**
+
+What now lies on a production path, where before the script called only
+`build_comparison_mask`, `registry.register`, `paired_loss_differential` and
+`build_metrics_artifact`: the vector time-block bootstrap per (model, benchmark) pair with
+its serialized `BootstrapResult`; the **one** primary results table — which is where
+PC-03/PC-04's co-reporting of the three difficulty controls acquires a live enforcement
+path for the first time; the breakdown family (member metrics; per-station, the only
+emitter of TC-12's driver caveat; the D-17 quality strata; the top-fraction sensitivity);
+the DEC regime breakdown on the locked partition only; the practical-relevance record; and
+the claims checklist. All ten SD-R-01 rendering refusals now have a production caller.
+
+Eleven new CLI inputs, each read from a governed upstream artifact and **never defaulted**:
+`--target-release-manifest`, `--budget-artifact`, `--table-caption`, `--conclusion-surface`,
+`--threshold-record`, `--g06-receipt-utc`, `--audit-artifact`, `--kp-series`,
+`--kp-release-grade`, `--kp-source`, `--notebook-captions`. A run that cannot report
+**refuses naming the first absent input** rather than emitting a point estimate with no
+interval and calling that a result.
+
+Three design points recorded because each could otherwise be mistaken for an omission.
+`--table-caption` is supplied **verbatim by the author** — FR-P1-05-19's plasmaspheric
+sentence and D-28's scored-set statement are frozen wordings, and an orchestrator composing
+its own caption would be authoring governed prose (TE §7). `--conclusion-surface` absent is
+**not** a skip: the checklist fails closed on `None` by design (R-126 control (36)).
+`--threshold-record` absent **records** the D-34 decided state machine-readably rather than
+skipping Vision §5.3's conjuncts silently.
+
+**Call-signature agreement was checked statically, name by name**, against
+`diagnostics.build_primary_table`, `build_breakdown_artifact`,
+`build_member_metrics_breakdown`, `build_quality_stratum`, `build_dec_regime_breakdown`,
+`build_claims_checklist`, `practical_relevance_statement`,
+`bootstrap.read_bootstrap_declaration`, `vector_block_bootstrap`, `write_bootstrap_result`,
+`regimes.read_regime_config` and `report_guards.ConclusionSurfaceRegistry`. Every keyword
+matches and every imported name resolves. **This is static agreement, not execution** —
+nothing was run.
+
+### Recommendation 19 — `build_metrics_artifact` emits no `units`
+
+Board's preferred: **(1)** with the value sourced from the mask's `target_definition_id`
+lineage, **plus (2)'s message split**, plus a producer/consumer contract test. All three.
+
+`metrics.resolve_target_units` reads `units` from the **released target's stamped release
+manifest** (TE §13.3), after checking the manifest's `target_definition_id` against the
+registered mask's — a units token borrowed from another lineage is a wrong number, not a
+discrepancy, and it raises `FairnessError`. With no manifest supplied it returns **`None`**,
+never `"TECU"`: hardcoding the token would discharge **BLK-08's genuine open bound by
+assertion**, which is exactly what the board warned an implementer might do.
+
+`report_guards.require_units` now has **two distinguishable refusals**. Limb 1, "declares
+no units", names the missing **producer input** and the path to go fix. Limb 2, "the
+declared units are …, not 'TECU'", names **BLK-08**. Collapsing them was what sent a reader
+to a governance question when the cause was an unwired argument.
+
+`tests/test_common_masks.py` § 7b closes the seam the board identified — that every test
+above it built the artifact and stopped, and every test in
+`tests/test_regimes_and_reporting.py` hand-built a mapping and started, so nothing ever
+passed the **real** producer's output into the **real** consumers. Four functions do that
+now, and the fourth also covers Recommendation 20's consumer half by pushing the budget
+shape `src/data/prepared.build_uncertainty_budget` actually returns through
+`build_primary_table` and asserting all three missing field names appear in **one** refusal.
+
+### Owed, and not done here — closure evidence outstanding
+
+1. **`configs/experiment.yaml` has no `reporting.top1pct_sensitivity` block.** Rec 21's new
+   reader `diagnostics.read_top1pct_declaration` requires `removed_fraction` and `scope`,
+   and `_report_set` calls it unconditionally, so **`scripts/07` cannot complete a run until
+   that block is declared**. `configs/` was outside this worker's write scope and no value
+   was invented (TE §18.2, §18.3). The block is owed, with `scope` carrying the **supervisor
+   ruling of dispositions §5 item 14**.
+2. **Rec 20's producer half** — amending `src/data/prepared.build_uncertainty_budget` to the
+   consumer's field shape — is in `src/data/`, another worker's scope. Until it lands,
+   `_assert_budget` refuses against the only budget the pipeline produces. The consumer half
+   and its contract test are complete here.
+3. **Rec 18's remaining closure evidence** — extending `tests/test_clean_run.py` to assert a
+   completed run emits a serialized `BootstrapResult` and a `primary_table`, and updating
+   the two `fixture_manifest.yaml` required-output lists — is in the custody and fixtures
+   worker's scope and is **not** done.
+4. **Execution.** Nothing ran. WS-16, WS-17, TA-11, TA-13, TA-14 and TA-18 stay `Pending`;
+   no acceptance row is claimed discharged; G-05 and G-06 remain `Blocked`.
+5. **The commit**, citing the D-numbers, remains the student's act.

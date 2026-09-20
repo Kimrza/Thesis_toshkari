@@ -684,6 +684,18 @@ def _provider_record(**overrides: object) -> dict[str, object]:
     return record
 
 
+#: A SYNTHETIC identity stamp for the manifest writers (R-70/TEC-05, board finding 24).
+#: The three values are deliberately made-up sentinels, never the project's real
+#: `phase_id`/`source_id`/`target_definition_id`: those are governed values awaiting the
+#: `target:` block's freeze (TE 18.2), and a test that hardcoded them would become a
+#: second transcription competing with the config.
+_STAMPS: dict[str, str] = {
+    "phase_id": "SYN-PHASE",
+    "source_id": "SYN-SOURCE",
+    "target_definition_id": "SYN-TARGET-DEF",
+}
+
+
 def _driver_entry(**overrides: object) -> dict[str, object]:
     entry: dict[str, object] = {
         "series": "kyoto_dst",
@@ -713,6 +725,7 @@ def test_request_manifest_happy_path_carries_policy_and_fields(tmp_path: Path) -
         provenance_class="full",
         producing_interpreter="Python 3.11.9 (smoke environment)",
         missing_months=["2022-04"],
+        stamps=_STAMPS,
     )
     import json
 
@@ -742,6 +755,7 @@ def test_absent_madrigalweb_version_fails_exactly_as_unknown_fails(tmp_path: Pat
             provider_files=[],
             provenance_class="derived_only",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     assert not target.exists()
 
@@ -758,6 +772,7 @@ def test_driver_inventory_with_fewer_than_nine_fields_fails(tmp_path: Path) -> N
             driver_inventory=[entry],
             provenance_class="derived_only",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     message = str(excinfo.value)
     assert "licence_access_notes" in message and "consuming_configuration" in message
@@ -776,6 +791,7 @@ def test_mixed_release_grade_within_one_series_fails(tmp_path: Path) -> None:
             ],
             provenance_class="derived_only",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     assert "mixed release grades" in str(excinfo.value)
 
@@ -789,6 +805,7 @@ def test_empty_release_status_fails() -> None:
             driver_inventory=[_driver_entry(release_status="")],
             provenance_class="derived_only",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     assert "release" in str(excinfo.value).lower()
 
@@ -830,6 +847,7 @@ def test_sha256_manifest_arithmetic_holds_and_refuses_a_hashless_provider_row(
         derived_artifacts={"coverage_summary.csv": SHA64},
         provenance_class="full",
         producing_interpreter="Python 3.11.9",
+        stamps=_STAMPS,
     )
     manifest = json.loads(path.read_text(encoding="utf-8"))
     meta = json.loads((path.parent / SHA256_MANIFEST_META_NAME).read_text(encoding="utf-8"))
@@ -849,6 +867,7 @@ def test_sha256_manifest_arithmetic_holds_and_refuses_a_hashless_provider_row(
             derived_artifacts={},
             provenance_class="full",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     with pytest.raises(AcquisitionError, match="AMBIGUOUS"):
         write_sha256_manifest(
@@ -857,6 +876,7 @@ def test_sha256_manifest_arithmetic_holds_and_refuses_a_hashless_provider_row(
             derived_artifacts={"aruc011a.22g.002": SHA64},
             provenance_class="full",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     with pytest.raises(AcquisitionError, match="64 lower-case hex"):
         write_sha256_manifest(
@@ -865,6 +885,7 @@ def test_sha256_manifest_arithmetic_holds_and_refuses_a_hashless_provider_row(
             derived_artifacts={"x.csv": "not-a-digest"},
             provenance_class="full",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     assert not (tmp_path / "dup.json").exists() and not (tmp_path / "bad.json").exists()
     incomplete = _provider_record(status="incomplete")
@@ -876,6 +897,7 @@ def test_sha256_manifest_arithmetic_holds_and_refuses_a_hashless_provider_row(
             derived_artifacts={},
             provenance_class="full",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     assert "omit a provider file" in str(excinfo.value)
 
@@ -890,6 +912,7 @@ def test_full_class_with_zero_provider_hashes_is_refused_and_derived_only_is_hon
             derived_artifacts={"a.csv": SHA64},
             provenance_class="full",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     # The twelve pre-TC-06 months' honest state: derived artifacts only, marked so.
     path = write_sha256_manifest(
@@ -898,6 +921,7 @@ def test_full_class_with_zero_provider_hashes_is_refused_and_derived_only_is_hon
         derived_artifacts={"a.csv": SHA64},
         provenance_class="derived_only",
         producing_interpreter="Python 3.14.0 (out-of-envelope, recorded not hidden)",
+        stamps=_STAMPS,
     )
     assert path.is_file()
 
@@ -910,6 +934,7 @@ def test_unknown_provenance_class_is_refused(tmp_path: Path) -> None:
             derived_artifacts={},
             provenance_class="mostly_full",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
 
 
@@ -924,6 +949,7 @@ def test_manifest_writer_refuses_a_credential_and_writes_nothing(tmp_path: Path)
             provider_files=[],
             provenance_class="derived_only",
             producing_interpreter="Python 3.11.9",
+            stamps=_STAMPS,
         )
     assert not target.exists()
 
@@ -979,6 +1005,210 @@ def test_an_undatable_record_fails_closed_rather_than_being_kept() -> None:
     assert "fail closed" in str(excinfo.value)
     with pytest.raises(AcquisitionError):
         partition_by_locked_month([{"no_timestamp_at_all": True}])
+
+
+# =======================================================================================
+# R-46 (board finding 46): record-date attribution is UTC, never the local date
+# =======================================================================================
+
+
+def test_offset_bearing_boundary_timestamp_is_never_attributed_to_its_local_date() -> None:
+    """The defect, stated as a test: `2022-11-30T23:30:00-05:00` IS `2022-12-01T04:30:00Z`.
+
+    The former `raw[:10]` slice read the LOCAL date off that string and filed the record
+    under 2022-11-30 — a December observation attributed to November, which walks straight
+    past `assert_no_locked_month_records` and the BLK-07 bar. Every record observed so far
+    carries `+00:00`, so the defect was latent; this control is what keeps it latent while
+    the DATA-07 re-acquisition is written against this function.
+
+    Both halves are asserted, because either alone is satisfiable by the wrong code:
+
+    * the offset-bearing form REFUSES rather than silently choosing a date, and the raise
+      names the offset — a fail-closed refusal, matching this module's posture everywhere
+      else, rather than a silent conversion no reader would see;
+    * the SAME instant written as explicit UTC is attributed to 2022-12-01 and is CAUGHT
+      as a locked-month record. Without this half, a function that simply rejected
+      everything would pass.
+    """
+    import datetime as dt
+
+    from src.data.acquisition import parse_record_date_utc
+
+    boundary_local = "2022-11-30T23:30:00-05:00"
+    with pytest.raises(ValueError, match="non-zero UTC offset"):
+        parse_record_date_utc(boundary_local)
+    # and it must NOT have been quietly attributed to November through a public entry point
+    with pytest.raises(AcquisitionError) as excinfo:
+        partition_by_locked_month([{"timestamp": boundary_local}])
+    assert "offset" in str(excinfo.value)
+
+    # The same instant, written the way the real data writes it: December, and caught.
+    boundary_utc = "2022-12-01T04:30:00+00:00"
+    assert parse_record_date_utc(boundary_utc) == dt.date(2022, 12, 1)
+    with pytest.raises(AcquisitionError, match="BLK-07"):
+        assert_no_locked_month_records([{"timestamp": boundary_utc}])
+
+    # A naive timestamp is refused too: with no offset it cannot be attributed at all, and
+    # ASSUMING UTC is the guess this function exists to refuse.
+    with pytest.raises(ValueError, match="no UTC offset"):
+        parse_record_date_utc("2022-11-30T23:30:00")
+
+    # A bare calendar date stays accepted — it carries no offset to misread, and it is the
+    # shape the month files' `date` column uses. Narrowing this would break every real
+    # caller while fixing nothing.
+    assert parse_record_date_utc("2022-11-30") == dt.date(2022, 11, 30)
+
+
+# =======================================================================================
+# R-70 / TEC-05 (board finding 24): the provenance head of the chain carries its stamps
+# =======================================================================================
+
+
+@pytest.mark.parametrize("absent", ["phase_id", "source_id", "target_definition_id"])
+def test_request_manifest_refuses_an_empty_identity_stamp(tmp_path: Path, absent: str) -> None:
+    """One control per stamp, so the check cannot pass on a subset.
+
+    Before 2026-09-20 `src/data/acquisition.py` contained ZERO occurrences of
+    `phase_id|source_id|target_definition_id`: neither `request_manifest.json` nor
+    `sha256_manifest.json` nor `fixture_read_manifest.json` carried any identity, while
+    stage 02 onward stamped thoroughly. Nothing is written on refusal.
+    """
+    target = tmp_path / f"request_manifest_{absent}.json"
+    stamps = dict(_STAMPS)
+    stamps[absent] = ""
+    with pytest.raises(AcquisitionError) as excinfo:
+        write_request_manifest(
+            target,
+            identity=_identity(),
+            provider_files=[],
+            provenance_class="derived_only",
+            producing_interpreter="Python 3.11.9",
+            stamps=stamps,
+        )
+    assert absent in str(excinfo.value)
+    assert not target.exists(), "an unstamped manifest must not reach disk"
+
+    # An entirely absent key fails exactly as an empty one does — one raise site.
+    del stamps[absent]
+    with pytest.raises(AcquisitionError) as absent_info:
+        write_request_manifest(
+            target,
+            identity=_identity(),
+            provider_files=[],
+            provenance_class="derived_only",
+            producing_interpreter="Python 3.11.9",
+            stamps=stamps,
+        )
+    assert absent in str(absent_info.value)
+
+
+@pytest.mark.parametrize("absent", ["phase_id", "source_id", "target_definition_id"])
+def test_sha256_manifest_refuses_an_empty_identity_stamp(tmp_path: Path, absent: str) -> None:
+    target = tmp_path / f"sha256_manifest_{absent}.json"
+    stamps = dict(_STAMPS)
+    stamps[absent] = ""
+    with pytest.raises(AcquisitionError) as excinfo:
+        write_sha256_manifest(
+            target,
+            provider_files=[],
+            derived_artifacts={"a.csv": SHA64},
+            provenance_class="derived_only",
+            producing_interpreter="Python 3.11.9",
+            stamps=stamps,
+        )
+    assert absent in str(excinfo.value)
+    assert not target.exists()
+
+
+def test_stamps_ride_the_sha256_metadata_sidecar_and_never_the_hash_mapping(
+    tmp_path: Path,
+) -> None:
+    """G-1's constraint and TEC-05's obligation held together.
+
+    The hash manifest IS the canonical TE 13.3 flat `{relative path: sha256}` document the
+    governed reader parses — an earlier nested payload failed that reader on its own
+    metadata keys (2026-09-19). So the stamps go on the SIDECAR. This control pins both
+    facts at once: a future edit that stamps the mapping breaks the first assertion, and
+    one that drops the stamp entirely breaks the second.
+    """
+    import json
+
+    path = write_sha256_manifest(
+        tmp_path / "sha256_manifest.json",
+        provider_files=[],
+        derived_artifacts={"a.csv": SHA64},
+        provenance_class="derived_only",
+        producing_interpreter="Python 3.11.9",
+        stamps=_STAMPS,
+    )
+    mapping = json.loads(path.read_text(encoding="utf-8"))
+    assert set(mapping) == {"a.csv"}, (
+        "the hash manifest must stay a flat {path: sha256} mapping; a stamp key in it "
+        "would fail the governed reader exactly as the 2026-09-19 nested payload did"
+    )
+    meta = json.loads((path.parent / SHA256_MANIFEST_META_NAME).read_text(encoding="utf-8"))
+    for field, value in _STAMPS.items():
+        assert meta[field] == value, f"TE 13 stamp {field!r} absent from the metadata sidecar"
+
+
+def test_request_manifest_carries_its_stamps_to_disk(tmp_path: Path) -> None:
+    import json
+
+    path = write_request_manifest(
+        tmp_path / "request_manifest.json",
+        identity=_identity(),
+        provider_files=[],
+        provenance_class="derived_only",
+        producing_interpreter="Python 3.11.9",
+        stamps=_STAMPS,
+    )
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    for field, value in _STAMPS.items():
+        assert manifest[field] == value
+
+
+# =======================================================================================
+# W-7 (board finding 26): the gap-accounting entries are actually PASSED, not defaulted
+# =======================================================================================
+
+
+def test_stage_00_passes_gap_accounting_so_the_conservation_loop_is_not_empty() -> None:
+    """INVOCATION control, not a correctness control.
+
+    `gap_accounting_entry` and `store_gaps_as_nan` were correct and unit-tested (above)
+    and had ZERO production callers, and `write_request_manifest(gap_accounting=())`
+    defaults empty — so the conservation loop iterated NOTHING on every run and the
+    D-5/D-10.2 rule was carried by nobody. Correctness alone cannot detect that; only an
+    invocation control can, which is the shape nfr-design c58 names (a guard module alone
+    fails open on a forgotten call).
+
+    This asserts the wiring at both stage-00 paths through the script's real source, the
+    same technique the fixture-window control at the foot of this module uses.
+    """
+    import importlib.util
+    import inspect
+
+    script = REPO_ROOT / "scripts" / "00_acquire_prepared_vtec.py"
+    spec = importlib.util.spec_from_file_location("stage_00_gap_accounting", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    for func, label in ((module._run, "_run"), (module._run_fixture_scoped, "_run_fixture_scoped")):
+        source = inspect.getsource(func)
+        assert "_gap_accounting_for(" in source, (
+            f"scripts/00::{label} composes no gap-accounting entry, so the NaN-count "
+            f"conservation invariant is unenforced on that path (board finding 26)"
+        )
+    run_source = inspect.getsource(module._run)
+    assert "gap_accounting=gap_accounting" in run_source, (
+        "scripts/00::_run must PASS its gap accounting to write_request_manifest; "
+        "composing entries and not passing them leaves the loop iterating zero entries"
+    )
+    helper = inspect.getsource(module._gap_accounting_for)
+    assert "gap_accounting_entry(" in helper and "store_gaps_as_nan(" in helper, (
+        "the helper must route through acquisition's own entry builder and NaN "
+        "normalisation rather than reimplementing either (one guard home, c58)"
+    )
 
 
 # =======================================================================================
@@ -1246,14 +1476,21 @@ def test_optionb_00_record_window_bound_behavioural_and_wired(tmp_path) -> None:
     from src.data.acquisition import assert_records_within_window
 
     window = (dt.date(2022, 11, 1), dt.date(2022, 11, 7))
-    inside = [{"timestamp": "2022-11-03T10:00:00"}, {"timestamp": "2022-11-07T23:59:59"}]
+    # Explicit `+00:00`, not naive. Since R-46 (2026-09-20) `parse_record_date_utc`
+    # REFUSES a naive timestamp rather than assuming UTC, so a naive literal here would
+    # make these assertions pass for the wrong reason — the out-of-window case below would
+    # raise on the parse instead of on the window, while still matching its date fragment.
+    inside = [
+        {"timestamp": "2022-11-03T10:00:00+00:00"},
+        {"timestamp": "2022-11-07T23:59:59+00:00"},
+    ]
     assert (
         assert_records_within_window(
             inside, start=window[0], end=window[1], timestamp_key="timestamp"
         )
         == 2
     )
-    outside = [*inside, {"timestamp": "2022-03-15T00:00:00"}]
+    outside = [*inside, {"timestamp": "2022-03-15T00:00:00+00:00"}]
     with pytest.raises(AcquisitionError, match="2022-03-15"):
         assert_records_within_window(
             outside, start=window[0], end=window[1], timestamp_key="timestamp"

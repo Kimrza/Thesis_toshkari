@@ -34,6 +34,15 @@ Purpose
   `FairnessError`, control 26; ordering by CONTAINMENT — the comparator records the audit
   result's ID and content hash found at generation, control 32), and the Phase-2
   not-independent-blind-test statement as an artifact field (VAL-05's mandated disclosure).
+* ``resolve_target_units`` / the emitted ``units`` field (Recommendation 19, 2026-09-20) —
+  the producer/consumer contract `report_guards.require_units` was already asserting against
+  an artifact that never carried the key. The value is READ from the released Phase 1
+  target's stamped release manifest (`src/data/release.py`'s TE §13.3 `units` field) after
+  its `target_definition_id` is checked against the registered mask's, and is **never
+  hardcoded to TECU here**: BLK-08's bound is a genuine open item, and asserting `"TECU"`
+  from source would discharge it by assertion rather than by evidence. With no lineage
+  object supplied the field is emitted as `None`, and the rendering boundary refuses with
+  its distinguishable "declares no units" message (`report_guards.require_units` limb 1).
 
 IRI/GIM boundary (R-112)
 ------------------------
@@ -107,11 +116,13 @@ __all__ = [
     "PHASE2_NOT_INDEPENDENT_STATEMENT",
     "DRIVER_AVAILABILITY_LIMITATION_STATEMENT",
     "EXTERNAL_COMPARATOR_IDS",
+    "TARGET_VALUE_FIELD",
     "LockedContext",
     "EstimandResult",
     "paired_difference_series",
     "equal_station_mean",
     "paired_loss_differential",
+    "resolve_target_units",
     "build_metrics_artifact",
     "assert_metrics_artifact",
     "write_metrics_artifact",
@@ -159,6 +170,11 @@ DRIVER_AVAILABILITY_LIMITATION_STATEMENT: str = (
 #: naming one of them is an "IRI/GIM comparison" for R-110 limb 3's disclosures.
 EXTERNAL_COMPARATOR_IDS: tuple[str, ...] = ("B-01", "C-01")
 _GIM_COMPARATOR_ID: str = "C-01"
+
+#: The target frame's value column (D-17's, the same identity `masks.py` reads it under).
+#: Used ONLY to select the right entry when a release manifest states `units` per column
+#: rather than as one string — a field identity, never a value.
+TARGET_VALUE_FIELD: str = "vtec_tecu"
 
 
 @dataclass(frozen=True)
@@ -498,6 +514,59 @@ def _gim_disclosure_block(
     return rendered
 
 
+def resolve_target_units(
+    target_release_manifest: Mapping[str, Any] | None,
+    *,
+    mask: Any,
+    resource: str,
+) -> str | None:
+    """The reporting unit, READ from a stamped upstream object — never asserted here.
+
+    The source is the released Phase 1 target's release manifest: TE §13.3 makes `units`
+    a required manifest field (`src/data/release.REQUIRED_MANIFEST_FIELDS`), and the
+    manifest also carries the target-definition lineage the mask records. The lineage is
+    checked FIRST: a units token read off a manifest for a different
+    `target_definition_id` is exactly the silently-wrong-number failure the stamp rule
+    exists to prevent (Vision §2.2/§6.6; TE §13).
+
+    Returns ``None`` — never a default token — when no manifest is supplied or the
+    manifest states no units for the target value column. `None` is the honest state
+    while BLK-08 stands: the rendering boundary then refuses with
+    ``report_guards.require_units``' distinguishable "declares no units" message, rather
+    than a hardcoded ``"TECU"`` discharging BLK-08's bound by assertion.
+
+    Raises
+    ------
+    FairnessError
+        the manifest's `target_definition_id` disagrees with the registered mask's.
+    """
+    if target_release_manifest is None:
+        return None
+    if not isinstance(target_release_manifest, Mapping):
+        raise FairnessError(
+            resource,
+            "the supplied target release manifest is not a mapping; the reporting unit is "
+            "read from a stamped upstream manifest, never inferred (TE §13.3)",
+        )
+    declared_lineage = str(target_release_manifest.get("target_definition_id", "") or "")
+    recorded_lineage = str(getattr(mask, "target_definition_id", "") or "")
+    if declared_lineage and recorded_lineage and declared_lineage != recorded_lineage:
+        raise FairnessError(
+            resource,
+            f"the target release manifest declares target_definition_id "
+            f"{declared_lineage!r} while the registered mask records {recorded_lineage!r}; "
+            f"the reporting unit is read from the mask's OWN target lineage and a units "
+            f"token taken from another lineage is a wrong number, not a discrepancy "
+            f"(Vision §2.2/§6.6; TE §13; Recommendation 19)",
+        )
+    units = target_release_manifest.get("units")
+    if isinstance(units, Mapping):
+        units = units.get(TARGET_VALUE_FIELD)
+    if units is None or not str(units).strip():
+        return None
+    return str(units)
+
+
 def build_metrics_artifact(
     *,
     set_id: str,
@@ -507,6 +576,7 @@ def build_metrics_artifact(
     estimands: Sequence[EstimandResult],
     gim_overlap_audit: Mapping[str, Any] | None = None,
     gim_comparator_provenance: Mapping[str, Any] | None = None,
+    target_release_manifest: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """W-6: the results artifact `07` emits — refused unless complete and disclosing.
 
@@ -519,11 +589,19 @@ def build_metrics_artifact(
     (controls 25, 26, 32): the TEC-06 sentence on every IRI/GIM comparison row, the
     fail-closed GIM overlap disclosure, the Phase-2 statement as a field.
 
+    `units` (Recommendation 19) is emitted from ``resolve_target_units`` — the released
+    target's stamped release manifest, lineage-checked against the mask — and is `None`
+    when no manifest is supplied. The downstream consumers (`build_primary_table`,
+    `build_breakdown_artifact`) then refuse at `require_units` limb 1 naming the absent
+    producer input, rather than this path asserting `"TECU"` and discharging BLK-08's
+    open bound by assertion.
+
     Raises
     ------
     FairnessError
         incomplete emission; a foreign or unregistered mask; a GIM comparison without its
-        registered audit result or containment evidence.
+        registered audit result or containment evidence; a target release manifest whose
+        `target_definition_id` disagrees with the registered mask's.
     """
     declared = declared_sets.get(set_id)
     if not isinstance(declared, Mapping):
@@ -610,6 +688,13 @@ def build_metrics_artifact(
         "row_counts": dict(mask.row_counts),
         "exclusion_counts": dict(mask.exclusion_counts),
         "scored_window_statement": mask.scored_window_statement,
+        # Read from the released target's stamped lineage, never asserted (Rec 19).
+        # `None` while no manifest is supplied — the rendering boundary refuses.
+        "units": resolve_target_units(
+            target_release_manifest,
+            mask=mask,
+            resource=f"metrics artifact for set {set_id}",
+        ),
         "comparisons": comparisons,
         "phase2_not_independent_statement": PHASE2_NOT_INDEPENDENT_STATEMENT,
         "emitted_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),

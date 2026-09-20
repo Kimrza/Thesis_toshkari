@@ -16,6 +16,60 @@ name: verify
 #
 # Authority: TE §9.1 (two governed platforms), §13.2 (ordered clean-run contract),
 # §13.7 (exact equality for hashes), §12 (`tests/` tree).
+#
+# ══════════════════════════════════════════════════════════════════════════════════════
+# THE BOUND (added 2026-09-20; GOV-2026-09-20-CG-01 Recommendation 47, owner authorised
+# the board's preferred option 1). READ THIS BEFORE CITING ANY OUTPUT OF THIS WORKFLOW.
+#
+# TC-03c and TE §9.1 authorise EXACTLY TWO execution platforms: Kaggle (primary compute,
+# Phase 1 acquisition/audit host) and local (development, small tests, fixture runs,
+# review). `team.md` § Testing Posture records "No CI service is used." A GitHub-hosted
+# runner is neither, and this workflow executes the suite on two of them.
+#
+# It is retained, not deleted, on the reading that TE §9.1 bounds GOVERNED COMPUTE rather
+# than all execution — and it is retained ONLY inside this bound:
+#
+#   1. GitHub Actions is a NON-SCIENTIFIC verification surface. Nothing it does is
+#      evidence for any TEC gate, any WS row, any TA row, or any claim in the thesis.
+#   2. No run of this workflow may PRODUCE, HASH or ATTEST a governed artifact. It writes
+#      nothing into `artifacts/` or `evidence/`, and the structural guard in the final
+#      step FAILS the job if it did. That guard is what makes limb 2 checkable rather
+#      than merely promised.
+#   3. A green run is NOT the §18.3 preflight gate, NOT TC-03g's in-session gate, and NOT
+#      G-07 evidence. TC-03g requires the critical set and both fixtures to run INSIDE
+#      the Kaggle session, because a Kaggle session carries no git working tree and a run
+#      anywhere else proves nothing about the environment a governed run executes in.
+#   4. `team.md`'s "No CI service is used." is now inaccurate and is owed a correction at
+#      the next practices-affirmation gate. That is a memory-layer write and is NOT made
+#      here: the §13 learnings ritual is its only sanctioned path.
+#
+# OWED, and NOT discharged by this annotation: the change record recording GitHub Actions
+# as an authorised non-scientific surface. Owner is Student + Supervisor, due G-07
+# (Recommendation 47's own closure evidence names both the change record AND this
+# annotation; only the second exists).
+#
+# ── ESCALATION, beyond what Recommendation 47 examined ────────────────────────────────
+# `git ls-files evidence/locked_test_restricted/` returns **29 tracked files** (derived
+# 2026-09-20, printed before assertion), and the root appears nowhere in `.gitignore`.
+# The locked December 2022 test data is therefore committed, and the remote is
+# `https://github.com/Kimrza/Thesis_toshkari.git`. Two consequences the two-platform
+# finding did not reach:
+#
+#   (a) Every `actions/checkout` below materialises the locked month onto third-party
+#       infrastructure, and the three restricted-reader modules then READ it there.
+#       Recommendation 30 held that a December read triggered by `git commit` is not a
+#       governed access because no per-occasion authorization exists; a December read
+#       triggered by a `push` webhook on a runner nobody authorised is the same defect on
+#       a worse surface.
+#   (b) Those reads emit `AccessRecord` rows into an ephemeral runner filesystem that is
+#       destroyed with the job, so the access is unrecorded in any durable artifact.
+#
+# NO UNILATERAL CHANGE IS MADE FOR (a) OR (b). Deleting the workflow, un-tracking the
+# restricted root, or narrowing the suite each trade one governance property for another,
+# and all three are owner acts. This is recorded as an OPEN RULING owed alongside
+# Recommendation 47's change record, and as an input to the G-09 disposition that already
+# holds the related history-immutability question.
+# ══════════════════════════════════════════════════════════════════════════════════════
 
 on:
   push:
@@ -90,3 +144,34 @@ jobs:
           done < <(find evidence -name 'madrigal_coverage_raw_records.csv')
           echo "violations: $violations"
           test "$violations" -eq 0
+
+      - name: Structural guard — this surface produced no governed artifact
+        # Recommendation 47's bound, limb 2, made CHECKABLE rather than promised.
+        #
+        # A non-scientific verification surface that quietly wrote into `artifacts/` or
+        # `evidence/` would be producing governed evidence on an unauthorised platform --
+        # precisely the outcome the bound exists to prevent, and precisely the kind of
+        # thing nobody notices until a gate reviewer finds an artifact whose producing
+        # environment cannot be named.
+        #
+        # `git status --porcelain` over the two governed roots is the whole check: the
+        # suite is a pure check by contract (it "writes nothing, mutates nothing"), so any
+        # difference here is either a test that writes where it must not, or a run that
+        # produced evidence. Untracked files are included (`--porcelain` reports `??`),
+        # because a NEW artifact is the more likely form. It runs LAST so it observes the
+        # cumulative effect of every preceding step.
+        #
+        # FAILING THIS STEP IS NOT A FLAKE. Find the writer; do not relax the guard.
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed=$(git status --porcelain -- artifacts evidence)
+          if [ -n "$changed" ]; then
+            echo "BOUND VIOLATED: this workflow wrote into a governed root." >&2
+            echo "$changed" >&2
+            echo "GitHub Actions is a NON-SCIENTIFIC verification surface (Rec 47)." >&2
+            echo "It may not produce, hash or attest a governed artifact." >&2
+            exit 1
+          fi
+          echo "governed roots clean: no artifact produced, hashed or attested here"

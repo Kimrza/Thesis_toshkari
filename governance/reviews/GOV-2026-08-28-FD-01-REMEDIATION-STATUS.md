@@ -116,4 +116,41 @@ not by diff.
 - `team.md`'s four stale facts — the practices-affirmation gate is the only sanctioned route.
 - The three exempt test modules' disposition (synthetic fixture roots vs logged real-root
   reads) — today all three read December content with no access row.
+  **Partially discharged 2026-09-20.** `tests/test_acquisition_window.py` now routes through
+  `open_restricted`; the other two do not — `tests/test_phase_boundary.py::_csv_header` has
+  zero `open_restricted` references, and `tests/test_release_hashes.py::_sha256` (`:212`,
+  `:227`) opens restricted bytes via `path.open("rb")` with no `AccessRecord`, though the
+  manifest read beside it is guarded. Carried as `GOV-2026-09-20-CG-01` Recommendation 32.
 - `.dst_summary.json` relocation — owes a D-number and a change record.
+- **Recommendation 31 (finding `VAL-09`) — OPEN, owner.** Added 2026-09-20; the item was
+  absent from this document, which is the artifact a reader checks for status. Rec 31 covers
+  five December accesses with no contemporaneous record (access-log rows 3, 4, 5, 8 and 9) and
+  one **unresolved possible unauthorized access** that the owner expressly declined to rule on.
+  Its closure evidence is the disclosure present in the G-05 and G-06 evidence packages, and
+  `RES-04` closed on its registered sequence after `open_restricted` exists. Owner / due gate:
+  project owner — G-05 (disclosure), G-06 (`RES-04` closed).
+  **Status as re-derived 2026-09-20**: `grep -rn "unauthorized access|unauthorised access"`
+  over `governance/` and `evidence/DECISIONS.md` returns one match, the Rec 31 heading itself
+  — no D-number resolves it. `RES-04`'s registered sequence required a rerun executed *after*
+  the `open_restricted` chokepoint exists and *after* its access-log row is written, then the
+  actual rerun date recorded and linked back without rewriting the record. `open_restricted`
+  now exists (`src/data/locked_test.py:390`) and the reruns have occurred **5,964 times across
+  13 dates** — yet `evidence/experiment_registry.md` carries no `RES-04` closure entry, no
+  captured report reference and no actual rerun date; its access table still ends at row 12 /
+  2026-08-28. So the physical act `RES-04` demanded has been performed at scale without the
+  record `RES-04` exists to produce. Blocker on closure: `reconcile_access_records` expects
+  `known_orphans` as `run_id`s, but the Evidence gap identifies the five retrospective accesses
+  by **table row number**, and those runs predate any run_id convention — no mapping exists on
+  disk and the owner must mint it. See `GOV-2026-09-20-CG-01` Recommendation 31 and
+  Recommendation 1.
+- **Step 5 of the Resume sequence ("Re-run the full board") — DISCHARGED 2026-09-20**, by
+  owner ruling on `GOV-2026-09-20-CG-01` Recommendation 4, option 1: the 2026-09-20 full-board
+  pass on stage 3.5 `code-generation` discharges the owed 3.1 re-run, reviewing what was built
+  from the design rather than the superseded design itself. The standing 3.1 verdict of `FAIL`
+  is superseded by that pass's own verdict, which is also `FAIL` — on different grounds, listed
+  in `governance/reviews/GOV-2026-09-20-CG-01.md`. Separately and by the same ruling, the
+  `nfr-design` consolidated report is declared **permanently lost** and its Recommendations
+  10–13 **void** rather than pending, since `project.md` `delivery-planning:c12` forbids
+  reconstructing a lost governance report as circular self-evidence. Partial surviving
+  evidence of that stage's quality signal: 21 `SENSOR_FAILED` `required-sections` events at
+  `nfr-design` in the audit shard, dated 2026-09-04/05.

@@ -4,6 +4,15 @@
 **Plan**: `code-generation-plan.md` (6 steps; all 6 executed)
 **Receipted answers**: Q1 = A (percentile interval confirmed), Q2 = A (fixed non-overlapping 24-hour partition confirmed), Q3 = A (cross-station paired-error Pearson correlation, all three pairs, confirmed), Q4 = A (both `estimand` and `bootstrap` config blocks transcribed).
 
+> ⚠ **This record was reopened 2026-09-20** to carry the `GOV-2026-09-20-CG-01` remediation
+> of Recommendation **18** — `vector_block_bootstrap` had **zero production callers** and
+> now has one. `src/evaluation/bootstrap.py` itself is **byte-unchanged**; what changed is
+> that the module is finally reachable from a stage script. Counts in the `Files` table and
+> the `Test coverage summary` are **re-derived below in the body** and the superseded
+> figures named, per `project.md` (`code-generation:fr-2`). **No code was executed** and
+> **the tree is uncommitted at `HEAD ff5c683`.** The READY verdict of 2026-09-06 predates
+> this and is **not** revalidated. See § GOV-CG-01 remediation (2026-09-20).
+
 ## Sources
 
 - Approved plan and receipted Q&A: `construction/statistical-inference/code-generation/{code-generation-plan.md,code-generation-questions.md}` [Q1][Q2][Q3][Q4]
@@ -14,13 +23,21 @@
 
 ## Files created (3) / modified (2)
 
+> **Every `Lines` cell re-derived 2026-09-20** by `wc -l` in the working tree, printed
+> before assertion, with the `HEAD ff5c683` value beside it. Three were stale: `metrics.py`
+> (cell 731, HEAD 744, now 829), `tests/test_bootstrap.py` (cell 1121, actual 1123 — wrong
+> at the moment it was written and never corrected across four passes), and
+> `configs/experiment.yaml` (cell 275, HEAD 371, now 384). `src/evaluation/bootstrap.py` at
+> **1198** is the one cell that was, and remains, exact. **The tree is UNCOMMITTED:
+> `HEAD` = `ff5c683`, `git diff --cached` empty (0 staged paths).**
+
 | File | Lines | Content |
 |---|---|---|
 | `governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md` | 241 | The three owner confirmations (percentile — R-119; fixed non-overlapping 24-h partition — R-115/Rec 26; paired-error Pearson all pairs — R-121) with ONE proposed D-number text for `evidence/DECISIONS.md` (owner adopts or edits; register untouched by any agent), the Q4 transcription scope, honest limits |
-| `configs/experiment.yaml` (modified) | **275 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`); **212** (was 178) as this unit left it. The growth is not this unit's: later sibling and owner commits transcribed D-33…D-38 into the same file. Corrected in the body per `project.md` (`code-generation:fr-2`); a line count for a file many units write is a claim about repository state, not about this unit's diff, and must be re-derived at read time | `estimand` (orientation `benchmark_minus_model`, weighting `equal_station`, sign sentence byte-identical to `metrics.SIGN_CONVENTION_SENTENCE`; Vision §2.3 / TE §1.3) and `bootstrap` (24 / 10000 / 0.95 / 48 / `seeds.bootstrap` / `percentile` / `fixed_nonoverlapping` / `paired_error_pearson_all_pairs`; TE §13.6 / TC-19 / D-122 / D-28 / the Step 1 record) replace the two `TBD — freeze gate` sentinels; nothing else touched; parse-verified |
+| `configs/experiment.yaml` (modified) | **384** working tree 2026-09-20 (HEAD `ff5c683` = 371; the +13 is the features worker's Rec 17 `window_length_hours` sentinel, not this unit's). Superseded: **275 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`); **212** (was 178) as this unit left it. The growth is not this unit's: later sibling and owner commits transcribed D-33…D-38 into the same file. Corrected in the body per `project.md` (`code-generation:fr-2`); a line count for a file many units write is a claim about repository state, not about this unit's diff, and must be re-derived at read time | `estimand` (orientation `benchmark_minus_model`, weighting `equal_station`, sign sentence byte-identical to `metrics.SIGN_CONVENTION_SENTENCE`; Vision §2.3 / TE §1.3) and `bootstrap` (24 / 10000 / 0.95 / 48 / `seeds.bootstrap` / `percentile` / `fixed_nonoverlapping` / `paired_error_pearson_all_pairs`; TE §13.6 / TC-19 / D-122 / D-28 / the Step 1 record) replace the two `TBD — freeze gate` sentinels; nothing else touched; parse-verified |
 | `src/evaluation/bootstrap.py` | 1198 | `vector_block_bootstrap` — approved signature, `seed` required by signature (`TypeError` when absent; ADR-05 carve-out); six sibling guards called (one copy each); per-pair paired-difference array precomputed once via `metrics.paired_difference_series` (R-114 one-copy, in-function exact-equality raise); block grid derived from the partition window per the confirmed partition (boundary/indivisibility raises, no calendar constant in source); PCG64 + `SeedSequence.spawn(2)` (child 0 = 48-h sensitivity, child 1 = comparator; assignments recorded); percentile interval read from config (unrecognised/absent method refuses naming the field); widening comparator QUARANTINED (`WideningGuardEvidence`: widths/replicates/derived-seed/passed/mode/disclosure only — no interval fields; fixture-mode failure raises in the constructor so a serialized fixture failure is unrepresentable; real-data failure representable only WITH the complete disclosure carrying the Q3 correlations); SHA-256 replicate hash over raw little-endian float64 bytes in draw order, four canonical-form facts recorded beside it; replicate vector materialised in full; append-safe `.tmp`→fsync→`os.replace` writer refusing overwrite |
-| `src/evaluation/metrics.py` (modified) | 731 (was 665) | **R-114 one-copy extraction, flagged for `evaluation-and-comparison`'s re-check**: the inline step-1 arithmetic extracted into `paired_difference_series` + `equal_station_mean`; `paired_loss_differential` recomposed from them, behaviour-preserving (sibling's 60 smoke tests re-run green) |
-| `tests/test_bootstrap.py` | 1121 | 37 test functions (derived: `grep -c "def test_"`) — W-8's eight checks; same-seed exact-equality hash control and different-seed control; canonical-form-fact presence controls; stream isolation; block-grid boundary raises; missing-pair rule; unconfirmed-method refusal naming the config field; fixture-time widening raise on a planted-correlation synthetic + quarantine control (no interval field on the comparator, shape-asserted); real-data failure-disclosure control (absent disclosure fails); missing `seed` = `TypeError`; the five per-entry guard controls through `vector_block_bootstrap`; append-safety; numpy-absence refusal asserted by name; config values re-read, never literal; synthetic year 2001 only |
+| `src/evaluation/metrics.py` (modified) | **829** working tree 2026-09-20 (HEAD `ff5c683` = 744; cell read 731, and 665 before that — both superseded). The +85 is **not this unit's**: it is `evaluation-and-comparison`'s Recommendation 19 work (`resolve_target_units` and the emitted `units` field), disclosed in that unit's record and noted here because this unit co-owns the file | **R-114 one-copy extraction, flagged for `evaluation-and-comparison`'s re-check**: the inline step-1 arithmetic extracted into `paired_difference_series` + `equal_station_mean`; `paired_loss_differential` recomposed from them, behaviour-preserving (sibling's 60 smoke tests re-run green) |
+| `tests/test_bootstrap.py` | **1123** re-derived 2026-09-20 (unchanged from HEAD `ff5c683`; the cell read **1121**, wrong by 2 when written and carried unchecked through four passes) | 37 test functions, re-derived 2026-09-20 (`grep -c "^def test_"` → 37, unchanged) — **none of them executed on this clone at any point in the 2026-09-20 remediation** — W-8's eight checks; same-seed exact-equality hash control and different-seed control; canonical-form-fact presence controls; stream isolation; block-grid boundary raises; missing-pair rule; unconfirmed-method refusal naming the config field; fixture-time widening raise on a planted-correlation synthetic + quarantine control (no interval field on the comparator, shape-asserted); real-data failure-disclosure control (absent disclosure fails); missing `seed` = `TypeError`; the five per-entry guard controls through `vector_block_bootstrap`; append-safety; numpy-absence refusal asserted by name; config values re-read, never literal; synthetic year 2001 only |
 
 ## Key implementation decisions
 
@@ -32,7 +49,17 @@
 
 ## Test coverage summary
 
-37 test functions. Smoke on the scratchpad Python 3.11.16 + pytest shim (PyPI unreachable; numpy/pyyaml uninstallable): **31 passed, 6 skipped by name (numpy/yaml-dependent draws and real-config reads), 0 failed** — the numpy-absence REFUSAL path is asserted, not skipped. Regression: `tests/test_common_masks.py` re-run — **60 passed, 1 skipped, 0 failed** (the metrics extraction broke nothing). `compileall` clean; stdlib lint substitute clean; ruff owed. **Smoke evidence only, never governed**; full pytest + numpy run owed when PyPI is reachable.
+**37 test functions**, re-derived 2026-09-20 (`grep -c "^def test_" tests/test_bootstrap.py`
+→ 37; unchanged by this remediation, which added no test to this file). ⚠ **Nothing was
+executed on 2026-09-20.** No usable Python interpreter exists on this clone (`python.exe`
+is a zero-byte Windows Store alias stub) and PyPI is unreachable, so even the scratchpad
+route that produced the older smoke figures below is no longer available. **No bootstrap
+has ever executed on real data, and as of 2026-09-20 none has executed at all in this
+pass.** Every claim about behaviour added by the Recommendation 18 wiring is **STATIC**,
+read from source.
+
+The prior smoke record, describing the **pre-2026-09-20** state and retained unaltered
+rather than restated as current: 37 test functions. Smoke on the scratchpad Python 3.11.16 + pytest shim (PyPI unreachable; numpy/pyyaml uninstallable): **31 passed, 6 skipped by name (numpy/yaml-dependent draws and real-config reads), 0 failed** — the numpy-absence REFUSAL path is asserted, not skipped. Regression: `tests/test_common_masks.py` re-run — **60 passed, 1 skipped, 0 failed** (the metrics extraction broke nothing). `compileall` clean; stdlib lint substitute clean; ruff owed. **Smoke evidence only, never governed**; full pytest + numpy run owed when PyPI is reachable.
 
 ## Deviations from the plan
 
@@ -248,3 +275,90 @@ No Python interpreter was invoked by this review; all test-count and skip/pass f
 The single correction since Iteration 3 — the `configs/experiment.yaml` file-table cell now stating both the current 275-line count and the historical 212-line count, with the growth explicitly attributed to later sibling/owner commits — is confirmed accurate against `wc -l` and `git log`. No code in this unit changed; every scientific-invariant claim (estimand sign/weighting, vector time-block bootstrap's cross-station sharing, seed discipline, config transcription, guard reuse via real entry points, no TBD fill, no December touch) re-verifies independently against current HEAD `1670ac8`. Two new Minor findings surface from this pass's own independent re-derivation: an incorrect commit-hash (`9d3e853`) in the Iteration-3 growth-attribution list, and a miscounted intermediate step (7 actual `importorskip` call sites, not 8) in the Iteration-1 verification text — neither changes any conclusion the artifact draws, both are historical-review prose rather than current-fact claims requiring a body edit. The one standing Major (R-114's unrecoverable pre-extraction baseline) and one standing Minor (duplicate guard) are unchanged for the fourth consecutive pass. Zero Critical, one Major, three Minor: within the READY threshold.
 
 **READY**
+
+## GOV-CG-01 remediation (2026-09-20) — Recommendation 18
+
+Owner dispositions: `governance/CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md` §2
+(Recommendations 13–60 authorised as *"the board's preferred option in each block"*).
+Finding and its printed derivation: `governance/reviews/GOV-2026-09-20-CG-01.md`
+§ Recommendation 18, raised independently by **two** seats (ML-5 and BENCH-4).
+
+**This section does not revalidate the 2026-09-06 READY verdict.** Nothing below is
+reviewed.
+
+### What the finding was, in this unit's terms
+
+The board's grep across `scripts/` for `vector_block_bootstrap` returned **zero call
+sites**. This unit's entire deliverable — the vector time-block bootstrap, the 95%
+percentile interval, the 10,000 replicates, the cross-station paired-error correlations,
+the 48-hour sensitivity, the SHA-256 replicate hash WS-17 reproduces — was reachable only
+from its own test module. A clean run under TE §13.2 completed and produced a point
+estimate with **no interval at all**. That is the state G-07's reproducibility evidence
+would have been prepared against.
+
+### What changed, and what did not
+
+**`src/evaluation/bootstrap.py` is byte-unchanged.** `git diff HEAD -- src/evaluation/bootstrap.py`
+is empty; `wc -l` = **1198**, exactly the figure this record already carried. No parameter,
+no guard, no seed handling, no quarantine shape, no canonical-form fact was touched. The
+remediation is entirely on the calling side, in a file this unit does not own.
+
+`scripts/07_evaluate_and_report.py` (owned by `evaluation-and-comparison`; +653/−4) now
+calls, inside `_report_set`, once per (model, benchmark) pair of each declared comparison
+set:
+
+- `read_bootstrap_declaration(snapshot.experiment)` — the frozen block this unit
+  transcribed under Q4, read rather than re-specified;
+- `vector_block_bootstrap(...)` with `block_hours`, `replicates`, `evaluation_mode`,
+  `month_start`, `month_end`, `embargo_hours`, `declared_sets`, `registry`, `experiment`
+  and `locked` all supplied from the run's own governed objects;
+- `write_bootstrap_result(result, report_dir / f"bootstrap_{model}_vs_{benchmark}.json")`.
+
+The seed is **not** a literal at the call site. A new helper `_bootstrap_seed` reads
+`seeds.yaml` by the key the bootstrap declaration itself names (`seed_key`, ADR-05's
+carve-out), and refuses on absent-or-`TBD — freeze gate` naming the field — so D-122's
+20221201 continues to live in configuration only.
+
+`evaluation_mode` is threaded honestly rather than defaulted: the fixture path passes
+`"fixture"`, the real path `"real_data"`, which is what the widening guard's differing
+failure semantics key on (R-120). A fixture-mode widening failure therefore still raises
+in the evidence constructor and remains unrepresentable, exactly as designed.
+
+**Signature agreement was verified statically**, keyword by keyword, against
+`vector_block_bootstrap`'s definition. It matches. **This is static agreement, not
+execution.**
+
+### Standing invariants re-affirmed, none relaxed
+
+- The vector construction is unchanged: 24-hour blocks carrying all three stations
+  together, 10,000 replicates, seed 20221201, 95% percentile interval, cross-station
+  paired-error Pearson on all three pairs. **No within-station or naive bootstrap was
+  introduced** at the call site or anywhere else — the rejected Q-27 variant stays
+  rejected.
+- R-114's one-copy rule holds: the replicate statistic still flows through
+  `metrics.paired_difference_series` / `equal_station_mean`, and the in-function
+  exact-equality control is untouched. The +85 lines in `metrics.py` are
+  `evaluation-and-comparison`'s Recommendation 19 work (`resolve_target_units` and the
+  emitted `units` field) and touch none of the estimand arithmetic.
+- No new import edge. `bootstrap.py` still references no `src.features`, `src.models`,
+  `src.external` or `src.gnss`.
+- The DEC path stays unreachable without the four locked-path arguments; `locked` is
+  passed through, never synthesised. G-05 and G-06 remain `Blocked`.
+
+### Owed, and not done here
+
+1. **Rec 18's closure evidence is only partly satisfied.** The board asked additionally for
+   `tests/test_clean_run.py` to assert that a completed run emits a serialized
+   `BootstrapResult` and a `primary_table` artifact — so that a clean run producing no
+   interval **fails** rather than passes — and for the two `fixture_manifest.yaml`
+   required-output lists to name them. Both files are in the custody and fixtures worker's
+   scope and **neither was touched**. Until they are, the wiring is real but nothing
+   enforces that it ran.
+2. **`scripts/07` cannot complete a run today** for a reason unrelated to this unit:
+   `configs/experiment.yaml` carries no `reporting.top1pct_sensitivity` block, which
+   Recommendation 21's new reader requires unconditionally. Recorded here because it blocks
+   the very path that would first exercise `vector_block_bootstrap`.
+3. **Execution.** Nothing ran. No bootstrap has executed on real data, and none executed at
+   all in this pass. **WS-17, TA-13, TA-14 and TA-26 stay `Pending`** and no acceptance row
+   is claimed discharged.
+4. **The commit** remains the student's act; `HEAD` is `ff5c683` with nothing staged.

@@ -559,3 +559,60 @@ Critical, zero Major, two carried-forward Minors (both non-blocking, both correc
 this unit's to fix). This pass is terminal.
 
 **Verdict: READY**
+
+---
+
+## Post-receipt amendment — 2026-09-20 (`GOV-2026-09-20-CG-01`, consequential only)
+
+*Written into the body, not filed as a review addendum, per `project.md`
+(`code-generation:fr-2`). The stage receipt and the `READY` verdict above are **frozen and
+untouched**. **No module this unit owns was edited** — `src/data/prepared.py` and
+`scripts/02_standardize_prepared_target.py` both show a **zero diff against `ff5c683`**,
+measured with `git diff --numstat` at the moment this section was written. This section
+exists because two changes made elsewhere reach this unit, and because one of its test
+modules WAS edited.*
+
+⚠ **UNEXECUTED.** No test or script was run — no usable Python interpreter exists on this
+clone. Every statement below is **static**. `git log -1` = **`ff5c683`**; everything below
+is uncommitted working tree and no git state-changing command was run.
+
+### 1. `resolve_target_identity` gained three new callers outside this unit
+
+Board **Recommendation 24** (TEC-05 stamps absent from every acquisition-side manifest)
+made `phase_id`/`source_id`/`target_definition_id` required on five writers at stages 00
+and 01. Rather than add a second transcription, all of them resolve through **this unit's**
+`prepared.resolve_target_identity` — now called from
+`scripts/00_acquire_prepared_vtec.py::_resolve_stamps`,
+`scripts/01_inventory_and_registry.py::_resolve_stamps` and
+`scripts/audit_gfz_drivers.py::_resolve_stamps`. The function itself is **unchanged**; what
+changed is that it is now the single identity resolver for the whole provenance chain
+rather than for stage 02 alone.
+
+**Consequence to read carefully.** `resolve_target_identity` raises while
+`configs/data.yaml` carries no `target.identity` block — which it does not. That refusal
+was previously reachable only on this unit's own path. It is now also reachable on a
+non-fixture stage-00 acquisition run, on the stage-01 source-inventory path, and on the
+stage-01 **`--audit`** path, which is the required pre-G-05 December coverage and regime
+audit. The owner's `target:` transcription is now a precondition of all four, not one.
+This is the TE §18.3 stop-and-report behaving as designed; it is recorded here so a reader
+of this unit's record knows that its resolver's blast radius grew.
+
+### 2. `tests/test_prepared_target_schema.py` was edited — +11 / −3
+
+Board **Recommendation 46** made `acquisition.parse_record_date_utc` the one record-date
+derivation and, in doing so, made it **refuse a naive timestamp** rather than assume UTC.
+The fixture-window control in this unit's test module
+(`test_…_declared_window…`, ≈ line 765) fed three **naive** `interval_start_utc` literals
+to `assert_records_within_window`. Left alone, its in-window assertion would have raised on
+the **parse**, and its out-of-window half would have raised for the wrong reason while
+still matching its `2022-11-03` fragment — a control that fails, or passes, for a reason
+other than the one it names. The three literals now carry a trailing `Z`, which is the
+shape `prepared.hour_start_utc` actually emits (`"%Y-%m-%dT%H:00:00Z"`).
+
+**Production is unaffected.** Every real `interval_start_utc` is `Z`-suffixed by
+`hour_start_utc`, and the month files' `date` column is a bare `YYYY-MM-DD`, which
+`parse_record_date_utc` accepts explicitly because it carries no offset to misread.
+
+No December content was read, no restricted-root path touched, no scientific constant
+decided, and `configs/data.yaml` remains untouched. The gate verdict for
+`GOV-2026-09-20-CG-01` stands at **`FAIL`**; nothing here advances it.

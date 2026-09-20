@@ -11,6 +11,19 @@ vacuous pass), the G-P3C hash-diff controls, and the documentation test pinning 
 static scan's subordinate status. Nothing here discharges TA-27 — mechanism only,
 smoke evidence until the governed environment exists.
 
+**THIS MODULE IS THE HASH-DIFF LIMB'S HOME** (cross-reference added 2026-09-20,
+Recommendation 58). `team.md` § Deployment names `tests/test_phase_boundary.py` as that
+home. It is not: `diff_protected_hashes` and `assert_protected_hashes_unchanged` are
+exercised here, over a synthetic protected-entry list, by
+`test_identical_manifests_diff_empty_and_training_is_permitted`,
+`test_a_differing_hash_is_named_and_training_is_refused`,
+`test_a_missing_protected_entry_fails_before_any_diff`,
+`test_an_unknown_entry_is_an_integrity_failure` and
+`test_an_empty_or_duplicated_protected_entry_list_is_refused`. Both required tests exist;
+only the LOCATION differs from the affirmed practice's wording, and
+`tests/test_phase_boundary.py`'s own docstring now points here so a G-P3C reviewer
+arriving from either side finds the limb rather than recording a false gap.
+
 Inputs
 ------
 `tmp_path` and the repository's own `scripts/` tree (read-only, for the completeness

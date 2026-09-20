@@ -35,6 +35,39 @@ scikit-learn==1.4.2
 # not make the environment exist.
 tensorflow==2.21.0
 
+# --- figures (TE §8.1, Required) ------------------------------------------------------
+# matplotlib: the ONLY third-party package that EXECUTES in src/ and is absent from this
+# file. `src/evaluation/plots.py:253-254` imports it lazily, and its own refusal message at
+# :249 names "requirements.txt, the pin surface" — an assertion that was FALSE until this
+# block existed (Recommendation 38). `pyproject.toml:21` keeps `dependencies = []`
+# deliberately, so this file is the single pin surface, and a package outside it is outside
+# TE §13.1's environment lock.
+#
+# THE VERSION IS NOT WRITTEN HERE, AND THAT IS DELIBERATE.
+#   value: TBD — freeze gate
+#   owner: Student (CR-2026-09-20-GOV-CG-01-DISPOSITIONS §5 item 15, due before G-07)
+# That disposition makes fixing the version a Student act "if no repository evidence
+# determines it". It does not. Derived 2026-09-20, printed before assertion:
+#   * `grep -rnoE "matplotlib[=<>~ ]*[0-9]+\.[0-9]+(\.[0-9]+)?"` over the entire working
+#     tree excluding `.git/` → 0 matches. No version literal exists anywhere.
+#   * matplotlib appears in all three environment captures on disk
+#     (artifacts/exec_evidence/environment.json,
+#     evidence/audit_gfz_2026-09-18/environment_supplemental.json,
+#     evidence/b01_tolerance_basis_2026-09-20/environment.json) → 0 times. No `pip freeze`
+#     has ever recorded it.
+#   * TE §8.1's table lists matplotlib "Required" with NO version, unlike the TensorFlow
+#     row, which carried the 2.21.0 candidate that became D-36.
+# An implementer may not fill a `TBD — freeze gate` value by convenience (Vision §1.2;
+# TE §1.1), and guessing one here would place an INVENTED figure inside the very artifact
+# whose SHA-256 is the environment lock. The requirement is therefore carried as a comment,
+# the same mechanism the gitleaks pin below already uses: the value stays inside the lock
+# hash while `pip install -r requirements.txt` stays runnable.
+#
+# TO CLOSE: the Student records the version the figures were rendered against, replaces
+# this block with a bare `matplotlib==<version>` line, regenerates the environment-lock
+# hash, and confirms plots.py:249's message has become accurate.
+#   matplotlib==TBD — freeze gate   (← replace with the real version; do NOT guess)
+
 # --- test suite (a first-class deliverable, TC-06) ------------------------------------
 pytest==8.2.2
 

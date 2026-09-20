@@ -41,6 +41,17 @@ Two things it is careful about:
    coverage statistics but kept in the merged raw records, so the evidence stays complete.
 
 Usage:  python scripts/merge_coverage_year.py
+
+PRE-TC-06 TOOLING, PENDING A RETIREMENT RULING (board Recommendation 51, 2026-09-20).
+This script predates TC-06 and does not meet the §12/§13.2 CLI convention the nine
+phase-aware stage scripts hold: it carries no `argparse`, takes no `--config configs/`,
+and reads no governed configuration. Its successors exist —
+`scripts/00_acquire_prepared_vtec.py` and `scripts/01_inventory_and_registry.py`, the
+latter of which already carries this script's merge/coverage logic as its migrated W-9
+path. The approved disposition is RETIREMENT rather than migration, and the owner is
+drafting that ruling; this script is NOT migrated here, and nothing new should be built
+on it. Until the ruling lands it is left runnable, with the DATA-07 caveat added above so
+that anything it does emit in the meantime is correctly qualified.
 """
 
 import csv
@@ -74,6 +85,30 @@ OUT_DIR = os.path.join(RESTRICTED_DIR, 'audit_evidence_%d-FULL' % AUDIT_YEAR)
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
+
+# --- the DATA-07 provenance caveat (board Recommendation 23, 2026-09-20) --------------
+#
+# This script publishes FULL's coverage figures -- `ARUC,71905,365,100.0,...` -- and until
+# now published them with no caveat column, no provenance class and no DATA-07 reference.
+# A reader meets "100.0" with nothing beside it saying what that number rests on.
+#
+# What it rests on: twelve monthly runs whose provenance is unverifiable IN PRINCIPLE, not
+# merely unverified. No provider byte stream exists anywhere in the workspace, so the
+# provider-side term of the hash arithmetic is zero; and 2022-04, 2022-07 and 2022-12 hold
+# no raw_isprint_cache/ at all. Every artifact this script writes now carries
+# `provenance_class` and `data07_caveat` as machine-readable fields, so the caveat travels
+# with the figure instead of living in a document a reader may not have open.
+#
+# The text is IMPORTED, never re-typed: `src.data.inventory.DATA07_CAVEAT` is the one copy,
+# and `data07_caveat_for` is the one derivation from a month's provenance class. A second
+# hand-typed copy would drift, and the drift would be invisible precisely because both
+# copies would read plausibly.
+from src.data.inventory import DATA07_CAVEAT, data07_caveat_for  # noqa: E402
+
+# FULL is derived from the twelve pre-TC-06 months and hashes derived artifacts only, so
+# its class is `derived_only` by construction -- not a judgement this script makes, but the
+# recorded class of every month it merges (acquisition R-36; team.md § Walking Skeleton).
+PROVENANCE_CLASS = 'derived_only'
 
 ACCESS_LOG = os.path.join(EVIDENCE_DIR, 'merge_run_access_log.jsonl')
 
@@ -218,6 +253,16 @@ def main():
         sys.exit('No rows inside the audit year -- nothing to report.')
 
     # --- per-station whole-year summary ----------------------------------------------
+    # The caveat text is DERIVED from the provenance class through the one derivation
+    # (`data07_caveat_for`), so a future month that is genuinely `full` stops carrying it
+    # automatically rather than by someone remembering to delete a literal.
+    caveat_text = data07_caveat_for('%d-FULL' % AUDIT_YEAR, PROVENANCE_CLASS)
+    if caveat_text != DATA07_CAVEAT:  # pragma: no cover - guards the import, not the run
+        sys.exit(
+            'DATA-07 caveat text drifted from src.data.inventory.DATA07_CAVEAT; there is '
+            'one copy of this text by design and this script must not carry a second.'
+        )
+
     stations = sorted({r['station'] for r in in_year})
     summary = []
     monthly = {}
@@ -236,6 +281,10 @@ def main():
             'december_days_present': len(dec_dates),
             'december_coverage_pct': round(100.0 * len(dec_dates) / 31.0, 3),
             'months_run': ','.join(str(m) for m in months),
+            # Recommendation 23: the caveat travels WITH the figure, in the same row, as a
+            # machine-readable column -- not in a separate notice a reader may never open.
+            'provenance_class': PROVENANCE_CLASS,
+            'data07_caveat': caveat_text,
         })
         for r in srows:
             monthly.setdefault(int(r['month']), {}).setdefault(station, set()).add(r['date'])
@@ -255,9 +304,15 @@ def main():
     monthly_path = os.path.join(OUT_DIR, 'madrigal_coverage_monthly.csv')
     with open(monthly_path, 'w', newline='') as fh:
         w = csv.writer(fh)
-        w.writerow(['month'] + stations + ['days_in_month'])
+        # Recommendation 23: the monthly table is read row by row, so the caveat is a
+        # per-row column here too rather than a header comment CSV readers discard.
+        w.writerow(['month'] + stations + ['days_in_month', 'provenance_class', 'data07_caveat'])
         for m in sorted(monthly):
-            w.writerow([m] + [len(monthly[m].get(s, ())) for s in stations] + [DAYS_IN_MONTH[m]])
+            w.writerow(
+                [m]
+                + [len(monthly[m].get(s, ())) for s in stations]
+                + [DAYS_IN_MONTH[m], PROVENANCE_CLASS, caveat_text]
+            )
 
     raw_path = os.path.join(OUT_DIR, 'madrigal_coverage_raw_records.csv')
     # DETERMINISTIC ORDER. Rows are emitted sorted on the dedup key, so identical inputs
@@ -293,6 +348,11 @@ def main():
 
     manifest = {
         'artifact_kind': 'MERGED -- derived from per-month runs, NOT a fresh retrieval',
+        # Recommendation 23. `partial_run` below already records a MISSING month; these
+        # two record that even a COMPLETE merge rests on months whose provenance cannot be
+        # verified in principle. The two shortfalls are different and are recorded apart.
+        'provenance_class': PROVENANCE_CLASS,
+        'data07_caveat': caveat_text,
         'merged_at_utc': datetime.now(timezone.utc).isoformat(),
         'merge_tool': 'scripts/merge_coverage_year.py',
         'audit_year': AUDIT_YEAR,
@@ -325,6 +385,9 @@ def main():
         json.dump(hashes, fh, indent=2)
 
     print('\nWritten to', OUT_DIR)
+    print('provenance_class: %s -- every coverage figure above carries data07_caveat '
+          '(Recommendation 23); the console line is a convenience, the CSV/JSON columns '
+          'are the record.' % PROVENANCE_CLASS)
     for row in summary:
         print('  %-5s %3d/%d days  %7.3f%%  |  December %2d/31  |  %d records'
               % (row['station'], row['unique_days'], DAYS_IN_YEAR, row['coverage_pct_days'],

@@ -16,24 +16,24 @@
 
 | File | Lines | Content |
 |---|---|---|
-| `src/models/persistence.py` | 135 | M-01 persistence, M-02 24-h seasonal persistence (no fitted state) |
-| `src/models/climatology.py` | 235 | M-03 station×month×hour climatology, training-partitions-only fit, `FittedPartitionRecord`; validation/`DEC` row in fitting input raises `LeakageError` |
-| `src/models/ridge.py` | 145 | M-04 Ridge over the D-121 six-value `alpha` grid; lazy `scikit-learn` import, absence refuses naming the `requirements.txt` pin |
-| `src/models/random_forest.py` | 188 | M-05 RF (direct only) over the 18-combination grid; importance emitted only as diagnostic-marked `ImportanceFigure`, never on a selection path |
+| `src/models/persistence.py` | **170** (re-derived 2026-09-20 by `wc -l`; the cell read 135) | M-01 persistence, M-02 24-h seasonal persistence (no fitted state — the only two families not persisted, and therefore the only two reachable on the locked partition directly). Accepts `validation_bundle` for a uniform family signature and ignores it: neither family selects anything |
+| `src/models/climatology.py` | **606** (re-derived 2026-09-20 by `wc -l` on the working tree; the cell read 235) | M-03 **station×hour** climatology — the key was **station×month×hour** until the owner's Recommendation 2 ruling of 2026-09-20 (see § Remediation 2026-09-20 below); training-partitions-only fit, `FittedPartitionRecord`; validation/`DEC` row in fitting input raises `LeakageError`; key read from `configs/experiment.yaml` `models.climatology` (TC-03e) and a fit that cannot produce a key the scored bundle demands raises at FIT time; adds the persist/load surface (`fit_state`, `climatology_from_state`, `predict_rows_from_state`) the locked path predicts through |
+| `src/models/ridge.py` | **226** (re-derived 2026-09-20 by `wc -l`; the cell read 145) | M-04 Ridge over the D-121 six-value `alpha` grid; lazy `scikit-learn` import, absence refuses naming the `requirements.txt` pin. Split into `fit_state` / `predict_rows_from_state` under Recommendation 6 so the locked path can load a REFIT-persisted model and predict |
+| `src/models/random_forest.py` | **277** (re-derived 2026-09-20 by `wc -l`; the cell read 188) | M-05 RF (direct only) over the 18-combination grid; importance emitted only as diagnostic-marked `ImportanceFigure`, never on a selection path. Split into `fit_state` / `predict_rows_from_state` under Recommendation 6, same as Ridge |
 | `src/models/checkpoint.py` | 182 | Backend-neutral checkpoint SELECTION on lowest validation RMSE over a recorded epoch history; restore returns that checkpoint (last-epoch restore fails) |
-| `src/models/lstm.py` | **373** (re-derived 2026-09-13 by `wc -l` at HEAD `1670ac8`; the cell read 367) | M-06 against the tf.keras 2.21.0 candidate API; every `tensorflow` import inside `_require_frozen_pin()`-guarded code refusing while `requirements.txt` carries no frozen `tensorflow==` line (FU-1 = C); 16-combination grid and seven §8.6 settings asserted from config, never in source |
-| `src/models/train.py` | 1487 | `fit_predict` (closed M-01…M-06 set), `assert_stamp_match` (R-90, named function, three checks), `three_seed_mean` (all four limbs; `expected_seeds` from `ConfigSnapshot.seeds`, never inlined), `tune` (January–November only; `TuningRecord` seven fields + three attestation fields, attestation UNCONDITIONAL per SD-M-01 Q1 = C), R-96 grid content+hash freeze, `select` (R-101, refit changes no hyperparameter), five-ablation registry from `experiment.yaml` (R-97: `ABL-HIST48` refuses before primary freeze; `ABL-DIFF` refuses naming D-27), `HorizonSpec` config-only (R-99) |
-| `scripts/06_train_and_predict.py` | **999** (re-derived 2026-09-13 by `wc -l`; the cell read 741, and this unit has carried a Minor on this figure since iteration 2 — the summary said 741 → 794 while numstat gave 806, and later sibling/owner edits have since taken it to 999) | Position 06; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; `assert_stamp_match` before EVERY scoring path; three-seed run per fitting-capable partition; W-12/R-102a one-shot `DEC` write path in full (write once → sha256 → `PredictionHashReceipt` → `.tmp`→fsync→rename → registry column 18 → refuse-to-exit) and UNREACHABLE today behind `materialise_locked_partition`'s G-05 signature guard; honest `aborted` registry row on `IntegrityError`; `prior_period_exposure` never written |
-| `tests/test_models_smoke.py` | **1393** (re-derived 2026-09-13 by `wc -l`; the cell read 1221) | **56** test functions (re-derived 2026-09-13: `grep -c "^def test_"` = 56; the cell read 54, the same stale figure the § "Test coverage summary" correction above addresses) — closed-set refusal, residual/GRU/PyTorch absence scan, M-01…M-03 happy paths + training-only control, M-04/M-05 refusal-by-name + grid-content controls (6/18/16 re-read from config), four R-90 controls (control 3 by enumeration over R-80's six ids) + must-not-fire control, the full `three_seed_mean` negative-control set (incl. wrong-but-distinct triple built from config at test time, never literal), tuning refusals (December partition, criterion-hash mismatch, missing attestation), ablation registration + refusals, horizon config-only, RF importance marker, M-06 pin-guard refusal + seven-settings-from-config, `06` receipt controls through a synthetic non-`DEC` fixture with the `DEC` guard asserted to refuse |
+| `src/models/lstm.py` | **626** (re-derived 2026-09-20 by `wc -l` on the working tree; 373 was exact at 2026-09-13 HEAD `1670ac8`, and 367 before that) | M-06 against the tf.keras **2.21.0** API; every `tensorflow` import inside `require_frozen_pin()`-guarded code. **The pin is FROZEN (`requirements.txt:36`, `tensorflow==2.21.0`, D-36) and the guard PASSES** — the refusal still fires for any requirements file carrying no non-comment `tensorflow==` line, which is what the negative controls inject; what blocks an M-06 run is the unverified ENVIRONMENT, not the guard (TA-26 `Pending`). 16-combination grid and seven §8.6 settings asserted from config, never in source. Split into `fit_state` / `predict_rows_from_state` under Recommendation 5: early stopping, per-epoch validation RMSE and checkpoint restore read an explicitly named `validation_bundle`, never the scored bundle; the REFIT fit names none and trains for the frozen `models.refit.epochs` count |
+| `src/models/train.py` | **2068** (re-derived 2026-09-20 by `wc -l` on the working tree; the cell read 1487) | Adds under Recommendations 5 and 6: `assert_not_locked_fit`, `assert_validation_bundle`, `refit_epoch_count` / `read_refit_epochs` / `assert_refit_epochs_match_rule`, and the persist/load surface `FittedStateBackend` / `JsonStateBackend` / `FittedModelRecord` / `fit_and_persist` / `load_fitted_model` / `assert_fitted_payload_unchanged` / `predict_from_fitted`. Pre-existing: `fit_predict` (closed M-01…M-06 set), `assert_stamp_match` (R-90, named function, three checks), `three_seed_mean` (all four limbs; `expected_seeds` from `ConfigSnapshot.seeds`, never inlined), `tune` (January–November only; `TuningRecord` seven fields + three attestation fields, attestation UNCONDITIONAL per SD-M-01 Q1 = C), R-96 grid content+hash freeze, `select` (R-101, refit changes no hyperparameter), five-ablation registry from `experiment.yaml` (R-97: `ABL-HIST48` refuses before primary freeze; `ABL-DIFF` refuses naming D-27), `HorizonSpec` config-only (R-99) |
+| `scripts/06_train_and_predict.py` | **1289** (re-derived 2026-09-20 by `wc -l` on the working tree; 999 was exact at 2026-09-13, before that 741 → 806 → 944) | Position 06; `ensure_process_determinism` first, `assert_no_raw_fields` before first write; `assert_stamp_match` before EVERY scoring path; three-seed run per fitting-capable partition; W-12/R-102a one-shot `DEC` write path in full (write once → sha256 → `PredictionHashReceipt` → `.tmp`→fsync→rename → registry column 18 → refuse-to-exit), reachable only behind `materialise_locked_partition`'s G-05 signature guard; honest `aborted` registry row on `IntegrityError`; `prior_period_exposure` never written. **Recommendations 5 and 6:** the `REFIT` iteration is no longer skipped — `_refit_and_persist` fits every fitted family on January–November and persists it hashed; the `DEC` iteration (`_locked_predictions`) LOADS those records and predicts, and no `model.fit` is reachable on it |
+| `tests/test_models_smoke.py` | **1895** (re-derived 2026-09-20 by `wc -l` on the working tree AFTER this pass's own docstring corrections; it read 1890 before them, 1393 at 2026-09-13, and 1221 before that) | **67** test functions (re-derived 2026-09-20: `grep -c "^def test_"` = 67; superseding 56, and 54 before that). One is parametrized over the four `FITTED_MODEL_IDS`, so the collected-case count is **70** (67 − 1 + 4) — stated separately because the two figures are not interchangeable. New on 2026-09-20 under Recommendations 2, 5 and 6: the `(station, hour)` key and coverage controls, the fit-time coverage refusal, the config-only-key control, the three inference-only negative controls (a) fit-on-`DEC` refused for every fitted family, (b) a `DEC` bundle offered as the validation set refused, (c) an absent persisted model refused rather than refitted, the frozen-epoch-rule control, the tampered-payload hash control, the unpersistable-state refusal, the **end-to-end locked-path success control on synthetic December data**, and the `05 --partition DEC` guarded-branch control. Pre-existing: closed-set refusal, residual/GRU/PyTorch absence scan, M-01…M-03 happy paths + training-only control, M-04/M-05 refusal-by-name + grid-content controls (6/18/16 re-read from config), four R-90 controls (control 3 by enumeration over R-80's six ids) + must-not-fire control, the full `three_seed_mean` negative-control set (incl. wrong-but-distinct triple built from config at test time, never literal), tuning refusals (December partition, criterion-hash mismatch, missing attestation), ablation registration + refusals, horizon config-only, RF importance marker, M-06 pin-guard refusal + seven-settings-from-config, `06` receipt controls through a synthetic non-`DEC` fixture with the `DEC` guard asserted to refuse |
 | `tests/test_checkpoint_restore.py` | 209 | 12 test functions — lowest-validation-RMSE selection, restore-returns-that-checkpoint, last-epoch restore fails, tie and NaN handling, fake-backend round trip |
-| `requirements.txt` (modified) | +6 | `scikit-learn==1.4.2` added under the scientific-base block citing the change record (Q3 = A); TensorFlow EXCLUDED with a comment naming the `TBD — freeze gate` rule |
+| `requirements.txt` (modified) | +6 at Step 6 | `scikit-learn==1.4.2` added under the scientific-base block citing the change record (Q3 = A). **The Step-6 state — "TensorFlow EXCLUDED with a comment naming the `TBD — freeze gate` rule" — is SUPERSEDED.** This unit's own later self-edit, commit `17e0767`, added the frozen pin; `requirements.txt:36` now reads `tensorflow==2.21.0` under D-36 (2026-09-10), which states verbatim that it "supersedes the earlier `TBD — freeze gate` state". The `+6` figure covers Step 6 only and was never updated for that self-edit. Installability on either governed platform is still unverified, so TA-26 stays `Pending` — that part of D-36 is not superseded |
 | `configs/experiment.yaml` (modified) | +133/− | D-121 grids transcribed verbatim (Ridge 6, RF 18, LSTM 16, each block citing D-121/Vision §8.6), `models.lstm_fixed_settings` (seven §8.6 settings, `source_text` quoted), `ablations` as the five TE §7.2 named entries; nothing D-121/§8.6/§7.2 does not fix was written (Q5 = A) |
 
 Plus Step 1's governance record: `governance/CHANGE_RECORD_2026-09-06_BLK03_confirmatory_contract.md` (353 lines) — BLK-03 contract approval, the sklearn pin, the D-121 transcription, the FU-1 = C posture, and the PROPOSED D-number text for FU-2 = B (owner adopts or edits; not written into `evidence/DECISIONS.md` by any agent).
 
 ## Key implementation decisions
 
-1. **FU-1 = C realised**: no `tensorflow` import at module scope anywhere; the Keras construction lives behind `_require_frozen_pin()`, whose refusal names TS-M-01 and the pin. No TBD sentinel was filled.
+1. **FU-1 = C realised**: no `tensorflow` import at module scope anywhere; the Keras construction lives behind `require_frozen_pin()`, whose refusal names TS-M-01 and the pin. No TBD sentinel was filled. *(Updated 2026-09-20, Recommendation 42: the pin has since been frozen at `tensorflow==2.21.0` under D-36, so against the governed `requirements.txt` the guard now PASSES. The structural property — no import outside a guarded path — is unchanged and still tested; the obstacle to an M-06 run is the unverified environment.)*
 2. **Confirmatory contract (BLK-03, Q1 = A)**: `three_seed_mean` enforces all four limbs of `domain-entities.md` § 3 — `SeedError` / `AlignmentError` on the ordered (`station`, `interval_start_utc`) index (set AND order) / `PartitionError` / `LeakageError` — with provenance copied and `seed = None` on output. Change record exists FIRST, as the plan ordered.
 3. **No scientific constant in source**: seeds, grids, the seven LSTM settings and ablation identities reach code only from `configs/`; tests re-read the counts 6/18/16 from `experiment.yaml` and never hold a real seed/grid value as a literal.
 4. **Two-tier errors** throughout: integrity violations raise typed exceptions naming file and expectation; completeness shortfalls land as machine-readable manifest fields.
@@ -41,13 +41,30 @@ Plus Step 1's governance record: `governance/CHANGE_RECORD_2026-09-06_BLK03_conf
 
 ## Test coverage summary
 
-**68 test functions total (56 + 12)**, re-derived 2026-09-13 at HEAD `1670ac8`:
-`grep -c "^def test_" tests/test_models_smoke.py` = **56**,
-`tests/test_checkpoint_restore.py` = **12**. This line previously read "66 test functions
-total (54 + 12, derived by count)" — stale, and stale in a way the 2026-09-10 correction
-box missed: that pass corrected one representation of the `test_models_smoke.py` figure and
-left this one asserting 54. Corrected in the body rather than in a review addendum, per
-`project.md` (`code-generation:fr-2`). Every hard rule carries a negative control (team.md mandated practice): pin guard, closed model set, stamp match ×4, seed limbs, tuning attestation, ablation refusals, `DEC` guard, receipt failure modes. Full suite ran in the generating session (2026-09-06T14:01Z; `evidence/test_run_access_log.jsonl` rows for `test_release_hashes` in the same run) — **smoke evidence only, never governed** (stdlib stand-in; pins not installable there).
+**79 test functions total (67 + 12)**, re-derived 2026-09-20 on the working tree and printed
+before assertion: `grep -c "^def test_" tests/test_models_smoke.py` = **67**,
+`grep -c "^def test_" tests/test_checkpoint_restore.py` = **12**. Collected cases are **82**,
+not 79: `tests/test_models_smoke.py` carries one `@pytest.mark.parametrize` over the four
+`FITTED_MODEL_IDS` (67 − 1 + 4 = 70; 70 + 12 = 82). The two figures are stated separately
+because they are not interchangeable.
+
+This line has now been stale twice and is corrected in the body rather than in a review
+addendum, per `project.md` (`code-generation:fr-2`): it read "66 (54 + 12)" until
+2026-09-13, then "68 (56 + 12)" until this pass. Every hard rule carries a negative control
+(team.md mandated practice): pin guard, closed model set, stamp match ×4, seed limbs,
+tuning attestation, ablation refusals, `DEC` guard, receipt failure modes, and — new on
+2026-09-20 — the M-03 key-coverage refusal, the three December-inference-only controls, the
+frozen-epoch-rule refusal, the persisted-payload hash mismatch, and the `05 --partition DEC`
+signature refusal.
+
+**Execution status, stated plainly: NOTHING in this unit has been executed since
+2026-09-06.** The generating session's run (2026-09-06T14:01Z) remains the only suite run,
+it predates every change recorded in this artifact after that date, and it was **smoke
+evidence only, never governed** (stdlib stand-in; pins not installable there). No test
+written or amended on 2026-09-13, 2026-09-19 or 2026-09-20 has ever run: no usable Python
+interpreter exists on this clone (`python.exe` is a zero-byte Windows Store alias stub) and
+PyPI is unreachable. Every behavioural claim in this artifact dated after 2026-09-06 is
+**static**, read from source. None of it may be read as "verified passing".
 
 ## Deviations from the plan
 
@@ -57,7 +74,7 @@ left this one asserting 54. Corrected in the body rather than in a review addend
 
 ## Open items routed to the gate
 
-BLK-03 evidence limb open at G-05; TensorFlow pin unfrozen (M-06 Keras path written-but-unexecutable; TA-26 `Pending`); sklearn install evidence owed; pyarrow pin carried; FR-P1-05-2 bootstrap-seed attribution disagreement (raised, not edited); `prior_period_exposure` deviation note (R-102a); da6cb7b commit-message disposition; WS-14, WS-15, TA-12, TA-13, TA-26 all `Pending`; nothing discharged.
+BLK-03 evidence limb open at G-05; **TensorFlow pin FROZEN at `tensorflow==2.21.0` (D-36, `requirements.txt:36`) — the earlier "pin unfrozen / M-06 Keras path written-but-unexecutable" claim here is SUPERSEDED and was corrected 2026-09-20 under Recommendation 42; what remains owed is installability and Kaggle/local compatibility verification, so TA-26 stays `Pending`**; **two `configs/experiment.yaml` keys OWED and absent today — `models.climatology` (key `[station, hour]`, `fitted_on: training_partition_only`) and `models.refit` (`rule`, `epochs`) — without which `read_climatology_key` and `read_refit_epochs` refuse and no M-03 fit or refit can run (see § Remediation 2026-09-20)**; sklearn install evidence owed; pyarrow pin carried; FR-P1-05-2 bootstrap-seed attribution disagreement (raised, not edited); `prior_period_exposure` deviation note (R-102a); da6cb7b commit-message disposition; WS-14, WS-15, TA-12, TA-13, TA-26 all `Pending`; nothing discharged.
 
 ## Assumptions & Open Questions
 
@@ -371,3 +388,92 @@ this pass matches the artifact's current claims exactly, and Step 7 remains corr
 unexecuted. With 0 Critical and exactly 2 Major findings, this clears the stated
 verdict bar (`≤2 Major` is READY) but both should be corrected before the next reader
 relies on this artifact's "Open items" or "Deviations" sections at face value.
+
+---
+
+## Remediation 2026-09-20 — `GOV-2026-09-20-CG-01` Recommendations 2, 5, 6 and 42
+
+Filed under `CR-2026-09-20-GOV-CG-01-DISPOSITIONS`. The receipted `## Review` verdict block
+above is a human-signed record and is **left standing untouched**; this block records what
+changed after it, and the Files table, § Test coverage summary and § Open items above have
+been corrected in the body so a reader who never reaches this block is not misinformed
+(`project.md` `code-generation:fr-2`). Recommendation 42's owner ruling was explicitly
+**"annotate in place"**, which is the authority for editing this completed-stage artifact.
+
+**Nothing below was executed.** No interpreter exists on this clone. Every statement about
+behaviour is static, read from source.
+
+### Recommendation 2 — M-03 climatology key (owner ruling, verbatim)
+
+> "Redefine M-03 as the mean VTEC by **station and hour**, calculated exclusively from each
+> partition's training data. Remove month from the key, document the seasonal limitation,
+> and fail early if a required key is missing. Record the definition before G-05 and verify
+> it without accessing the locked test."
+
+`src/models/climatology.py` now reads the key from `configs/experiment.yaml`
+`models.climatology.key` (TC-03e — the key is never spelled as a constant in source);
+implements `("station", "hour")` exactly and refuses any other configured key **by name**,
+so a month-bearing key cannot be re-adopted by a config edit alone; refuses a `fitted_on`
+other than `training_partition_only`; and raises at **fit** time — `assert_keys_cover_scored_rows`,
+one guard home called from `fit_climatology` (fold path) and `predict_rows_from_state`
+(persist path) — naming the missing keys, the fitting range and the config field. The
+seasonal limitation travels on `Climatology.limitation` and on every prediction frame as
+`climatology_limitation`, so it cannot be dropped between fit and report.
+
+### Recommendation 5 — refit epoch count (owner ruling, verbatim)
+
+> "Determine the final epoch count from the median best-validation epoch across the
+> predefined pre-December folds and seeds, rounding half upward. Freeze this rule and its
+> resulting value before G-05. Retrain from scratch on January–November, save and hash the
+> models, and make December strictly inference-only. Verify the complete path using
+> synthetic data; December must never influence training or model selection."
+
+The rule is implemented as `train.refit_epoch_count` (integer median, half rounded UP by
+`-(-(a+b)//2)` rather than `round()`, which rounds half to even); its identifier is
+`train.REFIT_EPOCH_RULE_ID`; the value it produced is read from
+`configs/experiment.yaml` `models.refit.epochs` and **refused while that field is
+`TBD — freeze gate`** rather than defaulted. `assert_refit_epochs_match_rule` re-derives the
+value from the recorded fold epochs so a transcription cannot drift from the rule.
+`lstm.fit_state` takes an explicit `validation_bundle` — on a fold, early stopping and the
+lowest-validation-RMSE restore read that bundle; on the refit there is none, and the model
+trains for exactly the frozen count with no selection at all. Both structural guards live in
+`train` (`assert_not_locked_fit`, `assert_validation_bundle`) and run from `fit_predict` and
+`fit_and_persist`, so no fitted family can be fitted on `DEC` and no `DEC` bundle can be
+offered as a validation set.
+
+### Recommendation 6 — the G-06 path executes (owner ruling: option 2)
+
+`scripts/05_build_features_and_splits.py` gains a `--partition DEC` branch behind the same
+`materialise_locked_partition` G-05 signature guard, requiring `--g05-signature`,
+`--locked-input`, `--locked-authorization` and `REFIT` in the same run; it never names the
+restricted root and reads December only through `locked_test.open_restricted`, which writes
+the `AccessRecord`. `scripts/06`'s `REFIT` iteration now fits and persists (hashed) instead
+of being skipped, and the `DEC` iteration loads those records and predicts. *(That `05`
+change is code this unit's summary does not own — `scripts/05` belongs to
+`features-and-splits`, whose own record is stale for it; carried to the gate as a disclosure
+item rather than edited here.)*
+
+### Recommendation 42 — the stale TensorFlow claims
+
+Corrected in the Files table, § Key implementation decisions item 1 and § Open items above.
+Derivation printed: `grep -n tensorflow requirements.txt` → the pin is at **line 36**
+(`tensorflow==2.21.0`); line 29 is its explanatory comment. The two source docstrings
+(`src/models/lstm.py`, `scripts/06_train_and_predict.py`) were corrected in the same
+remediation, as were two stale sites inside `tests/test_models_smoke.py` (the module
+docstring and the § 11 section header) that the finding did not enumerate.
+
+### What is owed before this is closed
+
+1. **Two `configs/experiment.yaml` keys, absent today.** `models.climatology`
+   (`key: [station, hour]`, `fitted_on: training_partition_only`) and `models.refit`
+   (`rule: median_best_validation_epoch_across_folds_and_seeds_round_half_up`,
+   `epochs: "TBD — freeze gate"` until the folds have run). Verified absent 2026-09-20 by
+   `grep -n "climatology\|refit" configs/experiment.yaml` — zero matches for the former, one
+   comment-only match for the latter. Until they exist, `read_climatology_key` and
+   `read_refit_epochs` refuse and neither an M-03 fit nor the refit can run. The config file
+   is outside this remediation's write scope; the keys are reported as owed, not written.
+2. **Two D-numbers**, drafted for the owner at `CR-2026-09-20-GOV-CG-01-DISPOSITIONS`
+   §4.1 (M-03 key) and §4.2 (refit epoch rule), both requiring supervisor countersignature
+   before G-05.
+3. **Execution.** Nothing here has run. `ruff check` and the full suite in the governed
+   Python 3.11 environment are the first execution any of this code will have had.

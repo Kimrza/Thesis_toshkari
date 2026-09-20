@@ -14,9 +14,30 @@ every governed check lives in `src/evaluation/{guards,masks,metrics}.py`, none i
   intersection mask (stamps first, membership exact, matched windows), register it once,
   compute `paired_loss_differential` per (model, benchmark) pair, and emit the
   `MetricsArtifact` -- refused unless complete and disclosing (R-110).
-* Bootstrap intervals and breakdown tables are NOT computed here: they are
-  `statistical-inference`'s and `regimes-diagnostics-reporting`'s, running inside this
-  script later per the boundary note (the path grant, R-56; no unit-level narrowing).
+* Per declared comparison set, the INFERENCE AND REPORTING layer then runs in the same
+  `--set` loop (`_report_set`), wired 2026-09-20 under Recommendation 18: the vector
+  time-block bootstrap per (model, benchmark) pair (`statistical-inference` W-1), the ONE
+  primary results table, the breakdown family (member metrics, per-station, the D-17
+  quality strata, the top-fraction sensitivity), the DEC regime breakdown on the locked
+  partition, the practical-relevance record, and the claims-and-limitations checklist
+  (`regimes-diagnostics-reporting` W-3...W-6). This is the path grant the boundary note
+  already made (R-56): these two units own no stage script and run INSIDE this one. NO
+  TENTH STAGE SCRIPT IS ADDED — TE 13.2 fixes the nine-script ordered sequence and
+  amending it is a governing-document change.
+
+  The gap this closed, recorded so the wiring is not mistaken for decoration: until
+  2026-09-20 this script imported and called `build_comparison_mask`,
+  `registry.register`, `paired_loss_differential` and `build_metrics_artifact` and
+  nothing else. A grep across `scripts/` for `vector_block_bootstrap`,
+  `build_primary_table`, `practical_relevance_statement`,
+  `build_member_metrics_breakdown`, `top1pct_sensitivity_block`,
+  `build_breakdown_artifact`, `build_claims_checklist` and `build_dec_regime_breakdown`
+  returned ZERO call sites, and all ten `report_guards` rendering refusals had zero
+  production callers. A clean run therefore produced a point estimate and no 95%
+  interval, no bootstrap, no cross-station correlations, no 48-hour sensitivity, no
+  primary results table, no December regime breakdown and no claims checklist — so
+  PC-03/PC-04's requirement that the three difficulty controls appear in the SAME
+  primary results table had no live enforcement path at all.
 
 What this script can and cannot run today
 -----------------------------------------
@@ -43,6 +64,17 @@ Inputs
 manifest); `--partition` (repeatable; default the four folds plus REFIT-scored sets found;
 `DEC` only with the four locked-path arguments); `--set` (repeatable; default every declared
 comparison set); `--evaluation-out` (default `artifacts/evaluation`); `--code-commit`.
+
+The reporting layer's inputs, each a governed upstream artifact read by path and NEVER
+defaulted (Recommendation 18): `--target-release-manifest` (the stamped lineage the
+metrics artifact's `units` is READ from — Recommendation 19), `--budget-artifact`,
+`--table-caption` (supplied verbatim by the author; this script composes no governed
+prose), `--conclusion-surface`, `--notebook-captions`, `--threshold-record` +
+`--g06-receipt-utc` (optional; under D-34 no numeric threshold is approved and a run
+without them RECORDS that state rather than skipping silently), and on `DEC`
+`--audit-artifact`, `--kp-series`, `--kp-release-grade`, `--kp-source`. A run that cannot
+report REFUSES naming the first absent input rather than emitting a point estimate with
+no interval and calling that a result.
 
 Re-run behaviour
 ----------------
@@ -80,6 +112,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.data.config import (  # noqa: E402
+    TBD_SENTINEL,
     IntegrityError,
     assert_declared_sources_exist,
     assert_lock_complete,
@@ -116,6 +149,22 @@ from src.data.splits import (  # noqa: E402
     partition_by_id,
     validation_month_range,
 )
+from src.evaluation.bootstrap import (  # noqa: E402
+    read_bootstrap_declaration,
+    vector_block_bootstrap,
+    write_bootstrap_result,
+)
+from src.evaluation.diagnostics import (  # noqa: E402
+    build_breakdown_artifact,
+    build_claims_checklist,
+    build_dec_regime_breakdown,
+    build_member_metrics_breakdown,
+    build_primary_table,
+    build_quality_stratum,
+    practical_relevance_statement,
+    read_top1pct_declaration,
+    top1pct_sensitivity_block,
+)
 from src.evaluation.masks import (  # noqa: E402
     MaskRegistry,
     build_comparison_mask,
@@ -129,6 +178,8 @@ from src.evaluation.metrics import (  # noqa: E402
     paired_loss_differential,
     write_metrics_artifact,
 )
+from src.evaluation.regimes import read_regime_config  # noqa: E402
+from src.evaluation.report_guards import ConclusionSurfaceRegistry  # noqa: E402
 
 STAGE = "evaluation-and-comparison"
 PHASE_DEFAULT = 1
@@ -167,6 +218,74 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "mask_ids",
     "entries",
     "frozen_at_utc",
+    # --- the inference and reporting layer, wired 2026-09-20 (Recommendation 18) --------
+    "units",
+    "comparisons",
+    "artifact_id",
+    "artifact_class",
+    "kind",
+    "rows",
+    "members",
+    "member_metrics",
+    "caption",
+    "budget_ref",
+    "surviving_row_counts",
+    "derived_percentage_rmse_reduction",
+    "derived_percentage_rmse_reductions",
+    "payload",
+    "role_label",
+    "aggregation",
+    "breakdown_id",
+    "completeness_shortfalls",
+    "partial",
+    "driver_identity_caveat",
+    "stratum_field",
+    "parent",
+    "sensitivity",
+    "rows_removed",
+    "removed_fraction",
+    "removed_keys",
+    "removal_rule",
+    "scope",
+    "label",
+    "ci_lower",
+    "ci_upper",
+    "ci_level",
+    "interval_method",
+    "block_hours",
+    "block_scheme",
+    "replicates",
+    "point_estimate",
+    "per_station_components",
+    "seed",
+    "seed_key",
+    "generator_identity",
+    "replicate_hash",
+    "canonical_form",
+    "stream_assignments",
+    "replicate_vector",
+    "widening_guard",
+    "pairwise_correlations",
+    "correlation_series",
+    "n_blocks",
+    "evaluation_mode",
+    "registered_storm_event_count",
+    "registered_audit_artifact_id",
+    "comparison_storm_event_count",
+    "descriptive_only",
+    "events_wholly_outside_scored_set",
+    "eligible_event_intervals",
+    "practical_relevance",
+    "first_conjunct",
+    "second_conjunct",
+    "enforcement",
+    "enforcement_note",
+    "inspected_registered_set",
+    "conclusion_artifact_id",
+    "claim_boundary",
+    "nico_5min_bar",
+    "residual",
+    "post_access_report",
 )
 
 
@@ -227,6 +346,101 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help=(
             "the write-once frozen-bundle manifest; open_restricted populates the SD-C-02 "
             "containment fields from it, and require_locked_receipt re-verifies it"
+        ),
+    )
+    # --- the inference and reporting layer's inputs (Recommendation 18, 2026-09-20) -----
+    parser.add_argument(
+        "--target-release-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "the released Phase 1 target's release_manifest.json. Its TE §13.3 `units` "
+            "field is the stamped lineage the metrics artifact's reporting unit is READ "
+            "from (never hardcoded); its target_definition_id is checked against the "
+            "registered mask's (Recommendation 19)"
+        ),
+    )
+    parser.add_argument(
+        "--budget-artifact",
+        type=Path,
+        default=None,
+        help=(
+            "the target uncertainty budget artifact placed adjacent to the primary result "
+            "(FR-P1-05-10; TA-19), produced by target-standardization"
+        ),
+    )
+    parser.add_argument(
+        "--table-caption",
+        type=str,
+        default=None,
+        help=(
+            "the primary table's caption, supplied VERBATIM by the author. This script "
+            "never composes it: FR-P1-05-19 requires the plasmaspheric-offset sentence in "
+            "the caption and D-28's scored-set statement with it, and both are frozen "
+            "wordings owned upstream — an orchestrator that wrote its own caption would "
+            "be authoring governed prose (TE §7: scripts orchestrate)"
+        ),
+    )
+    parser.add_argument(
+        "--conclusion-surface",
+        type=Path,
+        default=None,
+        help=(
+            "the registered ConclusionSurfaceArtifact the claims checklist resolves its "
+            "text rows against. ABSENT IS NOT SKIPPED: the checklist fails closed on None "
+            "(R-126 control (36)), which is the designed behaviour, not an omission"
+        ),
+    )
+    parser.add_argument(
+        "--threshold-record",
+        type=Path,
+        default=None,
+        help=(
+            "the frozen practical-relevance threshold record (PC-09). Optional: under "
+            "D-34 no numeric threshold is approved, so a run without it records that "
+            "decided state machine-readably instead of producing a statement"
+        ),
+    )
+    parser.add_argument(
+        "--g06-receipt-utc",
+        type=str,
+        default=None,
+        help="the G-06 receipt timestamp the threshold record must PRECEDE (PC-09)",
+    )
+    parser.add_argument(
+        "--audit-artifact",
+        type=Path,
+        default=None,
+        help=(
+            "the REGISTERED pre-G-05 December coverage/regime audit (DEC only); its "
+            "storm-event count is the DEC regime breakdown's sole governing input (R-124)"
+        ),
+    )
+    parser.add_argument(
+        "--kp-series",
+        type=Path,
+        default=None,
+        help="the GFZ Kp series the DEC regime comparison count is derived from (DEC only)",
+    )
+    parser.add_argument(
+        "--kp-release-grade",
+        type=str,
+        default=None,
+        help="the Kp series' single recorded release grade (D-10.1; DEC only)",
+    )
+    parser.add_argument(
+        "--kp-source",
+        type=str,
+        default=None,
+        help="the Kp series' source, checked against the GFZ allowlist (D-13; DEC only)",
+    )
+    parser.add_argument(
+        "--notebook-captions",
+        type=Path,
+        default=None,
+        help=(
+            "a JSON object of notebook_id -> caption for the checklist's FR-P1-03-4 row; "
+            "absent leaves that row FAILED fail-closed, which is the designed behaviour"
         ),
     )
     parser.add_argument(
@@ -471,6 +685,398 @@ def _month_bounds(partition: Partition) -> tuple[dt.datetime, dt.datetime, int]:
     return start, end, int(partition.embargo_hours)
 
 
+def _require_flag(value: Any, flag: str, what: str) -> Any:
+    """A flag this code path needs — absent REFUSES, naming the flag (TE §18.3)."""
+    if value in (None, ""):
+        raise IntegrityError(
+            flag,
+            f"no {what} was named; this run reaches a path that requires it and refuses "
+            f"rather than defaulting one (TE §18.3)",
+        )
+    return value
+
+
+def _read_json_input(path: Path | None, *, flag: str, what: str) -> Mapping[str, Any]:
+    """A governed upstream artifact read by path — absent or malformed REFUSES.
+
+    Never defaulted, never substituted: TE §18.3's stop-and-report, the same posture
+    `_load_target_by_manifest` takes for the released target.
+    """
+    if path is None:
+        raise IntegrityError(
+            flag,
+            f"no {what} was named; the inference and reporting layer reads it from a "
+            f"governed upstream artifact and refuses to invent one. A run that cannot "
+            f"report refuses rather than emitting a point estimate with no interval, no "
+            f"primary table and no claims checklist and calling that a result "
+            f"(Recommendation 18; TE §18.3)",
+        )
+    resolved = Path(path)
+    if not resolved.is_file():
+        raise IntegrityError(resolved, f"no {what} exists at this path")
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise IntegrityError(resolved, f"{what} is unreadable ({exc})") from exc
+    if not isinstance(payload, Mapping):
+        raise IntegrityError(resolved, f"{what} is not a JSON object")
+    return payload
+
+
+def _bootstrap_seed(snapshot: Any, *, seed_key: str) -> int:
+    """The D-122 bootstrap seed, read from `seeds.yaml` by the DECLARED key (ADR-05).
+
+    `seed_everything` never touches this seed, so it is read here at the call site, by
+    the key the bootstrap declaration names — never a literal in source.
+    """
+    key = str(seed_key).split(".")[-1]
+    value = snapshot.seeds.get(key)
+    if value is None or (isinstance(value, str) and value.strip() == TBD_SENTINEL):
+        raise IntegrityError(
+            f"configs/seeds.yaml: {seed_key}",
+            "absent or unresolved (TBD — freeze gate); the bootstrap seed is a frozen "
+            "scientific value (D-122) read at the call site by ADR-05's carve-out and is "
+            "never defaulted (TE §18.3)",
+        )
+    return int(value)
+
+
+def _report_set(
+    *,
+    snapshot: Any,
+    args: argparse.Namespace,
+    partition: Partition,
+    set_id: str,
+    declared: Mapping[str, Any],
+    declared_sets: Mapping[str, Mapping[str, Any]],
+    mask: Any,
+    registry: MaskRegistry,
+    members_by_id: Mapping[str, Any],
+    metrics_artifact: Mapping[str, Any],
+    budget_artifact: Mapping[str, Any],
+    report_dir: Path,
+    month_start: dt.datetime,
+    month_end: dt.datetime,
+    embargo_hours: int,
+    locked: LockedContext | None,
+    evaluation_mode: str,
+) -> list[str]:
+    """The inference and reporting layer for ONE comparison set (Recommendation 18).
+
+    Until 2026-09-20 this script computed the mask, the estimand and the metrics artifact
+    and stopped. `grep` across `scripts/` for `vector_block_bootstrap`,
+    `build_primary_table`, `practical_relevance_statement`,
+    `build_member_metrics_breakdown`, `top1pct_sensitivity_block`,
+    `build_breakdown_artifact`, `build_claims_checklist` and
+    `build_dec_regime_breakdown` returned ZERO call sites, and all ten `report_guards`
+    refusals had zero production callers — so a clean run produced a point estimate and
+    no 95% interval, no bootstrap, no cross-station correlations, no 48-hour sensitivity,
+    no primary results table, no December regime breakdown and no claims checklist, and
+    PC-03/PC-04's requirement that the three difficulty controls appear in the SAME
+    primary results table had no live enforcement path. This function is that path.
+
+    NO TENTH STAGE SCRIPT: TE §13.2 fixes the nine-script ordered sequence, and amending
+    it is a governing-document change. The boundary note's path grant (R-56) already
+    places `statistical-inference` and `regimes-diagnostics-reporting` INSIDE this script.
+
+    Every one of the ten SD-R-01 rendering refusals now lies on this path:
+    ``require_complete_members``, ``require_units``, ``require_beats_model``,
+    ``require_estimand_fields``, ``require_lineage_caveat``, ``require_derived_label``,
+    ``require_provenance_block`` and ``require_registered_surface`` through
+    ``build_primary_table``; ``require_driver_caveat`` through the per-station breakdown;
+    ``require_d17_bound`` through ``build_quality_stratum``.
+    """
+    written: list[str] = []
+    model_id = str(declared["model_id"])
+    model = members_by_id[model_id]
+    surfaces = ConclusionSurfaceRegistry(report_dir / "conclusion_surfaces")
+
+    # --- W-1 (statistical-inference): the interval, per (model, benchmark) pair ---------
+    declaration = read_bootstrap_declaration(snapshot.experiment)
+    seed = _bootstrap_seed(snapshot, seed_key=str(declaration["seed_key"]))
+    for benchmark_id in declared["benchmark_ids"]:
+        result = vector_block_bootstrap(
+            model,
+            members_by_id[benchmark_id],
+            mask=mask,
+            block_hours=int(declaration["block_hours"]),
+            replicates=int(declaration["replicates"]),
+            seed=seed,
+            declared_sets=declared_sets,
+            registry=registry,
+            experiment=snapshot.experiment,
+            evaluation_mode=evaluation_mode,
+            month_start=month_start,
+            month_end=month_end,
+            embargo_hours=embargo_hours,
+            locked=locked,
+        )
+        written.append(
+            str(
+                write_bootstrap_result(
+                    result, report_dir / f"bootstrap_{model_id}_vs_{benchmark_id}.json"
+                )
+            )
+        )
+
+    # --- W-3: the ONE primary results table (PC-03/PC-04's co-reporting, by construction)
+    if not args.table_caption:
+        raise IntegrityError(
+            "--table-caption",
+            "no caption was supplied; FR-P1-05-19 requires the plasmaspheric-offset "
+            "sentence in the primary table's caption and D-28's scored-set statement "
+            "with it, both frozen wordings owned upstream — this orchestrator supplies "
+            "no caption of its own rather than authoring governed prose (TE §7)",
+        )
+    table = build_primary_table(
+        metrics_artifact=metrics_artifact,
+        mask=mask,
+        budget_artifact=budget_artifact,
+        declared_member_ids=declared["member_ids"],
+        caption=str(args.table_caption),
+        table_artifact_id=f"primary_table_{partition.partition_id}_{set_id}",
+        registry=surfaces,
+        emit_path=report_dir / f"primary_table_{set_id}.json",
+    )
+    written.append(str(report_dir / f"primary_table_{set_id}.json"))
+
+    # --- W-5: the breakdown family -----------------------------------------------------
+    breakdowns: list[Mapping[str, Any]] = []
+    member_metrics_path = report_dir / f"breakdown_member_metrics_{set_id}.json"
+    breakdowns.append(
+        build_member_metrics_breakdown(
+            metrics_artifact=metrics_artifact,
+            mask=mask,
+            breakdown_id=f"member_metrics_{set_id}",
+            registry=surfaces,
+            emit_path=member_metrics_path,
+        )
+    )
+    written.append(str(member_metrics_path))
+
+    # the per-station breakdown — the ONLY path that emits TC-12's standing caveat, so
+    # `require_driver_caveat` reaches production here. Values are PRINTED from the
+    # emitted artifact's own per-station components, never restated (R-107 limb 6).
+    per_station_path = report_dir / f"breakdown_per_station_{set_id}.json"
+    breakdowns.append(
+        build_breakdown_artifact(
+            breakdown_id=f"per_station_{set_id}",
+            metrics_artifact=metrics_artifact,
+            mask=mask,
+            per_station=True,
+            payload={
+                "comparisons": [dict(row) for row in metrics_artifact.get("comparisons", ())]
+            },
+            registry=surfaces,
+            emit_path=per_station_path,
+        )
+    )
+    written.append(str(per_station_path))
+
+    # the D-17 quality strata — `build_quality_stratum` is `require_d17_bound`'s only
+    # caller, so the bound reaches production here. The masked rows carry the comparison
+    # surface, not D-17's observation-quality columns, so each stratum is emitted EMPTY
+    # with a machine-readable completeness shortfall rather than silently omitted (the
+    # two-tier posture: a shortfall is recorded, never console text).
+    regime_config = read_regime_config(snapshot.experiment)
+    strata = []
+    shortfalls: list[Mapping[str, Any]] = []
+    for field_name in regime_config.quality_strata_fields:
+        rows = [dict(row) for row in mask.masked_rows if field_name in row]
+        strata.append(
+            build_quality_stratum(
+                stratum_field=field_name, config=regime_config, strata_rows=rows
+            )
+        )
+        if not rows:
+            shortfalls.append(
+                {
+                    "stratum_field": field_name,
+                    "reason": (
+                        "the registered comparison mask carries the comparison surface "
+                        "(station, hour, y_true, y_hats) and not D-17's "
+                        "observation-quality columns, so this stratum has no rows in a "
+                        "07 run; the shortfall is recorded machine-readably and the "
+                        "artifact is marked partial (R-127; the two-tier posture)"
+                    ),
+                }
+            )
+    strata_path = report_dir / f"breakdown_quality_strata_{set_id}.json"
+    breakdowns.append(
+        build_breakdown_artifact(
+            breakdown_id=f"quality_strata_{set_id}",
+            metrics_artifact=metrics_artifact,
+            mask=mask,
+            payload={"strata": strata},
+            completeness_shortfalls=shortfalls,
+            registry=surfaces,
+            emit_path=strata_path,
+        )
+    )
+    written.append(str(strata_path))
+
+    # FR-P1-05-10's top-fraction sensitivity, COMPUTED per member (Recommendation 21) and
+    # emitted as its own labelled breakdown — beside the parent figures, never merged.
+    top1pct = read_top1pct_declaration(snapshot.experiment)
+    sensitivity_path = report_dir / f"breakdown_top1pct_sensitivity_{set_id}.json"
+    breakdowns.append(
+        build_breakdown_artifact(
+            breakdown_id=f"top1pct_sensitivity_{set_id}",
+            metrics_artifact=metrics_artifact,
+            mask=mask,
+            payload={
+                "blocks": [
+                    top1pct_sensitivity_block(
+                        mask=mask,
+                        member_id=member_id,
+                        removed_fraction=float(top1pct["removed_fraction"]),
+                        scope=str(top1pct["scope"]),
+                    )
+                    for member_id in declared["member_ids"]
+                ]
+            },
+            registry=surfaces,
+            emit_path=sensitivity_path,
+        )
+    )
+    written.append(str(sensitivity_path))
+
+    # the DEC regime breakdown — post-receipt by construction (it consumes the emitted
+    # metrics artifact, which cannot exist before R-109's verified hash receipt).
+    if partition.partition_id == LOCKED_ID:
+        dec_path = report_dir / f"breakdown_regime_split_dec_{set_id}.json"
+        breakdowns.append(
+            build_dec_regime_breakdown(
+                metrics_artifact=metrics_artifact,
+                mask=mask,
+                kp=_read_target_artifact(
+                    Path(
+                        _require_flag(
+                            args.kp_series, "--kp-series", "the DEC Kp series"
+                        )
+                    )
+                ),
+                audit=_read_json_input(
+                    args.audit_artifact,
+                    flag="--audit-artifact",
+                    what="the REGISTERED pre-G-05 December coverage and regime audit",
+                ),
+                experiment=snapshot.experiment,
+                release_grade=str(
+                    _require_flag(
+                        args.kp_release_grade,
+                        "--kp-release-grade",
+                        "the Kp series' recorded release grade",
+                    )
+                ),
+                source=str(
+                    _require_flag(args.kp_source, "--kp-source", "the Kp series' source")
+                ),
+                registry=surfaces,
+                emit_path=dec_path,
+            )
+        )
+        written.append(str(dec_path))
+
+    # --- W-6: practical relevance ------------------------------------------------------
+    relevance_path = report_dir / f"practical_relevance_{set_id}.json"
+    if args.threshold_record is None:
+        # D-34 (2026-09-10): the sentinel IS the decided state — no numeric threshold is
+        # approved. The absence is RECORDED, machine-readably, so §5.3's conjuncts are
+        # visibly not evaluated in this run rather than silently never running.
+        relevance: dict[str, Any] = {
+            "kind": "practical_relevance_not_produced",
+            "reason": (
+                "no --threshold-record was supplied. Under D-34 no numeric "
+                "practical-relevance threshold is approved and practical relevance is "
+                "reported DESCRIPTIVELY; Vision §5.3's two conjuncts are therefore NOT "
+                "evaluated in this run. This is a recorded state, not a skipped check"
+            ),
+            "set_id": set_id,
+            "partition_id": partition.partition_id,
+        }
+    else:
+        threshold_record = _read_json_input(
+            args.threshold_record,
+            flag="--threshold-record",
+            what="the frozen practical-relevance threshold record",
+        )
+        # WHICH benchmark the measured improvement is relative to is a scientific choice,
+        # so it is READ from the frozen record and never picked here (a first-row default
+        # would silently choose the reference §5.4's magnitude is compared against).
+        reference_benchmark = threshold_record.get("reference_benchmark_id")
+        if not reference_benchmark:
+            raise IntegrityError(
+                str(args.threshold_record),
+                "the frozen threshold record names no reference_benchmark_id, so the "
+                "measured improvement Vision §5.3's FIRST conjunct compares has no "
+                "declared reference. Which benchmark the reduction is relative to is a "
+                "scientific choice frozen in the record, never picked by this "
+                "orchestrator (PC-09; TE §1.1 — no implementer fills such a value by "
+                "convenience)",
+            )
+        measured = next(
+            (
+                row.get("derived_percentage_rmse_reduction")
+                for row in table.get("rows", ())
+                if str(row.get("benchmark_id")) == str(reference_benchmark)
+            ),
+            None,
+        )
+        relevance = dict(
+            practical_relevance_statement(
+                threshold_record=threshold_record,
+                budget_artifact=budget_artifact,
+                measured_improvement=measured,
+                g06_receipt_utc=_require_flag(
+                    args.g06_receipt_utc,
+                    "--g06-receipt-utc",
+                    "the G-06 receipt timestamp the threshold record must precede",
+                ),
+            )
+        )
+        relevance["reference_benchmark_id"] = str(reference_benchmark)
+    relevance_path.parent.mkdir(parents=True, exist_ok=True)
+    relevance_path.write_text(
+        json.dumps(relevance, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
+    )
+    written.append(str(relevance_path))
+
+    # --- W-4: the claims-and-limitations checklist -------------------------------------
+    # `conclusion_surface=None` is NOT a skip: the checklist fails closed on it by design
+    # (R-126 control (36)), which is why no pre-check guards this call.
+    checklist_path = report_dir / f"claims_checklist_{set_id}.json"
+    build_claims_checklist(
+        registry=surfaces,
+        conclusion_surface=(
+            _read_json_input(
+                args.conclusion_surface,
+                flag="--conclusion-surface",
+                what="the registered ConclusionSurfaceArtifact",
+            )
+            if args.conclusion_surface is not None
+            else None
+        ),
+        table=table,
+        breakdowns=breakdowns,
+        notebook_captions=(
+            dict(
+                _read_json_input(
+                    args.notebook_captions,
+                    flag="--notebook-captions",
+                    what="the notebook caption map",
+                )
+            )
+            if args.notebook_captions is not None
+            else None
+        ),
+        checklist_artifact_id=f"claims_checklist_{partition.partition_id}_{set_id}",
+        emit_path=checklist_path,
+    )
+    written.append(str(checklist_path))
+    return written
+
+
 def _evaluate_partition(
     *,
     snapshot: Any,
@@ -482,11 +1088,29 @@ def _evaluate_partition(
     target: Any,
     out_root: Path,
     locked: LockedContext | None,
+    evaluation_mode: str = "real_data",
 ) -> list[str]:
-    """Masks, estimands and the metrics artifact for one partition (W-1, W-2, W-6)."""
+    """Masks, estimands, the metrics artifact AND the reporting layer for one partition.
+
+    W-1, W-2, W-6 as before; since 2026-09-20 the `--set` loop also runs the inference
+    and reporting layer per set through ``_report_set`` (Recommendation 18), so the
+    bootstrap interval, the primary table, the breakdown family, the top-fraction
+    sensitivity, the practical-relevance record and the claims checklist are produced by
+    the same run that produces the point estimate.
+    """
     members_by_id = _load_predictions_run(args.predictions_run, partition.partition_id)
     month_start, month_end, embargo_hours = _month_bounds(partition)
     feature_set_id = str(snapshot.features.get("feature_set_id", ""))
+    target_release_manifest = _read_json_input(
+        args.target_release_manifest,
+        flag="--target-release-manifest",
+        what="the released Phase 1 target's release manifest (the stamped units lineage)",
+    )
+    budget_artifact = _read_json_input(
+        args.budget_artifact,
+        flag="--budget-artifact",
+        what="the target uncertainty budget artifact",
+    )
     written: list[str] = []
     for set_id in set_ids:
         declared = declared_sets[set_id]
@@ -528,12 +1152,34 @@ def _evaluate_partition(
             mask=mask,
             registry=registry,
             estimands=estimands,
+            target_release_manifest=target_release_manifest,
         )
         assert_metrics_artifact(artifact, declared_sets=declared_sets)
         path = write_metrics_artifact(
             artifact, out_root / partition.partition_id / f"metrics_{set_id}.json"
         )
         written.append(str(path))
+        written.extend(
+            _report_set(
+                snapshot=snapshot,
+                args=args,
+                partition=partition,
+                set_id=set_id,
+                declared=declared,
+                declared_sets=declared_sets,
+                mask=mask,
+                registry=registry,
+                members_by_id=members_by_id,
+                metrics_artifact=artifact,
+                budget_artifact=budget_artifact,
+                report_dir=out_root / partition.partition_id / set_id,
+                month_start=month_start,
+                month_end=month_end,
+                embargo_hours=embargo_hours,
+                locked=locked,
+                evaluation_mode=evaluation_mode,
+            )
+        )
     return written
 
 
@@ -601,6 +1247,9 @@ def _run_fixture_scale(
             target=target,
             out_root=out_root,
             locked=None,  # no locked path at fixture scale, structurally
+            # Rec 18: the reporting layer runs at fixture scale too, in `fixture` mode —
+            # the mode the widening guard's failure semantics key on (R-120; Rec 23).
+            evaluation_mode="fixture",
         )
         write_sibling_stamp(registry.registry_dir, stamp)  # the stamp beside the entries
         for artifact in artifacts:

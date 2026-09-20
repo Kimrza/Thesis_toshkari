@@ -9,6 +9,23 @@ and hashed. Re-running it against the same files reproduces the same report.
 
 Usage:
     python scripts/audit_ec1_drivers.py
+
+PRE-TC-06 TOOLING, PENDING A RETIREMENT RULING (board Recommendation 51, 2026-09-20).
+This script predates TC-06 and does not meet the §12/§13.2 CLI convention: no `argparse`,
+no `--config configs/`, no governed configuration read, and no `NN_verb_noun.py` ordinal
+position. Its successors are `scripts/00_acquire_prepared_vtec.py` (retrieval and
+provenance) and `scripts/01_inventory_and_registry.py` (inventory and audit). The approved
+disposition is RETIREMENT rather than migration, and the owner is drafting that ruling; the
+script is NOT migrated here.
+
+On the two-tier posture (`team.md` § Code Style), read precisely. The machine-readable half
+is already satisfied: `audit_dst` writes `missing_days` and `expected_days` per month into
+the emitted report, so a completeness shortfall is a field and not console text. A
+completeness shortfall is also legitimately NON-FATAL, so `main`'s unconditional `return 0`
+is correct and is not the defect. What was unmet is the remaining clause — "the artifact
+explicitly marked derived and/or partial" — and the report now carries a top-level
+`partial` flag with the months that set it. That one field stands whether or not the
+retirement ruling lands.
 """
 
 from __future__ import annotations
@@ -165,11 +182,50 @@ def audit_f107() -> dict:
     }
 
 
+def _partial_reasons(dst: dict, f107: dict) -> list[str]:
+    """Every measured completeness shortfall, as machine-readable reasons.
+
+    `team.md` § Code Style: a completeness shortfall is non-fatal but the artifact must be
+    "explicitly marked derived and/or partial". The per-month `missing_days` fields already
+    carried the detail; what a reader had no way to see at a glance was whether the report
+    as a whole is complete. Derived from the measurements, never asserted alongside them.
+    """
+    reasons: list[str] = []
+    for month, info in sorted(dst.items()):
+        if info.get("error"):
+            reasons.append(f"kyoto_dst 2022-{int(month):02d}: {info['error']}")
+        elif info.get("missing_days"):
+            reasons.append(
+                f"kyoto_dst 2022-{int(month):02d}: {len(info['missing_days'])} of "
+                f"{info.get('expected_days')} day rows absent"
+            )
+    if f107.get("days_missing_2022"):
+        reasons.append(
+            f"nrcan_f107: {len(f107['days_missing_2022'])} of "
+            f"{f107.get('days_expected_2022')} calendar days absent"
+        )
+    if f107.get("unparsed_lines"):
+        reasons.append(f"nrcan_f107: {f107['unparsed_lines']} unparsed line(s)")
+    return reasons
+
+
 def main() -> int:
+    dst = audit_dst()
+    f107 = audit_f107()
+    partial_reasons = _partial_reasons(dst, f107)
     report = {
         "generated_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "obligation_1_kyoto_dst": audit_dst(),
-        "obligation_2_canadian_f107": audit_f107(),
+        # Recommendation 51: the artifact marks ITSELF derived and partial. `partial` is
+        # the flag a reader or a downstream check can act on; `partial_reasons` is why,
+        # derived from the measurements above rather than restated beside them. A
+        # completeness shortfall stays non-fatal — `main` still returns 0 — so the exit
+        # code reports integrity and this field reports completeness, which is the
+        # two-tier split (`team.md` § Code Style).
+        "artifact_kind": "DERIVED -- audit over locally retrieved, hashed evidence",
+        "partial": bool(partial_reasons),
+        "partial_reasons": partial_reasons,
+        "obligation_1_kyoto_dst": dst,
+        "obligation_2_canadian_f107": f107,
     }
     out = EVIDENCE / "ec1-audit-report.json"
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -180,7 +236,14 @@ def main() -> int:
             f"2022-{int(month):02d}  rows={info.get('day_rows_parsed')}/"
             f"{info.get('expected_days')}  missing={info.get('missing_days')}"
         )
+    if partial_reasons:
+        print("\nPARTIAL — recorded in the report's `partial`/`partial_reasons` fields:")
+        for reason in partial_reasons:
+            print(f"  {reason}")
     print(f"\nwrote {out}")
+    # Completeness shortfalls are non-fatal by contract and are recorded as fields above,
+    # never signalled by the exit code. A non-zero exit here would mean an INTEGRITY
+    # violation, and the two must not be conflated (`team.md` § Code Style).
     return 0
 
 

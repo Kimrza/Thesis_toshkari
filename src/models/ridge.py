@@ -33,7 +33,7 @@ scientific constant.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -53,7 +53,7 @@ from src.models.train import (
     target_series,
 )
 
-__all__ = ["require_sklearn", "fit_predict_rows"]
+__all__ = ["require_sklearn", "fit_state", "predict_rows_from_state", "fit_predict_rows"]
 
 GRID_TRACK = "ridge"
 
@@ -73,18 +73,97 @@ def require_sklearn(requirements_path: Path | None = None) -> Any:
     return sklearn
 
 
-def _scored_features(
-    bundle: FeatureBundle, score_bundle: FeatureBundle, *, horizon_hours: int
-) -> tuple[list[str], list[list[float]], list[list[float]]]:
-    columns = list(eligible_feature_columns(bundle, horizon_hours=horizon_hours))
-    missing = [c for c in columns if c not in score_bundle.provenance]
+def _assert_score_columns(columns: Sequence[str], score_bundle: FeatureBundle) -> list[str]:
+    """The fit's eligible columns must all exist on the frame being scored."""
+    ordered = [str(c) for c in columns]
+    missing = [c for c in ordered if c not in score_bundle.provenance]
     if missing:
         raise IntegrityError(
             f"score bundle {score_bundle.spec.partition_id}/{score_bundle.spec.role}",
             f"lacks fitted feature column(s) {missing}; the score frame is not the one the "
             f"model was fitted for",
         )
-    return columns, feature_rows(bundle, columns), feature_rows(score_bundle, columns)
+    return ordered
+
+
+def fit_state(
+    model_id: str,
+    *,
+    bundle: FeatureBundle,
+    partition: Partition,
+    snapshot: ConfigSnapshot,
+    target: Any,
+    seed: int | None = None,
+    params: Mapping[str, Any] | None = None,
+    horizon_hours: int,
+    validation_bundle: FeatureBundle | None = None,
+    requirements_path: Path | None = None,
+    **_unused: Any,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Fit WITHOUT predicting: the fitted estimator plus the columns it was fitted on.
+
+    The REFIT half of the locked path. The returned state is NOT JSON-serialisable (it holds
+    a fitted scikit-learn estimator), so `train.JsonStateBackend` refuses it by name: the
+    serialization format for a fitted estimator is a governed choice that does not exist yet,
+    and pickling one is not an implementer's decision to make.
+    """
+    if model_id != "M-04":
+        raise IntegrityError(f"model_id {model_id!r}", "ridge.py serves M-04 only")
+    if params is None:
+        raise IntegrityError(
+            "fit_predict(M-04)",
+            "a grid point {alpha} is required; a default alpha would be a value chosen by "
+            "convenience (R-96; TE 18.2)",
+        )
+    assert_in_grid(snapshot, GRID_TRACK, params)  # a value outside the config grid refuses
+    columns = list(eligible_feature_columns(bundle, horizon_hours=horizon_hours))
+    x_train = feature_rows(bundle, columns)
+    _, labels, missing_labels = labels_for(bundle, target_series(target))
+    kept = [(x, y) for x, y in zip(x_train, labels, strict=True) if y is not None]
+    if not kept:
+        raise IntegrityError(
+            f"bundle {bundle.spec.partition_id}/{bundle.spec.role}",
+            "no training row carries a label; a fit over zero rows is not a fit",
+        )
+    require_sklearn(requirements_path)
+    from sklearn.linear_model import Ridge  # lazy: inside the fit path only
+
+    model = Ridge(alpha=params["alpha"])
+    model.fit([x for x, _ in kept], [y for _, y in kept])
+    state = {"estimator": model, "columns": columns, "hyperparameters": dict(params)}
+    attrs = {
+        "hyperparameters": dict(params),
+        "feature_columns": columns,
+        "training_rows_excluded_missing_label": missing_labels,
+    }
+    return state, attrs
+
+
+def predict_rows_from_state(
+    state: Mapping[str, Any],
+    model_id: str,
+    *,
+    score_bundle: FeatureBundle,
+    partition: Partition,
+    snapshot: ConfigSnapshot,
+    target: Any = None,
+    horizon_hours: int,
+    **_unused: Any,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Predict from a PERSISTED fit — nothing is fitted here (the locked path's half)."""
+    if model_id != "M-04":
+        raise IntegrityError(f"model_id {model_id!r}", "ridge.py serves M-04 only")
+    columns = _assert_score_columns(state["columns"], score_bundle)
+    y_hat = [float(v) for v in state["estimator"].predict(feature_rows(score_bundle, columns))]
+    rows = [
+        {"station": station, "interval_start_utc": stamp, "y_hat": value}
+        for (station, stamp), value in zip(bundle_index(score_bundle), y_hat, strict=True)
+    ]
+    return rows, {
+        "hyperparameters": dict(state.get("hyperparameters") or {}),
+        "feature_columns": columns,
+        "horizon_hours": horizon_hours,
+    }
 
 
 def fit_predict_rows(
@@ -98,37 +177,41 @@ def fit_predict_rows(
     seed: int | None,
     params: Mapping[str, Any] | None,
     horizon_hours: int,
+    validation_bundle: FeatureBundle | None = None,
     requirements_path: Path | None = None,
 ) -> Prediction:
-    """The family entry `train.fit_predict` dispatches to for M-04."""
+    """The family entry `train.fit_predict` dispatches to for M-04.
+
+    `validation_bundle` is accepted for a uniform family signature and is unused: Ridge has
+    no epoch loop and selects nothing at fit time.
+    """
     if model_id != "M-04":
         raise IntegrityError(f"model_id {model_id!r}", "ridge.py serves M-04 only")
-    if params is None:
-        raise IntegrityError(
-            "fit_predict(M-04)",
-            "a grid point {alpha} is required; a default alpha would be a value chosen by "
-            "convenience (R-96; TE 18.2)",
-        )
-    assert_in_grid(snapshot, GRID_TRACK, params)  # a value outside the config grid refuses
-    columns, x_train, x_score = _scored_features(bundle, score_bundle, horizon_hours=horizon_hours)
-    series = target_series(target)
-    _, labels, missing_labels = labels_for(bundle, series)
-    kept = [(x, y) for x, y in zip(x_train, labels, strict=True) if y is not None]
-    if not kept:
-        raise IntegrityError(
-            f"bundle {bundle.spec.partition_id}/{bundle.spec.role}",
-            "no training row carries a label; a fit over zero rows is not a fit",
-        )
-    require_sklearn(requirements_path)
-    from sklearn.linear_model import Ridge  # lazy: inside the fit path only
-
-    model = Ridge(alpha=params["alpha"])
-    model.fit([x for x, _ in kept], [y for _, y in kept])
-    y_hat = [float(v) for v in model.predict(x_score)]
-    rows = [
-        {"station": station, "interval_start_utc": stamp, "y_hat": value}
-        for (station, stamp), value in zip(bundle_index(score_bundle), y_hat, strict=True)
-    ]
+    # the eligible-column set is the FIT bundle's and must exist on the scored frame
+    _assert_score_columns(
+        eligible_feature_columns(bundle, horizon_hours=horizon_hours), score_bundle
+    )
+    state, attrs = fit_state(
+        model_id,
+        bundle=bundle,
+        partition=partition,
+        snapshot=snapshot,
+        target=target,
+        seed=seed,
+        params=params,
+        horizon_hours=horizon_hours,
+        validation_bundle=validation_bundle,
+        requirements_path=requirements_path,
+    )
+    rows, _ = predict_rows_from_state(
+        state,
+        model_id,
+        score_bundle=score_bundle,
+        partition=partition,
+        snapshot=snapshot,
+        target=target,
+        horizon_hours=horizon_hours,
+    )
     return new_prediction(
         model_id,
         seed=None,
@@ -138,8 +221,6 @@ def fit_predict_rows(
         attrs={
             "role": score_bundle.spec.role,
             "horizon_hours": horizon_hours,
-            "hyperparameters": dict(params),
-            "feature_columns": columns,
-            "training_rows_excluded_missing_label": missing_labels,
+            **attrs,
         },
     )

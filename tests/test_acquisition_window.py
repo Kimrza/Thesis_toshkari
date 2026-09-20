@@ -67,16 +67,33 @@ EVIDENCE_ROOTS = (EVIDENCE_DIR, RESTRICTED_DIR)
 # Before 2026-08-28 these reads happened with no access row at all (GOV-2026-08-28-FD-01
 # Rec 2, VAL-02, Validation Auditor veto). Corrected under D-31, which signed G-09.
 
-ACCESS_LOG = EVIDENCE_DIR / "test_run_access_log.jsonl"
+# TEST-MODE ACCESS LOG, separated 2026-09-20 (Recommendation 1, owner ruling = option 2).
+#
+# Until this remediation this module appended to `evidence/test_run_access_log.jsonl`, the
+# SAME file a real governed December access would use; together with
+# `tests/test_release_hashes.py` it produced all 5,964 of that file's rows (324 from here).
+# The custody rule is unchanged -- a restricted read still writes a durable `AccessRecord`
+# BEFORE the read -- but the destination is now a test-mode sidecar under
+# `artifacts/exec_evidence/`, which is gitignored. The governed log is reserved for real
+# accesses, is closed to further appends, and its rows are preserved unedited and described
+# in `evidence/test_run_access_log.SUPERSEDED_2026-09-20.md`. Nothing is deleted.
+ACCESS_LOG = REPO_ROOT / "artifacts" / "exec_evidence" / "test_access_log.jsonl"
 
 
 def _test_access_record() -> AccessRecord:
     """`purpose` is `coverage_audit`: this module asserts record DATES for containment,
     which is custody assessment rather than analysis -- the performance-blind class
-    Vision 8.3 permits before G-05. No VTEC value or coverage figure is read."""
+    Vision 8.3 permits before G-05. No VTEC value or coverage figure is read.
+
+    `retrieved_at_utc` is a REAL timestamp, taken at call time (Recommendation 1, limb 3).
+    It carried the placeholder `"recorded-at-call-time-by-the-runner"` on every historical
+    row, which left FR-P1-02-3's ordering requirement unverifiable from the very log that
+    records it. `AccessRecord.__post_init__` now refuses a value that does not parse as
+    ISO-8601, so the placeholder cannot be reintroduced by any future producer.
+    """
     return AccessRecord(
         run_id="test_acquisition_window",
-        retrieved_at_utc="recorded-at-call-time-by-the-runner",
+        retrieved_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
         scope="acquisition record dates, for the out-of-window containment invariant",
         purpose="coverage_audit",
         performance_inspected=False,

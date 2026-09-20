@@ -1,0 +1,527 @@
+# tests/fixtures/scientific_1month/fixture_manifest.yaml — TE §15.2 fixture manifest.
+#
+# Purpose: the STRUCTURAL skeleton of the one-month all-station scientific fixture's
+#   manifest, written 2026-09-20 under the approved governance remediation of
+#   Recommendation 37 (option 2, first step).
+# Inputs: `tests/fixtures/scientific_1month/identity_declaration.yaml` (the owner's Q-31
+#   identity declaration, adopted 2026-09-13 under CR-2026-09-13-000102-FIXTURE-WINDOW) —
+#   every identity field, every input hash, the apparatus-partition set and the
+#   `fixture_bootstrap` block below are TRANSCRIBED from it verbatim, never re-derived.
+#   `PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md` §15.2 (the
+#   twelve content areas), §15.3 (the reduced-replicate bootstrap) and §15.4 (the
+#   required-output enumeration).
+# Re-run behaviour: read-only data. `load_fixture_manifest` is the ONE read path
+#   (R-133 control 4). This file is never edited by code.
+#
+# ─────────────────────────────────────────────────────────────────────────────────────
+# WHAT THIS FILE IS NOT
+#
+# It is NOT frozen and it is NOT loadable-clean. `load_fixture_manifest` will REFUSE it,
+# by name, at the first MEASURED field — and that refusal is the intended outcome.
+#
+# TE §15.1: "exact counts, tolerances, and runtimes are measured from the fixtures and
+# frozen; they are not invented here." Neither fixture has ever run. NO measured figure is
+# written below. Every measured quantity carries the literal sentinel `TBD — freeze gate`
+# and deliberately carries NO `measuring_run_id`, which is what makes `_validate_measured`
+# (R-134 control 8) refuse it. Inventing a `measuring_run_id` to make the loader pass would
+# disguise an unmeasured manifest as a measured one — the worst available outcome.
+#
+# SEQUENCING, which this fixture does not get to skip: TE §9.2 and R-140 control 26
+# require a VERIFIED `plumbing_7day` receipt before a scientific measuring run. Both
+# fixtures must pass, in order, before any full-year job.
+#
+# BLK-02 is UNAFFECTED and stays OPEN: no measured value was written here.
+# ─────────────────────────────────────────────────────────────────────────────────────
+
+fixture_id: scientific_1month
+
+status: candidate
+
+# --- TE §15.2 area 1 of 12 — Identity ------------------------------------------------
+identity:
+  fixture_id: scientific_1month
+  stations:
+    - ARUC
+    - BSHM
+    - NICO
+  station_cells:
+    ARUC: "40/44"
+    BSHM: "32/35"
+    NICO: "35/33"
+  utc_dates: "2022-03-01..2022-03-31"
+  selection_rule: >-
+    D-14 (verbatim rationale): regime separation — D-11's frozen seven-day plumbing window
+    is 2022-11-01 to 2022-11-07, so placing the scientific fixture in a different season
+    means the two fixtures probe different diurnal and seasonal structure; March is an
+    equinox month. Measured coverage — March is the best-covered eligible month outside
+    January and February (ARUC 99.5%, BSHM 99.9%, NICO 97.8% in-month hourly) with
+    raw_isprint_cache/ present.
+  creator: >-
+    Kimia Rezaei (student; Q-31 assigns fixture station, dates and acceptance tolerances
+    to the Student, TE §18.2)
+  approval_status: >-
+    adopted 2026-09-13 under Q-31 (student-owned; owner FINAL RULING of 2026-09-13,
+    CR-2026-09-13-000102-FIXTURE-WINDOW; no supervisor countersignature required per
+    team.md § Walking Skeleton). The IDENTITY is adopted; the MANIFEST is not frozen —
+    status above is `candidate`.
+  window_citation:
+    decision: D-14
+    start_utc: "2022-03-01"
+    end_utc: "2022-03-31"
+  # `station_citation` (D-20) belongs to plumbing_7day ONLY and its presence here would be
+  # REFUSED: scientific_1month runs all cited stations under D-14.
+  limitations:
+    december_representativeness: not_representative
+    clauses:
+      - >-
+        March 2022 is an equinox month and does not reproduce December's winter-solstice
+        regime or its activity distribution.
+      - >-
+        It is not representative of the locked test month, and no fixture result may be
+        read as evidence about December behaviour.
+  data07_caveat: >-
+    DATA-07: this month's provenance is unverifiable in principle, not merely unverified —
+    no provider byte stream exists anywhere in the workspace, and the provider-side term of
+    the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12,
+    the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts
+    were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied
+    on at a freeze gate while its provenance chain points at superseded per-month hashes
+    (team.md § Walking Skeleton).
+  eligibility_evidence:
+    decision: D-14
+    source: >-
+      evidence/audit_evidence_2022-03/madrigal_coverage_raw_records.csv (D-14 measured
+      basis: in-month hourly coverage ARUC 99.5%, BSHM 99.9%, NICO 97.8%)
+  phase_id: P1A
+  source_id: GNSS_VTEC
+  target_definition_id: GRIDDed_VTEC_1H
+  # `freeze_citation` is required only when status is `frozen`; deliberately absent.
+
+# --- TE §15.2 area 2 of 12 — Inputs --------------------------------------------------
+inputs:
+  rinex_crx:
+    status: not_applicable
+    reason: >-
+      Phase 2 only. TE §7.0's Phase 1 hard prohibition bars RINEX parsing; the Phase 1
+      fixture reads prepared provider VTEC only (TE §15.1).
+  site_log:
+    value: "TBD — freeze gate"
+    source: >-
+      the official IGS site logs for ARUC, BSHM and NICO with their retrieval dates and
+      SHA-256. Not retrieved into the repository; the station-coordinate migration out of
+      `notebooks/madrigal_phase1_coverage_audit.ipynb` is owed first (team.md § Code Style)
+      and its values are a §18.2 forbidden-choice item.
+  dcb:
+    status: not_applicable
+    reason: Phase 2 only — DCB handling is inside TE §7.0's Phase 1 hard prohibition.
+  iri:
+    value: "TBD — freeze gate"
+    source: >-
+      IRI-2016 benchmark inputs, produced by `scripts/04_build_external_products.py`.
+      Evaluation-time only — never a model input (NFR-IRI-01).
+  ionex:
+    value: "TBD — freeze gate"
+    source: >-
+      CODE final GIM (IONEX) comparator input, same producer. Never presumed independent
+      before the network-overlap audit (TE §5.2); `gim_network_overlap_flag` disclosure is
+      mandatory once that audit runs.
+  space_weather:
+    value: "TBD — freeze gate"
+    source: >-
+      the Kp/ap3, Hp60/ap60, F10.7 and (diagnostic-only) Dst captures for the March window
+      with their release grades and SHA-256. Release grade is recorded, not only lag
+      (TE §10: never backfill from future final values).
+  prepared_vtec:
+    # TRANSCRIBED VERBATIM from identity_declaration.yaml — owner-recorded provenance,
+    # not a measurement taken here.
+    evidence_dir: evidence/audit_evidence_2022-03
+    sha256_manifest: sha256_manifest.json
+    records_file: madrigal_coverage_raw_records.csv
+    files:
+      madrigal_coverage_summary.csv: 1f42e1dce814dfdd408f3cbf3750e777c35da59c39e1116d15c1c3fa991f166b
+      madrigal_coverage_monthly.csv: 2f59aa4c17e553d125d7c2ef9392c80c24101377cc112fa6a335385b0ab1fc5c
+      madrigal_coverage_raw_records.csv: d88f66d9f81da079b1f39b8163a3ae0e125314d9902cc55d291072f2b663f528
+      request_manifest.json: 8d52fd6b67d63cadc7aa617786311a2ed9fdb62a2e7ba06eeed56659fe3d77ae
+    citation: >-
+      the month's four declared derived artifacts and their SHA-256 as recorded in
+      evidence/audit_evidence_2022-03/sha256_manifest.json (team.md § Walking Skeleton
+      eligibility criterion; R-135 limb 2); DATA-07 caveat applies — derived-artifact
+      verification, not retrieval verification.
+
+# --- TE §15.2 area 3 of 12 — Processing ----------------------------------------------
+processing:
+  gnss_tec_version:
+    status: not_applicable
+    reason: Phase 2 only — `gnss-tec` is a raw-processing dependency (TE §7.0).
+  calibration_layer_commit:
+    status: not_applicable
+    reason: Phase 2 only — the calibration layer is raw-processing (TE §7.0).
+  full_config_id:
+    value: "TBD — freeze gate"
+    source: >-
+      the run's configuration snapshot id over the four governed configs, computed at
+      stage entry and hashed into the TE §13.1 environment lock. A per-run identity.
+
+# --- TE §15.2 area 4 of 12 — Expected schema ------------------------------------------
+expected_schema:
+  raw:
+    status: not_applicable
+    reason: Phase 2 only — raw observation schema (TE §7.0).
+  intermediate:
+    status: not_applicable
+    reason: Phase 2 only — STEC/mapping intermediates (TE §7.0).
+  hourly_target:
+    contract: "D-17 (evidence/DECISIONS.md): exactly sixteen row fields"
+    permitted_extra: lineage_caveat
+    authoritative_copy: src/data/prepared.py D17_FIELDS
+    drift_guard: tests/test_phase_boundary.py::test_d17_target_fields_match_the_producer_contract
+  feature:
+    value: "TBD — freeze gate"
+    source: >-
+      `configs/features.yaml` `feature_dictionary` and `feature_set_id`, both still the
+      literal sentinel. Frozen at G-04, not here.
+  benchmark:
+    value: "TBD — freeze gate"
+    source: the IRI-2016 benchmark table schema (architecturally isolated, NFR-IRI-01).
+  comparator:
+    value: "TBD — freeze gate"
+    source: the CODE final GIM comparator table schema.
+  prediction:
+    value: "TBD — freeze gate"
+    source: >-
+      the prediction-row contract from `scripts/06_train_and_predict.py`, carrying the
+      three TEC-05 stamps on every row.
+  metric:
+    value: "TBD — freeze gate"
+    source: >-
+      the metrics contract from `scripts/07_evaluate_and_report.py`. The three mandatory
+      difficulty controls are co-reported in the SAME primary table as the LSTM-vs-IRI
+      comparison (Vision §2.4, binding honesty rule) — a reporting obligation, not a
+      schema value to invent here.
+  registry:
+    contract: "TE §13.4: the twenty-column experiment-registry row"
+    authoritative_copy: src/data/experiment_registry.py REGISTRY_COLUMNS
+
+# --- TE §15.2 area 5 of 12 — Units -----------------------------------------------------
+units:
+  utc_convention:
+    value: >-
+      all timestamps are UTC; `interval_start_utc` labels the START of the hourly bin
+      (D-17's row contract)
+    source: D-17; src/data/prepared.py
+  coordinates:
+    value: "TBD — freeze gate"
+    source: >-
+      the station registry's geodetic AND IGRF geomagnetic coordinates for all three
+      cells, plus the coordinate-to-cell rule. Both are §18.2 forbidden-choice items
+      (station coordinates: Student; cell-selection rule: Student + Supervisor).
+  tecu:
+    value: TECU
+    source: TE § Domain Glossary — the unit of every VTEC quantity in this project.
+  seconds_counts:
+    value: "TBD — freeze gate"
+    source: >-
+      the seconds/count conventions for `largest_internal_gap_s` and
+      `valid_observation_count`. Declared by the producer at measuring time.
+  external_index_units:
+    value: "TBD — freeze gate"
+    source: >-
+      TE §6.2's driver dictionary fixes the units of Kp/ap3, Hp60/ap60, F10.7 (sfu) and
+      Dst (nT); binding the fixture-scoped subset is a measuring-run act.
+
+# --- TE §15.2 area 6 of 12 — Row-count ranges -----------------------------------------
+row_count_ranges:
+  parsing:
+    status: not_applicable
+    reason: Phase 2 only — no parsing stage exists in Phase 1 (TE §7.0).
+  valid_observation:
+    status: not_applicable
+    reason: Phase 2 only — per-observation validity is a raw-processing quantity.
+  hourly_target:
+    min: "TBD — freeze gate"
+    max: "TBD — freeze gate"
+    note: >-
+      measured from the scientific fixture run, BY STATION and by stage (TE §15.2's
+      "expected range ... by station and stage"); no measuring_run_id exists yet
+  feature_window:
+    min: "TBD — freeze gate"
+    max: "TBD — freeze gate"
+    note: measured from the scientific fixture run; no measuring_run_id exists yet
+  split:
+    min: "TBD — freeze gate"
+    max: "TBD — freeze gate"
+    note: >-
+      measured over the APPARATUS partitions declared below, never the six frozen
+      F1…F4/REFIT/DEC ids (R-137 control 15)
+
+# --- TE §15.2 area 7 of 12 — Support/missingness ---------------------------------------
+support_missingness:
+  target_support:
+    limit: "TBD — freeze gate"
+    note: >-
+      measured. The numerical coverage minimum at Vision §6.1B is a SEPARATE supervisor
+      freeze gate governing G-P1A prepared-data acceptance, not a fixture value, and is
+      not restated here.
+  invalid_hour:
+    limit: "TBD — freeze gate"
+    note: measured
+  external_feature:
+    limit: "TBD — freeze gate"
+    note: >-
+      measured. The carry-forward bound is NOT measured and is fixed at ≤ 3 hours, then
+      exclude (TE §6.2; TC-09, the central leakage-prevention rule).
+  comparator:
+    limit: "TBD — freeze gate"
+    note: >-
+      measured over the single comparison-wide intersection mask, computed once per
+      comparison set — never a pairwise or model-specific mask (NFR-FAIR-01; TC-16).
+
+# --- TE §15.2 area 8 of 12 — Timestamp tolerances --------------------------------------
+timestamp_tolerances:
+  parser:
+    status: not_applicable
+    reason: Phase 2 only — there is no parser in the Phase 1 path (TE §7.0).
+  hourly_boundary:
+    tolerance: "TBD — freeze gate"
+    note: measured
+  iri:
+    tolerance: "TBD — freeze gate"
+    note: measured
+  gim:
+    tolerance: "TBD — freeze gate"
+    note: measured
+  feature_alignment:
+    tolerance: "TBD — freeze gate"
+    note: >-
+      measured. The declared safe LAGS are fixed by the feature contract and are not
+      restated here; the availability test asserts actual lag ≥ declared safe lag.
+
+# --- TE §15.2 area 9 of 12 — Independent reference checks -------------------------------
+independent_reference_checks:
+  stec_vtec_intermediates:
+    status: not_applicable
+    reason: Phase 2 only — STEC/VTEC intermediates are raw-processing (TE §7.0).
+  hand_worked_dcb_pass:
+    status: not_applicable
+    reason: >-
+      Phase 2 only. The hand-worked DCB pass and its reversed-sign negative control are
+      WS-04/TA-07, deferred to G-P3A.
+  sample_iri_gim_values:
+    value: "TBD — freeze gate"
+    source: >-
+      sample IRI and GIM values at the fixture's timestamps and station coordinates,
+      produced by `scripts/04_build_external_products.py`. Every comparison carries the
+      documented spatial-representativeness mismatch (Vision §6.6; TE §5).
+
+# --- TE §15.2 area 10 of 12 — Required outputs ------------------------------------------
+required_outputs:
+  artifact_manifest_ref: ../../../artifacts/walking_skeleton/scientific_1month/artifact_manifest.json
+
+  # TWENTY entries: TE §15.4's full enumeration, including the fixture-2-only
+  # `target_uncertainty_budget.json`. The `.*` entries keep TE §15.4's own wildcard form:
+  # the concrete extension is bound by the producing run, and naming one here would be
+  # this file inventing a fact about output the project has never produced.
+  outputs:
+    - input_manifest.yaml
+    - processing_config_snapshot.yaml
+    - hourly_vtec.parquet
+    - feature_table.parquet
+    - iri_benchmark.parquet
+    - gim_comparator.parquet
+    - split_manifest.json
+    - mask_manifest.json
+    - predictions.parquet
+    - metrics.json
+    - bootstrap_summary.json
+    - checkpoint_manifest.json
+    - registry_entry.json
+    - target_uncertainty_budget.json
+    - plots/target_support.*
+    - plots/predictions.*
+    - plots/residuals.*
+    - plots/quality_diagnostics.*
+    - test_report.*
+    - clean_run_log.*
+
+  # `comparison_class` IS THE SENTINEL ON EVERY ENTRY, DELIBERATELY — see the plumbing
+  # manifest's identical note. Assigning `exact` versus `toleranced` is a governed
+  # reproducibility decision under TE §13.7 and an implementer may not fill it by
+  # convenience (TE §1.1). When it IS frozen: a `toleranced` entry's `fp_tolerance` is
+  # MEASURED and carries its `measuring_run_id` (R-134), and a `toleranced` entry
+  # declaring TECU units whose producing path declares no `inverse_route` is NOT freezable
+  # (BLK-08 down-arrow; R-139 control 25).
+  comparison_ledger:
+    input_manifest.yaml:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/00_acquire_prepared_vtec.py
+    processing_config_snapshot.yaml:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/01_inventory_and_registry.py
+    hourly_vtec.parquet:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/02_standardize_prepared_target.py
+    feature_table.parquet:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/05_build_features_and_splits.py
+    iri_benchmark.parquet:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/04_build_external_products.py
+    gim_comparator.parquet:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/04_build_external_products.py
+    split_manifest.json:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/05_build_features_and_splits.py
+    mask_manifest.json:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    predictions.parquet:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/06_train_and_predict.py
+    metrics.json:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    bootstrap_summary.json:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    checkpoint_manifest.json:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/06_train_and_predict.py
+    registry_entry.json:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/run_walking_skeleton.py
+    target_uncertainty_budget.json:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    plots/target_support.*:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    plots/predictions.*:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    plots/residuals.*:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    plots/quality_diagnostics.*:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/07_evaluate_and_report.py
+    test_report.*:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/run_walking_skeleton.py
+    clean_run_log.*:
+      comparison_class: "TBD — freeze gate"
+      units: "TBD — freeze gate"
+      producing_path:
+        script: scripts/run_walking_skeleton.py
+
+# --- TE §15.2 area 11 of 12 — Runtime ---------------------------------------------------
+runtime:
+  cpu_total:
+    min_seconds: "TBD — freeze gate"
+    max_seconds: "TBD — freeze gate"
+    note: >-
+      measured on CPU with the GPU made invisible (CUDA_VISIBLE_DEVICES=""). CPU is a
+      complete execution path, never an emergency mode (TC-01).
+  storage_total:
+    min_bytes: "TBD — freeze gate"
+    max_bytes: "TBD — freeze gate"
+    note: measured from the fixture run
+  widening_guard_cpu:
+    # scientific_1month ONLY: statistical-inference R-120 clause 4's widening guard has a
+    # measured doubled CPU cost, and this is its named cross-unit slot.
+    min_seconds: "TBD — freeze gate"
+    max_seconds: "TBD — freeze gate"
+    note: measured; the widening guard's doubled-bootstrap cost
+
+# --- TE §15.2 area 12 of 12 — Numerical variation ---------------------------------------
+numerical_variation:
+  exact_fields:
+    value: "TBD — freeze gate"
+    source: >-
+      TE §13.7 fixes the five classes requiring exact equality — hashes, schemas,
+      partition membership, IDs, deterministic CPU transformations. WHICH of this
+      fixture's fields fall in each class is the same frozen decision as
+      `comparison_ledger.comparison_class` above and is deliberately not chosen here.
+  floating_point_tolerances:
+    value: "TBD — freeze gate"
+    note: >-
+      measured. A clean run FAILS when a value exceeds its declared tolerance and must
+      never silently update the expected value (TE §13.7; NFR-REP-01).
+  planted_correlation_recovery_tolerance:
+    # scientific_1month ONLY: statistical-inference R-121 places the planted-correlation
+    # recovery tolerance in the fixture manifest, never in the rule.
+    value: "TBD — freeze gate"
+    note: measured from the synthetic planted-correlation control on this fixture
+
+# --- apparatus partitions (R-137; Q4 = A) -----------------------------------------------
+# TRANSCRIBED VERBATIM from identity_declaration.yaml. Ids are OUTSIDE the six frozen ids
+# F1…F4/REFIT/DEC — the frozen id space is quarantined both ways and no seventh enumerated
+# exception is minted (R-137 control 15). No partition is ever `locked`: a December-free
+# fixture constructs no December read (R-82). Both training ranges and both validation
+# months lie inside D-14's cited window, which `_validate_apparatus_partitions` re-checks.
+apparatus_partitions:
+  FIX-MAR-FOLD-01:
+    kind: fold
+    train_start: "2022-03-01"
+    train_end: "2022-03-14"
+    validation_month: "2022-03-15"
+  FIX-MAR-FOLD-02:
+    kind: fold
+    train_start: "2022-03-01"
+    train_end: "2022-03-21"
+    validation_month: "2022-03-22"
+
+# --- fixture bootstrap (TE §15.3; R-133 limb 5, control 37) -----------------------------
+# TRANSCRIBED VERBATIM from identity_declaration.yaml. TE §15.3 requires ONE bootstrap
+# execution at REDUCED replicate count on fixture 2, for TIMING. These are apparatus
+# constants (R-122) and are NOT `experiment.yaml` values: the confirmatory bootstrap
+# remains 10,000 replicates at seed 20221201 with 24-hour vector blocks carrying all three
+# stations together (TE §13.6; TC-19), and nothing here amends it.
+#
+# The divisibility the loader re-checks: 336 h / 24 h = 14 whole blocks; 336 h / 48 h = 7.
+# Evaluated at freeze rather than discovered inside the run (control 37).
+fixture_bootstrap:
+  replicates: 1000
+  scored_range:
+    hours: 336
+  block_counts:
+    24h: 14
+    48h: 7

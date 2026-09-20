@@ -38,7 +38,7 @@ scientific constant in source.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final
@@ -59,7 +59,14 @@ from src.models.train import (
     target_series,
 )
 
-__all__ = ["ImportanceFigure", "diagnostic_importance", "development_seed", "fit_predict_rows"]
+__all__ = [
+    "ImportanceFigure",
+    "diagnostic_importance",
+    "development_seed",
+    "fit_state",
+    "predict_rows_from_state",
+    "fit_predict_rows",
+]
 
 GRID_TRACK: Final[str] = "random_forest"
 
@@ -113,21 +120,38 @@ def diagnostic_importance(
     )
 
 
-def fit_predict_rows(
+def _assert_score_columns(columns: Sequence[str], score_bundle: FeatureBundle) -> list[str]:
+    """The fit's eligible columns must all exist on the frame being scored."""
+    ordered = [str(c) for c in columns]
+    missing_columns = [c for c in ordered if c not in score_bundle.provenance]
+    if missing_columns:
+        raise IntegrityError(
+            f"score bundle {score_bundle.spec.partition_id}/{score_bundle.spec.role}",
+            f"lacks fitted feature column(s) {missing_columns}",
+        )
+    return ordered
+
+
+def fit_state(
     model_id: str,
     *,
     bundle: FeatureBundle,
-    score_bundle: FeatureBundle,
     partition: Partition,
     snapshot: ConfigSnapshot,
     target: Any,
-    seed: int | None,
-    params: Mapping[str, Any] | None,
+    seed: int | None = None,
+    params: Mapping[str, Any] | None = None,
     horizon_hours: int,
+    validation_bundle: FeatureBundle | None = None,
     requirements_path: Path | None = None,
-) -> Prediction:
-    """The family entry `train.fit_predict` dispatches to for M-05. Returns a `Prediction`
-    ONLY — no importance score travels on any fit or selection path (R-100)."""
+    **_unused: Any,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Fit WITHOUT predicting: the fitted forest plus the columns it was fitted on.
+
+    The REFIT half of the locked path. The returned state is NOT JSON-serialisable (it holds
+    a fitted scikit-learn estimator), so `train.JsonStateBackend` refuses it by name: the
+    serialization format for a fitted forest is a governed choice that does not exist yet.
+    """
     if model_id != "M-05":
         raise IntegrityError(f"model_id {model_id!r}", "random_forest.py serves M-05 only")
     if params is None:
@@ -138,14 +162,7 @@ def fit_predict_rows(
         )
     assert_in_grid(snapshot, GRID_TRACK, params)
     columns = list(eligible_feature_columns(bundle, horizon_hours=horizon_hours))
-    missing_columns = [c for c in columns if c not in score_bundle.provenance]
-    if missing_columns:
-        raise IntegrityError(
-            f"score bundle {score_bundle.spec.partition_id}/{score_bundle.spec.role}",
-            f"lacks fitted feature column(s) {missing_columns}",
-        )
     x_train = feature_rows(bundle, columns)
-    x_score = feature_rows(score_bundle, columns)
     _, labels, missing_labels = labels_for(bundle, target_series(target))
     kept = [(x, y) for x, y in zip(x_train, labels, strict=True) if y is not None]
     if not kept:
@@ -166,11 +183,86 @@ def fit_predict_rows(
         n_jobs=1,
     )
     model.fit([x for x, _ in kept], [y for _, y in kept])
-    y_hat = [float(v) for v in model.predict(x_score)]
+    state = {"estimator": model, "columns": columns, "hyperparameters": dict(params)}
+    attrs = {
+        "hyperparameters": dict(params),
+        "feature_columns": columns,
+        "random_state_source": "configs/seeds.yaml: seeds.development",
+        "training_rows_excluded_missing_label": missing_labels,
+    }
+    return state, attrs
+
+
+def predict_rows_from_state(
+    state: Mapping[str, Any],
+    model_id: str,
+    *,
+    score_bundle: FeatureBundle,
+    partition: Partition,
+    snapshot: ConfigSnapshot,
+    target: Any = None,
+    horizon_hours: int,
+    **_unused: Any,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Predict from a PERSISTED fit — nothing is fitted here (the locked path's half)."""
+    if model_id != "M-05":
+        raise IntegrityError(f"model_id {model_id!r}", "random_forest.py serves M-05 only")
+    columns = _assert_score_columns(state["columns"], score_bundle)
+    y_hat = [float(v) for v in state["estimator"].predict(feature_rows(score_bundle, columns))]
     rows = [
         {"station": station, "interval_start_utc": stamp, "y_hat": value}
         for (station, stamp), value in zip(bundle_index(score_bundle), y_hat, strict=True)
     ]
+    return rows, {
+        "hyperparameters": dict(state.get("hyperparameters") or {}),
+        "feature_columns": columns,
+        "horizon_hours": horizon_hours,
+    }
+
+
+def fit_predict_rows(
+    model_id: str,
+    *,
+    bundle: FeatureBundle,
+    score_bundle: FeatureBundle,
+    partition: Partition,
+    snapshot: ConfigSnapshot,
+    target: Any,
+    seed: int | None,
+    params: Mapping[str, Any] | None,
+    horizon_hours: int,
+    validation_bundle: FeatureBundle | None = None,
+    requirements_path: Path | None = None,
+) -> Prediction:
+    """The family entry `train.fit_predict` dispatches to for M-05. Returns a `Prediction`
+    ONLY — no diagnostic figure travels on any fit or selection path (R-100).
+
+    `validation_bundle` is accepted for a uniform family signature and is unused: the forest
+    has no epoch loop and selects nothing at fit time.
+    """
+    if model_id != "M-05":
+        raise IntegrityError(f"model_id {model_id!r}", "random_forest.py serves M-05 only")
+    state, attrs = fit_state(
+        model_id,
+        bundle=bundle,
+        partition=partition,
+        snapshot=snapshot,
+        target=target,
+        seed=seed,
+        params=params,
+        horizon_hours=horizon_hours,
+        validation_bundle=validation_bundle,
+        requirements_path=requirements_path,
+    )
+    rows, _ = predict_rows_from_state(
+        state,
+        model_id,
+        score_bundle=score_bundle,
+        partition=partition,
+        snapshot=snapshot,
+        target=target,
+        horizon_hours=horizon_hours,
+    )
     return new_prediction(
         model_id,
         seed=None,
@@ -180,9 +272,6 @@ def fit_predict_rows(
         attrs={
             "role": score_bundle.spec.role,
             "horizon_hours": horizon_hours,
-            "hyperparameters": dict(params),
-            "feature_columns": columns,
-            "random_state_source": "configs/seeds.yaml: seeds.development",
-            "training_rows_excluded_missing_label": missing_labels,
+            **attrs,
         },
     )

@@ -21,9 +21,32 @@ What this script can and cannot run today
 * **The registry path refuses at runtime** while `configs/data.yaml` carries its
   `TBD — freeze gate` sentinels for the coordinates, the cell rule and the IGRF version
   (Q2 = A: one pre-G-P1A freeze event; the code is complete, the values await it).
-* The source-inventory path runs: with no released acquisition artifact on disk it
-  honestly records an EMPTY inventory with a machine-readable `missing_entries` field —
-  a completeness shortfall, never console text only (team.md § Code Style).
+* **The source-inventory path now REFUSES too, and for one reason only**: it stamps the
+  three TE 13 definition IDs (R-70/TEC-05, board finding 24) and resolves them through
+  `prepared.resolve_target_identity`, which raises while `configs/data.yaml` carries no
+  `target:` block. Before 2026-09-20 this path ran and wrote a LITERAL EMPTY entry list,
+  which is why `assert_source_entry` and `assert_verbatim_notice` had never once fired
+  (board finding 26). It now builds a real TE 5.1 nine-field entry per month declared in
+  `declared_sources`, with `release_status` carrying the MEASURED provider-version
+  distribution (board finding 8). Completeness shortfalls — the ten months awaiting the
+  DATA-07 re-acquisition, and any provider whose verbatim acknowledgment notice is not
+  transcribed — stay machine-readable `missing_entries` fields and stay non-fatal
+  (team.md § Code Style).
+* **The schema-validation path (`--validate-schema`) refuses** while `configs/data.yaml`
+  carries no `prepared_schema` block: W-5's `expected_schema_from` and `validate_schema`
+  had no production caller at all, and this is their entry point (TE 18.3 — stop and
+  report, never an implementer default).
+
+Provider-version census (board findings 8 and 22)
+-------------------------------------------------
+Five of the eleven non-December months carry more than one provider version token
+(`g.001` alongside `g.002`) in their own `file` column, and the mix was recorded nowhere
+in the workspace. `read_provider_suffix_census` MEASURES the per-month, per-day
+distribution and `assert_sources_unmixed_or_recorded` REFUSES a mix the month's declared
+`release_status_versions` does not cover — R-52 prohibition 2's first production call
+site. The rule is not "never mixed": provider version drift is an observed fact of this
+dataset. The rule is "absent or RECORDED". No census figure is written into this script
+or into a config by hand; the run produces them (TE 18.2).
 
 Migration notes (DISC-I-2 discharged in this copy)
 --------------------------------------------------
@@ -95,22 +118,32 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
+from src.data.acquisition import (  # noqa: E402
+    count_gaps,
+    store_gaps_as_nan,
+)
 from src.data.inventory import (  # noqa: E402
+    AUDIT_MONTHS,
+    assert_no_silent_imputation,
     assert_record_date_class_agreement,
     assert_scope_equals_reference,
     attribute_records_by_month,
     build_regime_report,
     coverage_figures,
+    expected_schema_from,
     finalize_audit_reports,
     governed_reference_scope,
     new_audit_run_id,
+    read_provider_suffix_census,
     route_audit_path,
+    validate_schema,
     write_source_inventory,
 )
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.locked_test import RESTRICTED_ROOT  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
+from src.data.prepared import resolve_target_identity  # noqa: E402
 from src.data.registry import assert_registry_resolved, load_registry  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
 
@@ -158,6 +191,31 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "tally",
     "unscored_events",
     "threshold_owner",
+    # TE 13 identity stamps (R-70/TEC-05, board finding 24). The source inventory and
+    # both audit reports are gate-read artifacts and carried no identity at all.
+    "phase_id",
+    "source_id",
+    "target_definition_id",
+    # The measured provider-version census (board finding 8/22) and the prohibition
+    # results it feeds. `provider_version_census` carries the per-month, per-day
+    # distribution; `release_status` above is where the month DECLARES it.
+    "provider_version_census",
+    "records_by_version",
+    "provider_files_by_version",
+    "version_tokens",
+    "version_mixed",
+    "days_version_mixed",
+    "recorded_versions",
+    "mix_recorded",
+    "records_examined",
+    "records_unrecognised_version",
+    "by_day",
+    "prohibition_results",
+    "gaps_at_retrieval",
+    "gaps_in_artifact",
+    "expected_schema_digest",
+    "observed",
+    "checked_at_utc",
 )
 
 
@@ -201,6 +259,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help=(
             "attempt the December coverage/regime audit; REFUSES while BLK-07's "
             "authorization limb stands"
+        ),
+    )
+    parser.add_argument(
+        "--validate-schema",
+        action="store_true",
+        help=(
+            "attempt the W-5 prepared-product schema validation against the governed "
+            "schema; REFUSES while configs/data.yaml carries no prepared_schema block "
+            "(TE 18.3 — stop and report, never an implementer default)"
         ),
     )
     parser.add_argument(
@@ -404,18 +471,143 @@ def _registry_row(
 # =======================================================================================
 
 
-def _run_inventory(entry: Mapping[str, Any]) -> dict[str, Any]:
-    """W-1: write the source inventory from acquisition's RELEASED artifacts.
+def _resolve_stamps(snapshot: Any) -> Mapping[str, str]:
+    """The three TE 13 definition IDs, RESOLVED from `configs/data.yaml` — never invented.
 
-    Entries are consumed by release ID and hash, never by path (R-44). No released
-    acquisition artifact exists in this workspace yet, so the inventory honestly
-    records zero entries with a machine-readable `missing_entries` field — a
-    completeness shortfall is non-fatal and never console text only (team.md § Code
-    Style); fabricating nine-field entries from nothing would be the integrity failure.
+    Delegates to `prepared.resolve_target_identity`, the ONE resolver, so the head of the
+    provenance chain and stage 02 stamp from the same transcription rather than from two
+    that can drift (R-70, R-30; board finding 24).
+
+    This REFUSES today, and the refusal is the correct state: `configs/data.yaml` carries
+    no `target:` block, so `resolve_target_identity` raises a `StandardizationError`
+    naming the absent field. Stamping this unit's three gate-read artifacts with an
+    identity an implementer chose would be exactly the §18.2 violation the stop-and-report
+    exists to prevent. The exception is deliberately NOT caught here.
+    """
+    return resolve_target_identity(snapshot.data)
+
+
+def _declared_month_sources(snapshot: Any) -> list[Mapping[str, Any]]:
+    """The declared per-month sources this run inventories, from `configs/data.yaml`.
+
+    Read from `declared_sources` rather than hardcoded here, for two reasons. The
+    descriptive TE 5.1 values (provider, role, licence/access notes, the consuming
+    configuration) are the OWNER's transcription and belong in a governed config, not in a
+    script; and `assert_declared_sources_exist` has already hash-verified every entry
+    carrying `path` and `sha256` at stage entry, so an entry reaching this function is one
+    whose bytes match what the config declares.
+
+    Board findings 8 and 22: `declared_sources` was the literal `[]` and no
+    `source_inventory.json` existed anywhere, while both fixture identity declarations
+    already cited their month's evidence directory and four SHA-256 hashes. The two
+    fixture source months are what this list is populated with first; the remaining ten
+    follow at the DATA-07 re-acquisition and are recorded as an open item below.
+    """
+    declared = snapshot.data.get("declared_sources") or []
+    return [item for item in declared if isinstance(item, Mapping)]
+
+
+def _source_notices(snapshot: Any) -> dict[str, str]:
+    """Provider -> the VERBATIM acknowledgment text that provider requires (FR-P1-01-6).
+
+    Read from `configs/data.yaml`'s `source_notices` block. The text is the PROVIDER's,
+    character for character, and transcribing it is the owner's act — a paraphrase fails
+    `assert_verbatim_notice` exactly as an absent notice does, and inventing one here
+    would produce a notice that passes its own check while satisfying nobody.
+
+    Empty today: no notice text is recorded anywhere in this workspace. The absence is
+    reported as a machine-readable open item on the inventory rather than papered over.
+    """
+    block = snapshot.data.get("source_notices")
+    if not isinstance(block, Mapping):
+        return {}
+    return {str(provider): str(text) for provider, text in block.items()}
+
+
+def _inventory_entry(
+    workspace: Path, declaration: Mapping[str, Any]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build ONE TE 5.1 nine-field entry for a declared month, and its measured census.
+
+    Every value is either transcribed by the owner into `declared_sources` or MEASURED
+    from the month's own evidence. Nothing is composed here:
+
+    * `release_status` is the MEASURED provider-version distribution — the field board
+      finding 8 identified as the one that would have surfaced the mix. It is derived from
+      the census, never from the declaration, so a declaration that understates the mix
+      produces a visible disagreement rather than a quiet agreement.
+    * `provider_product_identity` combines the owner's declared identity with the distinct
+      provider filenames the month actually carries, so the version suffixes are ON the
+      entry.
+    * `checksum` is the declared SHA-256, already verified against the bytes at stage
+      entry by `assert_declared_sources_exist`.
+
+    Raises
+    ------
+    IntegrityError
+        (as `InventoryError` / `LockedTestError` / `GateError`) from
+        `read_provider_suffix_census`: an absent records file, a path inside the
+        restricted root, or an UNRECORDED provider-version mix.
+    """
+    records_path = workspace / str(declaration["path"])
+    recorded_versions = [str(v) for v in declaration.get("release_status_versions", ())]
+    _rows, census = read_provider_suffix_census(
+        records_path,
+        recorded_versions=recorded_versions,
+        label=str(declaration.get("coverage") or records_path.parent.name),
+    )
+    observed = census["version_tokens"]
+    entry: dict[str, Any] = {
+        "provider": declaration["provider"],
+        "role": declaration["role"],
+        "provider_product_identity": (
+            f"{declaration['provider_product_identity']}; provider files carry version "
+            f"token(s) {', '.join(observed) or '<none recognised>'} "
+            f"({census['provider_files_by_version']} distinct file(s) per token)"
+        ),
+        "coverage": declaration["coverage"],
+        "retrieval_date": declaration["retrieval_date"],
+        "checksum": declaration["sha256"],
+        # MEASURED, not declared. TE 5.1's "version or release status" slot, given the
+        # asserted meaning board finding 8 found missing everywhere in this workspace.
+        "release_status": (
+            f"provider version distribution (MEASURED {census['records_examined']} "
+            f"records): {census['records_by_version']}; mixed={census['version_mixed']}; "
+            f"days carrying more than one version: {len(census['days_version_mixed'])}; "
+            f"declared: {census['recorded_versions']}"
+        ),
+        "licence_access_notes": declaration["licence_access_notes"],
+        "consuming_configuration": declaration["consuming_configuration"],
+    }
+    if declaration.get("acknowledgment_notice"):
+        entry["acknowledgment_notice"] = declaration["acknowledgment_notice"]
+    return entry, census
+
+
+def _run_inventory(entry: Mapping[str, Any]) -> dict[str, Any]:
+    """W-1: write the source inventory from the DECLARED per-month sources.
+
+    Entries are consumed by release ID and hash, never by path (R-44), and every entry
+    passes `assert_source_entry`'s nine-field check and `assert_verbatim_notice` where the
+    provider requires a notice — both of which had no production caller before 2026-09-20
+    because this function wrote a literal empty entry list (board finding 26).
+
+    Two completeness shortfalls are recorded machine-readably rather than as console text
+    (`team.md` § Code Style), and neither is fatal:
+
+    * the ten months beyond the two fixture source months, deferred to the DATA-07
+      re-acquisition;
+    * any provider whose verbatim acknowledgment notice is not yet transcribed.
+
+    A month that IS declared but whose records are absent, or whose provider-version mix
+    is not recorded, is an INTEGRITY failure and terminates — that is the two-tier split,
+    and it is what makes the census's finding actionable rather than advisory.
     """
     _assert_phase1_field_contract()  # R-24: before the first write, always
 
     snapshot = entry["snapshot"]
+    stamps = _resolve_stamps(snapshot)
+    workspace = Path(snapshot.resolved_roots["workspace"])
     release_root = Path(
         snapshot.resolved_roots.get(
             "release_root", snapshot.resolved_roots["artifacts"] / "releases"
@@ -433,8 +625,81 @@ def _run_inventory(entry: Mapping[str, Any]) -> dict[str, Any]:
             f"inventory consumes releases by release ID and hash (R-44), and none has "
             f"been produced; recorded machine-readably rather than fabricated"
         )
-    inventory_path = write_source_inventory(out_path, [], missing_entries=missing_entries)
-    return {"source_inventory": str(inventory_path), "release_manifests_found": len(manifests)}
+
+    declarations = _declared_month_sources(snapshot)
+    if not declarations:
+        missing_entries.append(
+            "configs/data.yaml declared_sources is empty — no month is declared, so no "
+            "TE 5.1 entry can be built. This is the state board finding 22 reports; the "
+            "two fixture source months are the owner's first transcription"
+        )
+    entries: list[dict[str, Any]] = []
+    census_by_source: dict[str, Any] = {}
+    for declaration in declarations:
+        built, census = _inventory_entry(workspace, declaration)
+        entries.append(built)
+        census_by_source[str(declaration.get("coverage") or declaration["path"])] = census
+
+    inventoried = len(entries)
+    if inventoried and inventoried < len(AUDIT_MONTHS):
+        missing_entries.append(
+            f"{len(AUDIT_MONTHS) - inventoried} of "
+            f"{len(AUDIT_MONTHS)} calendar-2022 months are not yet inventoried; "
+            f"the remainder follow at the DATA-07 re-acquisition, which records each "
+            f"re-acquired file's FULL provider filename including its version suffix, its "
+            f"retrieval date and its SHA-256 (team.md § Walking Skeleton)"
+        )
+
+    notices = _source_notices(snapshot)
+    providers = sorted({str(built["provider"]) for built in entries})
+    unnoticed = [provider for provider in providers if provider not in notices]
+    if unnoticed:
+        missing_entries.append(
+            "no verbatim acknowledgment notice is transcribed for provider(s): "
+            + ", ".join(unnoticed)
+            + " — FR-P1-01-6 requires the provider's text character for character, its "
+            "transcription is the owner's, and a paraphrase fails exactly as an absent "
+            "notice does; recorded as an open item rather than invented"
+        )
+
+    inventory_path = write_source_inventory(
+        out_path,
+        entries,
+        stamps=stamps,
+        required_notices=notices,
+        missing_entries=missing_entries,
+        provider_version_census=census_by_source,
+    )
+    return {
+        "source_inventory": str(inventory_path),
+        "release_manifests_found": len(manifests),
+        "entries_written": inventoried,
+    }
+
+
+def _run_schema_validation(entry: Mapping[str, Any]) -> dict[str, Any]:
+    """W-5: validate the prepared product against the GOVERNED schema (R-49, TS-I-03).
+
+    `expected_schema_from` and `validate_schema` were implemented and unit-tested with no
+    production caller at all (board finding 26), so the governed schema was never checked
+    against anything on a real run. This is their entry point, derived from R-49's own
+    scope statement ("the expected schema lives in `configs/data.yaml`").
+
+    REFUSES today, and the refusal is the recorded state, not a defect:
+    `configs/data.yaml` carries no `prepared_schema` block, so `expected_schema_from`
+    raises a `PreflightError` under TE 18.3 rather than validating against a schema an
+    implementer supplied by convenience. The shape matches `--build-registry`'s: the code
+    is complete and the governed values await their freeze event.
+    """
+    _assert_phase1_field_contract()
+    snapshot = entry["snapshot"]
+    expected = expected_schema_from(snapshot.data)  # raises while the block is absent
+    observed = snapshot.data.get("prepared_product_observed", {})
+    report = validate_schema(observed, expected, resource="prepared product")
+    return {
+        "expected_schema_digest": report.expected_schema_digest,
+        "checked_at_utc": report.checked_at_utc,
+    }
 
 
 # =======================================================================================
@@ -656,6 +921,31 @@ def _run_audit(entry: Mapping[str, Any]) -> dict[str, Any]:
 
     merged = _dedup(all_rows)
     by_month, excluded = attribute_records_by_month(merged, timestamp_key="date")
+
+    # R-52 prohibition 1, at its production entry point (board finding 26).
+    # `assert_no_silent_imputation` and `store_gaps_as_nan` were implemented and
+    # unit-tested with no production caller, so the D-5/D-10.2 "gaps are explicit NaN and
+    # nothing fills them" rule was carried by nobody on a real run. The audit's own
+    # normalisation is where the invariant first has two states to compare: an empty CSV
+    # cell is a GAP and becomes an explicit NaN, and the gap count before and after that
+    # step must be equal. A fill of any kind — named, aliased or vectorised — changes the
+    # count, which is what catches it on branches no fixture exercises.
+    prohibition_results: dict[str, str] = {}
+    for month in sorted(by_month):
+        raw = [
+            None if str(row.get("tec", "")).strip() == "" else row.get("tec")
+            for row in by_month[month]
+        ]
+        stored = store_gaps_as_nan(raw)
+        assert_no_silent_imputation(raw, stored, series=f"tec[{month}]")
+    prohibition_results["silent_imputation"] = "PASS"
+    # Prohibition 2's result is established for each month at inventory time, by
+    # `read_provider_suffix_census` -> `assert_sources_unmixed_or_recorded`; the audit
+    # records the outcome rather than re-deriving it. The remaining two prohibitions
+    # (retrospective_split_redesign, map_value_mislabel) are OTHER units' to establish,
+    # and `assert_prohibition_results` refuses a record that omits either — the four are
+    # separately named exactly so one citation cannot stand for four (R-52).
+
     provenance_classes: dict[str, str] = {}  # sourced from acquisition manifests (R-36)
     figures = coverage_figures(
         by_month, provenance_classes=provenance_classes, timestamp_key="date"
@@ -664,6 +954,18 @@ def _run_audit(entry: Mapping[str, Any]) -> dict[str, Any]:
         "figures": figures,
         "per_month": {month: len(rows) for month, rows in by_month.items()},
         "rows_outside_audit_year_excluded": excluded,
+        "prohibition_results": prohibition_results,
+        "gaps_in_artifact": {
+            month: count_gaps(
+                store_gaps_as_nan(
+                    [
+                        None if str(row.get("tec", "")).strip() == "" else row.get("tec")
+                        for row in by_month[month]
+                    ]
+                )
+            )
+            for month in sorted(by_month)
+        },
         "one_day_excess_statement": (
             "December is counted over 1-31 (31 days); the G-06 scored set is 2-31 "
             "(30 days, D-28) — one day of excess, stated rather than left to compute"
@@ -679,6 +981,7 @@ def _run_audit(entry: Mapping[str, Any]) -> dict[str, Any]:
         december_identities=december_identities,
         coverage_report=coverage_report,
         regime_report=regime_report,
+        stamps=_resolve_stamps(snapshot),
     )
     return {"coverage_report": str(coverage_path), "regime_report": str(regime_path)}
 
@@ -718,6 +1021,8 @@ def main() -> int:
             summary = _run_audit(entry)
         elif args.build_registry:
             summary = _run_registry(entry)
+        elif args.validate_schema:
+            summary = _run_schema_validation(entry)
         else:
             summary = _run_inventory(entry)
     except IntegrityError as exc:

@@ -41,7 +41,23 @@ Everything between a computed number and a defensible statement, as producing pa
   `requirements.md` § Out of scope C by reference, never duplicated) and per mandated
   disclosure, resolved against the REGISTERED `ConclusionSurfaceArtifact` and FAILING
   CLOSED when it is absent, unmanifested or unregistered (control (36)). The
-  hand-authored-prose residual is STATED on the artifact, never claimed closed.
+  hand-authored-prose residual is STATED on the artifact, never claimed closed. **The
+  checklist is ADVISORY and says so** (Recommendation 48, 2026-09-20): no row raises, the
+  FR-P1-05-20 binding-honesty rows are a substring test over the conclusion text, and the
+  artifact carries `enforcement = "advisory"` plus ``BINDING_HONESTY_ADVISORY_NOTE`` as a
+  header — because whether a conclusion discloses a result FAIRLY is not decidable by
+  substring matching, and raising on one would give false confidence while still missing
+  every paraphrase. Fair disclosure is the human check at G-06.
+* the top-1% sensitivity, COMPUTED (``read_top1pct_declaration``,
+  ``top1pct_removed_keys``, ``compute_top1pct_sensitivity_metrics``,
+  ``top1pct_sensitivity_block``; Recommendation 21, 2026-09-20). Until this pass
+  ``top1pct_sensitivity_block`` accepted both figures from its caller and nothing in the
+  project computed FR-P1-05-10's metric at all. It is now computed beside
+  ``compute_member_metrics``, over the same registered mask, with the removal rule and
+  the removed-row count recorded on the block. Whether the top fraction is taken
+  comparison-wide or per station is NOT settled by the governing documents; it is a named
+  parameter read from configuration, ``comparison_wide`` is the implemented default, and
+  the question is routed to the gate — see ``read_top1pct_declaration``.
 * ``declare_notebook_inputs`` / ``register_notebook_conclusion`` — W-9: the first-cell
   declaration helper (TA-16's machine-parsed header; REQ-ENG-12's Run-all stop semantics
   by construction) and the conclusion-cell registration.
@@ -51,9 +67,20 @@ Inputs
 The emitted metrics artifact (`src/evaluation/metrics.build_metrics_artifact`'s shape),
 the registered `ComparisonMask`, the registered pre-G-05 audit artifact
 (`inventory-and-registry`'s read), the budget artifact (`target-standardization`'s), the
-`regimes` block off `ConfigSnapshot.experiment`, and the `ConclusionSurfaceRegistry`.
+`regimes` and `reporting` blocks off `ConfigSnapshot.experiment`, and the
+`ConclusionSurfaceRegistry`.
 Imports ONLY `src/data`, `src/evaluation` siblings and the standard library — no
 `src/features`, `src/models`, `src/external`, directly or transitively (TE §12; D-27).
+
+The budget artifact's producer is `src/data/prepared.build_uncertainty_budget`, and the
+two sides disagreed on every field but `asymmetry_statement` until 2026-09-20
+(Recommendation 20). The fields THIS consumer requires are enumerated with their reasons
+in ``_REQUIRED_BUDGET_FIELDS`` and named TOGETHER in one refusal, so a contract mismatch
+is diagnosable from a single run rather than four. `budget_value` is deliberately produced
+NOWHERE: how two uncertainty contents combine into one scalar is a TE §18.2
+forbidden-choice item owned by the Student with Supervisor countersignature, so
+``practical_relevance_statement`` REFUSES naming that owed rule and its owner, and
+Vision §5.3's second conjunct fails visibly instead of silently never running.
 
 Re-run behaviour
 ----------------
@@ -84,7 +111,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from src.data.config import RegimeError
+from src.data.config import TBD_SENTINEL, RegimeError
 from src.data.splits import LOCKED_ID
 from src.evaluation.metrics import (
     DRIVER_AVAILABILITY_LIMITATION_STATEMENT,
@@ -123,6 +150,10 @@ from src.evaluation.report_guards import (
 __all__ = [
     "FOLD_IDS",
     "SENSITIVITY_LABEL",
+    "TOP1PCT_SCOPES",
+    "DEFAULT_TOP1PCT_SCOPE",
+    "TOP1PCT_REMOVAL_RULE",
+    "BINDING_HONESTY_ADVISORY_NOTE",
     "DIAGNOSTIC_LABEL",
     "NON_AUTHORITATIVE_LABEL",
     "R62_BARRED_SURFACES",
@@ -133,6 +164,9 @@ __all__ = [
     "PROHIBITED_CLASS_ROWS",
     "compute_member_metrics",
     "derived_rmse_reduction",
+    "read_top1pct_declaration",
+    "top1pct_removed_keys",
+    "compute_top1pct_sensitivity_metrics",
     "build_primary_table",
     "build_breakdown_artifact",
     "build_member_metrics_breakdown",
@@ -161,6 +195,25 @@ FOLD_IDS: tuple[str, ...] = ("F1", "F2", "F3", "F4")
 
 #: FR-P1-05-10's label — the top-1% sensitivity is labelled, never merged.
 SENSITIVITY_LABEL: str = "sensitivity"
+
+#: The two implemented readings of "the top 1% of absolute errors" (identity tokens; the
+#: CHOICE between them is configuration, and the open question is stated on
+#: ``read_top1pct_declaration``). Recommendation 21, 2026-09-20.
+TOP1PCT_SCOPES: tuple[str, ...] = ("comparison_wide", "per_station")
+
+#: The default reading — the literal reading of the requirement's own wording. It is a
+#: DEFAULT, not a decision: `configs/experiment.yaml` declares the scope and the gate owns
+#: the ruling.
+DEFAULT_TOP1PCT_SCOPE: str = "comparison_wide"
+
+#: The removal rule, carried onto every sensitivity block so a reader never re-derives it.
+TOP1PCT_REMOVAL_RULE: str = (
+    "absolute errors |y_hat - y_true| ranked descending (ties broken by station then "
+    "interval_start_utc, ascending); the first ceil({fraction} x n) rows removed, n and "
+    "the ranking taken over {scope}; the parent figure is always computed over the "
+    "registered mask IN FULL and the sensitivity is a separate labelled field beside it, "
+    "never merged (FR-P1-05-10)"
+)
 
 #: TC-11's lane label. Diagnostic artifacts live only under diagnostic paths.
 DIAGNOSTIC_LABEL: str = "diagnostic/hindcast-only"
@@ -196,6 +249,20 @@ D8_CLAIM_BOUNDARY: str = (
 D7_NICO_5MIN_BAR: str = (
     "Any scientific question requiring 5-minute resolution at NICO is out of reach on "
     "this dataset and must not be claimed (D-7)"
+)
+
+#: Recommendation 48 (approved 2026-09-20, option 1 — keep it advisory, make the status
+#: EXPLICIT rather than inferable). Carried as a HEADER on every checklist artifact so a
+#: reader meets it before the rows, not as a per-row footnote they may never reach.
+BINDING_HONESTY_ADVISORY_NOTE: str = (
+    "ADVISORY, NOT ENFORCING. Every disclosure row below is reported at status 'found' or "
+    "'FAILED' and NOTHING in this module raises on a FAILED row. In particular the "
+    "FR-P1-05-20 binding-honesty rows test only whether a beating benchmark's IDENTIFIER "
+    "appears as a substring of the conclusion text. Whether a conclusion DISCLOSES a "
+    "result fairly is not decidable by substring matching, and raising on a substring "
+    "check would give false confidence while still missing every paraphrase. Fair "
+    "disclosure is a HUMAN check, performed by the student and supervisor at G-06; this "
+    "artifact routes the reviewer to the surfaces, it does not clear them."
 )
 
 #: SD-R-03's stated residual — carried on every checklist artifact, never softened.
@@ -271,20 +338,18 @@ def _percentile(sorted_values: Sequence[float], pct: float) -> float:
     return sorted_values[rank]
 
 
-def compute_member_metrics(mask: Any, member_id: str) -> dict[str, Any]:
-    """RMSE and §5.5's six supporting metrics for one member over the masked rows only.
+def _member_rows(mask: Any, member_id: str) -> list[tuple[str, str, float, float]]:
+    """The masked rows for one member as ordered `(station, stamp, y_true, y_hat)` tuples.
 
-    The paired loss differential remains the confirmatory estimand (Vision §2.3) — these
-    fields are the REPORTED error surface and decide nothing.
+    One traversal of `mask.masked_rows`, shared by ``compute_member_metrics`` and the
+    top-1% sensitivity so the two can never disagree about which rows they scored.
 
     Raises
     ------
     RegimeError
-        a masked row without the member's y_hat (a mask-construction failure), or a
-        degenerate series over which R² / correlation is undefined.
+        a masked row without the member's y_hat (a mask-construction failure).
     """
-    truths: list[float] = []
-    preds: list[float] = []
+    out: list[tuple[str, str, float, float]] = []
     for row in mask.masked_rows:
         y_hats = row["y_hats"]
         if member_id not in y_hats:
@@ -294,8 +359,44 @@ def compute_member_metrics(mask: Any, member_id: str) -> dict[str, Any]:
                 f"masked rows only and a masked row missing a member is a mask-"
                 f"construction failure (R-108 step 1's shape)",
             )
-        truths.append(float(row["y_true"]))
-        preds.append(float(y_hats[member_id]))
+        out.append(
+            (
+                str(row["station"]),
+                str(row["interval_start_utc"]),
+                float(row["y_true"]),
+                float(y_hats[member_id]),
+            )
+        )
+    return out
+
+
+def compute_member_metrics(
+    mask: Any,
+    member_id: str,
+    *,
+    excluded_keys: Sequence[tuple[str, str]] | None = None,
+) -> dict[str, Any]:
+    """RMSE and §5.5's six supporting metrics for one member over the masked rows only.
+
+    The paired loss differential remains the confirmatory estimand (Vision §2.3) — these
+    fields are the REPORTED error surface and decide nothing.
+
+    ``excluded_keys`` — `(station, interval_start_utc)` pairs to omit — exists for the
+    FR-P1-05-10 top-1% sensitivity ONLY (``compute_top1pct_sensitivity_metrics`` supplies
+    it). It is never a new exclusion policy on the frozen mask: the parent figure is
+    always computed over the mask in full, and the sensitivity is a separate, labelled
+    field beside it, never merged.
+
+    Raises
+    ------
+    RegimeError
+        a masked row without the member's y_hat (a mask-construction failure), or a
+        degenerate series over which R² / correlation is undefined.
+    """
+    dropped = frozenset(excluded_keys or ())
+    rows = [row for row in _member_rows(mask, member_id) if (row[0], row[1]) not in dropped]
+    truths = [row[2] for row in rows]
+    preds = [row[3] for row in rows]
     n = len(truths)
     if n == 0:
         raise RegimeError(f"mask {mask.mask_id}", "no masked rows; metrics are undefined")
@@ -400,28 +501,72 @@ def _register_reported_artifact(
 # =======================================================================================
 
 
+#: The budget fields THIS consumer requires, each with the reason it is required. The
+#: producer is `src/data/prepared.build_uncertainty_budget`; the two sides disagreed on
+#: every field but `asymmetry_statement` until 2026-09-20 (Recommendation 20), so the
+#: refusal below names EVERY missing field at once rather than failing on the first —
+#: a one-at-a-time refusal turns one contract mismatch into four sequential runs.
+_REQUIRED_BUDGET_FIELDS: Mapping[str, str] = {
+    "artifact_id": (
+        "the budget's own identity, printed into the primary table's budget_ref (TA-19)"
+    ),
+    "phase1_contents": (
+        "the Phase 1-applicable contents; FR-P1-05-10's budget adjacency asserts "
+        "CONTENTS, not existence (TA-19). The producer states these under `applicable`"
+    ),
+    "asymmetry_statement": "FR-P1-05-10's asymmetry statement, quoted from the requirement",
+    "phase2_quantities": (
+        "the four Phase 2 quantities as a mapping whose every value is the literal "
+        "'recorded not-applicable'; they are SHOWN recorded not-applicable, never "
+        "omitted (requirements.md § Known defects row 11). The producer states these as "
+        "a `not_applicable` LIST of {content, reason} dicts"
+    ),
+}
+
+#: The literal every `phase2_quantities` value must equal (an identity token, not prose).
+_RECORDED_NOT_APPLICABLE: str = "recorded not-applicable"
+
+
 def _assert_budget(budget: Mapping[str, Any]) -> None:
+    """FR-P1-05-10 / TA-19: the budget states CONTENTS, not merely existence.
+
+    Names every absent or empty required field in ONE refusal (Rec 20), so a
+    producer/consumer contract mismatch is diagnosable from a single run.
+
+    Raises
+    ------
+    RegimeError
+        any required field absent or empty (all named together); `phase2_quantities`
+        not a non-empty mapping; any Phase 2 quantity not recorded not-applicable.
+    """
     resource = f"budget artifact {budget.get('artifact_id', '<no id>')}"
-    if not budget.get("phase1_contents"):
+    missing = [name for name in _REQUIRED_BUDGET_FIELDS if not budget.get(name)]
+    if missing:
+        detail = "; ".join(f"{name} — {_REQUIRED_BUDGET_FIELDS[name]}" for name in missing)
         raise RegimeError(
             resource,
-            "Phase 1-applicable contents are absent or empty; FR-P1-05-10's budget "
-            "adjacency asserts CONTENTS, not existence (TA-19)",
+            f"required budget field(s) {missing} absent or empty. Each, with why it is "
+            f"required: {detail}. The producing path is "
+            f"src/data/prepared.build_uncertainty_budget; a field-name disagreement "
+            f"between producer and consumer is a contract defect, not a data gap "
+            f"(FR-P1-05-10; TA-19; Recommendation 20)",
         )
-    if not budget.get("asymmetry_statement"):
-        raise RegimeError(resource, "the asymmetry statement is absent or empty (FR-P1-05-10)")
     phase2 = budget.get("phase2_quantities")
-    if not isinstance(phase2, Mapping) or not phase2:
+    if not isinstance(phase2, Mapping):
         raise RegimeError(
             resource,
-            "the four Phase 2 quantities are absent; they are shown as RECORDED "
-            "not-applicable, never omitted (requirements.md § Known defects row 11)",
+            f"phase2_quantities is {type(phase2).__name__}, not a mapping of quantity → "
+            f"{_RECORDED_NOT_APPLICABLE!r}; the four Phase 2 quantities are shown as "
+            f"RECORDED not-applicable, never omitted and never a bare list "
+            f"(requirements.md § Known defects row 11)",
         )
-    wrong = [key for key, value in phase2.items() if value != "recorded not-applicable"]
+    wrong = sorted(
+        key for key, value in phase2.items() if value != _RECORDED_NOT_APPLICABLE
+    )
     if wrong:
         raise RegimeError(
             resource,
-            f"Phase 2 quantit(ies) {wrong} are not recorded not-applicable; a Phase 2 "
+            f"Phase 2 quantit(ies) {wrong} are not {_RECORDED_NOT_APPLICABLE!r}; a Phase 2 "
             f"value filled in Phase 1 is a phase-boundary defect (NFR-PHASE-01)",
         )
 
@@ -630,14 +775,203 @@ def build_quality_stratum(
     return {"stratum_field": str(stratum_field), "rows": list(strata_rows)}
 
 
-def top1pct_sensitivity_block(
-    parent_value: Mapping[str, Any], sensitivity_value: Mapping[str, Any]
+def read_top1pct_declaration(experiment: Mapping[str, Any]) -> dict[str, Any]:
+    """The FR-P1-05-10 sensitivity's two declared parameters, read from configuration.
+
+    Reads `experiment.reporting.top1pct_sensitivity`: `removed_fraction` (the "1%" of
+    "top 1%" — a scientific value, so it lives in `configs/experiment.yaml`, never in
+    source: TC-03e) and `scope`, one of ``TOP1PCT_SCOPES``.
+
+    THE OPEN QUESTION `scope` CARRIES (routed to the gate 2026-09-20, Recommendation 21).
+    FR-P1-05-10 says "top 1% of absolute errors removed" and does not say WHOSE top 1%.
+    Two readings are available and they differ materially under the project's
+    equal-station weighting (Vision §2.3):
+
+    * ``comparison_wide`` — rank the absolute errors of every masked row across all
+      stations together and drop the largest `removed_fraction`. A station whose errors
+      are systematically larger loses a larger share of its rows, so the per-station
+      supports become unequal and the equal-station mean is taken over unequal denominators.
+    * ``per_station`` — rank within each station and drop that station's own largest
+      `removed_fraction`. Supports stay proportionate, but the rows removed are not the
+      comparison's largest errors, which is what the requirement's wording most directly
+      names.
+
+    The governing documents settle neither. ``comparison_wide`` is implemented as the
+    DEFAULT reading because it is the literal reading of "the top 1% of absolute errors";
+    the choice is a named, configured parameter precisely so the gate can change it
+    without a code change, and the owed ruling is recorded in this unit's record.
+
+    Raises
+    ------
+    RegimeError
+        the block is absent or `TBD — freeze gate`; `removed_fraction` absent, `TBD`, or
+        outside (0, 1); `scope` absent, `TBD`, or outside ``TOP1PCT_SCOPES``.
+    """
+    resource = "configs/experiment.yaml: reporting.top1pct_sensitivity"
+    reporting = experiment.get("reporting")
+    node = reporting.get("top1pct_sensitivity") if isinstance(reporting, Mapping) else None
+    if node is None or (isinstance(node, str) and node.strip() == TBD_SENTINEL):
+        raise RegimeError(
+            resource,
+            "absent or unresolved (TBD — freeze gate); the FR-P1-05-10 sensitivity's "
+            "removed fraction and its comparison-wide-versus-per-station scope are "
+            "frozen scientific choices living in configuration (TC-03e) and are never "
+            "filled by an implementer by convenience (TE §18.3)",
+        )
+    if not isinstance(node, Mapping):
+        raise RegimeError(resource, "must be a mapping of declared fields")
+    fraction = node.get("removed_fraction")
+    if fraction is None or (isinstance(fraction, str) and fraction.strip() == TBD_SENTINEL):
+        raise RegimeError(
+            f"{resource}.removed_fraction",
+            "absent or unresolved (TBD — freeze gate); the fraction removed is the '1%' "
+            "of FR-P1-05-10's 'top 1%' and is read from configuration, never source",
+        )
+    fraction = float(fraction)
+    if not (0.0 < fraction < 1.0):
+        raise RegimeError(
+            f"{resource}.removed_fraction",
+            f"value {fraction!r} is not a fraction strictly between 0 and 1; a removal "
+            f"fraction of 0 computes nothing and 1 removes everything",
+        )
+    scope = node.get("scope")
+    if scope is None or (isinstance(scope, str) and scope.strip() == TBD_SENTINEL):
+        raise RegimeError(
+            f"{resource}.scope",
+            f"absent or unresolved (TBD — freeze gate); whether the top "
+            f"{fraction:.1%} is taken comparison-wide or per station is material under "
+            f"equal-station weighting and the governing documents do not settle it "
+            f"(Recommendation 21; routed to the gate) — declare one of "
+            f"{list(TOP1PCT_SCOPES)}",
+        )
+    if str(scope) not in TOP1PCT_SCOPES:
+        raise RegimeError(
+            f"{resource}.scope",
+            f"value {scope!r} is not one of the implemented readings "
+            f"{list(TOP1PCT_SCOPES)}; the scope refuses an unrecognised value rather "
+            f"than choosing one (TE §18.3)",
+        )
+    return {"removed_fraction": fraction, "scope": str(scope)}
+
+
+def top1pct_removed_keys(
+    mask: Any, member_id: str, *, removed_fraction: float, scope: str
+) -> tuple[tuple[str, str], ...]:
+    """The `(station, interval_start_utc)` keys the sensitivity removes — the removal RULE.
+
+    The rule, stated exactly so it is auditable and never re-derived by a reader:
+
+    1. Compute each masked row's absolute error `|y_hat - y_true|` for this member.
+    2. Rank DESCENDING by absolute error; ties are broken by `(station,
+       interval_start_utc)` ascending, so the removal is deterministic (WS-17's posture:
+       the same inputs remove the same rows on both governed platforms).
+    3. Remove the first `k = ceil(removed_fraction * n)` rows — `ceil`, not `round` or
+       `floor`, so a declared removal never silently removes nothing on a small support.
+    4. Under ``scope = "per_station"`` steps 1–3 run once per station over that station's
+       own rows; under ``comparison_wide`` they run once over all masked rows together.
+
+    Raises
+    ------
+    RegimeError
+        an unrecognised scope; a support on which the rule would remove every row (the
+        remainder must be non-empty for the recomputed metrics to exist).
+    """
+    if str(scope) not in TOP1PCT_SCOPES:
+        raise RegimeError(
+            f"top-1% sensitivity for member {member_id!r}",
+            f"scope {scope!r} is not one of {list(TOP1PCT_SCOPES)} (Recommendation 21)",
+        )
+    rows = _member_rows(mask, member_id)
+    if not rows:
+        raise RegimeError(
+            f"mask {getattr(mask, 'mask_id', '?')}",
+            "no masked rows; the top-1% sensitivity is undefined over an empty support",
+        )
+
+    def _take(group: Sequence[tuple[str, str, float, float]], label: str) -> list[tuple[str, str]]:
+        count = math.ceil(float(removed_fraction) * len(group))
+        if count >= len(group):
+            raise RegimeError(
+                f"top-1% sensitivity for member {member_id!r} over {label}",
+                f"the declared removed_fraction {removed_fraction!r} removes {count} of "
+                f"{len(group)} row(s), leaving no remainder; a sensitivity over zero "
+                f"rows is not a sensitivity (FR-P1-05-10)",
+            )
+        ordered = sorted(group, key=lambda r: (-abs(r[3] - r[2]), r[0], r[1]))
+        return [(row[0], row[1]) for row in ordered[:count]]
+
+    if str(scope) == "per_station":
+        removed: list[tuple[str, str]] = []
+        by_station: dict[str, list[tuple[str, str, float, float]]] = {}
+        for row in rows:
+            by_station.setdefault(row[0], []).append(row)
+        for station in sorted(by_station):
+            removed.extend(_take(by_station[station], f"station {station}"))
+        return tuple(sorted(removed))
+    return tuple(sorted(_take(rows, "the comparison-wide masked set")))
+
+
+def compute_top1pct_sensitivity_metrics(
+    mask: Any, member_id: str, *, removed_fraction: float, scope: str
 ) -> dict[str, Any]:
-    """FR-P1-05-10: the top-1%-absolute-error-removed sensitivity, emitted BESIDE its
-    parent figure, labelled `sensitivity`, never merged."""
+    """§5.5's metric set recomputed with the top `removed_fraction` of |errors| removed.
+
+    The metric is COMPUTED here (Recommendation 21, 2026-09-20). Until this pass the
+    sensitivity was caller-supplied and nothing in the project computed it, so
+    FR-P1-05-10's figure could only ever have been a hand-entered number.
+
+    Raises
+    ------
+    RegimeError
+        every ``top1pct_removed_keys`` and ``compute_member_metrics`` refusal.
+    """
+    removed = top1pct_removed_keys(
+        mask, member_id, removed_fraction=removed_fraction, scope=scope
+    )
+    metrics = compute_member_metrics(mask, member_id, excluded_keys=removed)
+    metrics["rows_removed"] = len(removed)
+    metrics["removed_fraction"] = float(removed_fraction)
+    metrics["scope"] = str(scope)
+    metrics["removal_rule"] = TOP1PCT_REMOVAL_RULE.format(
+        fraction=removed_fraction, scope=scope
+    )
+    metrics["removed_keys"] = [list(key) for key in removed]
+    return metrics
+
+
+def top1pct_sensitivity_block(
+    *,
+    mask: Any,
+    member_id: str,
+    removed_fraction: float,
+    scope: str = DEFAULT_TOP1PCT_SCOPE,
+) -> dict[str, Any]:
+    """FR-P1-05-10: the top-`removed_fraction`-absolute-error-removed sensitivity.
+
+    Emitted BESIDE its parent figure, labelled `sensitivity`, never merged. BOTH values
+    are computed here from the same registered mask — the parent over the mask in full,
+    the sensitivity over the mask less the removed rows — so the two can never describe
+    different supports, and neither is caller-supplied (Recommendation 21; before
+    2026-09-20 this function accepted both as literals and computed nothing).
+
+    See ``read_top1pct_declaration`` for the comparison-wide-versus-per-station question
+    `scope` carries, which the governing documents do not settle and which is routed to
+    the gate.
+
+    Raises
+    ------
+    RegimeError
+        every ``compute_member_metrics`` / ``top1pct_removed_keys`` refusal.
+    """
+    parent = compute_member_metrics(mask, member_id)
+    sensitivity = compute_top1pct_sensitivity_metrics(
+        mask, member_id, removed_fraction=removed_fraction, scope=scope
+    )
     return {
-        "parent": dict(parent_value),
-        "sensitivity": {**dict(sensitivity_value), "label": SENSITIVITY_LABEL},
+        "member_id": str(member_id),
+        "mask_id": str(getattr(mask, "mask_id", "")),
+        "parent": dict(parent),
+        "sensitivity": {**sensitivity, "label": SENSITIVITY_LABEL},
     }
 
 
@@ -960,7 +1294,9 @@ def practical_relevance_statement(
         a threshold timestamp that does not precede the G-06 receipt (control (19)); a
         non-TECU input (control (20)); a missing measured improvement leaving §5.3's
         first conjunct unevaluated (control (35)); a measured improvement without its
-        `derived: true` label.
+        `derived: true` label; an absent `budget_value`, whose combination rule is an
+        owed §18.2 forbidden-choice decision (Recommendation 20) — the refusal names the
+        rule and its owner rather than defaulting a combination.
     """
     surface = "practical-relevance statement"
     recorded = threshold_record.get("recorded_at_utc")
@@ -996,7 +1332,21 @@ def practical_relevance_statement(
     budget_value = budget_artifact.get("budget_value")
     if budget_value is None:
         raise RegimeError(
-            surface, "the budget artifact carries no budget_value to compare against (§5.4)"
+            surface,
+            "the budget artifact carries no `budget_value`, so Vision §5.3's SECOND "
+            "conjunct — 'the reference shall not correspond to an RMSE difference smaller "
+            "than the target uncertainty budget of Vision §6.9' — cannot be evaluated. "
+            "The missing thing is not a number the producer forgot: it is the FROZEN RULE "
+            "by which the Phase 1-applicable uncertainty contents "
+            "(provider_reported_uncertainty and within_hour_aggregation_spread) combine "
+            "into the one scalar TECU magnitude the comparison needs. Choosing that "
+            "combination — sum, quadrature, max, or a stated other — is a TE §18.2 "
+            "forbidden-choice item and its OWNER is the Student with Supervisor "
+            "countersignature, recorded as its own D-number in evidence/DECISIONS.md "
+            "before this statement can be produced. No implementer may fill it by "
+            "convenience (TE §1.1). This path REFUSES so §5.3's second conjunct fails "
+            "honestly and visibly rather than silently never running (PC-09; "
+            "Recommendation 20)",
         )
     reference_value = float(reference["value"])
     statement: dict[str, Any] = {
@@ -1520,6 +1870,11 @@ def build_claims_checklist(
         "artifact_id": str(checklist_artifact_id),
         "artifact_class": "claims_checklist",
         "kind": "claims_checklist",
+        # Rec 48: the enforcement status stated as a header, never inferred from the
+        # absence of a raise. `enforcement` is the machine-readable form; the note is the
+        # human-readable one. Both precede the rows.
+        "enforcement": "advisory",
+        "enforcement_note": BINDING_HONESTY_ADVISORY_NOTE,
         "inspected_registered_set": list(registered_set),
         "conclusion_artifact_id": conclusion_id,
         "rows": rows,

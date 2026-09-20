@@ -30488,3 +30488,4095 @@
 **Event**: HUMAN_TURN
 
 ---
+
+## Session End
+**Timestamp**: 2026-09-13T18:54:05Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Resume
+**Timestamp**: 2026-09-13T20:51:41Z
+**Event**: SESSION_RESUMED
+**Source**: resume
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-13T20:51:42Z
+**Event**: HUMAN_TURN
+
+---
+
+## Session End
+**Timestamp**: 2026-09-13T21:12:32Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Resume
+**Timestamp**: 2026-09-14T03:17:57Z
+**Event**: SESSION_RESUMED
+**Source**: resume
+
+---
+
+## Session End
+**Timestamp**: 2026-09-14T03:18:05Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-14T20:32:11Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-14T20:32:12Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-14T20:32:49Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-14T20:38:20Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: acdc9c6cf7bececf9
+**Message**: repair the change record to match shipped code
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-14T20:41:06Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-14T20:45:42Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a4c43ebd19863568e
+**Message**: Now re-run the full diff review against the corrected change record.
+
+---
+
+## Session End
+**Timestamp**: 2026-09-14T21:11:08Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Resume
+**Timestamp**: 2026-09-15T00:46:23Z
+**Event**: SESSION_RESUMED
+**Source**: resume
+
+---
+
+## Session End
+**Timestamp**: 2026-09-15T00:47:32Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-20T15:27:13Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Session End
+**Timestamp**: 2026-09-20T15:27:13Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-20T15:27:28Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:27:29Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:28:02Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:30:53Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:38:34Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a64b03885c0ff371a
+**Message**: wait for all seven passes, then give me the report
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:41:51Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: Explore
+**Agent ID**: a0ded356f5e9d0f89
+**Message**: # Verdict\n\n**No hard GPU/CUDA dependency exists. No result path depends on GPU presence. PyTorch is absent from the codebase.** CPU-completeness is actively enforced, not merely asserted.\n\n---\n\n## 1. 
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:43:12Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: Explore
+**Agent ID**: a270ecf525ba7f5a7
+**Message**: Note: the repo's hook mandates `graphify query` before grepping; the `graphify` CLI is not installed in this environment (`command not found`), and `graphify-out/graph.json` is flagged stale for sever
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:43:17Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a2631fe078707f002
+**Message**: ## 1. TE §13.4 required columns — derivation\n\n`PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md:818` — *"CSV or JSONL, including:"*, fenced block at `:820-827`.\n\nEnumerated in sour
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:43:38Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: Explore
+**Agent ID**: aa311fdd677e1108c
+**Message**: ## 1. What was verified — and what was not\n\n**Two separate things exist, and neither is the R-59 validation.**\n\n**(a) An installation/runtime smoke test (Kaggle, 2026-09-19) — PASS, but not a scientif
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:50:19Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a00c51c13a47f87e3
+**Message**: ## Repository baseline (derived today)\n\n```\n$ git rev-parse --short HEAD                                  → ff5c683\n$ git status --short -- src/ scripts/ tests/ configs/ kaggle/ evidence/ governance/\n
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:51:24Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a9d7fd8e92cdb8e90
+**Message**: ## TASK A — TE §13.3 immutable dataset release manifest\n\n**A1a. Authority enumeration (`PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md:801-812`)**\n\nDerivation — 10 table rows, fi
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:51:50Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a8825760438c5b855
+**Message**: ## Audit findings — cross-artifact consistency sweep\n\nNote: `graphify` CLI is not installed on this clone (`command -v graphify` → not found), so per CLAUDE.md I used the sanctioned grep fallback. All
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:52:35Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a35f9ac6020be7d89
+**Message**: Evidence pass complete. Findings follow.\n\n```\nID: BENCH-1\nSEVERITY: BLOCKER\nTITLE: IRI-2016 benchmark (B-01) has no completed validation — the R-59 comparison has never run\nCATEGORY: Compliance\nTEC GA
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:52:41Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:53:18Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a44db3a3763b2147d
+**Message**: PASS COMPLETE. Findings below.\n\n```\nID: TEC-1\nSEVERITY: BLOCKER\nTITLE: M-03 station×month×hour climatology has no key for any scored month; the mandatory difficulty control yields zero predictions and
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:53:20Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: aac590fa9e5f27301
+**Message**: ID: ML-1\nSEVERITY: BLOCKER\nTITLE: LSTM early stopping and best-checkpoint restoration are driven by the SCORE bundle's labels; on the REFIT→DEC path that is the locked December month, with no guard\nCA
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:53:24Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:53:25Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: af49287dca4901f09
+**Message**: ID: VAL-1\nSEVERITY: BLOCKER\nTITLE: 5,964 logged December restricted-root accesses have zero corresponding rows in either experiment registry of record\nCATEGORY: Compliance\nTEC GATE / AI-DLC STAGE: G-0
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:53:32Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:53:42Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:55:16Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: ab6eebef645ec0615
+**Message**: I have enough evidence. Writing the audit.\n\n## Method note\n\n`graphify` CLI is **not installed** on this clone (`command -v graphify` → `NO_GRAPHIFY_CLI`), matching `CLAUDE.md`'s verified 2026-09-10 no
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:58:21Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a432002cc055af896
+**Message**: All derivations complete. Working tree is clean (`git status --short -- src/ scripts/ tests/ configs/ notebooks/ artifacts/` → empty); HEAD is `ff5c683`.\n\n---\n\n## UNIT `regimes-diagnostics-reporting`\n
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:58:31Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: af41a28121b63ed27
+**Message**: ```\nID: IMPL-1\nSEVERITY: BLOCKER\nTITLE: §12-mandated `tests/test_feature_leakage_guards.py` was never built; TA-33…TA-36 have no primary test\nCATEGORY: Testing\nTEC GATE / AI-DLC STAGE: TC-06; G-P1A / 
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T15:58:34Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:59:02Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a9cbd2e76112fb904
+**Message**: Verification complete. All commands re-run against today's tree (HEAD `ff5c683`, `git status --short` clean for `src/ scripts/ tests/ configs/`).\n\n## UNIT governance-guards\n\n| Claim (verbatim, short) 
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T15:59:33Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a7b35024ffbe417a6
+**Message**: Audit complete. `graphify` CLI is absent from PATH (verified), so all findings are from direct reads.\n\n---\n\n# Phase 1 Provenance / Source-Integrity / Missingness / Time — Observed Facts\n\n## 1. ONE COM
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T16:00:13Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a07ad099e737aabd1
+**Message**: All derivations complete. Working tree is clean (`git status --short` shows only two `aidlc/`+`governance/` docs modified; **no** code-dir changes), HEAD is `ff5c683`.\n\n---\n\n## UNIT `features-and-spli
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T16:02:11Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a338d362ac00f1d81
+**Message**: All four audits complete and independently spot-verified. Here is the consolidated finding.\n\n## Baseline\n\n`HEAD = ff5c683` (2026-09-20). Working tree **clean** for `src/ scripts/ tests/ configs/ noteb
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T16:02:28Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a23581fa4d846242c
+**Message**: I have sufficient evidence. Compiling the seat report.\n\nID: CHAIR-1\nSEVERITY: BLOCKER\nTITLE: Stage 3.5 was closed while `external-products`' standing reviewer verdict was NOT-READY, and the human appr
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T16:02:31Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T16:03:55Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: ab57865134a7b2ddd
+**Message**: Audit complete. All derivations printed below.\n\n## Unit derivation\n\n`ls` of `construction/` returns **17** entries; **12** have a `code-generation/` subdir (the other 5 — `build-and-test`, `code-gener
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T16:06:28Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a1ae3cb845badf3ed
+**Message**: ID: DATA-1\nSEVERITY: BLOCKER\nTITLE: Phase 1 evidence mixes three provider product versions (g.001/g.002/g.003), undisclosed in every governed record, and the locked test month is itself version-mixed\n
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T16:06:32Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T16:24:58Z
+**Event**: HUMAN_TURN
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:39:52Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:39:53Z
+**Event**: SENSOR_FIRED
+**Fire id**: c68e7eac
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:39:53Z
+**Event**: SENSOR_PASSED
+**Fire id**: c68e7eac
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 321
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:39:53Z
+**Event**: SENSOR_FIRED
+**Fire id**: c29c9750
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:39:54Z
+**Event**: SENSOR_PASSED
+**Fire id**: c29c9750
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 297
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:40:03Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4f78c96d
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:04Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4f78c96d
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 251
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: 82e66e29
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:05Z
+**Event**: SENSOR_PASSED
+**Fire id**: 82e66e29
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 400
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:40:11Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: 6aa77903
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 6aa77903
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 265
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2768188a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2768188a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 192
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:40:22Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:23Z
+**Event**: SENSOR_FIRED
+**Fire id**: 56015ad0
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:23Z
+**Event**: SENSOR_PASSED
+**Fire id**: 56015ad0
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 263
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:23Z
+**Event**: SENSOR_FIRED
+**Fire id**: e8adee23
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:23Z
+**Event**: SENSOR_PASSED
+**Fire id**: e8adee23
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 190
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:40:33Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: bad2c316
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: bad2c316
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 225
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: c02615f2
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: c02615f2
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 200
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:40:47Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:47Z
+**Event**: SENSOR_FIRED
+**Fire id**: 6badce67
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:47Z
+**Event**: SENSOR_PASSED
+**Fire id**: 6badce67
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 217
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:48Z
+**Event**: SENSOR_FIRED
+**Fire id**: ecbd6781
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:48Z
+**Event**: SENSOR_PASSED
+**Fire id**: ecbd6781
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 200
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:40:58Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:58Z
+**Event**: SENSOR_FIRED
+**Fire id**: 51d04e2a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:58Z
+**Event**: SENSOR_PASSED
+**Fire id**: 51d04e2a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 203
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:40:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: 6d754eec
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:40:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: 6d754eec
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 189
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:41:06Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:07Z
+**Event**: SENSOR_FIRED
+**Fire id**: d45b05f1
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:07Z
+**Event**: SENSOR_PASSED
+**Fire id**: d45b05f1
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 252
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:07Z
+**Event**: SENSOR_FIRED
+**Fire id**: ac81084b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:07Z
+**Event**: SENSOR_PASSED
+**Fire id**: ac81084b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 219
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:41:15Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:15Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4f088c91
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4f088c91
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 211
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:16Z
+**Event**: SENSOR_FIRED
+**Fire id**: 77c41207
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: 77c41207
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 181
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:41:27Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:27Z
+**Event**: SENSOR_FIRED
+**Fire id**: 76e88f00
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:28Z
+**Event**: SENSOR_PASSED
+**Fire id**: 76e88f00
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 520
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:29Z
+**Event**: SENSOR_FIRED
+**Fire id**: 2de9ec74
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:29Z
+**Event**: SENSOR_PASSED
+**Fire id**: 2de9ec74
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 250
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:41:38Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Context**: construction > fixtures-and-reproducibility > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:38Z
+**Event**: SENSOR_FIRED
+**Fire id**: fcd56e2d
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: fcd56e2d
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 240
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:41:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: 89556ecd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:41:39Z
+**Event**: SENSOR_PASSED
+**Fire id**: 89556ecd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/fixtures-and-reproducibility/code-generation/code-summary.md
+**Duration ms**: 186
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:48:00Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Context**: construction > features-and-splits > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: ff741d6b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: ff741d6b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 422
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:02Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7d70e7e4
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:02Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7d70e7e4
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 273
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:48:08Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Context**: construction > features-and-splits > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:09Z
+**Event**: SENSOR_FIRED
+**Fire id**: ab564db8
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:09Z
+**Event**: SENSOR_PASSED
+**Fire id**: ab564db8
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 203
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:09Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0c065afd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:09Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0c065afd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 197
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:48:20Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Context**: construction > features-and-splits > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:20Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0f69fbf6
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:20Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0f69fbf6
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 357
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: a1055857
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: a1055857
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 260
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:48:34Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Context**: construction > features-and-splits > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8bd17082
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8bd17082
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 420
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:48:35Z
+**Event**: SENSOR_FIRED
+**Fire id**: e7a49f36
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:48:35Z
+**Event**: SENSOR_PASSED
+**Fire id**: e7a49f36
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/features-and-splits/code-generation/code-summary.md
+**Duration ms**: 263
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T16:50:23Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+**Context**: construction > external-products > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:50:23Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5d3749ef
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:50:23Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5d3749ef
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+**Duration ms**: 180
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T16:50:23Z
+**Event**: SENSOR_FIRED
+**Fire id**: a465afd2
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T16:50:23Z
+**Event**: SENSOR_PASSED
+**Fire id**: a465afd2
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+**Duration ms**: 175
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T16:53:11Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a30d3c17e42a3a50b
+**Message**: Work complete. Report follows.\n\n## 1. FILES CHANGED\n\n| Path | Change |\n|---|---|\n| `tests/test_feature_leakage_guards.py` | **NEW** — 849 lines, 21 test functions / 25 collected cases (untracked) |\n| 
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:00:29Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:03:28Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: ace7e52367b5ec601
+**Message**: resume the four workers
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-20T17:05:52Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:05:53Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:06:23Z
+**Event**: HUMAN_TURN
+
+---
+
+## Workflow Unparked
+**Timestamp**: 2026-09-20T17:06:48Z
+**Event**: WORKFLOW_UNPARKED
+**Timestamp**: 2026-09-20T17:06:48Z
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:07:30Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:11:51Z
+**Event**: HUMAN_TURN
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:16:24Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Context**: construction > build-and-test > memory.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:16:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: f593eb1b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:16:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: f593eb1b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 212
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:16:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3dcb3d75
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:16:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3dcb3d75
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 208
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:16:53Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Context**: construction > build-and-test > memory.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:16:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: e883c2c2
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:16:54Z
+**Event**: SENSOR_PASSED
+**Fire id**: e883c2c2
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 254
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:16:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7b07a3dd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:16:55Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7b07a3dd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 239
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:17:11Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Context**: construction > build-and-test > memory.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:17:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: 35fbbfc7
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:17:11Z
+**Event**: SENSOR_PASSED
+**Fire id**: 35fbbfc7
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 207
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:17:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: 47c2da30
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:17:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 47c2da30
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 196
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:19:15Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a5e0d0ed6f89c3bed
+**Message**: wait for the workers
+
+---
+
+## Session End
+**Timestamp**: 2026-09-20T17:20:31Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:21:15Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:15Z
+**Event**: SENSOR_FIRED
+**Fire id**: bde01368
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: bde01368
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 184
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:16Z
+**Event**: SENSOR_FIRED
+**Fire id**: 22371fe3
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: 22371fe3
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 186
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:21:24Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: dbadf57e
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: dbadf57e
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 258
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: f4957c0c
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: f4957c0c
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 238
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:21:33Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: 02329a96
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:33Z
+**Event**: SENSOR_PASSED
+**Fire id**: 02329a96
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 190
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: 24ea5478
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: 24ea5478
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 172
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:21:41Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:41Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1339a58a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1339a58a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 323
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:42Z
+**Event**: SENSOR_FIRED
+**Fire id**: ccd3f8ca
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:42Z
+**Event**: SENSOR_PASSED
+**Fire id**: ccd3f8ca
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 251
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:21:48Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:49Z
+**Event**: SENSOR_FIRED
+**Fire id**: abfc2be3
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: abfc2be3
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 206
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:49Z
+**Event**: SENSOR_FIRED
+**Fire id**: e3942717
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: e3942717
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 186
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:21:57Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:58Z
+**Event**: SENSOR_FIRED
+**Fire id**: 80686d1b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:58Z
+**Event**: SENSOR_PASSED
+**Fire id**: 80686d1b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 408
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:21:58Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7f16f08f
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:21:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7f16f08f
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 274
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:08Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:08Z
+**Event**: SENSOR_FIRED
+**Fire id**: 43b13f44
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:08Z
+**Event**: SENSOR_PASSED
+**Fire id**: 43b13f44
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 185
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:08Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7a9c8809
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:09Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7a9c8809
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 218
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:20Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: ad7cd1ce
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:22Z
+**Event**: SENSOR_PASSED
+**Fire id**: ad7cd1ce
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 444
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:22Z
+**Event**: SENSOR_FIRED
+**Fire id**: 12475865
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:23Z
+**Event**: SENSOR_PASSED
+**Fire id**: 12475865
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 375
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:24Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5556d27c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5556d27c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 215
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:25Z
+**Event**: SENSOR_FIRED
+**Fire id**: beeac139
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: beeac139
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 220
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:29Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:30Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5a3c8f10
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:30Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5a3c8f10
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 200
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:30Z
+**Event**: SENSOR_FIRED
+**Fire id**: b2c49330
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:30Z
+**Event**: SENSOR_PASSED
+**Fire id**: b2c49330
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 186
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:36Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3a3798f2
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:36Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3a3798f2
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 181
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:36Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1afcfd96
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:37Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1afcfd96
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 193
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:40Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: bd80cce2
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: bd80cce2
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 231
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: 83a28485
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: 83a28485
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 196
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:44Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:44Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5ee7f63a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:44Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5ee7f63a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 183
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:44Z
+**Event**: SENSOR_FIRED
+**Fire id**: 06b5726b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:45Z
+**Event**: SENSOR_PASSED
+**Fire id**: 06b5726b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 204
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:51Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4579374c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4579374c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 188
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:52Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4ab946be
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:52Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4ab946be
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 193
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:22:57Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:57Z
+**Event**: SENSOR_FIRED
+**Fire id**: a878c8fa
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:57Z
+**Event**: SENSOR_PASSED
+**Fire id**: a878c8fa
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:22:57Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1895f07d
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:22:58Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1895f07d
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 186
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:23:02Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Context**: construction > evaluation-and-comparison > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: ebbc328c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:03Z
+**Event**: SENSOR_PASSED
+**Fire id**: ebbc328c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 180
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: 92a94634
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:03Z
+**Event**: SENSOR_PASSED
+**Fire id**: 92a94634
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/evaluation-and-comparison/code-generation/code-summary.md
+**Duration ms**: 170
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:23:10Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4cfead29
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:11Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4cfead29
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 497
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: 87c297be
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 87c297be
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 321
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:23:23Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:23Z
+**Event**: SENSOR_FIRED
+**Fire id**: cb1e781f
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:23Z
+**Event**: SENSOR_PASSED
+**Fire id**: cb1e781f
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 198
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: 66539dcd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:24Z
+**Event**: SENSOR_PASSED
+**Fire id**: 66539dcd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 190
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:23:32Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3c5f8998
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:33Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3c5f8998
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 692
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: d6129c35
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: d6129c35
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 201
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:23:53Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:53Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1b5fec7a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:53Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1b5fec7a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 238
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:23:54Z
+**Event**: SENSOR_FIRED
+**Fire id**: c657a74f
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:23:54Z
+**Event**: SENSOR_PASSED
+**Fire id**: c657a74f
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 201
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:24:04Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:24:04Z
+**Event**: SENSOR_FIRED
+**Fire id**: e076b4c9
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:24:05Z
+**Event**: SENSOR_PASSED
+**Fire id**: e076b4c9
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 305
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:24:05Z
+**Event**: SENSOR_FIRED
+**Fire id**: c3f0b94e
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:24:05Z
+**Event**: SENSOR_PASSED
+**Fire id**: c3f0b94e
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 175
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:24:39Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:24:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: de877157
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:24:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: de877157
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 349
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:24:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: e4c0de8a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:24:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: e4c0de8a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 210
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:25:31Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:31Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4e1872cb
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:31Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4e1872cb
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 231
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:31Z
+**Event**: SENSOR_FIRED
+**Fire id**: d3f3dafa
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:32Z
+**Event**: SENSOR_PASSED
+**Fire id**: d3f3dafa
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 191
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:25:33Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Context**: construction > statistical-inference > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: 34651c7c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: 34651c7c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 184
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: fa71087c
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: fa71087c
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 191
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:25:42Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Context**: construction > statistical-inference > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:42Z
+**Event**: SENSOR_FIRED
+**Fire id**: 309fc5b0
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:42Z
+**Event**: SENSOR_PASSED
+**Fire id**: 309fc5b0
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 187
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:42Z
+**Event**: SENSOR_FIRED
+**Fire id**: fce47034
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:43Z
+**Event**: SENSOR_PASSED
+**Fire id**: fce47034
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 184
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:25:50Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Context**: construction > statistical-inference > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:50Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4759cb53
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:50Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4759cb53
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 195
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:50Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9da06f8a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9da06f8a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 229
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:25:55Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:55Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4a98fe8e
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:55Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4a98fe8e
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 175
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:55Z
+**Event**: SENSOR_FIRED
+**Fire id**: 37d72787
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:56Z
+**Event**: SENSOR_PASSED
+**Fire id**: 37d72787
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 209
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:25:58Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Context**: construction > statistical-inference > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: f4d1d101
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: f4d1d101
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 315
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:25:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: f5fa3833
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:25:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: f5fa3833
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 307
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:26:02Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: aafc87d3
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:03Z
+**Event**: SENSOR_PASSED
+**Fire id**: aafc87d3
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 204
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:03Z
+**Event**: SENSOR_FIRED
+**Fire id**: 596d6afd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:03Z
+**Event**: SENSOR_PASSED
+**Fire id**: 596d6afd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 211
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:26:11Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Context**: construction > statistical-inference > code-generation > code-summary.md
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:26:11Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Context**: construction > models-and-baselines > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:11Z
+**Event**: SENSOR_FIRED
+**Fire id**: 66d5741c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: 99cef5db
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 66d5741c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 264
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 99cef5db
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 281
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: 55b0f0fd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:12Z
+**Event**: SENSOR_FIRED
+**Fire id**: 4387ce6d
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 55b0f0fd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 193
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:12Z
+**Event**: SENSOR_PASSED
+**Fire id**: 4387ce6d
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/models-and-baselines/code-generation/code-summary.md
+**Duration ms**: 203
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:26:23Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Context**: construction > statistical-inference > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: 67d3dc06
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:24Z
+**Event**: SENSOR_PASSED
+**Fire id**: 67d3dc06
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 478
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:26:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: 368c8bc5
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:26:25Z
+**Event**: SENSOR_PASSED
+**Fire id**: 368c8bc5
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/statistical-inference/code-generation/code-summary.md
+**Duration ms**: 217
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:27:20Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: d3343b94
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: d3343b94
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 183
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:21Z
+**Event**: SENSOR_FIRED
+**Fire id**: 70c922cd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:21Z
+**Event**: SENSOR_PASSED
+**Fire id**: 70c922cd
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 185
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:27:31Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:31Z
+**Event**: SENSOR_FIRED
+**Fire id**: 895783bf
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:32Z
+**Event**: SENSOR_PASSED
+**Fire id**: 895783bf
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 329
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:32Z
+**Event**: SENSOR_FIRED
+**Fire id**: 45c6694a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:32Z
+**Event**: SENSOR_PASSED
+**Fire id**: 45c6694a
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 190
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:27:39Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: b9b323f6
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: b9b323f6
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: c1a237e6
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:40Z
+**Event**: SENSOR_PASSED
+**Fire id**: c1a237e6
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 178
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:27:46Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-developer-agent
+**Agent ID**: af768a5228ca725f8
+**Message**: ## Manifest — Worker A (Confirmatory path), resumed 2026-09-20\n\n`graphify` CLI is **not on PATH** on this clone (`command -v graphify` → not found). Stated once; all exploration below is direct read/g
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:27:48Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:49Z
+**Event**: SENSOR_FIRED
+**Fire id**: 7209ba4c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: 7209ba4c
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 191
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:27:49Z
+**Event**: SENSOR_FIRED
+**Fire id**: 55e5626b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:27:49Z
+**Event**: SENSOR_PASSED
+**Fire id**: 55e5626b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 264
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:27:49Z
+**Event**: HUMAN_TURN
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:28:00Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:00Z
+**Event**: SENSOR_FIRED
+**Fire id**: 28c02ad1
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:00Z
+**Event**: SENSOR_PASSED
+**Fire id**: 28c02ad1
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 210
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:01Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9adf4af7
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:01Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9adf4af7
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 185
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:28:07Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:07Z
+**Event**: SENSOR_FIRED
+**Fire id**: ea3aadca
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:08Z
+**Event**: SENSOR_PASSED
+**Fire id**: ea3aadca
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 216
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:08Z
+**Event**: SENSOR_FIRED
+**Fire id**: fd1ccff5
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:08Z
+**Event**: SENSOR_PASSED
+**Fire id**: fd1ccff5
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 217
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:28:15Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:15Z
+**Event**: SENSOR_FIRED
+**Fire id**: 17d65bd7
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:15Z
+**Event**: SENSOR_PASSED
+**Fire id**: 17d65bd7
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 177
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:15Z
+**Event**: SENSOR_FIRED
+**Fire id**: c8be5138
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:16Z
+**Event**: SENSOR_PASSED
+**Fire id**: c8be5138
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 190
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:28:23Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:23Z
+**Event**: SENSOR_FIRED
+**Fire id**: 0a6a4670
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:23Z
+**Event**: SENSOR_PASSED
+**Fire id**: 0a6a4670
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 190
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:24Z
+**Event**: SENSOR_FIRED
+**Fire id**: a1b6b0ab
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:24Z
+**Event**: SENSOR_PASSED
+**Fire id**: a1b6b0ab
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 236
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:28:32Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:32Z
+**Event**: SENSOR_FIRED
+**Fire id**: b06b537b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:32Z
+**Event**: SENSOR_PASSED
+**Fire id**: b06b537b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 178
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: 672bd946
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:33Z
+**Event**: SENSOR_PASSED
+**Fire id**: 672bd946
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 175
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:28:41Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:41Z
+**Event**: SENSOR_FIRED
+**Fire id**: 86905eb8
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:42Z
+**Event**: SENSOR_PASSED
+**Fire id**: 86905eb8
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 213
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:42Z
+**Event**: SENSOR_FIRED
+**Fire id**: e93ef531
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:42Z
+**Event**: SENSOR_PASSED
+**Fire id**: e93ef531
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 216
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:28:53Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Context**: construction > regimes-diagnostics-reporting > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:53Z
+**Event**: SENSOR_FIRED
+**Fire id**: f04f22ee
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:53Z
+**Event**: SENSOR_PASSED
+**Fire id**: f04f22ee
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 200
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:28:53Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1dcd1afb
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:28:53Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1dcd1afb
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/regimes-diagnostics-reporting/code-generation/code-summary.md
+**Duration ms**: 190
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:31:16Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-developer-agent
+**Agent ID**: a4fa468e1e15d5244
+**Message**: All work complete. Final manifest.\n\n# Worker B manifest — Evaluation / reporting (Recs 15, 16, 18, 19, 20, 21, 48)\n\n**Tooling note, stated once:** the `graphify` CLI is **not on PATH** on this clone (
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:31:23Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:31:37Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a7970c17843278ab7
+**Message**: continue
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:31:38Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/code-generation/code-summary.md
+**Context**: construction > acquisition > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:31:38Z
+**Event**: SENSOR_FIRED
+**Fire id**: 5e75654b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:31:38Z
+**Event**: SENSOR_PASSED
+**Fire id**: 5e75654b
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/code-generation/code-summary.md
+**Duration ms**: 215
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:31:39Z
+**Event**: SENSOR_FIRED
+**Fire id**: 95db61f0
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:31:39Z
+**Event**: SENSOR_PASSED
+**Fire id**: 95db61f0
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/acquisition/code-generation/code-summary.md
+**Duration ms**: 182
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:32:33Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/code-generation/code-summary.md
+**Context**: construction > inventory-and-registry > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:32:33Z
+**Event**: SENSOR_FIRED
+**Fire id**: 8fe76b66
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:32:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: 8fe76b66
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/code-generation/code-summary.md
+**Duration ms**: 394
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:32:34Z
+**Event**: SENSOR_FIRED
+**Fire id**: b44c2240
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:32:34Z
+**Event**: SENSOR_PASSED
+**Fire id**: b44c2240
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/inventory-and-registry/code-generation/code-summary.md
+**Duration ms**: 196
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:34:50Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/code-generation/code-summary.md
+**Context**: construction > foundation > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:34:50Z
+**Event**: SENSOR_FIRED
+**Fire id**: 97a9449a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:34:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 97a9449a
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/code-generation/code-summary.md
+**Duration ms**: 398
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:34:51Z
+**Event**: SENSOR_FIRED
+**Fire id**: 32f948d0
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:34:51Z
+**Event**: SENSOR_PASSED
+**Fire id**: 32f948d0
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/foundation/code-generation/code-summary.md
+**Duration ms**: 189
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:35:46Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/code-generation/code-summary.md
+**Context**: construction > target-standardization > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:35:47Z
+**Event**: SENSOR_FIRED
+**Fire id**: 1bcbfa54
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:35:47Z
+**Event**: SENSOR_PASSED
+**Fire id**: 1bcbfa54
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/code-generation/code-summary.md
+**Duration ms**: 361
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:35:47Z
+**Event**: SENSOR_FIRED
+**Fire id**: a0cd1e9b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:35:48Z
+**Event**: SENSOR_PASSED
+**Fire id**: a0cd1e9b
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/target-standardization/code-generation/code-summary.md
+**Duration ms**: 184
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:35:59Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+**Context**: construction > external-products > code-generation > code-summary.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:35:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: dad45206
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:35:59Z
+**Event**: SENSOR_PASSED
+**Fire id**: dad45206
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+**Duration ms**: 183
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:35:59Z
+**Event**: SENSOR_FIRED
+**Fire id**: e04e3d4e
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:36:00Z
+**Event**: SENSOR_PASSED
+**Fire id**: e04e3d4e
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/external-products/code-generation/code-summary.md
+**Duration ms**: 197
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:36:39Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:37:05Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-devsecops-agent
+**Agent ID**: aae1b0b6edf6b620c
+**Message**: All prohibitions hold: `core.hooksPath` UNSET, `HEAD` still `ff5c683`, `evidence/` diff empty.\n\n---\n\n# Worker D manifest — custody / environment / records\n\n## 1. Predecessor verification\n\n| File | Wha
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:37:48Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-developer-agent
+**Agent ID**: a48c4b522c449c854
+**Message**: Work complete. Manifest follows.\n\n---\n\n# WORKER C (Data provenance) — resume manifest\n\n**Note on tooling:** the `graphify` CLI is **not on PATH** on this clone (`which graphify` → not found). Per the 
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:37:51Z
+**Event**: HUMAN_TURN
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:38:40Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Context**: construction > build-and-test > memory.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:38:40Z
+**Event**: SENSOR_FIRED
+**Fire id**: 91d0e4e7
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:38:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: 91d0e4e7
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 237
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:38:41Z
+**Event**: SENSOR_FIRED
+**Fire id**: 9db430b9
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:38:41Z
+**Event**: SENSOR_PASSED
+**Fire id**: 9db430b9
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 211
+
+---
+
+## Artifact Updated
+**Timestamp**: 2026-09-20T17:38:55Z
+**Event**: ARTIFACT_UPDATED
+**Tool**: Edit
+**File**: C:/Users/s_sch/Desktop/test/Thesis_toshkari-main/Thesis_toshkari-main/aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Context**: construction > build-and-test > memory.md
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:38:55Z
+**Event**: SENSOR_FIRED
+**Fire id**: 3a383732
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:38:55Z
+**Event**: SENSOR_PASSED
+**Fire id**: 3a383732
+**Sensor ID**: required-sections
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 185
+
+---
+
+## Sensor Fired
+**Timestamp**: 2026-09-20T17:38:55Z
+**Event**: SENSOR_FIRED
+**Fire id**: d4541dca
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+
+---
+
+## Sensor Passed
+**Timestamp**: 2026-09-20T17:38:56Z
+**Event**: SENSOR_PASSED
+**Fire id**: d4541dca
+**Sensor ID**: upstream-coverage
+**Stage slug**: build-and-test
+**Output path**: aidlc/spaces/default/intents/260813-tec-hourly-forecast/construction/build-and-test/memory.md
+**Duration ms**: 179
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:39:19Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: ad5768d5673deb2cd
+**Message**: write the remediation manifest
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-20T17:40:46Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: aidlc-devsecops-agent
+**Agent ID**: aae1b0b6edf6b620c
+**Message**: ## Rec 25 follow-up — done\n\n**Files changed (this follow-up only, derived from numstat deltas against my previous pass):**\n\n| File | This edit | Cumulative vs `HEAD` |\n|---|---|---|\n| `tests/test_rele
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:40:49Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:44:44Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-20T17:55:54Z
+**Event**: HUMAN_TURN
+
+---

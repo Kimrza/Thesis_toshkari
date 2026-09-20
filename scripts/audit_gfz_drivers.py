@@ -52,7 +52,8 @@ Outputs (all under `evidence/audit_gfz_<date>/`)
 * `sha256_manifest.json` — the canonical flat {path: sha256} mapping over the four
   provider files plus the derived artifacts (TE 13.3; TA-15's reader verifies it) and
   `sha256_manifest_meta.json` — W-4's metadata sidecar (provider identities with DOI
-  version, provenance class, interpreter, hash arithmetic);
+  version, provenance class, interpreter, hash arithmetic, and since 2026-09-20 the
+  three TE §13 identity stamps — see "Identity stamps" below);
 * `gfz-comparison-report.json` — parse validation (2022 coverage, chronology, cadence,
   duplicates, missing symbols) and the value-by-value comparison per series, epochs
   keyed by INTEGER `{y, m, d, h}`. Since D-48 (2026-09-19) the December-custody scan
@@ -66,6 +67,31 @@ Outputs (all under `evidence/audit_gfz_<date>/`)
   false` (driver data; no December TARGET value is read), with the environment lock
   recorded as a supplemental stdlib lock because the governed `capture_environment_lock`
   needs `pyyaml`, absent on this host — stated in `notes`, never silently substituted.
+
+Identity stamps (R-70/TEC-05; board Recommendation 24, 2026-09-20)
+------------------------------------------------------------------
+`write_sha256_manifest` now REQUIRES the three TE §13 definition IDs (`phase_id`,
+`source_id`, `target_definition_id`) — the parameter is required rather than defaulted
+precisely so the provenance head of the chain cannot go on emitting unstamped artifacts.
+This script is one of its three callers and was left unstamped when the parameter landed,
+which made the call a `TypeError` rather than an unstamped write; `_resolve_stamps` below
+closes that.
+
+The values are **RESOLVED** from `configs/data.yaml`'s `target.identity` block through
+`prepared.resolve_target_identity`, the one resolver stages 00, 01 and 02 already use —
+never invented here (TE §18.2). That block does not exist today, so **this script now
+refuses at the manifest step and says why**, which is the stop-and-report TE §18.3
+requires rather than three artifacts carrying an identity an implementer chose. The
+`--offline` parse-and-compare path and every retrieval step run unchanged up to that
+point; only the manifest write is gated.
+
+⚠ **Open, routed to the owner and not decided here.** `target.identity.source_id`
+identifies the prepared-VTEC **target** lineage, and these four artifacts are **driver**
+evidence, not target evidence. Whether a driver audit stamps the study's target identity,
+or carries its own `source_id` derived from the provider DOI, is a governed question no
+document in this workspace settles. Stamping it with the one resolver keeps the value
+resolved rather than invented; if the owner rules that drivers need their own source
+identity, that ruling changes `configs/data.yaml`, not this script.
 
 Re-run behaviour
 ----------------
@@ -112,8 +138,9 @@ from src.data.acquisition import (  # noqa: E402
     guard_egress_free_text,
     write_sha256_manifest,
 )
-from src.data.config import IntegrityError  # noqa: E402
+from src.data.config import IntegrityError, _parse_yaml  # noqa: E402
 from src.data.experiment_registry import append_registry_event  # noqa: E402
+from src.data.prepared import resolve_target_identity  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
 from src.external.spaceweather import assert_gfz_cross_products  # noqa: E402
 
@@ -459,6 +486,39 @@ def _registry_row(
     return row
 
 
+def _resolve_stamps() -> Mapping[str, str]:
+    """The three TE §13 definition IDs for this audit's manifest — RESOLVED, never chosen.
+
+    Board Recommendation 24 (2026-09-20) made `stamps` a required argument of
+    `write_sha256_manifest`. This script is one of its three callers, so it needs the
+    values; and per TE §18.2 it may not supply them itself. Both facts are satisfied the
+    same way stages 00, 01 and 02 satisfy them: delegate to
+    `prepared.resolve_target_identity`, the ONE resolver, over `configs/data.yaml`.
+
+    `configs/data.yaml` is read through `config._parse_yaml`, the package's own strict
+    loader (duplicate-key-refusing, no arbitrary tags), rather than a second `yaml.load`
+    here — a second reader is a second derivation, and the one it would drift from is the
+    one every other stage uses. `load_configs` is deliberately NOT used: it loads and
+    preflights all four governed configs for a phase, and this script reads no `configs/`
+    value other than this identity.
+
+    Raises
+    ------
+    StandardizationError
+        naming the absent field, while `configs/data.yaml` carries no `target.identity`
+        block or any of its three values is empty or `TBD — freeze gate`. That is the
+        state today and the refusal is CORRECT: stamping four provenance artifacts with an
+        identity an implementer chose is exactly the §18.2 violation stop-and-report
+        exists to prevent (TE §18.3).
+    ConfigError
+        from `_parse_yaml`, when `configs/data.yaml` is absent or malformed — and on a
+        host without `pyyaml`, which this script already records as its own condition
+        (see the environment-lock note above). That refusal is loud and names its cause;
+        it is not a silent substitution.
+    """
+    return resolve_target_identity(_parse_yaml(REPO_ROOT / "configs" / "data.yaml"))
+
+
 # --- main -----------------------------------------------------------------------------
 
 
@@ -701,12 +761,20 @@ def _run_body(
     # the W-4 metadata (provider identities with version suffix, provenance class,
     # interpreter, hash arithmetic) in `sha256_manifest_meta.json` beside it. The interim
     # `w4_provider_sha256_manifest.json` this script wrote on 2026-09-18 is superseded.
+    # R-70/TEC-05 (board Recommendation 24): the stamps are RESOLVED from
+    # `configs/data.yaml` through the one resolver, never invented here. This REFUSES
+    # while the `target:` block is absent — the TE 18.3 stop-and-report, reached only
+    # after every retrieval, parse and comparison above has already been written, so a
+    # refusal here costs the run its manifest and nothing else. See the module
+    # docstring's "Identity stamps" section for the open driver-versus-target
+    # `source_id` question, which is the owner's and is not decided here.
     write_sha256_manifest(
         out_dir / "sha256_manifest.json",
         provider_files=records,
         derived_artifacts=derived,
         provenance_class="full",
         producing_interpreter=sys.version.split()[0],
+        stamps=_resolve_stamps(),
     )
     kp, hp = comparisons["kp_ap3"], comparisons["hp60_ap60"]
     return (

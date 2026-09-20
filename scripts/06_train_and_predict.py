@@ -8,9 +8,11 @@ checkpoints). It ORCHESTRATES `src/models` (W-1, W-2, W-3, W-6, W-7, W-12; R-90 
 
 * `assert_stamp_match` runs BEFORE EVERY scoring path (R-90): a frame whose spec is not
   `(partition k, role "score")`, or whose transform is not k's own, never reaches k's scoring.
-* Per fitting-capable partition, M-01 ... M-05 once and M-06 once per configured final seed;
-  the three M-06 predictions are averaged by `three_seed_mean` with `expected_seeds` read from
-  `ConfigSnapshot.seeds` HERE, at the call site (R-91, R-93) -- never inlined.
+* Per FOLD partition, M-01 ... M-05 once and M-06 once per configured final seed; the three
+  M-06 predictions are averaged by `three_seed_mean` with `expected_seeds` read from
+  `ConfigSnapshot.seeds` HERE, at the call site (R-91, R-93) -- never inlined. A fold fit
+  names its own score bundle as the explicit `validation_bundle`: on a fold the two
+  legitimately coincide, and naming it is what keeps them from coinciding on `DEC`.
 * The grid content is asserted against config before any fit (R-96), and every grid point a
   family is given is a member of that grid.
 * The ONE-SHOT `DEC` write (W-12; R-102a; SD-M-04): write the prediction file once; hash it
@@ -18,32 +20,62 @@ checkpoints). It ORCHESTRATES `src/models` (W-1, W-2, W-3, W-6, W-7, W-12; R-90 
   append the registry row carrying `prediction_hash` at TE 13.4's column 18; and REFUSE TO
   EXIT (`LockedTestError`) unless both the rename and the append succeeded.
 
+REFIT fits and persists; DEC loads and predicts (owner ruling, 2026-09-20)
+--------------------------------------------------------------------------
+The refit is no longer skipped and December no longer fits anything:
+
+* **`REFIT`** is a FIT-AND-PERSIST iteration. It is scored nowhere (FR-P1-04-14), so it has
+  no score bundle and produces no prediction; what it produces is a persisted, SHA-256-hashed
+  fitted model per fitted family (and per final seed for M-06) plus a `FittedModelRecord`
+  naming the payload and its hash. The M-06 refit trains for the frozen epoch count that
+  `models.refit.epochs` carries -- the value `train.REFIT_EPOCH_RULE_ID` produced from the
+  pre-December folds -- with no validation set and no early stopping, so nothing is selected
+  at refit time. Before this change the loop `continue`d here and the Jan-Nov refit was never
+  fitted standalone at all.
+* **`DEC`** is a LOAD-AND-PREDICT iteration. The fitted families reach it only through
+  `train.predict_from_fitted`, which re-verifies the persisted payload's hash and calls the
+  family's `predict_rows_from_state`; `model.fit` does not appear anywhere on that path, and
+  `train.assert_not_locked_fit` raises `LeakageError` if any future caller reaches for a fit
+  there. M-01 and M-02 carry no fitted state and are recomputed from the locked target
+  series as before. December therefore never influences training, early stopping, checkpoint
+  selection or model selection (Vision 8.3).
+
 What this script can and cannot run today
 -----------------------------------------
 * **It REFUSES, honestly, before any model is fitted**: the released Phase 1 target manifest
   and the bundle root's `split_manifest.json` do not exist (no feature bundle has ever been
   produced -- `05` refuses at the unset permitted-producer list), so the run writes an
-  `aborted` registry row naming the first absent input. Behind that, `experiment.horizons` is
-  not transcribed yet and `read_horizons` refuses naming it (TE 2.1; R-99).
-* **`DEC` is UNREACHABLE.** The locked path is implemented in full but enters ONLY through
-  `materialise_locked_partition(snapshot, g05_signature=...)`, which refuses without a
-  verifying G-05 signature (R-82, ADR-03); `--partition DEC` is not in the default list and
-  additionally requires `--g05-signature`, `--locked-input` and `--locked-authorization`. No
-  December content is read by any path this script can reach today, and this script never
-  names the restricted root -- the loader routes the human-supplied path through
-  `governance-guards`' `open_restricted`, the one door. The frame the door RETURNS is the
-  `DEC` iteration's target (`_locked_target`); the released January–November target loaded
-  before the partition loop is refused on that branch by identity, so the access-logged
-  read is the data the receipt's prediction was computed from (R-102a; SD-M-04; W-12).
-* M-06's Keras path refuses at the TensorFlow pin guard (FU-1 = C); M-04/M-05 refuse by name
-  without `scikit-learn` installed.
+  `aborted` registry row naming the first absent input.
+* **`DEC` requires the G-05 signature.** The locked path is implemented in full but enters
+  ONLY through `materialise_locked_partition(snapshot, g05_signature=...)`, which refuses
+  without a verifying G-05 signature (R-82, ADR-03); `--partition DEC` is not in the default
+  list and additionally requires `--g05-signature`, `--locked-input` and
+  `--locked-authorization`. This script never names the restricted root -- the loader routes
+  the human-supplied path through `governance-guards`' `open_restricted`, the one door. The
+  frame the door RETURNS is the `DEC` iteration's target (`_locked_target`); the released
+  January-November target loaded before the partition loop is refused on that branch by
+  identity, so the access-logged read is the data the receipt's prediction was computed from
+  (R-102a; SD-M-04; W-12).
+* **The TensorFlow pin is FROZEN at `tensorflow==2.21.0` (D-36) and `require_frozen_pin`
+  PASSES.** What stops an M-06 run here is the ENVIRONMENT, not the guard: TensorFlow has
+  never been installed or imported on this clone (PyPI unreachable), TE 8.1's both-platform
+  check has not run, and TA-26 stays `Pending`. Separately, this script supplies no
+  `CheckpointBackend`, so M-06 refuses for that reason too. M-04/M-05 refuse by name without
+  `scikit-learn` installed.
+* **Persisting M-04, M-05 and M-06 refuses by design.** `train.JsonStateBackend` serves any
+  family whose fitted state is JSON-serialisable (M-03's mean table is). A fitted
+  scikit-learn estimator and a set of Keras weights are not, and choosing a binary
+  serialization format for them is a governed decision that does not exist yet (TS-M-01
+  freezes the Keras checkpoint format at pin-freeze). The refusal names that, rather than
+  reaching for pickle.
 
 Inputs
 ------
 `--config configs/`; `--phase 1|2`; `--partition` (repeatable; default F1..F4, REFIT; `DEC`
 permitted only with the three locked-path arguments); `--horizon` (default: the single
 default-list entry of `experiment.horizons`); `--bundles-root` (default `artifacts/features`);
-`--predictions-out` (default `artifacts/predictions`); `--code-commit`.
+`--predictions-out` (default `artifacts/predictions`); `--fitted-models-root` (default
+`artifacts/models`, where the REFIT persist writes and the DEC load reads); `--code-commit`.
 
 Re-run behaviour
 ----------------
@@ -124,16 +156,21 @@ from src.features._frames import frame_attrs, records_of  # noqa: E402
 from src.features.build import FrameSpec, bundle_directory_name, load_bundle  # noqa: E402
 from src.features.transforms import transform_id_for  # noqa: E402
 from src.models.train import (  # noqa: E402
+    FITTED_MODEL_IDS,
     GRID_TRACKS,
     MODEL_IDS,
     TBD_SENTINEL,
+    JsonStateBackend,
     Prediction,
     assert_grid_content,
     assert_in_grid,
     assert_locked_exit_allowed,
     assert_stamp_match,
     expected_transform_id,
+    fit_and_persist,
     fit_predict,
+    load_fitted_model,
+    predict_from_fitted,
     resolve_horizon,
     three_seed_mean,
     write_prediction_hash_receipt,
@@ -171,7 +208,21 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "fitted_role",
     "missing_source_values",
     "missing_climatology_keys",
+    "climatology_key",
+    "climatology_limitation",
     "training_rows_excluded_missing_label",
+    "fitted_partition_id",
+    "fitted_model_partition_id",
+    "fitted_model_sha256",
+    "payload_ref",
+    "payload_sha256",
+    "fitted_at_utc",
+    "inference_only",
+    "checkpoint_selected",
+    "epoch_source",
+    "restored_epoch",
+    "epochs_run",
+    "validation_partition_id",
 )
 
 
@@ -219,6 +270,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--horizon", type=int, default=None, help="forecast horizon in hours")
     parser.add_argument("--bundles-root", type=Path, default=Path("artifacts/features"))
     parser.add_argument("--predictions-out", type=Path, default=Path("artifacts/predictions"))
+    parser.add_argument(
+        "--fitted-models-root",
+        type=Path,
+        default=Path("artifacts/models"),
+        help=(
+            "workspace-relative root where the REFIT fit persists its hashed models and "
+            "fitted-model records, and where the DEC iteration loads them from"
+        ),
+    )
     parser.add_argument("--code-commit", type=str, default=None)
     parser.add_argument(
         "--g05-signature",
@@ -412,7 +472,15 @@ def _bundle_pair(
     """The train bundle a family is fitted on and the score bundle it predicts on.
 
     For `DEC` the fit bundle is `REFIT`'s train bundle and the score bundle carries `REFIT`'s
-    transform -- the one enumerated G-06 apply (R-74).
+    transform -- the one enumerated G-06 apply (R-74). The `DEC` score bundle is produced by
+    `05 --partition DEC`, behind the same G-05 signature guard.
+
+    The score slot is `None` for `REFIT` alone, and that is the truthful answer: the final
+    refit is scored nowhere (FR-P1-04-14), so there is no score-role bundle to load and
+    fabricating one would contradict the split manifest. What changed on 2026-09-20 is the
+    CALLER: `_run` no longer treats a `None` score slot as "skip this partition". It routes
+    `REFIT` to the fit-and-persist branch, which is the only producer of the model the `DEC`
+    iteration loads.
     """
     fit_partition = partition
     if partition.partition_id == LOCKED_ID:
@@ -550,6 +618,169 @@ def _child_rows(
         registry_path, completed, phase=phase, writer_role=WRITER_ROLE, access_log_path=access_log
     )
     return True
+
+
+def _model_registry_rows(
+    run_id: str,
+    *,
+    lock_hash: str,
+    snapshot: Any,
+    code_commit: str,
+    registry_path: Path,
+    access_log: Path,
+    phase: int,
+    model_id: str,
+    seed: int | None,
+    fold_id: str,
+    hyperparameters: Mapping[str, Any] | None,
+    manifest_path: Path,
+) -> None:
+    """One `started` + `completed` pair for an artifact that is not a prediction — the
+    REFIT's persisted fitted model. Each seed is its own registry run (TE 13.5)."""
+    child_id = f"{run_id}/{fold_id}/{model_id}" + (f"/seed{seed}" if seed is not None else "")
+    common = {
+        "fold_id": fold_id,
+        "model_id": model_id,
+        "seed": "" if seed is None else seed,
+        "hyperparameters_json": json.dumps(
+            dict(hyperparameters or {}), sort_keys=True, default=str
+        ),
+        "locked_test_accessed": False,
+    }
+    for status, manifest in (("started", None), ("completed", manifest_path)):
+        row = _registry_row(
+            child_id, status=status, lock_hash=lock_hash, snapshot=snapshot,
+            code_commit=code_commit,
+            artifact_manifest_path="" if manifest is None else str(manifest),
+            **common,
+        )
+        append_registry_event(
+            registry_path, row, phase=phase, writer_role=WRITER_ROLE, access_log_path=access_log
+        )
+
+
+def _fitted_record_path(models_root: Path, model_id: str, seed: int | None) -> Path:
+    """Where the REFIT persist writes a family's fitted-model record and the DEC load finds
+    it. One file per (model, seed): each seed is its own run (TE 13.5)."""
+    suffix = "" if seed is None else f"_seed{seed}"
+    return Path(models_root) / f"{model_id}{suffix}.fitted_record.json"
+
+
+def _refit_and_persist(
+    *,
+    snapshot: Any,
+    partition: Partition,
+    train_bundle: Any,
+    refit_target: Any,
+    horizon: int,
+    expected_seeds: frozenset[int],
+    models_root: Path,
+) -> list[tuple[str, int | None, Any, Path]]:
+    """The REFIT iteration: FIT on January-November and PERSIST, hashed. Nothing is scored.
+
+    Every fitted family is refitted from scratch on the refit partition's training range and
+    written through `JsonStateBackend`, which hashes the payload as written. M-06 is refitted
+    once per configured final seed, each seed its own persisted model and its own registry
+    run (TE 13.5), for exactly the frozen `models.refit.epochs` count with no validation set
+    — so no epoch, checkpoint or hyperparameter is selected here and December cannot reach
+    one. `validation_bundle=None` is the refit contract, asserted by
+    `train.assert_validation_bundle`.
+
+    M-01 and M-02 are skipped: they carry no fitted state and are recomputed from the target
+    series wherever they are scored.
+    """
+    backend = JsonStateBackend(models_root)
+    persisted: list[tuple[str, int | None, Any, Path]] = []
+    for model_id in MODEL_IDS:
+        if model_id not in FITTED_MODEL_IDS:
+            continue
+        params = _selected_params(snapshot, model_id)
+        seeds: tuple[int | None, ...] = (
+            tuple(sorted(expected_seeds)) if model_id == "M-06" else (None,)
+        )
+        for seed in seeds:
+            record_path = _fitted_record_path(models_root, model_id, seed)
+            record = fit_and_persist(
+                model_id,
+                bundle=train_bundle,
+                partition=partition,
+                snapshot=snapshot,
+                target=refit_target,
+                backend=backend,
+                record_path=record_path,
+                validation_bundle=None,  # the refit selects nothing (frozen epoch count)
+                seed=seed,
+                params=params,
+                horizon_hours=horizon,
+            )
+            persisted.append((model_id, seed, record, record_path))
+    return persisted
+
+
+def _locked_predictions(
+    *,
+    snapshot: Any,
+    partition: Partition,
+    train_bundle: Any,
+    score_bundle: Any,
+    locked_target: Any,
+    horizon: int,
+    expected_seeds: frozenset[int],
+    models_root: Path,
+) -> tuple[list[Prediction], list[Prediction]]:
+    """The DEC iteration: LOAD the persisted REFIT models and PREDICT. Nothing fits here.
+
+    A fitted family reaches December ONLY through `predict_from_fitted`, which re-verifies
+    the persisted payload against the hash recorded when it was written and dispatches to the
+    family's `predict_rows_from_state`. An absent record RAISES rather than falling back to a
+    fit: a fit reached from this branch is December in the training loop (Vision 8.3).
+    M-01 and M-02 carry no fitted state and are recomputed from the locked target series.
+    """
+    backend = JsonStateBackend(models_root)
+    produced: list[Prediction] = []
+    seeded: list[Prediction] = []
+    for model_id in MODEL_IDS:
+        seeds: tuple[int | None, ...] = (
+            tuple(sorted(expected_seeds)) if model_id == "M-06" else (None,)
+        )
+        for seed in seeds:
+            assert_stamp_match(score_bundle, partition)  # R-90: before EVERY scoring path
+            if model_id in FITTED_MODEL_IDS:
+                record_path = _fitted_record_path(models_root, model_id, seed)
+                record = load_fitted_model(record_path)  # raises: no persisted refit model
+                if record.model_id != model_id or record.fitted_partition_id != REFIT_ID:
+                    raise LockedTestError(
+                        record_path,
+                        f"records model {record.model_id!r} fitted on "
+                        f"{record.fitted_partition_id!r}; the locked iteration predicts with "
+                        f"the {model_id} model fitted on {REFIT_ID} and nothing else "
+                        f"(Vision 8.3; TE 7.0B)",
+                    )
+                prediction = predict_from_fitted(
+                    record,
+                    score_bundle=score_bundle,
+                    partition=partition,
+                    snapshot=snapshot,
+                    backend=backend,
+                    target=locked_target,
+                    horizon_hours=horizon,
+                )
+            else:
+                prediction = fit_predict(
+                    model_id,
+                    bundle=train_bundle,
+                    partition=partition,
+                    snapshot=snapshot,
+                    target=locked_target,
+                    score_bundle=score_bundle,
+                    seed=seed,
+                    params=None,
+                    horizon_hours=horizon,
+                )
+            if model_id == "M-06":
+                seeded.append(prediction)
+            produced.append(prediction)
+    return produced, seeded
 
 
 def _final_seeds(snapshot: Any) -> frozenset[int]:
@@ -765,6 +996,9 @@ def _run_fixture_scale(
                     snapshot=snapshot,
                     target=fixture_target,  # the fixture-scale target; no locked path exists
                     score_bundle=score_bundle,
+                    # apparatus folds mirror the frozen folds: the scored bundle IS the
+                    # validation bundle here, named rather than implied
+                    validation_bundle=score_bundle,
                     seed=seed,
                     params=params,
                     horizon_hours=horizon,
@@ -847,10 +1081,16 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     bundle_root = _bundle_root(snapshot, args)
     released_target = _load_target_by_manifest(snapshot)  # January–November; never DEC's
     out_root = workspace / args.predictions_out / run_id
+    models_root = workspace / args.fitted_models_root
 
     written: list[str] = []
+    locked_models_predicted = 0
     for pid in args.partitions:
         partition = partition_by_id(partitions, pid)
+        # The bundles load FIRST, so a missing DEC bundle refuses before any locked read is
+        # made: an access-logged open of the restricted root is a custody event and is not
+        # spent discovering that `05 --partition DEC` never ran.
+        train_bundle, score_bundle = _bundle_pair(bundle_root, partition, partitions)
         if pid == LOCKED_ID:
             # The ONE door: refuses without a verifying G-05 signature (R-82) before any read,
             # and the frame it RETURNS is the DEC iteration's target -- the pre-loop released
@@ -864,32 +1104,77 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             )
         else:
             partition_target = released_target
-        train_bundle, score_bundle = _bundle_pair(bundle_root, partition, partitions)
+
+        if pid == REFIT_ID:
+            # FIT AND PERSIST. The refit is scored nowhere (FR-P1-04-14) so it writes no
+            # prediction -- but it is NOT skipped: the hashed model it persists here is the
+            # ONLY model the DEC iteration is allowed to predict with (Vision 8.3).
+            for model_id, seed, record, record_path in _refit_and_persist(
+                snapshot=snapshot,
+                partition=partition,
+                train_bundle=train_bundle,
+                refit_target=partition_target,
+                horizon=horizon,
+                expected_seeds=expected_seeds,
+                models_root=models_root,
+            ):
+                _model_registry_rows(
+                    run_id, lock_hash=lock_hash, snapshot=snapshot,
+                    code_commit=lock.code_commit, registry_path=registry_path,
+                    access_log=access_log, phase=args.phase, model_id=model_id, seed=seed,
+                    fold_id=pid, hyperparameters=record.hyperparameters,
+                    manifest_path=record_path,
+                )
+                written.append(str(record_path))
+            continue
+
         if score_bundle is None:
-            continue  # the final refit is scored nowhere (FR-P1-04-14)
+            raise IntegrityError(
+                f"partition {pid}",
+                "carries no score-role bundle; only the final refit is scored nowhere "
+                "(FR-P1-04-14) and it is handled on its own branch — a silently skipped "
+                "partition is how the refit went unfitted",
+            )
         assert_stamp_match(score_bundle, partition)  # R-90: before EVERY scoring path
         seeded: list[Prediction] = []
-        for model_id in MODEL_IDS:
-            seeds: tuple[int | None, ...] = (
-                tuple(sorted(expected_seeds)) if model_id == "M-06" else (None,)
+        if pid == LOCKED_ID:
+            # LOAD AND PREDICT. No fitted family is fitted here; `assert_not_locked_fit`
+            # makes that a LeakageError rather than a convention.
+            produced, seeded = _locked_predictions(
+                snapshot=snapshot,
+                partition=partition,
+                train_bundle=train_bundle,
+                score_bundle=score_bundle,
+                locked_target=partition_target,
+                horizon=horizon,
+                expected_seeds=expected_seeds,
+                models_root=models_root,
             )
-            params = _selected_params(snapshot, model_id)  # refuses while models.selected is TBD
-            for seed in seeds:
-                assert_stamp_match(score_bundle, partition)
-                prediction = fit_predict(
-                    model_id,
-                    bundle=train_bundle,
-                    partition=partition,
-                    snapshot=snapshot,
-                    target=partition_target,
-                    score_bundle=score_bundle,
-                    seed=seed,
-                    params=params,
-                    horizon_hours=horizon,
+            locked_models_predicted = len(produced)
+        else:
+            for model_id in MODEL_IDS:
+                seeds: tuple[int | None, ...] = (
+                    tuple(sorted(expected_seeds)) if model_id == "M-06" else (None,)
                 )
-                if model_id == "M-06":
-                    seeded.append(prediction)
-                if pid != LOCKED_ID:
+                params = _selected_params(snapshot, model_id)  # refuses while selected is TBD
+                for seed in seeds:
+                    assert_stamp_match(score_bundle, partition)
+                    prediction = fit_predict(
+                        model_id,
+                        bundle=train_bundle,
+                        partition=partition,
+                        snapshot=snapshot,
+                        target=partition_target,
+                        score_bundle=score_bundle,
+                        # on a FOLD the validation bundle and the scored bundle legitimately
+                        # coincide; naming it is what stops them coinciding on DEC
+                        validation_bundle=score_bundle,
+                        seed=seed,
+                        params=params,
+                        horizon_hours=horizon,
+                    )
+                    if model_id == "M-06":
+                        seeded.append(prediction)
                     name = f"{model_id}" + (f"_seed{seed}" if seed is not None else "") + ".json"
                     path = _write_prediction_once(
                         out_root / pid / name,
@@ -933,7 +1218,12 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
                 prediction=confirmatory, manifest_path=path,
             )
             written.append(str(path))
-    return {"horizon_hours": horizon, "grid_counts": grid_counts, "predictions_written": written}
+    return {
+        "horizon_hours": horizon,
+        "grid_counts": grid_counts,
+        "predictions_written": written,
+        "locked_models_predicted": locked_models_predicted,
+    }
 
 
 def main() -> int:

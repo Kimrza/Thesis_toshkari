@@ -94,6 +94,7 @@ from src.external.spaceweather import (
     SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG,
     align_interval_series,
     assert_alignment,
+    assert_identical_across_cells,
     assert_lagged_selection,
 )
 from src.features._frames import (
@@ -335,7 +336,16 @@ def _tokens(name: str) -> set[str]:
 
 def _assert_field_name_clean(name: str) -> None:
     lowered = name.lower()
-    if lowered.startswith("iri_") or "iri" in _tokens(name):
+    # Any token BEGINNING `iri`, not only the `iri_` prefix or a bare `iri` token. The
+    # narrower test missed this project's own canonical IRI field name,
+    # `iri2016_t_plus_1_tecu` (TE 6.2's row identity; `configs/experiment.yaml`
+    # `benchmark_b01.output_field`): it neither starts with `iri_` nor tokenises to `iri`,
+    # so the denial mechanism WS-10 exists to prove let the one name it most needed to
+    # catch straight through. Declaring it on the `target_support` row — the one row whose
+    # branch in `_assert_name_matches_row` imposes no name/row agreement — would then have
+    # carried it into the dictionary intact. The closed row table bounds legitimate names
+    # to TE 6.2's own, none of which begins `iri`, so this cannot over-match.
+    if lowered.startswith("iri_") or any(token.startswith("iri") for token in _tokens(name)):
         raise LeakageError(
             f"feature dictionary field {name!r}",
             "is an iri_* / IRI-derived field; no IRI value, residual or IRI-computed field "
@@ -648,6 +658,17 @@ def _producer_of(frame: Any, *, resource: str) -> str:
 
 
 def _hourly_series(frame: Any, *, series: str) -> dict[dt.datetime, float | None]:
+    """Index a driver frame by epoch: ONE value per epoch, a duplicate epoch NAMED.
+
+    The duplicate refusal is the consuming half of TC-12 (`binding: hard`: driver series
+    are time-indexed only, one value per epoch). Without it this was the single ingest
+    path in the codebase that let a second row at one epoch win silently by assignment —
+    `windows.py`'s `by_station` raises `IntegrityError` on a duplicate `(station, epoch)`
+    and `spaceweather.align_interval_series` raises `AlignmentError` on a second value
+    mapping onto one epoch "because a silent winner would shift a value outside its own
+    interval". The collapse was invisible downstream because `build_features` broadcasts
+    the epoch-keyed value to every station's row.
+    """
     out: dict[dt.datetime, float | None] = {}
     for index, record in enumerate(records_of(frame)):
         if "interval_start_utc" not in record or "value" not in record:
@@ -655,6 +676,14 @@ def _hourly_series(frame: Any, *, series: str) -> dict[dt.datetime, float | None
                 f"driver {series} row {index}", "driver rows carry interval_start_utc and value"
             )
         epoch = _as_utc(record["interval_start_utc"], resource=f"driver {series} row {index}")
+        if epoch in out:
+            raise IntegrityError(
+                f"driver series {series!r} row {index}",
+                f"duplicate epoch {epoch.isoformat()}; a driver series is time-indexed only "
+                f"— ONE value per epoch, identical across all three cells (TC-12, "
+                f"FR-P1-04-4) — and a second row at one epoch would win silently by "
+                f"assignment and then be broadcast to every station's row",
+            )
         raw = record["value"]
         if raw is None or (isinstance(raw, str) and not raw.strip()):
             out[epoch] = None
@@ -1032,6 +1061,17 @@ def build_features(
             f"assembled frame for {spec.partition_id}/{spec.role}",
             "is empty after windowing and exclusions; an empty assembled frame is a check that "
             "never ran, and must not pass for one that did (R-74)",
+        )
+    # TC-12's joined-grid limb, asserted on the ACTUAL join rather than assumed from the
+    # broadcast: after a driver reaches every station's row, its value at one epoch is
+    # identical in every cell. The broadcast makes this true by construction today, so the
+    # call is a tripwire on that construction — a future per-cell driver path (a per-station
+    # interpolation, a per-cell fallback) would be caught here instead of silently producing
+    # a station performance difference attributable to local forcing the dataset does not
+    # contain (TC-12, `binding: hard`; R-63's negative control; FR-P1-04-4).
+    for name in driver_fields:
+        assert_identical_across_cells(
+            assembled, epoch_key=timestamp_column, value_key=name, cell_key=station_column
         )
     # every assembled column is a dictionary field or a flattened step of one
     admitted = set(columns) | {timestamp_column, station_column}

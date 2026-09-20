@@ -268,6 +268,13 @@ class AccessRecord:
     `evaluation-and-comparison`'s `require_locked_receipt` refuses a `DEC` metric on `None`
     (the fail-closed half). Existing rows and callers are unbroken: both fields default and
     the required-field check below is untouched.
+
+    **`retrieved_at_utc` must parse as ISO-8601** (added 2026-09-20, Recommendation 1). It
+    was previously any non-empty string, and every one of the 5,964 rows in
+    `evidence/test_run_access_log.jsonl` used the same placeholder constant. The check runs
+    LAST, after the emptiness, purpose and `locked_test_accessed` checks, so an existing
+    caller that violates one of those still fails for its own reason rather than for this
+    one. See `_assert_parseable_retrieved_at` for what the check does and does not claim.
     """
 
     run_id: str
@@ -305,6 +312,45 @@ class AccessRecord:
                 "locked_test_accessed must be True for any read under RESTRICTED_ROOT; "
                 "TE 13.4 makes the flag the fact a G-06 reviewer establishes",
             )
+        _assert_parseable_retrieved_at(self.retrieved_at_utc)
+
+
+def _assert_parseable_retrieved_at(value: str) -> None:
+    """Refuse a `retrieved_at_utc` that does not parse as ISO-8601 (Recommendation 1).
+
+    THE DEFECT THIS CLOSES. All 5,964 rows of `evidence/test_run_access_log.jsonl` carried
+    the same caller-supplied placeholder string, `recorded-at-call-time-by-the-runner`.
+    A field that is one constant on every row evidences nothing, so FR-P1-02-3 / VAL-2's
+    log-then-read ORDERING requirement was unverifiable from the very artifact that records
+    it. The two producers were fixed 2026-09-20; this check is what makes the fix durable,
+    because fixing two callers does not stop a third from reintroducing the placeholder.
+
+    Scope, stated so it is not over-read: this refuses an UNPARSEABLE value. It does not
+    and cannot verify that the caller's timestamp is TRUE -- a caller can still supply a
+    well-formed lie. That is precisely why `_append_and_flush` stamps its own
+    `logged_at_utc` immediately before the fsync, and why the ordering check reads THAT
+    field. This check removes the class of value that carries no information at all; it
+    does not promote `retrieved_at_utc` into trusted evidence.
+
+    A `Z` suffix is accepted (`datetime.fromisoformat` rejects it before Python 3.11 and
+    accepts it from 3.11; the repository pins 3.11, and the suffix is normalised here so
+    the rule does not silently depend on the interpreter's patch level).
+    """
+    text = value.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        _dt.datetime.fromisoformat(text)
+    except ValueError as exc:
+        raise LockedTestError(
+            "AccessRecord",
+            f"retrieved_at_utc {value!r} does not parse as an ISO-8601 timestamp. An "
+            f"access row whose time is a placeholder or free text cannot evidence the "
+            f"log-then-read ordering FR-P1-02-3 and VAL-2 require, and 5,964 historical "
+            f"rows were written exactly that way before this check existed "
+            f"(Recommendation 1; see evidence/test_run_access_log.SUPERSEDED_2026-09-20.md). "
+            f"Pass datetime.datetime.now(datetime.timezone.utc).isoformat().",
+        ) from exc
 
 
 def _repo_root() -> Path:

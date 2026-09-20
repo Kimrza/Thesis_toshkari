@@ -2172,3 +2172,108 @@ def test_b01_verify_runtime_completes_at_subprocess_level(tmp_path: Path) -> Non
     # a full-year driver-audit invocation on the same workspace still fails closed (gate kept)
     audit = _run_script([], workspace)
     _assert_gate_fails_closed(audit)
+
+
+# =======================================================================================
+# Board Recommendation 51 — the legacy EC-1 audit marks its own artifact PARTIAL
+# =======================================================================================
+#
+# `scripts/audit_ec1_drivers.py` is pre-TC-06 tooling pending a retirement ruling (the
+# board's preferred option 2, an owner act). The board added one obligation that stands
+# either way: "Add the `partial` field regardless." This is that field's control.
+#
+# Read the board's own qualification precisely, because it bounds what is tested here.
+# The machine-readable limb was ALREADY satisfied — `audit_dst` writes `missing_days` and
+# `expected_days` per month into the report, so a shortfall was never console-text-only —
+# and a completeness shortfall is legitimately NON-FATAL, so `main`'s unconditional
+# `return 0` is correct and is NOT the defect. What was unmet is the remaining clause of
+# `team.md` § Code Style: "the artifact explicitly marked derived and/or partial". A
+# reader had the per-month detail and no way to see at a glance whether the report AS A
+# WHOLE is complete.
+#
+# `_partial_reasons` is exercised directly rather than through `main`: it is pure, while
+# `main` writes into the real `evidence/` tree, which no test here may do.
+
+
+def _load_ec1_audit_module() -> Any:
+    """Import the legacy script by path. Its module scope is pure path construction."""
+    import importlib.util
+
+    script = REPO_ROOT / "scripts" / "audit_ec1_drivers.py"
+    spec = importlib.util.spec_from_file_location("audit_ec1_drivers_under_test", script)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_ec1_audit_marks_a_complete_report_clean_and_an_incomplete_one_partial() -> None:
+    """Both directions. A flag that is always set, or never set, records nothing.
+
+    SYNTHETIC inputs throughout: these are the report's own SHAPES, never the measured
+    2022 figures, which the run owns and no test may transcribe (TE §15.1, §18.2).
+    """
+    module = _load_ec1_audit_module()
+
+    complete_dst = {1: {"missing_days": [], "expected_days": 31}}
+    complete_f107 = {"days_missing_2022": [], "days_expected_2022": 365, "unparsed_lines": 0}
+    assert module._partial_reasons(complete_dst, complete_f107) == [], (
+        "a complete audit must NOT be marked partial; a flag that is always set carries "
+        "no information and teaches its reader to ignore it"
+    )
+
+    # Each of the four shortfall classes sets the flag AND names itself.
+    shortfalls = {
+        "missing day rows": (
+            {1: {"missing_days": ["2022-01-05"], "expected_days": 31}},
+            complete_f107,
+            "kyoto_dst",
+        ),
+        "a month that errored": (
+            {2: {"error": "synthetic retrieval failure"}},
+            complete_f107,
+            "synthetic retrieval failure",
+        ),
+        "absent F10.7 calendar days": (
+            complete_dst,
+            {"days_missing_2022": ["2022-03-18"], "days_expected_2022": 365},
+            "nrcan_f107",
+        ),
+        "unparsed F10.7 lines": (
+            complete_dst,
+            {"days_missing_2022": [], "unparsed_lines": 4},
+            "unparsed",
+        ),
+    }
+    for label, (dst, f107, owed) in shortfalls.items():
+        reasons = module._partial_reasons(dst, f107)
+        assert reasons, f"{label} did not set the partial flag"
+        assert any(owed in reason for reason in reasons), (
+            f"{label} set the flag without naming itself ({owed!r} absent from "
+            f"{reasons!r}); `partial: true` with no reason is a shortfall a reader "
+            f"cannot act on"
+        )
+
+
+def test_ec1_audit_marks_itself_derived_and_keeps_completeness_off_the_exit_code() -> None:
+    """The two-tier split, asserted over `main`'s SOURCE rather than by running it.
+
+    `main` writes into the real `evidence/` tree, so it is read, not executed. Two facts
+    are pinned: the artifact declares its own kind and partial state, and the exit code
+    still reports INTEGRITY only — a completeness shortfall must not become a non-zero
+    exit, or the two tiers collapse into one (`team.md` § Code Style).
+    """
+    import inspect
+
+    module = _load_ec1_audit_module()
+    source = inspect.getsource(module.main)
+    for owed in ('"artifact_kind"', '"partial"', '"partial_reasons"'):
+        assert owed in source, (
+            f"the EC-1 report no longer carries {owed}; the artifact must mark itself "
+            f"derived and/or partial (board Recommendation 51)"
+        )
+    assert "_partial_reasons(" in source, "the flag must be DERIVED from the measurements"
+    assert source.rstrip().endswith("return 0"), (
+        "main must still return 0 on a completeness shortfall: shortfalls are non-fatal "
+        "by contract and are recorded as report fields, never signalled by exit status"
+    )

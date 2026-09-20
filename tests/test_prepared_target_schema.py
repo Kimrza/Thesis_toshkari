@@ -763,14 +763,22 @@ def test_optionb_02_row_window_bound_behavioural_and_wired() -> None:
     from src.data.acquisition import AcquisitionError, assert_records_within_window
 
     window = (dt.date(2022, 3, 1), dt.date(2022, 3, 31))
+    # Trailing `Z`, matching what `prepared.hour_start_utc` actually emits
+    # (`"%Y-%m-%dT%H:00:00Z"`) — the shape every real `interval_start_utc` carries.
+    # These literals were naive until 2026-09-20; since R-46 (board finding 46)
+    # `parse_record_date_utc` REFUSES a naive timestamp rather than assuming UTC, so a
+    # naive literal here would make the in-window assertion raise on the PARSE, and would
+    # make the out-of-window case below raise for the wrong reason while still matching
+    # its `2022-11-03` fragment. A control that fails, or passes, for a reason other than
+    # the one it names is worse than no control.
     inside = [
-        {"interval_start_utc": "2022-03-01T00:00:00", "station_id": "ARUC"},
-        {"interval_start_utc": "2022-03-31T23:00:00", "station_id": "NICO"},
+        {"interval_start_utc": "2022-03-01T00:00:00Z", "station_id": "ARUC"},
+        {"interval_start_utc": "2022-03-31T23:00:00Z", "station_id": "NICO"},
     ]
     assert assert_records_within_window(
         inside, start=window[0], end=window[1], timestamp_key="interval_start_utc"
     ) == 2
-    outside = [*inside, {"interval_start_utc": "2022-11-03T00:00:00", "station_id": "BSHM"}]
+    outside = [*inside, {"interval_start_utc": "2022-11-03T00:00:00Z", "station_id": "BSHM"}]
     with pytest.raises(AcquisitionError, match="2022-11-03"):
         assert_records_within_window(
             outside, start=window[0], end=window[1], timestamp_key="interval_start_utc"

@@ -34,6 +34,67 @@ and this is the one `src/external` module every consumer may import -- placing a
 integrity helper behind the two-path IRI/GIM allowlist would force the allowlist open
 for a check that has nothing to do with IRI values.
 
+Boundary split -- WHERE each refusal is invoked
+-----------------------------------------------
+A guard module alone fails open on a forgotten call, and inline copies drift
+(`nfr-design:c58`; the R-105-vs-R-92 exception mismatch was that drift realised). Each
+refusal below therefore has exactly ONE home and a NAMED call site, so nothing is
+checked twice and nothing is checked nowhere.
+
+**Driver-PRODUCING path** -- `scripts/04_build_external_products.py`, which constructs a
+driver series from provider material. These guards are the producer's obligation and
+have NO consumer-side equivalent:
+
+* `assert_time_indexed_shape` -- refuse a row shape carrying a station/cell key AT
+  CONSTRUCTION (TC-12, FR-P1-04-4). The consuming side cannot recover this: by the time
+  a series reaches `build_features` it has already been flattened to `{epoch: value}`.
+* `assert_grade_eligible` -- refuse a grade/use pair at the point of use (R-62
+  restriction 3; D-11, D-13). NOTE: `src/evaluation/diagnostics.py` declares a DIFFERENT
+  function of the same name for the reporting boundary; the two are not interchangeable
+  and neither call site satisfies the other's rule.
+* `assert_single_grade` -- see the D-10.1 split below.
+* `refuse_divergent_rerun` -- SD-E-07's byte-identical-or-divergent re-run contract.
+  `scripts/04_build_external_products.py`'s docstring describes an equivalent INLINE hash
+  comparison; that script owns reconciling the two into one home, exactly as D-10.1 is
+  reconciled below.
+
+The driver-producing path does NOT EXIST YET. These calls are therefore a NAMED
+OBLIGATION on the driver-producing Bolt, not dead code and not an optional extra: the
+Bolt that writes `04_build_external_products.py`'s driver half wires each of them at the
+construction site named above. Until it does, a driver series constructed outside this
+project's code is unchecked on the producing limbs.
+
+**Driver-CONSUMING path** -- `src/features/build.py::build_features` and
+`src/features/transforms.py::carry_forward`, WIRED and live today:
+
+* duplicate epoch -> `src/features/build.py::_hourly_series` raises `IntegrityError`
+  naming the epoch. This is the ingest half of TC-12's one-value-per-epoch rule; it lives
+  in the consumer because the consumer is what builds the `{epoch: value}` index.
+* `assert_identical_across_cells` -> called by `build_features` per driver field AFTER
+  the driver-to-station join, on the assembled rows (TC-12's joined-grid limb; R-63's
+  negative control).
+* `assert_carry_forward_conservation` -> called by `transforms.carry_forward` immediately
+  after `apply_carry_forward`, on the series it is about to return (R-58 limb 3 -- the
+  limb that carries the rule; it catches fills the AST token scan cannot reach).
+
+**D-10.1's single-grade rule has TWO homes, and the split is declared here.** One binding
+rule, two implementations, two exception classes -- so which one runs where is stated
+rather than left to drift:
+
+* PRODUCTION side (constructing a series from provider material): this module's
+  `assert_single_grade`, raising `IntegrityError`. Mixed Kyoto Dst release grades FAIL AT
+  CONSTRUCTION, never downstream. Part of the deferred driver-producing obligation above.
+* CONSUMPTION side (reading supplied driver rows into the availability matrix):
+  `src/features/availability.py::build_availability_matrix`'s inline grade check, raising
+  `FeatureAvailabilityError`. That is the one that actually runs today, via
+  `scripts/05_build_features_and_splits.py`.
+
+The two are NOT redundant and must not be collapsed: the production check governs bytes
+this project writes, the consumption check governs rows this project is handed. They
+carry different exception classes on purpose -- an integrity failure in a product we
+produced is not the same event as an availability-contract failure in a product we
+consumed -- and a caller must not catch one expecting the other.
+
 Inputs
 ------
 Plain mappings and sequences supplied by `scripts/04_build_external_products.py` (the

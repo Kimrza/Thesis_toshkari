@@ -709,3 +709,127 @@ check`/`ruff format` clean.
 file; it does not widen custody beyond the five classes' exact content-and-provenance
 conditions; it does not certify holdout independence "unaffected" (exposure is recorded,
 never asserted away); it does not pass G-04.
+
+---
+
+## Custody/environment remediation — 2026-09-20, `GOV-2026-09-20-CG-01` (worker D)
+
+Appended under the owner-authorised remediation recorded in
+`governance/CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md`, disclosing changes to
+modules **this unit owns or co-owns** so a reader is not left describing a pre-edit state
+(`project.md` `code-generation:gf-3`).
+
+⚠ **NOTHING BELOW WAS EXECUTED.** No usable Python interpreter exists on this clone
+(`python.exe` is a zero-byte Windows Store alias stub; PyPI is unreachable). Every statement
+about behaviour is **static**, read from source. Nothing here is "verified passing".
+
+### Rec 1 — the December access log is separated; the governed log is closed, not rewritten
+
+Owner ruling: **option 2** — separate the test-mode access log from the evidence access log;
+archive the current file as superseded; **never rewrite a row**. Both halves were honoured.
+
+| Change | Where |
+|---|---|
+| `AccessRecord.__post_init__` now refuses a `retrieved_at_utc` that does not parse as ISO-8601, via `_assert_parseable_retrieved_at`. The check runs **last**, so an existing caller violating emptiness/purpose/`locked_test_accessed` still fails for its own reason. | `src/data/locked_test.py` (+46) |
+| Both suite producers write real call-time timestamps and append to `artifacts/exec_evidence/test_access_log.jsonl`, a **gitignored test-mode sidecar**, instead of the governed log. | `tests/test_release_hashes.py`, `tests/test_acquisition_window.py` |
+| The one-file ignore entry, scoped so `artifacts/exec_evidence/`'s committed run evidence stays tracked. | `.gitignore` (+11) |
+| R-19 reconciliation run against the **real** registry/log pair, with the two historical test `run_id`s declared as `known_orphans`, plus a negative control that plants an unregistered access into a `tmp_path` **copy** and asserts the raise. | `tests/test_locked_test_guard.py` (+244/−12) |
+
+`evidence/test_run_access_log.jsonl` is **unmodified** — no row rewritten, truncated or
+deleted — and `evidence/test_run_access_log.SUPERSEDED_2026-09-20.md` is its notice.
+`artifacts/registry/experiment_registry.jsonl` is likewise unmodified; no registry row was
+back-filled, and `reconcile_access_records` must keep forbidding it.
+
+**Open, and encoded rather than decided:** whether the two suite `run_id`s are permanently
+registered as known orphans, or whether the closed log leaves reconciliation scope entirely.
+The test encodes the first reading; the ruling is owed.
+
+### Rec 32 — the restricted-read chokepoint, and its drift controls
+
+`R-28`'s `RESTRICTED_LITERAL_EXEMPT_MODULES` covers **holding** the restricted-root literal
+and has never covered obtaining the **content** — its own comment says so. Two modules were
+outside that exemption:
+
+- `tests/test_release_hashes.py::_sha256` opened December bytes directly. Now routed through
+  `_read_guarded`, guarded at the single point the bytes are opened rather than per call site.
+- `tests/test_phase_boundary.py::_csv_header` opened every collected December artifact
+  directly; the module had **zero** `open_restricted` references. Now routed, with a lazy
+  import that **fails closed** — a restricted read is refused outright if the chokepoint is
+  unimportable, rather than performed unguarded.
+
+Each module gained an **AST drift control** that walks its own source for content reads and
+refuses any receiver that is not guarded or enumerated, each with a negative control pushing
+three mutants through the real entry point and must-not-fire limbs. A scanner that never
+fires proves nothing.
+
+### Rec 58 — the G-P3C hash-diff limb's location, cross-referenced both ways
+
+`team.md` § Deployment names `tests/test_phase_boundary.py` as the hash-diff test's home; it
+is not there. `diff_protected_hashes` / `assert_protected_hashes_unchanged` are exercised in
+`tests/test_phase_contract.py`. Both required tests exist and **only the location differs**.
+Cross-references were added in **both** directions — `test_phase_boundary.py`'s docstring
+points to `test_phase_contract.py` (+13 to the latter) — so a G-P3C reviewer arriving from
+either side finds the limb instead of recording a false gap.
+
+### Rec 50 — the phase-boundary detector now has negative controls
+
+Two reviewers independently **refuted** the vacuity hypothesis: the scan reads the live import
+graph and skips with a stated reason rather than passing when `src/` is absent. The real gap
+was that nothing proved it would **catch** an injected violation (`grep -c 'pytest.raises'` =
+0). The two scan bodies are now callables taking a root — the shape `run_containment_scan`
+already uses — and synthetic `tmp_path` trees exercise **the same code the real assertions
+run**: a direct `import src.gnss.rinex` in a synthetic `src/features/` module and a transitive
+chain, each with a must-not-fire limb on the clean tree first. No real module is edited by any
+control.
+
+### Recs 30 / 35 — commit-time December access removed; the hook is still OFF
+
+`.githooks/pre-commit` (+68/−5) previously ran a single critical set unconditionally, three of
+whose modules read December restricted content. The set is now split by a stated criterion —
+**reads bytes under `evidence/locked_test_restricted/`** — with the per-module derivation
+printed in the hook itself. Deselected to the gate/freeze suite: `test_release_hashes.py`,
+`test_acquisition_window.py`, and **`test_phase_boundary.py`**, the last being a reader only
+*since* Rec 32's remediation the same day — the finding named two modules because two was the
+truth when it was written, and the hook applies the criterion rather than the enumeration.
+Retained at commit time: `test_locked_test_guard.py` and
+`test_merge_script_restricted_reads.py`, which resolve a path through `open_restricted` to a
+`tmp_path` registry and read **no** bytes; deselecting them would delete the guard's own
+controls.
+
+**`git config core.hooksPath .githooks` was NOT run** and no state-changing git command was
+issued. Enabling the hook is a **Student act** (dispositions §5 item 4), explicitly sequenced
+*after* this deselection — which has now landed, so the bar is clear.
+
+### Rec 25 follow-up — `_release_manifest` brought onto the new sub-schema (2026-09-20, same worker, second pass)
+
+The data-provenance worker's Rec 25 remediation added four sub-schema guards to
+`src/data/release.py` (`SOURCE_FILE_FIELDS`, `PROCESSING_PHASE1_FIELDS`, `ROW_COUNT_AXES`,
+`EXCLUSION_ENTRY_FIELDS`; composed in `assert_manifest_content_contract`, wired into
+`write_release`), and reported — correctly, per `code-generation:c32`, without editing a file
+outside its scope — that `tests/test_release_hashes.py::_release_manifest` would now be
+refused. Verified statically and repaired here, in the module's owning record:
+
+- **`source_files`**: was one entry with no `location_date` and a `retrieved_at_utc` key
+  TE §13.3 does not name. Now carries all six `SOURCE_FILE_FIELDS` (`provider`, `citation`,
+  `location_date`, `filename`, `retrieval_date`, `sha256`), with a full provider filename
+  including its version suffix (`syn220301g.003.hdf5`) — the field Rec 8's version mixing is
+  recordable in — under a **synthetic** stem.
+- **`processing`**: was four keys, one of them `cell_rule` (not the mandated
+  `station_coordinate_to_cell_rule`). Now all seven `PROCESSING_PHASE1_FIELDS`, every value
+  SYNTHETIC. The old `"floor(lat), floor(lon), half-open"` read like the governed rule —
+  a §18.2 forbidden-choice item — and was deliberately not carried forward, matching
+  `tests/test_release_contract.py::_manifest_for`'s convention.
+- **`row_counts`**: was station-keyed (`{"ARUC": 8760, …}`), one axis of four. Now all four
+  `ROW_COUNT_AXES` (`by_station`, `by_month`, `by_split`, `by_qc_stage`), each a non-empty
+  label→integer mapping with synthetic station labels.
+- **`exclusions_qc_summary`** already satisfied the reason→count mapping form; unchanged.
+
+Blast radius, derived: all seven `write_release` call sites in the module consume the one
+helper (one with a `body=` override, schema-neutral); **no test assertion referenced the old
+field values**; the AST drift control is unaffected (the release section's three content
+reads all have receiver root `target`, already in `TMP_PATH_ROOTS`). Nothing else in the
+module changed — the ACCESS_LOG sidecar wiring and the chokepoint controls stand as
+disclosed above.
+
+⚠ Static only, as before: **no test was executed** — no interpreter exists on this clone —
+so "would now pass the new guards" is a source-level claim, not a run result.

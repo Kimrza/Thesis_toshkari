@@ -635,6 +635,13 @@ def build_environment_and_cpu_preflight_report(
     the `matched_artifact_report`. Refuses a candidate manifest (5), a smoke-only input (13), a
     coverage figure lacking either caveat (36), a receipt that is not a pass, and a completion
     record that ran with a GPU visible.
+
+    `gate_result` is REQUIRED IN EFFECT since 2026-09-20 (Recommendation 28): the parameter
+    keeps its `| None` type so no caller's signature breaks, but `None` now RAISES instead of
+    emitting the report with a `None` runtime. See the refusal below for why. Whether a
+    supplied result is acceptable — platform, code commit, config hashes, frozen-manifest
+    agreement — remains `fixture_gate.require_in_session_gate`'s single guard home and is
+    deliberately not re-implemented here.
     """
     surface = "environment_and_cpu_preflight_report (G-07)"
     frozen = _require_frozen(manifests, surface=surface)
@@ -667,9 +674,44 @@ def build_environment_and_cpu_preflight_report(
             )
     for index, figure in enumerate(coverage_figures):
         assert_caveats_present(figure, surface=f"{surface}: coverage figure {index}")
-    measured_total_runtime = None
-    if gate_result is not None:
-        measured_total_runtime = gate_result.get("measured_total_runtime_seconds")
+
+    # --- TC-03g: a MISSING gate result is a refusal, not a None (Recommendation 28) -------
+    #
+    # THE DEFECT THIS CLOSES. `gate_result` was optional here: when it was `None` this
+    # function emitted the G-07 report anyway, with `measured_total_runtime` silently set to
+    # `None`. `emit_in_session_gate_result` has callers only in `tests/test_clean_run.py` --
+    # no stage script and no notebook calls it -- so `in_session_gate_result.json` is never
+    # produced in practice, which means the `None` branch was not a rare edge case but the
+    # ONLY branch that ever executed. A gate result never emitted cannot be checked by the
+    # refusal written to check it (`require_in_session_gate`), and the report was emitted
+    # regardless.
+    #
+    # TC-03g is binding: hard. The critical test set and both walking-skeleton fixtures run
+    # INSIDE the Kaggle session before any governed run executed there, because a Kaggle
+    # session carries no git working tree and a run anywhere else proves nothing about the
+    # environment a governed run actually executes in. This report is G-07's named evidence
+    # artifact; emitting it without the gate having been evaluated presents an unevidenced
+    # claim to a supervisor.
+    #
+    # SCOPE, so this is not over-read. The refusal is on ABSENCE only. Whether a supplied
+    # result is ACCEPTABLE -- the `platform: kaggle` stamp, the code-commit and config-hash
+    # agreement with this run's own lock, the frozen-manifest agreement -- is
+    # `require_in_session_gate`'s job and is not duplicated here; a second, drifting copy of
+    # those three checks is exactly the inline-copy failure `nfr-design` c58 warns against.
+    # This function owns one thing: the report is not emitted when the gate never ran.
+    if gate_result is None:
+        raise _refuse(
+            surface,
+            "no in-session gate result was supplied. TC-03g (binding: hard) requires the "
+            "critical test set and BOTH walking-skeleton fixtures to run inside the Kaggle "
+            "session before any governed run executed there, and this report is G-07's named "
+            "evidence artifact — emitting it while the gate was never evaluated would present "
+            "an unevidenced claim at a supervisor gate. Produce the result with "
+            "`fixture_gate.emit_in_session_gate_result` in the session, then pass it here and "
+            "let `fixture_gate.require_in_session_gate` judge whether it is acceptable "
+            "(TE 9.1, 9.2; TA-03, TA-26; Recommendation 28).",
+        )
+    measured_total_runtime = gate_result.get("measured_total_runtime_seconds")
     return {
         "artifact_class": "environment_and_cpu_preflight_report",
         "gate": "G-07 Reproducibility (Blocked, Supervisor)",

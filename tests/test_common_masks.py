@@ -52,8 +52,13 @@ from src.data.config import (  # noqa: E402
     LeakageError,
     LockedTestError,
     PartitionError,
+    RegimeError,
 )
 from src.data.splits import RecordFrame  # noqa: E402
+from src.evaluation.diagnostics import (  # noqa: E402
+    build_breakdown_artifact,
+    build_primary_table,
+)
 from src.evaluation.guards import (  # noqa: E402
     UNTRANSFORMED,
     require_declared_membership,
@@ -67,9 +72,12 @@ from src.evaluation.guards import (  # noqa: E402
 )
 from src.evaluation.masks import (  # noqa: E402
     _rows_of,
+    MANDATORY_DIFFICULTY_CONTROL_IDS,
+    PRIMARY_SET_ID,
     ComparisonMask,
     LoadedPrediction,
     MaskRegistry,
+    assert_mandatory_controls_declared,
     assert_mask_id_reproduces,
     assert_reporting_surface,
     build_comparison_mask,
@@ -86,7 +94,12 @@ from src.evaluation.metrics import (  # noqa: E402
     assert_metrics_artifact,
     build_metrics_artifact,
     paired_loss_differential,
+    resolve_target_units,
     write_metrics_artifact,
+)
+from src.evaluation.report_guards import (  # noqa: E402
+    REQUIRED_UNITS,
+    ConclusionSurfaceRegistry,
 )
 
 UTC = dt.timezone.utc
@@ -261,6 +274,73 @@ def test_comparison_sets_absent_refuses_naming_the_field() -> None:
     with pytest.raises(IntegrityError) as excinfo:
         read_comparison_sets(snapshot)
     assert "comparison_sets" in str(excinfo.value)
+
+
+# --- the membership floor (Recommendation 16, 2026-09-20) --------------------------------
+
+
+def _real_experiment() -> dict[str, Any]:
+    """The REAL `configs/experiment.yaml`, parsed — the floor is about that declaration."""
+    yaml = pytest.importorskip("yaml")
+    return yaml.safe_load((REPO_ROOT / "configs" / "experiment.yaml").read_text("utf-8"))
+
+
+def test_rec16_real_primary_set_declares_all_three_difficulty_controls() -> None:
+    """The must-NOT-fire half: the shipped declaration satisfies the floor today, and the
+    three control identities are re-read from the parsed file rather than asserted from a
+    literal list in this test."""
+    parsed = _real_experiment()
+    snapshot = type("S", (), {"experiment": parsed})()
+    declared = read_comparison_sets(snapshot)  # the floor fires inside this call
+    benchmarks = set(declared[PRIMARY_SET_ID]["benchmark_ids"])
+    assert set(MANDATORY_DIFFICULTY_CONTROL_IDS) <= benchmarks
+    # and the YAML comment that used to be the ONLY pin is no longer the only pin
+    assert set(parsed["comparison_sets"][PRIMARY_SET_ID]["benchmark_ids"]) >= set(
+        MANDATORY_DIFFICULTY_CONTROL_IDS
+    )
+
+
+@pytest.mark.parametrize("dropped", MANDATORY_DIFFICULTY_CONTROL_IDS)
+def test_rec16_primary_set_missing_a_mandatory_control_refuses(dropped: str) -> None:
+    """NEGATIVE CONTROL for the membership floor. The mutant: edit
+    `configs/experiment.yaml`'s primary set to drop one of PC-03/PC-04's three difficulty
+    controls. Before 2026-09-20 that mutant passed EVERY layer — `read_comparison_sets`
+    (model in members, benchmarks subset of members), `require_declared_membership`,
+    `require_complete_members`, `assert_metrics_artifact` — because each checks the table
+    against the declaration and none checked the declaration itself; the result was a
+    'complete' primary results table with a mandatory control silently absent. The floor
+    refuses the declaration instead, naming the control, PC-03/PC-04 and the binding
+    honesty rule."""
+    parsed = _real_experiment()
+    primary = parsed["comparison_sets"][PRIMARY_SET_ID]
+    primary["benchmark_ids"] = [b for b in primary["benchmark_ids"] if b != dropped]
+    primary["member_ids"] = [m for m in primary["member_ids"] if m != dropped]
+    snapshot = type("S", (), {"experiment": parsed})()
+    with pytest.raises(IntegrityError) as excinfo:
+        read_comparison_sets(snapshot)
+    message = str(excinfo.value)
+    assert dropped in message
+    assert "PC-03/PC-04" in message and "binding honesty" in message
+
+
+def test_rec16_floor_governs_the_primary_set_only_and_refuses_its_absence() -> None:
+    """Two limbs of the floor's scope. (1) The gim and tier3 sets are separate comparisons
+    with their own memberships and are NOT held to the primary table's floor. (2) A
+    declaration carrying no `primary` set at all refuses, so the floor cannot be evaded by
+    omission."""
+    parsed = _real_experiment()
+    declared = read_comparison_sets(type("S", (), {"experiment": parsed})())
+    for other in (set_id for set_id in declared if set_id != PRIMARY_SET_ID):
+        assert not set(MANDATORY_DIFFICULTY_CONTROL_IDS) <= set(
+            declared[other]["benchmark_ids"]
+        )  # they legitimately do not carry the controls, and nothing refuses them
+    del parsed["comparison_sets"][PRIMARY_SET_ID]
+    with pytest.raises(IntegrityError) as excinfo:
+        read_comparison_sets(type("S", (), {"experiment": parsed})())
+    assert PRIMARY_SET_ID in str(excinfo.value)
+    # and the helper is callable directly, on the same terms
+    with pytest.raises(IntegrityError):
+        assert_mandatory_controls_declared({})
 
 
 # =======================================================================================
@@ -633,12 +713,25 @@ def test_inverted_orientation_and_pooled_weighting_are_refused_as_fields() -> No
 # 5. The locked chokepoint (R-109; W-5; SD-C-02/SD-C-03) — synthetic year, no December 2022
 # =======================================================================================
 
-DEC_KEYS = [(s, d, h) for s in STATIONS for d in (2, 3) for h in (0, 1, 2)]
+#: The locked fixture's scored set covers the WHOLE stated window — days 2..31, all 24
+#: hours, all three stations. Widened 2026-09-20 for Recommendation 15: limb 3 now asserts
+#: the window is fully POPULATED, and the previous six-hours-per-station fixture described
+#: a scored set two orders of magnitude shorter than the 30 days its own
+#: `scored_window_statement` disclosed — exactly the defect the new limb exists to refuse.
+#: A fixture that cannot pass the guard cannot evidence the must-NOT-fire half.
+DEC_DAYS: tuple[int, ...] = tuple(range(2, 32))  # the month less its embargoed first day
+DEC_HOURS: tuple[int, ...] = tuple(range(24))
+DEC_KEYS = [(s, d, h) for s in STATIONS for d in DEC_DAYS for h in DEC_HOURS]
+
+#: The stated window's hour count per station, DERIVED from the fixture's own bounds and
+#: never written as a literal (D-28's arithmetic, on a synthetic year).
+DEC_WINDOW_HOURS: int = len(DEC_DAYS) * len(DEC_HOURS)
 
 
-def _dec_mask(tmp_path: Path, *, freeze: bool = True):
+def _dec_mask(tmp_path: Path, *, freeze: bool = True, keys: list | None = None):
+    dec_keys = DEC_KEYS if keys is None else keys
     members = [
-        _prediction(m, DEC_KEYS, partition_id="DEC", month=12, error=(0.0 if m == "M-C" else 1.0))
+        _prediction(m, dec_keys, partition_id="DEC", month=12, error=(0.0 if m == "M-C" else 1.0))
         for m in SYNTH_SETS["setA"]["member_ids"]
     ]
     registry = MaskRegistry(tmp_path / "mask_registry")
@@ -646,7 +739,7 @@ def _dec_mask(tmp_path: Path, *, freeze: bool = True):
         members,
         set_id="setA",
         declared_sets=SYNTH_SETS,
-        target=_target(DEC_KEYS, month=12),
+        target=_target(dec_keys, month=12),
         feature_set_id="FS-synth",
         month_start=DEC_MONTH_START,
         month_end=DEC_MONTH_END,
@@ -886,6 +979,128 @@ def test_dec_estimand_passes_only_with_full_locked_context(tmp_path: Path) -> No
         locked=locked,
     )
     assert result.partition_id == "DEC" and result.scalar == pytest.approx(1.0)
+
+
+# --- limb 3's population half (Recommendation 15, 2026-09-20) ----------------------------
+
+
+def test_rec15_full_window_fixture_passes_and_evidences_its_own_denominator(
+    tmp_path: Path,
+) -> None:
+    """The must-NOT-fire half, and the arithmetic the new limb checks, made visible: the
+    fixture's scored set covers every hour of the stated window for every station, the
+    recorded counters account for all of them, and limb 3 passes."""
+    mask, registry, _ = _dec_mask(tmp_path)
+    for station in mask.row_counts:
+        assert mask.row_counts[station] + mask.exclusion_counts[station] == DEC_WINDOW_HOURS
+    prediction_path, receipt_path = _receipted_prediction(tmp_path)
+    require_locked_receipt(
+        **_locked_kwargs(
+            mask, registry, prediction_path, receipt_path, _access_record(mask, registry)
+        )
+    )
+
+
+def test_rec15_scored_set_short_of_the_stated_window_refuses(tmp_path: Path) -> None:
+    """NEGATIVE CONTROL for limb 3's population half. The mutant: the first block of the
+    locked month is absent from the scored set — the case the reviewer derived from M-01's
+    and M-02's inability to predict 2 December from an embargo-trimmed series.
+
+    Before 2026-09-20 limb 3 checked only that masked rows lie INSIDE the window, and
+    `scored_window_statement` derived '30 days' from the partition bounds regardless, so a
+    29-day scored set was DISCLOSED as 30 days and nothing anywhere compared the two. The
+    limb now reconciles the disclosed denominator against the recorded counters and
+    refuses, naming the station and the hours that appear in neither counter."""
+    short_keys = [
+        (station, day, hour)
+        for station, day, hour in DEC_KEYS
+        if day != DEC_DAYS[0]  # the whole first block of the stated window, gone
+    ]
+    mask, registry, _ = _dec_mask(tmp_path, keys=short_keys)
+    # the mask still DISCLOSES the full stated window — that is the defect
+    assert mask.scored_window_statement == scored_window_statement(
+        DEC_MONTH_START, DEC_MONTH_END, embargo_hours=EMBARGO_HOURS
+    )
+    prediction_path, receipt_path = _receipted_prediction(tmp_path)
+    with pytest.raises(LockedTestError) as excinfo:
+        require_locked_receipt(
+            **_locked_kwargs(
+                mask, registry, prediction_path, receipt_path, _access_record(mask, registry)
+            )
+        )
+    message = str(excinfo.value)
+    assert "limb 3" in message
+    assert str(len(DEC_HOURS)) in message  # the 24 unaccounted hours are NAMED
+
+
+def test_rec15_counters_disagreeing_with_the_masked_rows_refuse(tmp_path: Path) -> None:
+    """The second failure of the same limb: the recorded exclusion counts and the actual
+    masked hours describe different scored sets. A hand-assembled or tampered reporting
+    surface cannot make a shrunk scored set look whole."""
+    mask, registry, _ = _dec_mask(tmp_path)
+    station = sorted(mask.row_counts)[0]
+    lying = dataclasses.replace(
+        mask,
+        exclusion_counts={**dict(mask.exclusion_counts), station: 5},
+        row_counts={**dict(mask.row_counts), station: mask.row_counts[station] - 5},
+    )
+    prediction_path, receipt_path = _receipted_prediction(tmp_path)
+    with pytest.raises(LockedTestError) as excinfo:
+        require_locked_receipt(
+            **_locked_kwargs(
+                lying, registry, prediction_path, receipt_path, _access_record(mask, registry)
+            )
+        )
+    assert "limb 3" in str(excinfo.value) and station in str(excinfo.value)
+
+
+def test_rec15_residual_member_absence_absorbed_by_exclusion_counts_is_not_caught(
+    tmp_path: Path,
+) -> None:
+    """KNOWN GAP, recorded so it is not mistaken for coverage — NOT an accepted behaviour.
+
+    When the TARGET carries an hour but a MEMBER's prediction does not, the intersection
+    drops the row and `build_comparison_mask` books it into `exclusion_counts`. The limb's
+    arithmetic (`surviving + excluded == window_hours`) is then true by construction, so
+    the refusal does not fire even though the scored set really is short of the stated
+    span. Closing this needs either a per-hour exclusion ATTRIBUTION on the mask
+    (target-caused versus member-caused) or a full-population requirement; both are
+    behaviour changes beyond the approved scope of Recommendation 15 and are routed to the
+    gate. This test pins the CURRENT behaviour so the gap is visible and so the day the
+    ruling lands, this test fails and has to be rewritten rather than quietly passing."""
+    first_hour = (DEC_DAYS[0], DEC_HOURS[0])
+    members = []
+    for member_id in SYNTH_SETS["setA"]["member_ids"]:
+        keys = DEC_KEYS
+        if member_id == "M-A":  # the member that cannot predict the first scored hour
+            keys = [k for k in DEC_KEYS if (k[1], k[2]) != first_hour]
+        members.append(
+            _prediction(
+                member_id, keys, partition_id="DEC", month=12,
+                error=(0.0 if member_id == "M-C" else 1.0),
+            )
+        )
+    registry = MaskRegistry(tmp_path / "mask_registry")
+    mask = build_comparison_mask(
+        members,
+        set_id="setA",
+        declared_sets=SYNTH_SETS,
+        target=_target(DEC_KEYS, month=12),  # the target HAS the hour; the member does not
+        feature_set_id="FS-synth",
+        month_start=DEC_MONTH_START,
+        month_end=DEC_MONTH_END,
+        embargo_hours=EMBARGO_HOURS,
+    )
+    registry.register(mask)
+    registry.freeze_bundle()
+    # the row is booked as an exclusion, one per station, so the identity still holds
+    assert all(count == 1 for count in mask.exclusion_counts.values())
+    prediction_path, receipt_path = _receipted_prediction(tmp_path)
+    require_locked_receipt(  # DOES NOT RAISE TODAY — the routed residual
+        **_locked_kwargs(
+            mask, registry, prediction_path, receipt_path, _access_record(mask, registry)
+        )
+    )
 
 
 # =======================================================================================
@@ -1151,6 +1366,176 @@ def test_metrics_artifact_write_is_refuse_to_overwrite(tmp_path: Path) -> None:
     write_metrics_artifact(artifact, path)
     with pytest.raises(FairnessError):
         write_metrics_artifact(artifact, path)
+
+
+# =======================================================================================
+# 7b. THE PRODUCER/CONSUMER CONTRACT (Recommendations 19/20, 2026-09-20)
+#
+# Every test above this line builds the metrics artifact and stops, and every test in
+# tests/test_regimes_and_reporting.py hand-builds an artifact mapping and starts. Nothing
+# passed the REAL producer's output into the REAL consumers, which is why `units` could be
+# required by `require_units` and emitted by nobody. These tests close that seam: one real
+# `build_metrics_artifact` output, pushed through `build_primary_table` and
+# `build_breakdown_artifact`.
+# =======================================================================================
+
+#: The released Phase 1 target's manifest, in the shape `src/data/release.py` writes
+#: (TE §13.3's `units` field). FIXTURE apparatus: no release exists today, and the whole
+#: point of Rec 19 is that the token is READ from this stamped object rather than asserted
+#: in source. `target_definition_id` matches the fixture mask's stamp.
+def _target_release_manifest(**overrides: Any) -> dict[str, Any]:
+    manifest = {
+        "dataset_version": "0123456789ab",
+        "schema_version": "1",
+        "target_definition_id": IDENTITY["target_definition_id"],
+        "units": REQUIRED_UNITS,
+    }
+    manifest.update(overrides)
+    return manifest
+
+
+def _contract_budget() -> dict[str, Any]:
+    """A budget carrying exactly the fields `diagnostics._assert_budget` requires."""
+    return {
+        "artifact_id": "budget-contract-fixture",
+        "units": REQUIRED_UNITS,
+        "phase1_contents": {
+            "provider_reported_uncertainty": "stated",
+            "within_hour_aggregation_spread": "stated",
+        },
+        "asymmetry_statement": "the budget is asymmetric about zero on this product",
+        "phase2_quantities": {
+            "dcb_uncertainty": "recorded not-applicable",
+            "mapping_function_error": "recorded not-applicable",
+            "stec_noise": "recorded not-applicable",
+            "arc_alignment_error": "recorded not-applicable",
+        },
+    }
+
+
+def _real_metrics_artifact(tmp_path: Path, **kwargs: Any) -> tuple[Any, dict[str, Any]]:
+    mask, registry, estimands = _artifact_inputs(tmp_path)
+    artifact = build_metrics_artifact(
+        set_id="setA", declared_sets=SYNTH_SETS, mask=mask, registry=registry,
+        estimands=estimands, **kwargs,
+    )
+    return mask, artifact
+
+
+def test_rec19_real_producer_output_flows_through_the_real_consumers(tmp_path: Path) -> None:
+    """THE CONTRACT TEST. One `build_metrics_artifact` output — not a hand-built mapping —
+    passed into BOTH consumers that call `require_units`. This single test would have
+    caught Recommendation 19 (the producer never emitted `units`) and Recommendation 20
+    (the budget producer and consumer disagreed on every field): before 2026-09-20 it
+    raised at `require_units` on the producer's own output."""
+    mask, artifact = _real_metrics_artifact(
+        tmp_path, target_release_manifest=_target_release_manifest()
+    )
+    assert artifact["units"] == REQUIRED_UNITS  # read from the stamped manifest, not source
+    surfaces = ConclusionSurfaceRegistry(tmp_path / "conclusion_surfaces")
+    table = build_primary_table(
+        metrics_artifact=artifact,
+        mask=mask,
+        budget_artifact=_contract_budget(),
+        declared_member_ids=SYNTH_SETS["setA"]["member_ids"],
+        caption="Primary results (contract fixture).",
+        table_artifact_id="primary-table-contract",
+        registry=surfaces,
+    )
+    assert table["units"] == REQUIRED_UNITS
+    assert {row["benchmark_id"] for row in table["rows"]} == set(
+        SYNTH_SETS["setA"]["benchmark_ids"]
+    )
+    breakdown = build_breakdown_artifact(
+        breakdown_id="contract",
+        metrics_artifact=artifact,
+        mask=mask,
+        registry=ConclusionSurfaceRegistry(tmp_path / "conclusion_surfaces_b"),
+    )
+    assert breakdown["units"] == REQUIRED_UNITS
+
+
+def test_rec19_producer_without_a_lineage_object_emits_no_units_and_the_consumer_says_so(
+    tmp_path: Path,
+) -> None:
+    """NEGATIVE CONTROL for the split refusal. With no `target_release_manifest` the
+    producer emits `units = None` — it does NOT assert 'TECU', because hardcoding the token
+    would discharge BLK-08's genuine bound by assertion. The consumer then refuses with the
+    MISSING-PRODUCER-INPUT message, distinguishable from BLK-08's non-TECU message, and
+    names the producing path a reader has to go fix."""
+    mask, artifact = _real_metrics_artifact(tmp_path)
+    assert artifact["units"] is None
+    with pytest.raises(RegimeError) as excinfo:
+        build_primary_table(
+            metrics_artifact=artifact,
+            mask=mask,
+            budget_artifact=_contract_budget(),
+            declared_member_ids=SYNTH_SETS["setA"]["member_ids"],
+            caption="Primary results (contract fixture).",
+            table_artifact_id="primary-table-unitless",
+            registry=ConclusionSurfaceRegistry(tmp_path / "csr"),
+        )
+    missing_message = str(excinfo.value)
+    assert "declares no units" in missing_message
+    assert "build_metrics_artifact" in missing_message and "BLK-08" in missing_message
+    # and the OTHER limb reads differently: a declared, wrong unit is BLK-08's bound
+    wrong = dict(artifact, units="TECU/10")
+    with pytest.raises(RegimeError) as excinfo2:
+        build_breakdown_artifact(
+            breakdown_id="contract-wrong-units",
+            metrics_artifact=wrong,
+            mask=mask,
+            registry=ConclusionSurfaceRegistry(tmp_path / "csr2"),
+        )
+    wrong_message = str(excinfo2.value)
+    assert "declared units are 'TECU/10'" in wrong_message
+    assert "declares no units" not in wrong_message
+
+
+def test_rec19_units_from_a_foreign_target_lineage_refuses(tmp_path: Path) -> None:
+    """The lineage check: a manifest for a DIFFERENT `target_definition_id` cannot lend its
+    units token to this mask's artifact. A unit read off another lineage is a wrong number,
+    not a discrepancy (Vision §2.2/§6.6)."""
+    mask, _, estimands = _artifact_inputs(tmp_path)
+    foreign = _target_release_manifest(target_definition_id="some-other-lineage")
+    with pytest.raises(FairnessError) as excinfo:
+        resolve_target_units(foreign, mask=mask, resource="contract fixture")
+    assert "some-other-lineage" in str(excinfo.value)
+    assert estimands  # the estimands were computed; only the units resolution refused
+
+
+def test_rec20_budget_contract_mismatch_names_every_missing_field_at_once(
+    tmp_path: Path,
+) -> None:
+    """NEGATIVE CONTROL for Recommendation 20's consumer half. The mutant is the budget
+    `src/data/prepared.build_uncertainty_budget` actually returns today: it states
+    `applicable`, `not_applicable`, `bounds_statement` and `completeness`, and shares only
+    `asymmetry_statement` with this consumer. The refusal must name EVERY missing field in
+    one message — a one-at-a-time refusal turns one contract mismatch into four runs."""
+    mask, artifact = _real_metrics_artifact(
+        tmp_path, target_release_manifest=_target_release_manifest()
+    )
+    producer_shaped = {
+        "applicable": {"provider_reported_uncertainty": "stated"},
+        "asymmetry_statement": "the budget is asymmetric about zero on this product",
+        "not_applicable": [{"content": "dcb_uncertainty", "reason": "Phase 2"}],
+        "bounds_statement": "stated as computed",
+        "completeness": {"asserted": True},
+    }
+    with pytest.raises(RegimeError) as excinfo:
+        build_primary_table(
+            metrics_artifact=artifact,
+            mask=mask,
+            budget_artifact=producer_shaped,
+            declared_member_ids=SYNTH_SETS["setA"]["member_ids"],
+            caption="Primary results (contract fixture).",
+            table_artifact_id="primary-table-budget-mismatch",
+            registry=ConclusionSurfaceRegistry(tmp_path / "csr3"),
+        )
+    message = str(excinfo.value)
+    for field in ("artifact_id", "phase1_contents", "phase2_quantities"):
+        assert field in message  # all three named together, not the first one only
+    assert "build_uncertainty_budget" in message  # the producing path is named
 
 
 # =======================================================================================

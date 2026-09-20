@@ -12,6 +12,14 @@
 #   blocks the commit; fixing the cause and re-committing is the re-run path.
 #
 # Enable with:  git config core.hooksPath .githooks
+#
+# NOT YET ENABLED. `git config core.hooksPath` is UNSET, `.git/hooks/` holds only Git's
+# stock samples, and no commit in this repository's history has been gated by this hook
+# (Recommendation 35). Enabling it is a STUDENT act — CR-2026-09-20-GOV-CG-01-DISPOSITIONS
+# §5 item 4 — and no agent has run or may run that command. Its stated precondition, the
+# Recommendation 30 restricted-case deselection in §2 below, LANDED 2026-09-20, so the
+# sequencing bar is clear: enabling the hook no longer makes every commit perform a
+# December restricted read. Record the activation date and the first commit it gated.
 
 set -e
 
@@ -67,18 +75,68 @@ if [ -n "$STAGED_NOTEBOOKS" ]; then
     done
 fi
 
-# --- 2. critical test set (Q7=D) -------------------------------------------------------
-# The §18.3 critical set grows as its modules land; every module listed here
-# must exist. Phase 1-reachable modules only.
+# --- 2. critical test set (Q7=D), SPLIT BY RESTRICTED-CONTENT ACCESS -------------------
+#
+# WHAT CHANGED AND WHY (Recommendation 30, 2026-09-20; owner authorised option 1).
+# This list was a single set run unconditionally on every commit, and three of its modules
+# OBTAIN December restricted CONTENT. Enabling the hook as it stood would have made an
+# ordinary developer commit perform a December restricted-root read, with no per-occasion
+# human authorization -- Vision §8.3's authorization limb is meant to be a decision, not a
+# constant, and a boundary whose crossing is triggered by `git commit` cannot be described
+# to a supervisor as a governed access. `evidence/experiment_registry.md:102-109` already
+# argues for exactly this split in writing.
+#
+# THE SPLIT CRITERION, stated so it can be re-applied rather than guessed: a module belongs
+# to the gate-only set when it READS BYTES from under `evidence/locked_test_restricted/`.
+# Merely resolving a path through `open_restricted`, or constructing an `AccessRecord`
+# against a `tmp_path` registry, is NOT restricted-content access -- those modules are the
+# guard's own controls and removing them would delete the very check that protects the
+# boundary at the moment it matters most.
+#
+# Derived 2026-09-20 over the eight modules previously listed, printed before assertion:
+#   tests/test_determinism.py                    reads no evidence root          -> commit
+#   tests/test_experiment_registry.py            reads no evidence root          -> commit
+#   tests/test_release_contract.py               reads no evidence root          -> commit
+#   tests/test_locked_test_guard.py              open_restricted -> tmp_path row,
+#                                                resolves a path, reads no bytes -> commit
+#   tests/test_merge_script_restricted_reads.py  same shape (ACCESS_LOG rebound
+#                                                to tmp_path; no byte read)      -> commit
+#   tests/test_release_hashes.py                 _sha256() streams December bytes -> GATE
+#   tests/test_acquisition_window.py             csv.DictReader over December rows-> GATE
+#   tests/test_phase_boundary.py                 _csv_header() reads December rows-> GATE
+#
+# tests/test_phase_boundary.py is in the gate set for a reason that POST-DATES the finding:
+# Recommendation 32's remediation routed its `_csv_header` through the chokepoint on the
+# same day, which turned it into a fourth restricted reader. The finding named two modules
+# because two was the truth when it was written; the criterion, not the enumeration, is what
+# this hook applies.
+#
+# NOTHING IS LOST, ONLY MOVED. The gate-only modules keep running -- in the full suite
+# before every acquisition or training run, before every governed run (freeze gate, phase
+# transition), and inside the Kaggle session before any governed run executed there
+# (TC-03g, binding: hard). That is where an authorization actually exists to be recorded.
+#
+# SEQUENCING, and the reason this block had to land first: `git config core.hooksPath
+# .githooks` is Recommendation 35 and is a STUDENT act
+# (CR-2026-09-20-GOV-CG-01-DISPOSITIONS §5 item 4), explicitly ordered AFTER this
+# deselection -- enabling the hook before it would have created the problem rather than
+# closed it. No agent has run, or may run, that command.
+
+# Commit-time set: no restricted content is read by any module here.
 CRITICAL_TESTS="
 tests/test_determinism.py
 tests/test_experiment_registry.py
-tests/test_release_hashes.py
 tests/test_release_contract.py
 tests/test_locked_test_guard.py
+tests/test_merge_script_restricted_reads.py
+"
+
+# Gate/freeze-suite set: DESELECTED here. Each reads December restricted content and must
+# run only on an occasion that carries an authorization to record.
+RESTRICTED_TESTS="
+tests/test_release_hashes.py
 tests/test_acquisition_window.py
 tests/test_phase_boundary.py
-tests/test_merge_script_restricted_reads.py
 "
 
 if command -v python >/dev/null 2>&1 && python -c "import pytest" >/dev/null 2>&1; then
@@ -87,6 +145,11 @@ if command -v python >/dev/null 2>&1 && python -c "import pytest" >/dev/null 2>&
         echo "pre-commit: critical test set failed; commit blocked (Q7=D)." >&2
         exit 1
     }
+    echo "pre-commit: restricted-reader modules were NOT run (Recommendation 30):" >&2
+    # shellcheck disable=SC2086
+    for t in $RESTRICTED_TESTS; do echo "pre-commit:   $t" >&2; done
+    echo "pre-commit: they read December content and belong to the gate/freeze suite," >&2
+    echo "pre-commit: where an authorization exists to be recorded (Vision 8.3)." >&2
 else
     echo "pre-commit: no python+pytest on PATH; critical test set NOT run; commit blocked." >&2
     exit 1

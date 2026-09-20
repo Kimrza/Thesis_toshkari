@@ -52,7 +52,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from src.data.config import IntegrityError, LeakageError, PartitionError, StrEnum
 from src.data.splits import Partition, training_range
-from src.external.spaceweather import apply_carry_forward
+from src.external.spaceweather import apply_carry_forward, assert_carry_forward_conservation
 from src.features._frames import column_values
 
 if TYPE_CHECKING:  # pragma: no cover - typing only; build.py imports this module at runtime
@@ -273,6 +273,15 @@ def carry_forward(
         here: FR-P1-04-3's <= 3 h allowance is scoped to external drivers and "must never be
         read as reaching `vtec_lag_*`" — the target-derived window is EXCLUDED instead
         (FR-P1-04-13).
+    IntegrityError
+        from `assert_carry_forward_conservation`, R-58 limb 3's conservation invariant
+        applied to the series this function is about to return: every value present at an
+        epoch with no observation must be one of the RECORDED carried-forward epochs, and
+        the two counts must reconcile. Stated as a law over the EMITTED series rather than
+        over the source text, it catches any fill — aliased, vectorised, dispatched or not
+        yet invented — that a token scan cannot reach. The class boundary above and this
+        invariant are two different checks: the boundary decides WHO may carry forward, the
+        invariant decides whether what came back is what was recorded.
     """
     if not isinstance(field_class, FieldClass):
         raise LeakageError(
@@ -289,6 +298,9 @@ def carry_forward(
             f"class has a value to carry",
         )
     result = apply_carry_forward(hourly, bound_h=bound_h)
+    assert_carry_forward_conservation(
+        result["values"], hourly, result["carried_forward_epochs"]
+    )
     result["feature"] = feature
     result["excluded_count"] = len(result["excluded_epochs"])
     return result

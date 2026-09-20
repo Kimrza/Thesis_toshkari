@@ -294,8 +294,11 @@ def _row(benchmark_id: str, *, beats: bool = False) -> dict[str, Any]:
 
 
 def _metrics_artifact(mask: _Mask, *, benchmarks: tuple[str, ...] = ("M-A", "M-B", "B-01")):
-    # `units` is FIXTURE apparatus: the real emitted metrics artifact carries NO units
-    # metadata today, and the refusal that fires on it is itself tested below (BLK-08).
+    # `units` is FIXTURE apparatus. Since Recommendation 19 (2026-09-20) the real producer
+    # DOES emit the key — read from the released target's stamped release manifest, never
+    # hardcoded — and emits `None` when no manifest is supplied. Both refusals are tested
+    # below; the real-producer-through-real-consumer contract test lives in
+    # tests/test_common_masks.py § 7b, which is where the real mask machinery is.
     return {
         "artifact_class": "metrics_artifact",
         "set_id": "setX",
@@ -772,17 +775,31 @@ def test_control_9_missing_beats_model_fails() -> None:
 
 
 def test_units_absent_refuses_blk08_checked() -> None:
-    """The REAL metrics artifact carries no units metadata today (BLK-08's bound): the
-    units refusal is what fires instead of a wrong number shipping."""
+    """Both units refusals fire, and they READ DIFFERENTLY (Recommendation 20, 2026-09-20).
+
+    A missing `units` key is a missing PRODUCER INPUT — `build_metrics_artifact` emits the
+    field from the released target's stamped lineage and emits `None` without one — and
+    the message names that producing path. A units token that is present and not TECU is
+    BLK-08's bound firing. Collapsing the two sent a reader to a governance question when
+    the cause was an unwired argument, so the distinguishability is the assertion here."""
     mask = _Mask()
     artifact = _metrics_artifact(mask)
     del artifact["units"]
-    with pytest.raises(RegimeError):
+    with pytest.raises(RegimeError) as absent:
         _table(mask, artifact)
+    assert "declares no units" in str(absent.value)
+    assert "build_metrics_artifact" in str(absent.value)
+    none_valued = _metrics_artifact(mask)
+    none_valued["units"] = None  # what the producer emits with no lineage object
+    with pytest.raises(RegimeError) as nulled:
+        _table(mask, none_valued)
+    assert "declares no units" in str(nulled.value)
     artifact2 = _metrics_artifact(mask)
     artifact2["units"] = "meters"
-    with pytest.raises(RegimeError):
+    with pytest.raises(RegimeError) as wrong:
         _table(mask, artifact2)
+    assert "declared units are 'meters'" in str(wrong.value)
+    assert "declares no units" not in str(wrong.value)
 
 
 def test_caveatless_iri_row_into_w3_raises() -> None:
@@ -1128,10 +1145,133 @@ def test_w3_w5_emission_register_then_write(tmp_path: Path) -> None:
     assert json.loads(out5.read_text("utf-8"))["artifact_class"] == "breakdown"
 
 
+# --- FR-P1-05-10: the top-1% sensitivity, now COMPUTED (Recommendation 21, 2026-09-20) ---
+
+#: The declared fraction the fixtures pass. FIXTURE apparatus standing in for
+#: `configs/experiment.yaml`'s `reporting.top1pct_sensitivity.removed_fraction`: the value
+#: is read from configuration in production (TC-03e) and the reader's refusals are tested
+#: separately below, so nothing here asserts a scientific value.
+FIXTURE_REMOVED_FRACTION = 0.01
+
+
+def _outlier_mask(member_id: str = "M-A", *, magnitude: float = 100.0) -> _Mask:
+    """A `_Mask` with ONE planted outlier in `member_id`'s errors.
+
+    Every other row is off by a constant, so the sensitivity's effect is unambiguous: any
+    change in the recomputed figure is the planted row leaving, and nothing else."""
+    mask = _Mask()
+    victim = mask.masked_rows[0]
+    victim["y_hats"] = {**victim["y_hats"], member_id: victim["y_true"] + magnitude}
+    return mask
+
+
 def test_top1pct_sensitivity_labelled_never_merged() -> None:
-    block = top1pct_sensitivity_block({"rmse": 1.0}, {"rmse": 0.9})
+    """The label and the separation, over a COMPUTED block. Until 2026-09-20 this function
+    took both figures as literals from its caller and computed nothing; the parent and the
+    sensitivity are now both derived from the same registered mask, so they can never
+    describe different supports."""
+    mask = _Mask()
+    block = top1pct_sensitivity_block(
+        mask=mask, member_id="M-A", removed_fraction=FIXTURE_REMOVED_FRACTION
+    )
     assert block["sensitivity"]["label"] == diagnostics.SENSITIVITY_LABEL
-    assert block["parent"] == {"rmse": 1.0}  # separate, never merged
+    assert block["member_id"] == "M-A" and block["mask_id"] == mask.mask_id
+    assert "label" not in block["parent"]  # separate, never merged
+    assert block["parent"]["rmse"] == pytest.approx(1.0)  # the mask in FULL
+    assert block["sensitivity"]["scope"] == diagnostics.DEFAULT_TOP1PCT_SCOPE
+    assert block["sensitivity"]["rows_removed"] == 1
+    assert "ranked descending" in block["sensitivity"]["removal_rule"]
+
+
+def test_rec21_removing_the_top_1pct_changes_the_reported_value() -> None:
+    """THE CONTROL Recommendation 21 asks for: on a fixture with a planted outlier, the
+    top-1%-removed figure DIFFERS from its parent.
+
+    Before 2026-09-20 nothing in the project computed this metric — `grep` for a
+    top-1%-removed computation returned the caller-supplied stub only — so FR-P1-05-10's
+    figure could only ever have been hand-entered. A stub that echoes its inputs passes
+    the old label test and fails this one."""
+    mask = _outlier_mask("M-A")
+    block = top1pct_sensitivity_block(
+        mask=mask, member_id="M-A", removed_fraction=FIXTURE_REMOVED_FRACTION
+    )
+    parent_rmse = block["parent"]["rmse"]
+    sensitivity_rmse = block["sensitivity"]["rmse"]
+    assert parent_rmse > 20.0  # the planted outlier dominates the full-mask figure
+    assert sensitivity_rmse == pytest.approx(1.0)  # and leaves with the removed row
+    assert sensitivity_rmse != pytest.approx(parent_rmse)
+    assert block["sensitivity"]["rows_removed"] == 1
+    assert [tuple(k) for k in block["sensitivity"]["removed_keys"]] == [
+        (mask.masked_rows[0]["station"], mask.masked_rows[0]["interval_start_utc"])
+    ]
+    # must NOT fire: with no outlier the two figures agree except for the removed row
+    clean = top1pct_sensitivity_block(
+        mask=_Mask(), member_id="M-A", removed_fraction=FIXTURE_REMOVED_FRACTION
+    )
+    assert clean["sensitivity"]["rmse"] == pytest.approx(clean["parent"]["rmse"])
+
+
+def test_rec21_scope_is_material_and_both_readings_are_implemented() -> None:
+    """The open question `scope` carries, made visible rather than buried: the two readings
+    remove DIFFERENT rows, so the choice is material under equal-station weighting and is
+    a configured parameter routed to the gate, not an implementer's pick."""
+    mask = _outlier_mask("M-A")
+    wide = top1pct_sensitivity_block(
+        mask=mask, member_id="M-A", removed_fraction=FIXTURE_REMOVED_FRACTION,
+        scope="comparison_wide",
+    )
+    per_station = top1pct_sensitivity_block(
+        mask=mask, member_id="M-A", removed_fraction=FIXTURE_REMOVED_FRACTION,
+        scope="per_station",
+    )
+    assert wide["sensitivity"]["rows_removed"] == 1
+    assert per_station["sensitivity"]["rows_removed"] == len(STATIONS)  # one per station
+    assert wide["sensitivity"]["removed_keys"] != per_station["sensitivity"]["removed_keys"]
+    with pytest.raises(RegimeError) as excinfo:
+        top1pct_sensitivity_block(
+            mask=mask, member_id="M-A", removed_fraction=FIXTURE_REMOVED_FRACTION,
+            scope="whatever_seems_reasonable",
+        )
+    assert "comparison_wide" in str(excinfo.value)
+
+
+def test_rec21_declaration_is_read_from_config_and_refuses_what_it_cannot_recognise() -> None:
+    """The two parameters are configuration, never source (TC-03e), and the reader refuses
+    an absent block, a `TBD — freeze gate` sentinel, an out-of-range fraction and an
+    unrecognised scope — each naming its own config field (TE §18.3)."""
+    unresolved: list[dict[str, Any]] = [
+        {},
+        {"reporting": {}},
+        {"reporting": {"top1pct_sensitivity": TBD_SENTINEL}},
+    ]
+    for experiment in unresolved:
+        with pytest.raises(RegimeError) as excinfo:
+            diagnostics.read_top1pct_declaration(experiment)
+        assert "top1pct_sensitivity" in str(excinfo.value)
+    base = {"removed_fraction": 0.01, "scope": diagnostics.DEFAULT_TOP1PCT_SCOPE}
+    assert diagnostics.read_top1pct_declaration(
+        {"reporting": {"top1pct_sensitivity": dict(base)}}
+    ) == {"removed_fraction": 0.01, "scope": diagnostics.DEFAULT_TOP1PCT_SCOPE}
+    for field, bad in (
+        ("removed_fraction", TBD_SENTINEL),
+        ("removed_fraction", 0.0),
+        ("removed_fraction", 1.0),
+        ("scope", TBD_SENTINEL),
+        ("scope", "whichever"),
+    ):
+        with pytest.raises(RegimeError) as excinfo:
+            diagnostics.read_top1pct_declaration(
+                {"reporting": {"top1pct_sensitivity": {**base, field: bad}}}
+            )
+        assert field in str(excinfo.value)
+
+
+def test_rec21_a_fraction_that_would_remove_every_row_refuses() -> None:
+    """A sensitivity over zero rows is not a sensitivity: the removal refuses rather than
+    recomputing metrics over an empty remainder."""
+    with pytest.raises(RegimeError) as excinfo:
+        top1pct_sensitivity_block(mask=_Mask(), member_id="M-A", removed_fraction=0.999)
+    assert "no remainder" in str(excinfo.value)
 
 
 def test_completeness_shortfalls_machine_readable_two_tier() -> None:
@@ -1495,6 +1635,35 @@ def test_control_10_beats_true_baseline_absent_from_conclusion_fails(tmp_path: P
     )
     rows = [r for r in _rows_by_ref(checklist, "FR-P1-05-20") if r.get("subject") == "M-A"]
     assert rows and rows[0]["status"] == "FAILED"
+
+
+def test_rec48_binding_honesty_is_advisory_and_the_artifact_says_so(tmp_path: Path) -> None:
+    """Recommendation 48 (approved option 1, 2026-09-20): the binding-honesty rows stay
+    ADVISORY — raising on a substring check would give false confidence while still
+    missing every paraphrase — but the artifact now STATES that rather than leaving a
+    reader to infer it from the absence of a raise.
+
+    The test asserts both halves: a FAILED binding-honesty row still does not raise, and
+    the checklist carries the machine-readable `enforcement` marker and the header note
+    naming G-06 and the human check."""
+    registry = _registry(tmp_path)
+    conclusion = _conclusion(registry)
+    mask = _Mask()
+    artifact = _metrics_artifact(mask)
+    artifact["comparisons"][0] = _row("M-A", beats=True)
+    checklist = build_claims_checklist(  # a FAILED row, and NO raise — advisory by design
+        registry=registry,
+        conclusion_surface=conclusion,
+        table=_table(mask, artifact),
+        notebook_captions={"04": "Phase 1 target figure"},
+    )
+    assert any(str(r["status"]).startswith("FAILED") for r in checklist["rows"])
+    assert checklist["enforcement"] == "advisory"
+    note = checklist["enforcement_note"]
+    assert note == diagnostics.BINDING_HONESTY_ADVISORY_NOTE
+    assert "ADVISORY, NOT ENFORCING" in note
+    assert "G-06" in note and "HUMAN check" in note
+    assert "substring" in note
 
 
 def test_control_11_caption_missing_plasmaspheric_fails_row(tmp_path: Path) -> None:

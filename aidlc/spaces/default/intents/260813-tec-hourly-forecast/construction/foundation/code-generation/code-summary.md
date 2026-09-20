@@ -383,3 +383,104 @@ One Major survives, unresolved for the third consecutive review pass: R-01's own
 Step 13 closes the Major that recurred across three prior passes (2026-09-05, 2026-09-10, 2026-09-11): the R-01 enumeration census now exists, is genuinely derived (units, artifacts, builtins, disclosures all computed rather than hardcoded), is pinned to its declaration site by an AST test, carries a real anti-vacuity guard and per-name negative controls, and its every headline count (12 units, 48 artifacts, 34 subclasses, 15 enumerated, 19 riders, the 13-of-19 foundation-only-disclosure figure, 43 test functions) reproduces exactly under my own independent derivation rather than the artifact's say-so. The one new defect this repair introduces is a documentation-sweep gap of the kind this project has hit twice before in this same file: the fresh 34/15/19 correction was not propagated to the `## Assumptions & Open Questions` bullet at line 1855, which still asserts 33/15/18 and omits `FeatureAvailabilityError` — a Major, but a single one, with zero Critical findings and no functional or test defect behind it. Per this stage's stated verdict rule (NOT-READY only on any Critical or more than two Major findings), one Major with zero Critical does not cross the threshold.
 
 **Verdict: READY**
+
+---
+
+## Post-receipt amendment — 2026-09-20 (`GOV-2026-09-20-CG-01`, Recommendations 25 and 43)
+
+*Written into the body, not filed as a review addendum, per `project.md`
+(`code-generation:fr-2`). The stage receipt and the `READY` verdict above are **frozen and
+untouched**; nothing here revises either.*
+
+⚠ **UNEXECUTED.** No test was run — no usable Python interpreter exists on this clone
+(`python.exe` is a zero-byte Windows Store alias stub). Every statement below is **static**,
+read from source and measured with `git diff --numstat` / `grep`.
+
+**Repository state, re-derived at the moment this section was written**
+(`code-generation:c30`): `git log -1` = **`ff5c683`**; `git status --porcelain` = 73
+entries. Everything below is **uncommitted working tree**; no git state-changing command
+was run and no commit, amend or revert was made.
+
+| File | Δ vs `ff5c683` | Now |
+|---|---|---|
+| `src/data/release.py` | +338 / −2 | 787 lines |
+| `src/data/experiment_registry.py` | +13 / −2 | 747 lines |
+| `tests/test_release_contract.py` | +262 / −10 | 568 lines, 32 `def test_` |
+
+### Recommendation 25 (High) — TE §13.3's second column is now enforced
+
+The board's derivation, restated because it is the whole finding: TE §13.3 has **10 rows
+naming 14 field names**, `REQUIRED_MANIFEST_FIELDS` matched them **exactly** (set
+difference ∅ both ways, order identical) — and enforcement was a **single top-level
+non-empty check**. So a manifest could satisfy every enforced check while carrying
+`source_files: ["x"]`, a four-key `processing` block omitting the kindat, the parameters
+and the **selected cell bounds**, and a station-keyed `row_counts` satisfying **one of
+four** mandated axes. Field-name presence without content is a schema that cannot be
+relied on.
+
+Four sub-schemas now carry the "Required content" column, each with one guard function:
+`SOURCE_FILE_FIELDS` (**6** items per file — provider, citation, location/date, filename,
+retrieval date, SHA-256); `PROCESSING_PHASE1_FIELDS` (**7** Phase 1 keys; the Phase 2 limb
+is deliberately **not** enumerated, because Phase 1 code must not require a raw-processing
+field — TE §7.0, NFR-PHASE-01); `ROW_COUNT_AXES` (**4** — station, month, split, QC stage,
+each a non-empty mapping of label to **integer** count); `EXCLUSION_ENTRY_FIELDS` (**2** —
+reason and count, in either the mapping or the sequence shape, because both carry what the
+row asks and refusing one would be house style enforced as contract). Plus
+`assert_output_file_keys_relative`: `target / rel_path` **discards** `target` when the key
+is absolute, so an absolute or `..` key made the release verify against bytes it does not
+contain — covered for POSIX, Windows drive-letter and UNC forms, because the check must not
+depend on which OS wrote the release. `write_release` **raises** on all of these before
+anything is hashed; `verify_release` **reports** them, matching its `Sequence[str]`
+contract, which is the only way a manifest written before the sub-schemas existed can be
+described at all. R-13's occupancy refusal still fires **first**, so a rejected write
+cannot partially apply.
+
+**Recommendation 8's version suffix now has a home**: `source_files.filename` is required
+and documented to carry the **full** provider filename including its `g.NNN` suffix — the
+field the version mixing would have been visible in.
+
+**The test half, which the interrupted predecessor left undone.** `_manifest_for` in
+`tests/test_release_contract.py` was itself one of the board's exhibits — a `source_files`
+entry with no `location_date` and a `retrieved_at_utc` key the table does not name, a
+four-key `processing` block, a station-keyed `row_counts` — so it could not pass the new
+contract, which is the cheapest available proof that the contract bites. It is rewritten as
+a complete **synthetic** manifest (the real `selected_cell_bounds` and
+`station_coordinate_to_cell_rule` are §18.2 forbidden-choice items awaiting freeze; a test
+carrying them would be a second transcription competing with `configs/data.yaml`), and the
+negative controls are **parametrised over the four tuples** rather than over a hand-picked
+subset, so a sub-field added to a tuple gains its control automatically — the same shape
+`test_missing_required_field_is_refused` already uses for the names, and the discipline
+`project.md` `fd-2026-08-30-sweep-derive-sites` requires (derive the sites; never sweep
+only what a finding enumerated). One **must-not-fire** control is included: both accepted
+exclusion shapes must still write, because a guard that refused everything would pass every
+negative control above it.
+
+⚠ **Cross-scope, not repaired here.** `tests/test_release_hashes.py::_release_manifest`
+carries the **same** pre-Recommendation-25 fixture shape and would therefore fail against
+the new contract at every one of its `write_release` call sites (≈ lines 417, 431, 434,
+449, 457, 476, 485). That module belongs to the custody/fixtures lane, which was editing it
+concurrently; per `project.md` `code-generation:c32` the need is **reported rather than
+silently edited**. The fix is mechanical and identical to `_manifest_for`'s.
+
+### Recommendation 43 (Medium) — the stale retrospective-row enumeration
+
+`reconcile_access_records`' docstring at `experiment_registry.py:619-621` enumerated "the
+**five** retrospective accesses … rows 3, 4, 5, 8 and 9", carried from
+`evidence/experiment_registry.md:43`'s own summary line, which predates row 10 and was
+never updated. Derived by enumerating the rows whose own text carries the literal
+`Retrospective row`, which returns exactly **{3, 4, 5, 8, 9, 10}** — rows 6, 7, 11 and 12
+record a pre-read write and are not retrospective. Row 10 is the `GOV-2026-08-28-FD-01`
+Validation Auditor seat's restricted-root inspection, whose own cell says it was "created
+2026-08-28, after the read". A caller sizing `known_orphans` from the stale five would
+leave row 10's access looking like an undisclosed orphan. Corrected in the docstring; the
+function still **NEVER writes**, and back-filling a registry row to clear an orphan remains
+forbidden.
+
+⚠ **The other half of Recommendation 43 is NOT done and is not this lane's to do**:
+retitling `evidence/experiment_registry.md` to what it is (a locked-month access record and
+pre-git acquisition narrative), pointing it at `artifacts/registry/experiment_registry.jsonl`
+as the TE §13.4 registry, and correcting its own `:43` summary line. `evidence/` is outside
+this lane's write scope, and **no row of either registry artifact was modified, rewritten,
+truncated or deleted**. **Owner act.**
+
+The gate verdict for `GOV-2026-09-20-CG-01` stands at **`FAIL`**. Nothing here advances it.

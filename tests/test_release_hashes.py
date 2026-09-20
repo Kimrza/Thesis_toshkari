@@ -38,6 +38,8 @@ Run: pytest tests/test_release_hashes.py
 
 from __future__ import annotations
 
+import ast
+import datetime as dt
 import hashlib
 import json
 import sys
@@ -72,7 +74,18 @@ F107_FILE = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "nrcan_f107" / "fluxtable.tx
 # Validation Auditor veto). Corrected under D-31, which signed G-09 and thereby authorised
 # editing this file.
 
-ACCESS_LOG = EVIDENCE_DIR / "test_run_access_log.jsonl"
+# TEST-MODE ACCESS LOG, separated 2026-09-20 (Recommendation 1, owner ruling = option 2).
+#
+# Until this remediation, every access row this module wrote landed in
+# `evidence/test_run_access_log.jsonl`, the SAME file a real governed December access would
+# use. 5,640 of that file's 5,964 rows came from this module alone, so the artifact a G-06
+# reviewer must read to find a genuine access was 100% suite noise. The custody rule is
+# unchanged -- a restricted read still writes a durable `AccessRecord` BEFORE the read -- but
+# the destination is now a test-mode sidecar under `artifacts/exec_evidence/`, which is
+# gitignored. `evidence/test_run_access_log.jsonl` is reserved for real, governed accesses
+# and is closed to further appends; the historical rows are preserved unedited and described
+# in `evidence/test_run_access_log.SUPERSEDED_2026-09-20.md`. Nothing is deleted.
+ACCESS_LOG = REPO_ROOT / "artifacts" / "exec_evidence" / "test_access_log.jsonl"
 
 
 def _test_access_record() -> AccessRecord:
@@ -82,10 +95,17 @@ def _test_access_record() -> AccessRecord:
     analysis, which is the performance-blind class Vision 8.3 permits before G-05. No
     December target value, coverage figure or performance quantity is read, parsed,
     counted or computed by this module.
+
+    `retrieved_at_utc` is a REAL timestamp, taken at call time. It carried the placeholder
+    string `"recorded-at-call-time-by-the-runner"` on all 5,964 historical rows, which left
+    FR-P1-02-3's ordering requirement unverifiable from the very log that records it
+    (Recommendation 1). `AccessRecord.__post_init__` now refuses any value that does not
+    parse as ISO-8601, so the placeholder cannot come back. This matches what
+    `scripts/06_train_and_predict.py` and `scripts/07_evaluate_and_report.py` already do.
     """
     return AccessRecord(
         run_id="test_release_hashes",
-        retrieved_at_utc="recorded-at-call-time-by-the-runner",
+        retrieved_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
         scope="restricted-root manifests and declared artifacts, bytes and hashes only",
         purpose="coverage_audit",
         performance_inspected=False,
@@ -112,9 +132,23 @@ CHUNK = 1 << 20
 
 
 def _sha256(path: Path) -> str:
-    """SHA-256 of a file, streamed so a 45 MB year artifact does not enter memory whole."""
+    """SHA-256 of a file, streamed so a 45 MB year artifact does not enter memory whole.
+
+    ROUTED THROUGH THE CHOKEPOINT since 2026-09-20 (Recommendation 32). This function was
+    the module's real restricted-byte reader and it opened `path` directly: the manifest
+    read at `_declared_artifacts` was guarded, but `_sha256(artifact)` -- called on the
+    December artifacts those manifests declare -- was not, so the bytes that matter most
+    were obtained with NO `AccessRecord`. R-28's `RESTRICTED_LITERAL_EXEMPT_MODULES`
+    exemption covers HOLDING the restricted-root literal and has never covered obtaining
+    the CONTENT; its own comment says so. Guarding here rather than at each call site is
+    deliberate: `_sha256` is the single place the bytes are actually opened, so one guard
+    home covers every present and future caller (`nfr-design` c58).
+
+    An ordinary path passes through unchanged -- `_read_guarded` returns it as-is, because
+    `open_restricted` REFUSES a non-restricted path by contract.
+    """
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
+    with _read_guarded(path).open("rb") as handle:
         while chunk := handle.read(CHUNK):
             digest.update(chunk)
     return digest.hexdigest()
@@ -342,30 +376,63 @@ from src.data.release import (  # noqa: E402
 
 
 def _release_manifest(directory: Path, body: bytes = b"row,value\n1,2\n") -> dict:
-    """A complete, valid TE 13.3 manifest with its one output file on disk."""
+    """A complete, valid TE 13.3 manifest with its one output file on disk.
+
+    ⚠ SYNTHETIC throughout, matching `tests/test_release_contract.py::_manifest_for`.
+    `processing.station_coordinate_to_cell_rule` and `selected_cell_bounds` are §18.2
+    forbidden-choice items awaiting their freeze; a fixture carrying the governed values
+    would be a second transcription competing with `configs/data.yaml` (project.md
+    § Forbidden). The previous fixture's `cell_rule: "floor(lat), floor(lon), half-open"`
+    read like the real rule and is deliberately NOT carried forward.
+
+    Rewritten 2026-09-20 against board **Recommendation 25**'s sub-schema guards
+    (`src/data/release.py`: `assert_manifest_content_contract`, wired into
+    `write_release`). The previous fixture predated them and would now be refused at three
+    fields: a `source_files` entry with no `location_date` and a `retrieved_at_utc` key
+    TE §13.3 does not name (the table's item is `retrieval_date`); a FOUR-key
+    `processing` block missing the provider kindat, the parameters, the cell rule and the
+    selected cell bounds; and a station-keyed `row_counts` satisfying one axis of four.
+    `filename` keeps a full provider filename INCLUDING its version suffix — the field
+    Recommendation 8's version mixing is recordable in — but with a synthetic stem.
+    """
     directory.mkdir(parents=True, exist_ok=True)
     (directory / "prepared.csv").write_bytes(body)
     return {
         "created_at_utc": "2026-09-05T00:00:00Z",
         "source_manifest_id": "src-manifest-0001",
+        # Six items per file (SOURCE_FILE_FIELDS): provider, citation, location_date,
+        # filename, retrieval_date, sha256.
         "source_files": [
             {
-                "provider": "Madrigal / OpenMadrigal",
-                "citation": "experiments4/2022/gps",
-                "filename": "gps220301g.003.hdf5",
-                "retrieved_at_utc": "2026-08-12T00:00:00Z",
+                "provider": "synthetic-provider",
+                "citation": "syn/experiments/0000 (synthetic permanent citation)",
+                "location_date": "synthetic-site / 2022-03-01",
+                "filename": "syn220301g.003.hdf5",
+                "retrieval_date": "2026-08-12",
                 "sha256": "0" * 64,
             }
         ],
+        # All seven Phase 1 keys (PROCESSING_PHASE1_FIELDS). The Phase 2 limb is
+        # deliberately absent (TE §7.0, NFR-PHASE-01).
         "processing": {
-            "phase_id": "P1",
-            "target_definition_id": "P1-GRID-MEDIAN",
-            "cell_rule": "floor(lat), floor(lon), half-open",
-            "hourly_aggregation": "median",
+            "phase_id": "SYN-PHASE",
+            "target_definition_id": "SYN-TARGET-DEF",
+            "provider_experiment_kindat": "SYNTHETIC instrument/kindat",
+            "parameters": "SYNTHETIC parameter list",
+            "station_coordinate_to_cell_rule": "SYNTHETIC rule, not the governed one",
+            "selected_cell_bounds": "SYNTHETIC bounds, not the governed ones",
+            "hourly_aggregation": "SYNTHETIC aggregation",
         },
         "schema_version": "1.0.0",
         "units": {"vtec": "TECU"},
-        "row_counts": {"ARUC": 8760, "BSHM": 8760, "NICO": 8760},
+        # All four mandated axes (ROW_COUNT_AXES), each a non-empty mapping of label to
+        # INTEGER count. Labels are synthetic, not the three governed stations.
+        "row_counts": {
+            "by_station": {"SYNA": 8760, "SYNB": 8760, "SYNC": 8760},
+            "by_month": {"2022-01": 2232, "2022-02": 2016},
+            "by_split": {"F1-train": 2000, "F1-validation": 500},
+            "by_qc_stage": {"raw": 26280, "post_support_filter": 26268},
+        },
         "exclusions_qc_summary": {"below_support_threshold": 12},
         "fold_ids": ["F1", "F2", "F3", "F4"],
         "mask_ids": ["DEC-COMPARISON-WIDE"],
@@ -452,3 +519,182 @@ def test_mutation_of_a_written_release_is_detected(tmp_path: Path) -> None:
     (target / "prepared.csv").write_bytes(b"row,value\n1,2\n#tampered")
     problems = verify_release(target / MANIFEST_NAME)
     assert any("do not match" in p for p in problems)
+
+
+# --- the chokepoint drift control (Recommendation 32, 2026-09-20) ---------------------
+#
+# R-28's boundary "does not weaken slightly; it ends" if a second path to restricted
+# content exists. `_sha256` WAS that second path from 2026-08-28 until 2026-09-20: it
+# opened December bytes directly while the manifest read beside it was guarded. Nothing
+# detected it, because nothing checked. This section is that check.
+#
+# The control is structural, not textual: it walks this module's OWN AST for every read
+# call and refuses any whose receiver is not recognisably safe. A future edit that adds an
+# unguarded read must add itself to one of the enumerated lists below, under review --
+# which is the only outcome that keeps the boundary from ending quietly again.
+
+#: Read methods that obtain file CONTENT. `write_bytes` / `write_text` are deliberately
+#: absent: this module never writes under the restricted root, and `write_restricted` is
+#: the guard for anything that would.
+READ_METHODS = frozenset({"open", "read_bytes", "read_text"})
+
+#: Module-level constants provably OUTSIDE `evidence/locked_test_restricted/`. Asserted
+#: below rather than trusted.
+UNRESTRICTED_READ_RECEIVERS = frozenset({"EC1_REPORT", "GITATTRIBUTES"})
+
+#: Local names bound from `_read_guarded(...)` earlier in their own function. Enumerated
+#: explicitly rather than inferred, so a rename cannot silently widen the exemption.
+GUARDED_LOCALS = frozenset({"guarded_source"})
+
+#: Leftmost names of `tmp_path`-rooted path expressions (`target / MANIFEST_NAME`). Every
+#: one is a pytest `tmp_path` descendant and cannot resolve under the real evidence tree.
+TMP_PATH_ROOTS = frozenset(
+    {"tmp_path", "target", "copy", "root", "planted", "directory", "not_a_dir"}
+)
+
+
+def _receiver_root(node: ast.AST) -> str | None:
+    """The leftmost `Name` of a path expression, or None when there is not one."""
+    while isinstance(node, ast.BinOp):
+        node = node.left
+    if isinstance(node, ast.Name):
+        return node.id
+    return None
+
+
+def scan_unguarded_reads(source: str, *, filename: str = "<scanned>") -> list[str]:
+    """Every content read whose receiver is not recognisably guarded or unrestricted.
+
+    Returned as `"line N: .method() on <receiver>"` strings, so a failure names the site.
+    Callable with an arbitrary source string, which is what makes the negative control
+    below a real one: it pushes a violating module through THIS function rather than
+    asserting that the real module happens to be clean (`nfr-design` c58).
+    """
+    tree = ast.parse(source, filename=filename)
+    offenders: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not isinstance(func, ast.Attribute) or func.attr not in READ_METHODS:
+            continue
+        receiver = func.value
+        if (
+            isinstance(receiver, ast.Call)
+            and isinstance(receiver.func, ast.Name)
+            and receiver.func.id == "_read_guarded"
+        ):
+            continue
+        root = _receiver_root(receiver)
+        if root in UNRESTRICTED_READ_RECEIVERS or root in GUARDED_LOCALS:
+            continue
+        if root in TMP_PATH_ROOTS:
+            continue
+        offenders.append(f"line {func.lineno}: .{func.attr}() on {root or type(receiver).__name__}")
+    return offenders
+
+
+def test_no_restricted_read_in_this_module_bypasses_the_chokepoint() -> None:
+    """Every content read here is guarded, or its receiver is enumerated as unrestricted.
+
+    The positive limb. Recommendation 32's defect -- `_sha256` opening December bytes with
+    no `AccessRecord` -- fails this test at the line that does it.
+    """
+    offenders = scan_unguarded_reads(
+        Path(__file__).read_text(encoding="utf-8"), filename=__file__
+    )
+    assert not offenders, (
+        "unguarded content reads in tests/test_release_hashes.py: "
+        + "; ".join(offenders)
+        + ". Route the read through `_read_guarded`, or -- only if the path provably "
+        "cannot lie under evidence/locked_test_restricted/ -- add its receiver to "
+        "UNRESTRICTED_READ_RECEIVERS / GUARDED_LOCALS / TMP_PATH_ROOTS with a stated "
+        "reason. R-28: the boundary does not weaken slightly; it ends."
+    )
+
+
+def test_enumerated_unrestricted_receivers_really_are_outside_the_restricted_root() -> None:
+    """The allowlist is asserted, not trusted.
+
+    A constant relocated under the restricted root would otherwise keep its exemption
+    silently -- which is how D-15's relocation defeated the previous collector (VAL-3).
+    """
+    for name in sorted(UNRESTRICTED_READ_RECEIVERS):
+        value = globals()[name]
+        assert isinstance(value, Path), f"{name} is not a Path"
+        assert not value.is_relative_to(RESTRICTED_DIR), (
+            f"{name} resolves under {RESTRICTED_DIR}; an allowlisted receiver that moved "
+            f"into the restricted root is exactly the drift this list must not absorb"
+        )
+
+
+def test_the_drift_scanner_catches_an_injected_unguarded_restricted_read() -> None:
+    """NEGATIVE CONTROL. A scanner that never fires proves nothing.
+
+    Three mutants, each pushed through the real public entry point `scan_unguarded_reads`:
+    a direct `.open(...)`, a `.read_bytes()`, and a `.read_text(...)` on a receiver in none
+    of the three enumerated lists. Each must be reported. The fourth case is the
+    must-not-fire limb: the same read routed through `_read_guarded` must NOT be reported.
+    """
+    mutant_calls = (
+        'artifact.open("rb")',
+        "artifact.read_bytes()",
+        'artifact.read_text(encoding="utf-8")',
+    )
+    for call in mutant_calls:
+        mutant = (
+            "from pathlib import Path\n"
+            "def offending():\n"
+            "    artifact = Path('e/locked_test_restricted/x/records.csv')\n"
+            f"    return {call}\n"
+        )
+        offenders = scan_unguarded_reads(mutant, filename="<mutant>")
+        assert offenders, f"the scanner did not catch `{call}` -- it bites nothing"
+        assert "artifact" in offenders[0]
+
+    clean = (
+        "from pathlib import Path\n"
+        "def compliant():\n"
+        "    artifact = Path('e/locked_test_restricted/x/records.csv')\n"
+        '    return _read_guarded(artifact).open("rb")\n'
+    )
+    assert not scan_unguarded_reads(clean, filename="<clean>"), (
+        "must-not-fire: a read routed through the chokepoint was reported as a bypass"
+    )
+
+
+# --- the separated test-mode access log (Recommendation 1, 2026-09-20) ----------------
+
+
+def test_the_test_mode_access_log_is_not_the_governed_evidence_log() -> None:
+    """Suite rows never again land in the governed access log.
+
+    `evidence/test_run_access_log.jsonl` is reserved for real, governed accesses and is
+    closed to further appends; its 5,964 historical rows are preserved unedited and
+    described in `evidence/test_run_access_log.SUPERSEDED_2026-09-20.md`.
+    """
+    assert ACCESS_LOG == REPO_ROOT / "artifacts" / "exec_evidence" / "test_access_log.jsonl"
+    assert not ACCESS_LOG.is_relative_to(EVIDENCE_DIR), (
+        "the test-mode access log resolves inside evidence/; suite noise would again be "
+        "indistinguishable from a governed December access (Recommendation 1)"
+    )
+    notice = EVIDENCE_DIR / "test_run_access_log.SUPERSEDED_2026-09-20.md"
+    assert notice.is_file(), (
+        f"{notice.name} is absent; the superseded log must carry its notice, because a "
+        f"closed log with no explanation reads as an abandoned one -- records are "
+        f"superseded, never deleted"
+    )
+
+
+def test_the_access_record_this_module_writes_carries_a_real_timestamp() -> None:
+    """Recommendation 1, limb 3: the placeholder cannot come back.
+
+    All 5,964 historical rows carried `retrieved_at_utc =
+    "recorded-at-call-time-by-the-runner"`, which left FR-P1-02-3's ordering requirement
+    unverifiable from the log that records it. `AccessRecord.__post_init__` now refuses a
+    non-ISO-8601 value; this asserts THIS module's producer satisfies it.
+    """
+    record = _test_access_record()
+    parsed = dt.datetime.fromisoformat(record.retrieved_at_utc)
+    assert parsed.tzinfo is not None, "retrieved_at_utc must be timezone-aware UTC"
+    assert record.retrieved_at_utc != "recorded-at-call-time-by-the-runner"

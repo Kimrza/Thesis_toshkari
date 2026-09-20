@@ -522,3 +522,154 @@ no filled TBD sentinel, and no restricted-root literal found in any file this un
 owns. No Python interpreter exists on this clone, so every pass/fail count in this
 artifact — this pass's included — is bounded as smoke evidence only, never governed;
 `def test_`-level counts were independently re-derived and match.
+
+---
+
+## Post-receipt amendment — 2026-09-20 (`GOV-2026-09-20-CG-01`, Recommendations 8, 22, 23, 24, 26, 46, 49)
+
+*Written into the body, not filed as a review addendum, per `project.md`
+(`code-generation:fr-2`). The stage receipt above is **frozen and untouched**. This unit
+carries **seven** of the ten findings the data-provenance remediation lane was given, more
+than any other unit.*
+
+⚠ **UNEXECUTED.** No test, script or notebook was run — no usable Python interpreter exists
+on this clone (`python.exe` is a zero-byte Windows Store alias stub). Every statement below
+is **static**, read from source and measured with `git diff --numstat` / `grep`. Nothing is
+"verified passing". **No December 2022 target value was read**, and no file content under
+`evidence/locked_test_restricted/` was opened.
+
+**Repository state, re-derived at the moment this section was written** (`code-generation:c30`):
+`git log -1` = **`ff5c683`**; `git status --porcelain` = 73 entries. Everything below is
+**uncommitted working tree**; no git state-changing command was run.
+
+| File | Δ vs `ff5c683` | Now |
+|---|---|---|
+| `src/data/inventory.py` | +342 / −9 | 1,814 lines |
+| `scripts/01_inventory_and_registry.py` | +316 / −11 | 1,055 lines |
+| `scripts/merge_coverage_year.py` | +65 / −2 | 400 lines |
+| `tests/test_december_audit.py` | +340 / −2 | 1,195 lines, 74 `def test_` |
+
+### Recommendation 8 (**Critical**) — the provider-version census
+
+The board measured, over the `file` column, that **five of the eleven non-December months
+are provider-version mixed** (`g.001` beside `g.002`), that FULL additionally carries 743
+`g.003` records **all dated 2022-12-31, inside the locked month**, and that `grep "g.001"`
+over every `*.md` in the workspace returns **zero matches** — the mix is recorded nowhere.
+
+Built here: `PROVIDER_VERSION_RE` / `provider_version_token` (anchored on the `.hdf5` tail,
+so a directory component can never be mistaken for a version); `provider_suffix_census`,
+which MEASURES the per-month and **per-day** distribution — per-day is what distinguishes a
+mid-month reissue from two cleanly separated retrieval runs — and reports an unreadable
+filename as `<unrecognised>` rather than folding it into a recognised bucket, because
+folding would **understate** the mix; `read_provider_suffix_census`, the one production
+entry point, which refuses a path inside the restricted root (a December read belongs to
+the logged `route_audit_path` chokepoint, never to a measurement helper that writes no
+access row) and treats an absent file as a **measurement gap, never a zero**; and
+`assert_sources_unmixed_or_recorded`, which is `assert_unmixed_sources`' first production
+call site. The rule enforced is **not** "never mixed" — version drift is an observed fact
+of this dataset and refusing every mixed month would refuse five of eleven outright — it is
+"**absent or RECORDED**", and an under-declaration is not a recording.
+
+⚠ **No census figure was written into code, config, test or record.** The census **RUN** is
+a gated owner act (dispositions §5 item 6, Student, before G-05) and the D-number
+placeholder at `CR-2026-09-20-GOV-CG-01-DISPOSITIONS` §4.3 stays
+`<INSERT FROM CENSUS RUN — do not transcribe from this draft>`.
+
+### Recommendation 22 (High) — the source inventory is now built, not stubbed
+
+`_run_inventory` called `write_source_inventory` **once, with a literal empty entry list**,
+which is why `assert_source_entry` and `assert_verbatim_notice` had never once fired on a
+real run no matter how correct they were. It now builds a real TE §5.1 nine-field entry per
+month declared in `declared_sources`, with `release_status` carrying the **MEASURED**
+version distribution — derived from the census, never from the declaration, so a
+declaration that understates the mix produces a visible disagreement rather than a quiet
+agreement. Two completeness shortfalls stay machine-readable and non-fatal: the months
+beyond those declared, and any provider whose verbatim notice is not transcribed.
+
+⚠ **`configs/data.yaml` was NOT edited** — it is outside this lane's write scope and the
+descriptive TE §5.1 values are the owner's transcription. `declared_sources` is still `[]`,
+so this path currently inventories nothing and says so machine-readably. **Owed to the
+owner**: transcribe the two fixture source months (2022-03 and 2022-11) before the Q-31
+fixture freeze act.
+
+### Recommendation 23 (High) — FULL's 100% figures carry their caveat
+
+`scripts/merge_coverage_year.py` published `ARUC,71905,365,100.0,…` with no caveat column,
+no provenance class and no DATA-07 reference, and did not import `src.data.inventory` at
+all. `provenance_class` and `data07_caveat` are now **per-row columns** on the summary and
+monthly CSVs and fields on `request_manifest.json`, so the caveat travels with the figure
+rather than living in a notice the reader may not open. The text is **imported** from
+`inventory.DATA07_CAVEAT` through the one derivation `data07_caveat_for`, with a drift
+guard that exits if the two disagree — a second hand-typed copy would drift, and the drift
+would be invisible because both copies would read plausibly.
+
+⚠ **Not done, and not doable from this lane**: restoring the literal `DATA-07` token to the
+live `PROVENANCE_NOTICE.md` beside its 100% sentence. That file is under
+`evidence/locked_test_restricted/` and this lane read **no** content there. **Owner act.**
+
+### Recommendation 24 (High) — TEC-05 stamps on the three gate-read artifacts
+
+The board's census found **one** occurrence of the three stamp names in
+`src/data/inventory.py` and it was a **default parameter name, not a stamp** — so
+`source_inventory.json`, `coverage_report.json` and `regime_count_report.json` all reached
+G-P1A carrying no phase, source or target-definition identity. `stamps` is now a
+**required** argument on `write_source_inventory` and `finalize_audit_reports`, refused
+through `acquisition.assert_identity_stamped` (one refusal, shared with the manifest
+writers). In `finalize_audit_reports` the stamp check runs **FIRST** — before the
+performance-blind scan and before reconciliation — so an unstamped audit fails at the same
+all-or-nothing boundary as every other defect there rather than producing two untraceable
+reports.
+
+### Recommendation 26 (High) — every named guard now has a production call site
+
+Re-derived by occurrence census over `src/` + `scripts/` at the time of writing, excluding
+definition lines, and printed before assertion: `assert_unmixed_sources` **1**;
+`assert_no_silent_imputation` **1**; `store_gaps_as_nan` **3**; `gap_accounting_entry` **1**;
+`expected_schema_from` **1**; `validate_schema` **1**; `assert_source_entry` **1**;
+`assert_verbatim_notice` **1**. **Eight of eight**, against eight zeros before. A new
+`--validate-schema` limb is W-5's entry point and **refuses** while `configs/data.yaml`
+carries no `prepared_schema` block (TE §18.3), the same shape `--build-registry` already
+holds. Invocation controls — as distinct from correctness controls — assert the wiring over
+the script's real source in `tests/test_december_audit.py`, because a correctness test
+cannot detect a guard nobody calls.
+
+### Recommendation 46 (Medium) — `_record_date` attributes in UTC
+
+This unit's reader wrapped the same `raw[:10]` slice and it matters here specifically
+because this reader decides the **routing class**: an observation attributed to the wrong
+month is routed as ordinary, read with no access row, and counted into the wrong month's
+figure. It now wraps `acquisition.parse_record_date_utc` — one derivation, two integrity
+tiers (`nfr-design:c58`) — and the control asserts **both** halves: the offset-bearing
+boundary timestamp refuses naming the offset, and the same instant as explicit UTC lands in
+the synthetic locked month. Without the second half a function that refused everything
+would pass.
+
+### Recommendation 49 (Medium) — the performance-blind control's limit is now stated
+
+Option (1), as the board preferred: the residual is **disclosed, not closed**.
+`assert_performance_blind` is a key-name filter over eleven fragments; it recurses into
+values and never examines one, so a performance quantity under a benign key, a bare list of
+error values, or a figure inside free text passes. Its **invocation** is strong —
+`finalize_audit_reports` runs it over both reports, all-or-nothing, before the first byte —
+and a strong chokepoint around a narrow test reads as a broad guarantee unless the
+narrowness is written where the reader meets it. `PERFORMANCE_BLIND_RESIDUAL` is now pinned
+in the docstring by a **disclosure-guarding test**: deleting the disclosure fails the
+suite. Widening to value-shape heuristics was deliberately **not** done — over a coverage
+report whose every figure is numeric, a value-shape test is indistinguishable from the data
+it guards, and a control that fires on its own subject teaches its operator to disable it.
+Option (2), the fail-closed positive allowlist, is **recorded as owed before the pre-G-05
+audit actually runs**.
+
+### Consequences a reader must not miss
+
+* ⚠ **`--audit` now refuses earlier than before.** `_run_audit` resolves its stamps through
+  `prepared.resolve_target_identity`, which raises while `configs/data.yaml` has no
+  `target:` block. The **required pre-G-05 December coverage and regime audit therefore
+  cannot run until the owner transcribes that block.** This is the TE §18.3
+  stop-and-report working as designed, not a regression — but it is a new precondition on a
+  G-05 input and should be read as one.
+* The `--audit` BLK-07 refusal, the restricted-root routing and the access-log chokepoint
+  are all unchanged. **No row of `evidence/test_run_access_log.jsonl` or
+  `artifacts/registry/experiment_registry.jsonl` was modified, rewritten, truncated or
+  deleted**, and `reconcile_access_records` still forbids back-filling a registry row.
+* The gate verdict for `GOV-2026-09-20-CG-01` stands at **`FAIL`**. Nothing here advances it.

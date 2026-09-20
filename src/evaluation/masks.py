@@ -8,6 +8,14 @@ Purpose
   from `configs/experiment.yaml` through `ConfigSnapshot`; membership is a frozen scientific
   choice living in configuration (TC-03e; confirmed Q1 = A,
   `governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md`), NEVER in source.
+* ``assert_mandatory_controls_declared`` — the MEMBERSHIP FLOOR (Recommendation 16,
+  2026-09-20), fired from ``read_comparison_sets``. Every other layer in this chain checks
+  the rendered table against the declaration; NOTHING checked what the declaration must
+  CONTAIN, so deleting `M-02` from `configs/experiment.yaml` yielded a set that passed every
+  check and rendered a "complete" primary table with a mandatory difficulty control silently
+  absent. The three controls were pinned only by a trailing YAML comment. The floor refuses
+  a primary declaration whose `benchmark_ids` omit any of M-01 / M-02 / M-03, citing
+  PC-03/PC-04 and Vision §2.4's binding honesty rule by name.
 * ``build_comparison_mask`` — stamps checked FIRST (W-1 step 1), membership checked exactly
   (W-1 step 2, one copy in `guards.require_declared_membership`), matched windows asserted
   across members (NFR-FAIR-01's matched-windows limb, control 28), ONE intersection over the
@@ -87,10 +95,13 @@ from src.evaluation.guards import (
 
 __all__ = [
     "FROZEN_BUNDLE_MANIFEST_NAME",
+    "PRIMARY_SET_ID",
+    "MANDATORY_DIFFICULTY_CONTROL_IDS",
     "LoadedPrediction",
     "ComparisonMask",
     "MaskRegistry",
     "read_comparison_sets",
+    "assert_mandatory_controls_declared",
     "prediction_from_payload",
     "build_comparison_mask",
     "compute_mask_id",
@@ -109,6 +120,34 @@ _TARGET_VALUE = "vtec_tecu"
 
 #: The three identity stamps every prediction carries (NFR-TDEF-01; TE §13).
 _IDENTITY_KEYS = ("phase_id", "source_id", "target_definition_id")
+
+#: The declared set the membership floor below governs — the set whose table PC-03/PC-04
+#: and Vision §2.4's binding honesty rule speak about. An identity token.
+PRIMARY_SET_ID: str = "primary"
+
+#: PC-03/PC-04's THREE mandatory difficulty controls, as the model identities
+#: `src/models/train.py`'s family map fixes them (that module is unimportable from here —
+#: D-27 — so the identities are restated, not the values behind them):
+#:
+#:   M-01 persistence; M-02 24-hour seasonal persistence; M-03 the fitted climatology.
+#:
+#: M-03's KEY is deliberately not glossed here. The owner ruled on 2026-09-20
+#: (`CR-2026-09-20-GOV-CG-01-DISPOSITIONS` §2 Rec 2) that the historical
+#: station x month x hour key is replaced by a station x hour key, and the replacement
+#: is drafted at §4.1 awaiting its D-number and a supervisor countersignature. Stating
+#: either key here would either repeat a superseded definition or assert an unadopted one;
+#: the floor below needs only the IDENTITY, and the definition lives in
+#: `configs/experiment.yaml` and the register (TC-03e).
+#:
+#: These are IDENTITY tokens, the same kind as `metrics.EXTERNAL_COMPARATOR_IDS`, not
+#: scientific constants (TC-03e bars the latter from source, not the former). Vision §2.4
+#: tier 2 and `project.md` § Mandated require all three to be CO-REPORTED in the SAME
+#: primary results table as the LSTM-vs-IRI comparison, never relegated; PC-03/PC-04 make
+#: that binding. Until 2026-09-20 nothing checked that the declaration CONTAINED them —
+#: every layer only checked the table was complete against whatever the declaration said,
+#: so deleting a control from `configs/experiment.yaml` produced a "complete" primary
+#: table with a mandatory control silently absent (Recommendation 16).
+MANDATORY_DIFFICULTY_CONTROL_IDS: tuple[str, ...] = ("M-01", "M-02", "M-03")
 
 
 @dataclass(frozen=True)
@@ -189,7 +228,9 @@ def read_comparison_sets(snapshot: Any) -> dict[str, dict[str, Any]]:
         choice; without a declaration nothing can ever build a mask, and this refusal names
         the field rather than defaulting it — TE §18.3); a set entry without a non-empty
         `member_ids` list, `model_id`, or `benchmark_ids`; a benchmark or model outside the
-        set's own membership.
+        set's own membership; or — the membership floor, Recommendation 16 — no declared
+        `primary` set, or a primary set whose `benchmark_ids` omit any of
+        ``MANDATORY_DIFFICULTY_CONTROL_IDS`` (see ``assert_mandatory_controls_declared``).
     """
     node = snapshot.experiment.get("comparison_sets")
     if node is None or (isinstance(node, str) and node.strip() == TBD_SENTINEL):
@@ -246,7 +287,63 @@ def read_comparison_sets(snapshot: Any) -> dict[str, dict[str, Any]]:
         raise IntegrityError(
             "configs/experiment.yaml: comparison_sets", "declares no comparison set"
         )
+    assert_mandatory_controls_declared(declared)
     return declared
+
+
+def assert_mandatory_controls_declared(
+    declared: Mapping[str, Mapping[str, Any]], *, set_id: str = PRIMARY_SET_ID
+) -> None:
+    """The MEMBERSHIP FLOOR: the primary set must CONTAIN the three difficulty controls.
+
+    Every other layer — ``read_comparison_sets``' own consistency checks,
+    ``guards.require_declared_membership``, ``report_guards.require_complete_members``,
+    ``metrics.assert_metrics_artifact`` — enforces that the rendered table is COMPLETE
+    AGAINST THE DECLARATION. None of them enforces what the declaration must contain, so
+    a control deleted from `configs/experiment.yaml` rendered a table that passed every
+    check with a mandatory control silently absent (Recommendation 16, 2026-09-20). The
+    three were pinned only by a trailing YAML comment. This is that floor, and it is the
+    one check in this chain that reads the declaration as a CLAIM rather than as truth.
+
+    Applies to the declared set named ``set_id`` (default ``PRIMARY_SET_ID``) ONLY: the
+    gim and tier3 sets are separate comparisons with their own memberships (Vision §2.4
+    tiers 1-3; §8.9), and PC-03/PC-04 speak about the primary results table. A workspace
+    whose `comparison_sets` declares no `primary` set at all is not silently exempted —
+    that refuses too, because the floor would otherwise be unenforceable by omission.
+
+    Raises
+    ------
+    IntegrityError
+        the primary set is not declared; its `benchmark_ids` omit any of
+        ``MANDATORY_DIFFICULTY_CONTROL_IDS``.
+    """
+    resource = f"configs/experiment.yaml: comparison_sets.{set_id}"
+    entry = declared.get(set_id)
+    if not isinstance(entry, Mapping):
+        raise IntegrityError(
+            "configs/experiment.yaml: comparison_sets",
+            f"declares no {set_id!r} comparison set (declared: {sorted(declared)}); the "
+            f"primary set is the one PC-03/PC-04 and Vision §2.4's binding honesty rule "
+            f"govern, and omitting it would make the three-difficulty-control membership "
+            f"floor unenforceable by omission (Recommendation 16)",
+        )
+    benchmarks = tuple(str(b) for b in entry.get("benchmark_ids", ()))
+    missing = [c for c in MANDATORY_DIFFICULTY_CONTROL_IDS if c not in benchmarks]
+    if missing:
+        raise IntegrityError(
+            f"{resource}.benchmark_ids",
+            f"omits mandatory difficulty control(s) {missing} (declared benchmarks: "
+            f"{list(benchmarks)}). Vision §2.4 tier 2 and PC-03/PC-04 require all three "
+            f"— M-01 persistence, M-02 24-hour seasonal persistence, M-03 the fitted "
+            f"climatology (key under redefinition by the 2026-09-20 Rec 2 ruling; not "
+            f"glossed here) — to be CO-REPORTED in the SAME primary "
+            f"results table as the LSTM-vs-IRI comparison, never relegated to an appendix "
+            f"and never absent. Vision §2.4's binding honesty rule makes a favourable "
+            f"result no licence to omit an unfavourable comparison. Every downstream "
+            f"check verifies the table against THIS declaration, so a control dropped "
+            f"here would render a 'complete' table with a mandatory control silently "
+            f"missing; the declaration is refused instead (Recommendation 16)",
+        )
 
 
 @dataclass(frozen=True)

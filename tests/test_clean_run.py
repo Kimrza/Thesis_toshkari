@@ -1580,6 +1580,11 @@ def test_control_36_report_figure_missing_either_caveat_fails(tmp_path):
     assert report["gate"].startswith("G-07")
     assert report["in_session_gate_measured_total_runtime_seconds"] == 2.5
     assert "aws_ai_dlc_preflight_report" in report["not_this"]
+    # Both negative controls below now supply a VALID gate_result. They previously passed
+    # `gate_result=None`, which still raised — but for the wrong reason once Recommendation 28
+    # made an absent gate result its own refusal: each would have been masked by a check it
+    # was not testing. A control must fail for the reason it names (2026-09-20).
+    good_gate = {"measured_total_runtime_seconds": 2.5}
     bad_figure = {"figure": "synthetic coverage"}
     with pytest.raises(IntegrityError, match="DATA-07"):
         build_environment_and_cpu_preflight_report(
@@ -1587,7 +1592,7 @@ def test_control_36_report_figure_missing_either_caveat_fails(tmp_path):
             platform="local",
             clean_run_result=clean,
             receipts=receipts,
-            gate_result=None,
+            gate_result=good_gate,
             manifests=manifests,
             coverage_figures=[bad_figure],
         )
@@ -1597,9 +1602,55 @@ def test_control_36_report_figure_missing_either_caveat_fails(tmp_path):
             platform="local",
             clean_run_result=dict(clean, cuda_visible_devices="0"),
             receipts=receipts,
-            gate_result=None,
+            gate_result=good_gate,
             manifests=manifests,
         )
+
+
+def test_rec28_g07_report_refuses_when_the_in_session_gate_never_ran(tmp_path):
+    """NEGATIVE CONTROL for Recommendation 28: `gate_result=None` REFUSES.
+
+    THE DEFECT. `build_environment_and_cpu_preflight_report` treated `gate_result` as
+    optional: on `None` it emitted G-07's named evidence artifact anyway, with
+    `measured_total_runtime` silently `None`. Since `emit_in_session_gate_result` has no
+    production caller — no stage script and no notebook invokes it — `None` was not a rare
+    edge case but the only branch that ever executed. TC-03g is binding: hard, and a gate
+    result never emitted cannot be checked by the refusal written to check it.
+
+    The must-not-fire limb runs first: an otherwise identical call WITH a gate result must
+    still produce the report, so this test cannot pass by the function having become
+    unconditionally refusing.
+    """
+    manifests = _frozen_pair(tmp_path)
+    receipts = {fid: _receipt_payload(manifests[fid], fid) for fid in FIXTURE_IDS}
+    clean = {
+        "cuda_visible_devices": "",
+        "completed": True,
+        "runtime_seconds": 1.0,
+        "storage_bytes": 10,
+        "matched_artifact_report": {"outputs": {}},
+    }
+    kwargs = dict(
+        lock=_lock(),
+        platform="local",
+        clean_run_result=clean,
+        receipts=receipts,
+        manifests=manifests,
+    )
+
+    ok = build_environment_and_cpu_preflight_report(
+        **kwargs, gate_result={"measured_total_runtime_seconds": 2.5}
+    )
+    assert ok["in_session_gate_measured_total_runtime_seconds"] == 2.5  # must-not-fire
+
+    with pytest.raises(IntegrityError) as excinfo:
+        build_environment_and_cpu_preflight_report(**kwargs, gate_result=None)
+    message = str(excinfo.value)
+    assert "TC-03g" in message, "the refusal must name the rule it enforces"
+    assert "emit_in_session_gate_result" in message, (
+        "the refusal must name the producer that closes it — a refusal that does not say "
+        "how to satisfy it invites the caller to route around it"
+    )
 
 
 def test_stamp_travels_and_is_never_rewritten(tmp_path):
@@ -2876,3 +2927,141 @@ def test_rec5_multi_run_ranges_stamped_and_zero_width_refused(tmp_path):
         write_measuring_result(fixture_root, run_id="only-run", measurements={})
     with pytest.raises(IntegrityError, match="no measuring result"):
         compose_measurement_ranges([])
+
+
+# =========================================================================================
+# Recommendation 44 — REPRODUCTION.md, and the THREE-WAY fence comparison
+# =========================================================================================
+#
+# TE §13.2:763 says "The reproduction guide **must provide** one ordered sequence", and until
+# 2026-09-20 no on-disk guide existed: a reproducer had to read the Technical Environment or
+# `run_walking_skeleton.PHASE1_SEQUENCE`. `REPRODUCTION.md` now carries it.
+#
+# WHY A THIRD COPY NEEDS A THIRD BINDING. The TE fence and `PHASE1_SEQUENCE` were already
+# machine-bound to each other by `test_control_18_and_39_...` above. Adding a human-facing
+# copy with no binding would create exactly the drift this repository keeps finding: a
+# document asserting a superseded version of a fact to the one reader it was written for
+# (`project.md` `units-generation:re-1`). The guide is therefore parsed with the SAME
+# `_fence_segments` shape and compared to both existing sources.
+
+REPRODUCTION_PATH = REPO_ROOT / "REPRODUCTION.md"
+
+#: The `export` line is part of the §13.2 contract, not a convenience (CR-2026-08-22-TE-AMEND,
+#: ADR-10). An external reproducer omitting it reports a determinism failure that is a
+#: documentation gap rather than a code defect — Recommendation 44's stated risk.
+PYTHONHASHSEED_LINE = "export PYTHONHASHSEED=0"
+
+
+def _guide_fence_segments() -> tuple[list[list[str]], list[list[str]]]:
+    """Parse REPRODUCTION.md's §13.2 fence into (Phase 1, Phase 2) python invocations.
+
+    Deliberately the same parse as `_fence_segments`, applied to the guide instead of the TE,
+    so the two results are directly comparable. The guide carries more than one ```bash```
+    fence (§0 has an install block), so the sequence fence is selected by content — the one
+    containing the `export PYTHONHASHSEED=0` line — rather than by position.
+    """
+    text = REPRODUCTION_PATH.read_text(encoding="utf-8", errors="replace")
+    fences = re.findall(r"```bash\n(.*?)```", text, re.DOTALL)
+    assert fences, "REPRODUCTION.md contains no ```bash fence"
+    candidates = [f for f in fences if PYTHONHASHSEED_LINE in f]
+    assert len(candidates) == 1, (
+        f"expected exactly one sequence fence in REPRODUCTION.md (the one carrying "
+        f"{PYTHONHASHSEED_LINE!r}); found {len(candidates)}"
+    )
+    phase = 1
+    segments: dict[int, list[list[str]]] = {1: [], 2: []}
+    for line in candidates[0].splitlines():
+        stripped = line.strip()
+        if stripped.startswith("# Phase 2, only after G-P2"):
+            phase = 2
+            continue
+        if stripped.startswith("python "):
+            segments[phase].append(stripped.split())
+    return segments[1], segments[2]
+
+
+def test_rec44_reproduction_guide_exists_and_carries_the_pythonhashseed_line() -> None:
+    """The guide exists and carries the contract's environment requirement.
+
+    `PYTHONHASHSEED=0` appeared in NO user-facing file before 2026-09-20 while being part of
+    the clean-run contract and material to determinism.
+    """
+    assert REPRODUCTION_PATH.is_file(), (
+        "REPRODUCTION.md is absent; TE §13.2:763 requires the reproduction guide to provide "
+        "one ordered sequence (Recommendation 44)"
+    )
+    text = REPRODUCTION_PATH.read_text(encoding="utf-8", errors="replace")
+    assert PYTHONHASHSEED_LINE in text, (
+        f"{PYTHONHASHSEED_LINE!r} is absent from REPRODUCTION.md; it is part of the §13.2 "
+        f"contract (ADR-10) and its omission is the documented reproducer failure mode"
+    )
+
+
+def test_rec44_three_way_sequence_agreement_te_constant_and_guide() -> None:
+    """THE BINDING. TE fence == `PHASE1_SEQUENCE` == REPRODUCTION.md, on membership AND order.
+
+    Two-way agreement already held. This adds the third leg, so the guide cannot drift from
+    the two sources that were already bound to each other. Both phases are compared: a guide
+    that silently dropped the Phase 2 block would still mislead a Phase 2 reproducer.
+    """
+    te_phase1, te_phase2 = _fence_segments()
+    guide_phase1, guide_phase2 = _guide_fence_segments()
+
+    assert guide_phase1 == te_phase1, (
+        "REPRODUCTION.md's Phase 1 sequence is not TE §13.2's fence verbatim.\n"
+        f"  guide: {guide_phase1}\n  TE:    {te_phase1}"
+    )
+    assert guide_phase2 == te_phase2, (
+        "REPRODUCTION.md's Phase 2 sequence is not TE §13.2's fence verbatim.\n"
+        f"  guide: {guide_phase2}\n  TE:    {te_phase2}"
+    )
+
+    guide_stage_calls = [
+        argv for argv in guide_phase1 if "run_walking_skeleton.py" not in argv[1]
+    ]
+    guide_sequence = [
+        (
+            argv[1].removeprefix("scripts/"),
+            int(argv[argv.index("--phase") + 1]) if "--phase" in argv else None,
+        )
+        for argv in guide_stage_calls
+    ]
+    assert guide_sequence == list(skeleton.PHASE1_SEQUENCE), (
+        f"REPRODUCTION.md {guide_sequence} disagrees with run_walking_skeleton."
+        f"PHASE1_SEQUENCE {list(skeleton.PHASE1_SEQUENCE)} (third leg of the three-way "
+        f"comparison; Recommendation 44)"
+    )
+
+    skeleton_calls = [argv for argv in guide_phase1 if "run_walking_skeleton.py" in argv[1]]
+    assert [c[-1] for c in skeleton_calls] == list(FIXTURE_IDS), (
+        "the guide's two fixture invocations are not plumbing_7day then scientific_1month, "
+        "in order — TE §9.2 makes that ordering hard, not advisory"
+    )
+
+
+def test_rec44_the_three_way_comparison_detects_a_drifted_guide() -> None:
+    """NEGATIVE CONTROL. A comparison that never fires proves nothing.
+
+    Three mutants of the real guide fence, each compared against the TE fence the same way
+    the test above does: a REORDERED sequence, a DROPPED invocation, and a CHANGED `--phase`
+    flag. Each must be detected. The must-not-fire limb runs first: the unmutated fence must
+    compare equal, so a comparison that simply always reported a difference would fail here
+    rather than pass the control by accident.
+    """
+    te_phase1, _ = _fence_segments()
+    guide_phase1, _ = _guide_fence_segments()
+
+    assert guide_phase1 == te_phase1  # must-not-fire
+
+    reordered = guide_phase1[1:] + guide_phase1[:1]
+    assert reordered != te_phase1, "a rotated sequence was not detected"
+
+    dropped = [argv for argv in guide_phase1 if "07_evaluate_and_report.py" not in argv[1]]
+    assert dropped != te_phase1, "a dropped invocation was not detected"
+
+    reflagged = [list(argv) for argv in guide_phase1]
+    for argv in reflagged:
+        if "--phase" in argv:
+            argv[argv.index("--phase") + 1] = "2"
+            break
+    assert reflagged != te_phase1, "a changed --phase flag was not detected"

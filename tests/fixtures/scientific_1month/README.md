@@ -1,7 +1,19 @@
 # `tests/fixtures/scientific_1month/` — the one-month all-station scientific fixture
 
-**No file in this directory is a fixture manifest.** `fixture_manifest.yaml` does not exist
-here and may not be authored by hand (TE §15.1; BLK-02).
+**No MEASURED value in this directory was authored by hand** (TE §15.1: "exact counts,
+tolerances, and runtimes are measured from the fixtures and frozen; they are not invented
+here"; BLK-02, which stays OPEN).
+
+*Amended 2026-09-20 (Recommendation 37). This paragraph previously read "**No file in this
+directory is a fixture manifest.** `fixture_manifest.yaml` does not exist here and may not
+be authored by hand". The first clause stopped being true on 2026-09-20.*
+`fixture_manifest.yaml` now exists as a `status: candidate` **skeleton**: structural fields
+transcribed from `identity_declaration.yaml`, and the literal `TBD — freeze gate` in every
+MEASURED field with **no `measuring_run_id` anywhere** — which is precisely what makes
+`load_fixture_manifest` refuse it, by name, at the first measured field it reaches. It
+exists so the loader can be exercised against a real file. It is not frozen, it produces no
+evidence, and the measuring run in step 2 below replaces it wholesale rather than patching
+it.
 
 ## How a manifest comes to exist
 
@@ -37,8 +49,24 @@ producing path declares no `inverse_route` is **not freezable** (BLK-08 ↓ chec
 outputs MAY serve WS-12/WS-13/WS-16/WS-17 evidence, which is exactly why the prohibition on
 reading them as December evidence travels with every number (D-14 clause (ii); Rec 36).
 
-Neither fixture has ever run. No measured value exists. `.gitkeep` and this README are the only
-files here by design (`governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md`).
+**Neither fixture has ever run. No measured value exists.** Both sentences remain TRUE and
+are the operative ones.
+
+*Amended 2026-09-20 (Recommendation 45). The clause that followed them — "`.gitkeep` and
+this README are the only files here by design
+(`governance/CHANGE_RECORD_2026-09-07_R133_fixtures_and_reproducibility.md`)" — was already
+stale when the owner's `identity_declaration.yaml` landed on 2026-09-13 and is now doubly
+so.* The directory holds four files by design:
+
+| File | What it is |
+|---|---|
+| `.gitkeep` | keeps the tree under version control while it is otherwise empty |
+| `README.md` | this file |
+| `identity_declaration.yaml` | the owner's Q-31 identity declaration, adopted 2026-09-13 under `CR-2026-09-13-000102-FIXTURE-WINDOW` |
+| `fixture_manifest.yaml` | the `status: candidate` structural skeleton written 2026-09-20; every measured field is the literal sentinel and the loader refuses it by name |
+
+A `fixture_manifest.sha256` is deliberately ABSENT: only a FROZEN manifest carries one, and
+a candidate carrying one is refused (SD-X-01's negative control).
 
 ## The Kaggle in-session sequence (TA-03 / TA-26)
 

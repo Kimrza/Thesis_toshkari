@@ -23,8 +23,12 @@ INPUTS. In-memory synthetic bundles and targets over the synthetic partition yea
 signature, no model trained.
 
 WHAT NO TEST HERE DISCHARGES. WS-14, WS-15, TA-12, TA-13, TA-26 stay `Pending`; M-04/M-05
-fits are unrun (scikit-learn not installable here) and M-06's Keras path is unexecutable
-until the pin is frozen. Smoke evidence only on the interpreter used here.
+fits are unrun (scikit-learn not installable here) and no M-06 Keras fit has ever run. The
+TensorFlow pin is FROZEN (`requirements.txt` `tensorflow==2.21.0`, D-36) and
+`require_frozen_pin` PASSES against the governed file: what blocks an M-06 fit is the
+unverified ENVIRONMENT — no install or import has ever been exercised — not the guard. The
+guard's refusal is still proved, on synthetic requirements files that carry no pin. Smoke
+evidence only on the interpreter used here.
 
 Run: pytest tests/test_models_smoke.py -rs
 """
@@ -88,32 +92,44 @@ from src.features.transforms import transform_id_for  # noqa: E402
 from src.models import climatology, lstm, persistence, random_forest, ridge  # noqa: E402
 from src.models.train import (  # noqa: E402
     ABLATION_IDS,
+    FITTED_MODEL_IDS,
+    FOLD_PARTITION_IDS,
     GRID_TRACKS,
     LSTM_FIXED_SETTING_KEYS,
     MODEL_IDS,
+    REFIT_EPOCH_RULE_ID,
     CandidateScore,
+    FittedModelRecord,
+    JsonStateBackend,
     Prediction,
     PredictionHashReceipt,
     TuningRecord,
     assert_ablation_runnable,
+    assert_fitted_payload_unchanged,
     assert_grid_content,
     assert_grid_unchanged,
     assert_in_grid,
     assert_locked_exit_allowed,
     assert_no_promotion,
+    assert_not_locked_fit,
     assert_refit_unchanged,
     assert_stamp_match,
+    assert_validation_bundle,
     criterion_hash,
     eligible_feature_columns,
     enumerate_grid,
     expected_transform_id,
+    fit_and_persist,
     fit_predict,
     grid_hash,
+    load_fitted_model,
     mean_per_fold_skill,
     pinned_requirement,
+    predict_from_fitted,
     read_ablations,
     read_horizons,
     read_lstm_fixed_settings,
+    read_refit_epochs,
     record_tuning,
     resolve_horizon,
     select_configuration,
@@ -154,6 +170,18 @@ SYNTH_SETTINGS: dict[str, Any] = {
     "min_improvement_tecu": 0.05,
     "checkpoint_policy": "best_checkpoint",
 }
+#: M-03's key definition and the refit's epoch rule as CONFIG — fixture values, never the
+#: governed ones (the real `models.refit.epochs` is `TBD — freeze gate` until the folds run).
+SYNTH_CLIMATOLOGY: dict[str, Any] = {
+    "key": ["station", "hour"],
+    "fitted_on": "training_partition_only",
+}
+SYNTH_REFIT: dict[str, Any] = {"rule": REFIT_EPOCH_RULE_ID, "epochs": 4}
+SYNTH_MODELS: dict[str, Any] = {
+    "lstm_fixed_settings": SYNTH_SETTINGS,
+    "climatology": SYNTH_CLIMATOLOGY,
+    "refit": SYNTH_REFIT,
+}
 
 
 def _ablation_entries(**overrides: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -176,7 +204,7 @@ def _snapshot(**experiment: Any):
     exp: dict[str, Any] = {
         "horizons": [SYNTH_HORIZON],
         "grids": SYNTH_GRIDS,
-        "models": {"lstm_fixed_settings": SYNTH_SETTINGS},
+        "models": dict(SYNTH_MODELS),
         "ablations": {"entries": _ablation_entries()},
     }
     exp.update(experiment)
@@ -473,7 +501,17 @@ def test_persistence_counts_a_missing_source_value_and_refuses_hyperparameters()
         )
 
 
-def test_climatology_is_fitted_on_the_training_range_and_predicts_station_month_hour() -> None:
+def test_climatology_is_keyed_by_station_and_hour_and_covers_every_scored_row() -> None:
+    """Recommendation 2 (owner ruling, 2026-09-20): the key is `(station, hour)`, fitted on
+    the training range alone, and EVERY scored row is producible from it.
+
+    The superseded `(station, month, hour)` key could not produce a single scored key on any
+    of the five scored partitions — the split calendar is strictly expanding, so the scored
+    month is always after the training range — and answered `y_hat = None` for every row
+    while reporting the hole only as a count. `missing_climatology_keys` is now a MEASURED
+    zero: the coverage guard makes it so, and the assertion below would have read
+    `3 * len(STATIONS)` under the old key.
+    """
     train = _bundle(_train_spec("F1"), transform_id="T-F1", hours=48)
     score = _bundle(_score_spec("F1"), transform_id="T-F1", hours=3)
     target = _target(_ts(1, 1), _ts(5, 1))
@@ -485,24 +523,70 @@ def test_climatology_is_fitted_on_the_training_range_and_predicts_station_month_
     climatology.assert_fitted_on_training_partitions(prediction)
     attrs = frame_attrs(prediction.frame)
     assert attrs["fitted_role"] == "train" and attrs["fitted_rows"] == 48 * len(STATIONS)
-    # the validation month (April) has no (station, month=4, hour) key in a Jan-only fit:
-    assert attrs["missing_climatology_keys"] == 3 * len(STATIONS)
+    assert attrs["missing_climatology_keys"] == 0
+    assert attrs["climatology_key"] == list(climatology.CLIMATOLOGY_KEY_FIELDS) == [
+        "station", "hour",
+    ]
+    assert "no seasonal term" in attrs["climatology_limitation"]
+    rows = records_of(prediction.frame)
+    assert len(rows) == 3 * len(STATIONS)
+    assert all(r["y_hat"] is not None for r in rows), "every scored row is answered"
+    # the value is the training-range mean over that (station, hour), computed here from the
+    # fixture generator rather than carried: two January days at hour 0 for S1
+    first = rows[0]
+    stamp = dt.datetime.fromisoformat(first["interval_start_utc"])
+    train_start, _ = training_range(_p("F1"))
+    same_hour = [
+        _value("S1", train_start + dt.timedelta(hours=h))
+        for h in range(48)
+        if (train_start + dt.timedelta(hours=h)).hour == stamp.hour
+    ]
+    assert first["y_hat"] == pytest.approx(sum(same_hour) / len(same_hour))
+
+
+def test_a_fit_that_cannot_produce_a_scored_key_fails_early_naming_the_key() -> None:
+    """Negative control (a): the coverage guard fires AT FIT TIME, not at prediction time.
+
+    A two-hour training range cannot answer an hour-2 scored row. Under the superseded
+    behaviour this produced `y_hat = None` and a count; it now refuses, naming the missing
+    `(station, hour)` keys, the fitting range and the config field that defines the key.
+    """
+    train = _bundle(_train_spec("F1"), transform_id="T-F1", hours=2)
+    score = _bundle(_score_spec("F1"), transform_id="T-F1", hours=3)
+    target = _target(_ts(1, 1), _ts(5, 1))
+    with pytest.raises(IntegrityError) as excinfo:
+        fit_predict(
+            "M-03", bundle=train, partition=_p("F1"), snapshot=SNAPSHOT, target=target,
+            score_bundle=score,
+        )
+    message = str(excinfo.value)
+    assert "('S1', 2)" in message and "('S2', 2)" in message
+    assert "models.climatology.key" in message
+    assert "src/models/climatology.py" in message
 
 
 def test_climatology_fitted_across_the_whole_year_fails_the_r98_control() -> None:
-    """The exact case FR-P1-05-21 names: rows beyond the training range reach the fit."""
+    """Negative control (b): the train-only rule is NOT weakened by the key change.
+
+    Rows beyond the training range reach the fit — the exact case FR-P1-05-21 names — and
+    the refusal is the same `LeakageError` it always was, raised before any coverage check.
+    """
     start, _ = training_range(_p("F1"))
     beyond = _bundle(_train_spec("F1"), transform_id="T-F1", start=start, hours=24 * 120)
-    series = {}
+    score = _bundle(_score_spec("F1"), transform_id="T-F1", hours=3)
     with pytest.raises(LeakageError) as excinfo:
-        climatology.fit_climatology(beyond, partition=_p("F1"), series=series)
+        climatology.fit_climatology(
+            beyond, partition=_p("F1"), series={}, snapshot=SNAPSHOT, score_bundle=score
+        )
     assert "outside partition F1's training range" in str(excinfo.value)
 
 
 def test_climatology_refuses_a_score_role_bundle_and_a_tampered_fit_record() -> None:
     score = _bundle(_score_spec("F1"), transform_id="T-F1")
     with pytest.raises(LeakageError):
-        climatology.fit_climatology(score, partition=_p("F1"), series={})
+        climatology.fit_climatology(
+            score, partition=_p("F1"), series={}, snapshot=SNAPSHOT, score_bundle=None
+        )
     with pytest.raises(LeakageError):
         fit_predict(
             "M-03", bundle=score, partition=_p("F1"), snapshot=SNAPSHOT,
@@ -514,6 +598,44 @@ def test_climatology_refuses_a_score_role_bundle_and_a_tampered_fit_record() -> 
         climatology.assert_fitted_on_training_partitions(tampered)
     with pytest.raises(IntegrityError):
         climatology.climatology_fit_partition(_prediction(model_id="M-03", seed=None))
+
+
+def test_the_climatology_key_is_configuration_and_an_unimplemented_field_refuses() -> None:
+    """TC-03e: the key definition lives in `configs/experiment.yaml`, not in source.
+
+    A month-bearing key — the superseded definition — is refused BY NAME rather than
+    silently grouped, so re-adopting it needs an implementation and the ordering argument
+    re-examined, never a config edit alone. `fitted_on` is likewise not widenable.
+    """
+    assert climatology.read_climatology_key(SNAPSHOT) == ("station", "hour")
+    with pytest.raises(IntegrityError) as excinfo:
+        climatology.read_climatology_key(
+            _snapshot(models=dict(SYNTH_MODELS, climatology={
+                "key": ["station", "month", "hour"], "fitted_on": "training_partition_only",
+            }))
+        )
+    assert "'month'" in str(excinfo.value)
+    with pytest.raises(IntegrityError):  # a known field in the wrong order is still refused
+        climatology.read_climatology_key(
+            _snapshot(models=dict(SYNTH_MODELS, climatology={
+                "key": ["hour", "station"], "fitted_on": "training_partition_only",
+            }))
+        )
+    with pytest.raises(LeakageError) as excinfo:
+        climatology.read_climatology_key(
+            _snapshot(models=dict(SYNTH_MODELS, climatology={
+                "key": ["station", "hour"], "fitted_on": "all_partitions",
+            }))
+        )
+    assert "training_partition_only" in str(excinfo.value)
+    with pytest.raises(IntegrityError):  # the block itself unresolved
+        climatology.read_climatology_key(
+            _snapshot(models=dict(SYNTH_MODELS, climatology=TBD_SENTINEL))
+        )
+    with pytest.raises(IntegrityError):  # and absent entirely
+        climatology.read_climatology_key(
+            _snapshot(models={"lstm_fixed_settings": SYNTH_SETTINGS})
+        )
 
 
 def test_fit_predict_refuses_an_untransformed_bundle_a_seed_on_an_unseeded_family_and_no_target(
@@ -1039,7 +1161,8 @@ def test_no_importance_score_reaches_the_fit_or_selection_path() -> None:
 
 
 # =======================================================================================
-# 11. M-06: the pin guard refuses while the pin is TBD; settings from config (FU-1 = C)
+# 11. M-06: the pin guard PASSES on the frozen pin (D-36) and refuses an absent or
+#     commented one; settings from config (FU-1 = C)
 # =======================================================================================
 
 
@@ -1096,14 +1219,15 @@ def test_m06_fit_refuses_at_the_guard_before_any_tensorflow_import(tmp_path: Pat
     with pytest.raises(SeedError):
         fit_predict(
             "M-06", bundle=train, partition=_p("F1"), snapshot=SNAPSHOT,
-            target=_target(_ts(1, 1), _ts(5, 1)), score_bundle=score, params=params,
+            target=_target(_ts(1, 1), _ts(5, 1)), score_bundle=score,
+            validation_bundle=score, params=params,
         )
     with pytest.raises(IntegrityError) as excinfo:
         lstm.fit_predict_rows(
             "M-06", bundle=train, score_bundle=score, partition=_p("F1"), snapshot=SNAPSHOT,
             target=_target(_ts(1, 1), _ts(5, 1)), seed=seed, params=params,
             horizon_hours=SYNTH_HORIZON, backend=_NullBackend(),
-            requirements_path=unpinned,
+            validation_bundle=score, requirements_path=unpinned,
         )
     assert "TS-M-01" in str(excinfo.value)
     assert "tensorflow" not in sys.modules
@@ -1293,7 +1417,7 @@ def _signed_snapshot():
         experiment={
             "horizons": [SYNTH_HORIZON],
             "grids": SYNTH_GRIDS,
-            "models": {"lstm_fixed_settings": SYNTH_SETTINGS},
+            "models": dict(SYNTH_MODELS),
             "ablations": {"entries": _ablation_entries()},
         },
     )
@@ -1413,3 +1537,359 @@ def test_a_dec_iteration_handed_the_pre_loop_target_is_refused() -> None:
     assert "target=partition_target" in text and "target=target" not in text, (
         "no scoring call in 06 consumes the pre-loop object directly"
     )
+
+
+# =======================================================================================
+# 14. December is INFERENCE-ONLY: the fit/predict split and the validation bundle
+#     (Recommendation 5, owner ruling 2026-09-20)
+# =======================================================================================
+
+
+def _refit_train_bundle() -> FeatureBundle:
+    """REFIT's train bundle — January-November, carrying REFIT's own transform."""
+    return _bundle(_train_spec(REFIT_ID), transform_id=transform_id_for(REFIT_ID), hours=48)
+
+
+def _dec_score_bundle(hours: int = 2) -> FeatureBundle:
+    """The December score bundle: DEC's rows under REFIT's transform (R-74's one apply)."""
+    locked = _p(LOCKED_ID)
+    start, _ = validation_month_range(locked)
+    return _bundle(
+        _score_spec(LOCKED_ID),
+        transform_id=expected_transform_id(locked),
+        start=start + dt.timedelta(hours=locked.embargo_hours),
+        hours=hours,
+    )
+
+
+@pytest.mark.parametrize("model_id", list(FITTED_MODEL_IDS))
+def test_no_fitted_family_may_be_fitted_on_the_locked_partition(model_id: str) -> None:
+    """Negative control (a): a `(REFIT train, DEC score)` pair pushed through the FIT
+    surface raises, for every fitted family.
+
+    Before the ruling, `06`'s locked branch called `fit_predict` with exactly this pair, so
+    December supplied the labels that drove M-06's per-epoch validation RMSE, its
+    `should_stop` decision and its restored checkpoint. The guard makes the violation
+    impossible rather than merely absent.
+    """
+    snapshot = _signed_snapshot()
+    params = _grid_point_for(model_id)
+    seed = sorted(EXPECTED)[0] if model_id in ("M-06",) else None
+    with pytest.raises(LeakageError) as excinfo:
+        fit_predict(
+            model_id,
+            bundle=_refit_train_bundle(),
+            partition=_p(LOCKED_ID),
+            snapshot=snapshot,
+            target=_target(_ts(12, 2), _ts(12, 3)),
+            score_bundle=_dec_score_bundle(),
+            seed=seed,
+            params=params,
+        )
+    message = str(excinfo.value)
+    assert "INFERENCE-ONLY" in message and LOCKED_ID in message
+    assert "Vision 8.3" in message and REFIT_ID in message
+
+
+def _grid_point_for(model_id: str) -> dict[str, Any] | None:
+    track = next((t for t, mid in GRID_TRACKS.items() if mid == model_id), None)
+    return None if track is None else dict(enumerate_grid(SNAPSHOT, track)[0])
+
+
+def test_the_two_unfitted_families_are_still_reachable_on_the_locked_partition() -> None:
+    """The must-not-fire case: M-01 and M-02 carry no fitted state, so the inference-only
+    rule has nothing to refuse — they are recomputed from the locked target series."""
+    for model_id in ("M-01", "M-02"):
+        assert model_id not in FITTED_MODEL_IDS
+        assert_not_locked_fit(model_id, _p(LOCKED_ID))  # must not raise
+    for model_id in FITTED_MODEL_IDS:
+        for pid in FOLD_PARTITION_IDS + (REFIT_ID,):
+            assert_not_locked_fit(model_id, _p(pid))  # must not raise off the locked month
+
+
+def test_a_december_bundle_offered_as_the_validation_set_is_refused() -> None:
+    """Negative control (b): the validation bundle is named, constrained and never inferred.
+
+    A `DEC` bundle, a `REFIT` bundle, a train-role frame and an unnamed set for M-06 on a
+    fold are each refused — the four ways the scored frame could have become the validation
+    frame again.
+    """
+    train = _bundle(_train_spec("F1"), transform_id="T-F1", hours=4)
+    score = _bundle(_score_spec("F1"), transform_id="T-F1", hours=2)
+    params = _grid_point_for("M-06")
+    seed = sorted(EXPECTED)[0]
+    with pytest.raises(LeakageError) as excinfo:
+        fit_predict(
+            "M-06", bundle=train, partition=_p("F1"), snapshot=SNAPSHOT,
+            target=_target(_ts(1, 1), _ts(5, 1)), score_bundle=score,
+            validation_bundle=_dec_score_bundle(), seed=seed, params=params,
+        )
+    assert LOCKED_ID in str(excinfo.value) and "Vision 8.3" in str(excinfo.value)
+    # a non-fold frozen partition
+    with pytest.raises(LeakageError):
+        assert_validation_bundle(
+            _bundle(_train_spec(REFIT_ID), transform_id=transform_id_for(REFIT_ID)),
+            model_id="M-06", partition=_p("F1"),
+        )
+    # a train-role frame: in-sample error cannot stop an epoch loop honestly
+    with pytest.raises(LeakageError) as excinfo:
+        assert_validation_bundle(train, model_id="M-06", partition=_p("F1"))
+    assert "score-role" in str(excinfo.value)
+    # the refit selects nothing, so a validation bundle there is refused
+    with pytest.raises(LeakageError) as excinfo:
+        assert_validation_bundle(score, model_id="M-06", partition=_p(REFIT_ID))
+    assert REFIT_EPOCH_RULE_ID in str(excinfo.value)
+    # M-06 on a fold with no validation bundle named at all
+    with pytest.raises(IntegrityError) as excinfo:
+        assert_validation_bundle(None, model_id="M-06", partition=_p("F1"))
+    assert "no validation_bundle was named" in str(excinfo.value)
+    # the must-not-fire cases: the fold's own score bundle, and the refit with none
+    assert_validation_bundle(score, model_id="M-06", partition=_p("F1"))
+    assert_validation_bundle(None, model_id="M-06", partition=_p(REFIT_ID))
+    assert_validation_bundle(None, model_id="M-01", partition=_p("F1"))
+
+
+def test_the_refit_epoch_count_is_a_frozen_rule_read_from_config() -> None:
+    """The VALUE cannot exist until the folds have run, so the pipeline refuses rather than
+    defaulting one; the RULE identifier is asserted, not assumed."""
+    assert read_refit_epochs(SNAPSHOT) == SYNTH_REFIT["epochs"]
+    with pytest.raises(IntegrityError) as excinfo:
+        read_refit_epochs(
+            _snapshot(models=dict(SYNTH_MODELS, refit={
+                "rule": REFIT_EPOCH_RULE_ID, "epochs": TBD_SENTINEL,
+            }))
+        )
+    assert "TBD" in str(excinfo.value) and REFIT_EPOCH_RULE_ID in str(excinfo.value)
+    with pytest.raises(IntegrityError) as excinfo:  # a different rule is not implemented here
+        read_refit_epochs(
+            _snapshot(models=dict(SYNTH_MODELS, refit={"rule": "last_epoch", "epochs": 3}))
+        )
+    assert REFIT_EPOCH_RULE_ID in str(excinfo.value)
+    with pytest.raises(IntegrityError):  # the block absent entirely
+        read_refit_epochs(_snapshot(models={"lstm_fixed_settings": SYNTH_SETTINGS}))
+
+
+def test_the_dec_iteration_with_no_persisted_refit_model_raises_rather_than_fitting(
+    tmp_path: Path,
+) -> None:
+    """Negative control (c): an absent persisted model is a refusal, never a silent refit.
+
+    `06`'s locked branch loads the REFIT model for every fitted family. With none on disk it
+    raises `LockedTestError` naming the fallback it will not take — a fit reached from the
+    locked branch is December in the training loop.
+    """
+    with pytest.raises(LockedTestError) as excinfo:
+        load_fitted_model(tmp_path / "absent.fitted_record.json")
+    assert "never falls back to fitting" in str(excinfo.value)
+    script = _load_script()
+    snapshot = _signed_snapshot()
+    with pytest.raises(LockedTestError):
+        script._locked_predictions(
+            snapshot=snapshot,
+            partition=_p(LOCKED_ID),
+            train_bundle=_refit_train_bundle(),
+            score_bundle=_dec_score_bundle(),
+            locked_target=_locked_month_frame(),
+            horizon=SYNTH_HORIZON,
+            expected_seeds=EXPECTED,
+            models_root=tmp_path / "empty",
+        )
+
+
+def test_a_tampered_persisted_model_fails_the_hash_check(tmp_path: Path) -> None:
+    """The persisted model is hashed as written and re-verified before it predicts: the
+    weights December is scored with are the weights January-November produced."""
+    record = FittedModelRecord(
+        model_id="M-03", seed=None, fitted_partition_id=REFIT_ID, transform_id="T-REFIT",
+        payload_ref=str(tmp_path / "M-03.fitted.json"), payload_sha256="0" * 64,
+        fitted_at_utc="2026-09-20T00:00:00+00:00", hyperparameters={}, attrs={},
+    )
+    with pytest.raises(IntegrityError) as excinfo:  # absent payload
+        assert_fitted_payload_unchanged(record)
+    assert "is absent" in str(excinfo.value)
+    Path(record.payload_ref).write_text("{}", encoding="utf-8")
+    with pytest.raises(IntegrityError) as excinfo:
+        assert_fitted_payload_unchanged(record)
+    assert "does not match the fitted-model record" in str(excinfo.value)
+
+
+def test_a_state_no_governed_format_can_persist_refuses_instead_of_pickling(
+    tmp_path: Path,
+) -> None:
+    """`JsonStateBackend` serves the families whose fitted state is JSON-serialisable and
+    refuses the rest BY NAME: choosing a binary format for a fitted estimator or for Keras
+    weights is a governed decision (TS-M-01), not an implementer's."""
+    backend = JsonStateBackend(tmp_path)
+    with pytest.raises(IntegrityError) as excinfo:
+        backend.save_state(model_id="M-04", seed=None, state={"estimator": object()})
+    assert "governed choice" in str(excinfo.value) and "TS-M-01" in str(excinfo.value)
+    ref, digest = backend.save_state(model_id="M-03", seed=None, state={"entries": []})
+    assert Path(ref).is_file() and len(digest) == 64
+    assert backend.load_state(ref) == {"entries": []}
+    with pytest.raises(IntegrityError):  # write-once
+        backend.save_state(model_id="M-03", seed=None, state={"entries": []})
+
+
+# =======================================================================================
+# 15. The G-06 path EXECUTES: refit -> persist -> locked load -> predict -> receipt
+#     (Recommendation 6, option 2) — synthetic signature, synthetic December fixture
+# =======================================================================================
+
+
+def test_the_locked_path_runs_end_to_end_on_synthetic_december_and_leaves_a_receipt(
+    tmp_path: Path,
+) -> None:
+    """The success control the locked path never had.
+
+    Every earlier `DEC` test asserted only that the path was UNREACHABLE or that it refused
+    a substituted target. Both limbs of Recommendation 6's defect are exercised here:
+
+    * the December score bundle now HAS a producer (`05 --partition DEC`, behind the same
+      G-05 signature guard) — here it is synthesised directly, standing in for that output;
+    * the locked iteration never looks up a training label against a December frame, because
+      it LOADS the model fitted on `REFIT` and only predicts.
+
+    No real December data, no real signature: the G-05 record is synthetic and verifies a
+    synthetic signature over the fixture year, and the December frame is generated by
+    `_locked_month_frame` with an offset that marks it as the loader's.
+    """
+    script = _load_script()
+    snapshot = _signed_snapshot()
+    locked = _p(LOCKED_ID)
+    models_root = tmp_path / "models"
+    backend = JsonStateBackend(models_root)
+    released_target = _target(_ts(1, 1), _ts(12, 1))  # January–November, as 06 loads it
+
+    # 1. REFIT: fit on January-November and PERSIST, hashed. Nothing is scored here.
+    refit_train = _refit_train_bundle()
+    record_path = script._fitted_record_path(models_root, "M-03", None)
+    record = fit_and_persist(
+        "M-03",
+        bundle=refit_train,
+        partition=_p(REFIT_ID),
+        snapshot=snapshot,
+        target=released_target,
+        backend=backend,
+        record_path=record_path,
+        validation_bundle=None,  # the refit selects nothing
+        horizon_hours=SYNTH_HORIZON,
+    )
+    assert record.fitted_partition_id == REFIT_ID
+    assert Path(record.payload_ref).is_file() and len(record.payload_sha256) == 64
+    assert record_path.is_file(), "the fitted-model record lands beside the payload"
+    with pytest.raises(IntegrityError):  # write-once: a refit is never silently redone
+        fit_and_persist(
+            "M-03", bundle=refit_train, partition=_p(REFIT_ID), snapshot=snapshot,
+            target=released_target, backend=JsonStateBackend(models_root),
+            record_path=record_path, horizon_hours=SYNTH_HORIZON,
+        )
+
+    # 2. The one door: the December target is the frame `open_restricted` returned.
+    loaded = script._locked_target(
+        snapshot,
+        g05_signature=SYNTH_SIGNATURE,
+        loader=lambda partition: _locked_month_frame(),
+        partitions=PARTITIONS,
+        released_target=released_target,
+    )
+    assert loaded is not released_target
+
+    # 3. DEC: LOAD the persisted model and PREDICT. No fit happens on this path.
+    dec_score = _dec_score_bundle(hours=2)
+    assert_stamp_match(dec_score, locked)  # R-90, before every scoring path
+    reloaded = load_fitted_model(record_path)
+    prediction = predict_from_fitted(
+        reloaded,
+        score_bundle=dec_score,
+        partition=locked,
+        snapshot=snapshot,
+        backend=JsonStateBackend(models_root),
+        target=loaded,
+        horizon_hours=SYNTH_HORIZON,
+    )
+    assert prediction.partition_id == LOCKED_ID
+    rows = records_of(prediction.frame)
+    assert len(rows) == 2 * len(STATIONS)
+    assert all(row["y_hat"] is not None for row in rows), "every locked row is answered"
+    attrs = frame_attrs(prediction.frame)
+    assert attrs["inference_only"] is True
+    assert attrs["fitted_model_partition_id"] == REFIT_ID
+    assert attrs["fitted_model_sha256"] == record.payload_sha256
+    assert attrs["missing_climatology_keys"] == 0
+
+    # 4. The one-shot write: prediction file, hash-as-written, durable receipt, exit check.
+    prediction_path = tmp_path / LOCKED_ID / "M-03_locked.json"
+    receipt_path = tmp_path / LOCKED_ID / "M-03_locked.receipt.json"
+    hashes: list[str] = []
+    script._finish_locked_write(
+        prediction_path=prediction_path,
+        payload=script._prediction_payload(prediction, horizon_hours=SYNTH_HORIZON),
+        run_id="synthetic-locked-run",
+        receipt_path=receipt_path,
+        append_row=lambda sha256: bool(hashes.append(sha256)) or True,
+    )
+    assert prediction_path.is_file(), "the locked prediction file is produced"
+    assert receipt_path.is_file(), "and its receipt lands durably"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["partition_id"] == LOCKED_ID and receipt["sha256"] == hashes[0]
+    assert_locked_exit_allowed(
+        prediction_path, receipt_path=receipt_path, registry_appended=True
+    )  # the receipt VERIFIES against the file as written
+
+
+def test_script_05_has_a_guarded_dec_branch_that_refuses_without_the_signature() -> None:
+    """Recommendation 6 limb (a): `05 --partition DEC` now exists and is guarded.
+
+    The December score bundle `06` demands had NO producer — `05` refused `DEC` by argparse,
+    so `load_bundle` could only ever raise "bundle is missing". The branch is now present and
+    enters through the same `materialise_locked_partition` guard, and BOTH refusal controls
+    are kept: `05` refuses without a verifying signature, and `06`'s locked path still
+    refuses a substituted target.
+    """
+    source = (REPO_ROOT / "scripts" / "05_build_features_and_splits.py").read_text("utf-8")
+    assert "materialise_locked_partition(" in source
+    assert "open_restricted(" in source
+    assert 'purpose="locked_evaluation"' in source
+    assert "--partition DEC requires --g05-signature" in source
+    from src.data.locked_test import RESTRICTED_ROOT
+
+    assert RESTRICTED_ROOT not in source, "05 never names the restricted root"
+
+    spec = importlib.util.spec_from_file_location(
+        "script05", REPO_ROOT / "scripts" / "05_build_features_and_splits.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    with pytest.raises(SystemExit):  # DEC without the three locked-path arguments
+        module._parse_args(["--config", "configs", "--partition", LOCKED_ID])
+    with pytest.raises(SystemExit):  # DEC without REFIT in the same run: no transform to apply
+        module._parse_args(
+            [
+                "--config", "configs", "--partition", LOCKED_ID,
+                "--g05-signature", "sig", "--locked-input", "x.jsonl",
+                "--locked-authorization", "auth",
+            ]
+        )
+    args = module._parse_args(["--config", "configs"])
+    assert LOCKED_ID not in args.partitions
+    ok = module._parse_args(
+        [
+            "--config", "configs", "--partition", REFIT_ID, "--partition", LOCKED_ID,
+            "--g05-signature", "sig", "--locked-input", "x.jsonl",
+            "--locked-authorization", "auth",
+        ]
+    )
+    assert set(ok.partitions) == {REFIT_ID, LOCKED_ID}
+    # and the branch itself refuses when the signature does not verify — before any read
+    with pytest.raises(LockedTestError):
+        module._build_locked_score_bundle(
+            args=ok,
+            snapshot=_signed_snapshot(),
+            partitions=PARTITIONS,
+            refit_transform=object(),
+            common={},
+            out_root=REPO_ROOT / "artifacts" / "unused",
+            run_id="r",
+            access_log=REPO_ROOT / "artifacts" / "unused" / "access.jsonl",
+        )

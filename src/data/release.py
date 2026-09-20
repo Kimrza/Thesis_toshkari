@@ -32,7 +32,16 @@ what makes a release immutable in practice rather than in intent.
 Governance
 ----------
 * **TE 13.3** -- the fourteen manifest fields, enumerated in `REQUIRED_MANIFEST_FIELDS`
-  and derived from the table rather than carried from prose.
+  and derived from the table rather than carried from prose. The table has TWO columns,
+  and until 2026-09-20 only the first was enforced: the field NAMES matched exactly (set
+  difference empty both ways) while `write_release` applied one top-level non-empty test,
+  so `source_files = ["x"]`, a four-key `processing` block and a station-only `row_counts`
+  all passed (board **Recommendation 25**). The "Required content" column is now the four
+  sub-schemas `SOURCE_FILE_FIELDS`, `PROCESSING_PHASE1_FIELDS`, `ROW_COUNT_AXES` and
+  `EXCLUSION_ENTRY_FIELDS`, each with one guard function and one negative control per
+  sub-field, plus a relative-path assertion on `output_files` keys (an absolute key is
+  DISCARDED by the `target / key` join, so the release would verify against bytes it does
+  not contain). No release manifest exists on disk yet, so there was no migration cost.
 * **D-29** (2026-08-28) -- `dataset_version` is the first **12 hex** of the release's
   `content_hash`, with a recorded collision bound and a **verify-on-write** check that the
   prefix is unused. The bound is recorded so it can be checked, not relied on; the check
@@ -56,7 +65,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Iterable, Mapping
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Final
 
 from src.data.config import ReleaseError
@@ -67,11 +76,21 @@ __all__ = [
     "EXCLUDED_CONTENT_FIELDS",
     "DATASET_VERSION_HEX_LENGTH",
     "MANIFEST_NAME",
+    "SOURCE_FILE_FIELDS",
+    "PROCESSING_PHASE1_FIELDS",
+    "ROW_COUNT_AXES",
+    "EXCLUSION_ENTRY_FIELDS",
     "sha256_of_file",
     "canonical_content_json",
     "content_hash_of",
     "dataset_version_for",
     "collision_probability",
+    "assert_source_files_contract",
+    "assert_processing_contract",
+    "assert_row_counts_contract",
+    "assert_exclusions_contract",
+    "assert_output_file_keys_relative",
+    "assert_manifest_content_contract",
     "write_release",
     "verify_release",
 ]
@@ -127,6 +146,300 @@ EXCLUDED_CONTENT_FIELDS: Final[tuple[str, ...]] = (
     "created_at_utc",
     "content_hash",
 )
+
+
+#: TE 13.3's `source_files` row: "Provider, permanent experiment/file citation or
+#: request, location/date, filename, retrieval date, SHA-256" — SIX items, transcribed
+#: from the table rather than carried from prose. Before 2026-09-20 `write_release`
+#: checked only that the top-level field was non-empty, so the literal `["x"]` passed
+#: (board Recommendation 25). `filename` is where the provider VERSION SUFFIX lives
+#: (`gps220228g.002.hdf5`) — the field Recommendation 8's version mixing would have been
+#: visible in, so the sub-schema admits and requires the full provider filename.
+SOURCE_FILE_FIELDS: Final[tuple[str, ...]] = (
+    "provider",
+    "citation",
+    "location_date",
+    "filename",
+    "retrieval_date",
+    "sha256",
+)
+
+#: TE 13.3's `processing` row, Phase 1 limb: "Phase ID and target-definition ID; provider
+#: experiment/kindat, parameters, station-coordinate-to-cell rule, selected cell bounds
+#: and hourly aggregation for gridded Phase 1" — SEVEN keys. The Phase 2 limb
+#: (`gnss-tec` release/commit, calibration-layer commit, full configuration ID) is NOT
+#: enumerated here: Phase 1 code must not produce or require a Phase 2 raw-processing
+#: field (TE 7.0 hard prohibition, NFR-PHASE-01), and a Phase 2 release adds its own
+#: contract when Phase 2 lands.
+PROCESSING_PHASE1_FIELDS: Final[tuple[str, ...]] = (
+    "phase_id",
+    "target_definition_id",
+    "provider_experiment_kindat",
+    "parameters",
+    "station_coordinate_to_cell_rule",
+    "selected_cell_bounds",
+    "hourly_aggregation",
+)
+
+#: TE 13.3's `row_counts` row: "Counts by station, month, split, and QC stage" — FOUR
+#: axes, each its own mapping. A station-keyed mapping alone satisfies one axis of four
+#: and reads as satisfying the field (board Recommendation 25).
+ROW_COUNT_AXES: Final[tuple[str, ...]] = (
+    "by_station",
+    "by_month",
+    "by_split",
+    "by_qc_stage",
+)
+
+#: TE 13.3's `exclusions_qc_summary` row: "Reasons and counts for exclusions" — a reason
+#: and a count per entry. A bare total is a count with no reason and does not satisfy it.
+EXCLUSION_ENTRY_FIELDS: Final[tuple[str, ...]] = ("reason", "count")
+
+
+def _refuse(resource: object, message: str) -> ReleaseError:
+    return ReleaseError(resource, message)
+
+
+def assert_source_files_contract(source_files: object) -> None:
+    """TE 13.3 `source_files`: six items per file, or REFUSE naming file and field(s).
+
+    Raises
+    ------
+    ReleaseError
+        when `source_files` is not a non-empty sequence of mappings, or any entry omits
+        one of `SOURCE_FILE_FIELDS`. The raise names the ENTRY (by filename where one is
+        present, by index otherwise) and every missing field together, so a partial
+        manifest is actionable in one pass rather than one field per run.
+    """
+    if isinstance(source_files, Mapping) or not isinstance(source_files, list | tuple):
+        raise _refuse(
+            "source_files",
+            "must be a sequence of per-file entries; TE 13.3 requires provider, "
+            "permanent citation/request, location/date, filename, retrieval date and "
+            "SHA-256 for EVERY source file, and a scalar or mapping carries none of them",
+        )
+    if not source_files:
+        raise _refuse("source_files", "is empty; a release with no recorded source has no provenance")
+    for index, entry in enumerate(source_files):
+        if not isinstance(entry, Mapping):
+            raise _refuse(
+                f"source_files[{index}]",
+                f"is {type(entry).__name__}, not a mapping of TE 13.3's six per-file "
+                f"items; a bare value records a source without recording anything about it",
+            )
+        label = str(entry.get("filename", "") or f"source_files[{index}]")
+        missing = [
+            field
+            for field in SOURCE_FILE_FIELDS
+            if not str(entry.get(field, "") or "").strip()
+        ]
+        if missing:
+            raise _refuse(
+                label,
+                "source_files entry is missing TE 13.3 item(s): "
+                + ", ".join(missing)
+                + " — six per file, not one. `filename` carries the FULL provider "
+                "filename including its version suffix (e.g. gps220228g.002.hdf5): "
+                "version drift is observed in this dataset, and a suffix-less filename "
+                "makes a mix unrecordable (board Recommendations 8 and 25)",
+            )
+
+
+def assert_processing_contract(processing: object) -> None:
+    """TE 13.3 `processing`, Phase 1 limb: all seven keys, or REFUSE naming them.
+
+    Raises
+    ------
+    ReleaseError
+        when `processing` is not a mapping, or omits any of `PROCESSING_PHASE1_FIELDS`.
+    """
+    if not isinstance(processing, Mapping):
+        raise _refuse(
+            "processing",
+            f"must be a mapping of TE 13.3's seven Phase 1 processing keys, got "
+            f"{type(processing).__name__}",
+        )
+    missing = [
+        field
+        for field in PROCESSING_PHASE1_FIELDS
+        if processing.get(field) in (None, "", [], {})
+    ]
+    if missing:
+        raise _refuse(
+            "processing",
+            "TE 13.3 Phase 1 processing key(s) missing or empty: "
+            + ", ".join(missing)
+            + f" ({len(missing)} of {len(PROCESSING_PHASE1_FIELDS)}) — the row requires "
+            "phase and target-definition ID, provider experiment/kindat, parameters, the "
+            "station-coordinate-to-cell rule, the selected cell bounds and the hourly "
+            "aggregation. A release whose processing block omits the kindat and the cell "
+            "bounds does not say what was processed (board Recommendation 25)",
+        )
+
+
+def assert_row_counts_contract(row_counts: object) -> None:
+    """TE 13.3 `row_counts`: counts by station, month, split AND QC stage.
+
+    Raises
+    ------
+    ReleaseError
+        when `row_counts` is not a mapping, omits an axis, or an axis is not a non-empty
+        mapping of label to integer count. Counts are integers by contract: `_canonical`
+        refuses floats in the identity representation, so a float count would fail later
+        and less legibly.
+    """
+    if not isinstance(row_counts, Mapping):
+        raise _refuse(
+            "row_counts",
+            f"must be a mapping carrying all four TE 13.3 axes "
+            f"({', '.join(ROW_COUNT_AXES)}), got {type(row_counts).__name__}",
+        )
+    missing = [axis for axis in ROW_COUNT_AXES if axis not in row_counts]
+    if missing:
+        raise _refuse(
+            "row_counts",
+            "TE 13.3 row-count axis/axes absent: "
+            + ", ".join(missing)
+            + f" ({len(missing)} of {len(ROW_COUNT_AXES)}) — the row requires counts by "
+            "station, month, split and QC stage. A station-keyed mapping satisfies one "
+            "axis of four while reading as a satisfied field (board Recommendation 25)",
+        )
+    for axis in ROW_COUNT_AXES:
+        values = row_counts[axis]
+        if not isinstance(values, Mapping) or not values:
+            raise _refuse(
+                f"row_counts.{axis}",
+                "must be a non-empty mapping of label to count; an empty axis records "
+                "the axis without recording any count",
+            )
+        for label, count in values.items():
+            if isinstance(count, bool) or not isinstance(count, int):
+                raise _refuse(
+                    f"row_counts.{axis}.{label}",
+                    f"count {count!r} is not an integer; row counts are integers and a "
+                    f"float would be refused by the canonical identity representation "
+                    f"(R-11) at a later and less legible point",
+                )
+
+
+def assert_exclusions_contract(exclusions: object) -> None:
+    """TE 13.3 `exclusions_qc_summary`: a reason AND a count per exclusion.
+
+    Accepts either shape a caller naturally reaches for: a mapping of reason to count, or
+    a sequence of `{reason, count}` entries. Both carry the two things the row requires;
+    refusing one of them would be a house style rule rather than the contract.
+
+    Raises
+    ------
+    ReleaseError
+        when the field is empty, is neither shape, or an entry omits its reason or count
+        or carries a non-integer count.
+    """
+    if isinstance(exclusions, Mapping):
+        if not exclusions:
+            raise _refuse(
+                "exclusions_qc_summary",
+                "is empty; TE 13.3 requires reasons and counts for exclusions, and a "
+                "release with no exclusions records that explicitly (e.g. "
+                "{'none': 0}) rather than by omission",
+            )
+        for reason, count in exclusions.items():
+            if not str(reason or "").strip():
+                raise _refuse(
+                    "exclusions_qc_summary",
+                    "an exclusion carries an empty reason; a count with no reason is not "
+                    "a QC summary (board Recommendation 25)",
+                )
+            if isinstance(count, bool) or not isinstance(count, int):
+                raise _refuse(
+                    f"exclusions_qc_summary.{reason}",
+                    f"count {count!r} is not an integer",
+                )
+        return
+    if isinstance(exclusions, list | tuple):
+        if not exclusions:
+            raise _refuse("exclusions_qc_summary", "is empty; see the mapping form's message")
+        for index, entry in enumerate(exclusions):
+            if not isinstance(entry, Mapping):
+                raise _refuse(
+                    f"exclusions_qc_summary[{index}]",
+                    f"is {type(entry).__name__}, not a mapping carrying "
+                    f"{', '.join(EXCLUSION_ENTRY_FIELDS)}",
+                )
+            missing = [f for f in EXCLUSION_ENTRY_FIELDS if entry.get(f) in (None, "")]
+            if missing:
+                raise _refuse(
+                    f"exclusions_qc_summary[{index}]",
+                    "exclusion entry is missing " + ", ".join(missing),
+                )
+            count = entry["count"]
+            if isinstance(count, bool) or not isinstance(count, int):
+                raise _refuse(
+                    f"exclusions_qc_summary[{index}].count",
+                    f"count {count!r} is not an integer",
+                )
+        return
+    raise _refuse(
+        "exclusions_qc_summary",
+        f"must be a mapping of reason to count or a sequence of {{reason, count}} "
+        f"entries, got {type(exclusions).__name__}",
+    )
+
+
+def assert_output_file_keys_relative(output_files: Mapping[str, Any]) -> None:
+    """TE 13.3 `output_files`: every key is a RELATIVE path inside the release directory.
+
+    `write_release` resolves each key as `target / rel_path`. Python's `/` operator
+    DISCARDS the left operand when the right is absolute, so an absolute key silently
+    hashes and declares a file outside the release, and a `..` key escapes upward — in
+    both cases the release verifies against bytes it does not contain (board
+    Recommendation 25).
+
+    Raises
+    ------
+    ReleaseError
+        naming the key, when it is empty, absolute (POSIX or Windows, including a drive
+        letter or a UNC root), or contains a `..` component.
+    """
+    for key in sorted(output_files):
+        text = str(key)
+        if not text.strip():
+            raise _refuse("output_files", "an output_files key is empty")
+        candidate = PurePosixPath(text.replace("\\", "/"))
+        if PureWindowsPath(text).is_absolute() or candidate.is_absolute():
+            raise _refuse(
+                text,
+                "output_files keys are RELATIVE artifact paths inside the release "
+                "directory (TE 13.3). An absolute key is discarded by the `target / key` "
+                "join, so the release would verify against a file outside itself",
+            )
+        if ".." in candidate.parts:
+            raise _refuse(
+                text,
+                "output_files key contains a '..' component and escapes the release "
+                "directory; TE 13.3's path is relative and inside the release",
+            )
+
+
+def assert_manifest_content_contract(manifest: Mapping[str, Any]) -> None:
+    """The four composite TE 13.3 fields, checked for CONTENT and not only for presence.
+
+    `REQUIRED_MANIFEST_FIELDS` matches TE 13.3's fourteen names exactly (set difference
+    empty both ways), and until 2026-09-20 that was the whole check: a single top-level
+    non-empty test, so `source_files = ["x"]` and a station-only `row_counts` both passed.
+    This function is the missing half — the "Required content" column of the same table.
+    One guard home per composite field, invoked here and from `write_release`
+    (nfr-design c58).
+
+    Raises
+    ------
+    ReleaseError
+        from whichever sub-contract fails first, naming the field and the shortfall.
+    """
+    assert_source_files_contract(manifest.get("source_files"))
+    assert_processing_contract(manifest.get("processing"))
+    assert_row_counts_contract(manifest.get("row_counts"))
+    assert_exclusions_contract(manifest.get("exclusions_qc_summary"))
 
 
 def sha256_of_file(path: Path) -> str:
@@ -316,6 +629,11 @@ def write_release(
           never chosen -- a supplied value could only duplicate the derivation or
           disagree with it);
         * a TE 13.3 field is missing or empty;
+        * a composite TE 13.3 field fails its **content** sub-schema — `source_files`
+          without its six per-file items, `processing` without its seven Phase 1 keys,
+          `row_counts` missing one of its four axes, `exclusions_qc_summary` without a
+          reason and a count (**Recommendation 25**);
+        * an `output_files` key is absolute or escapes the release directory;
         * `output_files` is empty, or an entry's recorded hash does not match the file;
         * the release root is unreachable (**SD-04**);
         * the 12-hex prefix already names a **different** `content_hash` (**D-29**).
@@ -344,6 +662,11 @@ def write_release(
 
     payload: dict[str, Any] = dict(manifest)
 
+    # --- the four composite 13.3 fields: CONTENT, not only presence (Rec. 25) ---------
+    # Runs before anything is hashed or written, so a content-short manifest is refused
+    # on the same all-or-nothing boundary as R-13 and leaves the directory untouched.
+    assert_manifest_content_contract(payload)
+
     # --- output_files must exist and verify -------------------------------------------
     output_files = payload.get("output_files")
     if not isinstance(output_files, Mapping) or not output_files:
@@ -353,6 +676,7 @@ def write_release(
             "and SHA-256 for every release file, and a release with no files has no "
             "identity to hash",
         )
+    assert_output_file_keys_relative(output_files)
     for rel_path, recorded in sorted(output_files.items()):
         artifact = target / rel_path
         if not artifact.is_file():
@@ -424,8 +748,20 @@ def verify_release(manifest_path: Path) -> list[str]:
         if data.get(field) in (None, "", [], {}):
             problems.append(f"{path}: TE 13.3 field {field!r} missing or empty")
 
+    # The "Required content" column, REPORTED here rather than raised, matching this
+    # function's Sequence[str] contract (Rec. 25). `write_release` raises on the same
+    # checks; a manifest written before they existed reports them here instead.
+    try:
+        assert_manifest_content_contract(data)
+    except ReleaseError as exc:
+        problems.append(f"{path}: TE 13.3 required content not satisfied ({exc})")
+
     output_files = data.get("output_files")
     if isinstance(output_files, Mapping):
+        try:
+            assert_output_file_keys_relative(output_files)
+        except ReleaseError as exc:
+            problems.append(f"{path}: output_files path contract ({exc})")
         for rel_path, recorded in sorted(output_files.items()):
             artifact = path.parent / rel_path
             if not artifact.is_file():

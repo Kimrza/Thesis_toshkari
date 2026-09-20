@@ -20,9 +20,11 @@ over the SYNTHETIC partition dates `test_split_embargo.py` authors:
 Plus: the full-dataset fit raises; a train-role bundle at a scoring site fails; a
 cross-partition transform fails; an already-transformed bundle passed back raises;
 `fit_transforms` raises `PartitionError` (not `LeakageError`) on an id disagreement
-(Recommendation 8); the R-77 carry-forward boundary rejects `vtec_lag_*`; `Transform`
-exposes no `apply`/`inverse` surface (Q4 = A, D-27); and `build_features` itself refuses at
-its public entry point (guard invocation proven per entry point, not only correctness once).
+(Recommendation 8); the R-77 carry-forward boundary rejects `vtec_lag_*`; R-58 limb 3's
+conservation invariant is INVOKED by `carry_forward` on the series it returns, so an
+unrecorded fill raises at this entry point rather than downstream; `Transform` exposes no
+`apply`/`inverse` surface (Q4 = A, D-27); and `build_features` itself refuses at its public
+entry point (guard invocation proven per entry point, not only correctness once).
 
 INPUTS. Synthetic in-memory bundles, partitions and configs. No December 2022 content, no
 restricted-root path, no real config value. RE-RUN: pure functions.
@@ -56,6 +58,9 @@ from test_split_embargo import (  # noqa: E402
 )
 
 from src.data.config import IntegrityError, LeakageError, PartitionError  # noqa: E402
+from src.external.spaceweather import (  # noqa: E402
+    assert_carry_forward_conservation,
+)
 from src.data.splits import (  # noqa: E402
     LOCKED_ID,
     PARTITION_IDS,
@@ -371,6 +376,68 @@ def test_driver_class_carries_forward_within_the_bound_and_counts_exclusions() -
     assert result["carried_forward_epochs"] == [_ts(1, 1, 2), _ts(1, 1, 3)]
     assert result["excluded_epochs"] == [_ts(1, 1, 4), _ts(1, 1, 5)]
     assert result["excluded_count"] == 2
+
+
+# --- R-58 limb 3: the conservation invariant, WIRED into the carry-forward entry point ----
+
+
+def test_carry_forward_invokes_the_conservation_invariant_on_what_it_returns(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """MUTANT: a stubbed filler that returns a series carrying a value at an epoch with no
+    observation, while reporting NO carried-forward epochs — the exact shape a vectorised,
+    aliased or newly invented fill would produce.
+
+    BITES: a `carry_forward` that trusted its filler. `assert_carry_forward_conservation`
+    existed with ZERO production call sites, and a guard module alone fails open on a
+    forgotten call (`nfr-design:c58`). The violating input has to come from a stubbed
+    collaborator because the real `apply_carry_forward` is correct — which is precisely the
+    invariant's stated purpose: it is a law over the EMITTED series, so it catches a fill the
+    AST token scan cannot reach, including one nobody has written yet.
+    """
+    gap = _ts(1, 1, 2)
+    hourly = {_ts(1, 1, h): (None if h == 2 else float(h)) for h in range(5)}
+
+    def silent_fill(series, *, bound_h):  # noqa: ANN001, ANN202 - stub mirrors the real shape
+        values = {epoch: float(v) for epoch, v in series.items() if v is not None}
+        values[gap] = 1.0  # filled ...
+        # ... and NOT recorded: `carried_forward_epochs` comes back empty
+        return {"values": values, "carried_forward_epochs": [], "excluded_epochs": []}
+
+    monkeypatch.setattr("src.features.transforms.apply_carry_forward", silent_fill)
+    with pytest.raises(IntegrityError) as excinfo:
+        carry_forward(hourly, field_class=FieldClass.driver, bound_h=3, feature="kp_safe")
+    message = str(excinfo.value)
+    assert "conservation invariant" in message
+    assert gap.isoformat() in message
+
+
+def test_conservation_invariant_reconciles_counts_not_only_presence() -> None:
+    """The guard's own surface, both failure modes kept distinct: an unrecorded filled epoch,
+    and a recorded count that does not reconcile with the emitted series. A record that is
+    merely PRESENT is not enough — the recorded count is load-bearing, not decorative."""
+    observed = {_ts(1, 1, 0): 0.0, _ts(1, 1, 1): None, _ts(1, 1, 2): 2.0}
+    filled = {_ts(1, 1, 0): 0.0, _ts(1, 1, 1): 0.0, _ts(1, 1, 2): 2.0}
+
+    assert assert_carry_forward_conservation(filled, observed, [_ts(1, 1, 1)]) is None
+
+    with pytest.raises(IntegrityError) as unrecorded:
+        assert_carry_forward_conservation(filled, observed, [])
+    assert "no recorded carry-forward" in str(unrecorded.value)
+
+    with pytest.raises(IntegrityError) as mismatched:
+        assert_carry_forward_conservation(filled, observed, [_ts(1, 1, 1), _ts(1, 1, 9)])
+    assert "load-bearing" in str(mismatched.value)
+
+
+def test_the_real_carry_forward_path_satisfies_the_invariant_it_now_asserts() -> None:
+    """The discriminating positive: wiring the invariant in did not turn the sanctioned,
+    bounded, recorded carry-forward into a failure. A driver series with gaps inside and
+    beyond the bound passes, and its recorded epochs are exactly the filled ones."""
+    hourly = {_ts(1, 1, h): (None if h in (2, 3, 4, 5) else float(h)) for h in range(8)}
+    result = carry_forward(hourly, field_class=FieldClass.driver, bound_h=2, feature="kp_safe")
+    filled = [e for e in result["values"] if hourly[e] is None]
+    assert filled == result["carried_forward_epochs"]
 
 
 def test_carry_forward_without_a_field_class_is_unrepresentable() -> None:

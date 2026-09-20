@@ -5,19 +5,96 @@
 **Plan:** `code-generation-plan.md` (approved 2026-09-07; Q1–Q6 = A)
 **Sessions:** generation began 2026-09-07 (interrupted after Steps 1–5 and 7); resumed and completed 2026-09-09.
 
-## ⚠ CRITICAL, DISCLOSED 2026-09-13 — the fixture ladder cannot complete, and half the cause is this unit's code
+## ⚠ CRITICAL DISCLOSURE OF 2026-09-13 — REPAIRED in `8d4297d`; a NARROWER limitation survives
+
+*Corrected in place 2026-09-20 under the approved governance remediation of
+**Recommendation 11**. The correction lands in this artifact's BODY, where the reader of the
+banner meets it, not as a dated foot addendum (`project.md` `code-generation:fr-2`). The
+2026-09-13 disclosure is preserved below rather than deleted, because four signed review
+blocks in this file rest on it and because its **conclusion** — that no fixture ladder can
+complete today — is still true for a different and narrower reason, stated first.*
+
+### Current position (2026-09-20)
+
+**The deadlock is REPAIRED. WS-20 and TA-17 are `Pending` — NOT unreachable.** The project
+decision owner ruled **"APPROVE OPTION (A)"** in
+`governance/CHANGE_RECORD_2026-09-13_04_fixture_window.md`
+(`CR-2026-09-13-04-FIXTURE-WINDOW`), and the ruling was applied in commit **`8d4297d`**
+("04 fixture-window repair (Option a): scope-derived audit windowing on fixture runs"), dated
+2026-09-13 — seven days before this correction, and the commit immediately following the
+`1670ac8` the disclosure below was written against.
+`scripts/04_build_external_products.py:338-343` now sets `declared_window = audit_window =
+scope.window` on the fixture path, so the declaration is made true by narrowing the READS
+(`:384-390`: `_audit_dst`, `_audit_f107` and `_verify_recorded_hashes` are window-bound),
+never by narrowing the report — the false-declaration option the disclosure below rightly
+rejected outright. `_declared_data_window()` (the hardcoded full calendar year) is
+deliberately not consulted on the fixture path; non-fixture behaviour is unchanged.
+Re-derived 2026-09-20 by reading the repaired source and `git show 8d4297d` directly, not
+carried from the change record's own summary.
+
+**"No code has moved" (below) described 2026-09-13 and is SUPERSEDED.** It was accurate on
+the day it was written and is false now. It must not be quoted as a current statement of
+repository state.
+
+**Superseded on this point, and listed so no reader has to infer it:** the two 2026-09-13
+review blocks in this file — `## Terminal adversarial re-review (2026-09-13, iteration 2 —
+budget exhausted)` and `## Adversarial re-review (2026-09-13, rejected-gate revision 2)` —
+each characterise WS-20/TA-17 as *structurally unreachable* and each rest on the pre-`8d4297d`
+code. Their text is a signed reviewer record and is **not edited** (`project.md`
+`fd-2026-08-30-never-edit-signed-record`); each carries a one-line dated pointer to this
+section beneath its `**Date:**` line and nothing else of theirs is touched. The earlier
+review blocks (2026-09-10, 2026-09-11, 2026-09-12) say only "WS-20/TA-17 stay `Pending`",
+which remains true, and are left entirely alone.
+
+### What still blocks an actual fixture run — the surviving limitation
+
+The banner's *conclusion* survives; its *reason* does not. Ordered by what a run reaches
+first:
+
+1. **No FROZEN `fixture_manifest.yaml` exists in either fixture tree.** Two `status:
+   candidate` skeletons were written 2026-09-20 under the approved **Recommendation 37**
+   remediation (`tests/fixtures/plumbing_7day/fixture_manifest.yaml`,
+   `tests/fixtures/scientific_1month/fixture_manifest.yaml`): structural fields populated
+   from the existing `identity_declaration.yaml`, and the literal `TBD — freeze gate` in
+   every MEASURED field, with no `measuring_run_id` anywhere. `load_fixture_manifest`
+   **refuses them BY NAME** on the first measured field it reaches, and that refusal is the
+   correct outcome — TE §15.1 forbids inventing a measured figure and neither fixture has
+   run. The skeletons let the loader be exercised against a real file; they do not make a run
+   possible, and no measured figure was written.
+2. **The two Q-31 freeze acts are OWNER acts and have not occurred** — `status: frozen`, the
+   sibling `fixture_manifest.sha256`, and the D-number recording that hash.
+   `write_candidate_manifest` refuses any status but `candidate`
+   (`src/data/fixture_manifest.py:1571-1576`), so no code path can perform them.
+3. **`configs/data.yaml` declares no `qc_operations` list** — verified 2026-09-20: the key is
+   absent from the file, not merely sentinel. `src/data/prepared.py:396`
+   `assert_qc_operations_frozen` refuses while it is absent or sentinel, so the ladder stops
+   at stage `02` and never reaches `04`. This is an open **supervisor** freeze, not a code
+   defect, and it is the first thing a fixture run hits today.
+4. **`configs/experiment.yaml:20` `folds` is still the literal `TBD — freeze gate`.**
+5. **No usable Python interpreter and no `pyyaml`/`numpy`/`pandas` on this clone**, so
+   `tests/test_clean_run.py`'s completion test still skips with its named §18.3 reason.
+
+BLK-02 therefore stays **OPEN** and WS-20 / TA-09 / TA-17 / TA-21 stay `Pending`. The
+material change is that none of the five items above is a structural impossibility: each is a
+named, owned, reachable act, which is exactly what "unreachable" denied.
+
+### The 2026-09-13 disclosure, preserved — SUPERSEDED on its conclusion, accurate as history
+
+*Everything from here to the end of this section describes the code at HEAD `1670ac8`, before
+`8d4297d`. It is retained because the signed reviews cite it by line. Read it as history.*
 
 *Added after the rejected-gate re-review returned NOT-READY for the absence of this
 disclosure. The defect was found while reviewing `external-products`, but the review was
 right that this record's silence was the worse fault: this unit authored half the causal
 chain, and §11.5 of this unit's own change record is what introduced it.*
 
+**[SUPERSEDED 2026-09-13 by `8d4297d` — see § Current position above]**
 **`scripts/04_build_external_products.py` can never complete inside a walking-skeleton
 fixture run, so the plumbing fixture's receipt is never written, and WS-20 and TA-17 are
 UNREACHABLE — not merely `Pending`.**
 
-The chain, every link re-derived at HEAD `1670ac8`, and three of the four links are this
-unit's modules:
+The chain, every link re-derived at HEAD `1670ac8` **and broken at link 3 by `8d4297d`**, and
+three of the four links are this unit's modules:
 
 1. `scripts/run_walking_skeleton.py:184` — `PHASE1_SEQUENCE` includes
    `("04_build_external_products.py", 1)`. **(this unit)**
@@ -28,13 +105,19 @@ unit's modules:
 3. `scripts/04_build_external_products.py:306` — receiving that flag is precisely what
    **arms** the window check; `_declared_data_window()` (`:265-274`) then returns a
    hardcoded full calendar year, with no CLI narrowing. *(`external-products`)*
+   — **THIS LINK IS BROKEN as of `8d4297d` (2026-09-13).** The fixture path now derives
+   `declared_window` from `scope.window` through the one loader and never consults
+   `_declared_data_window()`, so link 4's containment check is satisfied by construction
+   rather than defeated unconditionally. Links 1, 2 and 4 are unchanged and remain correct
+   descriptions of the current code; with link 3 broken the chain no longer closes.
 4. `src/data/fixture_gate.py:209-251`, `assert_declared_window_within_scope` — refuses
    unless BOTH declared endpoints sit inside the fixture scope's cited window, and a scope
    window is only ever 7 days or 1 month (`src/data/fixture_manifest.py:152-155`).
    **(this unit)**
 
 The refusal is unconditional, not input-dependent: `04` emits no window narrower than a full
-year for any scope it is given.
+year for any scope it is given. **[SUPERSEDED: true at `1670ac8`, false at `8d4297d` and
+after — `04` now emits exactly the scope's window on a fixture run.]**
 
 **This unit's §11.5 remediation is what re-created the deadlock.** `CHANGE_RECORD_2026-09-07_R133`
 §6.1 gave `04` the `--fixture-manifest` option specifically to break an earlier deadlock
@@ -43,7 +126,10 @@ board-Rec-2 window binding describes itself only as making "out-of-window inputs
 does not record that it makes `04` unreachable inside every fixture run. That description is
 corrected in the change record under a dated note.
 
-**Three remedies, all owner decisions** (TE §18.3 — stop and report, never choose a default):
+**Three remedies, all owner decisions** (TE §18.3 — stop and report, never choose a default)
+— **RESOLVED: the owner chose (a) on 2026-09-13 and it is implemented in `8d4297d`; (b) and
+(c) were not taken, `PHASE1_SEQUENCE` is unchanged, and TE §13.2's seven-invocation clean-run
+contract still certifies what it always did**:
 **(a)** genuinely window-parameterise `04` so its declaration is true under a fixture scope —
 a change to a governed script's data scope, wanting its own D-number, and `external-products`'
 call; **(b)** remove `04` from `PHASE1_SEQUENCE` — **this unit's call**, and it changes what
@@ -56,6 +142,16 @@ and is rejected outright rather than offered.
 **The owner ruled on 2026-09-13: record it, rule on the remedy later. No code has moved.**
 Nothing here is closed by that deferral, and this section must not be read as a resolution.
 
+> **[SUPERSEDED 2026-09-20 — this is the sentence Recommendation 11 was raised against.]**
+> Both halves are false as of the very next commit. The owner did NOT leave the remedy
+> deferred: the same day, in `governance/CHANGE_RECORD_2026-09-13_04_fixture_window.md`, the
+> ruling **"APPROVE OPTION (A)"** was given and applied in `8d4297d`, so code HAS moved and
+> the deadlock IS closed. Read § Current position (2026-09-20) at the head of this section
+> for the current state and for the five items that still block a fixture run. This sentence
+> is retained only because the two 2026-09-13 review blocks quote it ("*'No code has moved'
+> is the artifact's own words, twice*") and a signed record may not be edited to match a
+> later fact.
+
 ## Files created
 
 | File | Plan step | Purpose |
@@ -65,7 +161,7 @@ Nothing here is closed by that deferral, and this section must not be read as a 
 | `src/data/fixture_gate.py` | 3 | F4 + F6: append-safe registry receipts with SD-X-02 Rec 7 tamper binding, in-session gate (`require_in_session_gate`), R-140/R-141 |
 | `src/data/fixture_evidence.py` | 4 | F7 evidence emitters (three refusing emitters; D-number agreement checks with sidecar fallback); W-9, R-142, SD-X-01 step 3, SD-X-03 |
 | `scripts/run_walking_skeleton.py` | 5 | F3 orchestrator: `--fixture plumbing_7day` / `--fixture scientific_1month`, §13.2-conformant sequencing; W-3/W-4/W-5/W-7 |
-| `tests/fixtures/plumbing_7day/`, `tests/fixtures/scientific_1month/` | 7 | Fixture trees with `.gitkeep` + spec-conformant `README.md`; **no `fixture_manifest.yaml` anywhere** — BLK-02 held, no manifest authored by hand |
+| `tests/fixtures/plumbing_7day/`, `tests/fixtures/scientific_1month/` | 7 | Fixture trees with `.gitkeep` + spec-conformant `README.md`. **Corrected in place 2026-09-20 (Recommendation 37):** the row previously read "**no `fixture_manifest.yaml` anywhere** — BLK-02 held, no manifest authored by hand". Each tree now also carries an owner-authored `identity_declaration.yaml` (added 2026-09-13 under `CR-2026-09-13-000102-FIXTURE-WINDOW`) and, since 2026-09-20, a `status: candidate` `fixture_manifest.yaml` **skeleton** written under the approved Recommendation 37 remediation: structural fields only, the literal `TBD — freeze gate` in every MEASURED field, and no `measuring_run_id` anywhere, so `load_fixture_manifest` refuses it by name. **BLK-02 still holds**: no measured figure was authored by hand, and no manifest is `frozen`. See § Current position in the banner above, item 1. |
 | `tests/test_clean_run.py` | 8 | §12 mandated module: **64 test functions** (corrected in place 2026-09-12; was `50`, superseded first by the sibling `acquisition` repair of 2026-09-10 and then by this unit's own 2026-09-12 precondition repair — count derived from source and printed by its own final test: `def test_ count derived from source: 64; collected: 64`) hosting the 39 negative controls and 11 must-not-fire controls — both figures machine-checked by `test_control_counts_derived_from_business_rules_not_carried`, which parses `business-rules.md`'s enumeration and set-differences it against the file's `CONTROL_HOSTS`/`MUST_NOT_FIRE_HOSTS` ledger (empty in both directions; `R-137:mnf1` hosted in `tests/test_train_only_transforms.py`, presence-asserted) — plus the per-area §15.2 enumeration, project-wide AST only-copy scan, §13.2 fence parse (membership AND order, flags verbatim, ruled scope argument recognised), and the skip-with-named-reason completion test |
 
 ## Files modified (Step 6 — sibling additive edits, Q4=A / Q5=A, each flagged for its owner)
@@ -78,7 +174,7 @@ Nothing here is closed by that deferral, and this section must not be read as a 
 
 ## Key implementation decisions
 
-- **BLK-02 held throughout**: the apparatus is built; no fixture manifest exists on disk and no measuring run can complete before the `TBD — freeze gate` fields and TensorFlow pin freeze. The two Q-31 freeze acts remain owner acts.
+- **BLK-02 held throughout**: the apparatus is built; no measuring run can complete before the `TBD — freeze gate` fields and TensorFlow pin freeze. The two Q-31 freeze acts remain owner acts. **Corrected in place 2026-09-20 (Recommendation 37):** this bullet previously read "no fixture manifest exists on disk", which stopped being true on 2026-09-20. Two `status: candidate` skeletons now exist, carrying the literal sentinel in every measured field and refused by name by the loader; BLK-02 is unaffected because BLK-02 is about *measured values being invented*, not about a file existing, and no measured value was written. No manifest is `frozen` and none can be without the owner's Q-31 act.
 - **BLK-08 mechanism limb — CLOSED by D-37 (2026-09-10), reaffirming D-27** (updated after
   the owner's adoption; the line previously read "stays a checked refusal … D-27 unreopened").
   The checked refusal REMAINS the mechanism: R-139 control 25 still refuses a `toleranced`
@@ -92,7 +188,7 @@ Nothing here is closed by that deferral, and this section must not be read as a 
 
 Environment: uv-managed CPython 3.11.16 in the session scratchpad + a stdlib pytest stand-in; PyPI unreachable (`pyyaml`/`pytest`/`ruff` absent). **Smoke evidence only, session-of-generation only, never governed.**
 
-- `tests/test_clean_run.py`: **61 passed, 0 failed, 3 skipped, 0 errors** over **64 test functions** — figures re-derived and printed 2026-09-12, correcting **in this section's own body** the superseded `47 passed / 50 functions` that three consecutive review passes flagged and that was only ever corrected in a `## Review` addendum (`project.md` `code-generation:fr-2`). The trail, stated so no reader has to reconstruct it: `46/0/3` at first completion → `47/0/3` after the control-count meta-test → `58/0/3` over 61 functions after the sibling `acquisition` unit's 2026-09-10 repair added `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window` to this module → `61/0/3` over 64 functions after this unit's own 2026-09-12 precondition repair added three beyond-enumeration controls (see § Precondition check corrected (2026-09-12) below). Skips all by name: two pyyaml-gated production-loader paths (`require_fixture_receipts` full path incl. the Q5 exemption; control 32's frozen-hash staleness, now also carrying the R-141 must-not-fire acceptance limb) and the clean-run completion test skipping with the §18.3 stop-and-report reason. It fails (never passes) on a non-zero exit when preconditions hold. WS-20/TA-09/TA-17/TA-21 stay `Pending`.
+- `tests/test_clean_run.py`: **61 passed, 0 failed, 3 skipped, 0 errors** over **64 test functions** — figures re-derived and printed 2026-09-12, correcting **in this section's own body** the superseded `47 passed / 50 functions` that three consecutive review passes flagged and that was only ever corrected in a `## Review` addendum (`project.md` `code-generation:fr-2`). The trail, stated so no reader has to reconstruct it: `46/0/3` at first completion → `47/0/3` after the control-count meta-test → `58/0/3` over 61 functions after the sibling `acquisition` unit's 2026-09-10 repair added `test_rec2_00_stage_entry_real_invocation_refuses_out_of_window` to this module → `61/0/3` over 64 functions after this unit's own 2026-09-12 precondition repair added three beyond-enumeration controls (see § Precondition check corrected (2026-09-12) below). Skips all by name: two pyyaml-gated production-loader paths (`require_fixture_receipts` full path incl. the Q5 exemption; control 32's frozen-hash staleness, now also carrying the R-141 must-not-fire acceptance limb) and the clean-run completion test skipping with the §18.3 stop-and-report reason. It fails (never passes) on a non-zero exit when preconditions hold. WS-20/TA-09/TA-17/TA-21 stay `Pending` — and, corrected in place 2026-09-20 (Recommendation 11), `Pending` is now the *complete* characterisation: the 2026-09-13 disclosure that they were structurally *unreachable* was repaired by `8d4297d` and is superseded. What keeps them `Pending` is the five named, reachable items in § Current position at the head of this file, not a deadlock.
 - Derived counts printed by the meta-test (verbatim): `negative controls: enumerated 39 ((1)-(39), sum 39); annotated 39; missing []; extra []; duplicated []` and `must-not-fire: derived 11 (1+1+1+1+2+2+1+1+1 over ['R-133' … 'R-141']); annotated 11 (of which 1 hosted elsewhere); missing []; extra []`.
 - ~~Ten named regression modules + test_clean_run: **437 passed, 0 failed, 13 skipped, 0 errors**.~~ **Superseded 2026-09-12.** This figure is not reproducible from the artifact, because the artifact never names which ten modules it partitions (a reviewer recorded the same ambiguity on 2026-09-10 without raising it as a finding). Replaced with a partition that IS reproducible — **every `tests/test_*.py` module in the repository, 26 modules: 1160 passed, 0 failed, 39 skipped, 0 errors** (2026-09-12, same stand-in runner). The pre-existing failures line below is likewise superseded by that run: the four import-error modules and the `test_external_drivers` / `test_iri_denial` / `test_locked_test_guard` failures it records are all green on the current tree.
 - One self-introduced regression fixed same pass: `test_models_smoke`'s source assertion tripped by the new fixture path; local renamed to `fixture_target`.
@@ -108,7 +204,7 @@ Environment: uv-managed CPython 3.11.16 in the session scratchpad + a stdlib pyt
 
 ## Routed to the stage gate
 
-Amendment ledger +1 → 8 across 6 owed (`component-methods.md`); the seven sibling edits + stale code-summaries plus the 03 reroute (owner ruling requested); §15.2 REQ-ENG-4 13→12 correction owed in `requirements.md`; the FR-WS-2/FR-WS-3 candidate §15.2 rows and M10 §13.2 placement proposals (change record §§8–9); the two Q-31 freeze acts; BLK-02 open, BLK-08 mechanism limb open; WS-20/TA-09/TA-17/TA-21 `Pending`; TA-03/TA-26 unproducible off Kaggle; TA-15 not covered (foundation's); the stale `team.md` § Walking Skeleton "remains open under Q-31" line (practices-gate-owned); the owed `ruff`/`graphify` runs (the over-99 line count that used to be routed here alongside them is **0**, re-derived 2026-09-12 — see Deviations item 4; only the tool runs remain owed); and the commit disposition: owner commit `64c0551` exists with a template message and no D-number (the standing pattern's seventh instance) — the student's ruling is owed on amending it to cite D-11, D-14, D-20, D-28, D-29, D-31 + `CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY`, or letting it stand with a recorded reason, before the still-uncommitted resume-pass outputs land on top. The agent made no commit.
+Amendment ledger +1 → 8 across 6 owed (`component-methods.md`); the seven sibling edits + stale code-summaries plus the 03 reroute (owner ruling requested); §15.2 REQ-ENG-4 13→12 correction owed in `requirements.md`; the FR-WS-2/FR-WS-3 candidate §15.2 rows and M10 §13.2 placement proposals (change record §§8–9); the two Q-31 freeze acts; BLK-02 open, BLK-08 mechanism limb open; WS-20/TA-09/TA-17/TA-21 `Pending` (**and only `Pending`** — the 2026-09-13 "structurally unreachable" characterisation was repaired by `8d4297d` and is superseded; corrected in place 2026-09-20 under Recommendation 11); TA-03/TA-26 unproducible off Kaggle; TA-15 not covered (foundation's); the stale `team.md` § Walking Skeleton "remains open under Q-31" line (practices-gate-owned); the owed `ruff`/`graphify` runs (the over-99 line count that used to be routed here alongside them is **0**, re-derived 2026-09-12 — see Deviations item 4; only the tool runs remain owed); and the commit disposition: owner commit `64c0551` exists with a template message and no D-number (the standing pattern's seventh instance) — the student's ruling is owed on amending it to cite D-11, D-14, D-20, D-28, D-29, D-31 + `CR-2026-09-07-R133-FIXTURES-AND-REPRODUCIBILITY`, or letting it stand with a recorded reason, before the still-uncommitted resume-pass outputs land on top. The agent made no commit.
 
 ## Review
 
@@ -710,6 +806,14 @@ credential, no guard weakened, no locked-December reachability introduced. **REA
 **Verdict:** NOT-READY
 **Reviewer:** aidlc-architecture-reviewer-agent
 **Date:** 2026-09-13T11:13:45Z
+
+> *[Annotation added 2026-09-20 under the approved Recommendation 11 remediation. **Not one
+> word of this reviewer's record is edited.** This pass reviewed HEAD `1670ac8`; its Critical
+> — WS-20/TA-17 "structurally unreachable" — was repaired the same day in commit `8d4297d`
+> under the owner's "APPROVE OPTION (A)" ruling. The verdict and the finding stand as the
+> record of what was true at `1670ac8`; the **conclusion is superseded**. See § Current
+> position (2026-09-20) at the head of this file.]*
+
 **Scope:** iteration 2 of the two-pass floor set by the 2026-09-13 "Adversarial re-review
 (rejected-gate revision 2)" above. That pass's mandate was verifying the two disclosure fixes
 (this artifact's `## ⚠ CRITICAL, DISCLOSED 2026-09-13` box; the change record's §11.5 dated
@@ -915,6 +1019,14 @@ discrepancy. **This is the terminal pass; this verdict is what reaches the human
 **Verdict:** NOT-READY
 **Reviewer:** aidlc-architecture-reviewer-agent
 **Date:** 2026-09-13T11:02:57Z
+
+> *[Annotation added 2026-09-20 under the approved Recommendation 11 remediation. **Not one
+> word of this reviewer's record is edited.** Finding 1's four-link chain was traced at HEAD
+> `1670ac8` and was correct there; link 3 was broken the same day by commit `8d4297d`
+> (owner ruling "APPROVE OPTION (A)",
+> `governance/CHANGE_RECORD_2026-09-13_04_fixture_window.md`). WS-20/TA-17 are `Pending`,
+> not unreachable. See § Current position (2026-09-20) at the head of this file.]*
+
 **Scope:** the unremediated Critical carried into this pass by the dispatch brief (the
 fixture-ladder deadlock at `scripts/04_build_external_products.py`), re-verified independently
 from this unit's side of the boundary; full recount of every claimed figure; repository-state
@@ -1087,3 +1199,92 @@ consequence), this unit is **NOT-READY**. Every other invariant this re-review w
 to attack — test-function and over-99-line counts, commit state, the `_completion_
 preconditions` repair, BLK-02/BLK-08, the 39/11 reconciliation — re-verified exactly as
 claimed, with zero new findings beyond Finding 1.
+
+---
+
+## Custody/environment remediation — 2026-09-20, `GOV-2026-09-20-CG-01` (worker D)
+
+Appended under the owner-authorised remediation recorded in
+`governance/CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md`. This section discloses
+changes to modules **this unit owns**, so a reader of this record is not left describing a
+pre-edit state (`project.md` `code-generation:gf-3`).
+
+⚠ **NOTHING BELOW WAS EXECUTED.** No usable Python interpreter exists on this clone
+(`python.exe` is a zero-byte Windows Store alias stub; PyPI is unreachable). Every statement
+about behaviour is **static**, read from source. Nothing here is "verified passing".
+
+### Changes to this unit's modules
+
+| File | Change | Finding |
+|---|---|---|
+| `tests/fixtures/plumbing_7day/fixture_manifest.yaml` | **NEW** (529 lines). `status: candidate` structural skeleton; all twelve TE §15.2 areas present; **73** occurrences of the literal `TBD — freeze gate`; **no `measuring_run_id`** anywhere, so `load_fixture_manifest` refuses it by name. | Rec 37 |
+| `tests/fixtures/scientific_1month/fixture_manifest.yaml` | **NEW** (528 lines). Same shape; **78** sentinel occurrences; carries the two `scientific_1month`-only slots (`widening_guard_cpu`, `planted_correlation_recovery_tolerance`) and the `fixture_bootstrap` block. | Rec 37 |
+| `tests/fixtures/plumbing_7day/README.md` | Two stale clauses amended (+31/−5): the manifest-absence paragraph and the "`.gitkeep` and this README are the only files here" inventory. | Rec 37, Rec 45 |
+| `tests/fixtures/scientific_1month/README.md` | The same two clauses amended (+32/−4). This README was **untouched** by the interrupted predecessor and is the half Rec 45 recorded as unswept. | Rec 45 |
+| `tests/test_clean_run.py` | +191/−2. Three-way fence comparison (`REPRODUCTION.md` / TE §13.2 / `PHASE1_SEQUENCE`) with a drift negative control; a negative control for the new absent-gate refusal; two pre-existing controls repointed off `gate_result=None` so each fails for the reason it names. | Rec 44, Rec 28 |
+| `src/data/fixture_evidence.py` | +45/−3. `build_environment_and_cpu_preflight_report` now **refuses** on `gate_result=None` instead of emitting G-07's evidence artifact with a `None` runtime. | Rec 28 |
+| `REPRODUCTION.md` | **NEW** at the repository root. TE §13.2's ordered clean-run contract verbatim, including `export PYTHONHASHSEED=0`. | Rec 44 |
+
+**Measured fields: none written.** TE §15.1 and `project.md` § Forbidden both bar inventing
+one. Running both fixtures under the governed **Python 3.11** pin and populating the measured
+fields is a **Student act** — dispositions §5 item 8, due before G-07.
+
+**BLK-02 still holds.** No measured figure was authored by hand and neither manifest is
+`frozen`. What changed is only that a `candidate` skeleton now exists for the loader to be
+exercised against.
+
+### The D-49 Python 3.10 extension is withdrawn — this unit's ladder is affected
+
+Dispositions §2 item 9: the Python 3.10 environment is for the isolated B-01 benchmark
+**only**; both walking-skeleton fixtures run under the governed **3.11** pin, and the D-49
+register row at `evidence/DECISIONS.md:3056` stands as written.
+`kaggle/kaggle_iri2016_benchmark.ipynb` Step 6 ran this unit's ladder inside the 3.10 venv on
+the strength of the now-withdrawn extension; it now **probes the interpreter and refuses**
+unless it is 3.11. Consequence, stated rather than worked around: **that notebook no longer
+discharges TC-03g's fixtures limb**, and a separate 3.11 Kaggle session is required. Its
+critical-test limb (Step 3c) is unaffected. The withdrawal act itself is §5 item 9.
+
+### Rec 28 — one limb is NOT closed, named rather than left silent
+
+`emit_in_session_gate_result` still has **no production caller**: a repo-wide search finds it
+only in `tests/test_clean_run.py`, and the count of its occurrences in
+`kaggle/kaggle_iri2016_benchmark.ipynb` is **0**. Two limbs of Rec 28's preferred option are
+therefore open:
+
+1. **Emitting the gate result from the notebook.** The notebook drives everything by
+   `subprocess` into a separate venv and never imports project code in-process, so it cannot
+   construct the `ConfigSnapshot` and `RunRecord` the emitter requires. Closing this needs a
+   small `venv_python`-invoked entry point under `scripts/`, which is outside this worker's
+   write scope.
+2. **Calling `require_in_session_gate` from the stage scripts before any governed write.**
+   `scripts/` is owned by sibling units and outside this worker's write scope.
+
+What *is* closed is the third limb and the one that fails safe: `fixture_evidence.py` no
+longer emits G-07's report when the gate never ran. A reader should not read limb 3 as
+discharging limbs 1 and 2.
+
+### Ruling owed — eight historical BLK-02 assertions left standing
+
+Derived 2026-09-20 by grep over this file and **printed before assertion**: nine lines assert
+that no `fixture_manifest.yaml` exists anywhere. One — the Files-table row at **line 164** —
+was corrected in place under Rec 37. The other **eight** are at lines **224, 326, 363, 426,
+461, 769, 933, 1182**, and every one of them sits inside a dated reviewer block:
+
+| Line | Enclosing block |
+|---|---|
+| 224 | `## Review` |
+| 326, 363 | `## Gate-floor re-review (2026-09-10)` |
+| 426, 461 | `## Floor-reset re-review (2026-09-11)` |
+| 769 | `## Precondition-fix review (2026-09-12)` |
+| 933 | `## Terminal adversarial re-review (2026-09-13, iteration 2 — budget exhausted)` |
+| 1182 | `## Adversarial re-review (2026-09-13, rejected-gate revision 2)` |
+
+Each was **true when written**. `project.md`
+`functional-design:fd-2026-08-30-never-edit-signed-record` forbids editing a signed record to
+bring it into line with a later derivation, so all eight stand unedited and the correction is
+recorded here instead.
+
+**ONE ruling is routed to the owner:** annotate the eight reviewer blocks in place (which
+`governance/CHANGE_RECORD_PROCEDURE.md` permits only with owner approval for the specific
+item), **or** let this section carry the correction alone. No third option is proposed and
+nothing is annotated pending the answer.

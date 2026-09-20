@@ -39,7 +39,7 @@ later; no code moved on it.
 
 | Path | What |
 |---|---|
-| `src/external/spaceweather.py` | Driver builders/guards: `trailing_mean` (trailing by construction; TC-20 refusal), `resolve_f107_at_origin` (R-57a stop naming origin + staleness), alignment onto the existing `AlignmentError`, `apply_carry_forward` ≤ 3 h + conservation invariant, time-indexed/identical-across-cells refusals (TC-12), single-grade + eligibility (D-10.1/TC-11), four provenance fields + bounded reanalysed-value check (declared-status-only, never closed), `provenance_stamp` (evidentiary), `write_driver_manifest` (two-tier, `guard_egress`), `refuse_divergent_rerun` (SD-E-07, SEC-A-02 adopted) |
+| `src/external/spaceweather.py` | Driver builders/guards: `trailing_mean` (trailing by construction; TC-20 refusal), `resolve_f107_at_origin` (R-57a stop naming origin + staleness), alignment onto the existing `AlignmentError`, `apply_carry_forward` ≤ 3 h + conservation invariant, time-indexed/identical-across-cells refusals (TC-12), single-grade + eligibility (D-10.1/TC-11), four provenance fields + bounded reanalysed-value check (declared-status-only, never closed), `provenance_stamp` (evidentiary), `write_driver_manifest` (two-tier, `guard_egress`), `refuse_divergent_rerun` (SD-E-07, SEC-A-02 adopted). **2026-09-20 (Recommendation 14 / Recommendation 41, docstring only — no behaviour change):** the module docstring now carries a "Boundary split — WHERE each refusal is invoked" section, because four of these guards shipped with ZERO production call sites and a guard module alone fails open on a forgotten call (`nfr-design:c58`). It states (a) the driver-PRODUCING guards — `assert_time_indexed_shape`, `assert_grade_eligible`, `assert_single_grade`, `refuse_divergent_rerun` — and records their call sites as a NAMED OBLIGATION on the unwritten driver-producing Bolt rather than leaving them readable as dead code; (b) the driver-CONSUMING guards, now WIRED by `features-and-splits` (`assert_identical_across_cells` per driver field after the join in `build_features`; `assert_carry_forward_conservation` immediately after `apply_carry_forward` in `transforms.carry_forward`; a duplicate-epoch refusal in `build.py::_hourly_series`); and (c) **D-10.1's two guard homes, declared**: production side `assert_single_grade` → `IntegrityError`, consumption side `availability.build_availability_matrix`'s inline check → `FeatureAvailabilityError`, each docstring naming the other's function and exception class, with the statement that the two are not redundant and a caller must not catch one expecting the other. It also flags the same unreconciled shape for `refuse_divergent_rerun` versus the equivalent inline hash comparison described in `scripts/04_build_external_products.py`'s own docstring — that reconciliation belongs to `scripts/04`'s owner and is NOT done here |
 | `src/external/iri.py` | R-59's four limbs: refuses without a passing **pre-declared** validation report; tolerance timestamp must precede comparison; field-by-field report assertion (2000 km, 5–10 official-interface samples, no-future-centering); never silently switched; D-25 carried AS STANDING (amendment not treated as granted); `iricore` import inside the gated path only |
 | `src/external/gim.py` | Q-15 refusal (rule UNSET, no default); hand-check + overlap-audit timestamps must precede generation; map-to-map + spatial-mismatch statements emitted by the reporting path itself; comparison with no registered `gim_network_overlap_flag` fails; outside-tuning residual named open |
 | `scripts/04_build_external_products.py` | Position 04; six-step entry; `audit_ec1_drivers.py` logic migrated in — the `:184` unconditional `return 0` closed onto the two-tier posture (missing months = machine-readable field naming WHICH months, non-fatal; hash mismatch vs recorded `ec1-audit-report.json` hashes terminates naming file + expectation); registry rows via foundation's writer; `--attempt-benchmark`/`--attempt-comparator`/`--gate-state`/`--render-comparison` paths; original script untouched |
@@ -723,3 +723,104 @@ automation; manual sheet); tolerance not declared (proposal awaiting approval); 
 manifest frozen, no receipt; the fixture/B-01 environment-identity coupling unresolved
 (D-49 item 4); `observable_codes` absent (features path). G-04 not passed; no producer
 artifact; no commit.
+## Post-receipt amendment — 2026-09-20 (Recommendations 14 and 41: the boundary split declared; the consuming-side guards wired by a sibling)
+
+*Appended under `project.md` `code-generation:gf-3`. The § Files created row for
+`src/external/spaceweather.py` is corrected in the BODY as well, per `code-generation:fr-2`.
+Authority: the project decision owner's approval of the 2026-09-20 governance remediation.*
+
+**What was found.** Four public callables of `src/external/spaceweather.py` govern rules
+ALREADY IN FORCE and had ZERO production references: `assert_time_indexed_shape` (TC-12, at
+construction), `assert_identical_across_cells` (TC-12, joined grid),
+`assert_carry_forward_conservation` (R-58 limb 3 — its own docstring calls it "the limb that
+carries the rule"), and `assert_single_grade` (D-10.1). The two apparent hits for
+`assert_grade_eligible` at `src/evaluation/diagnostics.py:151,1088` are a DIFFERENT function
+of the same name in the reporting module, so that guard has zero production call sites too.
+Separately, D-10.1 had two implementations with two exception classes and no declared split
+— the shape that produced the R-105-vs-R-92 exception mismatch once already.
+
+**What changed here.** `src/external/spaceweather.py` +61 / −0, **module docstring only; no
+function body, signature, constant or behaviour was touched.** The new "Boundary split"
+section is enumerated in the § Files created row above.
+
+**What changed elsewhere** (`features-and-splits`' modules, recorded here because this unit
+owns the guards being called — `code-generation:gf-3`): `src/features/build.py` +41 / −1 and
+`src/features/transforms.py` +13 / −1 wire the three consuming-side calls, and
+`src/features/availability.py` +18 / −0 carries the reciprocal half of D-10.1's split in its
+own docstring. The owning unit's `code-summary.md` records these in its own body.
+
+**DEFERRED GUARD OBLIGATIONS — carried to this unit's plan, not discharged.** The
+driver-producing path (`scripts/04_build_external_products.py`'s driver half) does not exist
+yet. When it is written it must call, at construction: `assert_time_indexed_shape` on every
+driver row set before it is emitted; `assert_grade_eligible(series, grade, use=...)` at each
+point of use; `assert_single_grade` per series for calendar 2022; and `refuse_divergent_rerun`
+on every external product re-hash — the last of which must first be reconciled against the
+equivalent inline hash comparison `scripts/04`'s docstring already describes, so the rule
+ends with ONE home rather than two. These are a named obligation, not dead code, and the
+docstring now says so.
+
+**Repository state, re-verified at summary-writing time** (`code-generation:c30`): `git log
+-1` → `ff5c683`; **no commit, stage, amend or rebase was performed by this pass** and none is
+claimed. The working tree carries 39 modified/untracked entries, most from other units
+running concurrently.
+
+**VERIFICATION STATUS — no test was executed.** No `pytest`, no stage script, no Python and
+no `ruff` ran: no usable interpreter exists here, and execution appends to
+`evidence/test_run_access_log.jsonl`, a custody artifact. Every claim above is STATIC, read
+from the code and measured with `grep` / `git diff --numstat`. The docstring change is
+behaviour-free by inspection; the sibling's three wired call sites are UNEXECUTED. G-04 is
+not passed, no producer artifact exists, and nothing here certifies any `*_safe` feature
+leakage-free.
+
+---
+
+## Post-receipt amendment — 2026-09-20, second entry (`GOV-2026-09-20-CG-01`, Recommendation 51)
+
+*Separate from the Recommendations 14/41 amendment above, which the features/leakage lane
+wrote. This entry is the data-provenance lane's, and it discloses an edit to a test module
+this unit owns. Written into the body per `project.md` (`code-generation:fr-2`).*
+
+⚠ **UNEXECUTED.** No test was run — no usable Python interpreter exists on this clone.
+Static reading only. `git log -1` = **`ff5c683`**; the change is uncommitted working tree
+and no git state-changing command was run.
+
+**`tests/test_external_drivers.py` — +105 / −0, now 2,279 lines and 81 `def test_`**
+(both re-derived with `git diff --numstat` and `grep -c` at the moment of writing, printed
+before assertion). Two test functions added; **nothing existing was modified or removed**,
+and no IRI/GIM import was introduced — this module still imports neither
+`src.external.iri` nor `src.external.gim`, statically or dynamically (SD-E-01 intact).
+
+**Recommendation 51 (Medium)** found that `scripts/audit_ec1_drivers.py` and
+`scripts/merge_coverage_year.py` were never migrated onto the §12/§13.2 CLI convention, and
+that the first `return 0`s unconditionally. The board's preferred disposition is
+**retirement, an owner ruling**, with one obligation standing either way: "Add the
+`partial` field regardless." Both scripts now carry a docstring stating the pending
+retirement, and `audit_ec1_drivers.py`'s report carries `artifact_kind`, `partial` and
+`partial_reasons`.
+
+Read the board's own qualification precisely, because it bounds what these controls test.
+The machine-readable limb was **already** satisfied — `missing_days`/`expected_days` are
+per-month report fields, never console-text-only — and `main`'s unconditional `return 0` is
+**correct**, because a completeness shortfall is non-fatal by contract. What was unmet is
+`team.md` § Code Style's remaining clause: "the artifact explicitly marked derived and/or
+partial".
+
+The two controls: `_partial_reasons` is exercised **directly** (it is pure; `main` writes
+into the real `evidence/` tree, which no test here may do) in **both directions** — a
+complete audit must **not** be flagged, and each of the four shortfall classes must both
+set the flag and **name itself**, because `partial: true` with no reason is a shortfall a
+reader cannot act on. The second control reads `main`'s source and pins that the report
+declares its own kind and partial state **and** that `main` still ends `return 0`, so a
+completeness shortfall never becomes a non-zero exit — the exit code reports **integrity**,
+the field reports **completeness**, and collapsing the two tiers into one is the specific
+regression this control exists to catch.
+
+Why here: `tests/test_external_drivers.py` is this unit's module, and
+`audit_ec1_drivers.py` audits the Kyoto Dst and NRCan F10.7 driver evidence, which is this
+unit's subject matter. The **script itself** is not this unit's deliverable — it is
+pre-TC-06 tooling, and its retirement ruling is the project decision owner's.
+
+Nothing here discharges a WS or TA row, generates an IRI benchmark or GIM comparator, or
+advances G-04. The gate verdict for `GOV-2026-09-20-CG-01` stands at **`FAIL`**, and the
+standing reviewer `NOT-READY` on this unit (Recommendation 3) is untouched: clearing it
+needs a fresh reviewer dispatch and a human turn that post-dates the resulting verdict.

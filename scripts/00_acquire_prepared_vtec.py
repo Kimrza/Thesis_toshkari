@@ -57,7 +57,7 @@ import datetime as dt
 import os
 import sys
 import uuid
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -71,10 +71,13 @@ from src.data.acquisition import (  # noqa: E402
     assert_no_locked_month_records,
     assert_records_within_window,
     cited_stations,
+    count_gaps,
+    gap_accounting_entry,
     read_records_csv,
     retrieval_policy,
     select_records_within_window,
     select_station_records,
+    store_gaps_as_nan,
     verify_declared_inputs,
     write_fixture_read_manifest,
     write_request_manifest,
@@ -101,6 +104,7 @@ from src.data.experiment_registry import (  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
+from src.data.prepared import resolve_target_identity  # noqa: E402
 
 #: The manifest/artifact field names this run produces. Screened through R-23's
 #: produced-field limb BEFORE the first write (R-24): a Phase 1 artifact may carry no
@@ -129,6 +133,15 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "provenance_class",
     "producing_interpreter",
     "missing_months",
+    # TE 13 identity stamps (R-70/TEC-05, board finding 24): every manifest this stage
+    # writes now carries all three, so they are declared to R-23's produced-field guard.
+    "phase_id",
+    "source_id",
+    "target_definition_id",
+    # W-7 gap accounting, now actually emitted (board finding 26): the conservation loop
+    # in `write_request_manifest` iterated zero entries on every run because this script
+    # never passed any.
+    "gap_accounting",
 )
 
 
@@ -348,6 +361,57 @@ def _registry_row(
     return row
 
 
+def _resolve_stamps(entry: Mapping[str, Any]) -> Mapping[str, str]:
+    """The three TE 13 definition IDs for this run, RESOLVED — never invented (R-70, R-30).
+
+    Two sources, in order, and neither is a default:
+
+    1. On a FIXTURE run, the scope's own `identity` block. A fixture scope is required to
+       carry all three stamps (`fixture_manifest` validates them as required identity
+       fields), and they are the identity of the thing being read, so a fixture manifest
+       and the manifests a fixture run writes cannot disagree about it.
+    2. Otherwise `configs/data.yaml`'s `target.identity`, through
+       `prepared.resolve_target_identity` — the ONE resolver, shared with stage 02, so the
+       head and the middle of the chain stamp from the same place rather than from two
+       transcriptions that can drift.
+
+    Neither source resolving is a TE 18.3 stop-and-report: `resolve_target_identity`
+    raises while `target.identity` is absent or `TBD — freeze gate`, and this function does
+    not catch it. That refusal is the correct state today — `configs/data.yaml` carries no
+    `target:` block, so a non-fixture run of this stage refuses here and says why, rather
+    than writing three artifacts with an identity an implementer chose (TE 18.2).
+    """
+    scope = entry.get("fixture_scope")
+    if scope is not None:
+        return dict(scope.identity)
+    return resolve_target_identity(entry["snapshot"].data)
+
+
+def _gap_accounting_for(series: str, raw_values: Sequence[Any]) -> dict[str, Any]:
+    """One W-7 `GapAccounting` entry for a series this run read or retrieved.
+
+    Board finding 26: `store_gaps_as_nan` and `gap_accounting_entry` were implemented and
+    unit-tested with ZERO production callers, and `write_request_manifest`'s
+    `gap_accounting` defaulted empty — so the NaN-count conservation loop iterated nothing
+    on every run and the D-5/D-10.2 invariant was carried by nobody. This is their
+    production call site, derived from `gap_accounting_entry`'s own scope statement ("the
+    entry is a manifest field because FR-P1-01-9 has no acceptance row").
+
+    An empty CSV cell is a GAP, not the string `""`: it is normalised to `None` before
+    `store_gaps_as_nan` turns it into an explicit NaN, so a blank the provider left blank
+    is counted as missing rather than silently surviving as a present value. The count is
+    taken BEFORE and AFTER that normalisation and `gap_accounting_entry` asserts the two
+    are equal — the invariant catches a fill on branches no fixture exercises (R-37).
+    """
+    before = [None if str(value).strip() == "" else value for value in raw_values]
+    after = store_gaps_as_nan(before)
+    return gap_accounting_entry(
+        series,
+        gaps_at_retrieval=count_gaps(before),
+        gaps_in_artifact=count_gaps(after),
+    )
+
+
 def _build_transport() -> Any:
     """The live provider transport — deliberately NOT constructed in this environment.
 
@@ -412,6 +476,14 @@ def _run_fixture_scoped(
     assert_records_within_window(
         records, start=audit_window[0], end=audit_window[1], timestamp_key="date"
     )
+    stamps = _resolve_stamps(entry)
+    # W-7 gap accounting over the columns this fixture run actually READ (board finding
+    # 26). A fixture run is the one path in this stage that reads real records today, so
+    # it is where the conservation invariant first has something to conserve.
+    gap_accounting = [
+        _gap_accounting_for(f"{scope.fixture_id}:{column}", [r.get(column) for r in records])
+        for column in ("tec", "dtec")
+    ]
     fixture_inputs = {
         "fixture_id": str(scope.fixture_id),
         "evidence_dir": str(evidence_dir.relative_to(workspace)),
@@ -422,6 +494,7 @@ def _run_fixture_scoped(
         "records_read_from_month_file": len(rows),
         "records_in_window": len(records),
         "window": [audit_window[0].isoformat(), audit_window[1].isoformat()],
+        "gap_accounting": gap_accounting,
     }
     read_manifest = write_fixture_read_manifest(
         out_dir / "fixture_read_manifest.json",
@@ -430,6 +503,7 @@ def _run_fixture_scoped(
             "kindat": acquisition_cfg["kindat"],
             "parameters": acquisition_cfg["parameters"],
         },
+        stamps=stamps,
         fixture_inputs=fixture_inputs,
         month_request_manifest=evidence_dir / "request_manifest.json",
         producing_interpreter=sys.version,
@@ -440,6 +514,7 @@ def _run_fixture_scoped(
         derived_artifacts=dict(verification["verified"]),
         provenance_class="derived_only",
         producing_interpreter=sys.version,
+        stamps=stamps,
     )
     return {
         "workspace": str(workspace),
@@ -490,6 +565,19 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
             timestamp_key="timestamp",
         )
 
+    stamps = _resolve_stamps(entry)
+    # W-7 gap accounting, one entry per retrieved series (board finding 26). Composed from
+    # what was retrieved, so a run that retrieved nothing emits nothing and a run that
+    # retrieved a series cannot leave the conservation invariant unenforced by omission.
+    gap_accounting = [
+        _gap_accounting_for(
+            str(record.get("logical_name") or record.get("provider_filename") or "<series>"),
+            list(record.get("values", ())),
+        )
+        for record in retrieved_records
+        if "values" in record
+    ]
+
     request_manifest = write_request_manifest(
         out_dir / "request_manifest.json",
         identity={
@@ -498,7 +586,9 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
             "parameters": acquisition_cfg["parameters"],
             "madrigalWeb_version": str(acquisition_cfg.get("madrigalWeb_version", "")),
         },
+        stamps=stamps,
         provider_files=retrieved_records,
+        gap_accounting=gap_accounting,
         provenance_class="full",
         producing_interpreter=sys.version,
         missing_months=[],
@@ -509,6 +599,7 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
         derived_artifacts={},
         provenance_class="full",
         producing_interpreter=sys.version,
+        stamps=stamps,
     )
     return {
         "workspace": str(workspace),

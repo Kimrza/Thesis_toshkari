@@ -88,6 +88,17 @@ secrets.yml
 *.secret
 .madrigal_auth
 
+# ── Test-mode locked-test access log (Recommendation 1, 2026-09-20) ────
+# Suite runs write their `AccessRecord` rows HERE, never into
+# `evidence/test_run_access_log.jsonl`, which is reserved for real, governed
+# accesses and is closed to further appends. Ignoring only this ONE file, not
+# the directory: `artifacts/exec_evidence/` also holds committed run evidence
+# (environment.json, junit_*.xml, sha256_manifest.json) that must stay tracked.
+# The closed governed log and its notice
+# (`evidence/test_run_access_log.SUPERSEDED_2026-09-20.md`) remain committed:
+# records are superseded, never deleted.
+artifacts/exec_evidence/test_access_log.jsonl
+
 # ── Python derived artifacts ───────────────────────────────────────────
 __pycache__/
 *.py[cod]

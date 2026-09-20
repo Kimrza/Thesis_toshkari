@@ -225,19 +225,25 @@ def test_log_timestamp_is_guard_stamped_and_precedes_the_read(tmp_path: Path) ->
 
 
 def test_caller_supplied_timestamp_is_not_trusted_for_ordering(tmp_path: Path) -> None:
-    """A caller may write anything in `retrieved_at_utc`; the guard's stamp still holds.
+    """A caller may still write a well-formed LIE; the guard's own stamp is what holds.
 
-    Negative control for the same defect: a caller that supplies a meaningless or even a
-    future-dated `retrieved_at_utc` must not be able to corrupt the ordering evidence.
+    Amended 2026-09-20 (Recommendation 1). It previously used the literal
+    `"not-a-timestamp-at-all"`, which `AccessRecord` now refuses outright -- see
+    `test_record_rejects_an_unparseable_retrieved_at_utc` below for that limb. The point
+    this test was written to make is untouched and is now made with a value the tightened
+    constructor accepts: a wildly FUTURE-dated timestamp. The narrowing is deliberate and
+    stated so it is not over-read -- parseability is not truthfulness, and
+    `retrieved_at_utc` is still a descriptive caller field that ordering must not rest on.
     """
     target = _any_restricted_file()
     if target is None:
         pytest.skip("no restricted artifact present to guard")
     registry = tmp_path / "access.jsonl"
 
+    future = "2999-01-01T00:00:00+00:00"
     bogus = AccessRecord(
         run_id="r",
-        retrieved_at_utc="not-a-timestamp-at-all",
+        retrieved_at_utc=future,
         scope="s",
         purpose="coverage_audit",
         performance_inspected=False,
@@ -247,9 +253,69 @@ def test_caller_supplied_timestamp_is_not_trusted_for_ordering(tmp_path: Path) -
     open_restricted(target, record=bogus, registry=registry)
     row = json.loads(registry.read_text(encoding="utf-8").splitlines()[-1])
 
-    assert row["retrieved_at_utc"] == "not-a-timestamp-at-all"
-    # The guard's own stamp is still a real instant, independent of the caller's field.
-    assert dt.datetime.fromisoformat(row["logged_at_utc"]).tzinfo is not None
+    assert row["retrieved_at_utc"] == future
+    # The guard's own stamp is still a real instant, independent of the caller's field --
+    # and it is in the PAST relative to the caller's claim, which is the whole point.
+    logged = dt.datetime.fromisoformat(row["logged_at_utc"])
+    assert logged.tzinfo is not None
+    assert logged < dt.datetime.fromisoformat(future), (
+        "the guard's stamp tracked the caller's claim; ordering evidence would then be "
+        "caller-controlled, which is the defect this test exists for"
+    )
+
+
+def test_record_rejects_an_unparseable_retrieved_at_utc() -> None:
+    """NEGATIVE CONTROL for Recommendation 1's durable closure.
+
+    Four mutants, each pushed through the real public entry point -- the `AccessRecord`
+    constructor -- and each required to raise: the exact historical placeholder that all
+    5,964 rows of `evidence/test_run_access_log.jsonl` carried, plus three other
+    non-parsing shapes. Without this, the check could be deleted and nothing would notice.
+    """
+    for bad in (
+        "recorded-at-call-time-by-the-runner",  # the literal 5,964 rows actually carried
+        "not-a-timestamp-at-all",
+        "t",
+        "2026-13-45T99:99:99Z",  # well-shaped but not a real instant
+    ):
+        with pytest.raises(LockedTestError) as excinfo:
+            AccessRecord(
+                run_id="r",
+                retrieved_at_utc=bad,
+                scope="s",
+                purpose="coverage_audit",
+                performance_inspected=False,
+                locked_test_accessed=True,
+                authorization="a",
+            )
+        assert "retrieved_at_utc" in str(excinfo.value), (
+            f"{bad!r} was refused for some other reason; the refusal must name the field"
+        )
+
+
+def test_record_accepts_the_shapes_a_real_producer_writes() -> None:
+    """MUST-NOT-FIRE limb. The check must not refuse a legitimate timestamp.
+
+    Three shapes: what `datetime.now(timezone.utc).isoformat()` produces (the form
+    `scripts/06`, `scripts/07`, `src/data/inventory.py` and both repaired test producers
+    write), the `Z`-suffixed form already on disk in existing fixtures, and a
+    second-resolution offset form.
+    """
+    for good in (
+        dt.datetime.now(dt.timezone.utc).isoformat(),
+        "2026-08-28T00:00:00Z",
+        "2026-09-20T15:16:20+00:00",
+    ):
+        record = AccessRecord(
+            run_id="r",
+            retrieved_at_utc=good,
+            scope="s",
+            purpose="coverage_audit",
+            performance_inspected=False,
+            locked_test_accessed=True,
+            authorization="a",
+        )
+        assert record.retrieved_at_utc == good
 
 
 # --- 2. reads outside the chokepoint are refused ---------------------------------------
@@ -313,7 +379,7 @@ def test_record_rejects_an_unknown_purpose() -> None:
     with pytest.raises(LockedTestError):
         AccessRecord(
             run_id="r",
-            retrieved_at_utc="t",
+            retrieved_at_utc="2026-08-28T00:00:00Z",
             scope="s",
             purpose="browsing",
             performance_inspected=False,
@@ -327,7 +393,7 @@ def test_record_rejects_locked_test_accessed_false() -> None:
     with pytest.raises(LockedTestError):
         AccessRecord(
             run_id="r",
-            retrieved_at_utc="t",
+            retrieved_at_utc="2026-08-28T00:00:00Z",
             scope="s",
             purpose="coverage_audit",
             performance_inspected=False,
@@ -1654,7 +1720,7 @@ def test_containment_fields_are_optional_on_the_record_itself() -> None:
 
     with_fields = AccessRecord(
         run_id="r",
-        retrieved_at_utc="t",
+        retrieved_at_utc="2026-08-28T00:00:00Z",
         scope="s",
         purpose="locked_evaluation",
         performance_inspected=False,
@@ -1668,7 +1734,7 @@ def test_containment_fields_are_optional_on_the_record_itself() -> None:
     with pytest.raises(LockedTestError):
         AccessRecord(
             run_id="",
-            retrieved_at_utc="t",
+            retrieved_at_utc="2026-08-28T00:00:00Z",
             scope="s",
             purpose="locked_evaluation",
             performance_inspected=False,
@@ -1716,4 +1782,170 @@ def test_containment_manifest_key_matches_the_producer() -> None:
         f"`freeze_bundle` no longer writes a 'mask_ids' key (found {sorted(keys)}), but "
         f"`_containment_fields` still reads `payload['mask_ids']` -- the producer and "
         f"the guard have drifted, and every read supplying a manifest would now abort"
+    )
+
+
+# --- R-19 reconciliation against the REAL pair (Recommendation 1, 2026-09-20) ----------
+#
+# `reconcile_access_records` has existed since `src/data/experiment_registry.py` was written
+# and had never been run against the real pair of artifacts on disk. That is the gap this
+# section closes: every assertion below reads the actual
+# `artifacts/registry/experiment_registry.jsonl` and the actual access logs, never a fixture.
+#
+# NOT EXECUTED BY THE AUTHOR. No Python interpreter resolves on the clone where this was
+# written (`python`/`python3` are Microsoft Store App Execution Alias stubs) and PyPI is
+# unreachable, so these tests have never run. They are the STANDING check, written so the
+# first interpreter that exists runs them. Nothing here claims a result.
+
+REAL_REGISTRY = REPO_ROOT / "artifacts" / "registry" / "experiment_registry.jsonl"
+#: The governed access log, CLOSED to further appends 2026-09-20 and preserved unedited.
+GOVERNED_ACCESS_LOG = REPO_ROOT / "evidence" / "test_run_access_log.jsonl"
+#: Where suite rows go from 2026-09-20 (gitignored; may legitimately be absent).
+TEST_MODE_ACCESS_LOG = REPO_ROOT / "artifacts" / "exec_evidence" / "test_access_log.jsonl"
+
+#: The two `run_id`s in the closed governed log, with the reason they are orphans. Both are
+#: pytest modules, which open no registry run, so no `RegistryEvent` exists or should.
+#: `reconcile_access_records` REPORTS them and never suppresses them, and it never writes --
+#: back-filling a registry row to clear an orphan is the reconstruction failure this project
+#: has already refused once.
+HISTORICAL_TEST_ORPHANS = {
+    "test_release_hashes": (
+        "5,640 pre-2026-09-20 suite rows in the now-closed governed access log; a pytest "
+        "module opens no registry run. See "
+        "evidence/test_run_access_log.SUPERSEDED_2026-09-20.md"
+    ),
+    "test_acquisition_window": (
+        "324 pre-2026-09-20 suite rows in the now-closed governed access log; a pytest "
+        "module opens no registry run. See "
+        "evidence/test_run_access_log.SUPERSEDED_2026-09-20.md"
+    ),
+}
+
+
+def test_r19_reconciliation_runs_clean_against_the_real_registry_and_governed_log() -> None:
+    """R-19 on the REAL pair: no UNEXPECTED orphan in either direction.
+
+    "Clean" is stated precisely rather than loosely. It does NOT mean zero orphans: the
+    closed governed log holds 5,964 suite rows under two `run_id`s the experiment registry
+    has never known and should never know. It means (a) `reconcile_access_records` does not
+    RAISE, which it does on any orphan outside `known_orphans`, and (b) the only orphans it
+    reports are the two historical test `run_id`s named above. A THIRD `run_id` in that log
+    -- a real December access with no registry row -- fails here, which is the case R-19
+    exists to find.
+
+    The owner's ruling on whether these two are permanently registered as known orphans, or
+    whether the closed log leaves reconciliation scope entirely, is OWED and is recorded in
+    the superseded-log notice. This test encodes the first reading; it does not decide it.
+    """
+    if not REAL_REGISTRY.is_file():
+        pytest.skip(f"{REAL_REGISTRY.relative_to(REPO_ROOT)} does not exist yet")
+    if not GOVERNED_ACCESS_LOG.is_file():
+        pytest.skip(f"{GOVERNED_ACCESS_LOG.relative_to(REPO_ROOT)} does not exist")
+
+    report = reconcile_access_records(
+        REAL_REGISTRY, GOVERNED_ACCESS_LOG, known_orphans=HISTORICAL_TEST_ORPHANS
+    )
+    unexpected = sorted(set(report.expected_orphans) - set(HISTORICAL_TEST_ORPHANS))
+    assert not unexpected, (
+        f"reconciliation reported an orphan outside the enumerated historical set: "
+        f"{unexpected}"
+    )
+    assert report.access_rows > 0 and report.registry_rows > 0, (
+        "reconciliation read zero rows from one side; a join over an empty set proves "
+        "nothing and must not be mistaken for a clean result"
+    )
+
+
+def test_r19_reconciliation_would_raise_on_an_unregistered_access(tmp_path: Path) -> None:
+    """NEGATIVE CONTROL. A reconciliation that never raises is not a check.
+
+    The real governed log is copied to `tmp_path` byte-for-byte -- the on-disk artifact is
+    append-only and is NEVER written to by a test -- and one synthetic access row for an
+    unknown `run_id` is appended to the COPY. Reconciliation must raise, naming that
+    `run_id`. The must-not-fire limb runs first: the same copy WITHOUT the planted row,
+    with the historical orphans declared, must not raise.
+    """
+    if not REAL_REGISTRY.is_file() or not GOVERNED_ACCESS_LOG.is_file():
+        pytest.skip("the real registry/access-log pair is not both present")
+
+    copy = tmp_path / "access_copy.jsonl"
+    copy.write_bytes(GOVERNED_ACCESS_LOG.read_bytes())
+
+    reconcile_access_records(
+        REAL_REGISTRY, copy, known_orphans=HISTORICAL_TEST_ORPHANS
+    )  # must-not-fire on the unplanted copy
+
+    planted = {
+        "run_id": "unregistered-december-access",
+        "retrieved_at_utc": "2026-09-20T00:00:00+00:00",
+        "scope": "synthetic control row, tmp copy only",
+        "purpose": "locked_evaluation",
+        "performance_inspected": True,
+        "locked_test_accessed": True,
+        "authorization": "none -- this is the violation being detected",
+    }
+    with copy.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(planted, sort_keys=True) + "\n")
+
+    with pytest.raises(RegistryError) as excinfo:
+        reconcile_access_records(REAL_REGISTRY, copy, known_orphans=HISTORICAL_TEST_ORPHANS)
+    assert "unregistered-december-access" in str(excinfo.value)
+
+    assert GOVERNED_ACCESS_LOG.is_file(), "the real access log must survive this test"
+
+
+def test_the_test_mode_access_log_also_reconciles_when_it_exists() -> None:
+    """The separated suite log is held to the same rule once it has rows.
+
+    It is gitignored and legitimately absent on a fresh clone, so absence SKIPS with a
+    named reason rather than passing vacuously. Its rows carry the same two test `run_id`s.
+    """
+    if not TEST_MODE_ACCESS_LOG.is_file():
+        pytest.skip(
+            f"{TEST_MODE_ACCESS_LOG.relative_to(REPO_ROOT)} has no rows yet; it is written "
+            f"by tests/test_release_hashes.py and tests/test_acquisition_window.py on a run "
+            f"where restricted artifacts are present, and it is gitignored"
+        )
+    if not REAL_REGISTRY.is_file():
+        pytest.skip(f"{REAL_REGISTRY.relative_to(REPO_ROOT)} does not exist yet")
+    report = reconcile_access_records(
+        REAL_REGISTRY, TEST_MODE_ACCESS_LOG, known_orphans=HISTORICAL_TEST_ORPHANS
+    )
+    assert not (set(report.expected_orphans) - set(HISTORICAL_TEST_ORPHANS))
+
+
+def test_every_row_of_the_closed_governed_log_is_performance_blind() -> None:
+    """The closed log's own content claim, DERIVED here rather than carried.
+
+    `evidence/test_run_access_log.SUPERSEDED_2026-09-20.md` states that all 5,964 rows
+    record `performance_inspected: false` and that none is the G-06 one-shot evaluation.
+    A notice asserting its own contents is worth nothing unless something checks it. Only
+    the JSON envelope fields are read; no December content is opened by this test.
+    """
+    if not GOVERNED_ACCESS_LOG.is_file():
+        pytest.skip(f"{GOVERNED_ACCESS_LOG.relative_to(REPO_ROOT)} does not exist")
+    inspected: list[str] = []
+    evaluations: list[str] = []
+    rows = 0
+    with GOVERNED_ACCESS_LOG.open(encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            rows += 1
+            row = json.loads(line)
+            if row.get("performance_inspected"):
+                inspected.append(str(row.get("run_id")))
+            if row.get("purpose") == "locked_evaluation":
+                evaluations.append(str(row.get("run_id")))
+    print(f"closed governed access log: rows derived {rows}")
+    assert not inspected, (
+        f"rows claiming performance_inspected in the closed log: {sorted(set(inspected))}. "
+        f"The superseded-log notice asserts none exists, and a G-05 reviewer reads that "
+        f"notice"
+    )
+    assert not evaluations, (
+        f"rows claiming purpose=locked_evaluation in the closed log: "
+        f"{sorted(set(evaluations))}. The G-06 one-shot event has not occurred and no row "
+        f"may be read as evidence that it did"
     )

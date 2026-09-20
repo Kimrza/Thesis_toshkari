@@ -614,12 +614,23 @@ def reconcile_access_records(
     A restricted access with no registry row, and a registry row claiming
     `locked_test_accessed = true` with no logged access, are each an integrity
     violation. `known_orphans` maps `run_id` -> reason for the KNOWN pre-guard rows
-    (the five retrospective accesses `evidence/experiment_registry.md` rows 3, 4, 5, 8
-    and 9 record, plus Recommendation 31's expressly unresolved access — the caller
+    (the SIX retrospective accesses `evidence/experiment_registry.md` rows 3, 4, 5, 8,
+    9 and 10 record, plus Recommendation 31's expressly unresolved access — the caller
     supplies the run_ids from that evidence record); they are REPORTED in the returned
     report and never suppressed, and this function NEVER writes: back-filling a
     registry row to clear an orphan would be the reconstruction failure repeated
     deliberately. Runs with the integrity test, never on the write path (Q4=D).
+
+    Corrected 2026-09-20 (board Recommendation 43): this enumeration read "the five
+    retrospective accesses ... rows 3, 4, 5, 8 and 9", carried from
+    `evidence/experiment_registry.md:43`'s own summary line, which was written before row
+    10 was added on 2026-08-28 and never updated. Row 10 (the `GOV-2026-08-28-FD-01`
+    Validation Auditor seat's restricted-root inspection) states in its own cell that it
+    was "created 2026-08-28, after the read" — a sixth retrospective access. Derived here
+    by enumerating the rows whose own text carries the literal `Retrospective row`, which
+    returns exactly {3, 4, 5, 8, 9, 10}; rows 6, 7, 11 and 12 record a pre-read write and
+    are not retrospective. A caller sizing `known_orphans` from the stale five would leave
+    row 10's access looking like an undisclosed orphan.
 
     Raises
     ------

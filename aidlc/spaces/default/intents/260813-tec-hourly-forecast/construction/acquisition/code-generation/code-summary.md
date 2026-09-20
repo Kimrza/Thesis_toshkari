@@ -509,3 +509,105 @@ the ≤2-Major threshold, but the artifact must not stand uncorrected on a commi
 it is explicitly disciplined never to leave stale.
 
 **Verdict: READY**
+
+---
+
+## Post-receipt amendment — 2026-09-20 (`GOV-2026-09-20-CG-01`, Recommendations 24, 26, 46, 51)
+
+*Written into the body, not filed as a review addendum, per `project.md`
+(`code-generation:fr-2`). The stage receipt above is **frozen and untouched**: nothing in
+this section revises a verdict or a signed claim. It discloses what the owner-authorised
+remediation of `GOV-2026-09-20-CG-01` changed in modules this unit owns.*
+
+⚠ **UNEXECUTED.** No test, script or notebook was run. No usable Python interpreter exists
+on this clone (`python.exe` is a zero-byte Windows Store alias stub; PyPI is unreachable).
+Every statement below is **static**, read from source and measured with `git diff
+--numstat` / `grep`. Nothing here is "verified passing".
+
+**Repository state, re-derived at the moment this section was written** (`project.md`
+`code-generation:c30`): `git log -1` = **`ff5c683`**; `git status --porcelain` = 73 entries.
+Every change below is **uncommitted working tree**. No commit, add, amend, revert or config
+change was made — the commit is the student's act and is routed to the owner.
+
+### What changed in this unit's modules
+
+| File | Δ vs `ff5c683` | Change |
+|---|---|---|
+| `src/data/acquisition.py` | +184 / −14 | Rec 24, 26, 46 — see below |
+| `scripts/00_acquire_prepared_vtec.py` | +92 / −1 | Rec 24, 26 wiring |
+| `scripts/audit_ec1_drivers.py` | +65 / −2 | Rec 51 |
+| `scripts/audit_gfz_drivers.py` | +70 / −2 | Rec 24 (repair of a break, see below) |
+| `tests/test_acquisition.py` | +239 / −2 | controls for all of the above |
+
+**Recommendation 24 (High) — TEC-05 stamps at the provenance head.** The board's census
+found **zero** occurrences of `phase_id`/`source_id`/`target_definition_id` in
+`src/data/acquisition.py`, so `request_manifest.json`, `sha256_manifest.json` and
+`fixture_read_manifest.json` all reached a gate with no identity, while stage 02 onward
+stamped thoroughly. `TEC05_STAMP_FIELDS` and `assert_identity_stamped` are now declared
+here — the lowest module in the package, so `inventory` and `prepared` read one vocabulary
+— and `stamps` is a **required** keyword on all three writers. Required, not defaulted: a
+default would preserve exactly the silence being closed. On `write_sha256_manifest` the
+stamps ride the **metadata sidecar**, never the hash mapping, which must stay the canonical
+flat `{path: sha256}` document the governed reader parses (G-1, 2026-09-19). Stage 00
+resolves them from the fixture scope's `identity` block, else from `configs/data.yaml`
+`target.identity` through `prepared.resolve_target_identity` — the one resolver — and
+**invents nothing**; that block does not exist, so a non-fixture run now refuses and says
+why (TE §18.3).
+
+**Recommendation 46 (Medium) — record-date attribution in UTC.** `_record_date` sliced
+`raw[:10]`, attributing an offset-bearing timestamp to its **local** date:
+`2022-11-30T23:30:00-05:00` is `2022-12-01T04:30:00Z`, a December record a slice files
+under November and walks past the BLK-07 bar. `parse_record_date_utc` is now the one
+derivation — a bare `YYYY-MM-DD` is accepted (no offset to misread), an explicit zero UTC
+offset is accepted, and a naive or non-zero-offset timestamp is **refused** rather than
+silently converted. `inventory._record_date` wraps the same parser behind its own
+integrity type, so there is one derivation and two tiers (`nfr-design:c58`). Latent, not
+realised: all observed data carries `+00:00`, and the DATA-07 re-acquisition is being
+written against this function.
+
+**Recommendation 26 (High) — `store_gaps_as_nan` and `gap_accounting_entry` wired.** Both
+were correct, unit-tested and had **zero** production callers, and
+`write_request_manifest(gap_accounting=())` defaulted empty, so the NaN-conservation loop
+iterated nothing on every run and the D-5/D-10.2 rule was carried by nobody.
+`scripts/00::_gap_accounting_for` is their call site, derived from `gap_accounting_entry`'s
+own scope statement, and both stage-00 paths compose an entry per series. An empty CSV cell
+is normalised to `None` **before** `store_gaps_as_nan`, so a blank the provider left blank
+counts as missing rather than surviving as a present value.
+
+**Recommendation 51 (Medium) — the EC-1 legacy audit marks itself partial.** Read the
+board's qualification precisely: the machine-readable limb was **already** satisfied
+(`missing_days`/`expected_days` are per-month report fields, never console-text-only) and
+`main`'s unconditional `return 0` is **correct**, because a completeness shortfall is
+non-fatal by contract. What was unmet is `team.md`'s remaining clause — "the artifact
+explicitly marked derived and/or partial". The report now carries `artifact_kind`,
+`partial` and `partial_reasons`, derived from the measurements. The **migration** is not
+done and is not proposed: the board's preferred disposition is **retirement**, an owner
+ruling, and both legacy scripts carry a docstring saying so.
+
+### One defect found and repaired during this resume, beyond the sixty
+
+`scripts/audit_gfz_drivers.py:704` is the third caller of `write_sha256_manifest`. When
+Recommendation 24 made `stamps` required, that call was left unchanged — so the call was a
+**`TypeError` at runtime**, not an unstamped write. Repaired by `_resolve_stamps()`, which
+delegates to `prepared.resolve_target_identity` over `configs/data.yaml` read through
+`config._parse_yaml` (the package's own strict loader — a second `yaml.load` would be a
+second derivation). ⚠ **Open, routed to the owner and not decided here:**
+`target.identity.source_id` identifies the prepared-VTEC **target** lineage, and those four
+artifacts are **driver** evidence. Whether a driver audit stamps the study's target
+identity or carries its own provider-DOI-derived `source_id` is settled by no document in
+this workspace; resolving through the one resolver keeps the value resolved rather than
+invented, and a contrary ruling changes `configs/data.yaml`, not the script.
+
+### Consequences a reader must not miss
+
+* A **non-fixture** stage-00 run now **refuses** at `_resolve_stamps`, because
+  `configs/data.yaml` carries no `target:` block. This is the TE §18.3 stop-and-report, not
+  a regression — but it is new, and it is the owner's `target:` transcription that clears it.
+* `parse_record_date_utc` **refuses a naive timestamp**. One in-scope test fixture
+  (`tests/test_prepared_target_schema.py`, the fixture-window control) carried naive
+  literals and was corrected to the trailing-`Z` shape `prepared.hour_start_utc` actually
+  emits. Production is unaffected: real `interval_start_utc` values carry `Z` and the month
+  files' `date` column is a bare calendar date.
+* **The stage receipt above is not reopened.** This section is disclosure under the owner's
+  `CR-2026-09-20-GOV-CG-01-DISPOSITIONS` authorisation; the `code-generation` gate verdict
+  for `GOV-2026-09-20-CG-01` stands at **`FAIL`** and nothing here advances it.

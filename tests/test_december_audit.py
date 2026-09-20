@@ -75,6 +75,15 @@ from src.data.inventory import (
     validate_schema,
     write_source_inventory,
 )
+from src.data.inventory import (  # noqa: E402
+    PERFORMANCE_BLIND_RESIDUAL,
+    UNKNOWN_VERSION_TOKEN,
+    assert_sources_unmixed_or_recorded,
+    is_december_bearing,
+    provider_suffix_census,
+    provider_version_token,
+    read_provider_suffix_census,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -165,25 +174,59 @@ def test_paraphrased_notice_fails_and_verbatim_passes() -> None:
     assert_verbatim_notice(_entry(acknowledgment_notice=required), required)
 
 
+#: SYNTHETIC TE 13 identity stamps (R-70/TEC-05). Never the project's real
+#: phase/source/target-definition IDs: those are governed values awaiting the `target:`
+#: block's freeze (TE 18.2), and a test that hardcoded them would become a second
+#: transcription competing with the config.
+_STAMPS: dict[str, str] = {
+    "phase_id": "SYN-PHASE",
+    "source_id": "SYN-SOURCE",
+    "target_definition_id": "SYN-TARGET-DEF",
+}
+
+
 def test_write_source_inventory_enforces_notices_and_writes(tmp_path: Path) -> None:
     required = {"synthetic-provider": "The required verbatim text."}
     with pytest.raises(InventoryError):
-        write_source_inventory(tmp_path / "inv.json", [_entry()], required_notices=required)
+        write_source_inventory(
+            tmp_path / "inv.json", [_entry()], stamps=_STAMPS, required_notices=required
+        )
     path = write_source_inventory(
         tmp_path / "inv.json",
         [_entry(acknowledgment_notice="The required verbatim text.")],
+        stamps=_STAMPS,
         required_notices=required,
         missing_entries=["synthetic shortfall, recorded machine-readably"],
     )
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert payload["missing_entries"] == ["synthetic shortfall, recorded machine-readably"]
+    for field, value in _STAMPS.items():
+        assert payload[field] == value, f"TE 13 stamp {field!r} absent from the inventory"
+
+
+@pytest.mark.parametrize("absent", ["phase_id", "source_id", "target_definition_id"])
+def test_source_inventory_refuses_an_empty_identity_stamp(tmp_path: Path, absent: str) -> None:
+    """One control per stamp (R-70/TEC-05, board finding 24). Nothing written on refusal.
+
+    `src/data/inventory.py` held ONE occurrence of the three stamp names before
+    2026-09-20 and it was a default parameter name, not a stamp — so the source inventory,
+    the coverage report and the regime report all reached the G-P1A gate carrying no
+    phase, source or target-definition identity at all.
+    """
+    target = tmp_path / f"inv_{absent}.json"
+    stamps = dict(_STAMPS)
+    stamps[absent] = ""
+    with pytest.raises(IntegrityError) as excinfo:
+        write_source_inventory(target, [_entry()], stamps=stamps)
+    assert absent in str(excinfo.value)
+    assert not target.exists(), "an unstamped inventory must not reach disk"
 
 
 def test_inventory_refuses_credential_shaped_values(tmp_path: Path) -> None:
     """SD-I-06: the access-notes field is a secret-egress surface; the chokepoint fires."""
     entry = _entry(licence_access_notes="Bearer abcdefghijklmnop0123456789ABCDEFGH")
     with pytest.raises(CredentialEgressError):
-        write_source_inventory(tmp_path / "inv.json", [entry])
+        write_source_inventory(tmp_path / "inv.json", [entry], stamps=_STAMPS)
 
 
 # --- W-5 / R-49: schema validation ----------------------------------------------------
@@ -639,6 +682,7 @@ def test_interrupted_audit_leaves_no_report_while_rows_stand(tmp_path: Path) -> 
             december_identities=["artifact-1"],
             coverage_report=coverage_report,
             regime_report=regime,
+            stamps=_STAMPS,
         )
     assert not out_dir.exists() or not list(out_dir.iterdir()), "NO report on failure"
     assert registry.read_text(encoding="utf-8").strip(), "the rows stand (NFR-AUD-01)"
@@ -658,8 +702,47 @@ def test_consistent_audit_writes_both_reports(tmp_path: Path) -> None:
         december_identities=["artifact-1"],
         coverage_report=coverage_report,
         regime_report=regime,
+        stamps=_STAMPS,
     )
     assert coverage_path.is_file() and regime_path.is_file()
+    # R-70/TEC-05: both gate-read reports carry all three definition IDs.
+    for written in (coverage_path, regime_path):
+        payload = json.loads(written.read_text(encoding="utf-8"))
+        for field, value in _STAMPS.items():
+            assert payload[field] == value, (
+                f"TE 13 stamp {field!r} absent from {written.name} — this is the artifact "
+                f"G-P1A and G-05 actually read (board finding 24)"
+            )
+
+
+@pytest.mark.parametrize("absent", ["phase_id", "source_id", "target_definition_id"])
+def test_audit_reports_refuse_an_empty_identity_stamp(tmp_path: Path, absent: str) -> None:
+    """One control per stamp, asserted at the all-or-nothing boundary: NO report written.
+
+    The stamp check runs FIRST in `finalize_audit_reports`, before the performance-blind
+    scan and before reconciliation, so an unstamped audit fails the same way every other
+    defect there does rather than producing two untraceable reports.
+    """
+    registry = tmp_path / "access_log.jsonl"
+    _write_rows(registry, [{"run_id": "audit-A", "scope": "artifact-1"}])
+    out_dir = tmp_path / f"reports_{absent}"
+    stamps = dict(_STAMPS)
+    stamps[absent] = ""
+    with pytest.raises(IntegrityError) as excinfo:
+        finalize_audit_reports(
+            out_dir,
+            run_id="audit-A",
+            registry_path=registry,
+            declared=_scope(),
+            december_identities=["artifact-1"],
+            coverage_report={"figures": [], "per_month": {m: 1 for m in AUDIT_MONTHS}},
+            regime_report=build_regime_report([], audit_year=2021, locked_month=6),
+            stamps=stamps,
+        )
+    assert absent in str(excinfo.value)
+    assert not out_dir.exists() or not list(out_dir.iterdir()), (
+        "an unstamped audit must write NO report (SEC-I-03 all-or-nothing)"
+    )
 
 
 # --- R-51 / R-52: the G-P1A record and the four prohibitions -----------------------------
@@ -855,3 +938,258 @@ def test_optionb_01_fixture_runs_read_no_month_records() -> None:
         "the fixture branch consults the config declaration — the disjoint-windows "
         "deadlock CR-2026-09-13-000102-FIXTURE-WINDOW repairs"
     )
+
+
+# =======================================================================================
+# Board findings 8 / 22: the provider-version census and prohibition 2's production wiring
+# =======================================================================================
+#
+# FIXTURE DISCIPLINE, restated for this section. Every filename below is SYNTHETIC. The
+# real months' version distribution is MEASURED by running the tool, never transcribed
+# into a test: a test carrying `g.001: 613` would become a second, drifting record of a
+# figure the run owns (TE 18.2; project.md § Way of Working — "derive a count
+# programmatically ... never carry a count from adjacent prose").
+
+
+def _rec(day: str, version: str, station: str = "SYNA") -> dict:
+    """One synthetic raw-record row in the real column shape (`file`, `date`, `station`)."""
+    compact = day.replace("-", "")
+    return {
+        "station": station,
+        "date": day,
+        "file": f"/syn/root/experiments4/2021/gps/{day}/syn{compact}{version}.hdf5",
+    }
+
+
+def test_provider_version_token_reads_the_suffix_and_never_guesses() -> None:
+    assert provider_version_token("/a/b/gps220228g.002.hdf5") == "g.002"
+    assert provider_version_token("/a/b/gps221231g.003.hdf5") == "g.003"
+    # Anchored on the `.hdf5` tail, so a directory component that merely looks like a
+    # version is not mistaken for one.
+    assert provider_version_token("/a/g.009/records.csv") == UNKNOWN_VERSION_TOKEN
+    assert provider_version_token("") == UNKNOWN_VERSION_TOKEN
+    assert provider_version_token(None) == UNKNOWN_VERSION_TOKEN
+
+
+def test_census_measures_the_mix_per_month_and_per_day() -> None:
+    """The measurement board finding 8 found nothing in this workspace performing.
+
+    Every count is DERIVED by the tool and compared against a count derived the same way
+    from the same rows — never against a numeral written into this test.
+    """
+    rows = [
+        _rec("2021-06-01", "g.001"),
+        _rec("2021-06-01", "g.002"),
+        _rec("2021-06-02", "g.002"),
+        _rec("2021-06-03", "g.002"),
+    ]
+    census = provider_suffix_census(rows)
+    assert census["version_tokens"] == ["g.001", "g.002"]
+    assert census["version_mixed"] is True
+    assert census["records_examined"] == len(rows)
+    assert sum(census["records_by_version"].values()) == len(rows)
+    # Per-day is what distinguishes a mid-month reissue from two clean retrieval runs.
+    assert census["days_version_mixed"] == ["2021-06-01"]
+    assert set(census["by_day"]) == {"2021-06-01", "2021-06-02", "2021-06-03"}
+    # An unreadable filename is REPORTED, never folded into a recognised bucket: folding
+    # it would UNDERSTATE the mix, which is the defect the census exists to surface.
+    with_unknown = provider_suffix_census([*rows, {"date": "2021-06-04", "file": "x.csv"}])
+    assert with_unknown["records_unrecognised_version"] == 1
+    assert UNKNOWN_VERSION_TOKEN in with_unknown["version_tokens"]
+
+
+def test_a_single_version_month_is_clean_and_an_unrecorded_mix_is_refused() -> None:
+    """R-52 prohibition 2 at its production boundary (board findings 8 and 26).
+
+    `assert_unmixed_sources` had a definition, an `__all__` entry and unit tests, and ZERO
+    production callers — the guard-module-fails-open shape nfr-design c58 names. This is
+    the wrapper that gives it a call site, so the control drives the wrapper.
+    """
+    single = [_rec("2021-06-01", "g.002"), _rec("2021-06-02", "g.002")]
+    mixed = [*single, _rec("2021-06-02", "g.001")]
+
+    clean = assert_sources_unmixed_or_recorded(
+        single, artifact="syn-2021-06", recorded_versions=["g.002"]
+    )
+    assert clean["mix_recorded"] is True and clean["version_mixed"] is False
+
+    # An UNRECORDED mix refuses, naming every version found — the fact a workspace-wide
+    # grep for `g.001` over every *.md could not find recorded anywhere.
+    with pytest.raises(GateError) as excinfo:
+        assert_sources_unmixed_or_recorded(mixed, artifact="syn-2021-06")
+    message = str(excinfo.value)
+    assert "syn-2021-06" in message and "g.001" in message and "g.002" in message
+
+    # A RECORDED mix is cleared: the rule is "absent or recorded", not "never mixed".
+    # Provider version drift is an observed fact of this dataset, and refusing every mixed
+    # month would refuse five of the eleven non-December months outright.
+    recorded = assert_sources_unmixed_or_recorded(
+        mixed, artifact="syn-2021-06", recorded_versions=["g.001", "g.002"]
+    )
+    assert recorded["mix_recorded"] is True and recorded["version_mixed"] is True
+
+    # An UNDER-declaration is not a recording: it must still refuse, or the escape hatch
+    # swallows the rule it is an exception to.
+    with pytest.raises(GateError):
+        assert_sources_unmixed_or_recorded(
+            mixed, artifact="syn-2021-06", recorded_versions=["g.002"]
+        )
+
+
+def test_census_refuses_a_path_inside_the_restricted_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The census is a READ, and a December read belongs to the LOGGED chokepoint.
+
+    Exercised against a SYNTHETIC restricted root through `locked_test._repo_root`, the
+    guard's own documented test seam. No real restricted path is constructed, and this
+    module still holds no restricted-root literal (R-28).
+    """
+    monkeypatch.setattr(locked_test, "_repo_root", lambda: tmp_path)
+    restricted = locked_test._restricted_root(tmp_path)
+    restricted.mkdir(parents=True, exist_ok=True)
+    planted = restricted / "madrigal_coverage_raw_records.csv"
+    planted.write_text(
+        "station,date,file\nSYNA,2021-06-01,/syn/a/syn20210601g.002.hdf5\n", encoding="utf-8"
+    )
+    with pytest.raises(LockedTestError) as excinfo:
+        read_provider_suffix_census(planted)
+    assert "restricted root" in str(excinfo.value)
+
+    # An ORDINARY path reads normally. Without this half, a function that refused
+    # everything would pass the control.
+    ordinary = tmp_path / "evidence" / "audit_evidence_2021-06"
+    ordinary.mkdir(parents=True)
+    records = ordinary / "madrigal_coverage_raw_records.csv"
+    records.write_text(
+        "station,date,file\nSYNA,2021-06-01,/syn/a/syn20210601g.002.hdf5\n", encoding="utf-8"
+    )
+    rows, census = read_provider_suffix_census(records, recorded_versions=["g.002"])
+    assert len(rows) == 1 and census["version_tokens"] == ["g.002"]
+
+    # An absent file is a measurement GAP, never a zero: reporting zero records for a
+    # month whose file is missing would understate the very mix being measured.
+    with pytest.raises(InventoryError):
+        read_provider_suffix_census(ordinary / "absent.csv")
+
+
+def test_stage01_inventory_invokes_the_census_and_the_nine_field_check() -> None:
+    """INVOCATION control (board finding 26), not a correctness control.
+
+    `scripts/01` called `write_source_inventory` ONCE, with a literal empty entry list, so
+    `assert_source_entry` and `assert_verbatim_notice` could never fire on a real run no
+    matter how correct they were. A correctness test cannot detect that; this can.
+    """
+    import inspect
+
+    stage01 = _load_stage_script()
+    source = inspect.getsource(stage01._run_inventory)
+    assert "_inventory_entry(" in source, (
+        "scripts/01::_run_inventory builds no entry, so the nine-field check still cannot "
+        "fire on a real run (board finding 26)"
+    )
+    assert "required_notices=notices" in source, (
+        "the verbatim-notice guard must receive the provider notice map, or "
+        "assert_verbatim_notice remains uninvoked in production"
+    )
+    assert "stamps=stamps" in source, "the inventory must be stamped (R-70/TEC-05)"
+    entry_builder = inspect.getsource(stage01._inventory_entry)
+    assert "read_provider_suffix_census(" in entry_builder, (
+        "the entry builder must MEASURE the provider-version distribution: release_status "
+        "is the TE 5.1 field board finding 8 identified as the one that would have "
+        "surfaced the mix"
+    )
+    assert "release_status" in entry_builder and "census[" in entry_builder, (
+        "the MEASURED distribution must reach release_status, not merely be computed"
+    )
+
+
+def test_stage01_audit_invokes_the_silent_imputation_prohibition() -> None:
+    """INVOCATION control for R-52 prohibition 1 (board finding 26).
+
+    `assert_no_silent_imputation` and `store_gaps_as_nan` had no production caller, so the
+    D-5/D-10.2 rule that gaps are explicit NaN and nothing fills them was carried by
+    nobody on a real run.
+    """
+    import inspect
+
+    stage01 = _load_stage_script()
+    source = inspect.getsource(stage01._run_audit)
+    assert "assert_no_silent_imputation(" in source and "store_gaps_as_nan(" in source, (
+        "scripts/01::_run_audit must run the conservation check over the month's own "
+        "normalisation; a guard module alone fails open on a forgotten call (c58)"
+    )
+    assert "prohibition_results" in source
+
+
+def test_stage01_schema_validation_path_invokes_the_w5_guards() -> None:
+    """INVOCATION control: `expected_schema_from`/`validate_schema` had no caller at all."""
+    import inspect
+
+    stage01 = _load_stage_script()
+    source = inspect.getsource(stage01._run_schema_validation)
+    assert "expected_schema_from(" in source and "validate_schema(" in source
+
+
+# =======================================================================================
+# Board finding 49: `assert_performance_blind`'s stated limit must stay stated
+# =======================================================================================
+
+
+def test_performance_blind_control_discloses_that_it_is_a_key_name_filter() -> None:
+    """A DISCLOSURE-GUARDING test: deleting the disclosure fails the suite.
+
+    The residual is real and was ACCEPTED rather than closed: `_walk` inspects
+    `str(key).lower()` against eleven fragments and recurses into values without ever
+    examining one, so a performance quantity under a benign key passes. Invocation is
+    strong — `finalize_audit_reports` runs it over both reports, all-or-nothing, before
+    the first byte is written — and a strong chokepoint around a narrow test reads as a
+    broad guarantee unless the narrowness is written where the reader meets it.
+
+    The established pattern is `tests/test_locked_test_guard.py`'s disclosure test; that
+    module belongs to another unit, so this control lives with its subject.
+    """
+    from src.data.inventory import assert_performance_blind as guard
+
+    assert guard.__doc__ is not None
+    assert PERFORMANCE_BLIND_RESIDUAL in guard.__doc__, (
+        "the STATED LIMIT disclosure has been removed from assert_performance_blind's "
+        "docstring; the control is a key-name filter, and a reader who is not told so "
+        "will read a G-P1A acceptance as proof that no performance quantity is present "
+        "(board finding 49)"
+    )
+    for owed in ("key-name filter", "benign key", "bare list"):
+        assert owed in guard.__doc__, f"the disclosure no longer states: {owed}"
+
+    # The disclosure is not cover for a broken guard: the narrow job still gets done.
+    with pytest.raises(GateError, match="rmse"):
+        guard({"figures": [{"rmse": 0.1}]}, resource="coverage report")
+    # And the disclosed residual is real — which is exactly why it is disclosed.
+    guard({"figures": [{"summary": 0.1}]}, resource="coverage report")
+
+
+# =======================================================================================
+# Board finding 46: this unit's record-date reader attributes in UTC too
+# =======================================================================================
+
+
+def test_inventory_record_dates_are_attributed_in_utc_not_locally() -> None:
+    """`inventory._record_date` wraps the SAME parser as `acquisition`'s (one home, c58).
+
+    It matters here specifically because this reader decides the ROUTING CLASS: an
+    observation attributed to the wrong month is routed as ordinary, read with no access
+    row, and counted into the wrong month's figure.
+    """
+    boundary_local = {"station": "SYNA", "timestamp": "2021-05-31T23:30:00-05:00"}
+    with pytest.raises(InventoryError) as excinfo:
+        attribute_records_by_month([boundary_local], audit_year=2021)
+    assert "offset" in str(excinfo.value)
+
+    # The same instant as explicit UTC lands in JUNE, the synthetic locked month — the
+    # half that proves ATTRIBUTION rather than mere refusal.
+    boundary_utc = {"station": "SYNA", "timestamp": "2021-06-01T04:30:00+00:00"}
+    by_month, excluded = attribute_records_by_month([boundary_utc], audit_year=2021)
+    assert set(by_month) == {"2021-06"} and excluded == 0
+    assert is_december_bearing([boundary_utc], locked=SYNTHETIC_LOCKED) is True
+    # The local-date reading would have been May, which must NOT be what happens.
+    assert "2021-05" not in by_month

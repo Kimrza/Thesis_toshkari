@@ -12,6 +12,15 @@ NFR-PHASE-01 makes the same rule binding, and requirement FR-P1-03-2 decomposes 
 limbs. §2.2 and §7.0B add the protected-hash limb enforced by the transition-manifest
 hash-diff test, which is a separate module.
 
+WHERE THE HASH-DIFF LIMB LIVES (cross-reference added 2026-09-20, Recommendation 58).
+`team.md` § Deployment names `test_phase_boundary.py` as the home of the
+transition-manifest hash-diff test, and it is NOT here. `diff_protected_hashes` and
+`assert_protected_hashes_unchanged` are exercised in **`tests/test_phase_contract.py`**
+(a genuine digest comparison over the protected set, verified 2026-09-20). Both required
+tests exist and only the LOCATION differs from the affirmed practice's wording. A G-P3C
+reviewer looking here for the hash-diff limb should read `tests/test_phase_contract.py`
+and must not record its absence from this module as a coverage gap.
+
 INPUTS. Read-only:
   * `src/` -- the Phase 1 module graph, when it exists;
   * `scripts/` -- the phase-aware stage scripts, when they exist;
@@ -48,6 +57,8 @@ from __future__ import annotations
 
 import ast
 import csv
+import datetime as dt
+import sys
 from pathlib import Path
 
 import pytest
@@ -57,6 +68,67 @@ SRC_DIR = REPO_ROOT / "src"
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 EVIDENCE_DIR = REPO_ROOT / "evidence"
 RESTRICTED_DIR = EVIDENCE_DIR / "locked_test_restricted"
+
+# --- the restricted-root chokepoint (R-28; Recommendation 32, added 2026-09-20) --------
+#
+# THE DEFECT. This module is one of R-28's `RESTRICTED_LITERAL_EXEMPT_MODULES`, and until
+# 2026-09-20 it held that literal and also READ restricted content with no access record at
+# all: `_phase1_artifacts()` collects `madrigal_coverage_*.csv` from BOTH evidence roots
+# (`test_restricted_root_artifacts_are_checked_too` asserts it must), and `_csv_header`
+# opened every one of them directly. The exemption covers HOLDING the literal and has never
+# covered obtaining the CONTENT -- `src/data/locked_test.py`'s own comment on the constant
+# says exactly that. The module had ZERO `open_restricted` references.
+#
+# WHY THE IMPORT IS LAZY AND INSIDE THE GUARD. This module deliberately carries no
+# module-level `from src...` import: `_module_level_literal` reaches producer source by
+# PARSING it, and the module's contract is to stay collectible and SKIP with a named reason
+# when `src/` is absent. A module-level import of the chokepoint would turn that explicit
+# skip into a collection error and drag in `src.data.config`/`release`/`acquisition`
+# transitively. So the import happens only on the restricted branch, where it is needed, and
+# FAILS CLOSED if it is unavailable: a restricted read is refused outright rather than
+# performed unguarded. An ordinary path never touches it, so collectibility is unchanged.
+ACCESS_LOG = REPO_ROOT / "artifacts" / "exec_evidence" / "test_access_log.jsonl"
+
+
+def _read_guarded(path: Path) -> Path:
+    """Return `path` for reading, routing it through the chokepoint when restricted.
+
+    A path outside the restricted root is returned unchanged: `open_restricted` REFUSES an
+    ordinary path by contract, so routing everything through it would raise rather than
+    protect.
+    """
+    if not path.is_relative_to(RESTRICTED_DIR):
+        return path
+
+    if str(REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT))
+    try:
+        from src.data.locked_test import AccessRecord, open_restricted
+    except ImportError as exc:  # fail CLOSED
+        pytest.fail(
+            f"a restricted artifact ({path.name}) was reached for reading but the "
+            f"chokepoint src/data/locked_test.py is not importable ({exc}). The read is "
+            f"REFUSED rather than performed unguarded: R-28's boundary holds only while "
+            f"exactly one code path reaches the restricted root, and an unrecorded read "
+            f"is the failure the boundary exists to prevent."
+        )
+
+    record = AccessRecord(
+        run_id="test_phase_boundary",
+        # A REAL timestamp. `AccessRecord` refuses a non-ISO-8601 value since 2026-09-20
+        # (Recommendation 1); the placeholder every historical row carried cannot return.
+        retrieved_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
+        scope="produced Phase 1 artifact HEADER ROWS only, for the forbidden-field limb",
+        # Performance-blind custody assessment: this module reads the first CSV line and
+        # compares COLUMN NAMES. No December value, coverage figure or performance
+        # quantity is parsed, counted or computed here -- Vision 8.3's permitted class.
+        purpose="coverage_audit",
+        performance_inspected=False,
+        locked_test_accessed=True,
+        authorization="TE 7.0 / NFR-PHASE-01 produced-field limb; D-15 custody root is in "
+        "boundary-checking scope, not exempt from it",
+    )
+    return open_restricted(path, record=record, registry=ACCESS_LOG)
 
 # Raw-processing adapters. The first two are named in §7.0; the remaining two are the other
 # `src/gnss/` modules in the §12 tree, assigned to Phase 2 stages 2 and 3, and are included
@@ -190,7 +262,14 @@ def _module_level_literal(path: Path, name: str) -> object:
 
 
 def _csv_header(path: Path) -> list[str]:
-    with path.open(newline="", encoding="utf-8") as handle:
+    """The artifact's column names, read through the chokepoint when restricted.
+
+    This is the module's ONLY reader of produced-artifact content and therefore the single
+    guard home for it (`nfr-design` c58): guarding here covers every present and future
+    caller, where guarding at each call site would fail open on a forgotten one. It reads
+    the FIRST ROW ONLY -- column names, never a value.
+    """
+    with _read_guarded(path).open(newline="", encoding="utf-8") as handle:
         for row in csv.reader(handle):
             return [c.strip() for c in row]
     return []
@@ -204,22 +283,32 @@ def _phase1_artifacts() -> list[Path]:
 
 
 # --- limb 1: the import boundary ------------------------------------------------------
+#
+# REFACTORED 2026-09-20 (Recommendation 50). Two independent reviewers confirmed this limb
+# is NOT vacuous -- it scans the live import graph and SKIPS with a stated reason rather
+# than passing when `src/` is absent. The narrow gap was that nothing proved the detector
+# would CATCH an injected violation: the module carried no `pytest.raises` and no synthetic
+# tree, while both sibling scanners prove theirs (`tests/test_iri_denial.py`'s
+# `run_containment_scan`, 15 controls; `tests/test_import_boundary.py`, 4). The scan bodies
+# are now callables taking a ROOT -- the same shape `run_containment_scan` already uses --
+# so the negative controls below can push a violating synthetic tree through the SAME code
+# the real assertions run, not a re-implementation of it (`nfr-design` c58).
 
 
-def test_raw_processing_modules_are_absent_or_unreferenced_from_phase1_code() -> None:
-    """No Phase 1 module or stage script imports a raw-processing adapter.
+def scan_raw_processing_references(
+    src_root: Path, scripts_root: Path | None = None
+) -> dict[str, list[str]]:
+    """Files under the given roots that import a raw-processing adapter.
 
-    Covers all four `src/gnss/` modules, not only the two §7.0 names, because the clause
-    says "every raw-processing adapter". A violation via `target.py` or `verification.py`
-    was previously outside every stated prohibition (finding IMPL-2).
+    Returns `{relative path: sorted offending module names}`. `src/gnss/` itself is
+    excluded from the scanned set -- those modules are the adapters, not importers of them.
+    Paths are relative to `src_root.parent` so the result is meaningful for a synthetic
+    `tmp_path` tree as well as the real one.
     """
-    candidates = [p for p in _python_files(SRC_DIR) if "gnss" not in p.parts]
-    candidates += _python_files(SCRIPTS_DIR)
-    if not candidates:
-        pytest.skip(
-            "no Phase 1 source or stage scripts exist yet (src/ and the nine phase-aware "
-            "scripts are REQ-ENG-1); the import limb activates when they are built"
-        )
+    base = src_root.parent
+    candidates = [p for p in _python_files(src_root) if "gnss" not in p.parts]
+    if scripts_root is not None:
+        candidates += _python_files(scripts_root)
     offenders: dict[str, list[str]] = {}
     for path in candidates:
         hits = sorted(
@@ -229,7 +318,48 @@ def test_raw_processing_modules_are_absent_or_unreferenced_from_phase1_code() ->
             if name == raw or name.endswith(raw) or raw.endswith(name)
         )
         if hits:
-            offenders[str(path.relative_to(REPO_ROOT))] = hits
+            offenders[str(path.relative_to(base))] = hits
+    return offenders
+
+
+def scan_gnss_reachability(src_root: Path) -> dict[str, list[str]]:
+    """Files in the Phase 1 PACKAGES that name `gnss` in an import path.
+
+    Returns `{relative path: sorted offending module names}`. Complements the scan above:
+    that one matches the four enumerated adapter module names, this one matches the package
+    regardless of which module inside it is reached.
+    """
+    base = src_root.parent
+    offenders: dict[str, list[str]] = {}
+    for package in PHASE1_PERMITTED_PACKAGES:
+        for path in _python_files(src_root / package):
+            hits = sorted(n for n in _imported_modules(path) if "gnss" in n.split("."))
+            if hits:
+                offenders[str(path.relative_to(base))] = hits
+    return offenders
+
+
+def _write_module(root: Path, relative: str, body: str) -> Path:
+    """Write a synthetic module under `root`, creating its package directories."""
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(body, encoding="utf-8")
+    return path
+
+
+def test_raw_processing_modules_are_absent_or_unreferenced_from_phase1_code() -> None:
+    """No Phase 1 module or stage script imports a raw-processing adapter.
+
+    Covers all four `src/gnss/` modules, not only the two §7.0 names, because the clause
+    says "every raw-processing adapter". A violation via `target.py` or `verification.py`
+    was previously outside every stated prohibition (finding IMPL-2).
+    """
+    if not _python_files(SRC_DIR) and not _python_files(SCRIPTS_DIR):
+        pytest.skip(
+            "no Phase 1 source or stage scripts exist yet (src/ and the nine phase-aware "
+            "scripts are REQ-ENG-1); the import limb activates when they are built"
+        )
+    offenders = scan_raw_processing_references(SRC_DIR, SCRIPTS_DIR)
     assert not offenders, (
         f"Phase 1 code imports raw-processing adapters: {offenders}. TE §7.0 makes "
         f"{', '.join(RAW_PROCESSING_MODULES)} inaccessible from the Phase 1 target-build "
@@ -241,13 +371,81 @@ def test_gnss_package_is_not_imported_by_phase1_packages() -> None:
     """`src/gnss/` is unreachable from the Phase 1 packages, transitively or directly."""
     if not SRC_DIR.is_dir():
         pytest.skip("src/ does not exist yet (REQ-ENG-1)")
-    offenders: dict[str, list[str]] = {}
-    for package in PHASE1_PERMITTED_PACKAGES:
-        for path in _python_files(SRC_DIR / package):
-            hits = sorted(n for n in _imported_modules(path) if "gnss" in n.split("."))
-            if hits:
-                offenders[str(path.relative_to(REPO_ROOT))] = hits
+    offenders = scan_gnss_reachability(SRC_DIR)
     assert not offenders, f"Phase 1 packages reach src/gnss/: {offenders}"
+
+
+# --- the detector's own negative controls (Recommendation 50) -------------------------
+
+
+def test_detector_catches_a_directly_injected_raw_processing_import(tmp_path: Path) -> None:
+    """NEGATIVE CONTROL 1. A direct `import src.gnss.rinex` in a Phase 1 feature module.
+
+    Pushed through the real entry points `scan_raw_processing_references` and
+    `scan_gnss_reachability` against a synthetic `tmp_path` tree -- never the real one, and
+    no real module is edited. The must-not-fire limb runs first: the same tree WITHOUT the
+    offending import must produce an empty offender set, so a scanner that simply always
+    reports would fail here rather than pass the control by accident.
+    """
+    src = tmp_path / "src"
+    _write_module(src, "features/clean.py", "import src.data.config\n")
+    _write_module(src, "gnss/rinex.py", "RAW = True\n")
+    assert scan_raw_processing_references(src) == {}, (
+        "must-not-fire: a clean synthetic tree was reported as violating"
+    )
+    assert scan_gnss_reachability(src) == {}
+
+    _write_module(
+        src,
+        "features/leaky.py",
+        "import src.gnss.rinex  # TE 7.0 violation, injected by a negative control\n",
+    )
+
+    raw_offenders = scan_raw_processing_references(src)
+    assert raw_offenders, (
+        "the raw-adapter detector did not catch a direct `import src.gnss.rinex` in "
+        "src/features/ -- it bites nothing, and TE 7.0's import limb is unproven"
+    )
+    assert any("leaky.py" in key for key in raw_offenders)
+
+    package_offenders = scan_gnss_reachability(src)
+    assert package_offenders, "the gnss-package detector did not catch the same violation"
+    assert any("leaky.py" in key for key in package_offenders)
+
+
+def test_detector_catches_a_two_hop_transitive_raw_processing_chain(tmp_path: Path) -> None:
+    """NEGATIVE CONTROL 2. A two-hop chain: features/a -> features/b -> src.gnss.calibration.
+
+    The first hop is clean in isolation, which is exactly how a transitive breach hides
+    from a scan that only inspects entry points. This scan walks EVERY file in the Phase 1
+    packages, so the chain is caught at its second hop -- stated precisely rather than
+    claimed as full transitive resolution, which a static per-file scan does not perform.
+    What is proven: no link of a chain can sit inside `src/` unflagged.
+
+    The control also asserts hop A alone is NOT reported, so the detector is shown to be
+    discriminating rather than indiscriminate.
+    """
+    src = tmp_path / "src"
+    _write_module(src, "features/hop_a.py", "from src.features import hop_b\n")
+    _write_module(
+        src,
+        "features/hop_b.py",
+        "import src.gnss.calibration  # second hop; the DCB handling TE 7.0 bars\n",
+    )
+    _write_module(src, "gnss/calibration.py", "DCB = True\n")
+
+    offenders = scan_raw_processing_references(src)
+    assert offenders, (
+        "the detector did not catch a two-hop chain into src/gnss/calibration.py; a "
+        "transitive breach would reach Phase 1 unflagged"
+    )
+    flagged = sorted(offenders)
+    assert any("hop_b.py" in key for key in flagged), flagged
+    assert not any("hop_a.py" in key for key in flagged), (
+        f"hop_a.py imports only a Phase 1 sibling and must NOT be reported; reporting it "
+        f"would mean the detector flags the package rather than the violation: {flagged}"
+    )
+    assert any("gnss.calibration" in name for names in offenders.values() for name in names)
 
 
 # --- limb 2: the produced-field prohibition -------------------------------------------
@@ -393,4 +591,134 @@ def test_restricted_root_artifacts_are_checked_too() -> None:
         "no artifact inside the restricted root was collected for boundary checking; "
         "the collector must reach relocated December evidence (D-15), because custody "
         "containment and phase-boundary checking are separate obligations"
+    )
+
+
+# --- the chokepoint drift control (Recommendation 32, 2026-09-20) ---------------------
+#
+# The previous section asserts the collector REACHES the restricted root. Until 2026-09-20
+# nothing asserted that reaching it went through the chokepoint, and it did not: `_csv_header`
+# opened every collected December artifact directly. This section is that missing half.
+#
+# The control is structural: it walks this module's OWN AST for every content read and
+# refuses any that is neither routed through `_read_guarded` nor inside one of the two
+# enumerated source-tree-only readers. A future edit adding an unguarded read must declare
+# itself here, under review -- which is the only outcome that keeps the boundary from ending
+# quietly a second time (R-28: it "does not weaken slightly; it ends").
+
+#: Methods that obtain file CONTENT. Writes are deliberately absent: this module writes only
+#: synthetic modules under `tmp_path`, never under any evidence root.
+READ_METHODS = frozenset({"open", "read_bytes", "read_text"})
+
+#: Functions whose reads are exempt, each with the reason it can never touch an evidence
+#: path. Both read PYTHON SOURCE, are called only with `_python_files(<root>)` results or
+#: with `PREPARED_MODULE`, and `_python_files` globs `*.py` under `src/`, `scripts/` or a
+#: `tmp_path` synthetic tree. Neither is reachable from `_phase1_artifacts()`, which is the
+#: only collector that touches the evidence roots and which feeds `_csv_header` alone.
+SOURCE_TREE_ONLY_READERS = {
+    "_imported_modules": "parses *.py under src/ | scripts/ | tmp_path for its AST",
+    "_module_level_literal": "parses PREPARED_MODULE (src/data/prepared.py) for its AST",
+}
+
+
+def scan_unguarded_reads(source: str, *, filename: str = "<scanned>") -> list[str]:
+    """Every content read that is neither guarded nor inside an exempt source reader.
+
+    Returned as `"line N: .method() in <function>"`, so a failure names the site. Callable
+    with an arbitrary source string, which is what makes the negative control below real:
+    it pushes a violating module through THIS function rather than asserting that the real
+    module happens to be clean (`nfr-design` c58).
+    """
+    tree = ast.parse(source, filename=filename)
+    enclosing: dict[int, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            for child in ast.walk(node):
+                enclosing.setdefault(id(child), node.name)
+
+    offenders: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not isinstance(func, ast.Attribute) or func.attr not in READ_METHODS:
+            continue
+        owner = enclosing.get(id(node), "<module>")
+        if owner in SOURCE_TREE_ONLY_READERS:
+            continue
+        receiver = func.value
+        if (
+            isinstance(receiver, ast.Call)
+            and isinstance(receiver.func, ast.Name)
+            and receiver.func.id == "_read_guarded"
+        ):
+            continue
+        offenders.append(f"line {func.lineno}: .{func.attr}() in {owner}")
+    return offenders
+
+
+def test_no_restricted_read_in_this_module_bypasses_the_chokepoint() -> None:
+    """Every content read here is guarded, or sits in an enumerated source-tree reader.
+
+    The positive limb. Recommendation 32's defect -- `_csv_header` opening December bytes
+    with no `AccessRecord` -- fails this test at the line that does it.
+    """
+    offenders = scan_unguarded_reads(
+        Path(__file__).read_text(encoding="utf-8"), filename=__file__
+    )
+    assert not offenders, (
+        "unguarded content reads in tests/test_phase_boundary.py: "
+        + "; ".join(offenders)
+        + ". Route the read through `_read_guarded`, or -- only if it provably reads "
+        "python source and can never reach an evidence root -- add its function to "
+        "SOURCE_TREE_ONLY_READERS with a stated reason."
+    )
+
+
+def test_the_drift_scanner_catches_an_injected_unguarded_read() -> None:
+    """NEGATIVE CONTROL. A scanner that never fires proves nothing.
+
+    Three mutants pushed through the real entry point `scan_unguarded_reads`: a
+    `.open(...)`, a `.read_bytes()` and a `.read_text(...)` inside a function that is NOT
+    in `SOURCE_TREE_ONLY_READERS`. Each must be reported. Then two must-not-fire limbs:
+    the same read routed through `_read_guarded`, and the same read inside an exempt
+    reader, must NOT be reported.
+    """
+    for call in ('artifact.open("rb")', "artifact.read_bytes()", "artifact.read_text()"):
+        mutant = f"def _csv_header(artifact):\n    return {call}\n"
+        offenders = scan_unguarded_reads(mutant, filename="<mutant>")
+        assert offenders, f"the scanner did not catch `{call}` -- it bites nothing"
+        assert "_csv_header" in offenders[0]
+
+    guarded = 'def _csv_header(artifact):\n    return _read_guarded(artifact).open("rb")\n'
+    assert not scan_unguarded_reads(guarded, filename="<guarded>"), (
+        "must-not-fire: a read routed through the chokepoint was reported as a bypass"
+    )
+
+    exempt = "def _imported_modules(path):\n    return path.read_text()\n"
+    assert not scan_unguarded_reads(exempt, filename="<exempt>"), (
+        "must-not-fire: an enumerated source-tree-only reader was reported as a bypass"
+    )
+
+
+def test_the_exempt_readers_are_named_and_still_exist() -> None:
+    """The exemption list is asserted, not trusted.
+
+    A renamed or deleted exempt function would silently leave its entry behind, and the
+    next function to take that name would inherit an exemption nobody granted it.
+    """
+    for name in sorted(SOURCE_TREE_ONLY_READERS):
+        assert name in globals(), (
+            f"SOURCE_TREE_ONLY_READERS exempts {name!r}, which no longer exists in this "
+            f"module; a stale exemption is an exemption waiting to be inherited"
+        )
+        assert callable(globals()[name])
+
+
+def test_the_access_log_is_the_test_mode_sidecar_not_the_governed_log() -> None:
+    """Recommendation 1: rows this module writes never land in the governed access log."""
+    assert ACCESS_LOG == REPO_ROOT / "artifacts" / "exec_evidence" / "test_access_log.jsonl"
+    assert not ACCESS_LOG.is_relative_to(EVIDENCE_DIR), (
+        "this module's access rows resolve inside evidence/; suite noise would again be "
+        "indistinguishable from a real governed December access (Recommendation 1)"
     )

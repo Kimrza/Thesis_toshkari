@@ -25,22 +25,37 @@ What this script can and cannot run today
   are unfrozen (`PartitionError`), and `read_availability_lags` while
   `features.availability_lags` is (`FeatureAvailabilityError`). Every refusal is an
   `IntegrityError`, so the same honest `aborted` row covers each.
-* **No December path exists.** The fitting-capable set is `F1`..`F4`, `REFIT`;
-  `--partition DEC` is refused by `argparse` and no call here materialises the locked
-  partition (that is `materialise_locked_partition`'s, behind a verifying G-05 signature,
-  and it is not invoked by this script).
-* When every value is frozen, `--partition <id>` (default: all five) runs the three-call
-  sequence with the target and driver inputs supplied through the release root; those
-  loaders are `target-standardization`'s and `external-products`' artifacts and are read
-  by manifest -- a missing release refuses.
+* **The December path is GUARDED, not absent.** `--partition DEC` is off the default list and
+  runs only behind the same guard `06` uses: `materialise_locked_partition`, which refuses
+  (`LockedTestError`) without a G-05 signature that verifies against `configs/data.yaml`
+  `gates.G-05` (R-82, ADR-03). Naming `DEC` additionally requires `--g05-signature`,
+  `--locked-input` and `--locked-authorization`, and requires `REFIT` in the same run,
+  because the December score bundle carries REFIT's transform -- the one enumerated G-06
+  apply (R-74). The December bundle is written ONCE, under the signature; `write_bundle`
+  refuses an existing directory. This script never names the restricted root: the
+  human-supplied path is routed through `governance-guards`' `open_restricted`, the one door,
+  which writes the `AccessRecord`. The split manifest stays five rows and never enumerates
+  `DEC` (FR-P1-04-5, ADR-11 M5) -- the locked partition keeps its separate record, whose
+  `access_gate_state` now reports whether the signature verified.
+
+  Before 2026-09-20 there was no producer for the `DEC` score bundle at all, so `06`'s locked
+  branch could only ever fail at `load_bundle` with "bundle is missing": the G-06 path was
+  unexecutable end to end. This branch is what makes it executable, and it stays refused
+  until G-05 is signed.
+* When every value is frozen, `--partition <id>` (default: the five fitting-capable ones)
+  runs the three-call sequence with the target and driver inputs supplied through the release
+  root; those loaders are `target-standardization`'s and `external-products`' artifacts and
+  are read by manifest -- a missing release refuses.
 
 Inputs
 ------
 `--config configs/` (the four governed configs, read only through `load_configs`);
 `--phase 1|2` (every path below is phase-1-legal); `--partition` (repeatable, from
-`F1`..`F4`,`REFIT`); `--bundles-out` (workspace-relative bundle root, default
-`artifacts/features`); `--parity-tolerance` (the fixture manifest's declared value, TE 15.2;
-absent -> the value-level parity limb STOPS naming the field); `--code-commit`.
+`F1`..`F4`,`REFIT`,`DEC`; default the five fitting-capable ones); `--bundles-out`
+(workspace-relative bundle root, default `artifacts/features`); `--parity-tolerance` (the
+fixture manifest's declared value, TE 15.2; absent -> the value-level parity limb STOPS
+naming the field); `--g05-signature`, `--locked-input`, `--locked-authorization` (required
+together with `--partition DEC`); `--code-commit`.
 
 Re-run behaviour
 ----------------
@@ -62,6 +77,7 @@ Boundaries this script holds
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
 import json
 import sys
@@ -98,14 +114,21 @@ from src.data.fixture_manifest import (  # noqa: E402
     load_fixture_scope,
     read_embargo_hours,
 )
+from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.registry import load_registry  # noqa: E402
 from src.data.splits import (  # noqa: E402
     FITTING_PARTITION_IDS,
+    LOCKED_ID,
+    PARTITION_IDS,
+    REFIT_ID,
+    Partition,
+    RecordFrame,
     apply_embargo,
     build_partitions,
     build_split_manifest,
     locked_partition_record,
+    materialise_locked_partition,
     partition_by_id,
     training_range,
     validation_month_range,
@@ -201,11 +224,12 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--partition",
         action="append",
-        choices=FITTING_PARTITION_IDS,
+        choices=PARTITION_IDS,
         default=None,
         help=(
-            "fitting-capable partition(s) to build (repeatable; default all five). DEC is "
-            "not a choice: no December path exists in this script"
+            "partition(s) to build (repeatable; default the five fitting-capable ones). DEC "
+            "is NOT in the default list: it requires --g05-signature, --locked-input, "
+            "--locked-authorization and REFIT in the same run"
         ),
     )
     parser.add_argument(
@@ -246,12 +270,45 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "`features-and-splits`' record (fixtures-and-reproducibility CR-2026-09-07)"
         ),
     )
+    parser.add_argument(
+        "--g05-signature",
+        type=str,
+        default=None,
+        help="the G-05 signature artifact; DEC materialises only when it verifies (R-82)",
+    )
+    parser.add_argument(
+        "--locked-input",
+        type=Path,
+        default=None,
+        help="the December target artifact, opened ONLY through locked_test.open_restricted",
+    )
+    parser.add_argument(
+        "--locked-authorization",
+        type=str,
+        default=None,
+        help="the authorization the AccessRecord carries (the G-05 decision record)",
+    )
     args = parser.parse_args(argv)
     if args.fixture_manifest is not None and args.partition:
         parser.error(
             "--fixture-manifest runs the manifest's declared apparatus partitions; a frozen "
             "--partition id alongside it is a contradiction (R-137's two-way quarantine)"
         )
+    wanted = tuple(args.partition) if args.partition else FITTING_PARTITION_IDS
+    if LOCKED_ID in wanted:
+        if not (args.g05_signature and args.locked_input and args.locked_authorization):
+            parser.error(
+                "--partition DEC requires --g05-signature, --locked-input and "
+                "--locked-authorization; the December bundle is written only behind the G-05 "
+                "guard"
+            )
+        if REFIT_ID not in wanted:
+            parser.error(
+                "--partition DEC requires --partition REFIT in the same run: the December "
+                "score bundle carries REFIT's transform, the one enumerated G-06 apply "
+                "(R-74), and that transform is fitted on REFIT's training rows here"
+            )
+    args.partitions = wanted
     return args
 
 
@@ -319,7 +376,9 @@ def _registry_row(
         "artifact_manifest_path": "",
         "prediction_hash": "",
         "locked_test_accessed": False,
-        "notes": "features-and-splits run (P1-04); no December path exists in this script",
+        "notes": (
+            "features-and-splits run (P1-04); DEC only through the G-05 signature guard"
+        ),
     }
     if reason:
         row["reason"] = reason
@@ -352,6 +411,94 @@ def _load_release_inputs(snapshot: Any) -> tuple[Any, Mapping[str, Any]]:
         "none is today, so this path is unreachable and stops here rather than defaulting a "
         "loader (TE 18.3)",
     )
+
+
+def _read_target_artifact(path: Path) -> Any:
+    """Read a target artifact (`.jsonl` or `.csv`) that `open_restricted` has ALREADY logged.
+
+    The only reader the locked loader uses. It is reached only with a path the chokepoint
+    returned, so this script never constructs a restricted path itself (R-28, one door).
+    """
+    suffix = path.suffix.lower()
+    if suffix == ".jsonl":
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+    elif suffix == ".csv":
+        with path.open(encoding="utf-8", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+    else:
+        raise IntegrityError(path, f"unsupported target artifact suffix {suffix!r}")
+    return RecordFrame(rows)
+
+
+def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
+    """The one door: every byte of December this script reads comes through here, logged."""
+
+    def loader(locked: Partition) -> Any:
+        record = AccessRecord(
+            run_id=run_id,
+            retrieved_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
+            scope=f"{locked.partition_id} {locked.validation_month.isoformat()} feature build",
+            purpose="locked_evaluation",
+            performance_inspected=False,
+            locked_test_accessed=True,
+            authorization=str(args.locked_authorization),
+        )
+        opened = open_restricted(Path(args.locked_input), record=record, registry=access_log)
+        return _read_target_artifact(Path(opened))
+
+    return loader
+
+
+def _build_locked_score_bundle(
+    *,
+    args: argparse.Namespace,
+    snapshot: Any,
+    partitions: tuple[Partition, ...],
+    refit_transform: Any,
+    common: Mapping[str, Any],
+    out_root: Path,
+    run_id: str,
+    access_log: Path,
+) -> tuple[str, int]:
+    """The guarded December branch: materialise `DEC` behind G-05 and write its score bundle.
+
+    `materialise_locked_partition` refuses (`LockedTestError`) unless `--g05-signature`
+    verifies against `configs/data.yaml` `gates.G-05`, and it refuses BEFORE the loader runs,
+    so an unsigned invocation reads no December byte at all. What it returns is the December
+    frame with its first `embargo_hours` excluded and counted (D-28) — and that returned frame
+    is the only thing the feature build consumes.
+
+    The bundle carries REFIT's transform, fitted on REFIT's training rows in this same run:
+    `DEC` fits no transform of its own (R-74 element 4's one enumerated apply). Returns the
+    bundle directory and the embargo-excluded row count.
+    """
+    if refit_transform is None:
+        raise IntegrityError(
+            f"partition {LOCKED_ID}",
+            f"no {REFIT_ID} transform was fitted in this run; the December score bundle is "
+            f"the one enumerated apply of {REFIT_ID}'s fitted transform (R-74) and is never "
+            f"built against a transform fitted elsewhere",
+        )
+    locked = partition_by_id(partitions, LOCKED_ID)
+    scored_target = materialise_locked_partition(
+        snapshot,
+        g05_signature=args.g05_signature,
+        loader=_locked_loader(args, run_id=run_id, access_log=access_log),
+        partitions=partitions,
+    )
+    if scored_target is None:
+        raise IntegrityError(
+            f"partition {LOCKED_ID}",
+            "the locked loader returned no frame; the December bundle is built from the frame "
+            "the one door returned, never from an absent or substituted target",
+        )
+    excluded = int(getattr(scored_target, "attrs", {}).get("excluded_embargo_rows", 0))
+    score_start, score_end = validation_month_range(locked)
+    score_spec = FrameSpec(LOCKED_ID, "score", score_start, score_end)
+    score = build_features(
+        scored_target, spec=score_spec, transform=refit_transform, **dict(common)
+    )
+    return str(write_bundle(score, out_root)), excluded
 
 
 def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
@@ -474,12 +621,14 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     return {"split_manifest": str(manifest_path), "bundles_written": written}
 
 
-def _run(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:
     if args.fixture_manifest is not None:
         return _run_fixture_scale(entry, args)  # Q4 = A: the ONE fixture-scale entry
     _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
     snapshot = entry["snapshot"]
     workspace = Path(snapshot.resolved_roots["workspace"])
+    _, access_log = _registry_paths(snapshot)
+    wanted = tuple(getattr(args, "partitions", None) or FITTING_PARTITION_IDS)
 
     # 1. The fail-closed refusal GENUINELY FIRST (SD-F-01): the permitted-producer list is
     #    checked against the closed TE 6.2 ROW IDENTITIES (`SECTION_6_2_ROWS`, identities not
@@ -492,11 +641,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     rows = sorted({str(e["dictionary_row"]) for e in dictionary.values()})
     load_permitted_producers(args.config, dictionary_rows=rows)
 
-    # 2. Partitions (values from configs/data.yaml), the five-row manifest, the locked record.
+    # 2. Partitions (values from configs/data.yaml) and the five-row manifest. The locked
+    #    record's gate state is written at the end, once the branch's outcome is known.
     partitions = build_partitions(snapshot)
-    locked_record = locked_partition_record(
-        partitions, access_gate_state="G-05 Blocked; no execution path in this script"
-    )
 
     # 3. Inputs by manifest, the availability matrix and its three limbs.
     target, drivers = _load_release_inputs(snapshot)
@@ -505,27 +652,31 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     registry = load_registry(snapshot)
 
     # 4. The three-call sequence per fitting-capable partition (R-81, FU-6 = A).
-    wanted = tuple(args.partition) if args.partition else FITTING_PARTITION_IDS
     out_root = workspace / args.bundles_out
     written: list[str] = []
     excluded_embargo: dict[str, int] = {}
+    common = {
+        "drivers": drivers,
+        "registry": registry,
+        "matrix": matrix,
+        "partitions": partitions,
+        "snapshot": snapshot,
+        "parity_tolerance": args.parity_tolerance,
+        # registry gate scoped to this run's phase (Phase 1 does not require the
+        # Phase-2-only observable_codes; CR-2026-09-20-B01-PREREQS §5)
+        "phase": args.phase,
+    }
+    refit_transform: Any = None
     for pid in wanted:
+        if pid == LOCKED_ID:
+            continue  # built after the loop: it applies REFIT's transform, fitted below
         partition = partition_by_id(partitions, pid)
         train_start, train_end = training_range(partition)
         train_spec = FrameSpec(pid, "train", train_start, train_end)
-        common = {
-            "drivers": drivers,
-            "registry": registry,
-            "matrix": matrix,
-            "partitions": partitions,
-            "snapshot": snapshot,
-            "parity_tolerance": args.parity_tolerance,
-            # registry gate scoped to this run's phase (Phase 1 does not require the
-            # Phase-2-only observable_codes; CR-2026-09-20-B01-PREREQS §5)
-            "phase": args.phase,
-        }
         raw = build_features(target, spec=train_spec, **common)
         transform = fit_transforms(raw, partition=partition)
+        if pid == REFIT_ID:
+            refit_transform = transform
         written.append(str(write_bundle(raw, out_root)))
         train = build_features(target, spec=train_spec, transform=transform, **common)
         written.append(str(write_bundle(train, out_root)))
@@ -536,6 +687,30 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
             score_spec = FrameSpec(pid, "score", score_start, score_end)
             score = build_features(scored_target, spec=score_spec, transform=transform, **common)
             written.append(str(write_bundle(score, out_root)))
+
+    # 5. The GUARDED December branch. Refuses before any December byte is read unless the
+    #    G-05 signature verifies (R-82, ADR-03); the released January–November target loaded
+    #    above is never the source here — the one door's returned frame is.
+    if LOCKED_ID in wanted:
+        bundle_dir, excluded = _build_locked_score_bundle(
+            args=args,
+            snapshot=snapshot,
+            partitions=partitions,
+            refit_transform=refit_transform,
+            common=common,
+            out_root=out_root,
+            run_id=run_id,
+            access_log=access_log,
+        )
+        written.append(bundle_dir)
+        excluded_embargo[LOCKED_ID] = excluded
+        gate_state = (
+            f"G-05 signature verified; DEC score bundle written once under it "
+            f"({excluded} embargo rows excluded, D-28)"
+        )
+    else:
+        gate_state = "G-05 gated; no December bundle requested in this run"
+    locked_record = locked_partition_record(partitions, access_gate_state=gate_state)
 
     manifest = build_split_manifest(partitions, excluded_embargo_rows=excluded_embargo)
     manifest_path = out_root / "split_manifest.json"
@@ -582,7 +757,7 @@ def main() -> int:
     )
 
     try:
-        summary = _run(entry, args)
+        summary = _run(entry, args, run_id=run_id)
     except IntegrityError as exc:
         aborted = _registry_row(
             run_id, status="aborted", lock_hash=lock_hash, snapshot=snapshot, reason=str(exc)

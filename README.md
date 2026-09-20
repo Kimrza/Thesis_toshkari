@@ -48,20 +48,65 @@ Install from the single pinned surface:
 pip install -r requirements.txt
 ```
 
-TensorFlow is **excluded** from the pins: its pin is `TBD — freeze gate` (Q3=A) and is
-added only under an approved D-number. PyTorch, R, Julia and MATLAB are prohibited
-(TE §8.3).
+TensorFlow **is pinned**, at `tensorflow==2.21.0`, by the project decision owner's ruling
+of 2026-09-10 adopted as **D-36**.
+
+*Corrected 2026-09-20 (`GOV-2026-09-20-CG-01` Recommendation 42's corrected fact, swept into
+this file). This paragraph previously read "TensorFlow is **excluded** from the pins: its
+pin is `TBD — freeze gate` (Q3=A) and is added only under an approved D-number." That was
+true under code-generation Q3=A and stopped being true on 2026-09-10 — the D-number the
+sentence was waiting for arrived. The pin is frozen; what remains OWED is verification:
+PyPI is unreachable from the implementation environment, so installation, import,
+API-compatibility and TE §8.1's both-platform (Kaggle AND local) check are unperformed.
+Freezing a pin makes the guard pass; it does not make the environment exist.*
+
+One required package is still **unpinned**: `matplotlib` (TE §8.1, Required) executes in
+`src/evaluation/plots.py` and is absent from `requirements.txt`, so figures are outside
+TE §13.1's environment lock. No repository evidence determines the version — derivation
+printed in `requirements.txt`'s own block — and fixing it is a Student act owed before G-07
+(`CR-2026-09-20-GOV-CG-01-DISPOSITIONS` §5 item 15; Recommendation 38).
+
+PyTorch, R, Julia and MATLAB are prohibited (TE §8.3).
+
+## Reproducing a run
+
+**`REPRODUCTION.md`** carries TE §13.2's ordered clean-run contract verbatim — including
+`export PYTHONHASHSEED=0`, which is part of the contract and not a convenience. Start there
+rather than reading the Technical Environment or a source constant. The guide, the TE fence
+and `scripts/run_walking_skeleton.py`'s `PHASE1_SEQUENCE` are bound to each other by a
+three-way comparison in `tests/test_clean_run.py`, so none of the three can drift silently.
 
 ## Running the test suite
 
 ```
+export PYTHONHASHSEED=0
 python -m pytest tests/
 ```
 
-Runnable without manual setup. Gate tests run per team practice Q7=D: the pre-commit
-hook runs the critical set on every commit; the full suite runs locally before every
-acquisition/training/governed run, and **inside the Kaggle session** before any
-governed run executed there (TC-03g).
+Runnable without manual setup. Gate tests run per team practice Q7=D: the full suite runs
+locally before every acquisition/training/governed run, and **inside the Kaggle session**
+before any governed run executed there (TC-03g) — a Kaggle session carries no git working
+tree, so a commit hook cannot fire there and a local run proves nothing about it.
+
+Two qualifications on the commit-time set, both added 2026-09-20:
+
+* **It is narrower than the critical set, deliberately.** `.githooks/pre-commit` deselects
+  `tests/test_release_hashes.py`, `tests/test_acquisition_window.py` and
+  `tests/test_phase_boundary.py`, each of which reads December restricted content. A
+  boundary crossed as a side effect of `git commit` is not a governed access (Vision §8.3;
+  Recommendation 30). Those three run in the gate/freeze suite, where an authorization
+  exists to be recorded.
+* **The hook is not enabled yet.** `git config core.hooksPath` is UNSET and no commit in
+  this repository's history has been gated by it (Recommendation 35). Enabling it is a
+  Student act (`CR-2026-09-20-GOV-CG-01-DISPOSITIONS` §5 item 4), explicitly sequenced
+  after the deselection above, which has now landed.
+
+A full-suite run under the real evidence tree appends access rows to
+`artifacts/exec_evidence/test_access_log.jsonl`, a gitignored **test-mode** sidecar.
+`evidence/test_run_access_log.jsonl` is reserved for real, governed accesses and is closed
+to further appends; its historical rows stand unedited under
+`evidence/test_run_access_log.SUPERSEDED_2026-09-20.md` (Recommendation 1). Records are
+superseded, never rewritten and never deleted.
 
 ## Tooling
 
@@ -70,6 +115,7 @@ governed run executed there (TC-03g).
 * **gitleaks 8.18.4** (pinned) scans for secrets in two modes (SD-01):
   * incremental, on every commit, via the pre-commit hook — a preventive net, never
     evidence. Enable hooks once per clone: `git config core.hooksPath .githooks`
+    (**not yet run on this repository** — see § Running the test suite)
   * history-inclusive, before each governed run and freeze gate, via
     `python scripts/gate_secret_scan.py` — the only mode whose output is TA-22
     evidence (tool version, commit range, scope, result). Running it at a gate is a

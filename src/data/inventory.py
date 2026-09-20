@@ -13,7 +13,16 @@ mechanism R-50/SD-I-04 fix. Four responsibilities:
    path. FR-P1-01-6's verbatim Kyoto/CEDAR acknowledgment notice is a DISTINCT field from
    the operational access notes, so a redaction rule cannot mangle text that must not
    change. Every written value routes through `acquisition`'s `guard_egress` redaction
-   chokepoint (hard dependency, SD-I-06). FR-P1-01-2's `suffix_mismatch` surfacing is
+   chokepoint (hard dependency, SD-I-06).
+   **Provider-version census (added 2026-09-20, board Recommendation 8 — Critical).**
+   `provider_suffix_census` MEASURES the per-month, per-day distribution of the `g.NNN`
+   version tokens in a month's own `file` column, and `assert_sources_unmixed_or_recorded`
+   is prohibition 2's production call site: a mix the inventory's `release_status` does
+   not declare is REFUSED by `assert_unmixed_sources`, which owns the refusal text. The
+   rule is not "never mixed" — provider version drift is an observed fact of this dataset
+   — it is "absent or RECORDED". No census FIGURE is written into this module: the tool
+   measures and the run produces the numbers (TE 18.2).
+   FR-P1-01-2's `suffix_mismatch` surfacing is
    ⚠ PROPOSED, not settled (`acquisition` R-34 holds the release-manifest carriage Open
    for stage 3.2) — it is recorded here and deliberately NOT implemented.
 2. **Schema validation (W-5, R-49, TS-I-03).** The expected schema lives in
@@ -74,6 +83,17 @@ Governance
   literal** (R-28): residency is computed against `locked_test`'s own derivation
   (`_repo_root`/`_restricted_root`), the module's supported test seam, so tests exercise
   the boundary against `tmp_path` roots only.
+* **TE 13 identity stamps (R-70/TEC-05, added 2026-09-20).** `write_source_inventory`
+  and `finalize_audit_reports` REQUIRE `stamps` (`phase_id`, `source_id`,
+  `target_definition_id`) and refuse an absent or empty one through `acquisition`'s
+  single `assert_identity_stamped`. Board finding TEC-05 found this unit's three gate-read
+  outputs — `source_inventory.json`, `coverage_report.json`, `regime_count_report.json` —
+  carrying no stamp while stage 02 onward stamped thoroughly. The values are RESOLVED from
+  configuration by the stage script and never invented here.
+* **Record-date attribution is UTC** (R-46, 2026-09-20): `_record_date` wraps
+  `acquisition.parse_record_date_utc`, the ONE derivation, rather than slicing `raw[:10]`
+  — a slice attributes an offset-bearing timestamp to its LOCAL date, and this function
+  decides which class an artifact is ROUTED as.
 * The locked month (December 2022) is a governance boundary identity fixed by D-8/D-15,
   imported from `acquisition` (`LOCKED_YEAR`/`LOCKED_MONTH`) — never a scientific
   constant, and never derived from a directory or file name (project.md § Forbidden;
@@ -84,9 +104,12 @@ Governance
 from __future__ import annotations
 
 import calendar
+import csv
 import datetime as _dt
 import hashlib
+import io
 import json
+import re
 import uuid
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -98,7 +121,9 @@ from src.data.acquisition import (
     LOCKED_MONTH,
     LOCKED_YEAR,
     PROVENANCE_CLASSES,
+    assert_identity_stamped,
     guard_egress,
+    parse_record_date_utc,
 )
 from src.data.config import (
     TBD_SENTINEL,
@@ -120,6 +145,12 @@ __all__ = [
     "assert_entry_matches_release",
     "assert_verbatim_notice",
     "write_source_inventory",
+    "PROVIDER_VERSION_RE",
+    "UNKNOWN_VERSION_TOKEN",
+    "provider_version_token",
+    "provider_suffix_census",
+    "read_provider_suffix_census",
+    "assert_sources_unmixed_or_recorded",
     "expected_schema_from",
     "schema_digest",
     "SchemaReport",
@@ -145,6 +176,7 @@ __all__ = [
     "data07_caveat_for",
     "assert_figures_caveated",
     "assert_performance_blind",
+    "PERFORMANCE_BLIND_RESIDUAL",
     "reconcile_audit",
     "build_regime_report",
     "assert_regime_report_states_range",
@@ -295,16 +327,29 @@ def write_source_inventory(
     path: Path,
     entries: Sequence[Mapping[str, object]],
     *,
+    stamps: Mapping[str, object],
     required_notices: Mapping[str, str] | None = None,
     missing_entries: Sequence[str] = (),
+    provider_version_census: Mapping[str, object] | None = None,
 ) -> Path:
     """Validate and write the source inventory. Every value routes through `guard_egress`.
+
+    `stamps` carries the three TE 13 definition IDs (`phase_id`, `source_id`,
+    `target_definition_id`; R-70/TEC-05). Required, not defaulted: this artifact is read
+    at the G-P1A gate, and board finding TEC-05 found it — with the two audit reports —
+    carrying no identity stamp at all while stage 02 onward stamped thoroughly.
 
     `required_notices` maps a provider name to its required verbatim acknowledgment text;
     every entry for such a provider must carry it character for character (FR-P1-01-6).
     `missing_entries` is the machine-readable completeness-shortfall field (`team.md`
     § Code Style): a source that could not be inventoried is recorded here, never
     console text only, and is non-fatal.
+
+    `provider_version_census` is the MEASURED per-month, per-day provider-version
+    distribution (`provider_suffix_census`), carried on the artifact so the mix TE 5.1's
+    `release_status` field declares is checkable against what the data actually holds.
+    Optional only because a month with no records on disk has nothing to measure; when a
+    month IS inventoried, its census belongs here (Recommendation 8).
 
     FR-P1-01-2's `suffix_mismatch` surfacing to `write_release` is ⚠ PROPOSED and NOT
     implemented here: `acquisition` R-34 holds the release-manifest carriage of that
@@ -319,6 +364,7 @@ def write_source_inventory(
         when any value is credential-shaped — no credential, token or signed URL enters
         any field of a committed artifact (SD-I-06, NFR-SEC-01).
     """
+    stamped = assert_identity_stamped(stamps, resource=str(path))
     notices = dict(required_notices or {})
     for entry in entries:
         assert_source_entry(entry)
@@ -329,7 +375,10 @@ def write_source_inventory(
         "entries": [dict(entry) for entry in entries],
         "missing_entries": list(missing_entries),
         "field_contract": list(SOURCE_INVENTORY_FIELDS),
+        **stamped,
     }
+    if provider_version_census is not None:
+        payload["provider_version_census"] = dict(provider_version_census)
     guard_egress(payload, context=f"source_inventory[{Path(path).name}]")
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -338,6 +387,235 @@ def write_source_inventory(
         encoding="utf-8",
     )
     return path
+
+
+# =======================================================================================
+# B / Recommendation 8: the provider-version census (read-only measurement)
+# =======================================================================================
+#
+# Board finding (Recommendation 8, Critical): five of the eleven non-December months are
+# provider-VERSION mixed in their own `file` column — `g.001` and `g.002` records sit in
+# one month's artifact — and a workspace-wide search for the literal `g.001` over every
+# `*.md` returns ZERO matches. The mix is recorded NOWHERE. TE 5.1's nine-field contract
+# already has the two slots that would have surfaced it (`provider_product_identity` and
+# `release_status`, `SOURCE_INVENTORY_FIELDS` above); what was missing is anything that
+# MEASURES the distribution and anything that REFUSES an unrecorded mix.
+#
+# This section is measurement only. It reads a month's already-acquired records and
+# reports what is there; it retrieves nothing, rewrites nothing, and judges no
+# scientific value. The census FIGURES are produced by running it — no count is written
+# into this module, into a config, or into a decision record by an implementer (TE 18.2).
+
+#: The provider's version token as it appears in the `file` column, e.g.
+#: `/opt/openmadrigal/madroot/experiments4/2022/gps/28feb22/gps220228g.002.hdf5` -> `g.002`.
+#: Anchored on the `.hdf5` tail so a directory component can never be mistaken for a
+#: version, and case-insensitive because the token is the provider's, not ours.
+PROVIDER_VERSION_RE: Final[re.Pattern[str]] = re.compile(
+    r"(g\.\d{3})\.hdf5$", re.IGNORECASE
+)
+
+#: The census field an unrecognised `file` value is counted under, rather than dropped.
+#: A file whose version cannot be read is a MEASUREMENT gap and is reported as one; it is
+#: never silently folded into a recognised bucket, because that would understate the mix.
+UNKNOWN_VERSION_TOKEN: Final[str] = "<unrecognised>"
+
+
+def provider_version_token(provider_file: object) -> str:
+    """The `g.NNN` version token of one provider filename, or `UNKNOWN_VERSION_TOKEN`.
+
+    Pure and total: returns a token, never raises. A value this cannot read is reported
+    as unrecognised by the census rather than discarded — an unreadable filename is a
+    fact about the evidence, not a row to drop.
+    """
+    match = PROVIDER_VERSION_RE.search(str(provider_file or "").strip())
+    return match.group(1).lower() if match else UNKNOWN_VERSION_TOKEN
+
+
+def provider_suffix_census(
+    rows: Iterable[Mapping[str, object]],
+    *,
+    file_key: str = "file",
+    date_key: str = "date",
+    label: str = "",
+) -> dict[str, Any]:
+    """MEASURE one month's provider-version distribution, per month and per day.
+
+    Read-only: takes rows that a caller has already read and hash-verified, and returns a
+    machine-readable summary. Nothing here retrieves, rewrites, judges or thresholds.
+
+    The returned mapping is the machine-readable field `team.md` § Code Style requires of
+    a completeness/provenance observation — a census that printed to the console would be
+    exactly the "console text only" this project forbids.
+
+    Keys returned:
+
+    * `version_tokens` — the sorted distinct tokens observed (the mix, if any);
+    * `records_by_version` — record count per token, the figure D-? cites;
+    * `provider_files_by_version` — DISTINCT filename count per token, so one reissued
+      file and ten thousand records from it are distinguishable;
+    * `version_mixed` — whether more than one token appears at all;
+    * `by_day` — per observation date, the per-token record counts, and
+      `days_version_mixed` — the dates carrying more than one token, which is what
+      distinguishes a mid-month reissue from two cleanly separated retrieval runs;
+    * `records_examined` / `records_unrecognised_version` — the measurement's own
+      completeness, reported rather than assumed.
+
+    Dates are attributed through `_record_date`, so the census inherits R-46's UTC
+    attribution and R-50's "never from a directory or file name" rule; a record whose
+    date cannot be established fails closed exactly as it does everywhere else.
+    """
+    by_version: dict[str, int] = {}
+    files_by_version: dict[str, set[str]] = {}
+    by_day: dict[str, dict[str, int]] = {}
+    examined = 0
+    unrecognised = 0
+
+    for row in rows:
+        examined += 1
+        raw_file = str(row.get(file_key, "") or "")
+        token = provider_version_token(raw_file)
+        if token == UNKNOWN_VERSION_TOKEN:
+            unrecognised += 1
+        by_version[token] = by_version.get(token, 0) + 1
+        files_by_version.setdefault(token, set()).add(Path(raw_file).name or raw_file)
+        day = _record_date(row, date_key).isoformat()
+        by_day.setdefault(day, {})
+        by_day[day][token] = by_day[day].get(token, 0) + 1
+
+    tokens = sorted(by_version)
+    return {
+        "schema": "provider-suffix-census v1",
+        "label": label,
+        "file_key": file_key,
+        "records_examined": examined,
+        "records_unrecognised_version": unrecognised,
+        "version_tokens": tokens,
+        "records_by_version": {token: by_version[token] for token in tokens},
+        "provider_files_by_version": {
+            token: len(files_by_version[token]) for token in tokens
+        },
+        "version_mixed": len(tokens) > 1,
+        "by_day": {day: dict(sorted(by_day[day].items())) for day in sorted(by_day)},
+        "days_version_mixed": sorted(
+            day for day, counts in by_day.items() if len(counts) > 1
+        ),
+    }
+
+
+def read_provider_suffix_census(
+    csv_path: Path,
+    *,
+    recorded_versions: Sequence[str] = (),
+    file_key: str = "file",
+    date_key: str = "date",
+    label: str = "",
+) -> tuple[list[dict[str, str]], dict[str, Any]]:
+    """The ONE production entry point for the census: refuse, read once, measure, judge.
+
+    Returns `(rows, census)`. The stage script calls this and nothing else, so both
+    guards below are invoked on every real run rather than only from a test
+    (nfr-design c58 — a guard module alone fails open on a forgotten call).
+
+    Guard 1 — the restricted-root refusal, held HERE because this is where a path first
+    becomes a read. The census is a performance-blind coverage-class measurement, but it
+    is still a READ, and a read of December content belongs to the audit's logged
+    `route_audit_path` chokepoint, never to a measurement helper that writes no access
+    row (FR-P1-02-3, R-28). Residency is computed against `locked_test`'s OWN derivation,
+    exactly as `route_audit_path` does, so this module still holds no restricted-root
+    literal.
+
+    Guard 2 — `assert_sources_unmixed_or_recorded`, which refuses an UNRECORDED provider-
+    version mix through `assert_unmixed_sources` (R-52 prohibition 2). `recorded_versions`
+    is the month's declared `release_status` version set.
+
+    Raises
+    ------
+    LockedTestError
+        naming the file, when the path resolves inside the restricted root.
+    InventoryError
+        naming the file, when it is absent — a census that silently reported zero records
+        for a month whose file is missing would UNDERSTATE the mix, which is the defect
+        this tool exists to surface. An absent file is a measurement gap, never a zero.
+    GateError
+        from guard 2, when the month's observed version set is an unrecorded mix.
+    """
+    resolved = Path(csv_path).resolve()
+    if resolved.is_relative_to(_current_restricted_root()):
+        raise LockedTestError(
+            resolved,
+            "the provider-version census refuses a path inside the restricted root: the "
+            "census writes no access row, and a December read belongs to the audit's "
+            "logged chokepoint (route_audit_path) rather than to a measurement helper "
+            "(FR-P1-02-3, R-28) — read it through the audit or not at all",
+        )
+    if not resolved.is_file():
+        raise InventoryError(
+            resolved,
+            "no raw-records CSV at this path; the provider-version census reports what "
+            "is measured and an absent file is a measurement gap, never a zero (R-44)",
+        )
+    with io.StringIO(resolved.read_text(encoding="utf-8")) as handle:
+        rows = list(csv.DictReader(handle))
+    census = assert_sources_unmixed_or_recorded(
+        rows,
+        artifact=label or resolved.parent.name,
+        recorded_versions=recorded_versions,
+        file_key=file_key,
+        date_key=date_key,
+    )
+    return rows, census
+
+
+def assert_sources_unmixed_or_recorded(
+    rows: Sequence[Mapping[str, object]],
+    *,
+    artifact: str,
+    recorded_versions: Sequence[str] = (),
+    file_key: str = "file",
+    date_key: str = "date",
+) -> dict[str, Any]:
+    """R-52 prohibition 2 AT THE PRODUCTION BOUNDARY: an UNRECORDED mix refuses.
+
+    `assert_unmixed_sources` has been correct and unit-tested since it was written and
+    has never had a production caller — the guard-module-fails-open shape nfr-design c58
+    names. This is its call site, derived from prohibition 2's own scope statement ("a
+    mixed-source artifact must FAIL"), not from the surrounding narrative.
+
+    The rule enforced is NOT "never mixed". Provider version drift is an observed fact of
+    this dataset (`g.002` versus `g.003`), and refusing every mixed month would refuse
+    five of the eleven non-December months outright. The rule is that a mix is either
+    ABSENT or RECORDED: `recorded_versions` is the month's declared
+    `release_status` version set, read from the source inventory, and a census whose
+    observed token set equals it is cleared. Anything else — an undeclared mix, a
+    declaration naming versions the data does not carry, a single version the inventory
+    does not mention — goes to `assert_unmixed_sources`, which owns the refusal text and
+    is the only place a refusal is composed.
+
+    Returns the census, so the caller records the MEASURED distribution on its artifact
+    rather than re-deriving it.
+
+    Raises
+    ------
+    GateError
+        from `assert_unmixed_sources`, naming the artifact and every distinct version
+        found, when the observed set is not the recorded one and carries a mix.
+    """
+    census = provider_suffix_census(
+        rows, file_key=file_key, date_key=date_key, label=artifact
+    )
+    observed = set(census["version_tokens"])
+    declared = {str(version).strip().lower() for version in recorded_versions if str(version).strip()}
+    census["recorded_versions"] = sorted(declared)
+    census["mix_recorded"] = bool(declared) and observed == declared
+    if observed != declared:
+        assert_unmixed_sources(
+            [
+                {"source_id": provider_version_token(row.get(file_key))}
+                for row in rows
+            ],
+            artifact=artifact,
+        )
+    return census
 
 
 # =======================================================================================
@@ -746,16 +1024,25 @@ def audit_access_record(
 
 
 def _record_date(record: Mapping[str, object], timestamp_key: str) -> _dt.date:
+    """This unit's record-date reader, over `acquisition`'s ONE UTC derivation (R-46).
+
+    The former `raw[:10]` slice attributed an offset-bearing timestamp to its LOCAL
+    date, which on a month boundary files a December observation under November — and
+    this function decides which class an artifact is ROUTED as. The parser is
+    `acquisition.parse_record_date_utc`, shared with that module's own `_record_date`,
+    so the rule has ONE derivation and each module keeps its own integrity tier
+    (nfr-design c58). Corrected 2026-09-20.
+    """
     raw = str(record.get(timestamp_key, "") or "")
     try:
-        return _dt.date.fromisoformat(raw[:10])
-    except ValueError:
+        return parse_record_date_utc(raw)
+    except ValueError as exc:
         raise InventoryError(
             raw or f"<record with no {timestamp_key}>",
-            f"record timestamp {timestamp_key!r} is missing or unparseable; membership "
-            f"derives from RECORD TIMESTAMPS, never from a directory or file name "
-            f"(R-50, project.md § Forbidden), and a record whose date cannot be "
-            f"established cannot be cleared — fail closed, never guess",
+            f"record timestamp {timestamp_key!r} cannot establish a UTC observation "
+            f"date ({exc}); membership derives from RECORD TIMESTAMPS, never from a "
+            f"directory or file name (R-50, project.md § Forbidden), and a record whose "
+            f"date cannot be established cannot be cleared — fail closed, never guess",
         ) from None
 
 
@@ -1018,10 +1305,44 @@ def assert_figures_caveated(figures: Sequence[Mapping[str, object]]) -> None:
             )
 
 
+#: H / Recommendation 49: the disclosure sentence `assert_performance_blind`'s docstring
+#: must keep carrying, pinned by `tests/test_december_audit.py` so deleting it FAILS.
+#: A control whose limit is undisclosed is read as a guarantee it does not give.
+PERFORMANCE_BLIND_RESIDUAL: Final[str] = (
+    "STATED LIMIT: this control is a KEY-NAME filter, not a value inspection."
+)
+
+
 def assert_performance_blind(payload: Mapping[str, object], *, resource: str) -> None:
     """FR-P1-02-3's checkable criterion: NO performance figure in report or log.
 
-    Scans mapping keys recursively for performance-figure fragments.
+    Scans mapping keys recursively for the fragments in `_PERFORMANCE_KEY_FRAGMENTS`.
+    Values are RECURSED INTO so nested mappings and lists are reached, but a value is
+    never itself examined.
+
+    STATED LIMIT: this control is a KEY-NAME filter, not a value inspection. What it
+    catches is a performance quantity that ANNOUNCES itself in its key — `rmse`,
+    `validation_metric`, `skill`. What it does NOT catch, and is not designed to:
+
+    * a performance quantity parked under a benign key (`summary`, `value`, `figure_3`);
+    * a bare list of error values, which has no key of its own at all;
+    * a performance figure embedded inside a free-text string.
+
+    The residual is recorded here rather than left to be discovered because the control's
+    INVOCATION is strong — `finalize_audit_reports` runs it over both reports,
+    all-or-nothing, before the first byte is written — and a strong chokepoint around a
+    narrow test reads as a broad guarantee unless the narrowness is stated. A reviewer
+    accepting G-P1A on this evidence is accepting a key-name filter plus the human
+    performance-blindness discipline of Vision §8.3, not a proof that no performance
+    quantity is present. Widening it to value-shape heuristics was NOT done: over a
+    coverage report whose every figure is numeric, a value-shape test is
+    indistinguishable from the data it guards, and a control that fires on its own
+    subject teaches its operator to disable it.
+
+    This paragraph is a governance disclosure, not commentary:
+    `tests/test_december_audit.py` asserts `PERFORMANCE_BLIND_RESIDUAL` appears in this
+    docstring, so removing the disclosure fails the suite (Recommendation 49; the
+    established pattern is `tests/test_locked_test_guard.py`'s disclosure test).
 
     Raises
     ------
@@ -1176,9 +1497,10 @@ def finalize_audit_reports(
     run_id: str,
     registry_path: Path,
     declared: DeclaredAuditScope,
-    december_identities: Sequence[str],
     coverage_report: Mapping[str, Any],
     regime_report: Mapping[str, Any],
+    december_identities: Sequence[str],
+    stamps: Mapping[str, object],
 ) -> tuple[Path, Path]:
     """All-or-nothing evidence (SEC-I-03): validate, reconcile, THEN write both reports.
 
@@ -1186,11 +1508,22 @@ def finalize_audit_reports(
     audit yields NO report while its access rows stand (NFR-AUD-01). Both payloads
     route through the redaction chokepoint before writing.
 
+    `stamps` carries the three TE 13 definition IDs (R-70/TEC-05) and is stamped onto
+    BOTH reports. Required, not defaulted, and asserted FIRST — before the
+    performance-blind scan and before reconciliation — so an unstamped audit fails at the
+    same all-or-nothing boundary as every other defect here rather than producing two
+    untraceable reports. These are the artifacts G-P1A and G-05 actually read.
+
     Raises
     ------
+    AcquisitionError
+        when any identity stamp is absent or empty (via `assert_identity_stamped`).
     AuditScopeError, GateError, PreflightError
         from the checks below — in every case, nothing is written.
     """
+    stamped = assert_identity_stamped(stamps, resource=str(Path(out_dir)))
+    coverage_report = {**dict(coverage_report), **stamped}
+    regime_report = {**dict(regime_report), **stamped}
     assert_performance_blind(coverage_report, resource="coverage report")
     assert_performance_blind(regime_report, resource="regime-count report")
     figures = coverage_report.get("figures", ())

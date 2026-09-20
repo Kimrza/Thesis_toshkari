@@ -19,7 +19,9 @@ The ten guards, exactly SD-R-01's table:
   figure, "present" means the caveat rendered into the caption or figure metadata
   (SEC-R-02 half 2; TEC-06). Called by W-3, W-5, W-7.
 * ``require_units`` — a value whose units assertion is absent or non-TECU where TECU is
-  required (R-125 limb 6; BLK-08's reach made checked, not silent). Called by W-3, W-5, W-6.
+  required (R-125 limb 6; BLK-08's reach made checked, not silent). TWO distinguishable
+  refusals since 2026-09-20 (Rec 20): "declares no units" names the missing producer input,
+  "the declared units are not TECU" names BLK-08. Called by W-3, W-5, W-6.
 * ``require_complete_members`` — a table missing any declared comparison-set member's
   metric (SEC-R-01; FR-P1-05-9). Called by W-3.
 * ``require_d17_bound`` — a breakdown stratum outside the configured D-17 enumerated set
@@ -332,24 +334,47 @@ def require_lineage_caveat(
 
 
 def require_units(mapping: Mapping[str, Any], *, surface: str) -> None:
-    """Guard 3: refuse a value whose units assertion is absent or non-TECU.
+    """Guard 3: refuse a value whose units assertion is absent, or present and non-TECU.
 
-    BLK-08's bound made checked, not silent: until the co-owner adopts its half of the
+    TWO DISTINGUISHABLE REFUSALS (Recommendation 20, 2026-09-20). Limb 1 — the artifact
+    carries no `units` at all: that is a MISSING PRODUCER INPUT, not a governance
+    question, and the message names the producing path and the input it needs
+    (`metrics.build_metrics_artifact`'s `target_release_manifest`, read through
+    `metrics.resolve_target_units`). Limb 2 — the artifact DECLARES units and they are
+    not TECU: that is BLK-08's bound firing, and the message names BLK-08. Collapsing the
+    two, as this guard did until 2026-09-20, sent a reader chasing a governance item when
+    the cause was an unwired producer argument.
+
+    BLK-08's bound stays checked, not silent: until the co-owner adopts its half of the
     R-103 joint contract no design path returns model output to TECU, so on real inputs
-    THIS refusal is what fires instead of a wrong number shipping.
+    one of THESE refusals is what fires instead of a wrong number shipping.
 
     Raises
     ------
     RegimeError
-        `units` absent or not TECU.
+        limb 1: `units` absent, `None` or empty. Limb 2: `units` present and not TECU.
     """
     units = mapping.get("units")
+    if units is None or (isinstance(units, str) and not units.strip()):
+        raise RegimeError(
+            surface,
+            f"the metrics artifact declares no units: the `units` field is absent or "
+            f"empty, so there is nothing to check against {REQUIRED_UNITS!r}. This is a "
+            f"MISSING PRODUCER INPUT, not BLK-08's bound — "
+            f"`metrics.build_metrics_artifact` emits `units` from the released target's "
+            f"stamped release manifest via `metrics.resolve_target_units`, and emits "
+            f"`None` when no `target_release_manifest` is supplied. Supply it at the "
+            f"producing path; the units are read from metadata and never assumed here "
+            f"(R-125 limb 6; Recommendation 19/20)",
+        )
     if units != REQUIRED_UNITS:
         raise RegimeError(
             surface,
-            f"units metadata is {units!r}, not {REQUIRED_UNITS!r} read from the "
-            f"artifact; the table's units are asserted from metadata, never assumed "
-            f"(R-125 limb 6; BLK-08 checked, not resolved)",
+            f"the declared units are {units!r}, not {REQUIRED_UNITS!r}. The artifact DOES "
+            f"state a unit and it is the wrong one — BLK-08's bound firing, not a missing "
+            f"field: no design path returns model output to TECU while BLK-08 stands, and "
+            f"a non-TECU assertion is refused rather than rescaled (R-125 limb 6; BLK-08 "
+            f"checked, not resolved)",
         )
 
 

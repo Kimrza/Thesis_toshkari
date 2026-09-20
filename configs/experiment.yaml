@@ -35,6 +35,19 @@ embargo_hours: 24 # D-38 (2026-09-10); TE §7.1 "24 hours"
 # +24 h horizon needs a config change here, never a code change (TE §2.1, Q-33).
 horizons: [1] # D-51 (2026-09-20); TE §2.1
 
+# window_length_hours — DECLARED, NOT TRANSCRIBED. The primary 24-hour history window is a
+# frozen, non-tuned value (Vision §8.1 "History length is not a tuned hyperparameter") and one
+# of TE §7.0B's protected hashes. This key was ABSENT, not TBD: `read_window_length`
+# (src/features/windows.py) refused only at runtime, after the run had started, and an absent
+# key states nothing — `assert_no_tbd` can report "(absent)" only for a field it was given, and
+# `required_fields_for` did not list it. The sentinel is this project's machine-readable
+# statement that a value is owed to a named owner at a named gate. Transcribing the frozen 24
+# is an OWNER ACT requiring authorization, exactly as D-38 (embargo_hours) and D-51 (horizons)
+# were transcribed; no implementer may fill it by convenience (Vision §1.2; TE §1.1).
+# Declared 2026-09-20 under GOV-2026-09-20-CG-01 Recommendation 17, owner-authorised.
+# Draft transcription decision: CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md §4.4.
+window_length_hours: "TBD — freeze gate"
+
 # --- frozen hyperparameter grids (D-121, Vision §14.2 line 1206: "Exact frozen grids:
 # ridge 6, RF 18, LSTM 16 combinations, with fixed training settings" — Approved).
 # Contents transcribed VERBATIM from Vision §8.6 "Frozen Hyperparameter Grids" (the grid

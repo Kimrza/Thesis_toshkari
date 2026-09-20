@@ -4,6 +4,15 @@
 **Plan**: `code-generation-plan.md` (11 steps; Steps 1–7, 9–11 executed; Step 8 GATED and NOT executed — precondition absent, see § Deviations)
 **Receipted answers**: Q1 = A (regimes block transcribed), Q2 = A (four notebook skeletons), Q3 = A (gated migration).
 
+> ⚠ **This record was reopened 2026-09-20** to carry the `GOV-2026-09-20-CG-01` remediation
+> of Recommendations **18, 20, 21** and **48**. Recommendation 21 is the material one: the
+> FR-P1-05-10 top-1% sensitivity had **no computation anywhere** — `top1pct_sensitivity_block`
+> labelled whatever its caller handed it — and it is now computed. Counts in the `Files`
+> table and the `Test coverage summary` are **re-derived below in the body** and the
+> superseded figures named, per `project.md` (`code-generation:fr-2`). **No code was
+> executed** and **the tree is uncommitted at `HEAD ff5c683`.** No prior verdict is
+> revalidated by this pass. See § GOV-CG-01 remediation (2026-09-20).
+
 ## Sources
 
 - Approved plan and receipted Q&A: `construction/regimes-diagnostics-reporting/code-generation/{code-generation-plan.md,code-generation-questions.md}` [Q1][Q2][Q3]
@@ -14,19 +23,30 @@
 
 ## Files created (10) / modified (1)
 
+> **Every `Lines` cell re-derived 2026-09-20** by `wc -l` in the working tree, printed
+> before assertion, with the `HEAD ff5c683` value beside it. Two of this unit's files were
+> rewritten by the remediation (`diagnostics.py` +385/−30, `tests/test_regimes_and_reporting.py`
+> +177/−8) and one was edited by the sibling that co-owns it (`report_guards.py` +34/−9,
+> Recommendation 19's message split). Three cells were **already stale at `HEAD ff5c683`**
+> before anything was touched: `report_guards.py` (cell 522, HEAD 522 — correct),
+> `diagnostics.py` (cell 1611, HEAD 1638) and `tests/test_regimes_and_reporting.py`
+> (cell 1833, HEAD 1856); `configs/experiment.yaml` (cell 247, HEAD 371) had drifted
+> furthest. **The tree is UNCOMMITTED: `HEAD` = `ff5c683`, `git diff --cached` empty
+> (0 staged paths).**
+
 | File | Lines | Content |
 |---|---|---|
 | `governance/CHANGE_RECORD_2026-09-06_R123_regimes_and_reporting.md` | **237** (re-derived 2026-09-13 by `wc -l` at HEAD `1670ac8`; the cell read 197 — the record grew when its own later sections were appended) | Q1 transcription record; Q2 decision (notebook-name divergence from R-131's indicative names recorded); Q3's PROPOSED D-number text quoting the coverage notebook's Cell-3 constants verbatim (ARUC 40.286/44.086, BSHM 32.778987/35.022987, NICO 35.140989/33.396450; floor half-open cell rule), IGS-site-log validation named as the post-freeze obligation; honest limits |
-| `configs/experiment.yaml` (modified) | 247 (was 212) | ONE `regimes` block: thresholds quiet `Kp<4` / disturbed `Kp>=4` / storm `Kp>=5`, window −12/+24 h, contiguous-`Kp>=5` event definition, ≥24 h-of-`Kp<4` independence, D-13 demotion threshold, `count_source` GFZ (D-11), `december_day_range: "TBD — freeze gate"` (Rec 15 — Student+Supervisor), `d17_quality_strata` citing D-17; nothing else touched; copy exactness test-asserted |
+| `configs/experiment.yaml` (modified) | **384** working tree 2026-09-20 (HEAD `ff5c683` = 371; cell read 247, wrong by 124 at HEAD. The +13 over HEAD is the features worker's Rec 17 sentinel, not this unit's). ⚠ **The `reporting.top1pct_sensitivity` block Recommendation 21's reader requires is ABSENT** — `grep -n "^reporting:" configs/experiment.yaml` returns nothing — so `read_top1pct_declaration` refuses and `scripts/07` cannot complete a run. See § GOV-CG-01 remediation, owed item 1 | ONE `regimes` block: thresholds quiet `Kp<4` / disturbed `Kp>=4` / storm `Kp>=5`, window −12/+24 h, contiguous-`Kp>=5` event definition, ≥24 h-of-`Kp<4` independence, D-13 demotion threshold, `count_source` GFZ (D-11), `december_day_range: "TBD — freeze gate"` (Rec 15 — Student+Supervisor), `d17_quality_strata` citing D-17; nothing else touched; copy exactness test-asserted |
 | `src/evaluation/regimes.py` | 607 | ONE classifier (`classify_hours`, December-blind by signature — params exactly `{kp, config}`), `count_storm_events` with the approved signature (`source`/`release_grade` required; non-GFZ / absent-or-TBD grade / Dst-derived input each raise `RegimeError` naming `.dst_summary.json`/D-11); registered-audit read path with the control-(31) divergence raise; `read_december_day_range` refuses on the TBD sentinel by field name |
-| `src/evaluation/report_guards.py` | **522 on disk, re-derived 2026-09-13** by `wc -l` at HEAD `1670ac8`; the cell led with 519 (its iteration-2 size) and disclosed 522 only in a parenthetical, so the figure a reader meets first was the superseded one | The TEN SD-R-01 guards exactly as reviewed READY (incl. `require_provenance_block` on W-3 AND W-5, presence then agreement; `require_lineage_caveat` on W-3/W-5/W-7, figure-"present" = caption/metadata — **the W-5 half of this claim was FALSE at iteration 1 and is true from iteration 2**: the call at `diagnostics.py:662` was added on the reviewer's Critical, see § Iteration 2 changes); `ConclusionSurfaceRegistry` fail-closed, write-once atomic; `emit_registered_artifact` as one register-then-write transaction |
-| `src/evaluation/diagnostics.py` | **1611 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`); 1434 at iteration 2 (was 1394 at iteration 1; +41/−1); 1596 after the 2026-09-10 gate-reopened repair, then +~15 from the W-4 addition — see § Gate-reopened repair. The **1596** carried in this cell was correct only for the state immediately after that repair and has been flagged as a Minor on two consecutive passes; corrected here in the body per `project.md` (`code-generation:fr-2`) | Primary table (three difficulty controls co-reported by construction; `beats_model` printed never judged; R-108 fields asserted present, never restated; TEC-06 caveat on IRI/GIM rows; tier-3 row; provenance block; `derived: true` on the §5.5 percentage reduction); breakdown family (D-17 bound from config; top-1%-removed sensitivity labelled; driver-identity caveat; machine-readable shortfalls; **from iteration 2:** TECU units asserted from the metrics artifact's metadata and printed as `units`, and the TEC-06 lineage caveat asserted on every IRI/GIM item in the payload tree, both at the W-5 producing path); DEC regime breakdown (registered count governs; computed count for divergence only); practical relevance (both §5.3 conjuncts, PC-09 ordering, honest demotion per R-128); Dst/RF quarantine (`authoritative = false` render refusal); claims-and-limitations checklist over the registered surface set (D-8/D-7/TC-12 prohibited rows, D-28 disclosure, Phase-2 replication statement, hand-authored-prose residual STATED, never claimed enforced), itself a registered surface |
+| `src/evaluation/report_guards.py` | **547** working tree 2026-09-20 (HEAD `ff5c683` = 522; +25 net is Recommendation 19/20's `require_units` message split into two distinguishable refusals — a sibling-driven edit to a module this unit owns. Superseded: 522 at HEAD, 519 at iteration 2) | The TEN SD-R-01 guards exactly as reviewed READY (incl. `require_provenance_block` on W-3 AND W-5, presence then agreement; `require_lineage_caveat` on W-3/W-5/W-7, figure-"present" = caption/metadata — **the W-5 half of this claim was FALSE at iteration 1 and is true from iteration 2**: the call at `diagnostics.py:662` was added on the reviewer's Critical, see § Iteration 2 changes); `ConclusionSurfaceRegistry` fail-closed, write-once atomic; `emit_registered_artifact` as one register-then-write transaction |
+| `src/evaluation/diagnostics.py` | **1993** working tree 2026-09-20 (HEAD `ff5c683` = 1638; **+355 net**, the largest change this unit has taken: Recommendation 21's computed top-1% sensitivity, Recommendation 20's `_REQUIRED_BUDGET_FIELDS` / `budget_value` refusal, Recommendation 48's advisory marker). Superseded: **1611 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`) — itself 27 short of HEAD; 1434 at iteration 2 (was 1394 at iteration 1; +41/−1); 1596 after the 2026-09-10 gate-reopened repair, then +~15 from the W-4 addition — see § Gate-reopened repair. The **1596** carried in this cell was correct only for the state immediately after that repair and has been flagged as a Minor on two consecutive passes; corrected here in the body per `project.md` (`code-generation:fr-2`) | Primary table (three difficulty controls co-reported by construction; `beats_model` printed never judged; R-108 fields asserted present, never restated; TEC-06 caveat on IRI/GIM rows; tier-3 row; provenance block; `derived: true` on the §5.5 percentage reduction); breakdown family (D-17 bound from config; **the top-1%-removed sensitivity, COMPUTED since 2026-09-20** — `read_top1pct_declaration` / `top1pct_removed_keys` / `compute_top1pct_sensitivity_metrics`, both figures derived from the same registered mask, the removal rule and `rows_removed` recorded on the block; the superseded cell wording "top-1%-removed sensitivity labelled" was accurate and is exactly the defect Rec 21 named, since labelling was **all** it did; driver-identity caveat; machine-readable shortfalls; **from iteration 2:** TECU units asserted from the metrics artifact's metadata and printed as `units`, and the TEC-06 lineage caveat asserted on every IRI/GIM item in the payload tree, both at the W-5 producing path); DEC regime breakdown (registered count governs; computed count for divergence only); practical relevance (both §5.3 conjuncts, PC-09 ordering, honest demotion per R-128 — **and since 2026-09-20 the second conjunct REFUSES on an absent `budget_value`**, naming the owed §18.2 forbidden-choice combination rule and its owner rather than defaulting a combination, so the conjunct fails visibly instead of silently never running); Dst/RF quarantine (`authoritative = false` render refusal); claims-and-limitations checklist over the registered surface set (D-8/D-7/TC-12 prohibited rows, D-28 disclosure, Phase-2 replication statement, hand-authored-prose residual STATED, never claimed enforced; **and since 2026-09-20 an explicit `enforcement = "advisory"` field plus the `BINDING_HONESTY_ADVISORY_NOTE` header** — Recommendation 48's approved option 1, so the advisory status is read rather than inferred from the absence of a raise), itself a registered surface |
 | `src/evaluation/plots.py` | 271 | Presentation-only BY SIGNATURE (AST-verified: zero aggregation calls, zero arithmetic BinOps); source-data IDs stamped; lineage caveats carried into captions; WS-19-schema manifest through `require_registered_surface`; matplotlib lazy, absence refuses naming the pin surface |
 | `notebooks/01_data_and_target_audit.ipynb` | 130 | Governed skeleton: declaration cell first, `src/` imports only, stop on missing inputs, registered conclusion cell, never-executed limit in cell 1 |
 | `notebooks/02_processing_and_features_review.ipynb` | 119 | Same discipline |
 | `notebooks/03_model_training_review.ipynb` | 120 | Same discipline |
 | `notebooks/04_results_and_claims_review.ipynb` | 134 | Same discipline |
-| `tests/test_regimes_and_reporting.py` | **1833 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`); 1653 at iteration 2 (was 1599 at iteration 1; +57/−3); 1810 with 88 test functions after the 2026-09-10 gate-reopened repair, then +23 from the W-4 addition — see § Gate-reopened repair. The **1810** carried in this cell was correct only for the state immediately after that repair and has been flagged as a Minor on two consecutive passes; corrected here in the body per `project.md` (`code-generation:fr-2`) | 82 test functions at iteration 2 (derived: `grep -c "def test_"` → 82; was 81) — classifier boundary controls; counting-path refusals; audit-divergence raise; December-blind signature control; the per-entry render-guard set for W-3/W-5/W-7/W-4; provenance-on-breakdown and scored-window-agreement controls; quarantine controls; checklist controls incl. planted-phrase prohibited-class detection and the stated residual; notebook static scans; AST no-threshold-literal / plots-compute-nothing / no-new-import-edge controls; must-NOT-fire controls; config re-read, never literal; synthetic year 2001 only |
+| `tests/test_regimes_and_reporting.py` | **2025** working tree 2026-09-20 (HEAD `ff5c683` = 1856; +169 net for Recommendations 21 and 48). Superseded: **1833 on disk, re-derived 2026-09-13** at HEAD `1670ac8` (`wc -l`) — itself 23 short of HEAD; 1653 at iteration 2 (was 1599 at iteration 1; +57/−3); 1810 with 88 test functions after the 2026-09-10 gate-reopened repair, then +23 from the W-4 addition — see § Gate-reopened repair. The **1810** carried in this cell was correct only for the state immediately after that repair and has been flagged as a Minor on two consecutive passes; corrected here in the body per `project.md` (`code-generation:fr-2`) | **94 test functions**, re-derived 2026-09-20 (`grep -c "^def test_"` → 94; HEAD `ff5c683` = 89, so **+5**; there is **no** `parametrize` decorator in this file, so 94 functions = 94 collected cases). Superseded: 82 at iteration 2, 81 at iteration 1, and the 88 asserted in § Test coverage summary. The five added: four for Recommendation 21 (the outlier control proving the removed-top-1% figure **differs** from its parent, the comparison-wide-versus-per-station materiality control, the configuration-reader refusal set, and the remove-everything refusal) and one for Recommendation 48 (a FAILED binding-honesty row still does not raise, **and** the artifact states `enforcement = "advisory"`). **None of the 94 has been executed** — classifier boundary controls; counting-path refusals; audit-divergence raise; December-blind signature control; the per-entry render-guard set for W-3/W-5/W-7/W-4; provenance-on-breakdown and scored-window-agreement controls; quarantine controls; checklist controls incl. planted-phrase prohibited-class detection and the stated residual; notebook static scans; AST no-threshold-literal / plots-compute-nothing / no-new-import-edge controls; must-NOT-fire controls; config re-read, never literal; synthetic year 2001 only |
 
 ## Key implementation decisions
 
@@ -38,6 +58,21 @@
 
 ## Test coverage summary
 
+**Current, re-derived 2026-09-20 in the working tree: 94 test functions / 94 collected
+cases** (`grep -c "^def test_" tests/test_regimes_and_reporting.py` → 94; no `parametrize`
+decorator in the file). HEAD `ff5c683` = 89, so the remediation added **five**. The **88**
+asserted below is superseded, as are 82 and 81.
+
+⚠ **NONE of the 94 has been executed, and nothing was executed on 2026-09-20.** No usable
+Python interpreter exists on this clone (`python.exe` is a zero-byte Windows Store alias
+stub) and PyPI is unreachable, so even the scratchpad Python + pytest-shim route that
+produced every figure below is no longer available. In particular **the Recommendation 21
+outlier control — the one that proves the top-1%-removed figure differs from its parent —
+has never run.** Every claim about the new code's behaviour in this record is **STATIC**,
+read from source. Nothing is "verified passing".
+
+The prior smoke record, describing the **pre-2026-09-20** state and retained unaltered
+rather than restated as current:
 **Gate-reopened repair (2026-09-10): 88 test functions, 88 passed, 0 failed, 0 skipped —
 see § Gate-reopened repair.** Iteration 2 (2026-09-07): 82 test functions, 82 passed, 0 failed, 0 skipped — see § Iteration 2 changes for the exact runner lines. Iteration 1, as recorded then: 81 test functions, all executed under the scratchpad Python 3.11.16 + pytest shim: **81 passed, 0 skipped, 0 failed** (first run 80/1 — the unit's own AST control caught a set-difference `-` operator in `plots.py`; rewritten to `set.difference()`, re-run green — the control worked). Regressions: `test_common_masks.py` 60/1/0, `test_bootstrap.py` 31/6/0 — unchanged. `compileall` OK; stdlib lint substitute CLEAN (4 over-length lines wrapped); ruff and full pytest owed (PyPI unreachable). **Smoke evidence only, never governed.**
 
@@ -1225,3 +1260,175 @@ functional consequence — the unit's own transcribed config content, the two pr
 Critical/Major-repaired producing paths, the fail-closed registration wiring, and every
 standing invariant re-verified independently in this pass. Both Minors are routed to the next
 touch of this document rather than blocking the gate.
+
+## GOV-CG-01 remediation (2026-09-20) — Recommendations 18, 20, 21, 48
+
+Owner dispositions: `governance/CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md` §2
+(Recommendations 13–60 authorised as *"the board's preferred option in each block"*).
+Findings and their printed derivations: `governance/reviews/GOV-2026-09-20-CG-01.md`
+§§ Recommendation 18, 20, 21, 48.
+
+**This section revalidates no prior verdict.** Nothing below is reviewed.
+
+### Repository state, re-derived at writing time
+
+`git rev-parse --short HEAD` → **`ff5c683`**. `git diff --cached --numstat` → **0 paths
+staged**. Everything here is working-tree only. No commit, `add`, `amend`, `rebase`,
+`checkout`, `restore` or `config` was run; the commit is the student's act
+(`project.md` `code-generation:c30`). `git diff HEAD --numstat` for this unit's files:
+
+| Path | + | − |
+|---|---|---|
+| `src/evaluation/diagnostics.py` | 385 | 30 |
+| `tests/test_regimes_and_reporting.py` | 177 | 8 |
+| `src/evaluation/report_guards.py` | 34 | 9 |
+
+`src/evaluation/regimes.py` (607) and `src/evaluation/plots.py` (271) are **byte-unchanged**;
+`git diff HEAD` is empty on both. The four notebook skeletons are untouched.
+
+### Recommendation 21 — the top-1%-error-removed sensitivity had no computation anywhere
+
+The board's evidence: the entire body of `top1pct_sensitivity_block` was
+`return {"parent": dict(parent_value), "sensitivity": {**dict(sensitivity_value), "label": SENSITIVITY_LABEL}}`.
+Both inputs were caller-supplied. A caller could have passed the unmodified parent as the
+sensitivity and nothing would have objected. Board's preferred: **(1)** implement the
+computation beside `compute_member_metrics` and have the block **call** it.
+
+Implemented as four additions to `diagnostics.py`:
+
+- `_member_rows` — one traversal of `mask.masked_rows` returning ordered
+  `(station, stamp, y_true, y_hat)` tuples, **shared** by `compute_member_metrics` and the
+  sensitivity so the two can never disagree about which rows they scored.
+- `read_top1pct_declaration(experiment)` — reads
+  `experiment.reporting.top1pct_sensitivity`: `removed_fraction` and `scope`. Both are
+  configuration, never source (TC-03e), and each refusal names its own config field.
+- `top1pct_removed_keys` — the removal **rule**, stated so it is auditable and never
+  re-derived by a reader: rank by `|y_hat − y_true|` descending, ties broken by
+  `(station, interval_start_utc)` ascending so the removal is deterministic across both
+  governed platforms; remove the first `k = ceil(removed_fraction × n)`, **`ceil` not
+  `round` or `floor`** so a declared removal never silently removes nothing on a small
+  support; under `per_station` the whole rule runs once per station.
+- `compute_top1pct_sensitivity_metrics` — §5.5's metric set recomputed over the remainder,
+  carrying `rows_removed`, `removed_fraction`, `scope`, `removal_rule` and `removed_keys`
+  onto the block.
+
+`top1pct_sensitivity_block` is now keyword-only `(mask, member_id, removed_fraction, scope)`
+and computes **both** figures: the parent over the registered mask **in full**, the
+sensitivity over the mask less the removed rows. The parent is never recomputed over a
+reduced support, and the sensitivity remains a separate labelled field beside it, never
+merged (FR-P1-05-10). `excluded_keys` on `compute_member_metrics` exists for this one
+caller and is **not** a new exclusion policy on the frozen mask.
+
+**THE GENUINE FORK, routed and not decided.** Whether the top 1% is taken
+**comparison-wide** or **per station** is not settled by any governing document, and
+equal-station weighting makes it material: comparison-wide ranking removes a larger share
+of rows from a station whose errors are systematically larger, so the equal-station mean is
+then taken over unequal denominators; per-station ranking keeps the supports proportionate
+but the rows removed are not the comparison's largest errors, which is what the
+requirement's wording most directly names. Per the board's instruction, **`comparison_wide`
+is implemented as the configured default** — the literal reading — the choice is a **named
+parameter read from configuration** so the gate can change it without a code change, and
+the question is a **Supervisor ruling owed before G-06** (dispositions §5 item 14). The
+argument on both sides is written into `read_top1pct_declaration`'s docstring so the next
+reader meets it rather than inheriting a silent default. **No value was invented and no
+ruling was pre-empted.**
+
+Four test functions, including the control the board named — on a fixture with one planted
+outlier, removing the top 1% **changes** the reported value (parent RMSE > 20 against a
+sensitivity of 1.0), with a must-NOT-fire companion on the clean fixture where the two
+agree. A stub that echoes its inputs passes the old label test and **fails** this one.
+A second function asserts the two scopes remove **different** rows, making the materiality
+of the open question executable rather than asserted.
+
+### Recommendation 20 — the budget producer and its consumers disagree on every field
+
+Board's preferred: **(1)** the structural fields, which are pure transcription of what
+`_assert_budget` already names, with `budget_value` left as a declared sentinel and the
+combination rule routed to the supervisor; `practical_relevance_statement` must then refuse
+naming the missing rule and its owner. The **consumer half is done here**; the producer
+half is not this unit's file.
+
+`_assert_budget` now carries `_REQUIRED_BUDGET_FIELDS` — `artifact_id`, `phase1_contents`,
+`asymmetry_statement`, `phase2_quantities` — **each with the reason it is required**, and
+names **every** absent field in **one** refusal that also names the producing path
+`src/data/prepared.build_uncertainty_budget`. A one-at-a-time refusal would turn one
+contract mismatch into four sequential runs; the board flagged precisely that.
+`phase2_quantities` must be a mapping whose every value is the literal
+`"recorded not-applicable"`, and a bare list — which is what the producer returns today —
+now refuses with a message saying so.
+
+`practical_relevance_statement`'s `budget_value` refusal is rewritten to state what is
+actually missing: **not a number the producer forgot, but the frozen RULE** by which the
+Phase 1-applicable uncertainty contents combine into one scalar TECU magnitude. It names
+the candidate combinations (sum, quadrature, max, or a stated other), names the owner
+(Student with Supervisor countersignature), names `evidence/DECISIONS.md` as where the
+decision must land, and states that no implementer may fill it by convenience (TE §1.1).
+Vision §5.3's second conjunct therefore **fails visibly** rather than silently never
+running. The draft sits at dispositions §4.5; **nothing was written to
+`evidence/DECISIONS.md`.**
+
+The negative control lives in `tests/test_common_masks.py` § 7b rather than here, because
+that is where the real mask machinery is: it pushes the budget shape the producer actually
+returns through `build_primary_table` and asserts all three missing field names appear in
+one message.
+
+### Recommendation 48 — the binding honesty rule is checked advisorily
+
+Board's preferred: **(1)** keep it advisory and **state** that status explicitly, rather
+than (2) raising on a FAILED row. The board's reasoning is adopted as given: whether a
+conclusion discloses a result *fairly* is not decidable by substring matching, and raising
+on a substring check would give false confidence while still missing every paraphrase.
+
+`build_claims_checklist` now emits two fields **before the rows**: a machine-readable
+`enforcement: "advisory"` and a human-readable `enforcement_note` carrying
+`BINDING_HONESTY_ADVISORY_NOTE`, which states in terms that nothing raises, that the
+FR-P1-05-20 rows test only whether a beating benchmark's **identifier** appears as a
+substring of the conclusion text, why a raise would be worse, and that **fair disclosure is
+a human check performed by the student and supervisor at G-06**. A header, not a per-row
+footnote a reader may never reach.
+
+One test asserts **both halves**: a FAILED binding-honesty row still does not raise, and
+the artifact carries the marker and the note. **Owed to the gate record**, per the board's
+closure evidence: an entry stating that the binding honesty rule is human-verified at G-06,
+**naming the human verifier**. That is an owner act and is not written here.
+
+### Recommendation 18 — this unit's producing path
+
+Every W-3/W-4/W-5/W-6 entry point this unit owns now has a production caller in
+`scripts/07_evaluate_and_report.py::_report_set` (that file is `evaluation-and-comparison`'s;
+see its record for the wiring in full). All ten SD-R-01 rendering refusals are reachable:
+`require_complete_members`, `require_units`, `require_beats_model`, `require_estimand_fields`,
+`require_lineage_caveat`, `require_derived_label`, `require_provenance_block` and
+`require_registered_surface` through `build_primary_table`; `require_driver_caveat` through
+the per-station breakdown, the only path that emits TC-12's caveat; `require_d17_bound`
+through `build_quality_stratum`.
+
+One honest consequence recorded rather than smoothed over: the masked rows carry the
+comparison surface (station, hour, `y_true`, `y_hats`) and **not** D-17's
+observation-quality columns, so in a `07` run each quality stratum is emitted **empty**
+with a machine-readable `completeness_shortfall` and the artifact marked partial — the
+project's two-tier posture, a shortfall recorded rather than console text, never a silent
+omission.
+
+### Owed, and not done here
+
+1. **`configs/experiment.yaml` has no `reporting.top1pct_sensitivity` block.**
+   `grep -n "^reporting:" configs/experiment.yaml` returns nothing.
+   `read_top1pct_declaration` requires `removed_fraction` and `scope`, and `_report_set`
+   calls it unconditionally, so **`scripts/07` cannot complete a run until the block is
+   declared**. `configs/` was outside this worker's write scope and **no value was
+   invented** (TE §18.2, §18.3 — stop and report rather than choose a default). The block
+   is owed, with `scope` carrying the Supervisor ruling of dispositions §5 item 14.
+2. **Recommendation 20's producer half** — `src/data/prepared.build_uncertainty_budget`
+   amended to the consumer's field shape — is in another worker's scope and is **not done**.
+   Until it lands, `build_primary_table` refuses against the only budget the pipeline
+   produces. That is the designed fail-closed behaviour, not a regression.
+3. **`budget_value` and its combination rule** remain a TE §18.2 forbidden-choice item with
+   no decision. Draft at dispositions §4.5. Vision §5.3's second conjunct is **not**
+   computable today, and now says so out loud.
+4. **Recommendation 48's gate-record entry**, naming the human verifier of the binding
+   honesty rule at G-06, is an owner act and is not written here.
+5. **Execution.** Nothing ran. WS-19, TA-14, TA-16, TA-19 and TA-20 stay `Pending`; no
+   acceptance row is claimed discharged; BLK-03, BLK-04, BLK-08 and BLK-09 remain open;
+   G-05 and G-06 remain `Blocked`.
+6. **The commit** remains the student's act; `HEAD` is `ff5c683` with nothing staged.

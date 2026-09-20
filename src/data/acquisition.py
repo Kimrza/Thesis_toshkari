@@ -53,7 +53,12 @@ functional design:
    file; `suffix_mismatch` recorded machine-readably at retrieval and **refused at
    release**; driver rows carrying a `release_status` grade that is never mixed within
    one series; gaps stored as explicit NaN with the NaN-count conservation invariant
-   carried on the manifest; and R-42's derived-release provenance check.
+   carried on the manifest; and R-42's derived-release provenance check. Every manifest
+   this unit writes carries the three TE 13 definition IDs (`phase_id`, `source_id`,
+   `target_definition_id`) through the one `assert_identity_stamped` refusal — added
+   2026-09-20 on board finding TEC-05, which found the provenance HEAD of the chain
+   unstamped while stage 02 onward stamped thoroughly. `stamps` is a REQUIRED argument
+   on all three writers: a default would preserve exactly the silence being closed.
 4. **The notebook saved-output check (W-9 limb 2, Q3 = A).** The testable helper the
    pre-commit hook calls: a staged notebook carrying saved outputs or execution counts
    fails closed, and nothing is auto-stripped.
@@ -100,6 +105,13 @@ Governance
   derived from RECORD TIMESTAMPS, never from a directory or file name (R-31,
   project.md § Forbidden). **No acquisition run may touch calendar 2022-12 while
   BLK-07 stands** — `assert_no_locked_month_records` is the executable form.
+* Record-date attribution is **UTC**, via `parse_record_date_utc` (R-46, added
+  2026-09-20). The former `raw[:10]` slice attributed an offset-bearing timestamp to its
+  LOCAL date: `2022-11-30T23:30:00-05:00` is `2022-12-01T04:30:00Z`, a December record a
+  slice files under November and walks past the BLK-07 bar. All observed data carries
+  `+00:00`, so the defect was latent — but this derivation decides locked-month
+  membership and the DATA-07 re-acquisition is being written against it. `inventory`
+  wraps the SAME parser in its own integrity type, so the rule has one derivation home.
 """
 
 from __future__ import annotations
@@ -145,6 +157,9 @@ __all__ = [
     "DRIVER_INVENTORY_FIELDS",
     "LOCKED_YEAR",
     "LOCKED_MONTH",
+    "TEC05_STAMP_FIELDS",
+    "assert_identity_stamped",
+    "parse_record_date_utc",
     "store_gaps_as_nan",
     "count_gaps",
     "gap_accounting_entry",
@@ -776,7 +791,121 @@ DRIVER_INVENTORY_FIELDS: Final[tuple[str, ...]] = (
 LOCKED_YEAR: Final[int] = 2022
 LOCKED_MONTH: Final[int] = 12
 
+#: TE 13's three definition IDs, stamped on every dataset, prediction, mask and
+#: comparison (project.md § Mandated, board finding TEC-05; R-70). Named ONCE here, the
+#: lowest module in the package, so `acquisition`'s manifests, `inventory`'s audit
+#: reports and `prepared`'s row stamps read one vocabulary rather than three copies.
+TEC05_STAMP_FIELDS: Final[tuple[str, ...]] = (
+    "phase_id",
+    "source_id",
+    "target_definition_id",
+)
+
 _NAN: Final[float] = float("nan")
+
+#: A bare calendar date carries no offset and therefore no local/UTC ambiguity; anything
+#: longer must state an explicit zero UTC offset before a date can be read off it (R-46).
+_DATE_ONLY: Final[re.Pattern[str]] = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def assert_identity_stamped(
+    identity: Mapping[str, object], *, resource: str
+) -> dict[str, str]:
+    """TEC-05 / R-70: all three definition IDs present and non-empty, or REFUSE.
+
+    The provenance head of the chain (`request_manifest.json`, `sha256_manifest.json`,
+    the fixture read manifest, the source inventory and the two December-audit reports)
+    carried no stamp at all until 2026-09-20, while stage 02 onward stamped thoroughly
+    — so an artifact could reach a gate with no phase, source or target-definition
+    identity on it. This is the one refusal both ends share; the empty-stamp shape
+    matches `prepared.assert_*`'s existing pattern rather than inventing a second one.
+
+    Returns the three values as a plain `dict[str, str]`, so a caller never has to
+    re-read the mapping it just handed in.
+
+    Raises
+    ------
+    AcquisitionError
+        naming the resource and EVERY absent or empty stamp — an artifact that names one
+        of the three is no more traceable than one that names none, so all three are
+        reported together rather than one raise at a time.
+    """
+    missing = [
+        field
+        for field in TEC05_STAMP_FIELDS
+        if not str(identity.get(field, "") or "").strip()
+    ]
+    if missing:
+        raise AcquisitionError(
+            resource,
+            "TE 13 identity stamp(s) absent or empty: "
+            + ", ".join(missing)
+            + " — every dataset, prediction, mask and comparison carries phase_id, "
+            "source_id and target_definition_id (project.md § Mandated, board finding "
+            "TEC-05; R-70), and the values are RESOLVED from configuration, never "
+            "invented by an implementer (TE 18.2/18.3)",
+        )
+    return {field: str(identity[field]).strip() for field in TEC05_STAMP_FIELDS}
+
+
+def parse_record_date_utc(raw: object) -> _dt.date:
+    """R-31/R-46: the ONE derivation of a record's observation date, in UTC.
+
+    Until 2026-09-20 both record-date readers in this package sliced `raw[:10]`, which
+    attributes a timestamp to its LOCAL date. Every record observed to date carries
+    `+00:00`, so the defect was latent — but this derivation decides LOCKED-MONTH
+    membership, and `2022-11-30T23:30:00-05:00` is `2022-12-01T04:30:00Z`: a December
+    record that a slice files under November and walks past the BLK-07 bar. The
+    re-acquisition (DATA-07) is being written against this function, so the latent form
+    is fixed before it can be reached.
+
+    Accepted, in order:
+
+    * a bare `YYYY-MM-DD` calendar date — no offset exists to misread, and this is the
+      shape the month files' `date` column carries;
+    * an ISO-8601 timestamp bearing an EXPLICIT zero UTC offset (`+00:00` or `Z`,
+      space- or `T`-separated), whose `.date()` is then the UTC date.
+
+    Refused: a naive timestamp (no offset — unattributable, never assumed to be UTC) and
+    a non-zero offset (its local date is not its UTC date, and guessing which the writer
+    meant is the failure mode this function exists to close). Refusal rather than silent
+    conversion is the fail-closed posture the rest of this module holds; a caller that
+    genuinely has offset-bearing data converts it upstream and records that it did.
+
+    Raises
+    ------
+    ValueError
+        carrying the reason as its message. Deliberately the stdlib exception rather
+        than an `IntegrityError` subclass: `acquisition` and `inventory` each raise
+        their OWN integrity type around this ONE parser, so the derivation has a single
+        home (nfr-design c58) without either module inheriting the other's exception.
+    """
+    text = str(raw if raw is not None else "").strip()
+    if not text:
+        raise ValueError("record timestamp is missing or empty")
+    if _DATE_ONLY.match(text):
+        return _dt.date.fromisoformat(text)
+    try:
+        parsed = _dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        raise ValueError(
+            f"record timestamp {text!r} is neither a YYYY-MM-DD calendar date nor a "
+            f"parseable ISO-8601 timestamp"
+        ) from None
+    if parsed.tzinfo is None:
+        raise ValueError(
+            f"record timestamp {text!r} carries no UTC offset; a naive timestamp cannot "
+            f"be attributed to a UTC date and is never ASSUMED to be UTC (R-46)"
+        )
+    offset = parsed.utcoffset()
+    if offset != _dt.timedelta(0):
+        raise ValueError(
+            f"record timestamp {text!r} carries a non-zero UTC offset ({offset}); its "
+            f"local date is not its UTC date, and attributing it to the local one is how "
+            f"a December observation gets filed under November (R-46) — convert to "
+            f"explicit UTC upstream and record that the conversion happened"
+        )
+    return parsed.date()
 
 
 def _is_gap(value: object) -> bool:
@@ -939,6 +1068,7 @@ def write_request_manifest(
     path: Path,
     *,
     identity: Mapping[str, Any],
+    stamps: Mapping[str, Any],
     provider_files: Sequence[Mapping[str, Any]],
     driver_inventory: Sequence[Mapping[str, Any]] = (),
     gap_accounting: Sequence[Mapping[str, Any]] = (),
@@ -948,11 +1078,24 @@ def write_request_manifest(
 ) -> Path:
     """Write `request_manifest.json` (W-3, domain-entities 2). Every value guarded.
 
-    Validations, in order: `madrigalWeb_version` present and non-empty (R-35);
-    `provenance_class` in the closed set (R-36); all nine TE 5.1 fields per driver
-    series plus a single recorded grade (R-40); the NaN-count conservation invariant
-    per gap-accounting entry (R-37); then the WHOLE payload through the W-9 redaction
-    chokepoint — nothing is written when any check fails.
+    Validations, in order: `madrigalWeb_version` present and non-empty (R-35); the three
+    TE 13 identity stamps present and non-empty (R-70/TEC-05); `provenance_class` in the
+    closed set (R-36); all nine TE 5.1 fields per driver series plus a single recorded
+    grade (R-40); the NaN-count conservation invariant per gap-accounting entry (R-37);
+    then the WHOLE payload through the W-9 redaction chokepoint — nothing is written when
+    any check fails.
+
+    `stamps` carries `phase_id`, `source_id` and `target_definition_id`, RESOLVED from
+    configuration by the calling stage script and never invented here (R-30, R-70). It is
+    required rather than defaulted: a default would let the provenance head of the chain
+    go on emitting unstamped artifacts, which is the defect this parameter closes
+    (board finding TEC-05, 2026-09-20).
+
+    `gap_accounting` is the W-7 NaN-conservation evidence, one entry per series. It
+    defaults to empty for a run that retrieved no series at all; a run that DID retrieve
+    one and passes nothing leaves the conservation loop below iterating zero entries,
+    which is a silently unenforced invariant rather than a satisfied one — the calling
+    script composes an entry per series through `gap_accounting_entry`.
 
     `missing_months` is the machine-readable completeness-shortfall field
     (`team.md` § Code Style): a missing month is recorded here, never console text
@@ -961,6 +1104,7 @@ def write_request_manifest(
     (SD-A-01).
     """
     assert_madrigalweb_version(identity)
+    stamped = assert_identity_stamped(stamps, resource=str(path))
     if provenance_class not in PROVENANCE_CLASSES:
         raise AcquisitionError(
             str(path),
@@ -993,6 +1137,7 @@ def write_request_manifest(
         "producing_interpreter": producing_interpreter,
         "missing_months": list(missing_months),
         "retrieval_policy": retrieval_policy(),
+        **stamped,
     }
     guard_egress(payload, context=f"request_manifest[{Path(path).name}]")
     return _write_json(Path(path), payload)
@@ -1009,6 +1154,7 @@ def write_sha256_manifest(
     derived_artifacts: Mapping[str, str],
     provenance_class: str,
     producing_interpreter: str,
+    stamps: Mapping[str, Any],
 ) -> Path:
     """Write `sha256_manifest.json` (W-4): one entry per provider file PLUS one per derived
     artifact, in the CANONICAL TE §13.3 representation — a flat `{relative path: sha256}`
@@ -1024,6 +1170,12 @@ def write_sha256_manifest(
     Provider entries are keyed by the file's ON-DISK name (`logical_name`, falling back
     to `provider_filename` when no logical name was recorded), so the mapping resolves
     against the directory it sits in.
+
+    `stamps` (`phase_id`, `source_id`, `target_definition_id`, R-70/TEC-05) rides on the
+    METADATA sidecar and NEVER on the hash mapping: the mapping is the canonical TE 13.3
+    `{relative path: sha256}` document the governed reader parses, and the earlier nested
+    payload failed that reader on its own metadata keys (G-1, 2026-09-19). Stamping the
+    sidecar is what keeps the artifact traceable without reopening that defect.
 
     Refusals (all `AcquisitionError`, naming the file and the expectation): a provider
     record without a `sha256` (incomplete or divergent retrieval — admitting it would make
@@ -1041,6 +1193,7 @@ def write_sha256_manifest(
         )
     if not str(producing_interpreter).strip():
         raise AcquisitionError(str(path), "producing_interpreter must be recorded (R-36)")
+    stamped = assert_identity_stamped(stamps, resource=str(path))
 
     mapping: dict[str, str] = {}
     provider_identity: dict[str, str] = {}
@@ -1094,6 +1247,7 @@ def write_sha256_manifest(
         "provider_files": provider_identity,
         "provenance_class": provenance_class,
         "producing_interpreter": producing_interpreter,
+        **stamped,
     }
     guard_egress(mapping, context=f"sha256_manifest[{Path(path).name}]")
     guard_egress(meta, context=f"sha256_manifest_meta[{Path(path).name}]")
@@ -1189,17 +1343,24 @@ def assert_derived_release_provenance(
 
 def _record_date(record: Mapping[str, Any], timestamp_key: str) -> _dt.date:
     """The ONE reader of a record's observation date (R-31): shared by the locked-month
-    predicate and by the window predicate below, so no second copy of the rule exists."""
+    predicate and by the window predicate below, so no second copy of the rule exists.
+
+    Attribution is UTC, via `parse_record_date_utc` (R-46, 2026-09-20): the former
+    `raw[:10]` slice attributed an offset-bearing timestamp to its LOCAL date, which on
+    a month boundary files a December observation under November and walks it past the
+    BLK-07 bar. `inventory._record_date` wraps the SAME parser with its own exception
+    type, so the rule has one derivation and two integrity tiers.
+    """
     raw = str(record.get(timestamp_key, "") or "")
     try:
-        return _dt.date.fromisoformat(raw[:10])
-    except ValueError:
+        return parse_record_date_utc(raw)
+    except ValueError as exc:
         raise AcquisitionError(
             raw or f"<record with no {timestamp_key}>",
-            f"record timestamp {timestamp_key!r} is missing or unparseable; "
-            f"membership derives from RECORD TIMESTAMPS, never from a directory or "
-            f"file name (R-31, project.md Forbidden), and a record whose date cannot "
-            f"be established cannot be cleared — fail closed, never guess",
+            f"record timestamp {timestamp_key!r} cannot establish a UTC observation "
+            f"date ({exc}); membership derives from RECORD TIMESTAMPS, never from a "
+            f"directory or file name (R-31, project.md Forbidden), and a record whose "
+            f"date cannot be established cannot be cleared — fail closed, never guess",
         ) from None
 
 
@@ -1440,6 +1601,7 @@ def write_fixture_read_manifest(
     path: Path,
     *,
     identity: Mapping[str, Any],
+    stamps: Mapping[str, Any],
     fixture_inputs: Mapping[str, Any],
     month_request_manifest: Path | None,
     producing_interpreter: str,
@@ -1453,13 +1615,20 @@ def write_fixture_read_manifest(
     recorded state and is never replaced by a plausible value). Every value passes the W-9
     redaction chokepoint.
 
+    `stamps` carries the three TE 13 definition IDs (R-70/TEC-05). A fixture scope already
+    declares them as required identity fields, so this writer RESOLVES them from the scope
+    through its caller and invents nothing. Named in board finding TEC-05 alongside the
+    request and sha256 manifests as a provenance-head artifact carrying no stamp.
+
     Raises
     ------
     AcquisitionError
-        an empty `producing_interpreter`; a redaction-chokepoint refusal.
+        an empty `producing_interpreter`; an absent or empty identity stamp; a
+        redaction-chokepoint refusal.
     """
     if not str(producing_interpreter).strip():
         raise AcquisitionError(str(path), "producing_interpreter must be recorded (R-36)")
+    stamped = assert_identity_stamped(stamps, resource=str(path))
     recorded_version: str | None = None
     if month_request_manifest is not None and Path(month_request_manifest).is_file():
         try:
@@ -1476,6 +1645,7 @@ def write_fixture_read_manifest(
         "fixture_inputs": dict(fixture_inputs),
         "month_recorded_madrigalWeb_version": recorded_version,
         "producing_interpreter": producing_interpreter,
+        **stamped,
     }
     guard_egress(payload, context=f"fixture_read_manifest[{Path(path).name}]")
     return _write_json(Path(path), payload)
