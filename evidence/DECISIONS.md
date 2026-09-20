@@ -2859,6 +2859,101 @@ tuning run's output and not a freeze item.
 
 ---
 
+## D-52 — Stage 00 on a fixture run READS the scope's verified derived artifacts; no transport (ruling; option (a))
+
+**Decision date:** 2026-09-20. **Ruled by:** the project decision owner ("for item 1 i choose a",
+against `governance/CHANGE_RECORD_2026-09-20_b01_prerequisites.md` §2.5 item 1, which offered
+two mutually exclusive rulings). **Authority:** TE §15.1 (a walking-skeleton fixture "reads
+prepared provider VTEC only"); TE §9.2 (both fixtures before any full-year job); `team.md`
+§ Walking Skeleton (eligibility judged on derived-artifact verification; the DATA-07 caveat);
+R-31 / Option B (`CR-2026-09-13-000102-FIXTURE-WINDOW`); R-36 (`provenance_class` closed set,
+"the twelve pre-TC-06 months are 'derived_only'"); R-135 control 12 (declared inputs verified
+at use).
+
+**Decision.** On a fixture run (`--fixture-manifest` given), `scripts/00_acquire_prepared_vtec.py`
+constructs **no** provider transport. It re-executes the orchestrator's declared-input
+verification (`verify_declared_inputs`, now housed once in `src/data/acquisition.py` and
+imported by both), reads the scope's cited records file, SELECTS the cited station(s)' records
+inside the cited window on record dates, ASSERTS the assembled set (no locked-month record;
+every record inside the window), and writes `artifacts/acquisition/fixture_read_manifest.json`
+(`retrieval_performed: false`; the month's own recorded `madrigalWeb_version` copied verbatim —
+`"unknown"` for the pre-TC-06 months, never replaced by a plausible value) plus
+`sha256_manifest.json` with `provenance_class = "derived_only"`, zero provider files and
+exactly the verified artifacts. **No `request_manifest.json` is written on this path**: nothing
+was requested, so R-35's retrieval check (a non-empty `madrigalWeb_version`) is neither applied
+nor imitated. A retrieval run (no `--fixture-manifest`) is unchanged and still refuses at
+`_build_transport` until the DATA-07 re-acquisition is authorised.
+
+**What this does not do.** It does not verify retrieval (DATA-07's caveat stands on every
+fixture artifact); it does not authorise any provider call; it does not change the fixture
+windows, stations or any cited value. Option (b) — exempting stage 00 from the fixture sequence
+— was offered and not chosen.
+
+**Measured effect.** Plumbing measuring-run probe (governed 3.11 environment, isolated copy):
+stage 00 completes (`records_read_from_month_file` 18,183; `records_in_window` 1,810 for
+`BSHM`, D-11's own figure), stage 01 completes, and the ladder now stops at **stage 02**
+(`configs/data.yaml: qc_operations` absent — freeze item 2, the supervisor's). Tests:
+`tests/test_clean_run.py::test_item1_option_a_00_fixture_run_reads_verified_artifacts_and_writes_derived_only`,
+`::test_item1_option_a_00_fixture_run_refuses_a_tampered_artifact_before_reading`.
+
+---
+
+## D-49 addendum — Python 3.10 compatibility of the CODE, found and closed on the first Kaggle run
+
+**2026-09-20.** The D-49 extension (fixture runs in the 3.10 venv) was recorded after a
+dependency-level compatibility check (50-package cp310 resolution). The first Kaggle run of
+revision 2 refused at `--verify-runtime` with `ImportError: cannot import name 'UTC' from
+'datetime'` — a **language-level** incompatibility the dependency check did not cover:
+`datetime.UTC` (3.11+) was used in 33 modules under `src/`, `scripts/`, `tests/` and
+`kaggle/build_b01_package.py`, and `enum.StrEnum` (3.11+) in two. Under 3.10 every `src`
+module failed to import (measured: 37/37 import failures before the change, 0/37 after).
+
+**Closed by a mechanical, behaviour-preserving sweep, not by a new environment decision:**
+`datetime.UTC` → `datetime.timezone.utc` everywhere (on 3.11 `datetime.UTC is
+datetime.timezone.utc` — the same object); `enum.StrEnum` imported from the standard library on
+3.11 and provided by a 3.10 backport in `src/data/config.py` (`str()`/`format()` give the
+member value, as on 3.11) for `src/data/splits.py` and `src/features/transforms.py`. The
+timestamp parsers already handled the `Z` suffix explicitly, so `fromisoformat` semantics are
+unaffected. `ruff` rule UP017 (which would rewrite the object back to the 3.11 alias) is
+ignored in `pyproject.toml` with the reason recorded there. **The main environment stays
+Python 3.11** (TC-03d); the pins are unchanged; no scientific value, no config and no
+declaration changed. Proof: the full suite under the governed 3.11 environment AND under a
+CPython 3.10.21 environment carrying the governed pins (WSL2, diagnostic only) — counts in
+`governance/CHANGE_RECORD_2026-09-20_b01_prerequisites.md` §9. The Kaggle notebook (revision
+4) now runs the whole suite inside the 3.10 venv (Step 3c) before any stage runs, so a
+recurrence stops the session with the junit counts rather than a stage traceback.
+
+---
+
+## D-50 addendum — the hmF2 diagnostic column is approved and implemented (no threshold)
+
+**2026-09-20.** The student approved the optional hmF2 diagnostic column ("The optional hmF2
+diagnostic column approved as well"). Implemented in `src/external/iri.py:build_validation_report`:
+when a sample carries `official_interface_hmf2_km` (read from the official output's
+`Peak Heights/km: hmF2=` line), the report records it beside `adapter_hmf2_km` (one
+`iricore.iri` call at `version=16`, `oarr[1]`, same index files and default switches as the
+TEC call) and `hmf2_diff_km_diagnostic_no_threshold`. **The column never enters
+`within_tolerance`**; a sample without the official value records nulls. The tolerance of
+D-50 is unchanged. Test:
+`tests/test_external_drivers.py::test_b01_validation_report_records_the_hmf2_diagnostic_without_a_threshold`.
+
+---
+
+## D-51 addendum — countersignature statement of record
+
+**2026-09-20.** The student states, in the same reply, that items 3 and 5 of the freeze
+package "are both approved by student and supervisor also countersigned". For D-51 this is
+recorded as the **student's statement that the supervisor countersigned**; it is stronger than
+the delegation D-51 was first recorded under, and D-51's paragraph "Governance condition,
+stated precisely" is superseded to that extent. What is still true and still stated: no signed
+document, email or minute from Dr. Reza Saraf Shirazi is held in this repository, and none is
+represented as existing here — `governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md` is the
+pattern for lodging one. Item 3 (the feature dictionary and normalization) had **no value on
+record to countersign** when the statement was made; see
+`CR-2026-09-20-B01-PREREQS` §9 for the proposed D-53 text that the countersignature can attach to.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to

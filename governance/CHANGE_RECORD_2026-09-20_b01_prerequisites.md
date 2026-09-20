@@ -381,3 +381,184 @@ full suite re-run recorded in §8.2 when complete. Package rebuilt (configs chan
 **1365 tests, 0 failures, 0 errors, 4 pre-existing skips** (junit-counted). Package rebuilt:
 zip SHA-256 `62eb9d2ca1bebf9dd23033f2825dacfed6541a76c744f3560548cbdb7736d838`, tree SHA-256
 `b01244acd6ab00d00dfaf09e22199cbdeb277c0d504a847d9d352f6be1f4d21c`, 200 files, at `4253d51+dirty`.
+
+---
+
+## 9 — Second pass, 2026-09-20 (after the owner's reply: hmF2 approved; items 3 and 5 "approved by student and supervisor, countersigned"; item 1 = (a); items 4 and 6 "tell me more"; "check and complete my work"; the Kaggle `--verify-runtime` traceback)
+
+### 9.1 The Kaggle refusal: a language-level Python 3.10 incompatibility, closed
+
+The traceback the owner returned (`ImportError: cannot import name 'UTC' from 'datetime'
+(/usr/lib/python3.10/datetime.py)` at `src/data/config.py:107`, reached from
+`04 --verify-runtime`) is not a pin problem: §1.1's compatibility check covered the
+**dependency** level (50-package cp310 resolution) and not the **language** level. Measured
+under a CPython 3.10.21 environment (WSL2, diagnostic): **37 of 37** `src` modules failed to
+import — 35 through `datetime.UTC` (3.11+; used in 33 files across `src/`, `scripts/`,
+`tests/`, `kaggle/build_b01_package.py`), 2 through `enum.StrEnum` (3.11+; `src/data/splits.py`,
+`src/features/transforms.py`). Nothing else 3.11-only was found (`hashlib.file_digest`,
+`typing.Self`, `except*`, `tomllib`, `contextlib.chdir`: absent; every `fromisoformat` caller
+already strips a `Z` suffix itself).
+
+**Closed by a mechanical, behaviour-preserving sweep (D-49 addendum):** `dt.UTC` →
+`dt.timezone.utc` (73 sites; on 3.11 the two names are the same object), the two
+`from datetime import UTC` sites likewise; `StrEnum` imported from `enum` on 3.11 and backported
+in `src/data/config.py` on 3.10 (`str()`/`format()` return the member value as on 3.11 — checked
+on 3.10.21: `str(FieldClass.driver) == "driver"`, equality with the string holds). `ruff` UP017
+(which rewrites the object back to the alias) is ignored in `pyproject.toml` with the reason
+recorded there. Files: 33 modules, one-line-pattern diffs, no logic touched; `src/data/config.py`
+exports `StrEnum` and `UTC`. Main environment: still Python 3.11.16. Pins: unchanged. After the
+sweep: 0 of 37 import failures on 3.10; suite results in §9.7.
+
+The two alternatives considered and not taken: (b) building `iricore` from its sdist under
+Kaggle's 3.11 (would replace the D-49 pinned wheel `iricore-1.8.0-cp310-…` with a
+locally-compiled, non-reproducible binary — a new D-49 decision, and the measured tolerance basis
+was taken on the wheel); (c) running the fixtures on 3.11 and only B-01 on 3.10 (the environment
+mismatch the D-49 extension exists to remove). The sweep is reversible by the same pattern if
+the owner prefers (b).
+
+### 9.2 The owner's collection, checked file by file (item 2 of the 8.1 list)
+
+Eight outputs and a screenshot were found under `kaggle/official_reference_outputs/`. Every
+file's **server-echoed header** was compared with its case (§3's table); the header, not the
+filename, is authoritative. Result — recorded in the sheet's new §9 and reproduced here:
+
+| Case | Header | Finding | Action taken |
+|---|---|---|---|
+| 1 | `2022/-7/ 0.0UT` in the file named `…T12Z` | wrong hour — this is case 2's run | renamed to `case_2_ARUC_20220107T00Z.txt` |
+| 2 | `2022/-7/12.0UT` in the file named `…T0Z` | this is case 1's run | renamed to `case_1_ARUC_20220107T12Z.txt` |
+| 3, 4, 6, 8 | agree | — | accepted |
+| 5 | `2022/-216/ 0.0UT`; case 5 is **12 UT** | wrong hour, no matching run exists | kept as `rejected_case_5_BSHM_20220804T00Z_wrong_hour.txt`; **re-run required** |
+| 7 | agrees | hour token `T2Z` | renamed `…T02Z` (sheet pattern) |
+| screenshot | default form page (2012, 10°/110°), optionals collapsed | proves the IRI-2016 selector only | renamed `form_settings_default_page_not_the_filled_form.png`; the per-option evidence is each output's header block (all §2 options echoed: NeQuick, URSI-88, foF2 storm on, **Shubin-2015 hmF2**, ABT-2009, Scotto-97-no-L, foE storm off, IRI-1990 D, TBT-2012, RBV10+TBT15), which is stronger — no retake needed |
+
+Cause: the current form's 12-hour time picker (`0 UT` = 12:00 AM, `12 UT` = 12:00 PM). Two
+deviations recorded, both immaterial by §4's measured bands: the form exposes no `tecLower`
+(header echoes `from 50 to 2000.0 km`; the 50–100 km band is ≤ 0.08 TECU daytime and the
+server-side scheme starts at 100 km regardless), and the screenshot is not of a filled form.
+
+**Assembly without retyping:** `kaggle/official_reference_outputs/parse_official_outputs.py`
+parses every `case_*.txt` (TEC column as printed, one decimal; `t/%`; `hmF2`; the header block
+verbatim; retrieval instant from the file's mtime, UTC; the interface URL) and matches each to
+its predeclared case by echoed date/hour/lat/lon — a mislabelled file can only fail to match.
+It wrote `kaggle/b01_validation_samples.DRAFT.json` (**7/8 filled**) and will write the final
+`kaggle/b01_validation_samples.json` only when case 5's correct run is added. The seven
+official values were read for this assembly; **no adapter value for any of the eight cases was
+computed** (the paired comparison runs only inside stage 04 on Kaggle). One adapter *hmF2* (not
+TEC) was evaluated on WSL for case 1 while checking `oarr[1]` is the hmF2 slot (227.026 km;
+the official header prints 227.03) — a diagnostic quantity outside the tolerance test, recorded
+here so it is not later mistaken for an undisclosed comparison.
+
+### 9.3 hmF2 diagnostic (approved) — implemented
+
+D-50 addendum. `build_validation_report` records `official_interface_hmf2_km` (from the
+samples), `adapter_hmf2_km` (one `iricore.iri` call, `version=16`, `oarr[1]`) and
+`hmf2_diff_km_diagnostic_no_threshold` per sample; nulls when the sample carries no official
+hmF2; never part of `within_tolerance`. Test added (`test_external_drivers.py`, stub `iricore`
+gained an `iri` function recording its calls); the notebook's Step 5 prints the column.
+
+### 9.4 Freeze-package item 1 — ruled (a), implemented (D-52)
+
+`scripts/00_acquire_prepared_vtec.py` gains `_run_fixture_scoped`: on a fixture run no
+transport is built; `verify_declared_inputs` (moved from the orchestrator into
+`src/data/acquisition.py` together with `read_records_csv`, `select_station_records` and a new
+`cited_stations`, re-imported by the orchestrator — one guard home, R-135) re-verifies the
+scope's artifacts; the cited station(s)' in-window records are selected on record dates and
+asserted; `fixture_read_manifest.json` (`retrieval_performed: false`; the month's recorded
+`madrigalWeb_version` copied verbatim — `"unknown"`) and a `derived_only` `sha256_manifest.json`
+(zero provider files, the four verified artifacts) are written; the registry `completed` row
+cites the read manifest. No `request_manifest.json` on this path (R-35 is a retrieval check).
+Two tests (`test_clean_run.py`, fresh-process): the read path (edge-dated and other-station rows
+selected out, not refused; no transport call; `derived_only` meta with 0 provider / 2 derived) and
+the tampered-artifact refusal before any write. **Probe (isolated copy, 3.11):** stage 00
+completes with 18,183 rows read / **1,810 BSHM in window** (D-11's figure), stage 01 completes,
+and the ladder stops at **stage 02 — `qc_operations` (item 2, supervisor)**.
+
+### 9.5 Items 3 and 5 — what the countersignature statement can and cannot attach to
+
+- **Item 5 (`horizons`)** — D-51 addendum records the owner's statement that the supervisor
+  countersigned; the value was already transcribed. Nothing else to do.
+- **Item 3 (`feature_set_id`, `feature_dictionary`, `normalization`)** — there was **no value on
+  record** to approve or countersign (8.1 said so), so nothing was transcribed. TE §6.2 fixes
+  most of the dictionary but leaves **six choices open** that no implementer may make (TE §18.2
+  "Any feature, its safe lag, or its missing rule — Student + Supervisor"). The proposed D-53
+  text below is offered for adoption; the owner answers the six choice points, the supervisor
+  countersigns the answered text, and only then is it transcribed. `experiment.window_length_hours`
+  (absent today; `read_window_length` refuses) is part of the same freeze because the reader
+  asserts it equals the dictionary's `sequence_steps`.
+
+**Proposed D-53 (draft — not recorded; every `CHOICE` needs the owner's answer):**
+
+> `configs/features.yaml: feature_set_id`, `feature_dictionary`, `normalization` and
+> `configs/experiment.yaml: window_length_hours` are transcribed from TE §6.2 / §6.4 as follows.
+> Primary-track fields (all producers per D-35; every entry names its `dictionary_row`):
+> `vtec_lag_1h`, `vtec_lag_2h`, `vtec_lag_3h`, `vtec_lag_24h` (row `vtec_lag`, `lag_hours`
+> 1/2/3/24, `source_column: vtec_tecu`, `normalization: train_only_standardize`);
+> `vtec_seq_24` (row `vtec_seq_24`, `sequence_steps: 24`, `source_column: vtec_tecu`,
+> `train_only_standardize`); `utc_hour_sin/cos`, `doy_sin/cos`, `lst_sin/cos` (`none`);
+> `station_onehot_ARUC/BSHM/NICO` (row `station_onehot`, `station_id`, `none`);
+> `station_lat` (**CHOICE 1:** `train_only_standardize` or `none` — TE says "train-only *if*
+> scaled"); `kp_safe`, `ap_safe`, `hp60_safe`, `ap60_safe`, `f107_safe`, `f107_81_trailing`
+> (`source_series` = the series name each released D-41 driver artifact carries — fixed at the
+> driver release, item 4; **CHOICE 2:** scaled (`train_only_standardize`) or `none`, one answer
+> for all six or per field). **CHOICE 3:** include `dst` as a diagnostic-class field (built,
+> barred from model input by `DIAGNOSTIC_ONLY_SERIES`) or omit it from the dictionary.
+> **CHOICE 4:** include `target_support` (row `target_support`, `source_column:
+> valid_observation_count`, diagnostic by default, model use needs G-04 `approval`) or omit.
+> **CHOICE 5:** `feature_set_id` — a stable identifier for this set (proposal:
+> `fs-phase1-primary-v1`). **CHOICE 6:** `window_length_hours: 24` (TE §6.4 "one frozen value
+> per feature-set ID"; the sequence field has 24 steps — confirm 24). The RF family's
+> "no scaling" (TE §6.2/§6.4) is a family representation applied at model time, not a
+> dictionary value. `normalization` (the top-level field) records the rule in words:
+> "train-only standardization fitted per fold on the training partition; RF receives the
+> unscaled representation of the same information set (TE §6.4)".
+
+### 9.6 Items 4 and 6 — what they are, what the owner is asked for
+
+**Item 4 — `permitted_producers` for the seven driver rows.** A `permitted_producers` entry is
+the identity of the **released artifact** allowed to supply a row (D-35 limb 3). D-41 froze the
+three producer **identities** (`gfz_kp_ap_3h_2022_v1` → `kp_safe`/`ap_safe`;
+`gfz_hp60_ap60_1h_2022_v1` → `hp60_safe`/`ap60_safe`; `srmp_f107_observed_daily_2022_v1` →
+`f107_safe`, with `f107_81_trailing` derived from it; Dst has no producer artifact — it stays
+diagnostic and unlisted) and their source-file hashes, but **no artifact has been released**:
+D-41's "Output SHA-256 / dataset_version" column is empty by decision, and no stage script calls
+`src/data/release.py:write_release` for a driver today. So item 4 is two steps, in order:
+(i) **implementation** — a driver-release path in stage 04 that builds each D-41 artifact from
+its hashed source under TE §13.3 (`write_release`: version, source manifest, SHA-256, schema,
+row counts, exclusions) — needs the owner's go-ahead to implement, then the owner's approval of
+each of the three releases ("in its own owner-approved step", D-41); (ii) **transcription** —
+the six entries `kp_safe: ["gfz_kp_ap_3h_2022_v1"]`, … keyed to the released ids, which is then a
+copy, not a choice. Not a countersignature item (D-41: "requires no supervisor countersignature
+under §18.2"); the availability floors those releases rely on (D-42/D-43/D-46) are the
+Q-16 items whose countersignature was requested 2026-09-19. **Ask:** authorise (i); approve each
+release when presented with its manifest.
+
+**Item 6 — Q-15, the CODE GIM comparator interpolation rule.** TE §6.3 already states the rule
+in words — *"Bilinear space + linear time with longitude-rotation correction"* — but
+`src/external/gim.py` reads it from `experiment.yaml: gim_interpolation_rule`, a TE §18.2
+**student** forbidden choice that is unset, and refuses generation while it is (obligation 1);
+obligation 2 is a **hand-checked sample interpolation with worked arithmetic, timestamped BEFORE
+any comparator generation** (EV-11). Two facts bound it: no CODE final IONEX file has been
+acquired yet, and `gim_comparator.parquet` is a TE §15.4 required fixture output — so the
+fixture ladder needs Q-15 *and* a CODE product. **Proposed D-54 text (draft):** "For each
+station coordinate and target hour t: take the two IONEX maps bracketing t (epochs t₁ ≤ t < t₂);
+rotate each map in longitude by the Earth's rotation between its epoch and t
+(λ′ = λ + 360°·(t − tᵢ)/86400 s, the IONEX 1.0 'rotated maps' scheme, Schaer et al. 1998);
+interpolate bilinearly in latitude/longitude on each rotated grid; interpolate linearly in time
+between the two results; a missing bracketing map excludes the hour from the GIM comparison
+only (TE §6.3)." **Ask:** adopt D-54 (student decision) — then the config key is set, and the
+hand-check is produced against the first acquired IONEX file before any generation.
+
+### 9.7 Validation and package
+
+- Governed 3.11 suite and the 3.10 (WSL2, governed pins) suite: counts recorded in §9.8 when
+  complete.
+- Notebook revision `b01-production-4`: Step 3c runs the whole suite inside the 3.10 venv before
+  any stage run (a failing suite stops the session with junit counts); Step 5 prints the hmF2
+  column; the note field names this revision. Package rebuilt (hash in §9.8).
+- Records touched: `evidence/DECISIONS.md` (D-52; D-49, D-50, D-51 addenda),
+  `governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md` §6, the collection sheet (rev 3,
+  §9), `kaggle/HOW_TO_RUN.md`, `pyproject.toml` (UP017), this record.
+- Line endings: several files written on 2026-09-20 had acquired CRLF endings in the working
+  tree; normalised back to LF (the two identity declarations re-hash to the values §2.3 records,
+  `d02c31e5…` / `582da002…`).
+

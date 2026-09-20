@@ -126,7 +126,7 @@ switched and the tolerance never widened after the fact (R-59; TE §18.2).
 **1.0 TECU absolute per case: APPROVED** (D-50, 2026-09-20T12:27:01Z — the approval instant is
 the declaration time recorded in `experiment.yaml`).
 
-**Still open, not addressed by that approval:** recording the official **hmF2** column per case
-as a no-threshold diagnostic (§4's mitigation for the hmF2 mismatch class, which no per-case
-tolerance catches). Not implemented until separately ruled — it is a small addition to the
-samples template and the report builder, not a change to the frozen tolerance.
+**hmF2 diagnostic column: APPROVED 2026-09-20 (D-50 addendum) and implemented.** The samples
+carry `official_interface_hmf2_km` (parsed from the output's `Peak Heights/km: hmF2=` line) and
+the report records `adapter_hmf2_km` and `hmf2_diff_km_diagnostic_no_threshold` per case. It
+never enters the tolerance verdict. Nothing about the frozen 1.0 TECU changed.

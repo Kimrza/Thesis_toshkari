@@ -2122,9 +2122,10 @@ def test_b01_config_block_is_the_annotated_d45_contract() -> None:
     assert block["validation_report"]["tolerance_tecu"] == 1.0
     import datetime as _dt
 
-    declared = _dt.datetime.fromisoformat(
-        str(block["validation_report"]["tolerance_declared_at_utc"])
-    )
+    declared_text = str(block["validation_report"]["tolerance_declared_at_utc"])
+    if declared_text.endswith("Z"):  # Python 3.10 cannot parse the `Z` suffix
+        declared_text = declared_text[:-1] + "+00:00"
+    declared = _dt.datetime.fromisoformat(declared_text)
     assert declared.tzinfo is not None
 
 

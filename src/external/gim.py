@@ -112,8 +112,11 @@ def interpolation_rule_from(experiment: Mapping[str, Any]) -> str | None:
 
 
 def _parse_utc(value: Any, *, resource: str, field: str) -> dt.datetime:
+    text = str(value)
+    if text.endswith("Z"):  # the `Z` suffix parses only from Python 3.11; 3.10 needs +00:00
+        text = text[:-1] + "+00:00"
     try:
-        parsed = dt.datetime.fromisoformat(str(value))
+        parsed = dt.datetime.fromisoformat(text)
     except (TypeError, ValueError) as exc:
         raise ComparatorError(
             resource,

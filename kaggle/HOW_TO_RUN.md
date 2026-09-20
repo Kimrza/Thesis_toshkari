@@ -320,3 +320,31 @@ with zero mismatches and locate `scripts/04_build_external_products.py`; (c) sto
 is current: a fresh build produces the same `tree_sha256`. Steps 1–2 and 3b–8 are unchanged from
 revision 2 and **revision 3 has not run on Kaggle**; Step 3's zip branch is the same code as
 revision 2's.
+
+## Production workflow revision 4 (2026-09-20, second pass)
+
+What changed since revision 2/3 and why:
+
+- **The first Kaggle run of revision 2 refused at Step 4** with `ImportError: cannot import
+  name 'UTC' from 'datetime'` — the codebase used two Python-3.11-only names
+  (`datetime.UTC`, `enum.StrEnum`) and the venv is Python 3.10 (D-49). Closed by a
+  behaviour-preserving sweep (`datetime.timezone.utc`; a `StrEnum` backport in
+  `src/data/config.py`); see `evidence/DECISIONS.md` D-49 addendum and
+  `governance/CHANGE_RECORD_2026-09-20_b01_prerequisites.md` §9.1. The main environment is
+  still Python 3.11.
+- **Step 3c (new):** the whole `tests/` suite runs inside the 3.10 venv before any stage run
+  (project.md § Mandated, TC-03g). A failing suite stops the notebook with the junit counts in
+  the bundle (`pytest_junit_py310.xml`).
+- **Step 5:** the R-59 report now carries the approved hmF2 diagnostic column (D-50 addendum);
+  the samples file must be the one `kaggle/official_reference_outputs/parse_official_outputs.py`
+  writes (`kaggle/b01_validation_samples.json`, written only when all eight cases match their
+  saved outputs). Until case 5 is re-collected at 12 UT the file does not exist and Step 5
+  records "not run", exactly as before.
+- **Step 6:** stage 00 on a fixture run now reads the verified derived artifacts (D-52, item 1
+  option (a)); the plumbing measuring run is expected to reach **stage 02** and stop on
+  `configs/data.yaml: qc_operations` (freeze item 2, the supervisor's) until that list is
+  frozen. That stop is the correct, diagnosed outcome of this revision — not a defect.
+
+Run exactly as before: upload `kaggle/kaggle_iri2016_benchmark.ipynb`, attach
+`kaggle/dist/tec_b01_package.zip` as a dataset, Internet ON, Accelerator None, Run All, return
+`/kaggle/working/b01_bundle.zip`.

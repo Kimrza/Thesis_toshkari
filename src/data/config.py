@@ -105,7 +105,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from dataclasses import fields as _dataclass_fields
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Final
 
 try:  # Python 3.11+
@@ -807,7 +807,13 @@ def load_configs(config_dir: Path, *, phase: int) -> ConfigSnapshot:
     if isinstance(declared_roots, Mapping):
         for key, value in declared_roots.items():
             rel = Path(str(value))
-            if rel.is_absolute():
+            # R-16 is platform-independent: a Windows drive path in a config read on Linux
+            # (Kaggle) is still a machine path, so both flavours are tested, not the host's.
+            if (
+                rel.is_absolute()
+                or PureWindowsPath(str(value)).is_absolute()
+                or PurePosixPath(str(value)).is_absolute()
+            ):
                 raise ConfigError(
                     config_dir / "data.yaml",
                     f"roots.{key} is an absolute path ({value!r}); no machine path may "
