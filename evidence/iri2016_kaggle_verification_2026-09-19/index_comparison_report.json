@@ -1,0 +1,180 @@
+{
+  "schema": "iri index-file comparison v1 (produced by iri_index_checks.py, this directory)",
+  "installed": {
+    "source": "iricore-1.8.0-cp310-cp310-manylinux_2_35_x86_64.whl, PyPI, sha256 f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874 (uploaded 2024-04-02); member iricore/data/index/; hashes equal to those the Kaggle run reported",
+    "apf107.dat": {
+      "sha256": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+      "summary": {
+        "rows": 24172,
+        "first_date": "1958-01-01",
+        "last_date": "2024-03-06",
+        "contiguous_daily": true,
+        "date_gaps": [],
+        "ir_column_values": [
+          -11
+        ]
+      },
+      "support_2022": {
+        "direct_read_rows_required": {
+          "first": "2021-12-30",
+          "end_exclusive": "2023-01-01",
+          "count": 367
+        },
+        "centered_81d_window_required": [
+          "2021-11-22",
+          "2023-02-09"
+        ],
+        "centered_365d_window_required": [
+          "2021-07-03",
+          "2023-07-01"
+        ],
+        "direct_read_rows_missing": [],
+        "direct_read_rows_with_negative_sentinel": [],
+        "centered_81d_window_inside_file": true,
+        "centered_365d_window_inside_file": true,
+        "centered_means_recomputed_rows": 365,
+        "centered_81d_max_abs_diff_vs_file": 0.049,
+        "centered_365d_max_abs_diff_vs_file": 0.05,
+        "ok": true
+      }
+    },
+    "ig_rz.dat": {
+      "sha256": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486",
+      "summary": {
+        "header_raw": [
+          "3",
+          "7",
+          "2024"
+        ],
+        "update_date_month_day_year": "2024-03-07",
+        "range_first_month": "1958-01",
+        "range_last_month": "2024-10",
+        "value_count_each": 804,
+        "extra_values_after_2n": 0
+      },
+      "support_2022": {
+        "months_required": {
+          "first": "2021-12",
+          "last": "2023-01",
+          "count": 14
+        },
+        "months_missing": [],
+        "months_with_negative_value": [],
+        "centered_12m_window_of_last_required_month_ends": "2023-07",
+        "update_date": "2024-03-07",
+        "update_date_at_or_after_that_window": true,
+        "ok": true
+      },
+      "required_month_values_note": "per-month IG12/Rz12 values are not enumerated here (locked-month custody guard R-26); read them from index_files/ with iri_index_checks.parse_ig_rz"
+    }
+  },
+  "historical": {
+    "source": "GitHub master snapshot at commit 92c6d8c727b0300d8bd61e7e8e91dd97514256a7 (archive retained from the 2026-09-19 session, sha256 03d8973b6b08c7ef16cb2ea1556509ff2ae9eba3e868fa500bc45f87b69c8e28) and PyPI sdist iricore-1.9.0.tar.gz (sha256 6f1503716f5f8ba3e48038a4cade9310d396ee2dce299ac841824a054b595e35, matches PyPI); both carry byte-identical index files; these are the copies CR-2026-09-19-SCI-DECISIONS section 3 inspected",
+    "apf107.dat": {
+      "sha256": "4de3bfa2d3b488e61477cf7bfb9ec1d9ca891b265694752b20e7b320f9657e82",
+      "summary": {
+        "rows": 24275,
+        "first_date": "1958-01-01",
+        "last_date": "2024-06-17",
+        "contiguous_daily": true,
+        "date_gaps": [],
+        "ir_column_values": [
+          -11
+        ]
+      }
+    },
+    "ig_rz.dat": {
+      "sha256": "e688620c6ac25dec6cf31ebd4afe091a6a083c4e1d50f22c68d096474944e1a8",
+      "summary": {
+        "header_raw": [
+          "6",
+          "18",
+          "2024"
+        ],
+        "update_date_month_day_year": "2024-06-18",
+        "range_first_month": "1958-01",
+        "range_last_month": "2024-10",
+        "value_count_each": 804,
+        "extra_values_after_2n": 0
+      }
+    }
+  },
+  "comparison": {
+    "apf107.dat": {
+      "rows_a": 24172,
+      "rows_b": 24275,
+      "last_date_a": "2024-03-06",
+      "last_date_b": "2024-06-17",
+      "common_dates": 24172,
+      "common_dates_with_any_value_difference": 176,
+      "first_differing_dates": [
+        "2023-09-08",
+        "2023-09-09",
+        "2023-09-10",
+        "2023-09-11",
+        "2023-09-12",
+        "2023-09-13",
+        "2023-09-14",
+        "2023-09-15",
+        "2023-09-16",
+        "2023-09-17"
+      ],
+      "support_window_checked": [
+        "2021-07-02",
+        "2023-07-01"
+      ],
+      "support_window_dates_with_any_value_difference": []
+    },
+    "ig_rz.dat": {
+      "header_a": [
+        "3",
+        "7",
+        "2024"
+      ],
+      "header_b": [
+        "6",
+        "18",
+        "2024"
+      ],
+      "range_a": [
+        "1958-01",
+        "2024-10"
+      ],
+      "range_b": [
+        "1958-01",
+        "2024-10"
+      ],
+      "value_count_a": 804,
+      "value_count_b": 804,
+      "common_months": 804,
+      "common_months_with_any_value_difference": [
+        "2023-09",
+        "2023-10",
+        "2023-11",
+        "2023-12",
+        "2024-01",
+        "2024-02",
+        "2024-03",
+        "2024-04",
+        "2024-05",
+        "2024-06",
+        "2024-07",
+        "2024-08",
+        "2024-09",
+        "2024-10",
+        "2024-11"
+      ],
+      "required_months_with_any_value_difference": []
+    }
+  },
+  "conclusion": "every apf107.dat row and ig_rz.dat month that IRI-2016 (iricore 1.8.0 compiled irifun.for: APF, APF_ONLY, tcon) reads for any 2022 target time, and every window behind the centered columns those rows carry, is identical between the installed and the historical files; differences begin 2023-09-08 (apf107) / 2023-09 (ig_rz), outside every such window",
+  "not_claimed": "no performance effect measured or claimed; provider observed/provisional grade of the underlying monthly data is not encoded in the files and is not asserted",
+  "recording_interpreter": "3.14.7",
+  "custody_statement": {
+    "policy": "D-48 (December custody scan) and R-26/R-27; project.md December-blind rule",
+    "content": "index-file (driver) metadata only: file hashes, row/month counts, coverage bounds stated as [first, end_exclusive) / [first, last, count] intervals, recomputation residuals, and value-difference dates between two file versions. No target value, prediction, metric, or per-day/per-month index VALUE for any 2022 month is stored here. A first version of this file (2026-09-19, overwritten, hash not retained) enumerated the 14 required months with their IG12/Rz12 values, including the locked month's; those values were removed because the report does not need them, not to defeat the scanner -- the scanner had correctly flagged that version and the flag is recorded in CR-2026-09-19-SCI-DECISIONS-P3 3.8.3.",
+    "interval_semantics": "direct_read_rows_required = [2021-12-30, 2023-01-01) = 367 daily rows (the two ap-history days before the year plus every day of the year); months_required = 2021-12 .. 2023-01 inclusive = 14 months; both asserted by evidence/iri2016_kaggle_verification_2026-09-19/validation/test_modules.py",
+    "exposure": "D-48 item 4 disclosure: to compare the installed and historical files, every apf107.dat row and every ig_rz.dat month -- including those of December 2022 -- was read and compared for equality (driver indices: adjusted F10.7, ap, IG12, Rz12). No December value was inspected for a target, prediction, threshold, lag, missingness or model decision; the reading served version identification only. This is exposure to December DRIVER indices, of the same class the custody scan already excludes (classes 1-5), never to December targets.",
+    "scanner_note": "the JSON detector is literal/structural (D-48 item 1); an interval stated with an exclusive bound carries no literal and is not detected. That is a documented limit of the detector, not a compliance mechanism: this file is compliant because it carries no December datum, and it is listed here so a reviewer can verify that claim directly."
+  }
+}

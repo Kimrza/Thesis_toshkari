@@ -136,16 +136,40 @@ passed; `ok: true`. The returned `iri_verification_bundle.zip` (SHA-256
 `governance/CHANGE_RECORD_2026-09-19_scientific_decisions_p3.md` §3.6.
 
 **Consequences for this file.**
-- The notebook is now **frozen at the hash above** as the producer of that evidence; do
-  not edit it in place. A later revision gets a new hash and a new run.
-- Two diagnostic improvements are owed to the next revision, neither needed to reproduce
-  the pass: read `ig_rz.dat`'s in-file update month (the fourth run hashed the file but
-  did not read its date), and add a network preflight in Step 1 so an Internet-OFF session
-  stops in seconds with the real cause.
+- Revision 2 — the producer of that evidence — is preserved byte-exactly at
+  `evidence/iri2016_kaggle_verification_2026-09-19/kaggle_iri2016_verification.ipynb`
+  (hash above). The file in this folder is now **revision 3** (see the next section),
+  which has a different hash and has **not** run on Kaggle.
 - Everything under "Cannot be verified without actually running on Kaggle" below is now
   verified for the 2026-09-19 Kaggle image (kernel Python 3.12.13, glibc 2.35 — exactly
   the `manylinux_2_35` floor `iricore`'s wheel requires). The list is left as written for
   the record of what was and was not claimed before the run.
+
+## Revision 3 — 2026-09-19 — built and locally validated, NOT yet run on Kaggle
+
+`kaggle/kaggle_iri2016_verification.ipynb` is now revision 3, SHA-256
+`0e4d4478f256c37737038388b52e2a29960909657ee4fa4672774974911d2a34`, 19 cells. It does not
+change the pins, the smoke test, or the environment ladder. It adds:
+
+1. **Step 1b — network preflight** before anything is installed: DNS → TCP → TLS → HTTPS to
+   `pypi.org` and `files.pythonhosted.org`, 10 s per stage. If a stage fails the notebook
+   writes the bundle and stops at once, naming the host, the stage, a failure class and the
+   exception. A DNS failure's message lists the Kaggle Internet setting as one *possible*
+   cause to check first — the notebook cannot see that setting and does not claim it is off.
+2. A **`failure_class`** on every failed command (DNS / TLS / connection / hash mismatch /
+   platform tag / resolution / missing module / timeout), so a stop can be read without
+   the raw log.
+3. In the inner script, **`ig_rz.dat` and `apf107.dat` metadata and 2022-support checks**:
+   update date, range, counts, and whether every row, month and centered window IRI-2016
+   reads for a 2022 target time is present. Step 5 asserts both checks hold.
+
+Validated locally: every cell and the inner script parse; the preflight, classifier and
+index parsers were exercised on real and synthetic failures; the inner script ran end to
+end against a stub `iricore` carrying the real 1.8.0 index files. **Not validated: an
+actual Kaggle execution of revision 3.** Nothing in `evidence/…2026-09-19/` was produced by
+it. Run it (Internet ON, CPU, Run All) before relying on it for any new evidence; the run
+should reproduce the revision-2 results and additionally show the `index_files.ig_rz` and
+`index_files.apf107` blocks with `support_2022.ok: true`.
 
 ## What this session verified locally, and what still needs Kaggle
 
@@ -188,3 +212,28 @@ passed; `ok: true`. The returned `iri_verification_bundle.zip` (SHA-256
 
 None of the above is claimed as verified, installed, or executed until you actually run
 the notebook and this session (or you) reads back `verification_report.json`.
+
+## The production workflow — `kaggle_iri2016_benchmark.ipynb` (2026-09-19)
+
+**Build the package** (repository root, governed environment):
+
+    python kaggle/build_b01_package.py
+
+→ `kaggle/dist/tec_b01_package.zip` (prints its SHA-256 and the source commit). Upload the zip
+as a **Kaggle dataset** and attach it to a new notebook; upload
+`kaggle_iri2016_benchmark.ipynb`; Settings: **Internet ON, Accelerator None**; Run All.
+
+**State on 2026-09-19 (revision `c8a1ef04…`).** Stations and `igrf_version` are transcribed
+(done). Still needed before the validation step: the owner's approval of the tolerance
+(`governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md`; on approval the value and the
+approval instant go into `experiment.yaml`), and the eight official reference values
+collected per `kaggle/b01_official_reference_collection_sheet.md` into
+`kaggle/b01_validation_samples.json`; then rebuild the package. Step 6 (fixtures, real
+receipts, governed 3.11 environment) runs only when frozen fixture manifests are packaged —
+none exist yet. Step 7 (full year) is disabled by default (`RUN_FULL_YEAR = False` in Step 0).
+The next run therefore performs: network preflight, environment, package verification,
+`--verify-runtime`, and — once the two inputs above exist — `--build-validation-report`.
+
+**What to return:** `/kaggle/working/b01_bundle.zip`. Steps 1–5 alone establish the runtime
+identity and the R-59 validation report on Kaggle; step 6 adds `b01_iri2016_rows.jsonl`,
+`b01_provenance.json` (with the measured workload time) and the registry rows.

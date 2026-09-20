@@ -1,0 +1,9 @@
+{
+  "url": "https://igs.bkg.bund.de/root_ftp/IGS/obs/2022/001/",
+  "retrieved_utc": "2026-09-19T20:18:02.537578+00:00",
+  "files": [
+    "ARUC00ARM_R_20220010000_01D_30S_MO.crx.gz",
+    "BSHM00ISR_R_20220010000_01D_30S_MO.crx.gz",
+    "NICO00CYP_R_20220010000_01D_30S_MO.crx.gz"
+  ]
+}

@@ -651,3 +651,75 @@ annotation routed to the owner in `CR-…-P3` §3.6; D-45 not edited).
 **What this amendment does NOT do.** It does not discharge this unit's terminal
 NOT-READY verdict; does not pass G-04; does not touch R-59 limb 1; does not register a
 producer artifact, a `permitted_producers` entry or a benchmark result; makes no commit.
+
+## Post-receipt amendment — 2026-09-19 (4) (D-45 annotation; index-file coverage and comparison; notebook revision 3; `CR-2026-09-19-SCI-DECISIONS-P3` §3.7)
+
+*Appended under `project.md` `code-generation:gf-3`. Authority: the owner's instruction of
+2026-09-19 approving a dated D-45 annotation subject to evidence checks.*
+
+**Files changed (measured):** none under `src/`, `scripts/`, `tests/` or `configs/`.
+`evidence/DECISIONS.md` — annotation block appended under D-45 (original text preserved)
+and a pointer in the D-45 summary row. `kaggle/kaggle_iri2016_verification.ipynb` —
+**revision 3**, SHA-256 `0e4d4478f256c37737038388b52e2a29960909657ee4fa4672774974911d2a34`,
+19 cells; revision 2 (`b8399c98…`, the producer of the returned bundle) preserved
+byte-exactly under `evidence/iri2016_kaggle_verification_2026-09-19/`, which also gained
+the two installed and two historical index files, `iri_index_checks.py`,
+`index_comparison_report.json`, and a 12-file manifest. `kaggle/HOW_TO_RUN.md` — revision-3
+section.
+
+**Established (all from the installed wheel bytes, hash-equal to the Kaggle-reported
+values):** `apf107.dat` 24,172 contiguous rows 1958-01-01 → 2024-03-06; `ig_rz.dat` updated
+2024-03-07, range 1958-01 → 2024-10, 804 values; every row/month/window IRI-2016 reads for
+any 2022 target time present and full-window; the historically inspected copies
+(`master`@`92c6d8c7`, 1.9.0 sdist) differ only from 2023-09-08 / 2023-09 — **2022 inputs
+identical**. `iri.py`'s R-59 confirmations and `src/external/iri.py` are untouched by this
+amendment; whether the recorded hashes should also be asserted by that module at run time
+is a design question for the unit's next pass, not decided here.
+
+**What this amendment does NOT do.** No 2022 IRI value computed; R-59 limb 1 untouched;
+G-04 not passed; no producer artifact, `permitted_producers` entry or benchmark result; no
+commit; revision 3 not run on Kaggle. **Repository state (re-verified):** owner commit `60cdabd` (2026-09-19 21:48:35 +0330) captured amendment (3), the D-45 annotation and revision 2 (blob `ba499531…` = `b8399c98…` LF-normalized); everything in this amendment (4), including revision 3, is uncommitted working-tree change at writing time.
+
+## Post-receipt amendment — 2026-09-19 (5) (B-01 production path; `CR-2026-09-19-SCI-DECISIONS-P3` §3.8)
+
+*Appended under `project.md` `code-generation:gf-3`. Authority: the owner's "final preparation"
+instruction of 2026-09-19.*
+
+**Files changed (measured, `git diff --numstat` vs `60cdabd`):** `src/external/iri.py`
+(+562 / −9 lines, measured: execution contract reader, runtime pin verification before/after a session,
+target grid, workload with per-row error capture, R-59 report builder, limb-4 driver rows,
+`run_gated_generation`; existing gate functions unchanged; `generate_benchmark`'s terminal
+message reworded, contract unchanged); `scripts/04_build_external_products.py` (three
+production flags; TE 9.2 receipt gate scoped to full-year jobs and kept on every generation
+run; the real attempt path names `BENCHMARK_DRIVER_IDS`); `configs/experiment.yaml`
+(`benchmark_b01` block — every value from D-45 as annotated; tolerance TBD for the student);
+`tests/test_external_drivers.py` (+14 tests); `tests/test_locked_test_guard.py` (inventory:
+two prose files); `pyproject.toml` (`kaggle/*` subprocess-lint posture as `scripts/*`). New:
+`kaggle/kaggle_iri2016_benchmark.ipynb`, `kaggle/build_b01_package.py`,
+`kaggle/b01_validation_samples.TEMPLATE.json`, `kaggle/dist/tec_b01_package.zip` (build
+output). Full suite (junit-counted): 1330 tests, 0 failures, 0 errors, 4 pre-existing skips. **Still NOT-READY / not passed:** this unit's
+terminal verdict; G-04; R-59 limb 1 (no passing report exists — the student's samples and
+tolerance are the inputs); no producer artifact, `permitted_producers` entry, benchmark
+result, commit or push. The B-01 path is implemented and gated, not executed.
+
+## Post-receipt amendment — 2026-09-19 (6) (D-49 interpreter exception; registry transcription; reference-sample sheet; tolerance proposal; custody disposition; `CR-2026-09-19-SCI-DECISIONS-P3` §3.9)
+
+*Appended under `project.md` `code-generation:gf-3`. Authority: the owner's seven-item
+instruction of 2026-09-19.*
+
+**Files changed:** `configs/data.yaml` (`stations` transcribed with per-field provenance;
+`igrf_version: "IGRF-13"`), `configs/experiment.yaml` (`benchmark_b01.runtime.interpreter_exception`),
+`evidence/DECISIONS.md` (D-49; D-1 annotation; D-49 summary row), `src/external/iri.py`
+(report samples carry `official_interface_top` / `official_interface_header`),
+`tests/test_external_drivers.py` (one precondition fix), `kaggle/build_b01_package.py`
+(broader content; `tree_sha256`), `kaggle/kaggle_iri2016_benchmark.ipynb` (fixture step with
+a governed 3.11 `uv` environment; `RUN_FULL_YEAR = False`; structural-test labelling),
+`kaggle/b01_validation_samples.TEMPLATE.json` (the eight selected cases). New:
+`kaggle/b01_official_reference_collection_sheet.md`, `governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md`,
+`evidence/station_registry_sources_2026-09-19/`, `evidence/iri2016_official_reference_2026-09-19/`
+(both manifested). Full suite: 1346 tests, 0 failures, 4 pre-existing skips.
+**Not done / still blocked:** no official reference value retrieved (interface refused
+automation; manual sheet); tolerance not declared (proposal awaiting approval); no fixture
+manifest frozen, no receipt; the fixture/B-01 environment-identity coupling unresolved
+(D-49 item 4); `observable_codes` absent (features path). G-04 not passed; no producer
+artifact; no commit.

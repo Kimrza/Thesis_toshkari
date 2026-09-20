@@ -1,0 +1,101 @@
+{
+ "_purpose": "R-59 area 6: the eight cases selected 2026-09-19T20:28:42Z BEFORE any retrieval (evidence/iri2016_official_reference_2026-09-19/sample_selection.json). Fill official_interface_value/source/top/header from the CCMC Instant Run IRI-2016 output collected per kaggle/b01_official_reference_collection_sheet.md, save as kaggle/b01_validation_samples.json, remove this key. Never replace a case. The tolerance is NOT here: it is predeclared in configs/experiment.yaml benchmark_b01.validation_report BEFORE the comparison runs.",
+ "samples": [
+  {
+   "site": "ARUC",
+   "lat": 40.286,
+   "lon": 44.086,
+   "target_time_utc": "2022-01-07T12:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "quiet",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  },
+  {
+   "site": "ARUC",
+   "lat": 40.286,
+   "lon": 44.086,
+   "target_time_utc": "2022-01-07T00:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "quiet",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  },
+  {
+   "site": "ARUC",
+   "lat": 40.286,
+   "lon": 44.086,
+   "target_time_utc": "2022-03-13T22:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "disturbed",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  },
+  {
+   "site": "BSHM",
+   "lat": 32.778987,
+   "lon": 35.022987,
+   "target_time_utc": "2022-09-04T10:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "disturbed",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  },
+  {
+   "site": "BSHM",
+   "lat": 32.778987,
+   "lon": 35.022987,
+   "target_time_utc": "2022-08-04T12:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "quiet",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  },
+  {
+   "site": "NICO",
+   "lat": 35.140989,
+   "lon": 33.39645,
+   "target_time_utc": "2022-09-04T22:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "disturbed",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  },
+  {
+   "site": "NICO",
+   "lat": 35.140989,
+   "lon": 33.39645,
+   "target_time_utc": "2022-11-17T02:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "quiet",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  },
+  {
+   "site": "NICO",
+   "lat": 35.140989,
+   "lon": 33.39645,
+   "target_time_utc": "2022-04-14T16:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "disturbed",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": ""
+  }
+ ]
+}

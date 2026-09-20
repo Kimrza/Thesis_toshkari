@@ -1,0 +1,7 @@
+{
+  "hash_count": 3,
+  "manifest": "sha256_manifest.json",
+  "provenance_class": "validation-sample selection (fixed before retrieval) and the official-interface access attempt log; no official value retrieved 2026-09-19",
+  "recording_interpreter": "3.14.7",
+  "schema": "TE-13.3 path-to-sha256; metadata sidecar v1"
+}

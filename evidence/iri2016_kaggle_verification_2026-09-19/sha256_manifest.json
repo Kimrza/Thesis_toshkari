@@ -1,7 +1,19 @@
 {
-  "RETURN_RECORD.md": "2d539a20c0f06a43714a2a05beb31bbfe62faf1b5e7d60843095301cda894014",
+  "RETURN_RECORD.md": "6857b946d8cef77778821a05178be202866e7811aea355b8ab7da2f74fbdbb0f",
+  "index_comparison_report.json": "7d31653fae13e00f70f57cd7840e1df104a4070d4c5b685bf28ad77bc6b3a8d5",
+  "index_files/historical_master-92c6d8c7_and_1.9.0-sdist/apf107.dat": "4de3bfa2d3b488e61477cf7bfb9ec1d9ca891b265694752b20e7b320f9657e82",
+  "index_files/historical_master-92c6d8c7_and_1.9.0-sdist/ig_rz.dat": "e688620c6ac25dec6cf31ebd4afe091a6a083c4e1d50f22c68d096474944e1a8",
+  "index_files/installed_iricore-1.8.0_wheel/apf107.dat": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+  "index_files/installed_iricore-1.8.0_wheel/ig_rz.dat": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486",
+  "iri_index_checks.py": "507858889718019344e94af1c91c5b5e0d69279a14b1f5eafd7b44dc9b71caf4",
   "iri_inner_verify.py": "a76ceeec5de6586ddb4d69e2ed864bfff942e1be26056990fff9be4aea181902",
   "iri_verification_bundle.zip": "3a0723a1ff70c213ed3cb7139cbfc02e4495d04888a00136c3e5a6c9afa6d508",
+  "kaggle_iri2016_verification.ipynb": "b8399c98f248749fca3b6e5acebec9543c262ec0cc83dde2dab0042460d564fa",
   "requirements-iri.txt": "d479b1eec9a89e31dda3f936fd6d031385073163facaac744b96de9b2ab23c31",
+  "validation/README.md": "cce3e3fb484343a45a68a85819cdb6ff646de014cee3d32c6bc8e0e417cf425b",
+  "validation/build_rev3.py": "1c2a2a001dbdd98c828d93ef7c1a39cc83d9693cec3ca082920b24dab83af11c",
+  "validation/iri_net_preflight.py": "2f8070010d8a327ecd800c21ed7eb2999ed0ad4d90683e2e4e3d98d6712f265c",
+  "validation/test_modules.py": "923f20f9eb01941f8d09f14e66dca456ed5b5696b9b9b4843a9ea597b5dca8cf",
+  "validation/test_rev3.py": "b07e1a88123983b3bbf052d336b7652813f1e8e37734bd684a018c8bdf8bd26d",
   "verification_report.json": "2fbd8de4f43a3364f088d7a16862f0739fcdb6d70e974d29da7ea8d7281b090a"
 }

@@ -346,13 +346,375 @@ entry, benchmark result, commit or push. R-59 limb 1 is untouched. **G-04 is not
 by this run**; it establishes only that the D-45-selected execution path installs and runs
 on Kaggle as designed.
 
+## 3.7 — D-45 annotation (owner-authorized), index-file coverage and comparison, notebook revision 3
+
+**Authority for this section.** The project decision owner's instruction of 2026-09-19:
+"I approve a dated D-45 annotation identifying the actual verified runtime and its bundled
+index files, subject to the evidence checks below" (items 1–5). Recorded as the student's
+authorization; **no supervisor signature is claimed or fabricated**. Boundaries as in the
+header: no full-year benchmark, locked-target access, training, producer release,
+`write_release`, `permitted_producers`, commit or push; G-04 not passed.
+
+### 3.7.1 The annotation — status
+
+Written under D-45 in `evidence/DECISIONS.md` on 2026-09-19 as an **annotation block
+appended after item 4**; every original line of D-45 is preserved; the register's D-45
+summary row gained a bracketed pointer. This is the annotate-in-place disposition
+`governance/CHANGE_RECORD_PROCEDURE.md` allows on owner approval for the specific item,
+which the instruction above is. Approval status: **owner-authorized annotation, recorded;
+D-45's own supervisor status unchanged** (student-reported approval and countersignature,
+2026-09-19, as the entry records). Material-change assessment (annotation item 6): none —
+the release and pin values are the concrete form of D-45 item 1, and the 2022 inputs are
+equal to the copies the original text described (§3.7.3), so TE §18.2 requires no
+additional approval; the two hashes go to the Vision §6.11 driver-input freeze gate
+(G-03/G-05) with the rest of D-45, as already planned.
+
+### 3.7.2 The verified runtime and index files (from the bundle and the wheel bytes)
+
+Runtime: `iricore==1.8.0`, wheel `iricore-1.8.0-cp310-cp310-manylinux_2_35_x86_64.whl`,
+SHA-256 `f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874` (PyPI upload
+2024-04-02); CPython 3.10.12 `virtualenv` on the Kaggle image (kernel 3.12.13, glibc 2.35);
+`numpy==1.26.4`, `fortranformat==2.0.3`, `pymap3d==3.2.0` at the pinned hashes;
+`version=16` explicit against an installed default of 20. To read metadata the Kaggle run
+had not read, the same wheel was downloaded from PyPI here, hash-verified, and its
+`iricore/data/index/` members extracted: **they hash exactly to the Kaggle-reported values**
+(`apf107.dat` `cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674`,
+`ig_rz.dat` `fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486`), so every
+statement below is about the installed bytes. Both files are filed under
+`evidence/iri2016_kaggle_verification_2026-09-19/index_files/installed_iricore-1.8.0_wheel/`.
+
+| File | Update metadata and coverage (installed 1.8.0) |
+|---|---|
+| `apf107.dat` | 1,329,460 bytes; 24,172 rows, contiguous daily, **1958-01-01 → 2024-03-06**; the unused 13th integer column is −11 on every row; format `(3I3,9I3,I3,3F5.1)` as the wheel's own `irifun.for:readapf107` reads it |
+| `ig_rz.dat` | 9,815 bytes; header `3,7,2024` = update date **2024-03-07** in the file's month-day-year convention (the 2024-06 copy's `6,18,2024` cannot be day-month-year); declared range 1958-01 → 2024-10; 804 IG12 + 804 Rz12 values = one edge value before and after the range, exactly `3-imst+(iyend-iyst)*12+imend` as `read_ig_rz` computes and `tcon` indexes (value 1 = 1957-12, value 804 = 2024-11) |
+
+**Support required for every 2022 target time**, derived from the compiled sources the
+wheel ships (`irifun.for`), not from the wrapper's comments: `APF` takes 3-hourly ap back
+to UT−39 h (`aap(is-2, …)`), `APF_ONLY` the target row plus the previous day's F10.7
+(`AF107(IS-1,1)`), `tcon` the target month plus the previous (day < 15) or next (day ≥ 15)
+month. Hence direct reads: `apf107.dat` rows **2021-12-30 → 2022-12-31** (367 rows) and
+`ig_rz.dat` months **2021-12 → 2023-01** (14 months). Behind those rows the file carries
+centered means whose windows must also lie inside the file for the values to be
+full-window: F10.7_81 needs **2021-11-22 → 2023-02-09**, F10.7_365 needs **2021-07-03 →
+2023-07-01**, and the 12-month IG12/Rz12 mean for 2023-01 rests on observed months through
+**2023-07**. Result on the installed files: all 367 rows present, none with a negative
+missing sentinel; both centered windows inside the file; all 365 rows of 2022 have
+F10.7_81 / F10.7_365 that recompute from the same file's daily column within 0.049 / 0.050
+(F5.1 rounding) — full-window values; all 14 months present and non-negative; update date
+2024-03-07 ≥ 2023-07. The files do not label values observed versus predicted, so
+"final" is asserted only as "the window the update date covers".
+
+**Two executable-path facts the earlier inspection did not record.** (a) In 1.8.0 the
+Python reader `read_iri_data.readapf107` is dead code (`# IRI_DATA = readapf107()`,
+"TODO: Fix data reading from Python"); the compiled library reads both files itself. That
+Python reader carries a column bug — its 81-day slot is overwritten by the 365-day values —
+which would matter only if a later release activated it; one more reason the pin is on this
+exact wheel. (b) `read_ig_rz` multiplies Rz12 by **0.7** for every month from 2014-01 when
+the header date is after 2016-09 (new sunspot-number series), so the Rz12 IRI-2016 uses in
+2022 is 0.7 × the file value (2022-06: file 81.1, used 56.77); IG12 is used as stored.
+Neither changes a decision; both are now in the D-45 annotation.
+
+### 3.7.3 Comparison with the historically inspected files — differences by kind
+
+The copies `CR-2026-09-19-SCI-DECISIONS` §3 inspected were recovered with identifiable
+provenance from the 2026-09-19 session's retained archives: the GitHub `master` snapshot
+(tarball pax comment = commit `92c6d8c727b0300d8bd61e7e8e91dd97514256a7`, archive SHA-256
+`03d8973b6b08c7ef16cb2ea1556509ff2ae9eba3e868fa500bc45f87b69c8e28`) and the PyPI sdist
+`iricore-1.9.0.tar.gz` (SHA-256 `6f1503716f5f8ba3e48038a4cade9310d396ee2dce299ac841824a054b595e35`,
+matches PyPI's published digest). Their index files are byte-identical to each other
+(`apf107.dat` `4de3bfa2d3b488e61477cf7bfb9ec1d9ca891b265694752b20e7b320f9657e82`,
+`ig_rz.dat` `e688620c6ac25dec6cf31ebd4afe091a6a083c4e1d50f22c68d096474944e1a8`) and are filed
+under `index_files/historical_master-92c6d8c7_and_1.9.0-sdist/`. Today's `master` was not
+substituted for them. Comparison (`index_comparison_report.json`, produced by
+`iri_index_checks.py`):
+
+| Kind of difference | `apf107.dat` | `ig_rz.dat` |
+|---|---|---|
+| Length / update date | 24,172 vs 24,275 rows; last row 2024-03-06 vs 2024-06-17 | header 2024-03-07 vs 2024-06-18; same declared range 1958-01 → 2024-10; same 804 values each |
+| Values on common dates/months | 24,172 common; **176 differ, earliest 2023-09-08** | 804 common; **15 months differ, 2023-09 → 2024-11** |
+| Values inside any 2022 support window | **0** in 2021-07-02 → 2023-07-01 | **0** in 2021-12 → 2023-01 |
+
+So the earlier description ("ends 2024-06-17", "updated 6/2024") was of newer files whose
+extra rows and revised tail lie entirely after 2023-09; **every value the 2022 benchmark
+reads is identical in both**. The four spot values the earlier inspection quoted (239.0,
+144.5, 257.0, 133.1) are unchanged in the installed file. No performance effect is claimed
+— none could arise from equal inputs. Nothing was refreshed or replaced; `iricore.update()`
+was not run.
+
+### 3.7.4 Evidence preservation and notebook revision 3
+
+**Preserved.** The returned bundle stays as filed (§3.6). The producing notebook, revision 2,
+is now also filed byte-exactly beside it (`evidence/…/kaggle_iri2016_verification.ipynb`,
+SHA-256 `b8399c98f248749fca3b6e5acebec9543c262ec0cc83dde2dab0042460d564fa`) — regenerated
+from its own builder and hash-verified, because the working copy in `kaggle/` was found
+modified at 21:49 local on 2026-09-19 by something outside this session (cells 1–7 gained
+editor `id` fields; **zero source differences**; the file was untracked, so no git copy
+existed). The manifest now covers 12 files.
+
+**Revision 3** — `kaggle/kaggle_iri2016_verification.ipynb`, SHA-256
+**`0e4d4478f256c37737038388b52e2a29960909657ee4fa4672774974911d2a34`**, 19 cells (11 code),
+built from the preserved revision 2 by a builder that asserts revision 2's hash first.
+**It has not run on Kaggle and none of the 2026-09-19 evidence is attributable to it**; its
+first cell says so. Changes, none of which touch the pins, the smoke test or the ladder:
+1. **Step 1b network preflight** before any install: DNS → TCP → TLS → HTTPS for
+   `pypi.org/simple/iricore/` (must answer 200) and `files.pythonhosted.org`, each stage
+   under a 10 s timeout, bundle written, then a stop naming the failed host, stage,
+   closed-set class and exception. The stop text lists the Kaggle Internet setting as a
+   *possible* cause of a DNS failure that the probe "cannot tell apart" from a DNS outage
+   or a restricted network — never as established.
+2. **`failure_class`** on every failed command from `run()` (`dns_failure`, `tls_failure`,
+   `connection_failure`, `hash_mismatch`, `platform_tag_mismatch`, `resolution_failure`,
+   `missing_module`, `timeout`, `unknown`), tested on the literal run-3 stderr; the rung
+   summary and the pip-install stop message name it.
+3. **Inner script**: `iri_index_checks.py` embedded verbatim; after hashing, both files are
+   parsed as the Fortran reads them and `index_files.apf107.{summary,support_2022}` /
+   `index_files.ig_rz.{summary,support_2022}` are recorded (update date, range, counts,
+   the required rows/months/windows and whether each holds); the revision-2 last-date
+   regex is cross-checked against the parser; Step 5 asserts both `support_2022.ok`.
+4. The bundle is still written after every attempt and on every stop.
+
+**Validation performed (focused; no full suite, no Kaggle run).** Notebook is nbformat 4;
+all 11 code cells and the 20,071-character inner script parse. Module checks
+(`test_modules.py`): real preflight passes all four stages on both hosts from this machine;
+synthetic DNS failure (`nonexistent-host.invalid`) → `dns_failure`; TCP refused on a closed
+local port → `tcp_connect_failure`; a local plain-HTTP listener answering a TLS ClientHello
+→ `tls_failure` with the TCP stage recorded ok; a 404 index path → `http_error` with TLS ok;
+10 classifier cases including run 3's exact stderr; parsers reproduce every figure in
+§3.7.2–3.7.3 and 5 synthetic index failures (truncated file, negative sentinel, early
+update date, missing 2023-01, malformed line) are caught. Notebook checks (`test_rev3.py`):
+(A) inner script with `iricore` absent → `ok:false`, `failed_stage: import_iricore`, exit 1;
+(B) inner script end to end against a stub `iricore` carrying the real 1.8.0 index bytes →
+`ok:true`, hashes, dates, 2022 support and repeatability fields exactly as expected;
+(C) outer helper and preflight cells exec'd with the bundle directory redirected: `run()`
+classifies a synthetic DNS stderr and a timeout, the preflight stop path writes
+`verification_report.json` (`notebook_revision: 3`, `stopped_reason`, the per-stage
+record) and the zip, then raises; (D) the Step 5 cell passes on (B) and fails with the
+`ig_rz.dat` message on a doctored copy. **Not established locally:** that revision 3
+executes on Kaggle's image; the only things a rerun would add are that regression check
+and the same metadata fields recorded by the Kaggle run itself, which §3.7.2 already holds
+from identical bytes. A rerun is therefore **not required for any claim in this record**;
+it is recommended before revision 3 is relied on to produce any future evidence.
+
+**Repository state, re-verified at writing time (`git log`, `git status`).** An owner commit
+**`60cdabd`** (2026-09-19 21:48:35 +0330) was made while this section's work was in
+progress. It holds: the §3.6 evidence filing (bundle, three members, first manifest,
+`RETURN_RECORD.md`), the D-45 annotation in `evidence/DECISIONS.md`, `kaggle/HOW_TO_RUN.md`
+with the third/fourth-run section, this record through §3.6, the code-summary amendment (3),
+and `kaggle/kaggle_iri2016_verification.ipynb` as **revision 2** — blob
+`ba499531…`, which is `b8399c98…` with CRLF normalized to LF by `core.autocrlf=true`
+(restoring CRLF reproduces `b8399c98…` byte for byte). One minute later (21:49:45) an
+editor re-save added `id` fields to that working copy (§3.7.4 above); revision 3 then
+replaced it. **Uncommitted at writing time:** revision 3, this §3.7, the revision-3
+`HOW_TO_RUN.md` section, code-summary amendment (4), and the evidence additions
+(preserved revision 2, `index_files/`, `iri_index_checks.py`, `index_comparison_report.json`,
+`validation/`, the 17-file manifest). No commit was made by this session; the
+commit-or-follow-up disposition is the owner's.
+
+### 3.7.5 Not done, by design
+
+No 2022 IRI value was computed; no target time evaluated; R-59 limb 1 (a passing validation
+report) untouched; no producer artifact; no `permitted_producers` entry; no commit.
+Installation and smoke testing are verified; **scientific validation of the full 2022
+benchmark is not**, and nothing here says otherwise.
+
+## 3.8 — Final preparation pass: the B-01 production path (owner instruction 2026-09-19, "one consolidated final preparation pass")
+
+**Authority and boundary.** The owner's instruction authorising implementation and permitted
+diagnostic verification to complete preparation; no full-year execution, locked-target access,
+producer release, `write_release`, registration, training, commit or push. The reported
+supervisor approval of D-45 stands as the entry records it; nothing here re-asks it.
+
+### 3.8.1 R-59 mapped to evidence — what is met, what is genuinely unmet
+
+| R-59 / release requirement | Status | Evidence or gap |
+|---|---|---|
+| Limb 1 — a passing report exists | **Unmet (student input)** | Report builder implemented (`--build-validation-report`); it needs the 5–10 samples with **official IRI-2016 interface values** (`kaggle/b01_validation_samples.TEMPLATE.json`) — a reading only the student can take |
+| Limb 2 — tolerance predeclared, timestamp before comparison | **Unmet (student freeze)** | `experiment.yaml: benchmark_b01.validation_report.tolerance_tecu` / `tolerance_declared_at_utc` are `TBD — freeze gate`; the builder refuses while TBD and refuses a timestamp not preceding the comparison (tested) |
+| Limb 3 — seven areas field by field | **Met by construction** | `build_validation_report` emits all seven in this unit's schema; `assert_validation_report` (unchanged) asserts them; ceiling 2000, `version=16`, no overrides, `index_inputs_retrospective_centered: True`, full index hashes |
+| Limb 4 — benchmark drivers in the availability matrix | **Met** | `benchmark_driver_rows` emits the three IRI index rows in the EV-12 shape, graded hindcast-only (D-45 item 4); consumed by the gate and written into the provenance |
+| D-45 item 1 — index files pinned by full SHA-256, never updated after the pin | **Met** | One authoritative record: `experiment.yaml: benchmark_b01.index_file_pins`; `verify_runtime` before the session, `assert_index_unchanged` after; refusal named per file (tested with altered bytes, wrong release, changed default) |
+| Station coordinates (D-1) in configuration | **Unmet (student freeze)** | `data.yaml: stations` and `igrf_version` are `TBD — freeze gate`; the registry refuses and so does generation (tested). D-1 holds the values; transcription + IGS site-log validation is inventory-and-registry's recorded obligation |
+| TE 9.2 / TC-03g — both fixtures pass in the Kaggle session before a full-year job | **Unmet (execution prerequisite)** | The stage script's receipt gate is kept on every `--generate-benchmark`; the production notebook checks the receipts and skips step 6 with the reason when absent |
+| TC-04 — the 26,000-call workload timed | Met when run | `workload_seconds` and `calls_per_second` in `b01_provenance.json` |
+| B-01 labelled generated, not trained | Met | `experiment.yaml: benchmark_b01.label`; provenance `label` |
+| TC-03d — governed interpreter 3.11 | **Deviation, recorded** | The only Linux `iricore` wheel is cp310; the session runs under 3.10.12 and the environment lock records it (D-45 annotation item 1; `benchmark_b01.runtime.python`). An owner ruling accepting this for B-01 sessions — or authorising a from-source 3.11 build — is the one environment decision still open |
+
+No new gate, threshold or approval layer was added; the TE 9.2 gate was **scoped** (below), not
+bypassed.
+
+### 3.8.2 What was built (all within the existing contracts)
+
+- **`configs/experiment.yaml: benchmark_b01`** — the execution contract transcribed from D-45 as
+  annotated: `iri_version 16`, `htop 2000` (frozen) with `hbot 90` / `hstep 0.5` disclosed as
+  wrapper defaults, no `oarr` overrides, output field/units, index semantics, the wheel and
+  companion pins, the two full index-file hashes, the 2022 hourly grid rule, the three TEC-05
+  stamps, and the validation-report contract (tolerance TBD — the student's).
+- **`src/external/iri.py`** (+562 / −9 lines after `ruff format`, measured against `60cdabd`; existing functions unchanged): `read_benchmark_contract`,
+  `verify_runtime`, `assert_index_unchanged`, `build_target_grid`, `evaluate_points`
+  (per-point failure recorded on the row, never fatal — two-tier posture), `benchmark_driver_rows`,
+  `build_validation_report` (refuses December samples), `run_gated_generation` (pins → all four
+  limbs → report-vs-installed hash cross-check → grid → workload → pins again → stamped rows +
+  provenance). `generate_benchmark` keeps its refusal contract; injection mode never generates.
+- **`scripts/04_build_external_products.py`**: `--verify-runtime`, `--build-validation-report
+  <samples.json>`, `--generate-benchmark --validation-report <report.json> [--months …]`; outputs
+  under `artifacts/external/b01/` with a SHA-256 manifest; registry rows as for every run. The
+  TE 9.2 receipt gate now applies to full-year jobs (every `--generate-benchmark`, partial or not,
+  and the driver audit) and is recorded as "not required" for the two bounded checks
+  (`--verify-runtime` hashes two files; `--build-validation-report` makes 5–10 calls and no
+  product) — the rule's own text, "before any full-year job".
+- **`kaggle/kaggle_iri2016_benchmark.ipynb`** (21 cells, SHA-256 `99815fb6…`, not yet run on
+  Kaggle) + **`kaggle/build_b01_package.py`** → `kaggle/dist/tec_b01_package.zip` (58 files: `src/`,
+  the stage script, the four configs, `requirements.txt`, `tests/fixtures/`, the samples template
+  and, when present, the filled samples; a manifest with per-file SHA-256 and the source commit;
+  `evidence/locked_test_restricted/` refused by rule). The notebook reuses the verified
+  environment cells of the verification notebook verbatim, hash-verifies the package, then runs
+  steps 4–6 through the stage script inside the 3.10 venv, copying every output and the registry
+  rows into `b01_bundle.zip`.
+
+### 3.8.3 Validation performed
+
+14 new tests in `tests/test_external_drivers.py` (function level through the stage module, plus
+one subprocess-level `--verify-runtime` completing with exit 0 on the real configs; a stub
+`iricore` carrying the **real pinned index bytes**): pins verified and written; altered
+`apf107.dat` / `ig_rz.dat`, wrong release, changed default each refused by name; the report
+passes and carries the seven areas with the D-45 call shape (`version=16`, `htop=2000`, naive UT
+handed to iricore); a failed report is written and blocks; TBD tolerance and a late declaration
+refused; a December sample refused; a one-month partial generation end to end (3 × 28 × 24 rows,
+stamps, cell ids 40/44, 32/35, 35/33, UTC alignment, provenance, manifest, hindcast-only driver
+rows); a failed report and a report validated against different index bytes refused at
+generation; unresolved stations refused; per-point failures recorded (3 error rows) not fatal;
+the config block asserted as the annotated D-45 contract. The package was unpacked into an
+empty directory and `--verify-runtime` run from it alone (exit 0, registry rows written).
+Full suite in the governed environment (`pytest tests -q`, junit-counted): **1330 tests, 0 failures, 0 errors, 4 skipped** (the four pre-existing environment skips). Ruff clean
+on every touched file.
+
+**One guard fired and was honoured.** The locked-month custody guard (R-26,
+`tests/test_locked_test_guard.py`) flagged `index_comparison_report.json` and
+`validation/test_modules.py` for carrying `2022-12` literals (required-month enumerations and a
+synthetic date). Fixed at the source, not in the guard: `iri_index_checks.py` now states the
+required rows/months as ranges with exclusive bounds and counts; the report was regenerated;
+the two new markdown files were added to the test's inventory of prose outside automated
+inspection. **Revision 3 of the verification notebook was rebuilt** with the corrected module:
+its hash is now `0e4d4478f256c37737038388b52e2a29960909657ee4fa4672774974911d2a34` (previously
+`ec089ff6…`; still not run on Kaggle; swept in every record).
+
+## 3.9 — Remaining preparation (owner instruction 2026-09-19, seven items): interpreter exception, registry transcription, reference samples, tolerance proposal, custody finding, real-Kaggle workflow
+
+### 3.9.1 Python exception — recorded as **D-49**
+
+Owner approval quoted in D-49 (`evidence/DECISIONS.md`); scope = the isolated Kaggle B-01
+environment only (CPython 3.10.12 `virtualenv`, pinned `iricore==1.8.0` and companions with
+their hashes, IGRF-13 compiled in); training, fixtures and every other stage stay on 3.11
+(TC-03d unchanged). Mirrored in `experiment.yaml: benchmark_b01.runtime.interpreter_exception`.
+**Fixture interaction, preserved:** `fixture_gate.verify_receipt` accepts a receipt only when
+its recorded environment identity equals the caller's lock, so a 3.10 full-year run cannot
+consume receipts from 3.11 fixture runs. D-49 item 4 records the two admissible resolutions
+(extend the exception to the fixture runs; or build `iricore` for 3.11 from the sdist,
+`e5c4a71e…`) and chooses neither. Independently, **no frozen fixture manifest exists yet**
+(BLK-02: `tests/fixtures/*` hold identity declarations only), so no receipt can exist in any
+environment until the measuring runs and the freeze happen.
+
+### 3.9.2 Transcribed values and their authorities
+
+| Field | Value | Authority |
+|---|---|---|
+| ARUC / BSHM / NICO lat, lon | 40.286/44.086; 32.778987/35.022987; 35.140989/33.396450 | D-1 (approved), now **validated** against the official IGS site logs (`aruc00arm_20260317.log` `858aa54b…`, `bshm00isr_20260422.log` `d0dae804…`, `nico00cyp_20251027.log` `2740b73a…`): 40.285722/44.085583, 32.778986/35.022986, 35.140989/33.396450 — max Δ 0.0004° (ARUC rounding); cells unchanged; never averaged |
+| DOMES | 12312M002, 20705M001, 14302M001 | site logs §1 |
+| Ellipsoidal height | 1222.0, 225.1, 190.1 m | site logs §2 |
+| Receiver / antenna / firmware intervals covering 2022 | SEPT POLARX5 5.4.0 (ARUC, BSHM); LEICA GR50 4.51/7.710 (NICO); antennas ASH701945C_M SCIS, TRM59800.00 SCIS, LEIAR25.R4 LEIT | site logs §3–4; no change inside 2022 |
+| Sampling interval | 30 s | IGS 2022 daily files `<STATION>_R_2022001…_01D_30S_MO.crx.gz` (BKG listing, retrieved 2026-09-19) |
+| `igrf_version` | **IGRF-13** | the only IGRF consumer in the Phase 1 executable path is the compiled IRI-2016 in the pinned wheel: `igrf.for` 2020.01, `FELDCOF` wired to `dgrf2015` + `igrf2020` + `igrf2020s` (2022 uses the IGRF-13 2020.0 coefficients, g₁⁰ = −29404.8 nT); coefficient files hashed in D-49 |
+| Benchmark location convention | station coordinates, never cell centres | D-45; Vision §6.6 |
+
+Sources filed under `evidence/station_registry_sources_2026-09-19/` (manifested). D-1 carries
+a dated annotation; `load_registry` now resolves all three stations with the D-1 cells.
+**Genuine gap, stated:** `observable_codes` (Vision §6.2) — in no governing record and not in
+a site log; read from a 2022 RINEX header (Phase 2 material). `assert_registry_resolved`
+(features path) keeps refusing on that field alone; the B-01 path (`load_registry`) does not
+need it.
+
+### 3.9.3 Official reference samples — selection fixed, retrieval refused, manual sheet delivered
+
+The eight cases were **selected before any retrieval** (2026-09-19T20:28:42Z,
+`evidence/iri2016_official_reference_2026-09-19/sample_selection.json`): quietest and most
+disturbed non-December days of the audited definitive Kp record, three sites, day/night,
+two seasons; cases are never replaced. The official interface (CCMC Instant Run IRI-2016;
+its API and option catalogue were discovered from the page's own JavaScript and are recorded
+in `interface_notes.json`) answered **HTTP 429 to every run request** after two schema probes,
+then reset connections; `official_runs.json` holds the attempt log. **No official value was
+retrieved; none was fabricated; the adapter was not used to produce any.** Delivered instead:
+`kaggle/b01_official_reference_collection_sheet.md` — exact URL, every form setting mapped
+to the IRI-2016 standard `jf` switch the adapter uses (the form's default hmF2 model, AMTB, is
+**not** the IRI-2016 standard and must be changed to Shubin-COSMIC; `tecLower` must be set to
+90), the eight cases, and the output fields to copy (TEC, TOP, header lines with the server's
+F10.7/Rz12/IG12, output URL, precision). `b01_validation_samples.TEMPLATE.json` is prefilled
+with the eight cases; the report builder now carries the extra provenance fields.
+
+### 3.9.4 Tolerance — proposed, not declared
+
+`governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md`: **1.0 TECU absolute per case**,
+derived from display precision (≤ 0.05), the two quadratures (`iri_tec` segment steps vs the
+adapter's 0.5 km sum, ≤ ~1 % ≈ 0.5 TECU), the 90-vs-100 km lower segment (≤ 0.02), and zero
+for version/switches/ceiling by construction; index inputs are checked from the output
+header, not absorbed. D-47's 8e-12 sfu is not reused. No discrepancy was computed or
+inspected; `experiment.yaml` keeps `TBD — freeze gate` until the owner's approval instant,
+which is then recorded as the declaration time (never backdated).
+
+### 3.9.5 December-custody finding and disposition
+
+**Finding.** §3.8.3's fix reserialised my own new evidence file to avoid the literal scanner.
+Against D-48 that is the wrong reflex (item 3: "no evidence file is relocated or
+reserialised"; item 1: the detector is literal/structural and cannot see an exclusive-bound
+interval). **Assessment of the content, not the serialisation:** the first version carried
+December-2022 IG12/Rz12 **values** (driver indices) and was correctly flagged; the current
+version carries **no December datum** — only interval bounds (`[2021-12-30, 2023-01-01)` =
+367 rows; months `2021-12 … 2023-01` = 14), counts and residuals, each asserted by
+`validation/test_modules.py`. It is therefore compliant on content, and the file now says so
+in a `custody_statement` that also records the **exposure** D-48 item 4 requires: every
+apf107.dat row and ig_rz.dat month, December's included, was read for version comparison
+(driver indices only, no target), informing no method, threshold or model decision.
+**Scanner gap, reported through the existing rule:** D-48 item 1 already separates scanner
+coverage from compliance; an interval-bound representation is outside the detector's reach
+and is documented here rather than papered over. No further renaming or reformatting was
+done. The first version's hash was not retained (overwritten before the manifest was
+refreshed) — recorded as a gap in this trail.
+
+### 3.9.6 Real-Kaggle workflow — one notebook, unchanged identity, new revision
+
+`kaggle/kaggle_iri2016_benchmark.ipynb` (23 cells, SHA-256
+`c8a1ef048674f5382982acbcc476f9cb0da0c6b3267c6af90be42f2db898d37b`): steps 4–7 run the real
+installed `iricore` through the real adapter via the stage script inside the 3.10 venv;
+**Step 6** creates a governed 3.11 environment with pinned `uv`, installs `requirements.txt`,
+and runs `run_walking_skeleton.py` for both fixtures **only when frozen manifests are
+packaged** — receipts are whatever the orchestrator writes, nothing is marked passed;
+**Step 7** full-year generation is **disabled by default** (`RUN_FULL_YEAR = False`) and,
+when enabled, still refuses without identity-matching receipts. The local stub checks are
+labelled structural tests in the notebook's first cell. Package: `kaggle/build_b01_package.py`
+now collects `src/`, all stage scripts, `configs/`, `requirements.txt`, `pyproject.toml`,
+`tests/` (the fixtures' M10 contract needs them), the November 2022 acquisition evidence and
+the two driver audits (custody classes 1–5 content), `evidence/DECISIONS.md` (the skeleton
+asserts identity against it); `evidence/locked_test_restricted/` refused by rule. The manifest
+carries a **`tree_sha256`** over every packaged file — the working-tree identifier
+independent of HEAD: **`865b33ecd91e91471c625ead8874a97a97fae37c6bbb14a122adafbd2257fa09`**,
+zip `1b7af8ec09ae164d9c96075f0446a5c743f4be2992e29126064120482b416e44`, built at commit
+`60cdabd+dirty`.
+
+### 3.9.7 Validation and repository state
+
+Full suite in the governed environment after the transcription and config changes:
+**1346 tests, 0 failures, 0 errors, 4 pre-existing skips** (the manifest-parametrised release
+tests grew by the three new/updated evidence manifests). One of my own tests was corrected to
+re-create the pre-transcription refusal state explicitly. HEAD is still `60cdabd`; every
+change in §3.7–3.9 is uncommitted working tree (`tree_sha256` above identifies it). No
+commit or push by this session.
+
 ## 4 — Closure table
 
 | Item | Status |
 |---|---|
 | 1. Countersignature | **Closed 2026-09-19** — recorded as the student's stated report, matching the established letter mechanism; not a fabricated signature |
 | 2. Config validation/enforcement | **Complete**: reader-level required/closed-set/bounds checks for `lag_reference_instant`, `selection_rule`, `recomputation_input_bound_sfu`; real consumer wiring (`build_availability_matrix` → `assert_anchor_recomputed`; `build_features` → `assert_lagged_selection` drift guard); 4 new focused tests + 1 integration test class; no contradiction found; no scientific value changed |
-| 3. Kaggle notebook | **Executed on Kaggle 2026-09-19 — PASS (fourth run).** Runs 1–3 stopped in Step 3 (run 1: stdlib `venv` without ensurepip, a notebook defect, fixed; runs 2–3: Kaggle Internet toggle OFF, diagnosed by run 3's complete per-rung log). Run 4, same notebook, Internet ON: `iricore==1.8.0` installed hash-verified into a Python 3.10.12 `virtualenv`, smoke test 37.3737545… TECU bit-identical on repeat, index files unchanged, reconciliation passed. Bundle filed at `evidence/iri2016_kaggle_verification_2026-09-19/`. One reconciliation finding (installed `apf107.dat` ends 2024-03-06, not the 2024-06-17 read from `master`) routed to the owner as a proposed D-45 annotation — see §3.3–3.6 |
+| 3. Kaggle notebook | **Executed on Kaggle 2026-09-19 — PASS (fourth run).** Runs 1–3 stopped in Step 3 (run 1: stdlib `venv` without ensurepip, a notebook defect, fixed; runs 2–3: Kaggle Internet toggle OFF, diagnosed by run 3's complete per-rung log). Run 4, same notebook, Internet ON: `iricore==1.8.0` installed hash-verified into a Python 3.10.12 `virtualenv`, smoke test 37.3737545… TECU bit-identical on repeat, index files unchanged, reconciliation passed. Bundle filed at `evidence/iri2016_kaggle_verification_2026-09-19/`. One reconciliation finding (installed `apf107.dat` ends 2024-03-06, not the 2024-06-17 read from `master`) routed to the owner as a proposed D-45 annotation — see §3.3–3.6 **Then (§3.7):** D-45 annotated on owner authorization (release, wheel, Python, explicit `version=16`, full index-file hashes, smoke-test limits); coverage and 2022 support verified on the installed bytes; historical copies recovered with provenance and compared — 2022 inputs identical; revision 2 preserved beside the bundle; revision 3 (`0e4d4478…`, not run on Kaggle) adds the network preflight, failure classes and `ig_rz.dat` metadata. |
 | 4. Verification bundle design | **Delivered** (report + logs + hashes + provenance + smoke test + repeatability, explicitly diagnostic-only) |
 | 5. Honest validation | **Done** — structure/syntax/logic locally checked; Kaggle execution explicitly marked pending |
 | 6. Code summaries / change record | **Updated** (this record; code-summary addenda below) |
@@ -362,9 +724,16 @@ on Kaggle as designed.
 1. ~~The student must actually run `kaggle_iri2016_verification.ipynb` on Kaggle and
    return `iri_verification_bundle.zip`~~ — **closed 2026-09-19** (§3.6): run 4 returned
    the bundle; installation, smoke-test correctness and repeatability are verified on
-   Kaggle's real environment. Open in its place: the owner's ruling on the proposed D-45
-   annotation (1.8.0-wheel index-file hashes; `apf107.dat` coverage to 2024-03-06), and
-   the two diagnostic notebook revisions owed to the next version.
+   Kaggle's real environment. ~~Open in its place: the owner's ruling on the proposed D-45
+   annotation and the two diagnostic notebook revisions~~ — **both closed 2026-09-19**
+   (§3.7): annotation authorized and recorded; revision 3 built and locally validated.
+   Closed since (§3.9): stations + `igrf_version` transcribed; 3.10 exception recorded
+   (D-49). Still open: the owner's approval of the 1.0 TECU tolerance (declaration time =
+   approval time); the eight official reference values (manual sheet; interface refused
+   automation); frozen fixture manifests and in-session receipts (BLK-02 — the walking-
+   skeleton freeze precedes any full-year job); the fixture/B-01 environment-identity
+   resolution (D-49 item 4); `observable_codes` (features path only). The verification notebook revision 3 no longer needs a separate run:
+   its checks are incorporated in the production notebook's first execution.
 2. `iricore` remains uninstallable in the local governed Windows environment (unchanged
    from the prior pass; Kaggle is the intended path, not a substitute local fix).
 3. Producer artifacts, `permitted_producers` registration, and G-04 itself remain

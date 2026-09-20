@@ -244,6 +244,50 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help="attempt IRI benchmark generation; REFUSES today (R-59: no passing report)",
     )
     parser.add_argument(
+        "--verify-runtime",
+        action="store_true",
+        help=(
+            "B-01 runtime pin protection (D-45): verify the installed iricore release, its "
+            "default IRI version and the FULL SHA-256 of the two index files it would "
+            "consume against experiment.benchmark_b01; writes the runtime identity"
+        ),
+    )
+    parser.add_argument(
+        "--build-validation-report",
+        type=Path,
+        default=None,
+        help=(
+            "JSON file of 5-10 student-supplied samples (site, lat, lon, target_time_utc, "
+            "local_time_class, activity_class, official_interface_value); computes the "
+            "adapter value for each and writes the R-59 seven-area report (status passed or "
+            "failed -- never hidden) using the PREDECLARED tolerance from configuration"
+        ),
+    )
+    parser.add_argument(
+        "--generate-benchmark",
+        action="store_true",
+        help=(
+            "the production path: pins verified, all four R-59 limbs over the report named "
+            "by --validation-report, hourly grid from data.yaml stations, workload, pins "
+            "re-verified, stamped rows + provenance written; refuses on any failed gate"
+        ),
+    )
+    parser.add_argument(
+        "--validation-report",
+        type=Path,
+        default=None,
+        help="the governed R-59 report JSON --generate-benchmark gates on",
+    )
+    parser.add_argument(
+        "--months",
+        type=str,
+        default=None,
+        help=(
+            "comma-separated months restricting the grid (a PARTIAL product, labelled so); "
+            "absent = the full year (the 26,000-call workload, TC-04)"
+        ),
+    )
+    parser.add_argument(
         "--attempt-comparator",
         action="store_true",
         help="attempt GIM comparator generation; REFUSES today (Q-15 unset; R-60)",
@@ -306,6 +350,7 @@ def _stage_entry(
     phase: int,
     code_commit: str | None,
     fixture_manifest: Path | None = None,
+    full_year_job: bool = True,
 ) -> dict[str, Any]:
     """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()).
 
@@ -347,16 +392,26 @@ def _stage_entry(
         audit_window = _declared_data_window()
         fixture_scope_id = None
         declared_window = None
-    receipts_gate = require_receipts_for_snapshot(
-        snapshot,
-        lock,
-        fixture_manifest=fixture_manifest,
-        declared_window=declared_window,
-        declared_window_resource=(
-            "scripts/04_build_external_products.py: declared audit window "
-            "(fixture scope's cited window on a fixture run; calendar year otherwise)"
-        ),
-    )
+    if full_year_job:
+        receipts_gate: Any = require_receipts_for_snapshot(
+            snapshot,
+            lock,
+            fixture_manifest=fixture_manifest,
+            declared_window=declared_window,
+            declared_window_resource=(
+                "scripts/04_build_external_products.py: declared audit window "
+                "(fixture scope's cited window on a fixture run; calendar year otherwise)"
+            ),
+        )
+    else:
+        # TE 9.2 gates FULL-YEAR jobs. `--verify-runtime` (hashing two files) and
+        # `--build-validation-report` (5-10 calls, no product) are bounded checks that
+        # produce no artifact a full-year job consumes; the exemption is recorded, never
+        # silent. EVERY `--generate-benchmark` run, partial or not, keeps the gate.
+        receipts_gate = {
+            "status": "not required",
+            "reason": "bounded B-01 runtime/validation check, not a full-year job (TE 9.2)",
+        }
     return {
         "snapshot": snapshot,
         "determinism": determinism,
@@ -573,9 +628,7 @@ def _audit_dst(
             if match:
                 day_rows.add(int(match.group(1)))
         month_start = dt.date(year, month, 1)
-        next_month_start = (
-            dt.date(year + 1, 1, 1) if month == 12 else dt.date(year, month + 1, 1)
-        )
+        next_month_start = dt.date(year + 1, 1, 1) if month == 12 else dt.date(year, month + 1, 1)
         # The in-window slice of this month (whole month on a full-year window).
         lo = max(month_start, start)
         hi = min(next_month_start - dt.timedelta(days=1), end)
@@ -854,7 +907,7 @@ def _attempt_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             validation_report=None,
             report_name="iri_implementation_validation_report",
             availability_matrix=None,
-            benchmark_drivers=("f107", "kp_ap3"),
+            benchmark_drivers=iri.BENCHMARK_DRIVER_IDS,
             injection_mode=False,
         )
     else:
@@ -870,6 +923,137 @@ def _attempt_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> di
         "generate_benchmark returned without raising; the gate contract requires a "
         "refusal on every attempt today",
     )
+
+
+def _b01_out_dir(entry: Mapping[str, Any], args: argparse.Namespace) -> Path:
+    workspace = Path(entry["snapshot"].resolved_roots["workspace"])
+    out = args.out if args.out is not None else Path("artifacts/external/b01")
+    out = out if out.is_absolute() else workspace / out
+    out.mkdir(parents=True, exist_ok=True)
+    return out
+
+
+def _write_json(path: Path, payload: Any) -> Path:
+    path.write_text(json.dumps(payload, indent=2, default=str) + "\n", encoding="utf-8")
+    return path
+
+
+def _write_manifest(out: Path, files: list[Path]) -> Path:
+    manifest = {f.name: sha256_of_file(f) for f in files}
+    return _write_json(out / "sha256_manifest.json", manifest)
+
+
+def _verify_runtime(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """D-45 runtime pin protection, run before an execution session (annotation item 2)."""
+    _assert_phase1_field_contract(args.phase)
+    from src.external import iri  # allowlisted importer; deferred by design
+
+    contract = iri.read_benchmark_contract(entry["snapshot"])
+    identity = iri.verify_runtime(contract)
+    out = _b01_out_dir(entry, args)
+    identity["environment_lock_hash"] = environment_lock_hash(entry["lock"])
+    identity["config_hashes"] = dict(entry["snapshot"].hashes)
+    path = _write_json(out / "b01_runtime_identity.json", identity)
+    _write_manifest(out, [path])
+    print(f"04_build_external_products: runtime verified: {identity['index_files_sha256']}")
+    return {"runtime_identity": path}
+
+
+def _load_json_object(path: Path, *, what: str) -> Any:
+    try:
+        loaded = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise IntegrityError(str(path), f"{what} is unreadable ({exc})") from exc
+    return loaded
+
+
+def _build_validation_report(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """R-59's seven-area report from student-supplied samples; the tolerance is the
+    predeclared one in configuration. A failed report is written with status failed."""
+    _assert_phase1_field_contract(args.phase)
+    from src.external import iri  # allowlisted importer; deferred by design
+
+    samples = _load_json_object(args.build_validation_report, what="validation samples file")
+    if isinstance(samples, Mapping) and "samples" in samples:
+        samples = samples["samples"]
+    if not isinstance(samples, list):
+        raise IntegrityError(
+            str(args.build_validation_report),
+            "must hold a JSON list of samples (or an object with a 'samples' list)",
+        )
+    contract = iri.read_benchmark_contract(entry["snapshot"])
+    identity = iri.verify_runtime(contract)
+    report = iri.build_validation_report(contract, identity, samples)
+    out = _b01_out_dir(entry, args)
+    path = _write_json(out / f"{contract.report_name}.json", report)
+    _write_manifest(out, [path])
+    print(f"04_build_external_products: validation report {report['status'].upper()} -> {path}")
+    if report["status"] != "passed":
+        raise IntegrityError(
+            str(path),
+            "validation report status is 'failed': at least one sample exceeds the predeclared "
+            "tolerance; the report is written as-is and generation stays blocked (R-59) -- "
+            "the implementation is never silently switched",
+        )
+    return {"validation_report": path}
+
+
+def _generate_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """The production path (R-59 all limbs; D-45 pins before and after the session)."""
+    _assert_phase1_field_contract(args.phase)
+    from src.data.registry import load_registry  # station coordinates (D-1)
+    from src.external import iri  # allowlisted importer; deferred by design
+
+    if args.validation_report is None:
+        raise IntegrityError(
+            "--validation-report",
+            "required with --generate-benchmark: the governed R-59 report to gate on (limb 1)",
+        )
+    report = _load_json_object(args.validation_report, what="validation report")
+    if not isinstance(report, Mapping):
+        raise IntegrityError(
+            str(args.validation_report), "validation report must be a JSON object"
+        )
+    months = [int(m) for m in args.months.split(",")] if args.months else None
+    contract = iri.read_benchmark_contract(entry["snapshot"])
+    stations = load_registry(entry["snapshot"])
+
+    def progress(done: int, total: int) -> None:
+        print(f"04_build_external_products: B-01 {done}/{total} calls", flush=True)
+
+    result = iri.run_gated_generation(
+        contract=contract,
+        validation_report=report,
+        stations=stations,
+        months=months,
+        progress=progress,
+    )
+    out = _b01_out_dir(entry, args)
+    rows_path = out / (
+        "b01_iri2016_rows_partial.jsonl" if result["partial"] else "b01_iri2016_rows.jsonl"
+    )
+    with rows_path.open("w", encoding="utf-8") as handle:
+        for row in result["rows"]:
+            handle.write(json.dumps(row, default=str) + "\n")
+    prov = dict(result["provenance"])
+    prov["rows_file"] = rows_path.name
+    prov["rows_sha256"] = sha256_of_file(rows_path)
+    prov["validation_report_file"] = str(args.validation_report)
+    prov["validation_report_sha256"] = sha256_of_file(Path(args.validation_report))
+    prov["environment_lock_hash"] = environment_lock_hash(entry["lock"])
+    prov["config_hashes"] = dict(entry["snapshot"].hashes)
+    prov["artifact_class"] = (
+        "B-01 benchmark rows (generated, not trained); partial"
+        if result["partial"]
+        else "B-01 benchmark rows (generated, not trained)"
+    )
+    prov_path = _write_json(out / "b01_provenance.json", prov)
+    _write_manifest(out, [rows_path, prov_path])
+    print(
+        f"04_build_external_products: B-01 generated {prov['call_count']} rows "
+        f"({prov['error_rows']} error rows) in {prov['workload_seconds']} s -> {rows_path}"
+    )
+    return {"benchmark_rows": rows_path, "provenance": prov_path}
 
 
 def _attempt_comparator(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
@@ -950,6 +1134,7 @@ def main() -> int:
             phase=args.phase,
             code_commit=args.code_commit,
             fixture_manifest=args.fixture_manifest,
+            full_year_job=not (args.verify_runtime or args.build_validation_report is not None),
         )
     except IntegrityError as exc:
         print(f"04_build_external_products: preflight refusal: {exc}", file=sys.stderr)
@@ -977,6 +1162,12 @@ def main() -> int:
     try:
         if args.attempt_benchmark:
             summary = _attempt_benchmark(entry, args)
+        elif args.verify_runtime:
+            summary = _verify_runtime(entry, args)
+        elif args.build_validation_report is not None:
+            summary = _build_validation_report(entry, args)
+        elif args.generate_benchmark:
+            summary = _generate_benchmark(entry, args)
         elif args.attempt_comparator:
             summary = _attempt_comparator(entry, args)
         elif args.render_comparison is not None:

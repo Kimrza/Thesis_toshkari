@@ -1573,3 +1573,554 @@ def test_fixture_declaration_derives_from_the_scope_never_the_full_year() -> Non
     assert (
         "_declared_data_window" in else_src
     ), "the non-fixture branch must keep the full-year window (D-8's claim boundary)"
+
+
+# =====================================================================================
+# B-01 production path (2026-09-19): runtime pin protection, validation-report builder,
+# gated generation -- exercised at FUNCTION level through the allowlisted stage script
+# (`_load_stage_04`), never by importing `src.external.iri` here (TE 12; TA-07).
+# `iricore` is a STUB on sys.path carrying the REAL pinned index bytes from
+# evidence/iri2016_kaggle_verification_2026-09-19/ (hash-equal to the D-45 pins), so the
+# pin checks run against the genuine files while `vtec` returns a deterministic value.
+# Station coordinates are D-1's (evidence/DECISIONS.md D-1) in a TEMPORARY config copy,
+# because configs/data.yaml:stations is still `TBD -- freeze gate` (the student's freeze).
+# =====================================================================================
+
+_EVIDENCE_INDEX = (
+    REPO_ROOT
+    / "evidence"
+    / "iri2016_kaggle_verification_2026-09-19"
+    / "index_files"
+    / "installed_iricore-1.8.0_wheel"
+)
+_D1_STATIONS = {  # D-1 coordinates; other 6.2 fields synthetic, provenance labelled so
+    "ARUC": (40.286, 44.086),
+    "BSHM": (32.778987, 35.022987),
+    "NICO": (35.140989, 33.396450),
+}
+
+
+def _stub_iricore(
+    tmp_path: Path,
+    *,
+    version: str = "1.8.0",
+    default_iri: int = 20,
+    corrupt: str | None = None,
+    fail_at: str | None = None,
+) -> Path:
+    """A stub `iricore` distribution: config.DEFAULT_IRI_VERSION, data/index/* (real
+    pinned bytes unless `corrupt` names a file to alter), and a `vtec` that records its
+    arguments and returns a deterministic TECU value (or raises for `fail_at`)."""
+    site = tmp_path / "stub_site"
+    pkg = site / "iricore"
+    (pkg / "data" / "index").mkdir(parents=True, exist_ok=True)
+    for name in ("apf107.dat", "ig_rz.dat"):
+        data = (_EVIDENCE_INDEX / name).read_bytes()
+        if corrupt == name:
+            data = data + b" \n"
+        (pkg / "data" / "index" / name).write_bytes(data)
+    (pkg / "config.py").write_text(
+        f"IRI_VERSIONS = [16, 20]\nDEFAULT_IRI_VERSION = {default_iri}\n", encoding="utf-8"
+    )
+    fail_clause = (
+        f"    if dt.isoformat().startswith({fail_at!r}):\n        raise RuntimeError('stub failure')\n"
+        if fail_at
+        else ""
+    )
+    (pkg / "__init__.py").write_text(
+        "CALLS = []\n"
+        "def vtec(dt, lat, lon, hbot=90.0, htop=2000.0, hstep=0.5, version=20, **kw):\n"
+        "    CALLS.append((dt, lat, lon, hbot, htop, hstep, version))\n"
+        + fail_clause
+        + "    return [10.0 + dt.hour * 0.5 + (lat - 30.0)]\n",
+        encoding="utf-8",
+    )
+    dist = site / f"iricore-{version}.dist-info"
+    dist.mkdir(exist_ok=True)
+    (dist / "METADATA").write_text(
+        f"Metadata-Version: 2.1\nName: iricore\nVersion: {version}\n", encoding="utf-8"
+    )
+    return site
+
+
+def _b01_configs(
+    tmp_path: Path,
+    *,
+    tolerance: object = 1.0,
+    declared_at: object = "2026-09-19T00:00:00+00:00",
+    stations: bool = True,
+) -> Path:
+    """A temporary copy of configs/ with D-1 stations transcribed (synthetic 6.2 fields),
+    igrf_version set, and the predeclared tolerance filled -- the freezes the real
+    config still carries as TBD, supplied here as test data only."""
+    import yaml
+
+    cfg = tmp_path / "configs"
+    shutil.copytree(REPO_ROOT / "configs", cfg)
+    data = yaml.safe_load((cfg / "data.yaml").read_text(encoding="utf-8"))
+    if stations:
+        data["stations"] = {
+            sid: {
+                "lat": lat,
+                "lon": lon,
+                "ellipsoidal_height_m": 0.0,
+                "domes": "00000M000",
+                "sampling_interval_s": 30,
+                "provenance": {
+                    k: "test-fixture (D-1 coordinates; other fields synthetic)"
+                    for k in ("lat", "lon", "ellipsoidal_height_m", "domes", "sampling_interval_s")
+                },
+            }
+            for sid, (lat, lon) in _D1_STATIONS.items()
+        }
+        data["igrf_version"] = "test-fixture"
+    else:
+        # the real data.yaml carries the transcription since 2026-09-19; this branch
+        # re-creates the pre-transcription refusal state deliberately
+        data["stations"] = "TBD — freeze gate"
+    (cfg / "data.yaml").write_text(
+        yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8"
+    )
+    exp = yaml.safe_load((cfg / "experiment.yaml").read_text(encoding="utf-8"))
+    exp["benchmark_b01"]["validation_report"]["tolerance_tecu"] = tolerance
+    exp["benchmark_b01"]["validation_report"]["tolerance_declared_at_utc"] = declared_at
+    (cfg / "experiment.yaml").write_text(
+        yaml.safe_dump(exp, sort_keys=False, allow_unicode=True), encoding="utf-8"
+    )
+    return cfg
+
+
+_B01_DETERMINISM: list[Any] = []  # seed_everything runs once per process (R-05: TensorFlow init)
+
+
+def _b01_entry(mod, cfg: Path, workspace: Path):
+    from src.data.config import capture_environment_lock, load_configs, seed_everything
+
+    os.environ["TEC_WORKSPACE_ROOT"] = str(workspace)
+    snapshot = load_configs(cfg, phase=1)
+    if not _B01_DETERMINISM:
+        _B01_DETERMINISM.append(seed_everything(snapshot, stage="external-products"))
+    lock = capture_environment_lock(snapshot, _B01_DETERMINISM[0], code_commit="test-no-git-tree")
+    return {"snapshot": snapshot, "lock": lock}
+
+
+def _samples(n: int = 6) -> list[dict[str, object]]:
+    specs = [
+        ("ARUC", 40.286, 44.086, "2022-06-15T12:00:00+00:00", "day", "quiet"),
+        ("ARUC", 40.286, 44.086, "2022-06-15T00:00:00+00:00", "night", "quiet"),
+        ("BSHM", 32.778987, 35.022987, "2022-03-31T12:00:00+00:00", "day", "disturbed"),
+        ("BSHM", 32.778987, 35.022987, "2022-03-31T01:00:00+00:00", "night", "disturbed"),
+        ("NICO", 35.140989, 33.396450, "2022-08-28T13:00:00+00:00", "day", "disturbed"),
+        ("NICO", 35.140989, 33.396450, "2022-01-06T02:00:00+00:00", "night", "quiet"),
+        ("ARUC", 40.286, 44.086, "2022-09-01T11:00:00+00:00", "day", "quiet"),
+    ]
+    out = []
+    for site, lat, lon, t, ltc, act in specs[:n]:
+        hour = int(t[11:13])
+        out.append(
+            {
+                "site": site,
+                "lat": lat,
+                "lon": lon,
+                "target_time_utc": t,
+                "local_time_class": ltc,
+                "activity_class": act,
+                "official_interface_value": 10.0 + hour * 0.5 + (lat - 30.0),
+                "official_interface_source": "test-fixture",
+            }
+        )
+    return out
+
+
+@pytest.fixture
+def b01(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    pytest.importorskip("yaml")
+    site = _stub_iricore(tmp_path)
+    monkeypatch.syspath_prepend(str(site))
+    for name in [m for m in sys.modules if m == "iricore" or m.startswith("iricore.")]:
+        del sys.modules[name]
+    workspace = _workspace(tmp_path)
+    mod = _load_stage_04()
+    yield mod, tmp_path, workspace, site
+    for name in [m for m in sys.modules if m == "iricore" or m.startswith("iricore.")]:
+        del sys.modules[name]
+
+
+def _ns(**kw):
+    import argparse
+
+    base = dict(
+        phase=1, out=None, months=None, validation_report=None, build_validation_report=None
+    )
+    base.update(kw)
+    return argparse.Namespace(**base)
+
+
+def test_b01_verify_runtime_writes_identity_with_full_pins(b01) -> None:
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path), workspace)
+    summary = mod._verify_runtime(entry, _ns())
+    identity = json.loads(summary["runtime_identity"].read_text(encoding="utf-8"))
+    assert identity["release"] == "1.8.0" and identity["installed_default_iri_version"] == 20
+    assert identity["index_files_sha256"] == {
+        "apf107.dat": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+        "ig_rz.dat": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486",
+    }
+    assert (summary["runtime_identity"].parent / "sha256_manifest.json").is_file()
+
+
+@pytest.mark.parametrize("corrupt", ["apf107.dat", "ig_rz.dat"])
+def test_b01_verify_runtime_refuses_altered_index_file(
+    tmp_path: Path, monkeypatch, corrupt: str
+) -> None:
+    pytest.importorskip("yaml")
+    from src.data.config import BenchmarkError
+
+    site = _stub_iricore(tmp_path, corrupt=corrupt)
+    monkeypatch.syspath_prepend(str(site))
+    for name in [m for m in sys.modules if m.startswith("iricore")]:
+        del sys.modules[name]
+    mod = _load_stage_04()
+    entry = _b01_entry(mod, _b01_configs(tmp_path), _workspace(tmp_path))
+    with pytest.raises(BenchmarkError) as exc:
+        mod._verify_runtime(entry, _ns())
+    assert (
+        corrupt in str(exc.value) and "D-45 pin" in str(exc.value) and "refused" in str(exc.value)
+    )
+    for name in [m for m in sys.modules if m.startswith("iricore")]:
+        del sys.modules[name]
+
+
+def test_b01_verify_runtime_refuses_wrong_release_or_default(tmp_path: Path, monkeypatch) -> None:
+    pytest.importorskip("yaml")
+    from src.data.config import BenchmarkError
+
+    for kw, marker in (
+        (dict(version="1.9.0"), "pinned '1.8.0'"),
+        (dict(default_iri=16), "DEFAULT_IRI_VERSION is 16"),
+    ):
+        site = _stub_iricore(tmp_path / marker.replace(" ", "_").replace("'", ""), **kw)
+        monkeypatch.syspath_prepend(str(site))
+        for name in [m for m in sys.modules if m.startswith("iricore")]:
+            del sys.modules[name]
+        mod = _load_stage_04()
+        entry = _b01_entry(
+            mod,
+            _b01_configs(tmp_path / marker.replace(" ", "_").replace("'", "")),
+            _workspace(tmp_path / marker.replace(" ", "_").replace("'", "")),
+        )
+        with pytest.raises(BenchmarkError) as exc:
+            mod._verify_runtime(entry, _ns())
+        assert marker in str(exc.value)
+        sys.path.remove(str(site))
+        for name in [m for m in sys.modules if m.startswith("iricore")]:
+            del sys.modules[name]
+
+
+def test_b01_validation_report_passes_and_carries_seven_areas(b01) -> None:
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path), workspace)
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(_samples()), encoding="utf-8")
+    summary = mod._build_validation_report(entry, _ns(build_validation_report=samples_path))
+    report = json.loads(summary["validation_report"].read_text(encoding="utf-8"))
+    assert report["status"] == "passed" and report["altitude_ceiling_km"] == 2000.0
+    for area in (
+        "package_version",
+        "model_switches",
+        "topside_option",
+        "altitude_ceiling_km",
+        "units",
+        "output_extraction",
+        "driver_inputs",
+        "samples",
+        "tolerance",
+    ):
+        assert area in report
+    d = report["driver_inputs"]
+    assert (
+        d["index_inputs_retrospective_centered"] is True
+        and d["iri_version"] == 16
+        and d["oarr_overrides"] == {}
+    )
+    assert d["index_files_sha256"]["apf107.dat"].startswith("cdf4d5df")
+    assert len(report["samples"]) == 6 and all(s["within_tolerance"] for s in report["samples"])
+    assert report["tolerance"]["declared_at_utc"] < report["comparison_ran_at_utc"]
+    # the adapter's call is the D-45 call: explicit version 16, ceiling 2000, wrapper hbot/hstep
+    import iricore
+
+    assert iricore.CALLS and all(c[3:] == (90.0, 2000.0, 0.5, 16) for c in iricore.CALLS)
+    assert all(c[0].tzinfo is None for c in iricore.CALLS)  # naive UT handed to iricore
+
+
+def test_b01_validation_report_failed_is_written_and_blocks(b01) -> None:
+    from src.data.config import IntegrityError
+
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path, tolerance=0.001), workspace)
+    samples = _samples()
+    samples[2]["official_interface_value"] += 5.0  # one sample outside tolerance
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(samples), encoding="utf-8")
+    with pytest.raises(IntegrityError) as exc:
+        mod._build_validation_report(entry, _ns(build_validation_report=samples_path))
+    assert "status is 'failed'" in str(exc.value) and "never silently switched" in str(exc.value)
+    written = json.loads(
+        (
+            workspace
+            / "artifacts"
+            / "external"
+            / "b01"
+            / "iri_implementation_validation_report.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert (
+        written["status"] == "failed"
+        and sum(not s["within_tolerance"] for s in written["samples"]) == 1
+    )
+
+
+def test_b01_validation_report_refuses_tbd_tolerance_and_late_declaration(b01) -> None:
+    from src.data.config import BenchmarkError
+
+    mod, tmp_path, workspace, _ = b01
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(_samples()), encoding="utf-8")
+    entry = _b01_entry(
+        mod, _b01_configs(tmp_path / "tbd", tolerance="TBD — freeze gate"), workspace
+    )
+    with pytest.raises(BenchmarkError) as exc:
+        mod._build_validation_report(entry, _ns(build_validation_report=samples_path))
+    assert "predeclared" in str(exc.value) and "TE 1.1" in str(exc.value)
+    entry = _b01_entry(
+        mod, _b01_configs(tmp_path / "late", declared_at="2099-01-01T00:00:00+00:00"), workspace
+    )
+    with pytest.raises(BenchmarkError) as exc:
+        mod._build_validation_report(entry, _ns(build_validation_report=samples_path))
+    assert "does not precede" in str(exc.value)
+
+
+def test_b01_validation_report_refuses_december_sample(b01) -> None:
+    from src.data.config import BenchmarkError
+
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path), workspace)
+    samples = _samples()
+    samples[0]["target_time_utc"] = "2022-12-05T12:00:00+00:00"
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(samples), encoding="utf-8")
+    with pytest.raises(BenchmarkError) as exc:
+        mod._build_validation_report(entry, _ns(build_validation_report=samples_path))
+    assert "locked month" in str(exc.value)
+
+
+def test_b01_generate_partial_month_end_to_end(b01) -> None:
+    mod, tmp_path, workspace, _ = b01
+    cfg = _b01_configs(tmp_path)
+    entry = _b01_entry(mod, cfg, workspace)
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(_samples()), encoding="utf-8")
+    report_path = mod._build_validation_report(entry, _ns(build_validation_report=samples_path))[
+        "validation_report"
+    ]
+    summary = mod._generate_benchmark(
+        entry, _ns(generate_benchmark=True, validation_report=report_path, months="2")
+    )
+    rows = [
+        json.loads(line)
+        for line in summary["benchmark_rows"].read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(rows) == 3 * 28 * 24 and summary["benchmark_rows"].name.endswith("_partial.jsonl")
+    first = rows[0]
+    assert (
+        first["phase_id"] == "P1A"
+        and first["source_id"] == "IRI2016_B01"
+        and first["target_definition_id"] == "GRIDDed_VTEC_1H"
+    )
+    assert (
+        first["benchmark_id"] == "B-01"
+        and first["units"] == "TECU"
+        and first["iri_version"] == 16
+        and first["htop_km"] == 2000.0
+    )
+    assert (
+        first["station_id"] == "ARUC"
+        and first["cell_id"] == "40/44"
+        and first["target_time_utc"] == "2022-02-01T00:00:00+00:00"
+    )
+    assert {r["cell_id"] for r in rows} == {"40/44", "32/35", "35/33"}
+    assert all(r["status"] == "ok" and isinstance(r["iri2016_t_plus_1_tecu"], float) for r in rows)
+    times = [r["target_time_utc"] for r in rows if r["station_id"] == "NICO"]
+    assert times == sorted(times) and len(set(times)) == 28 * 24
+    prov = json.loads(summary["provenance"].read_text(encoding="utf-8"))
+    assert (
+        prov["partial"] is True
+        and prov["months"] == [2]
+        and prov["call_count"] == len(rows)
+        and prov["error_rows"] == 0
+    )
+    assert (
+        prov["index_files_sha256_after_session"] == prov["runtime_identity"]["index_files_sha256"]
+    )
+    assert (
+        prov["validation_report_status"] == "passed" and prov["label"] == "generated, not trained"
+    )
+    assert {r["driver_id"] for r in prov["benchmark_driver_rows"]} == {
+        "iri_apf107_f107_adjusted",
+        "iri_apf107_ap_3h",
+        "iri_ig_rz_ig12_rz12",
+    }
+    assert all(
+        r["release_status"].startswith("hindcast-only") for r in prov["benchmark_driver_rows"]
+    )
+    manifest = json.loads(
+        (summary["benchmark_rows"].parent / "sha256_manifest.json").read_text(encoding="utf-8")
+    )
+    assert set(manifest) == {"b01_iri2016_rows_partial.jsonl", "b01_provenance.json"}
+
+
+def test_b01_generate_refuses_failed_report_and_mismatched_pins(b01) -> None:
+    from src.data.config import BenchmarkError
+
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path), workspace)
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(_samples()), encoding="utf-8")
+    report_path = mod._build_validation_report(entry, _ns(build_validation_report=samples_path))[
+        "validation_report"
+    ]
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    failed = dict(report, status="failed")
+    failed_path = tmp_path / "failed.json"
+    failed_path.write_text(json.dumps(failed), encoding="utf-8")
+    with pytest.raises(BenchmarkError) as exc:
+        mod._generate_benchmark(
+            entry, _ns(generate_benchmark=True, validation_report=failed_path, months="2")
+        )
+    assert "not 'passed'" in str(exc.value)
+    other = json.loads(json.dumps(report))
+    other["driver_inputs"]["index_files_sha256"]["apf107.dat"] = "0" * 64
+    other_path = tmp_path / "other.json"
+    other_path.write_text(json.dumps(other), encoding="utf-8")
+    with pytest.raises(BenchmarkError) as exc:
+        mod._generate_benchmark(
+            entry, _ns(generate_benchmark=True, validation_report=other_path, months="2")
+        )
+    assert "validated a different runtime" in str(exc.value)
+
+
+def test_b01_generate_refuses_unresolved_stations(b01) -> None:
+    from src.data.config import RegistryError
+
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path, stations=False), workspace)
+    report_path = tmp_path / "r.json"
+    report_path.write_text("{}", encoding="utf-8")
+    with pytest.raises(RegistryError) as exc:
+        mod._generate_benchmark(
+            entry, _ns(generate_benchmark=True, validation_report=report_path, months="2")
+        )
+    assert "TBD" in str(exc.value)
+
+
+def test_b01_per_point_failure_is_recorded_not_fatal(tmp_path: Path, monkeypatch) -> None:
+    pytest.importorskip("yaml")
+    site = _stub_iricore(tmp_path, fail_at="2022-02-03T05")
+    monkeypatch.syspath_prepend(str(site))
+    for name in [m for m in sys.modules if m.startswith("iricore")]:
+        del sys.modules[name]
+    mod = _load_stage_04()
+    workspace = _workspace(tmp_path)
+    entry = _b01_entry(mod, _b01_configs(tmp_path), workspace)
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(_samples()), encoding="utf-8")
+    report_path = mod._build_validation_report(entry, _ns(build_validation_report=samples_path))[
+        "validation_report"
+    ]
+    summary = mod._generate_benchmark(
+        entry, _ns(generate_benchmark=True, validation_report=report_path, months="2")
+    )
+    rows = [
+        json.loads(line)
+        for line in summary["benchmark_rows"].read_text(encoding="utf-8").splitlines()
+    ]
+    bad = [r for r in rows if r["status"] == "error"]
+    assert len(bad) == 3 and all(
+        r["iri2016_t_plus_1_tecu"] is None and "stub failure" in r["error"] for r in bad
+    )
+    prov = json.loads(summary["provenance"].read_text(encoding="utf-8"))
+    assert prov["error_rows"] == 3
+    for name in [m for m in sys.modules if m.startswith("iricore")]:
+        del sys.modules[name]
+
+
+def test_b01_config_block_is_the_annotated_d45_contract() -> None:
+    """The one authoritative pin record: experiment.benchmark_b01 carries the full hashes
+    D-45's annotation recorded, version 16, the 2000 km ceiling and no overrides."""
+    pytest.importorskip("yaml")
+    import yaml
+
+    block = yaml.safe_load(
+        (REPO_ROOT / "configs" / "experiment.yaml").read_text(encoding="utf-8")
+    )["benchmark_b01"]
+    assert (
+        block["iri_version"] == 16
+        and block["integration"]["htop_km"] == 2000.0
+        and block["oarr_overrides"] == {}
+    )
+    assert block["index_file_pins"] == {
+        "apf107.dat": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+        "ig_rz.dat": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486",
+    }
+    assert (
+        block["runtime"]["wheel_sha256"]
+        == "f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874"
+    )
+    assert str(block["validation_report"]["tolerance_tecu"]).startswith(
+        "TBD"
+    )  # student's predeclaration still open
+
+
+def test_b01_verify_runtime_completes_at_subprocess_level(tmp_path: Path) -> None:
+    """`--verify-runtime` is a bounded check, not a full-year job: the TE 9.2 receipt gate
+    is recorded as not required, the run completes (exit 0) on the real configs (stations
+    may stay TBD -- no coordinate is needed to hash two files), and the identity carries
+    the full D-45 pins. The stub iricore carries the real pinned bytes."""
+    pytest.importorskip("yaml")
+    site = _stub_iricore(tmp_path)
+    workspace = _workspace(tmp_path)
+    env = dict(
+        os.environ, PYTHONHASHSEED="0", TEC_WORKSPACE_ROOT=str(workspace), PYTHONPATH=str(site)
+    )
+    env.pop("TEC_PLATFORM", None)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--config",
+            str(REPO_ROOT / "configs"),
+            "--code-commit",
+            "smoke-no-git-tree",
+            "--verify-runtime",
+        ],
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=str(REPO_ROOT),
+        timeout=600,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr[-2000:]
+    identity = json.loads(
+        (workspace / "artifacts" / "external" / "b01" / "b01_runtime_identity.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert (
+        identity["index_files_sha256"]["ig_rz.dat"]
+        == "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486"
+    )
+    assert "runtime verified" in result.stdout
+    # a full-year driver-audit invocation on the same workspace still fails closed (gate kept)
+    audit = _run_script([], workspace)
+    _assert_gate_fails_closed(audit)

@@ -1,0 +1,53 @@
+{
+  "aruc00arm_20260317.log": {
+    "url": "https://files.igs.org/pub/station/log/aruc00arm_20260317.log",
+    "sha256": "858aa54b36b43011f48f0329cce7a3f974dfbd5adb752e2fc02d6746a5f5ef25",
+    "retrieved_utc": "2026-09-19T20:15:46.190227+00:00",
+    "bytes": 17177,
+    "date_prepared": "2026-03-17",
+    "four_char": null,
+    "nine_char": "ARUC00ARM",
+    "domes": "12312M002",
+    "X": "3500416.7822",
+    "Y": "3390432.6839",
+    "Z": "4103027.5848",
+    "lat_dms": "+401708.60",
+    "lon_dms": "+0440508.10",
+    "elev_m": null,
+    "coord_ref": null
+  },
+  "bshm00isr_20260422.log": {
+    "url": "https://files.igs.org/pub/station/log/bshm00isr_20260422.log",
+    "sha256": "d0dae80429fac5cc065b6bfdec87d2f948754d3d243b9e8dfb74c1005d37770f",
+    "retrieved_utc": "2026-09-19T20:15:47.345984+00:00",
+    "bytes": 18442,
+    "date_prepared": "2026-04-22",
+    "four_char": null,
+    "nine_char": "BSHM00ISR",
+    "domes": "20705M001",
+    "X": "4395951.1833",
+    "Y": "3080707.2289",
+    "Z": "3433498.2609",
+    "lat_dms": "+324644.35",
+    "lon_dms": "+0350122.75",
+    "elev_m": null,
+    "coord_ref": null
+  },
+  "nico00cyp_20251027.log": {
+    "url": "https://files.igs.org/pub/station/log/nico00cyp_20251027.log",
+    "sha256": "2740b73a695c5a4a3faab3a989407893b4786735587c4c41ee036f9c2f3d719a",
+    "retrieved_utc": "2026-09-19T20:15:48.973206+00:00",
+    "bytes": 28906,
+    "date_prepared": "2025-10-27",
+    "four_char": null,
+    "nine_char": "NICO00CYP",
+    "domes": "14302M001",
+    "X": "4359415.4000",
+    "Y": "2874117.3000",
+    "Z": "3650778.1000",
+    "lat_dms": "+350827.56",
+    "lon_dms": "+0332347.22",
+    "elev_m": null,
+    "coord_ref": null
+  }
+}

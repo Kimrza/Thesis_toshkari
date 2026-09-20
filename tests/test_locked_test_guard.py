@@ -865,6 +865,11 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         "experiment_registry.md",
         "audit_ec1_2026-08-15/EC1-AUDIT.md",
         "audit_gfz_2026-09-18/GFZ-AUDIT.md",
+        # 2026-09-19: the returned IRI-2016 Kaggle verification bundle's return record and
+        # its validation README (prose; no December target content -- the JSON/py files
+        # beside them are inside automated inspection and pass it).
+        "iri2016_kaggle_verification_2026-09-19/RETURN_RECORD.md",
+        "iri2016_kaggle_verification_2026-09-19/validation/README.md",
     }
     assert not [e for e in inventory if e.disposition == "flagged"]
 

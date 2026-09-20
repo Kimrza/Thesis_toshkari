@@ -46,6 +46,28 @@ three stations sit well away from cell edges (nearest approach ≈ 0.14°), so a
 coordinate correction would not change any assignment. Site-log validation remains
 outstanding.
 
+**Annotation, 2026-09-19 — site-log validation performed; registry transcribed (owner-authorized; original text above preserved).**
+On the owner's instruction ("transcribe existing authoritative values … with provenance"), the
+three official IGS site logs were retrieved from `https://files.igs.org/pub/station/log/`
+(ARUC `aruc00arm_20260317.log` SHA-256 `858aa54b36b43011f48f0329cce7a3f974dfbd5adb752e2fc02d6746a5f5ef25`;
+BSHM `bshm00isr_20260422.log` `d0dae80429fac5cc065b6bfdec87d2f948754d3d243b9e8dfb74c1005d37770f`;
+NICO `nico00cyp_20251027.log` `2740b73a695c5a4a3faab3a989407893b4786735587c4c41ee036f9c2f3d719a`;
+copies in `evidence/station_registry_sources_2026-09-19/`). The "known limitation" above is
+closed by this check: the site logs give ARUC 40.285722 N / 44.085583 E, BSHM 32.778986 /
+35.022986, NICO 35.140989 / 33.396450 — the approved values above differ by at most 0.0004°
+(ARUC, a rounding of the network-page value); every cell assignment is unchanged. The
+approved D-1 values are what `configs/data.yaml: stations` now carries (transcribed
+2026-09-19); the site-log values are recorded beside them in the per-field provenance,
+never averaged. Also transcribed from the same logs: DOMES 12312M002 / 20705M001 /
+14302M001, ellipsoidal heights 1222.0 / 225.1 / 190.1 m, and the receiver, antenna and
+firmware intervals covering 2022 (no hardware change falls inside 2022 at any station);
+sampling interval 30 s from the IGS daily file names `…_01D_30S_MO` (BKG data centre,
+2022-001). `igrf_version` is transcribed as **IGRF-13** — the generation compiled into the
+pinned `iricore` 1.8.0 IRI-2016 library, the only IGRF consumer in the Phase 1 executable
+path (D-49 item 3). **Still absent from every governing record:** the available observable
+codes (Vision §6.2; a 2022 RINEX header, Phase 2 material) — `assert_registry_resolved`
+keeps refusing on that one field; `load_registry` (the B-01 path) is satisfied.
+
 ---
 
 ## D-2 — Coverage minimum for G-P1A
@@ -2662,6 +2684,61 @@ applies. No target value is involved, so no locked-test access provision is enga
 
 ---
 
+## D-49 — B-01 execution-environment exception: CPython 3.10.12 for the isolated Kaggle IRI-2016 environment only (owner approval 2026-09-19)
+
+**Decision date:** 2026-09-19. **Decided by:** the project owner / student ("I approve
+CPython 3.10.12 for the isolated Kaggle B-01 IRI execution environment, using the verified,
+pinned iricore installation. Record this as a B-01-specific exception to the Python 3.11
+requirement. Keep the main project environment unchanged."). **Authority:** TE §8.1 / TC-03d
+(Python 3.11, exact pins — TE §18.2 Q-29 environment row) as the rule being excepted; D-45
+and its 2026-09-19 annotation (the verified runtime); `CR-2026-09-19-SCI-DECISIONS-P3`
+§3.6–3.9. **Recorded on the owner's authority; no supervisor signature is claimed.**
+
+**Decision.**
+
+1. **Scope.** The exception covers exactly one environment: the `virtualenv` created on the
+   Kaggle image from `/usr/bin/python3.10` (CPython **3.10.12**) in which
+   `scripts/04_build_external_products.py` runs `--verify-runtime`,
+   `--build-validation-report` and `--generate-benchmark` against the pinned
+   `iricore==1.8.0` wheel. It does **not** extend to model training, the walking-skeleton
+   fixture runs, any other stage script, or the governed local environment, all of which
+   remain Python 3.11 with `requirements.txt`'s exact pins (TC-03d unchanged).
+2. **Why.** `iricore==1.8.0` — the newest release with a Linux wheel — publishes that wheel
+   for CPython 3.10 only (`cp310-cp310-manylinux_2_35_x86_64`); 1.8.1–1.9.0 publish
+   macOS-arm64 only. The wheel installs and runs on Kaggle (verified 2026-09-19; no
+   from-source Fortran build was attempted).
+3. **Recorded identity.** `iricore==1.8.0` wheel SHA-256
+   `f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874`; `numpy==1.26.4`
+   `ffa75af20b44f8dba823498024771d5ac50620e6915abac414251bd971b4529f`; `fortranformat==2.0.3`
+   `88c8e7a3eac16c23420e8a1c4b21ddc7108f48e8dcbd2e0da6c8ecc48b051bb2`; `pymap3d==3.2.0`
+   `fccd44f2f6021a95adec19771c603b8dac104eab120d863c463d76b9bc298669`; `pyyaml==6.0.1` (cp310
+   manylinux wheel) `ba336e390cd8e4d1739f42dfe9bb83a3cc2e80f567d8805e11b46f4a943f5515`; index
+   files `apf107.dat` `cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674`,
+   `ig_rz.dat` `fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486`; IGRF-13
+   compiled in (`igrf2020.dat` `5c5288ede8987252…`, `igrf2020s.dat` `40abaa5990a20487…`,
+   `dgrf2015.dat` `bfa50177d289f007…`); Kaggle kernel 3.12.13, `Linux-6.12.90+-x86_64-with-glibc2.35`;
+   virtualenv seeds `pip==26.2.1`, `setuptools==84.0.0`. Every B-01 run's environment lock
+   records the 3.10.12 interpreter and the environment's own `pip freeze`
+   (`configs/experiment.yaml: benchmark_b01.runtime.interpreter_exception`).
+4. **Interaction with the fixture gate — preserved, not waived.** `fixture_gate.verify_receipt`
+   (SD-X-02, Q2 = A) accepts a receipt only when its recorded environment identity
+   (requirements hash, pip freeze, versions, code commit, config hashes, platform) equals
+   the caller run's lock. A full-year `--generate-benchmark` run inside this 3.10
+   environment therefore **cannot** consume receipts produced by fixture runs in the
+   3.11 environment. This decision does not resolve that; two admissible resolutions are
+   recorded for a later, separate decision: (a) extend this exception to the two fixture
+   runs executed inside the same B-01 environment — an extension to the fixtures'
+   training step, hence NOT granted here; (b) build `iricore` for Python 3.11 from its
+   sdist (`iricore-1.8.0.tar.gz`, SHA-256
+   `e5c4a71e3639879b48c3c091f2c543d750a23cca50eafeca1bdc62fb9d206d77`; TC-04 anticipates a
+   Fortran build re-established from pins) so B-01 runs in the governed environment and
+   this exception becomes a fallback. The bounded checks (`--verify-runtime`,
+   `--build-validation-report`) need no receipts and run under this exception now.
+5. **Not changed.** No scientific value; no gate; D-45 as annotated stands; G-04 is not
+   passed.
+
+---
+
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule
 
 **2026-08-21.** D-1's decision text is unchanged and remains accurate: a station maps to
@@ -2761,3 +2838,4 @@ exposed to challenge and should be read first.
 | D-46 F10.7 missing-update composition: reading B (clock hours, inclusive 3 h from the expected availability instant) | **Student states supervisor countersigned, 2026-09-19** (`COUNTERSIGNATURE_REQUEST_2026-09-19.md`) — TE §18.2 Q-16/Q-17 | 2026-09-19 | Ordinary reuse of `median(D−1)` on day D is not carry-forward; missing update → carried at 00–03 inclusive, excluded from 04:00 until a valid update; clock from 00:00 D; `f107_81_trailing` never imputed → whole affected day lost when both rows are present. Measured Jan–Nov 2022: 8016 origins, 0 affected; sensitivity protocol stops at Step 0. Implemented. *[Corrected 2026-09-19, `CR-2026-09-19-SCI-DECISIONS-P2`: "config transcription pending (item 9)" described the pre-2026-09-19 state; the six-entry configuration was transcribed 2026-09-19 (item 6 of that record) — `carry_forward_bound_hours`/`carry_forward_composition` are now set in `configs/features.yaml`.]* |
 | D-47 Recomputation tolerance 8.0e-12 sfu, certified for constituents ≤ 400 sfu | **Not required (Q6 numerical parameter of the Student's window contract)** | 2026-09-19 | (N+1)·2⁻⁵²·B = 7.28e-12 rounded up; ε = 2u explained; verified against an exact `Fraction` reference (max 1.9e-13), repr round trip, must-fail perturbations; B = 400 is an applicability condition — out-of-domain constituents fail the certification clearly and are never clipped. *[Corrected 2026-09-19, `CR-2026-09-19-SCI-DECISIONS-P2`: "transcription pending (item 9)" described the pre-2026-09-19 state; `window.recomputation_tolerance` and `window.recomputation_input_bound_sfu` were transcribed into `configs/features.yaml`'s `f107_81_trailing` row 2026-09-19 (item 6 of that record).]* |
 | D-48 December custody scan: structural detection; driver-exclusion class 5 with content + provenance conditions | **Not required — R-26 class list amended by the owner under the D-30 precedent; no target value involved** | 2026-09-19 | Structural detection for JSON (`{y, m}`, month keys, literals), WDC/Hpo/isprint/CSV formats; Markdown reported as outside automated inspection; class 5 = `audit_gfz_*` raw captures + comparison report, content-validated and provenance-checked, fail-closed on mixed content; narrower than the prepared text; excluded files inventoried as exposure, never licensed for use. Implemented and verified. |
+| D-49 B-01 execution-environment exception: CPython 3.10.12 for the isolated Kaggle IRI-2016 environment only | **Owner approval 2026-09-19; no supervisor signature claimed** — TE §8.1 / TC-03d excepted for one environment | 2026-09-19 | `iricore==1.8.0` cp310 wheel `f452b223…`; index pins `cdf4d5df…` / `fbbed304…`; scope excludes training, fixtures, every other stage; fixture-receipt identity coupling recorded, unresolved (two admissible resolutions) |

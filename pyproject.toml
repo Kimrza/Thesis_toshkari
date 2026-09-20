@@ -52,6 +52,7 @@ ignore = [
 # assert is the test mechanism; subprocess use in tests is deliberate.
 "tests/*" = ["S101", "S603", "S607"]
 "scripts/*" = ["S603", "S607"]
+"kaggle/*" = ["S603", "S607"]  # package builder: fixed git argv, same posture as scripts/
 
 [tool.ruff.format]
 quote-style = "double"   # affirmed convention: double quotes, f-strings

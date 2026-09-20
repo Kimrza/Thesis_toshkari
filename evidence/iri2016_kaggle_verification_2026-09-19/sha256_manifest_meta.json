@@ -1,9 +1,10 @@
 {
   "bundle_zip_sha256": "3a0723a1ff70c213ed3cb7139cbfc02e4495d04888a00136c3e5a6c9afa6d508",
   "extracted_members_verified_byte_identical_to_zip": true,
-  "hash_count": 5,
+  "hash_count": 17,
+  "index_files": "index_files/installed_iricore-1.8.0_wheel/ = bytes extracted from the PyPI wheel f452b223..., hashes equal to the Kaggle-reported values; index_files/historical_master-92c6d8c7_and_1.9.0-sdist/ = the copies CR-2026-09-19-SCI-DECISIONS section 3 inspected; compared in index_comparison_report.json",
   "manifest": "sha256_manifest.json",
-  "producing_notebook": "kaggle/kaggle_iri2016_verification.ipynb",
+  "producing_notebook": "kaggle_iri2016_verification.ipynb (revision 2; byte-exact copy in this directory) -- the live kaggle/ file is revision 3 (0e4d4478f256c37737038388b52e2a29960909657ee4fa4672774974911d2a34), not run on Kaggle",
   "producing_notebook_sha256": "b8399c98f248749fca3b6e5acebec9543c262ec0cc83dde2dab0042460d564fa",
   "producing_platform": "Kaggle, CPU, Internet ON; kernel Python 3.12.13; isolated venv Python 3.10.12 (see verification_report.json[\"runtime\"] and [\"environment_strategy\"])",
   "provenance_class": "student-returned diagnostic bundle (NOT a producer release, NOT a registered benchmark artifact)",

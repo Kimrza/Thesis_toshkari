@@ -97,3 +97,5 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+# B-01 Kaggle package: a build output of the tree (kaggle/build_b01_package.py)
+kaggle/dist/

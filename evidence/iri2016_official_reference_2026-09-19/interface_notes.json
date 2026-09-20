@@ -1,0 +1,68 @@
+{
+ "interface": "CCMC Instant Run, IRI-2016: https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri (page) ; API POST https://kauai.ccmc.gsfc.nasa.gov/instantrun/api/iri/2016/ (JSON body = the page form values; response {txt: <url of the text output>})",
+ "discovered_from": "the page's own JavaScript (pages/iri-9430722cffd3fad6.js), 2026-09-19",
+ "option_catalogue_2016": {
+  "NeTopside": "NeQuick (default)",
+  "fof2Model": [
+   "CCIR",
+   "URSI-88"
+  ],
+  "fof2Storm": "checkbox",
+  "NeTopsideStorm": "checkbox",
+  "hmF2Model": [
+   "AMTB-model (form default)",
+   "Shubin-COSMIC-model",
+   "f(M3000F2)"
+  ],
+  "hmF2ModelWithFoF2Storm": "checkbox",
+  "bottomsideThicknessB0": [
+   "ABT-2009",
+   "Bil-2000",
+   "Gul-1987"
+  ],
+  "F1Model": "Scotto-1997-no-L (default)",
+  "EPeakAuroralStorm": "checkbox",
+  "D": "IRI-1990 (default)",
+  "Te": "TBT-2012_PF107 (default)",
+  "Ti": [
+   "Bil-1981",
+   "Tru-2021"
+  ],
+  "ionCompModel": "RBV10/TBT15 (default)",
+  "auroralBoundaryModel": "checkbox",
+  "tecUpper/tecLower": "km, form default 2000 / 65",
+  "optional index inputs": "F107D, F107_81AVG, Rz12, IG12 -- 'will use file input if left blank'"
+ },
+ "settings_matching_the_pinned_iricore_1.8.0_IRI-2016_standard_jf": {
+  "version": "2016",
+  "timeType": "ut",
+  "coordinateType": "geo",
+  "profileType": 1,
+  "start": 300,
+  "stop": 300,
+  "step": 10,
+  "tecLower": 90,
+  "tecUpper": 2000,
+  "outputType": 1,
+  "useOptionals": true,
+  "NeTopside": "NeQuick",
+  "fof2Model": "URSI-88",
+  "fof2Storm": true,
+  "NeTopsideStorm": false,
+  "hmF2Model": "Shubin-COSMIC-model",
+  "hmF2ModelWithFoF2Storm": false,
+  "bottomsideThicknessB0": "ABT-2009",
+  "Sporadic_E_Occ_Prob": true,
+  "F1Model": "Scotto-1997-no-L",
+  "EPeakAuroralStorm": false,
+  "D": "IRI-1990",
+  "Te": "TBT-2012_PF107",
+  "Ti": "Bil-1981",
+  "ionCompModel": "RBV10/TBT15",
+  "auroralBoundaryModel": false,
+  "F107D/F107_81AVG/Rz12/IG12": "blank (file input)"
+ },
+ "why_Shubin": "IRI-2016 irisub.for 'standard version' column: jf(39)=false, jf(40)=false -> hmF2 Shubin-COSMIC; iricore.get_jf('default') sets exactly the standard set (plus messages off). The form's DEFAULT is AMTB-model, which is NOT the IRI-2016 standard and must be changed on the form.",
+ "known_difference_not_resolvable_here": "the server's apf107.dat / ig_rz.dat file versions are not displayed by the form; the pinned 1.8.0 files carry 2022 values identical to the 2024-06 copies (index_comparison_report), so a difference would require a provider revision of 2022 indices after 2024-06 -- check the output header for the F10.7/IG12/Rz12 the server used, if printed",
+ "access_outcome_2026-09-19": "programmatic access refused: HTTP 429 'Rate limit exceeded' on every attempt after two exploratory calls (form-schema probes), then TCP resets; see official_runs.json. No official value was retrieved. Manual collection sheet prepared instead (kaggle/b01_official_reference_collection_sheet.md)."
+}

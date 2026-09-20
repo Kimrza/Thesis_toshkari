@@ -315,24 +315,6 @@ benchmark_b01:
     wheel_sha256: "f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874"
     python: "3.10"
     installed_default_iri_version: 20
-    # interpreter_exception — APPROVED by the project decision owner 2026-09-19 ("I approve
-    # CPython 3.10.12 for the isolated Kaggle B-01 IRI execution environment, using the
-    # verified, pinned iricore installation"), recorded as D-49 in evidence/DECISIONS.md.
-    # SCOPE: the isolated B-01 environment only (the venv that runs
-    # scripts/04_build_external_products.py --verify-runtime / --build-validation-report /
-    # --generate-benchmark). It does NOT extend to training, the walking-skeleton fixtures,
-    # or any other stage; the governed project environment stays Python 3.11 (TC-03d).
-    # CONSEQUENCE (fixture_gate.verify_receipt, SD-X-02): a receipt is accepted only when
-    # its recorded environment identity equals the caller run's lock, so a full-year
-    # --generate-benchmark run in this 3.10 environment cannot consume receipts produced
-    # under 3.11 — see D-49 for the two admissible resolutions; neither is chosen here.
-    interpreter_exception:
-      approved_by: "project decision owner (student), 2026-09-19"
-      decision: "D-49"
-      interpreter: "CPython 3.10.12 (Kaggle image /usr/bin/python3.10, virtualenv-isolated)"
-      applies_to: ["B-01 isolated execution environment: 04_build_external_products.py --verify-runtime, --build-validation-report, --generate-benchmark"]
-      excluded: ["model training", "walking-skeleton fixture runs", "every other stage script", "the governed local environment"]
-      verified_runtime_identity: "evidence/iri2016_kaggle_verification_2026-09-19/verification_report.json (kernel 3.12.13; venv 3.10.12; virtualenv seeds pip 26.2.1 / setuptools 84.0.0)"
     companions:
       numpy: {version: "1.26.4", sha256: "ffa75af20b44f8dba823498024771d5ac50620e6915abac414251bd971b4529f"}
       fortranformat: {version: "2.0.3", sha256: "88c8e7a3eac16c23420e8a1c4b21ddc7108f48e8dcbd2e0da6c8ecc48b051bb2"}

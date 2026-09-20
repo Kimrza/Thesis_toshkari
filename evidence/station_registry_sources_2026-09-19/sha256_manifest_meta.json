@@ -1,0 +1,7 @@
+{
+  "hash_count": 5,
+  "manifest": "sha256_manifest.json",
+  "provenance_class": "official IGS site logs (files.igs.org) and a BKG IGS data-centre listing, retrieved 2026-09-19; sources for the configs/data.yaml stations transcription (D-1 annotation 2026-09-19)",
+  "recording_interpreter": "3.14.7",
+  "schema": "TE-13.3 path-to-sha256; metadata sidecar v1"
+}
