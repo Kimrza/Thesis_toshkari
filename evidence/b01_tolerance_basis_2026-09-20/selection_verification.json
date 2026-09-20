@@ -1,0 +1,105 @@
+{
+ "kind": "r59_case_selection_verification",
+ "rows_parsed_jan_nov": 334,
+ "december_rows_parsed": 0,
+ "december_cases": [],
+ "jan_nov_all_zero_days": [
+  "2022-01-07"
+ ],
+ "jan_nov_slots_kp_ge_6": [
+  [
+   "2022-03-13",
+   7,
+   6.33
+  ],
+  [
+   "2022-04-10",
+   1,
+   6.67
+  ],
+  [
+   "2022-04-14",
+   5,
+   6.0
+  ],
+  [
+   "2022-08-17",
+   6,
+   6.67
+  ],
+  [
+   "2022-09-04",
+   2,
+   6.0
+  ],
+  [
+   "2022-09-04",
+   3,
+   6.33
+  ],
+  [
+   "2022-09-04",
+   5,
+   6.0
+  ]
+ ],
+ "cases": [
+  {
+   "case": 1,
+   "site": "ARUC",
+   "utc": "2022-01-07T12:00:00+00:00",
+   "slot_kp": 0.0,
+   "day_max_kp": 0.0
+  },
+  {
+   "case": 2,
+   "site": "ARUC",
+   "utc": "2022-01-07T00:00:00+00:00",
+   "slot_kp": 0.0,
+   "day_max_kp": 0.0
+  },
+  {
+   "case": 3,
+   "site": "ARUC",
+   "utc": "2022-03-13T22:00:00+00:00",
+   "slot_kp": 6.333333333333333,
+   "day_max_kp": 6.333333333333333
+  },
+  {
+   "case": 4,
+   "site": "BSHM",
+   "utc": "2022-09-04T10:00:00+00:00",
+   "slot_kp": 6.333333333333333,
+   "day_max_kp": 6.333333333333333
+  },
+  {
+   "case": 5,
+   "site": "BSHM",
+   "utc": "2022-08-04T12:00:00+00:00",
+   "slot_kp": 1.6666666666666665,
+   "day_max_kp": 2.0
+  },
+  {
+   "case": 6,
+   "site": "NICO",
+   "utc": "2022-09-04T22:00:00+00:00",
+   "slot_kp": 5.0,
+   "day_max_kp": 6.333333333333333
+  },
+  {
+   "case": 7,
+   "site": "NICO",
+   "utc": "2022-11-17T02:00:00+00:00",
+   "slot_kp": 0.0,
+   "day_max_kp": 0.6666666666666666
+  },
+  {
+   "case": 8,
+   "site": "NICO",
+   "utc": "2022-04-14T16:00:00+00:00",
+   "slot_kp": 6.0,
+   "day_max_kp": 6.0
+  }
+ ],
+ "conclusion": "every case is outside December 2022; every activity claim re-derives from January-November rows alone, so December values could not have influenced the selection (an extremum over a set that excludes December is independent of December's values)"
+}

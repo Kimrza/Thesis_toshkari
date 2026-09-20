@@ -48,10 +48,9 @@ import datetime as dt
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Final
 
-from src.data.config import IntegrityError, LeakageError, PartitionError
+from src.data.config import IntegrityError, LeakageError, PartitionError, StrEnum
 from src.data.splits import Partition, training_range
 from src.external.spaceweather import apply_carry_forward
 from src.features._frames import column_values

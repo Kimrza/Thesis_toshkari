@@ -30,6 +30,7 @@ import pytest
 from src.data.config import TBD_SENTINEL, ConfigSnapshot, RegistryError
 from src.data.registry import (
     CELL_RULE_ID,
+    PHASE2_ONLY_REGISTRY_FIELDS,
     SECTION_6_2_FIELDS,
     ConflictResolution,
     Station,
@@ -205,6 +206,45 @@ def test_missing_6_2_field_raises() -> None:
     with pytest.raises(RegistryError) as excinfo:
         assert_registry_resolved({"SYNA": _station(observable_codes=())})
     assert "observable_codes" in str(excinfo.value)
+
+
+# --- CR-2026-09-20-B01-PREREQS §5: the Phase-2-only field under a phase-scoped gate ----------
+
+
+def test_phase1_does_not_require_observable_codes() -> None:
+    """Phase 1 reads prepared provider VTEC only (TE 7.0); Vision's phase table assigns
+    observable/cadence checks to Phase 2 — an empty `observable_codes` (and no provenance
+    for it) resolves under `phase=1`. No value is defaulted for it."""
+    provenance = {n: "synthetic-fixture" for n in SECTION_6_2_FIELDS if n != "observable_codes"}
+    station = _station(observable_codes=(), provenance=provenance)
+    assert_registry_resolved({"SYNA": station}, phase=1)
+    assert station.observable_codes == ()  # nothing was invented to pass the gate
+
+
+def test_phase2_default_still_requires_observable_codes() -> None:
+    """Nothing is weakened for Phase 2: the default (phase=2) is the full R-45 check."""
+    with pytest.raises(RegistryError) as excinfo:
+        assert_registry_resolved({"SYNA": _station(observable_codes=())}, phase=2)
+    assert "observable_codes" in str(excinfo.value)
+    with pytest.raises(RegistryError):
+        assert_registry_resolved({"SYNA": _station(observable_codes=())})
+
+
+def test_phase1_scope_narrows_only_the_phase2_only_fields() -> None:
+    """Every other R-45 limb still bites under phase=1: DOMES, coverage, IGRF pin, provenance."""
+    assert PHASE2_ONLY_REGISTRY_FIELDS == ("observable_codes",)
+    with pytest.raises(RegistryError):
+        assert_registry_resolved({"SYNA": _station(domes="")}, phase=1)
+    short = ((dt.date(2022, 3, 1), dt.date(2022, 12, 31), "R"),)
+    with pytest.raises(RegistryError):
+        assert_registry_resolved({"SYNA": _station(receiver_intervals=short)}, phase=1)
+    with pytest.raises(RegistryError):
+        assert_registry_resolved({"SYNA": _station(igrf_version="library default")}, phase=1)
+    with pytest.raises(RegistryError) as excinfo:
+        assert_registry_resolved({"SYNA": _station(provenance={})}, phase=1)
+    assert "provenance" in str(excinfo.value)
+    with pytest.raises(RegistryError):
+        assert_registry_resolved({"SYNA": _station()}, phase=3)
 
 
 def test_intervals_not_covering_2022_raise() -> None:

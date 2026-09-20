@@ -612,7 +612,7 @@ def build_metrics_artifact(
         "scored_window_statement": mask.scored_window_statement,
         "comparisons": comparisons,
         "phase2_not_independent_statement": PHASE2_NOT_INDEPENDENT_STATEMENT,
-        "emitted_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+        "emitted_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
     }
 
 

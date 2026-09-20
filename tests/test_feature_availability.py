@@ -95,7 +95,7 @@ from src.features.windows import (  # noqa: E402
     read_window_length,
 )
 
-UTC = dt.UTC
+UTC = dt.timezone.utc
 PARTITIONS = synthetic_partitions()
 
 #: Synthetic lag VALUES -- fixture parameters, not the frozen ones (which are configuration).

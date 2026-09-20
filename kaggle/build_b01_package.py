@@ -64,10 +64,16 @@ def _collect() -> list[Path]:
     files += sorted(
         p for p in (REPO_ROOT / "tests").rglob("*") if p.is_file() and "__pycache__" not in p.parts
     )
-    # fixture inputs, as the identity declarations cite them: the November 2022 acquisition
-    # evidence, the driver audits (classes 1-5 of the custody scan; driver content only),
-    # and the decision register the skeleton asserts fixture identity against
-    for sub in ("audit_evidence_2022-11", "audit_ec1_2026-08-15", "audit_gfz_2026-09-18"):
+    # fixture inputs, as the identity declarations cite them: the November 2022 (plumbing,
+    # D-11) and March 2022 (scientific, D-14) acquisition evidence, the driver audits
+    # (classes 1-5 of the custody scan; driver content only), and the decision register the
+    # skeleton asserts fixture identity against
+    for sub in (
+        "audit_evidence_2022-11",
+        "audit_evidence_2022-03",
+        "audit_ec1_2026-08-15",
+        "audit_gfz_2026-09-18",
+    ):
         files += sorted(p for p in (REPO_ROOT / "evidence" / sub).rglob("*") if p.is_file())
     files.append(REPO_ROOT / "evidence" / "DECISIONS.md")
     samples = REPO_ROOT / "kaggle" / "b01_validation_samples.json"
@@ -111,7 +117,7 @@ def main(argv: list[str]) -> int:
     files = _collect()
     manifest = {
         "package": "tec_b01_package",
-        "built_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+        "built_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "source_commit": _git_commit(),
         "builder_python": sys.version.split()[0],
         "files": {f.relative_to(REPO_ROOT).as_posix(): _sha256(f) for f in files},

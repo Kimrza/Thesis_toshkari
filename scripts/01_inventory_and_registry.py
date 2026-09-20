@@ -204,6 +204,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--code-commit",
+        type=str,
+        default=None,
+        help=(
+            "explicit code commit for the environment lock where no git tree exists "
+            "(a Kaggle session; the walking-skeleton orchestrator threads its own "
+            "--code-commit through here); the lock is never written unpopulated "
+            "(REQ-ENG-10; CR-2026-09-20-B01-PREREQS §2)"
+        ),
+    )
+    parser.add_argument(
         "--fixture-manifest",
         type=Path,
         default=None,
@@ -281,7 +292,11 @@ def _refuse_fixture_audit(audit: bool, fixture_manifest: Path | None) -> None:
 
 
 def _stage_entry(
-    config_dir: Path, *, fixture_manifest: Path | None = None, audit: bool = False
+    config_dir: Path,
+    *,
+    fixture_manifest: Path | None = None,
+    audit: bool = False,
+    code_commit: str | None = None,
 ) -> dict[str, Any]:
     """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()).
 
@@ -302,7 +317,7 @@ def _stage_entry(
     assert_declared_sources_exist(snapshot)
     assert_phase_boundary(PHASE, loaded_modules=sys.modules)
     determinism = seed_everything(snapshot, stage=STAGE)
-    lock = capture_environment_lock(snapshot, determinism)
+    lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
     _refuse_fixture_audit(audit, fixture_manifest)
     if fixture_manifest is not None:
@@ -356,7 +371,7 @@ def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
 def _registry_row(
     run_id: str, *, status: str, lock_hash: str, snapshot: Any, reason: str = ""
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -436,7 +451,10 @@ def _run_registry(entry: Mapping[str, Any]) -> dict[str, Any]:
     """
     _assert_phase1_field_contract()
     registry = load_registry(entry["snapshot"])  # raises RegistryError while TBD
-    assert_registry_resolved(registry)
+    # Phase 1 registry resolution: the Phase-2-only `observable_codes` (RINEX-header
+    # material, Vision 3.6 phase table / TE 7.0) are not required here; every other 6.2
+    # field, the 2022 coverage, the IGRF pin and provenance are (CR-2026-09-20-B01-PREREQS §5).
+    assert_registry_resolved(registry, phase=PHASE)
     return {"stations": sorted(registry)}
 
 
@@ -671,7 +689,10 @@ def main() -> int:
 
     try:
         entry = _stage_entry(
-            args.config, fixture_manifest=args.fixture_manifest, audit=args.audit
+            args.config,
+            fixture_manifest=args.fixture_manifest,
+            audit=args.audit,
+            code_commit=args.code_commit,
         )
     except IntegrityError as exc:
         print(f"01_inventory_and_registry: preflight refusal: {exc}", file=sys.stderr)
@@ -682,7 +703,7 @@ def main() -> int:
     lock_hash = environment_lock_hash(lock)
     registry_path, access_log = _registry_paths(snapshot)
     run_id = (
-        f"inventory-and-registry-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}"
+        f"inventory-and-registry-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
         f"-{uuid.uuid4().hex[:8]}"
     )
 

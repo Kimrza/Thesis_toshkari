@@ -188,7 +188,7 @@ ABLATION_IDS: Final[tuple[str, ...]] = (
 _REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
 _SEQUENCE_STEP_SUFFIX: Final[re.Pattern[str]] = re.compile(r"_t-(\d+)$")
 _LAG_FIELD: Final[re.Pattern[str]] = re.compile(r"^vtec_lag_(\d+)h$")
-_UTC: Final = dt.UTC
+_UTC: Final = dt.timezone.utc
 
 
 # --- the boundary shape -------------------------------------------------------------------

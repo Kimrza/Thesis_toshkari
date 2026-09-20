@@ -1,0 +1,108 @@
+{
+ "samples": [
+  {
+   "site": "ARUC",
+   "lat": 40.286,
+   "lon": 44.086,
+   "target_time_utc": "2022-01-07T12:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "quiet",
+   "official_interface_value": 12.1,
+   "official_interface_source": "CCMC Instant Run, IRI-2016 selected on the form (https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri); text output saved as kaggle/official_reference_outputs/case_1_ARUC_20220107T12Z.txt (retrieved 2026-09-20T13:43:23+00:00, file mtime); TEC printed as '12.1' (one decimal); server integration limits 50-2000 km as echoed in the header",
+   "official_interface_top": 76.0,
+   "official_interface_header": "yyyy/mmdd(or -ddd)/hh.h):2022/  -7/12.0UT  geog Lat/Long/Alt= 40.3/  44.1/ 300.0\n\nNeQuick is used for topside Ne profile\nURSI maps are used for the F2 peak density (NmF2)\nfoF2 STORM model is turned on \nShubin2015model is used for F2 peak height (hmF2)\nABT-2009 option is used for the bottomside thickness parameter B0\nScotto-97 no L   option is used for the F1 occurrence probability\nfoE auroral storm model is turned off\nIRI-1990   option is used for D-region\nTBT-2012 with solar dependence is used for the electron temperature\nRBV10+TBT15 option is used for ion composition\nCGM coordinates not computed\nauroral boundaries not computed\n\nPeak Densities/cm-3: NmF2= 487123.8   NmF1=      0.0   NmE=  80631.8\nPeak Heights/km:     hmF2=   227.03   hmF1=     0.00   hmE=   110.00\n\nSolar Zenith Angle/degree                              73.9\nDip (Magnetic Inclination)/degree                      58.87\nModip (Modified Dip)/degree                            49.64\nSolar Sunspot Number (12-months running mean) Rz12     41.3           \nIonospheric-Effective Solar Index IG12                 38.1           \nSolar radio flux F10.7 (daily)                        103.8           \nSolar radio flux F10.7 (81-day average)               102.9           \n\nTEC [1.E16 m-2] is obtained by numerical integration in 1km steps\n  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.\n\n-",
+   "official_interface_hmf2_km": 227.03
+  },
+  {
+   "site": "ARUC",
+   "lat": 40.286,
+   "lon": 44.086,
+   "target_time_utc": "2022-01-07T00:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "quiet",
+   "official_interface_value": 4.0,
+   "official_interface_source": "CCMC Instant Run, IRI-2016 selected on the form (https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri); text output saved as kaggle/official_reference_outputs/case_2_ARUC_20220107T00Z.txt (retrieved 2026-09-20T13:41:39+00:00, file mtime); TEC printed as '4.0' (one decimal); server integration limits 50-2000 km as echoed in the header",
+   "official_interface_top": 76.0,
+   "official_interface_header": "yyyy/mmdd(or -ddd)/hh.h):2022/  -7/ 0.0UT  geog Lat/Long/Alt= 40.3/  44.1/ 300.0\n\nNeQuick is used for topside Ne profile\nURSI maps are used for the F2 peak density (NmF2)\nfoF2 STORM model is turned on \nShubin2015model is used for F2 peak height (hmF2)\nABT-2009 option is used for the bottomside thickness parameter B0\nScotto-97 no L   option is used for the F1 occurrence probability\nfoE auroral storm model is turned off\nIRI-1990   option is used for D-region\nTBT-2012 with solar dependence is used for the electron temperature\nRBV10+TBT15 option is used for ion composition\nCGM coordinates not computed\nauroral boundaries not computed\n\nPeak Densities/cm-3: NmF2= 155171.1   NmF1=      0.0   NmE=   2315.1\nPeak Heights/km:     hmF2=   292.54   hmF1=     0.00   hmE=   110.00\n\nSolar Zenith Angle/degree                             140.0\nDip (Magnetic Inclination)/degree                      58.87\nModip (Modified Dip)/degree                            49.64\nSolar Sunspot Number (12-months running mean) Rz12     41.3           \nIonospheric-Effective Solar Index IG12                 38.1           \nSolar radio flux F10.7 (daily)                        103.8           \nSolar radio flux F10.7 (81-day average)               102.9           \n\nTEC [1.E16 m-2] is obtained by numerical integration in 1km steps\n  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.\n\n-",
+   "official_interface_hmf2_km": 292.54
+  },
+  {
+   "site": "ARUC",
+   "lat": 40.286,
+   "lon": 44.086,
+   "target_time_utc": "2022-03-13T22:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "disturbed",
+   "official_interface_value": 4.6,
+   "official_interface_source": "CCMC Instant Run, IRI-2016 selected on the form (https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri); text output saved as kaggle/official_reference_outputs/case_3_ARUC_20220313T22Z.txt (retrieved 2026-09-20T13:45:37+00:00, file mtime); TEC printed as '4.6' (one decimal); server integration limits 50-2000 km as echoed in the header",
+   "official_interface_top": 76.0,
+   "official_interface_header": "yyyy/mmdd(or -ddd)/hh.h):2022/ -72/22.0UT  geog Lat/Long/Alt= 40.3/  44.1/ 300.0\n\nNeQuick is used for topside Ne profile\nURSI maps are used for the F2 peak density (NmF2)\nfoF2 STORM model is turned on \nShubin2015model is used for F2 peak height (hmF2)\nABT-2009 option is used for the bottomside thickness parameter B0\nScotto-97 no L   option is used for the F1 occurrence probability\nfoE auroral storm model is turned off\nIRI-1990   option is used for D-region\nTBT-2012 with solar dependence is used for the electron temperature\nRBV10+TBT15 option is used for ion composition\nCGM coordinates not computed\nauroral boundaries not computed\n\nPeak Densities/cm-3: NmF2= 175720.0   NmF1=      0.0   NmE=   2463.9\nPeak Heights/km:     hmF2=   327.50   hmF1=     0.00   hmE=   110.00\n\nSolar Zenith Angle/degree                             140.8\nDip (Magnetic Inclination)/degree                      58.88\nModip (Modified Dip)/degree                            49.64\nSolar Sunspot Number (12-months running mean) Rz12     47.9           \nIonospheric-Effective Solar Index IG12                 45.9           \nSolar radio flux F10.7 (daily)                        121.4           \nSolar radio flux F10.7 (81-day average)               116.8           \n\nTEC [1.E16 m-2] is obtained by numerical integration in 1km steps\n  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.\n\n-",
+   "official_interface_hmf2_km": 327.5
+  },
+  {
+   "site": "BSHM",
+   "lat": 32.778987,
+   "lon": 35.022987,
+   "target_time_utc": "2022-09-04T10:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "disturbed",
+   "official_interface_value": 33.1,
+   "official_interface_source": "CCMC Instant Run, IRI-2016 selected on the form (https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri); text output saved as kaggle/official_reference_outputs/case_4_BSHM_20220904T10Z.txt (retrieved 2026-09-20T13:48:13+00:00, file mtime); TEC printed as '33.1' (one decimal); server integration limits 50-2000 km as echoed in the header",
+   "official_interface_top": 67.0,
+   "official_interface_header": "yyyy/mmdd(or -ddd)/hh.h):2022/-247/10.0UT  geog Lat/Long/Alt= 32.8/  35.0/ 300.0\n\nNeQuick is used for topside Ne profile\nURSI maps are used for the F2 peak density (NmF2)\nfoF2 STORM model is turned on \nShubin2015model is used for F2 peak height (hmF2)\nABT-2009 option is used for the bottomside thickness parameter B0\nScotto-97 no L   option is used for the F1 occurrence probability\nfoE auroral storm model is turned off\nIRI-1990   option is used for D-region\nTBT-2012 with solar dependence is used for the electron temperature\nRBV10+TBT15 option is used for ion composition\nCGM coordinates not computed\nauroral boundaries not computed\n\nPeak Densities/cm-3: NmF2=1127243.9   NmF1= 310468.2   NmE= 167898.6\nPeak Heights/km:     hmF2=   296.62   hmF1=   175.44   hmE=   110.00\n\nSolar Zenith Angle/degree                              26.6\nDip (Magnetic Inclination)/degree                      48.98\nModip (Modified Dip)/degree                            42.99\nSolar Sunspot Number (12-months running mean) Rz12     66.6           \nIonospheric-Effective Solar Index IG12                 74.7           \nSolar radio flux F10.7 (daily)                        130.4           \nSolar radio flux F10.7 (81-day average)               130.1           \n\nTEC [1.E16 m-2] is obtained by numerical integration in 1km steps\n  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.\n\n-",
+   "official_interface_hmf2_km": 296.62
+  },
+  {
+   "site": "BSHM",
+   "lat": 32.778987,
+   "lon": 35.022987,
+   "target_time_utc": "2022-08-04T12:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "quiet",
+   "official_interface_value": null,
+   "official_interface_source": "",
+   "official_interface_top": null,
+   "official_interface_header": "",
+   "official_interface_hmf2_km": null
+  },
+  {
+   "site": "NICO",
+   "lat": 35.140989,
+   "lon": 33.39645,
+   "target_time_utc": "2022-09-04T22:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "disturbed",
+   "official_interface_value": 8.5,
+   "official_interface_source": "CCMC Instant Run, IRI-2016 selected on the form (https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri); text output saved as kaggle/official_reference_outputs/case_6_NICO_20220904T22Z.txt (retrieved 2026-09-20T13:54:53+00:00, file mtime); TEC printed as '8.5' (one decimal); server integration limits 50-2000 km as echoed in the header",
+   "official_interface_top": 75.0,
+   "official_interface_header": "yyyy/mmdd(or -ddd)/hh.h):2022/-247/22.0UT  geog Lat/Long/Alt= 35.1/  33.4/ 300.0\n\nNeQuick is used for topside Ne profile\nURSI maps are used for the F2 peak density (NmF2)\nfoF2 STORM model is turned on \nShubin2015model is used for F2 peak height (hmF2)\nABT-2009 option is used for the bottomside thickness parameter B0\nScotto-97 no L   option is used for the F1 occurrence probability\nfoE auroral storm model is turned off\nIRI-1990   option is used for D-region\nTBT-2012 with solar dependence is used for the electron temperature\nRBV10+TBT15 option is used for ion composition\nCGM coordinates not computed\nauroral boundaries not computed\n\nPeak Densities/cm-3: NmF2= 321550.4   NmF1=      0.0   NmE=   2941.9\nPeak Heights/km:     hmF2=   341.94   hmF1=     0.00   hmE=   110.00\n\nSolar Zenith Angle/degree                             137.9\nDip (Magnetic Inclination)/degree                      51.92\nModip (Modified Dip)/degree                            45.06\nSolar Sunspot Number (12-months running mean) Rz12     66.6           \nIonospheric-Effective Solar Index IG12                 74.7           \nSolar radio flux F10.7 (daily)                        130.4           \nSolar radio flux F10.7 (81-day average)               130.1           \n\nTEC [1.E16 m-2] is obtained by numerical integration in 1km steps\n  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.\n\n-",
+   "official_interface_hmf2_km": 341.94
+  },
+  {
+   "site": "NICO",
+   "lat": 35.140989,
+   "lon": 33.39645,
+   "target_time_utc": "2022-11-17T02:00:00+00:00",
+   "local_time_class": "night",
+   "activity_class": "quiet",
+   "official_interface_value": 4.1,
+   "official_interface_source": "CCMC Instant Run, IRI-2016 selected on the form (https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri); text output saved as kaggle/official_reference_outputs/case_7_NICO_20221117T02Z.txt (retrieved 2026-09-20T13:57:56+00:00, file mtime); TEC printed as '4.1' (one decimal); server integration limits 50-2000 km as echoed in the header",
+   "official_interface_top": 75.0,
+   "official_interface_header": "yyyy/mmdd(or -ddd)/hh.h):2022/-321/ 2.0UT  geog Lat/Long/Alt= 35.1/  33.4/ 300.0\n\nNeQuick is used for topside Ne profile\nURSI maps are used for the F2 peak density (NmF2)\nfoF2 STORM model is turned on \nShubin2015model is used for F2 peak height (hmF2)\nABT-2009 option is used for the bottomside thickness parameter B0\nScotto-97 no L   option is used for the F1 occurrence probability\nfoE auroral storm model is turned off\nIRI-1990   option is used for D-region\nTBT-2012 with solar dependence is used for the electron temperature\nRBV10+TBT15 option is used for ion composition\nCGM coordinates not computed\nauroral boundaries not computed\n\nPeak Densities/cm-3: NmF2= 150579.6   NmF1=      0.0   NmE=   3027.5\nPeak Heights/km:     hmF2=   278.26   hmF1=     0.00   hmE=   110.00\n\nSolar Zenith Angle/degree                             119.4\nDip (Magnetic Inclination)/degree                      51.93\nModip (Modified Dip)/degree                            45.06\nSolar Sunspot Number (12-months running mean) Rz12     71.1           \nIonospheric-Effective Solar Index IG12                 83.4           \nSolar radio flux F10.7 (daily)                        116.5           \nSolar radio flux F10.7 (81-day average)               129.2           \n\nTEC [1.E16 m-2] is obtained by numerical integration in 1km steps\n  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.\n\n-",
+   "official_interface_hmf2_km": 278.26
+  },
+  {
+   "site": "NICO",
+   "lat": 35.140989,
+   "lon": 33.39645,
+   "target_time_utc": "2022-04-14T16:00:00+00:00",
+   "local_time_class": "day",
+   "activity_class": "disturbed",
+   "official_interface_value": 21.7,
+   "official_interface_source": "CCMC Instant Run, IRI-2016 selected on the form (https://kauai.ccmc.gsfc.nasa.gov/instantrun/iri); text output saved as kaggle/official_reference_outputs/case_8_NICO_20220414T16Z.txt (retrieved 2026-09-20T13:59:35+00:00, file mtime); TEC printed as '21.7' (one decimal); server integration limits 50-2000 km as echoed in the header",
+   "official_interface_top": 75.0,
+   "official_interface_header": "yyyy/mmdd(or -ddd)/hh.h):2022/-104/16.0UT  geog Lat/Long/Alt= 35.1/  33.4/ 300.0\n\nNeQuick is used for topside Ne profile\nURSI maps are used for the F2 peak density (NmF2)\nfoF2 STORM model is turned on \nShubin2015model is used for F2 peak height (hmF2)\nABT-2009 option is used for the bottomside thickness parameter B0\nScotto-97 no L   option is used for the F1 occurrence probability\nfoE auroral storm model is turned off\nIRI-1990   option is used for D-region\nTBT-2012 with solar dependence is used for the electron temperature\nRBV10+TBT15 option is used for ion composition\nCGM coordinates not computed\nauroral boundaries not computed\n\nPeak Densities/cm-3: NmF2= 843553.6   NmF1=      0.0   NmE=  33724.7\nPeak Heights/km:     hmF2=   279.95   hmF1=     0.00   hmE=   110.00\n\nSolar Zenith Angle/degree                              87.0\nDip (Magnetic Inclination)/degree                      51.90\nModip (Modified Dip)/degree                            45.05\nSolar Sunspot Number (12-months running mean) Rz12     51.0           \nIonospheric-Effective Solar Index IG12                 50.7           \nSolar radio flux F10.7 (daily)                        104.0           \nSolar radio flux F10.7 (81-day average)               131.6           \n\nTEC [1.E16 m-2] is obtained by numerical integration in 1km steps\n  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.\n\n-",
+   "official_interface_hmf2_km": 279.95
+  }
+ ]
+}

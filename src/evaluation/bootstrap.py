@@ -224,8 +224,8 @@ def _as_utc(value: Any, *, resource: str) -> dt.datetime:
         except ValueError as exc:
             raise IntegrityError(resource, f"timestamp {value!r} is not ISO-8601") from exc
     if stamp.tzinfo is None:
-        return stamp.replace(tzinfo=dt.UTC)
-    return stamp.astimezone(dt.UTC)
+        return stamp.replace(tzinfo=dt.timezone.utc)
+    return stamp.astimezone(dt.timezone.utc)
 
 
 # =======================================================================================
@@ -1149,7 +1149,7 @@ def serialize_bootstrap_result(result: BootstrapResult) -> dict[str, Any]:
         "model_id": result.model_id,
         "benchmark_id": result.benchmark_id,
         "n_blocks": result.n_blocks,
-        "emitted_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+        "emitted_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
     }
 
 

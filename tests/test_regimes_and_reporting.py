@@ -113,7 +113,7 @@ from src.evaluation.report_guards import (  # noqa: E402
     require_registered_surface,
 )
 
-UTC = dt.UTC
+UTC = dt.timezone.utc
 SYNTH_YEAR = 2001  # fixture year; never 2022, so no test can brush the locked month
 
 

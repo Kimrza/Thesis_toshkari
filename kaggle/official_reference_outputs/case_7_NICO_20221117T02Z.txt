@@ -1,0 +1,36 @@
+
+
+
+yyyy/mmdd(or -ddd)/hh.h):2022/-321/ 2.0UT  geog Lat/Long/Alt= 35.1/  33.4/ 300.0
+
+NeQuick is used for topside Ne profile
+URSI maps are used for the F2 peak density (NmF2)
+foF2 STORM model is turned on 
+Shubin2015model is used for F2 peak height (hmF2)
+ABT-2009 option is used for the bottomside thickness parameter B0
+Scotto-97 no L   option is used for the F1 occurrence probability
+foE auroral storm model is turned off
+IRI-1990   option is used for D-region
+TBT-2012 with solar dependence is used for the electron temperature
+RBV10+TBT15 option is used for ion composition
+CGM coordinates not computed
+auroral boundaries not computed
+
+Peak Densities/cm-3: NmF2= 150579.6   NmF1=      0.0   NmE=   3027.5
+Peak Heights/km:     hmF2=   278.26   hmF1=     0.00   hmE=   110.00
+
+Solar Zenith Angle/degree                             119.4
+Dip (Magnetic Inclination)/degree                      51.93
+Modip (Modified Dip)/degree                            45.06
+Solar Sunspot Number (12-months running mean) Rz12     71.1           
+Ionospheric-Effective Solar Index IG12                 83.4           
+Solar radio flux F10.7 (daily)                        116.5           
+Solar radio flux F10.7 (81-day average)               129.2           
+
+TEC [1.E16 m-2] is obtained by numerical integration in 1km steps
+  from 50 to 2000.0 km. t is the percentage of TEC above the F peak.
+
+-
+   H   ELECTRON DENSITY   TEMPERATURES      ION PERCENTAGES[%]*10    1E16m-2
+   km  Ne/cm-3 Ne/NmF2 Tn/K  Ti/K  Te/K  O+  N+  H+ He+ O2+ NO+ Clust TEC t/%
+ 300.0  146403  0.972   810   877  1022 982  16   1   1   0   0  -1   4.1  75

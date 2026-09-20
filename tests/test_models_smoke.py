@@ -121,7 +121,7 @@ from src.models.train import (  # noqa: E402
     write_prediction_hash_receipt,
 )
 
-UTC = dt.UTC
+UTC = dt.timezone.utc
 PARTITIONS = synthetic_partitions()
 MODELS_DIR = REPO_ROOT / "src" / "models"
 SCRIPT_PATH = REPO_ROOT / "scripts" / "06_train_and_predict.py"
@@ -624,8 +624,9 @@ def test_real_experiment_yaml_transcription_is_internally_consistent() -> None:
     assert tuple(settings) == LSTM_FIXED_SETTING_KEYS
     assert tuple(e.ablation_id for e in read_ablations(snapshot)) == ABLATION_IDS
     assert parsed["grids"]["decision"] == "D-121"
-    with pytest.raises(IntegrityError):
-        read_horizons(snapshot)  # TE 2.1's horizons are NOT transcribed by this pass
+    # D-51 (2026-09-20): TE 2.1's `horizons: [1]` is transcribed; the +24 h horizon stays
+    # outside the default run list (a config change, never a code change).
+    assert read_horizons(snapshot) == (1,)
 
 
 # =======================================================================================

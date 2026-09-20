@@ -70,7 +70,7 @@ from src.data.splits import (  # noqa: E402
     validation_month_range,
 )
 
-UTC = dt.UTC
+UTC = dt.timezone.utc
 
 # --- the M10 synthetic fixture (Q12 = C; authored here, reused by the transforms tests) ---
 

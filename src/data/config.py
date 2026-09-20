@@ -104,11 +104,33 @@ import uuid
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from dataclasses import fields as _dataclass_fields
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
+try:  # Python 3.11+
+    from enum import StrEnum
+except ImportError:  # Python 3.10 -- the D-49 extension runs the B-01 fixture runs on 3.10
+    import enum as _enum
+
+    class StrEnum(str, _enum.Enum):  # type: ignore[no-redef]
+        """Backport of `enum.StrEnum` for Python 3.10: `str()` and `format()` give the value,
+        exactly as the 3.11 class does. Members compare equal to their string value either way."""
+
+        def __str__(self) -> str:
+            return str(self.value)
+
+        def __format__(self, spec: str) -> str:
+            return format(str(self.value), spec)
+
+
+#: `datetime.UTC` is 3.11+; `timezone.utc` is the identical object on 3.11 and exists on 3.10.
+UTC = timezone.utc
+
 __all__ = [
+    # Python 3.10 compatibility (D-49 extension): the two 3.11-only names the package uses
+    "StrEnum",
+    "UTC",
     # C-1 Resolve
     "TBD_SENTINEL",
     "GOVERNED_CONFIG_FILES",
@@ -621,6 +643,16 @@ REQUIRED_FIELDS_MAP: Final[Mapping[tuple[str, int], tuple[str, ...]]] = {
     # 3.5 exactly as the map's docstring anticipates ("entries are added as their owning
     # stages land").
     ("evaluation-and-comparison", 1): ("seeds.development",),
+    # fixtures-and-reproducibility's preflight (the walking-skeleton orchestrator,
+    # `scripts/run_walking_skeleton.py`): deliberately MINIMAL, the same shape as the six
+    # entries above — the orchestrator's own docstring names "this stage's
+    # REQUIRED_FIELDS_MAP entry (deliberately minimal, as every sibling's)", but the entry
+    # was never added, so `required_fields_for` refused every fixture run at the preflight
+    # before any fixture logic ran (found by the first real measuring-run probe,
+    # CR-2026-09-20-B01-PREREQS §2). Every fixture-scoped scientific field is enforced at
+    # its owning stage script's entry point, exactly as for the siblings. Field IDENTITIES
+    # only, never values (the map's own rule).
+    ("fixtures-and-reproducibility", 1): ("seeds.development",),
 }
 
 #: `CredentialNameMap` (FU-3 = A, Q8 = D; domain-entities 3): `(stage_slug, provider)`

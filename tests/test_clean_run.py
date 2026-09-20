@@ -66,6 +66,7 @@ from _fresh_process import in_fresh_process  # noqa: E402
 from src.data.acquisition import (  # noqa: E402
     assert_no_locked_month_records,
     assert_records_within_window,
+    select_records_within_window,
 )
 from src.data.config import (  # noqa: E402
     TBD_SENTINEL,
@@ -380,7 +381,7 @@ def _lock(input_versions: list[str] | None = None, **overrides: Any) -> RunRecor
 
 
 def _registry_template() -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     return {
         "run_id": RUN_ID,
         "started_at_utc": now,
@@ -680,6 +681,61 @@ def test_control_9_foreign_station_record_fails(tmp_path):
         skeleton.assert_assembled_records(records, scope=manifest)
 
 
+def test_assembly_selects_the_cited_window_on_record_dates_then_asserts(tmp_path):
+    """CR-2026-09-20-B01-PREREQS §2 (Option B on the orchestrator's own assembly): a month file
+    carries records outside the cited seven-day window (and provider edge records dated in
+    the adjacent month); the orchestrator SELECTS the in-window records on RECORD dates and
+    the assembled set then passes the assertion. The folder name plays no role."""
+    manifest = write_and_load(tmp_path, PLUMBING_FIXTURE_ID, status=CANDIDATE)
+    start, end = PLUMBING_WINDOW
+    start_d, end_d = dt.date.fromisoformat(start), dt.date.fromisoformat(end)
+    month_file = _records(
+        [
+            ((start_d - dt.timedelta(days=1)).isoformat(), STATION),  # previous-month edge record
+            (start, STATION),
+            (end, STATION),
+            ((end_d + dt.timedelta(days=1)).isoformat(), STATION),  # after the window
+            (start, "ARUC"),  # foreign station, dropped by the station selection
+        ]
+    )
+    with pytest.raises(IntegrityError, match="outside the window"):
+        skeleton.assert_assembled_records(
+            skeleton.select_station_records(month_file, [STATION]), scope=manifest
+        )
+    assembled = select_records_within_window(
+        skeleton.select_station_records(month_file, [STATION]),
+        start=start_d,
+        end=end_d,
+        timestamp_key="date",
+    )
+    assert [r["date"] for r in assembled] == [start, end]
+    report = skeleton.assert_assembled_records(assembled, scope=manifest)
+    assert report["records"] == 2 and report["folder_name_consulted"] is False
+    # a record whose date cannot be read fails closed inside the selection, never dropped
+    with pytest.raises(IntegrityError):
+        select_records_within_window(
+            [{"date": "", "station": STATION}], start=start_d, end=end_d, timestamp_key="date"
+        )
+
+
+def test_build_phase1_commands_threads_the_explicit_code_commit(tmp_path):
+    """A Kaggle session has no git tree: the orchestrator's --code-commit reaches every stage
+    invocation (00/01/02 now accept it exactly as 04-07 do); absent, nothing is added."""
+    kwargs = dict(
+        python="python", scripts_dir=Path("scripts"), config_dir=Path("configs/"),
+        scope_path=Path("SCOPE"), fixture_id=PLUMBING_FIXTURE_ID,
+    )
+    without = skeleton.build_phase1_commands(**kwargs)
+    assert all("--code-commit" not in argv for argv in without)
+    with_commit = skeleton.build_phase1_commands(**kwargs, code_commit="abc123")
+    assert len(with_commit) == len(skeleton.PHASE1_SEQUENCE)
+    for argv in with_commit:
+        assert argv[argv.index("--code-commit") + 1] == "abc123"
+    for script, _phase in skeleton.PHASE1_SEQUENCE:
+        source = (REPO_ROOT / "scripts" / script).read_text(encoding="utf-8")
+        assert '"--code-commit"' in source, f"{script} does not accept --code-commit"
+
+
 def test_control_10_manifest_naming_other_station_fails_citation(tmp_path):
     """(10) A manifest naming any station other than the cited one fails against the
     station decision's record."""
@@ -861,14 +917,14 @@ def test_control_16_fixture_partition_id_at_adr11_identity_check_raises():
         columns=("x",),
         means={"x": 0.0},
         scales={"x": 1.0},
-        fitted_start=dt.datetime(2001, 3, 1, tzinfo=dt.UTC),
-        fitted_end=dt.datetime(2001, 3, 20, tzinfo=dt.UTC),
+        fitted_start=dt.datetime(2001, 3, 1, tzinfo=dt.timezone.utc),
+        fitted_end=dt.datetime(2001, 3, 20, tzinfo=dt.timezone.utc),
     )
     spec = FrameSpec(
         "F1",
         "score",
-        dt.datetime(2001, 3, 25, tzinfo=dt.UTC),
-        dt.datetime(2001, 3, 26, tzinfo=dt.UTC),
+        dt.datetime(2001, 3, 25, tzinfo=dt.timezone.utc),
+        dt.datetime(2001, 3, 26, tzinfo=dt.timezone.utc),
     )
     with pytest.raises(LeakageError):
         assert_transform_identity(transform, spec)
@@ -2382,6 +2438,96 @@ def test_optionb_00_stage_entry_real_invocation_full_scale_refuses(tmp_path, mon
         "the window-bound exemption was consulted on a full-scale run; it is reachable "
         "only with --fixture-manifest (TE 9.2; Q5 = A)"
     )
+
+
+def _fixture_scoped_00_apparatus(tmp_path, monkeypatch, *, records_text: str):
+    """A synthetic workspace whose fixture scope cites a synthetic evidence month whose
+    records CSV holds `records_text`; hashes are the real bytes' hashes."""
+    workspace = tmp_path / "workspace"
+    _apparatus_parsers(monkeypatch, workspace)
+    module = _load_script("00_acquire_prepared_vtec.py")
+    evidence_dir = workspace / "evidence" / "synthetic_month"
+    evidence_dir.mkdir(parents=True)
+    (evidence_dir / "records.csv").write_text(records_text, encoding="utf-8")
+    (evidence_dir / "coverage.json").write_text("{}", encoding="utf-8")
+    files = {n: sha256_of_file(evidence_dir / n) for n in ("records.csv", "coverage.json")}
+    (evidence_dir / "sha256_manifest.json").write_text(json.dumps(files), encoding="utf-8")
+    (evidence_dir / "request_manifest.json").write_text(
+        json.dumps({"madrigalWeb_version": "unknown"}), encoding="utf-8"
+    )
+    root = tmp_path / "scope" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    data["inputs"]["prepared_vtec"] = {
+        "evidence_dir": "evidence/synthetic_month",
+        "sha256_manifest": "sha256_manifest.json",
+        "files": dict(files),
+        "records_file": "records.csv",
+    }
+    scope_path = root / MANIFEST_NAME
+    scope_path.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
+    config_dir = _apparatus_config_tree(tmp_path / "cfg", window=None)
+    entry = module._stage_entry(config_dir, fixture_manifest=scope_path)
+    return module, entry, evidence_dir, files
+
+
+@in_fresh_process
+def test_item1_option_a_00_fixture_run_reads_verified_artifacts_and_writes_derived_only(
+    tmp_path, monkeypatch
+):
+    """Freeze-package item 1, option (a): a fixture run's stage 00 constructs NO transport;
+    it re-verifies the scope's declared derived artifacts, SELECTS the in-window records on
+    record dates (an adjacent-month edge record is selected out, not refused), and writes a
+    `fixture_read_manifest.json` (retrieval_performed false; the month's recorded
+    madrigalWeb_version copied verbatim) plus a `derived_only` sha256 manifest listing
+    exactly the verified artifacts and zero provider files."""
+    module, entry, evidence_dir, files = _fixture_scoped_00_apparatus(
+        tmp_path,
+        monkeypatch,
+        records_text=(
+            "date,station\n2001-10-31,SYNT\n2001-11-02,SYNT\n2001-11-03,SYNT\n2001-11-03,OTHR\n"
+        ),
+    )
+    calls = []
+    monkeypatch.setattr(module, "_build_transport", lambda: calls.append("transport"))
+    summary = module._run(entry)
+    assert calls == []  # no live transport on the fixture path
+    read_manifest = json.loads(Path(summary["fixture_read_manifest"]).read_text("utf-8"))
+    assert read_manifest["retrieval_performed"] is False
+    assert read_manifest["provenance_class"] == "derived_only"
+    assert read_manifest["month_recorded_madrigalWeb_version"] == "unknown"
+    fi = read_manifest["fixture_inputs"]
+    # four rows read; the adjacent-month edge row and the other station's row are selected
+    # out, never refused; two remain
+    assert fi["records_read_from_month_file"] == 4 and fi["records_in_window"] == 2
+    assert fi["stations"] == [STATION]
+    assert fi["verified_artifacts"] == files and fi["records_file"] == "records.csv"
+    sha_manifest = json.loads(Path(summary["sha256_manifest"]).read_text("utf-8"))
+    assert sha_manifest == files
+    meta = json.loads(
+        (Path(summary["sha256_manifest"]).parent / "sha256_manifest_meta.json").read_text("utf-8")
+    )
+    assert meta["provenance_class"] == "derived_only" and meta["provider_file_count"] == 0
+    assert meta["derived_artifact_count"] == 2
+    assert not (Path(summary["sha256_manifest"]).parent / "request_manifest.json").exists()
+
+
+@in_fresh_process
+def test_item1_option_a_00_fixture_run_refuses_a_tampered_artifact_before_reading(
+    tmp_path, monkeypatch
+):
+    """The one guard home (`verify_declared_inputs`) runs again inside stage 00: an
+    artifact whose bytes no longer match the month's manifest refuses before any record is
+    read, and nothing is written."""
+    module, entry, evidence_dir, files = _fixture_scoped_00_apparatus(
+        tmp_path, monkeypatch, records_text="date,station\n2001-11-02,SYNT\n"
+    )
+    (evidence_dir / "records.csv").write_text("date,station\nTAMPERED,X\n", encoding="utf-8")
+    with pytest.raises(IntegrityError, match="bytes hash to"):
+        module._run(entry)
+    out_dir = Path(entry["snapshot"].resolved_roots["artifacts"]) / "acquisition"
+    assert not (out_dir / "fixture_read_manifest.json").exists()
+    assert not (out_dir / "sha256_manifest.json").exists()
 
 
 def test_rec2_00_out_of_window_acquisition_exemption_refuses(tmp_path):

@@ -346,7 +346,7 @@ def _append_and_flush(registry: Path, record: AccessRecord) -> str:
     """
     registry.parent.mkdir(parents=True, exist_ok=True)
     row = asdict(record)
-    row["logged_at_utc"] = _dt.datetime.now(_dt.UTC).isoformat()
+    row["logged_at_utc"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     line = json.dumps(row, sort_keys=True, ensure_ascii=False)
     with registry.open("a", encoding="utf-8") as handle:
         handle.write(line + "\n")

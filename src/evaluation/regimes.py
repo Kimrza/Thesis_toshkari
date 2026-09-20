@@ -251,8 +251,8 @@ def _as_utc(value: Any, *, resource: str) -> dt.datetime:
         except ValueError as exc:
             raise RegimeError(resource, f"timestamp {value!r} is not ISO-8601") from exc
     if stamp.tzinfo is None:
-        return stamp.replace(tzinfo=dt.UTC)
-    return stamp.astimezone(dt.UTC)
+        return stamp.replace(tzinfo=dt.timezone.utc)
+    return stamp.astimezone(dt.timezone.utc)
 
 
 def _kp_rows(kp: Any) -> list[tuple[dt.datetime, float]]:
@@ -561,9 +561,9 @@ def eligible_storm_events(
     [scored_start, scored_end] (end-inclusive days). Wholly-outside events are REPORTED
     SEPARATELY on the DEC regime rows and never count toward D-13's threshold.
     """
-    window_start = dt.datetime.combine(scored_start, dt.time(0), tzinfo=dt.UTC)
+    window_start = dt.datetime.combine(scored_start, dt.time(0), tzinfo=dt.timezone.utc)
     window_end = dt.datetime.combine(
-        scored_end + dt.timedelta(days=1), dt.time(0), tzinfo=dt.UTC
+        scored_end + dt.timedelta(days=1), dt.time(0), tzinfo=dt.timezone.utc
     )
     eligible: list[tuple[str, str]] = []
     outside: list[tuple[str, str]] = []

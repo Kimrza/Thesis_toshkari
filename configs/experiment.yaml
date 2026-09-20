@@ -24,6 +24,16 @@ folds: "TBD — freeze gate"
 # copy of an already-frozen value, not a choice: `build_partitions` applies it to all six
 # partitions and refuses rather than defaulting when it is unresolved (TE §18.3).
 embargo_hours: 24 # D-38 (2026-09-10); TE §7.1 "24 hours"
+# horizons — TRANSCRIBED from TE §2.1 ("`experiment.yaml` shall expose `horizons: [1]` with
+# `24` implemented and testable but **not** included in the default run list"). A copy of an
+# already-frozen value, not a choice. Authorized for transcription by the project decision
+# owner on 2026-09-20 ("3. approved" against CR-2026-09-20-B01-PREREQS §2.5 item 5) under the
+# workspace's recorded student/supervisor authority equivalence (D-1 addendum; D-31
+# precondition 3 names horizons among the supervisor-signed items and records that no
+# independent supervisor signature artifact exists — none is claimed here either). Recorded
+# as **D-51**. `read_horizons` (src/models/train.py) refuses while this is absent or TBD; the
+# +24 h horizon needs a config change here, never a code change (TE §2.1, Q-33).
+horizons: [1] # D-51 (2026-09-20); TE §2.1
 
 # --- frozen hyperparameter grids (D-121, Vision §14.2 line 1206: "Exact frozen grids:
 # ridge 6, RF 18, LSTM 16 combinations, with fixed training settings" — Approved).
@@ -318,20 +328,26 @@ benchmark_b01:
     # interpreter_exception — APPROVED by the project decision owner 2026-09-19 ("I approve
     # CPython 3.10.12 for the isolated Kaggle B-01 IRI execution environment, using the
     # verified, pinned iricore installation"), recorded as D-49 in evidence/DECISIONS.md.
-    # SCOPE: the isolated B-01 environment only (the venv that runs
-    # scripts/04_build_external_products.py --verify-runtime / --build-validation-report /
-    # --generate-benchmark). It does NOT extend to training, the walking-skeleton fixtures,
-    # or any other stage; the governed project environment stays Python 3.11 (TC-03d).
-    # CONSEQUENCE (fixture_gate.verify_receipt, SD-X-02): a receipt is accepted only when
-    # its recorded environment identity equals the caller run's lock, so a full-year
-    # --generate-benchmark run in this 3.10 environment cannot consume receipts produced
-    # under 3.11 — see D-49 for the two admissible resolutions; neither is chosen here.
+    # EXTENDED 2026-09-20 (D-49 addendum, owner-authorized: "I authorize extending the Python
+    # 3.10 exception to the prerequisite fixture runs specifically required for B-01 …
+    # Preserve the receipt requirement"): the two walking-skeleton fixture runs that produce
+    # the TE 9.2 receipts a B-01 --generate-benchmark run consumes execute in the SAME
+    # environment, which additionally carries requirements.txt's exact pins (cp310 wheels;
+    # dry-run resolution of 50 packages, no conflict — D-49 addendum item 2). Model training,
+    # every other stage run and the governed local environment stay Python 3.11 (TC-03d).
+    # RECEIPT REQUIREMENT PRESERVED (fixture_gate.verify_receipt, SD-X-02 — unchanged): a
+    # receipt is accepted only when its recorded environment identity equals the caller
+    # run's lock; one environment for fixtures and benchmark makes that satisfiable by
+    # construction, and a receipt from any other environment still refuses.
     interpreter_exception:
-      approved_by: "project decision owner (student), 2026-09-19"
-      decision: "D-49"
+      approved_by: "project decision owner (student), 2026-09-19; extension to the B-01 fixture runs 2026-09-20"
+      decision: "D-49 (with the 2026-09-20 addendum)"
       interpreter: "CPython 3.10.12 (Kaggle image /usr/bin/python3.10, virtualenv-isolated)"
-      applies_to: ["B-01 isolated execution environment: 04_build_external_products.py --verify-runtime, --build-validation-report, --generate-benchmark"]
-      excluded: ["model training", "walking-skeleton fixture runs", "every other stage script", "the governed local environment"]
+      applies_to:
+        - "B-01 isolated execution environment: 04_build_external_products.py --verify-runtime, --build-validation-report, --generate-benchmark"
+        - "the plumbing_7day and scientific_1month runs of scripts/run_walking_skeleton.py (measuring and verification runs, their seven Phase 1 stage-script subprocesses and the M10 contract fixture) executed inside that same environment to produce the TE 9.2 receipts B-01 consumes (D-49 addendum 2026-09-20, item 1)"
+      environment_pins: "requirements.txt (exact pins, installed unchanged) plus the hash-pinned IRI set below; the run's own pip freeze is the identity"
+      excluded: ["model training as a deliverable", "every other stage run", "the governed local environment"]
       verified_runtime_identity: "evidence/iri2016_kaggle_verification_2026-09-19/verification_report.json (kernel 3.12.13; venv 3.10.12; virtualenv seeds pip 26.2.1 / setuptools 84.0.0)"
     companions:
       numpy: {version: "1.26.4", sha256: "ffa75af20b44f8dba823498024771d5ac50620e6915abac414251bd971b4529f"}
@@ -350,6 +366,6 @@ benchmark_b01:
     target_definition_id: "GRIDDed_VTEC_1H" # the comparison's target definition (tests/fixtures identity declaration); B-01 is scored on that target
   validation_report:
     name: "iri_implementation_validation_report"
-    tolerance_tecu: "TBD — freeze gate" # R-59 area 7: student predeclares, with the timestamp below, BEFORE the comparison
-    tolerance_declared_at_utc: "TBD — freeze gate"
+    tolerance_tecu: 1.0 # D-50 (2026-09-20): student-approved, per governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md
+    tolerance_declared_at_utc: "2026-09-20T12:27:01Z" # the approval instant; never backdated (R-59 limb 2)
     official_interface: "IRI-2016 official web interface (irimodel.org / CCMC instant run), 5-10 samples spanning sites, day/night, quiet/disturbed (R-59 area 6)"

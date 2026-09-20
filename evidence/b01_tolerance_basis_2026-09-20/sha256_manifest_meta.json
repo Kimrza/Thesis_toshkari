@@ -1,0 +1,7 @@
+{
+  "hash_count": 7,
+  "manifest": "sha256_manifest.json",
+  "provenance_class": "independent numerical convergence, mismatch-sensitivity and case-selection checks for the B-01 tolerance proposal (diagnostic; non-December, non-R-59-case profiles; pinned iricore 1.8.0 wheel on Linux x86-64 via WSL2); no official value, no adapter value for the eight cases, no December target read",
+  "recording_interpreter": "3.11.16",
+  "schema": "TE-13.3 path-to-sha256; metadata sidecar v1"
+}

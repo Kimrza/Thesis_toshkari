@@ -221,7 +221,7 @@ def test_log_timestamp_is_guard_stamped_and_precedes_the_read(tmp_path: Path) ->
 
     # The read happens only now -- after the row was flushed.
     returned.read_bytes()
-    assert logged <= dt.datetime.now(dt.UTC)
+    assert logged <= dt.datetime.now(dt.timezone.utc)
 
 
 def test_caller_supplied_timestamp_is_not_trusted_for_ordering(tmp_path: Path) -> None:
@@ -1272,7 +1272,7 @@ def _synthetic_locked_loader(partition):
     in production, would route through `open_restricted` (limb 2's door)."""
     assert partition.partition_id == LOCKED_ID and partition.validation_month is not None
     first = dt.datetime(
-        partition.validation_month.year, partition.validation_month.month, 1, tzinfo=dt.UTC
+        partition.validation_month.year, partition.validation_month.month, 1, tzinfo=dt.timezone.utc
     )
     return [
         {"interval_start_utc": (first + dt.timedelta(hours=h)).isoformat(), "vtec_tecu": 1.0}

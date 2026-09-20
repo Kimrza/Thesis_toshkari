@@ -315,7 +315,7 @@ def _registry_row(
     reason: str = "",
     **columns: Any,
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -438,7 +438,7 @@ def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
     def loader(locked: Partition) -> Any:
         record = AccessRecord(
             run_id=run_id,
-            retrieved_at_utc=dt.datetime.now(dt.UTC).isoformat(),
+            retrieved_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
             scope=(
                 f"{locked.partition_id} {locked.validation_month.isoformat()} locked "
                 f"evaluation"
@@ -730,7 +730,7 @@ def main() -> int:
     lock_hash = environment_lock_hash(lock)
     registry_path, access_log = _registry_paths(snapshot)
     run_id = (
-        f"evaluation-and-comparison-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}"
+        f"evaluation-and-comparison-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
         f"-{uuid.uuid4().hex[:8]}"
     )
 

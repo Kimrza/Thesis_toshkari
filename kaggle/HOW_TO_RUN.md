@@ -223,6 +223,22 @@ the notebook and this session (or you) reads back `verification_report.json`.
 as a **Kaggle dataset** and attach it to a new notebook; upload
 `kaggle_iri2016_benchmark.ipynb`; Settings: **Internet ON, Accelerator None**; Run All.
 
+**Attaching the package — the step the 2026-09-20 first run missed.** The notebook does not
+carry the package; Step 3 stops with `STOPPED: tec_b01_package.zip ... not found` when no
+dataset is attached. Concretely:
+
+1. Kaggle → **Datasets → New Dataset** → upload `kaggle/dist/tec_b01_package.zip` (any title,
+   e.g. `tec-b01-package`; private is fine) → **Create**.
+2. Open the benchmark notebook → right sidebar **Input → Add Input → Your Datasets** → pick that
+   dataset. It mounts under `/kaggle/input/<dataset-slug>/`.
+3. **Kaggle auto-extracts an uploaded `.zip`**, so the mount holds `src/`, `scripts/`, `configs/`,
+   `package_manifest.json`, … and NOT the zip itself. Revision `b01-production-3` of the notebook
+   accepts either form (see the last section); revision 2 and earlier looked for the zip filename
+   only and stop with the same message even with the dataset attached.
+4. Rebuild and upload a **new version** of the dataset whenever the working tree changes — the
+   notebook records `package_manifest.json`'s `tree_sha256` and `source_commit`, so a stale dataset
+   is visible in the bundle but is not detected automatically.
+
 **State on 2026-09-19 (revision `c8a1ef04…`).** Stations and `igrf_version` are transcribed
 (done). Still needed before the validation step: the owner's approval of the tolerance
 (`governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md`; on approval the value and the
@@ -237,3 +253,70 @@ The next run therefore performs: network preflight, environment, package verific
 **What to return:** `/kaggle/working/b01_bundle.zip`. Steps 1–5 alone establish the runtime
 identity and the R-59 validation report on Kaggle; step 6 adds `b01_iri2016_rows.jsonl`,
 `b01_provenance.json` (with the measured workload time) and the registry rows.
+
+## Production workflow revision 2 — 2026-09-20 — built and locally validated, NOT yet run on Kaggle
+
+`kaggle/kaggle_iri2016_benchmark.ipynb` is now revision `b01-production-2` (24 cells; SHA-256
+printed by `python kaggle/build_b01_package.py`, which also rebuilds `kaggle/dist/tec_b01_package.zip`).
+Prepared under `governance/CHANGE_RECORD_2026-09-20_b01_prerequisites.md`. What changed:
+
+1. **One environment for fixtures and benchmark (D-49 addendum, owner-authorized 2026-09-20).**
+   New **Step 3b** installs `requirements.txt`'s exact pins into the same 3.10 venv that carries
+   the hash-pinned IRI set, and records `pip freeze` after every install. Step 6 no longer builds
+   a separate 3.11 environment: `run_walking_skeleton.py` runs with the venv's interpreter
+   (`--python`), the package's `--code-commit`, and the fixture ladder therefore produces receipts
+   whose environment identity a Step 7 generation run can match. `fixture_gate.verify_receipt`
+   is unchanged.
+2. **Measuring runs when only identity declarations exist.** Step 6 now distinguishes a frozen
+   manifest (verification run → receipt written only by the orchestrator on a pass) from an
+   identity declaration alone (two `--emit-candidate` runs → `fixture_manifest.yaml` with
+   `status: candidate`, copied into the bundle for the owner's Q-31 freeze act). The scientific
+   fixture's measuring run needs a verified plumbing receipt (R-140), so it runs only once the
+   plumbing manifest is frozen and packaged with its `.sha256` sidecar.
+3. **Step 5 no longer stops the notebook when `b01_validation_samples.json` is absent** — it
+   records "not run" and continues to Step 6, so one Kaggle session can return the fixture
+   ladder's diagnosis and (once the samples exist) the R-59 report. Step 7 stays gated on the
+   report AND the receipts and is still `RUN_FULL_YEAR = False` by default.
+4. **The package now carries `evidence/audit_evidence_2022-03/`** (the scientific fixture's cited
+   input, D-14) beside November's.
+
+**What the fixture ladder will do on Kaggle today, honestly.** With the repairs in the change
+record (orchestrator preflight entry, declaration corrections, window selection on record dates,
+`--code-commit` threading), the plumbing measuring run passes its own preflight, identity
+agreement, input verification and record assembly (1810 BSHM records, 7/7 days, verified
+locally) and then stops at **stage 00** — `00_acquire_prepared_vtec.py` refuses on every run
+because no live provider transport exists (DATA-07 deferred re-acquisition). The stops behind it
+are enumerated in the change record §2 with their owners; none is an environment problem. The
+bundle records the exact stderr of the first refusal.
+
+**Return:** `/kaggle/working/b01_bundle.zip` as before; it now also holds `fixtures/<id>/…`
+(measuring results, candidate manifests, the run log with the first refusal).
+
+## Production workflow revision 3 — 2026-09-20 — Step 3 accepts the extracted dataset tree
+
+`kaggle/kaggle_iri2016_benchmark.ipynb` is now revision `b01-production-3` (24 cells; SHA-256
+`6a206ac251b777a93ef14831ad2d5bbfb59bf537e7f51730a0c1fef702a6675d`). The first Kaggle run of
+revision 2 on 2026-09-20 stopped at Step 3 with `STOPPED: tec_b01_package.zip not found under
+/kaggle/input/** or /kaggle/working/` — no dataset had been attached. Attaching one would not have
+been enough: Kaggle auto-extracts a `.zip` uploaded as a dataset, and Step 3 globbed for the zip
+filename only, so it would have stopped identically with the dataset in place. Change, confined to
+the Step 3 markdown and code cell plus the `notebook_revision` string:
+
+1. Step 3 looks for `tec_b01_package.zip` first (under `/kaggle/input/**` and `/kaggle/working/`),
+   then for the extracted form — any `/kaggle/input/**/package_manifest.json`, whose parent
+   directory is copied into the workspace. The per-file SHA-256 check against
+   `package_manifest.json` runs identically on both forms.
+2. `report['package']` gains `form: "zip" | "extracted"`; for the extracted form `sha256` is
+   `null` (no archive bytes exist to hash) and `tree_sha256` + the per-file check are the integrity
+   evidence. No other cell reads `sha256`.
+3. The stop message now says how to attach the dataset.
+
+Verified locally on 2026-09-20 with the real `kaggle/dist/tec_b01_package.zip` (zip SHA-256
+`62eb9d2ca1bebf9dd23033f2825dacfed6541a76c744f3560548cbdb7736d838`, `tree_sha256`
+`b01244acd6ab00d00dfaf09e22199cbdeb277c0d504a847d9d352f6be1f4d21c`, 200 files, commit
+`4253d51+dirty`): the discovery logic was exercised against a simulated `/kaggle/input/` holding
+(a) only the extracted tree, (b) only the zip, (c) nothing — (a) and (b) verify all 200 files
+with zero mismatches and locate `scripts/04_build_external_products.py`; (c) stops. That package
+is current: a fresh build produces the same `tree_sha256`. Steps 1–2 and 3b–8 are unchanged from
+revision 2 and **revision 3 has not run on Kaggle**; Step 3's zip branch is the same code as
+revision 2's.

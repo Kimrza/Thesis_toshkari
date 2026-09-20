@@ -144,8 +144,8 @@ def _as_utc(value: Any, *, resource: str) -> dt.datetime:
         except ValueError as exc:
             raise IntegrityError(resource, f"timestamp {value!r} is not ISO-8601") from exc
     if stamp.tzinfo is None:
-        return stamp.replace(tzinfo=dt.UTC)
-    return stamp.astimezone(dt.UTC)
+        return stamp.replace(tzinfo=dt.timezone.utc)
+    return stamp.astimezone(dt.timezone.utc)
 
 
 # --- guard 1: require_stamps (LeakageError — the information-flow limbs) -------------------
@@ -525,7 +525,7 @@ def require_locked_receipt(
             f"written — a detected second write (FR-P1-05-12's write-once criterion; a "
             f"Validation-Auditor veto condition)",
         )
-    call_time = now if now is not None else dt.datetime.now(dt.UTC)
+    call_time = now if now is not None else dt.datetime.now(dt.timezone.utc)
     recorded_at = _as_utc(receipt["recorded_at_utc"], resource=str(receipt_path))
     if not recorded_at < call_time:
         raise LockedTestError(

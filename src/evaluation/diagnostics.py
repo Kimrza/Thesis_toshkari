@@ -255,8 +255,8 @@ def _as_utc(value: Any, *, resource: str) -> dt.datetime:
         except ValueError as exc:
             raise RegimeError(resource, f"timestamp {value!r} is not ISO-8601") from exc
     if stamp.tzinfo is None:
-        return stamp.replace(tzinfo=dt.UTC)
-    return stamp.astimezone(dt.UTC)
+        return stamp.replace(tzinfo=dt.timezone.utc)
+    return stamp.astimezone(dt.timezone.utc)
 
 
 # =======================================================================================
@@ -1604,7 +1604,7 @@ def declare_notebook_inputs(
             "code_commit": str(code_commit),
             "config_ids": dict(config_ids),
             "artifact_ids": [str(a) for a in artifact_ids],
-            "declared_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+            "declared_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
             "never_executed_note": never_executed_note,
         }
     }

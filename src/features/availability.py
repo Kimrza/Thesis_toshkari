@@ -147,7 +147,7 @@ AVAILABILITY_RULES_WITH_WINDOW: Final[frozenset[str]] = frozenset(
     {AVAILABILITY_RULE_PREVIOUS_DAY_MEDIAN_MIDNIGHT_UTC}
 )
 
-_UTC: Final = dt.UTC
+_UTC: Final = dt.timezone.utc
 
 
 @dataclass(frozen=True)

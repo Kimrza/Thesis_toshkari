@@ -209,7 +209,7 @@ def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
 def _registry_row(
     run_id: str, *, status: str, lock_hash: str, snapshot: Any, reason: str = ""
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -344,7 +344,7 @@ def main() -> int:
     lock_hash = environment_lock_hash(lock)
     registry_path, access_log = _registry_paths(snapshot)
     run_id = (
-        f"target-verification-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}"
+        f"target-verification-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
         f"-{uuid.uuid4().hex[:8]}"
     )
 

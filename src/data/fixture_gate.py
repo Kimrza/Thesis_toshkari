@@ -341,7 +341,7 @@ def _child_rows(
     artifact_path: Path,
     kind: str,
 ) -> None:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     base = dict(template)
     base.update(
         {
@@ -456,7 +456,7 @@ def write_fixture_pass_receipt(
         "result": RESULT_PASS,
         "registry_run_id": run_id,
         "receipt_run_id": child_run_id,
-        "completed_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+        "completed_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "platform": snapshot.platform,
         "environment_lock": lock_items(lock),
         "environment_lock_hash": environment_lock_hash(lock),
@@ -736,8 +736,8 @@ def _parse_utc(value: object, *, resource: str) -> dt.datetime:
     except ValueError as exc:
         raise _refuse(resource, f"{value!r} is not an ISO-8601 timestamp") from exc
     if stamp.tzinfo is None:
-        stamp = stamp.replace(tzinfo=dt.UTC)
-    return stamp.astimezone(dt.UTC)
+        stamp = stamp.replace(tzinfo=dt.timezone.utc)
+    return stamp.astimezone(dt.timezone.utc)
 
 
 def emit_in_session_gate_result(

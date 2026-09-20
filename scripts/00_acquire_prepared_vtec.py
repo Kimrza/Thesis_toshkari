@@ -70,7 +70,13 @@ from src.data.acquisition import (  # noqa: E402
     RetrievalClient,
     assert_no_locked_month_records,
     assert_records_within_window,
+    cited_stations,
+    read_records_csv,
     retrieval_policy,
+    select_records_within_window,
+    select_station_records,
+    verify_declared_inputs,
+    write_fixture_read_manifest,
     write_request_manifest,
     write_sha256_manifest,
 )
@@ -162,6 +168,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help="this stage is phase 1 only (TE 7.0A P1-00); 2 is refused by choices",
     )
     parser.add_argument(
+        "--code-commit",
+        type=str,
+        default=None,
+        help=(
+            "explicit code commit for the environment lock where no git tree exists "
+            "(a Kaggle session; the walking-skeleton orchestrator threads its own "
+            "--code-commit through here); the lock is never written unpopulated "
+            "(REQ-ENG-10; CR-2026-09-20-B01-PREREQS §2)"
+        ),
+    )
+    parser.add_argument(
         "--fixture-manifest",
         type=Path,
         default=None,
@@ -215,7 +232,9 @@ def _declared_data_window(snapshot: Any) -> tuple[dt.date, dt.date]:
         ) from exc
 
 
-def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> dict[str, Any]:
+def _stage_entry(
+    config_dir: Path, *, fixture_manifest: Path | None = None, code_commit: str | None = None
+) -> dict[str, Any]:
     """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()).
 
     2. `load_configs` — snapshot, hash, resolve roots (the only read of configs/).
@@ -235,7 +254,7 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
     for provider in PROVIDERS:
         assert_credential_names_present(credential_names_for(STAGE, provider, PHASE), os.environ)
     determinism = seed_everything(snapshot, stage=STAGE)
-    lock = capture_environment_lock(snapshot, determinism)
+    lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
     if fixture_manifest is not None:
         # Option B (CR-2026-09-13-000102-FIXTURE-WINDOW, Stage-04 precedent): the fixture
@@ -243,12 +262,14 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
         # config pair `acquisition.window_start/window_end` is deliberately not consulted
         # on this path (it stays reserved for the real re-acquisition window, DATA-07).
         scope = load_fixture_scope(fixture_manifest)
+        fixture_scope: Any = scope
         audit_window: tuple[dt.date, dt.date] | None = scope.window
         fixture_scope_id: str | None = scope.fixture_id
         declared_window: tuple[dt.date, dt.date] | None = audit_window
     else:
         audit_window = None
         fixture_scope_id = None
+        fixture_scope = None
         declared_window = None
     receipts_gate = require_receipts_for_snapshot(
         snapshot,
@@ -267,6 +288,7 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
         "receipts_gate": receipts_gate,
         "audit_window": audit_window,
         "fixture_scope_id": fixture_scope_id,
+        "fixture_scope": fixture_scope,
     }
 
 
@@ -298,7 +320,7 @@ def _registry_row(
     guard: one boundary, one guard home, and the refusal is proved per entry point rather
     than per composer (nfr-design c58).
     """
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -348,6 +370,86 @@ def _build_transport() -> Any:
     )
 
 
+def _run_fixture_scoped(
+    entry: Mapping[str, Any], *, workspace: Path, out_dir: Path
+) -> dict[str, Any]:
+    """A fixture run's stage 00: READ the scope's declared derived artifacts, never retrieve.
+
+    Freeze-package item 1, option (a) (CR-2026-09-20-B01-PREREQS 2.5; owner ruling
+    2026-09-20). TE 15.1: a walking-skeleton fixture "reads prepared provider VTEC only";
+    the input of a fixture run is the month's already-acquired derived artifacts, cited in
+    the scope's `inputs.prepared_vtec` and hash-verified by the orchestrator before the
+    stage sequence starts. This path re-executes that verification (one guard home:
+    `verify_declared_inputs`), reads the cited records file, SELECTS the cited station(s)' in-window
+    records on record dates (Option B) and ASSERTS the assembled set (no locked-month record; every
+    record inside the cited window), then writes this run's `fixture_read_manifest.json`
+    (what was read -- not a request manifest: nothing was requested, so R-35's retrieval
+    check is neither applied nor imitated) and `sha256_manifest.json` with
+    `provenance_class = "derived_only"` (R-36: the pre-TC-06 months are derived-only and
+    say so) and zero provider files. No live transport is
+    constructed, no provider is contacted, and DATA-07's re-acquisition obligations are
+    untouched -- a fixture run proves plumbing over verified evidence, not retrieval.
+    """
+    scope = entry["fixture_scope"]
+    snapshot = entry["snapshot"]
+    acquisition_cfg = snapshot.data["acquisition"]
+    verification = verify_declared_inputs(scope, workspace=workspace)
+    evidence_dir = Path(verification["evidence_dir"])
+    rows = read_records_csv(evidence_dir / verification["records_file"])
+    audit_window = entry.get("audit_window")
+    if audit_window is None:
+        raise IntegrityError(
+            scope.path, "a fixture run declares the window it reads (Option B); none resolved"
+        )
+    stations = cited_stations(scope)
+    records = select_records_within_window(
+        select_station_records(rows, stations),
+        start=audit_window[0],
+        end=audit_window[1],
+        timestamp_key="date",
+    )
+    assert_no_locked_month_records(records, timestamp_key="date")
+    assert_records_within_window(
+        records, start=audit_window[0], end=audit_window[1], timestamp_key="date"
+    )
+    fixture_inputs = {
+        "fixture_id": str(scope.fixture_id),
+        "evidence_dir": str(evidence_dir.relative_to(workspace)),
+        "sha256_manifest": Path(verification["sha256_manifest"]).name,
+        "records_file": verification["records_file"],
+        "verified_artifacts": dict(verification["verified"]),
+        "stations": stations,
+        "records_read_from_month_file": len(rows),
+        "records_in_window": len(records),
+        "window": [audit_window[0].isoformat(), audit_window[1].isoformat()],
+    }
+    read_manifest = write_fixture_read_manifest(
+        out_dir / "fixture_read_manifest.json",
+        identity={
+            "experiment": acquisition_cfg["experiment"],
+            "kindat": acquisition_cfg["kindat"],
+            "parameters": acquisition_cfg["parameters"],
+        },
+        fixture_inputs=fixture_inputs,
+        month_request_manifest=evidence_dir / "request_manifest.json",
+        producing_interpreter=sys.version,
+    )
+    sha256_manifest = write_sha256_manifest(
+        out_dir / "sha256_manifest.json",
+        provider_files=[],
+        derived_artifacts=dict(verification["verified"]),
+        provenance_class="derived_only",
+        producing_interpreter=sys.version,
+    )
+    return {
+        "workspace": str(workspace),
+        "fixture_read_manifest": str(read_manifest),
+        "sha256_manifest": str(sha256_manifest),
+        "client": "none (fixture-scoped read of verified derived artifacts)",
+        "fixture_inputs": fixture_inputs,
+    }
+
+
 def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
     """The acquisition work: guard, resolve, retrieve, screen, account, write.
 
@@ -364,6 +466,9 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
 
     workspace = Path(snapshot.resolved_roots["workspace"])
     out_dir = Path(snapshot.resolved_roots["artifacts"]) / "acquisition"
+
+    if entry.get("fixture_scope") is not None:
+        return _run_fixture_scoped(entry, workspace=workspace, out_dir=out_dir)
 
     client = RetrievalClient(_build_transport())  # raises: no live transport here
     retrieved_records: list[Mapping[str, Any]] = []
@@ -418,7 +523,9 @@ def main() -> int:
     args = _parse_args(sys.argv[1:])
 
     try:
-        entry = _stage_entry(args.config, fixture_manifest=args.fixture_manifest)
+        entry = _stage_entry(
+            args.config, fixture_manifest=args.fixture_manifest, code_commit=args.code_commit
+        )
     except IntegrityError as exc:
         # Integrity tier, before the run record exists: terminate non-zero naming the
         # resource and the violated expectation. No registry row is fabricated for a
@@ -432,7 +539,7 @@ def main() -> int:
     lock_hash = environment_lock_hash(lock)
     registry_path, access_log = _registry_paths(snapshot)
     run_id = (
-        f"acquisition-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
+        f"acquisition-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     )
 
     started = _registry_row(run_id, status="started", lock_hash=lock_hash, snapshot=snapshot)
@@ -465,11 +572,14 @@ def main() -> int:
 
     completed = _registry_row(run_id, status="completed", lock_hash=lock_hash, snapshot=snapshot)
     completed["code_commit"] = lock.code_commit
-    completed["artifact_manifest_path"] = summary["request_manifest"]
+    # a retrieval run's artifact is its request manifest; a fixture-scoped run's is the
+    # read manifest (item 1, option (a)) -- whichever the run produced, never both
+    artifact = summary.get("request_manifest") or summary["fixture_read_manifest"]
+    completed["artifact_manifest_path"] = artifact
     append_registry_event(
         registry_path, completed, phase=PHASE, writer_role="stage", access_log_path=access_log
     )
-    print(f"00_acquire_prepared_vtec: completed: {summary['request_manifest']}")
+    print(f"00_acquire_prepared_vtec: completed: {artifact}")
     return 0
 
 

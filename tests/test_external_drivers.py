@@ -74,7 +74,7 @@ from src.external.spaceweather import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = REPO_ROOT / "scripts" / "04_build_external_products.py"
-UTC = dt.UTC
+UTC = dt.timezone.utc
 
 #: The TE 6.2 window length (`f107_81_trailing`) as a TEST PARAMETER: the module under
 #: test takes it as an argument (frozen elsewhere); tests exercise the property with
@@ -1629,10 +1629,20 @@ def _stub_iricore(
     )
     (pkg / "__init__.py").write_text(
         "CALLS = []\n"
+        "IRI_CALLS = []\n"
         "def vtec(dt, lat, lon, hbot=90.0, htop=2000.0, hstep=0.5, version=20, **kw):\n"
         "    CALLS.append((dt, lat, lon, hbot, htop, hstep, version))\n"
         + fail_clause
-        + "    return [10.0 + dt.hour * 0.5 + (lat - 30.0)]\n",
+        + "    return [10.0 + dt.hour * 0.5 + (lat - 30.0)]\n"
+        "class _Out:\n"
+        "    def __init__(self, oarr):\n"
+        "        self.oarr = oarr\n"
+        "def iri(dt, altrange, lat, lon, version=20, **kw):\n"
+        "    # oarr[1] is hmF2/km (the D-50 diagnostic); deterministic from the hour\n"
+        "    IRI_CALLS.append((dt, tuple(altrange), lat, lon, version))\n"
+        "    oarr = [0.0] * 100\n"
+        "    oarr[1] = 250.0 + dt.hour\n"
+        "    return _Out(oarr)\n",
         encoding="utf-8",
     )
     dist = site / f"iricore-{version}.dist-info"
@@ -1815,6 +1825,37 @@ def test_b01_verify_runtime_refuses_wrong_release_or_default(tmp_path: Path, mon
         sys.path.remove(str(site))
         for name in [m for m in sys.modules if m.startswith("iricore")]:
             del sys.modules[name]
+
+
+def test_b01_validation_report_records_the_hmf2_diagnostic_without_a_threshold(b01) -> None:
+    """D-50's hmF2 diagnostic column: when a sample carries the official interface's
+    hmF2, the report records it beside the adapter's own hmF2 (one `iricore.iri` call at
+    version 16) and their difference, and that difference never changes the tolerance
+    verdict; a sample without it records nulls and makes no `iri` call."""
+    import iricore
+
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path), workspace)
+    samples = _samples()
+    samples[0]["official_interface_hmf2_km"] = 200.0  # far from the stub's 262 -> still passes
+    samples[1]["official_interface_hmf2_km"] = 250.0  # exactly the stub's value at 00 UT
+    samples_path = tmp_path / "samples_hmf2.json"
+    samples_path.write_text(json.dumps(samples), encoding="utf-8")
+    del iricore.IRI_CALLS[:]
+    summary = mod._build_validation_report(entry, _ns(build_validation_report=samples_path))
+    report = json.loads(summary["validation_report"].read_text(encoding="utf-8"))
+    assert report["status"] == "passed"
+    rows = report["samples"]
+    assert rows[0]["official_interface_hmf2_km"] == 200.0
+    assert rows[0]["adapter_hmf2_km"] == 262.0
+    assert rows[0]["hmf2_diff_km_diagnostic_no_threshold"] == pytest.approx(62.0)
+    assert rows[0]["within_tolerance"] is True  # a 62 km hmF2 gap is diagnostic, not a failure
+    assert rows[1]["hmf2_diff_km_diagnostic_no_threshold"] == pytest.approx(0.0)
+    for row in rows[2:]:
+        assert row["official_interface_hmf2_km"] is None
+        assert row["adapter_hmf2_km"] is None
+        assert row["hmf2_diff_km_diagnostic_no_threshold"] is None
+    assert len(iricore.IRI_CALLS) == 2 and all(c[4] == 16 for c in iricore.IRI_CALLS)
 
 
 def test_b01_validation_report_passes_and_carries_seven_areas(b01) -> None:
@@ -2076,9 +2117,15 @@ def test_b01_config_block_is_the_annotated_d45_contract() -> None:
         block["runtime"]["wheel_sha256"]
         == "f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874"
     )
-    assert str(block["validation_report"]["tolerance_tecu"]).startswith(
-        "TBD"
-    )  # student's predeclaration still open
+    # D-50 (2026-09-20): the student's predeclaration is frozen — 1.0 TECU absolute per
+    # case, declared with a timestamp that precedes any comparison (R-59 limb 2).
+    assert block["validation_report"]["tolerance_tecu"] == 1.0
+    import datetime as _dt
+
+    declared = _dt.datetime.fromisoformat(
+        str(block["validation_report"]["tolerance_declared_at_utc"])
+    )
+    assert declared.tzinfo is not None
 
 
 def test_b01_verify_runtime_completes_at_subprocess_level(tmp_path: Path) -> None:

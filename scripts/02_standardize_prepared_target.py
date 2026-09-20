@@ -183,6 +183,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--code-commit",
+        type=str,
+        default=None,
+        help=(
+            "explicit code commit for the environment lock where no git tree exists "
+            "(a Kaggle session; the walking-skeleton orchestrator threads its own "
+            "--code-commit through here); the lock is never written unpopulated "
+            "(REQ-ENG-10; CR-2026-09-20-B01-PREREQS §2)"
+        ),
+    )
+    parser.add_argument(
         "--fixture-manifest",
         type=Path,
         default=None,
@@ -236,7 +247,9 @@ def _declared_data_window(snapshot: Any) -> tuple[dt.date, dt.date]:
         ) from exc
 
 
-def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> dict[str, Any]:
+def _stage_entry(
+    config_dir: Path, *, fixture_manifest: Path | None = None, code_commit: str | None = None
+) -> dict[str, Any]:
     """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()).
 
     2. `load_configs` — snapshot, hash, resolve roots (the only read of configs/).
@@ -256,7 +269,7 @@ def _stage_entry(config_dir: Path, *, fixture_manifest: Path | None = None) -> d
     assert_declared_sources_exist(snapshot)
     assert_phase_boundary(PHASE, loaded_modules=sys.modules)
     determinism = seed_everything(snapshot, stage=STAGE)
-    lock = capture_environment_lock(snapshot, determinism)
+    lock = capture_environment_lock(snapshot, determinism, code_commit=code_commit)
     assert_lock_complete(lock)
     if fixture_manifest is not None:
         # Option B (CR-2026-09-13-000102-FIXTURE-WINDOW, Stage-04 precedent): the fixture
@@ -307,7 +320,7 @@ def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
 def _registry_row(
     run_id: str, *, status: str, lock_hash: str, snapshot: Any, reason: str = ""
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -414,7 +427,9 @@ def main() -> int:
     args = _parse_args(sys.argv[1:])
 
     try:
-        entry = _stage_entry(args.config, fixture_manifest=args.fixture_manifest)
+        entry = _stage_entry(
+            args.config, fixture_manifest=args.fixture_manifest, code_commit=args.code_commit
+        )
     except IntegrityError as exc:
         print(f"02_standardize_prepared_target: preflight refusal: {exc}", file=sys.stderr)
         return 1
@@ -424,7 +439,7 @@ def main() -> int:
     lock_hash = environment_lock_hash(lock)
     registry_path, access_log = _registry_paths(snapshot)
     run_id = (
-        f"target-standardization-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}"
+        f"target-standardization-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
         f"-{uuid.uuid4().hex[:8]}"
     )
 

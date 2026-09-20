@@ -495,7 +495,7 @@ def validate_schema(
     return SchemaReport(
         expected_schema_digest=schema_digest(expected),
         observed=dict(observed),
-        checked_at_utc=_dt.datetime.now(_dt.UTC).isoformat(),
+        checked_at_utc=_dt.datetime.now(_dt.timezone.utc).isoformat(),
     )
 
 
@@ -692,7 +692,7 @@ def new_audit_run_id(now: _dt.datetime | None = None) -> str:
     undisclosed extra access — an interrupted audit's rows stand permanently, so the
     log will legitimately show December opened more times than the audit ran.
     """
-    stamp = (now or _dt.datetime.now(_dt.UTC)).strftime("%Y%m%dT%H%M%SZ")
+    stamp = (now or _dt.datetime.now(_dt.timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
     return f"audit-{stamp}-{uuid.uuid4().hex[:8]}"
 
 
@@ -736,7 +736,7 @@ def audit_access_record(
         )
     return AccessRecord(
         run_id=run_id,
-        retrieved_at_utc=_dt.datetime.now(_dt.UTC).isoformat(),
+        retrieved_at_utc=_dt.datetime.now(_dt.timezone.utc).isoformat(),
         scope=artifact_identity,
         purpose=bound,
         performance_inspected=False,

@@ -91,7 +91,6 @@ two Phase-2-only script names are identities frozen upstream and carried as such
 from __future__ import annotations
 
 import argparse
-import csv
 import datetime as dt
 import json
 import os
@@ -110,6 +109,10 @@ if str(REPO_ROOT) not in sys.path:
 from src.data.acquisition import (  # noqa: E402
     assert_no_locked_month_records,
     assert_records_within_window,
+    read_records_csv,
+    select_records_within_window,
+    select_station_records,
+    verify_declared_inputs,
 )
 from src.data.config import (  # noqa: E402
     IntegrityError,
@@ -434,7 +437,7 @@ def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
 def _registry_row(
     run_id: str, *, status: str, lock_hash: str, snapshot: Any, reason: str = ""
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -517,9 +520,11 @@ def build_phase1_commands(
     config_dir: Path,
     scope_path: Path,
     fixture_id: str | None = None,
+    code_commit: str | None = None,
 ) -> list[list[str]]:
-    """TE 13.2's seven Phase 1 invocations, in order, plus the ruled scope argument (Q4/Q5)
-    and — when `fixture_id` is given — the Rec 4 lifecycle roots under the fixture root."""
+    """TE 13.2's seven Phase 1 invocations, in order, plus the ruled scope argument (Q4/Q5),
+    — when `fixture_id` is given — the Rec 4 lifecycle roots under the fixture root, and —
+    when `code_commit` is given — `--code-commit` on every invocation (Kaggle: no git tree)."""
     commands: list[list[str]] = []
     for script, phase in PHASE1_SEQUENCE:
         assert_phase1_invocation(script)
@@ -527,6 +532,11 @@ def build_phase1_commands(
         if phase is not None:
             argv += ["--phase", str(phase)]
         argv += [FIXTURE_SCOPE_OPTION, str(scope_path)]
+        if code_commit is not None:
+            # a Kaggle session carries no git working tree: the orchestrator's explicit
+            # commit is threaded into every stage subprocess's TE 13.1 lock, so the seven
+            # locks and the receipt agree on the one code identity (REQ-ENG-10; TC-03g)
+            argv += ["--code-commit", str(code_commit)]
         if fixture_id is not None:
             argv += lifecycle_arguments(script, fixture_id)
         commands.append(argv)
@@ -558,7 +568,7 @@ def run_command(
     argv: Sequence[str], *, env: Mapping[str, str], cwd: Path, timeout: int = SUBPROCESS_TIMEOUT_S
 ) -> dict[str, Any]:
     """Run ONE command, recording its argv, exit code, timing and output tails."""
-    started = dt.datetime.now(dt.UTC)
+    started = dt.datetime.now(dt.timezone.utc)
     clock = time.monotonic()
     try:
         completed = subprocess.run(  # noqa: S603 - fixed argv, no shell; the interpreter is ours
@@ -583,7 +593,7 @@ def run_command(
         "argv": list(argv),
         "returncode": returncode,
         "started_at_utc": started.isoformat(),
-        "ended_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+        "ended_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "duration_seconds": time.monotonic() - clock,
         "stdout_tail": stdout[-_TAIL_CHARS:],
         "stderr_tail": stderr[-_TAIL_CHARS:],
@@ -611,95 +621,6 @@ def run_sequence(
 # =======================================================================================
 # W-3 / W-4: lineage — verify the declared inputs, assemble on record dates
 # =======================================================================================
-
-
-def _month_manifest_entries(payload: Mapping[str, Any]) -> Mapping[str, str]:
-    """Accept the flat `{name: sha256}` shape the existing evidence carries, or acquisition's
-    `{"derived_artifacts": {...}}` shape."""
-    if isinstance(payload.get("derived_artifacts"), Mapping):
-        return {str(k): str(v) for k, v in payload["derived_artifacts"].items()}
-    return {str(k): str(v) for k, v in payload.items() if isinstance(v, str)}
-
-
-def verify_declared_inputs(
-    scope: FixtureManifest | IdentityDeclaration, *, workspace: Path
-) -> dict[str, Any]:
-    """R-135 control 12 / limb 2: every declared derived artifact verifies against the month's
-    `sha256_manifest.json` AND against its bytes on disk, BEFORE the fixture runs."""
-    inputs = scope.data.get("inputs")
-    declared = inputs.get("prepared_vtec") if isinstance(inputs, Mapping) else None
-    if not isinstance(declared, Mapping):
-        raise IntegrityError(
-            scope.path,
-            "inputs.prepared_vtec is required: the month's declared derived artifacts with their "
-            "SHA-256 are the eligibility evidence re-verified at use (team.md; R-135 limb 2)",
-        )
-    evidence_dir = Path(workspace) / str(declared.get("evidence_dir", ""))
-    month_manifest = evidence_dir / str(declared.get("sha256_manifest", "sha256_manifest.json"))
-    if not month_manifest.is_file():
-        raise IntegrityError(
-            month_manifest,
-            "the month's sha256_manifest.json is absent; eligibility is judged on derived-"
-            "artifact verification and cannot be assumed from the selection record",
-        )
-    try:
-        entries = _month_manifest_entries(json.loads(month_manifest.read_text(encoding="utf-8")))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise IntegrityError(month_manifest, f"unreadable ({exc})") from exc
-    files = declared.get("files")
-    if not isinstance(files, Mapping) or not files:
-        raise IntegrityError(scope.path, "inputs.prepared_vtec.files must map artifact -> sha256")
-    verified: dict[str, str] = {}
-    for name, declared_hash in files.items():
-        recorded = entries.get(str(name))
-        if recorded is None:
-            raise IntegrityError(
-                month_manifest, f"declared artifact {name!r} is not hash-listed by the month"
-            )
-        if str(declared_hash).lower() != recorded.lower():
-            raise IntegrityError(
-                evidence_dir / str(name),
-                f"declared SHA-256 {declared_hash} disagrees with the month's recorded {recorded} "
-                f"(R-135 control 12)",
-            )
-        artifact = evidence_dir / str(name)
-        if not artifact.is_file():
-            raise IntegrityError(artifact, "declared derived artifact is absent from the evidence")
-        actual = sha256_of_file(artifact)
-        if actual != recorded.lower():
-            raise IntegrityError(
-                artifact,
-                f"bytes hash to {actual} but the month's sha256_manifest.json records {recorded}; "
-                f"the eligibility check re-executed at use FAILS before the fixture runs "
-                f"(R-135 control 12; team.md, CHAIR-02)",
-            )
-        verified[str(name)] = actual
-    records_file = str(declared.get("records_file", ""))
-    if records_file not in verified:
-        raise IntegrityError(
-            scope.path,
-            f"inputs.prepared_vtec.records_file {records_file!r} is not one of the verified "
-            f"declared artifacts {sorted(verified)}",
-        )
-    return {
-        "evidence_dir": str(evidence_dir),
-        "sha256_manifest": str(month_manifest),
-        "verified": verified,
-        "records_file": records_file,
-    }
-
-
-def read_records_csv(path: Path) -> list[dict[str, str]]:
-    with Path(path).open(encoding="utf-8", newline="") as handle:
-        return [dict(row) for row in csv.DictReader(handle)]
-
-
-def select_station_records(
-    rows: Sequence[Mapping[str, Any]], stations: Sequence[str], *, station_key: str = "station"
-) -> list[Mapping[str, Any]]:
-    """Select the cited stations' records — SELECTION, before the assembled input is asserted."""
-    wanted = {str(s) for s in stations}
-    return [row for row in rows if str(row.get(station_key, "")) in wanted]
 
 
 def assert_assembled_records(
@@ -866,8 +787,19 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         if isinstance(citation, Mapping)
         else list(scope.identity["stations"])
     )
-    assembled = select_station_records(rows, stations)
+    # Option B, the orchestrator's own assembly (CR-2026-09-20-B01-PREREQS §2): the cited
+    # window is SELECTED on record dates out of the month file (D-11's seven days sit inside
+    # the November file, which also carries provider edge records dated 2022-10-31), then the
+    # assembled set is ASSERTED — station, window, locked month — exactly as before.
+    window_start, window_end = scope.window
+    assembled = select_records_within_window(
+        select_station_records(rows, stations),
+        start=window_start,
+        end=window_end,
+        timestamp_key="date",
+    )
     assembly = assert_assembled_records(assembled, scope=scope)
+    assembly["records_read_from_month_file"] = len(rows)
 
     # 5. The fixture's own TE 15.4 artifacts, stamped by the producing path.
     stamp = stamp_for_manifest(scope)
@@ -906,7 +838,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     env = child_environment(os.environ, workspace=workspace)
     commands = build_phase1_commands(
         python=args.python, scripts_dir=REPO_ROOT / "scripts", config_dir=Path(args.config),
-        scope_path=scope_path, fixture_id=args.fixture,
+        scope_path=scope_path, fixture_id=args.fixture, code_commit=args.code_commit,
     )
     sequence = run_sequence(commands, env=env, cwd=workspace)
     m10: dict[str, Any] | None = None
@@ -1082,7 +1014,7 @@ def main() -> int:
     lock_hash = environment_lock_hash(lock)
     registry_path, access_log = _registry_paths(snapshot)
     run_id = (
-        f"walking-skeleton-{args.fixture}-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}"
+        f"walking-skeleton-{args.fixture}-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
         f"-{uuid.uuid4().hex[:8]}"
     )
 

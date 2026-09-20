@@ -673,8 +673,8 @@ def build_target_grid(
         st = stations[station_id]
         lat, lon = float(st.lat), float(st.lon)
         cell = (_math.floor(lat), _math.floor(lon))
-        t = dt.datetime(year, 1, 1, tzinfo=dt.UTC)
-        end = dt.datetime(year + 1, 1, 1, tzinfo=dt.UTC)
+        t = dt.datetime(year, 1, 1, tzinfo=dt.timezone.utc)
+        end = dt.datetime(year + 1, 1, 1, tzinfo=dt.timezone.utc)
         step = dt.timedelta(hours=cadence_hours)
         while t < end:
             if t.month in wanted:
@@ -689,6 +689,31 @@ def build_target_grid(
                 )
             t += step
     return points
+
+
+def _hmf2_at(contract: BenchmarkContract, when: dt.datetime, lat: float, lon: float) -> float:
+    """The D-50 hmF2 DIAGNOSTIC: IRI-2016's F2-peak height (oarr[1], km) from one
+    `iricore.iri` call under the same version, index files and default switches as
+    `_vtec_at`. No threshold is attached to it and it never enters the tolerance test; it
+    is recorded beside the official interface's own hmF2 so a wrong hmF2-model option on the
+    official form (an effect of <= 0.45 TECU, below any per-case tolerance) is visible by
+    inspection instead of absorbed (governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md 3)."""
+    import math as _math
+
+    import iricore
+    import numpy as _np
+
+    if when.tzinfo is None or when.utcoffset() != dt.timedelta(0):
+        raise BenchmarkError("target_time_utc", f"{when!r} is not a UTC-aware timestamp")
+    naive = when.replace(tzinfo=None)
+    out = iricore.iri(naive, [300.0, 300.0, 10.0], lat, lon, version=contract.iri_version)
+    oarr = _np.asarray(out.oarr, dtype=float).reshape(-1)
+    scalar = float(oarr[1])
+    if not _math.isfinite(scalar) or scalar <= 0.0:
+        raise BenchmarkError(
+            "iricore.iri", f"hmF2 diagnostic {scalar!r} at {when.isoformat()} ({lat}, {lon})"
+        )
+    return scalar
 
 
 def _vtec_at(contract: BenchmarkContract, when: dt.datetime, lat: float, lon: float) -> float:
@@ -823,7 +848,7 @@ def build_validation_report(
     declared_at = _parse_utc(
         contract.tolerance_declared_at_utc, resource=resource, field="tolerance.declared_at_utc"
     )
-    comparison_at = now or dt.datetime.now(dt.UTC)
+    comparison_at = now or dt.datetime.now(dt.timezone.utc)
     if declared_at >= comparison_at:
         raise BenchmarkError(
             resource,
@@ -859,6 +884,15 @@ def build_validation_report(
         diff = abs(adapter_value - official)
         within = diff <= tolerance
         all_within = all_within and within
+        # D-50 hmF2 diagnostic: recorded when the sample carries the official interface's
+        # hmF2; no threshold, never part of `within_tolerance`.
+        official_hmf2 = s.get("official_interface_hmf2_km")
+        adapter_hmf2: float | None = None
+        hmf2_diff: float | None = None
+        if official_hmf2 is not None:
+            official_hmf2 = float(official_hmf2)
+            adapter_hmf2 = _hmf2_at(contract, when, float(s["lat"]), float(s["lon"]))
+            hmf2_diff = adapter_hmf2 - official_hmf2
         out_samples.append(
             {
                 "site": str(s["site"]),
@@ -874,6 +908,9 @@ def build_validation_report(
                 "adapter_value": adapter_value,
                 "abs_diff": diff,
                 "within_tolerance": within,
+                "official_interface_hmf2_km": official_hmf2,
+                "adapter_hmf2_km": adapter_hmf2,
+                "hmf2_diff_km_diagnostic_no_threshold": hmf2_diff,
             }
         )
     return {

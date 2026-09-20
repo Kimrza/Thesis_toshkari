@@ -89,7 +89,7 @@ from src.evaluation.metrics import (  # noqa: E402
     write_metrics_artifact,
 )
 
-UTC = dt.UTC
+UTC = dt.timezone.utc
 SYNTH_YEAR = 2001  # fixture year; never 2022, so no test can brush the locked month
 STATIONS = ("S1", "S2", "S3")
 IDENTITY = {"phase_id": "p", "source_id": "s", "target_definition_id": "t"}

@@ -665,7 +665,7 @@ class MaskRegistry:
             "scored_window_statement": mask.scored_window_statement,
             "window_length_hours": mask.window_length_hours,
             "lag_set": list(mask.lag_set),
-            "registered_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+            "registered_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         }
         payload = (json.dumps(entry, sort_keys=True, indent=2) + "\n").encode("utf-8")
         _write_once_atomic(self._entry_path(mask.set_id), payload, what="mask registration")
@@ -705,7 +705,7 @@ class MaskRegistry:
             "artifact_class": "frozen_mask_bundle_manifest",
             "mask_ids": sorted(e["mask_id"] for e in entries.values()),
             "entries": entries,
-            "frozen_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+            "frozen_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         }
         payload = (json.dumps(manifest, sort_keys=True, indent=2) + "\n").encode("utf-8")
         _write_once_atomic(self.manifest_path, payload, what="frozen-bundle manifest")

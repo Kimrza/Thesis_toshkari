@@ -1032,7 +1032,7 @@ def provenance_stamp(*, source: str, produced_by: str) -> dict[str, str]:
         "source": source,
         "produced_by": produced_by,
         "stamp_class": "evidentiary",
-        "stamped_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+        "stamped_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
     }
 
 

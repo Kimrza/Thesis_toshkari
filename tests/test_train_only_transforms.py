@@ -83,7 +83,7 @@ from src.features.transforms import (  # noqa: E402
     transform_id_for,
 )
 
-UTC = dt.UTC
+UTC = dt.timezone.utc
 PARTITIONS = synthetic_partitions()
 
 

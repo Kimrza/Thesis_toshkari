@@ -39,7 +39,9 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+UTC = timezone.utc  # datetime.UTC is 3.11+; identical object (D-49 extension: fixture runs on 3.10)
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent

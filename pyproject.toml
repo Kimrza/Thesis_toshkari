@@ -46,6 +46,11 @@ select = [
 ]
 ignore = [
     "E501",  # long lines in docstrings citing governance records
+    # UP017 would rewrite `datetime.timezone.utc` to the 3.11-only `datetime.UTC` alias.
+    # The main environment stays Python 3.11 (TC-03d), but the D-49 extension runs the
+    # B-01 fixture runs in the Kaggle 3.10 venv (CR-2026-09-20-B01-PREREQS 1), so the
+    # codebase keeps the object both interpreters expose. Same object on 3.11.
+    "UP017",
 ]
 
 [tool.ruff.lint.per-file-ignores]

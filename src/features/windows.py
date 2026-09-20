@@ -90,7 +90,7 @@ TOLERANCE_MANIFEST_FIELD: Final[str] = (
     "tests/fixtures/<fixture_id>/fixture_manifest.yaml: permitted_floating_point_tolerances"
 )
 
-_UTC: Final = dt.UTC
+_UTC: Final = dt.timezone.utc
 _GRID_TOKENS: Final[frozenset[str]] = frozenset({"window", "history", "seq", "sequence"})
 
 

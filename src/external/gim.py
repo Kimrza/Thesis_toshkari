@@ -235,7 +235,7 @@ def generate_comparator(
         always, today: from the violated gate, or from the injection-mode terminal
         refusal.
     """
-    attempt_utc = now if now is not None else dt.datetime.now(dt.UTC)
+    attempt_utc = now if now is not None else dt.datetime.now(dt.timezone.utc)
     evaluate_generation_gates(
         interpolation_rule=interpolation_rule,
         hand_check=hand_check,

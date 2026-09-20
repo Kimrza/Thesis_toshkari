@@ -64,6 +64,7 @@ from src.data.config import TBD_SENTINEL, ConfigSnapshot, RegistryError
 
 __all__ = [
     "SECTION_6_2_FIELDS",
+    "PHASE2_ONLY_REGISTRY_FIELDS",
     "CELL_RULE_ID",
     "Station",
     "ConflictResolution",
@@ -96,6 +97,17 @@ SECTION_6_2_FIELDS: Final[tuple[str, ...]] = (
 #: value (including the TBD sentinel) is refused. The identifier names the frozen rule
 #: — it does not choose one (D-1 is the freeze; TE 18.2 stands).
 CELL_RULE_ID: Final[str] = "floor-half-open-d1"
+
+#: Vision 6.2 fields that no Phase 1 executable path consumes and that Vision itself assigns
+#: to Phase 2: "available observable codes" are read from RINEX headers, and Vision 3.6's
+#: phase table places "observable/cadence checks" under Phase 2 (Step 8, "Inventory and
+#: inspect raw files and metadata"); Phase 1 reads prepared provider VTEC only (TE 7.0), and
+#: its registry consumers (`features.build` for `station_lat` / `lst_sin` / `lst_cos`; B-01
+#: for the station coordinates) use coordinates and the IGRF pin alone. Under `phase=1`
+#: these fields are therefore not required by `assert_registry_resolved`; under `phase=2`
+#: (the default) the full 6.2 set is required, unchanged. No value is defaulted or
+#: invented for them in either phase (CR-2026-09-20-B01-PREREQS §5).
+PHASE2_ONLY_REGISTRY_FIELDS: Final[tuple[str, ...]] = ("observable_codes",)
 
 #: Values that mark an igrf_version as DEFAULTED rather than pinned. A default and an
 #: absence are refused identically (R-45; the R-35 "unknown" precedent).
@@ -379,8 +391,14 @@ def load_registry(snapshot: ConfigSnapshot) -> Mapping[str, Station]:
     return registry
 
 
-def assert_registry_resolved(registry: Mapping[str, Station]) -> None:
+def assert_registry_resolved(registry: Mapping[str, Station], *, phase: int = 2) -> None:
     """The approved gate: raises `RegistryError` on any unresolved station (R-45/R-46).
+
+    `phase` scopes the required field set: under `phase=1` the `PHASE2_ONLY_REGISTRY_FIELDS`
+    (`observable_codes`) are not required — no Phase 1 path consumes them and Vision assigns
+    observable/cadence checks to Phase 2 — while every other 6.2 field, the 2022 interval
+    coverage, the pinned IGRF version and the provenance limb are checked exactly as before.
+    The default `phase=2` is the full, unchanged R-45 check (nothing is weakened for Phase 2).
 
     Checks, per station: every 6.2 field present and non-empty; receiver, antenna and
     firmware intervals COVERING ALL OF 2022; a pinned (never defaulted) `igrf_version`
@@ -398,6 +416,9 @@ def assert_registry_resolved(registry: Mapping[str, Station]) -> None:
         naming the `station_id` (the station-registry resource, SD-I-03) and the
         violated expectation.
     """
+    if phase not in (1, 2):
+        raise RegistryError("station registry", f"phase must be 1 or 2, got {phase!r}")
+    phase2_only = set(PHASE2_ONLY_REGISTRY_FIELDS) if phase == 1 else set()
     if not registry:
         raise RegistryError(
             "station registry",
@@ -422,7 +443,7 @@ def assert_registry_resolved(registry: Mapping[str, Station]) -> None:
                 )
         if station.sampling_interval_s <= 0:
             raise RegistryError(sid, "sampling_interval_s must be a positive integer (R-45)")
-        if not station.observable_codes:
+        if not station.observable_codes and "observable_codes" not in phase2_only:
             raise RegistryError(sid, "observable_codes is empty (6.2; R-45)")
         if not station.igrf_version.strip():
             raise RegistryError(
@@ -444,7 +465,9 @@ def assert_registry_resolved(registry: Mapping[str, Station]) -> None:
                 f"for you, and both are refused (R-45, TS-I-01)",
             )
         missing_provenance = [
-            name for name in SECTION_6_2_FIELDS if not station.provenance.get(name, "").strip()
+            name
+            for name in SECTION_6_2_FIELDS
+            if name not in phase2_only and not station.provenance.get(name, "").strip()
         ]
         if missing_provenance:
             raise RegistryError(

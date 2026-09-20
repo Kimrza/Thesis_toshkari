@@ -175,7 +175,7 @@ _RAW_LONGITUDE_TOKENS: Final[frozenset[str]] = frozenset({"lon", "longitude", "g
 _TARGET_HOUR_QUALITY: Final[str] = "target_hour_quality"
 _STANDARDIZE: Final[str] = "train_only_standardize"
 _NO_NORMALIZATION: Final[str] = "none"
-_UTC: Final = dt.UTC
+_UTC: Final = dt.timezone.utc
 _MODEL_INPUT_CLASSES: Final[frozenset[FieldClass]] = frozenset(
     {FieldClass.driver, FieldClass.target, FieldClass.station, FieldClass.time}
 )
@@ -833,12 +833,16 @@ def build_features(
     parity_tolerance: float | None = None,
     timestamp_column: str = "interval_start_utc",
     station_column: str = "station_id",
+    phase: int = 2,
 ) -> FeatureBundle:
     """ADR-11's `build_features`, refusing in the order the module docstring states.
 
     `parity_tolerance` is the fixture manifest's declared floating-point tolerance for
     WS-13's value-level limb (TE 15.2); `None` makes that limb STOP naming the field (the
-    shape/ordering limb runs regardless). Everything else is the approved signature.
+    shape/ordering limb runs regardless). `phase` scopes the registry gate's required field
+    set (`assert_registry_resolved(..., phase=)`: Phase 1 does not require the Phase-2-only
+    `observable_codes`; the default 2 is the full check). Everything else is the approved
+    signature.
     """
     # 1. the spec against the partition list
     partition = validate_spec(spec, partitions)
@@ -880,7 +884,7 @@ def build_features(
     # 5. the registry gates station-derived fields
     station_fields = {n: e for n, e in feature_set.items() if classes[n] is FieldClass.station}
     if station_fields:
-        assert_registry_resolved(registry)
+        assert_registry_resolved(registry, phase=phase)
     # the frozen window
     sequence_fields = {
         n: e for n, e in feature_set.items() if str(e["dictionary_row"]) == "vtec_seq_24"

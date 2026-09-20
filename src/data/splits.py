@@ -56,10 +56,10 @@ import datetime as dt
 import hashlib
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from enum import StrEnum
 from typing import Any, Final
 
 from src.data.config import (
+    StrEnum,
     TBD_SENTINEL,
     ConfigSnapshot,
     LockedTestError,
@@ -100,7 +100,7 @@ FITTING_PARTITION_IDS: Final[tuple[str, ...]] = tuple(
     pid for pid in PARTITION_IDS if pid != LOCKED_ID
 )
 
-_UTC: Final = dt.UTC
+_UTC: Final = dt.timezone.utc
 
 
 class PartitionKind(StrEnum):

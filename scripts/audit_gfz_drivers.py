@@ -295,7 +295,7 @@ def validate_series(
     keys_2022 = sorted(k for k in series if k[0] == YEAR)
     out_of_year = [k for k in series if k[0] != YEAR]
     expected = 365 * (24 // step_hours)
-    stamps = [dt.datetime(*k, tzinfo=dt.UTC) for k in keys_2022]
+    stamps = [dt.datetime(*k, tzinfo=dt.timezone.utc) for k in keys_2022]
     gaps = [
         (stamps[i - 1], stamps[i])
         for i in range(1, len(stamps))
@@ -431,7 +431,7 @@ def _supplemental_lock(out_dir: Path) -> tuple[str, dict[str, Any]]:
 def _registry_row(
     run_id: str, *, status: str, lock_hash: str, code_commit: str, notes: str, reason: str = ""
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -475,7 +475,7 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
 
 def run(out_dir: Path, *, offline: bool) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
-    started_utc = dt.datetime.now(dt.UTC).isoformat()
+    started_utc = dt.datetime.now(dt.timezone.utc).isoformat()
     # lower-case + digits with separators only: the W-9 heuristic refuses a 20+-char
     # three-class token, and the allowlist is not grown for a run id.
     run_id = "gfz-driver-audit-" + started_utc[:19].replace(":", "").replace("-", "").replace(
@@ -724,7 +724,7 @@ def _write_markdown(
     lines = [
         "# GFZ driver-pair audit — retrieval, hashes, parse validation and cross-comparison",
         "",
-        f"Generated {dt.datetime.now(dt.UTC).isoformat()} by `scripts/audit_gfz_drivers.py`; machine-readable twins: `retrieval_record.json`, `gfz-comparison-report.json`, `sha256_manifest.json`.",
+        f"Generated {dt.datetime.now(dt.timezone.utc).isoformat()} by `scripts/audit_gfz_drivers.py`; machine-readable twins: `retrieval_record.json`, `gfz-comparison-report.json`, `sha256_manifest.json`.",
         "",
         "## Retrieved files (TE 13.3 source_files items)",
         "",

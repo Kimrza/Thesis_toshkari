@@ -298,7 +298,7 @@ def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
 def _registry_row(
     run_id: str, *, status: str, lock_hash: str, snapshot: Any, reason: str = ""
 ) -> dict[str, Any]:
-    now = dt.datetime.now(dt.UTC).isoformat()
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     row: dict[str, Any] = {
         "run_id": run_id,
         "started_at_utc": now,
@@ -409,6 +409,9 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             "partitions": partitions,
             "snapshot": snapshot,
             "parity_tolerance": args.parity_tolerance,
+            # registry gate scoped to this run's phase (Phase 1 does not require the
+            # Phase-2-only observable_codes; CR-2026-09-20-B01-PREREQS §5)
+            "phase": args.phase,
         }
         stamp = stamp_for_manifest(scope, apparatus_partition_id=pid)
         raw = build_features(target, spec=train_spec, **common)
@@ -517,6 +520,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
             "partitions": partitions,
             "snapshot": snapshot,
             "parity_tolerance": args.parity_tolerance,
+            # registry gate scoped to this run's phase (Phase 1 does not require the
+            # Phase-2-only observable_codes; CR-2026-09-20-B01-PREREQS §5)
+            "phase": args.phase,
         }
         raw = build_features(target, spec=train_spec, **common)
         transform = fit_transforms(raw, partition=partition)
@@ -561,7 +567,7 @@ def main() -> int:
     lock_hash = environment_lock_hash(lock)
     registry_path, access_log = _registry_paths(snapshot)
     run_id = (
-        f"features-and-splits-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}"
+        f"features-and-splits-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
         f"-{uuid.uuid4().hex[:8]}"
     )
 

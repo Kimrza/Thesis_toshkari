@@ -1,0 +1,29 @@
+{
+ "kind": "b01_tolerance_basis_environment",
+ "purpose": "independent numerical convergence and sensitivity checks of the B-01 adapter quadrature; diagnostic only, NOT a governed run and NOT the Kaggle B-01 environment",
+ "platform": "Linux-6.18.33.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+ "python": "3.10.21 (main, Sep  1 2026, 14:16:49) [Clang 22.1.3 ]",
+ "pip_freeze": [
+  "fortranformat==2.0.3",
+  "iricore==1.8.0",
+  "numpy==1.26.4",
+  "packaging==26.3",
+  "pymap3d==3.2.0",
+  "python-dateutil==2.9.0.post0",
+  "six==1.17.0"
+ ],
+ "iricore_wheel": "iricore-1.8.0-cp310-cp310-manylinux_2_35_x86_64.whl installed with --require-hashes from evidence/iri2016_kaggle_verification_2026-09-19/requirements-iri.txt (sha256 f452b223...) plus python-dateutil (pymap3d runtime dependency) installed unpinned",
+ "libgfortran": "the wheel links libgfortran.so.5 from the system; none present in WSL, so libgfortran-040039e1.so.5.0.0 and libquadmath-96973f99.so.0.0.0 were taken from the scipy==1.15.3 manylinux wheel (scipy.libs/) and exposed via LD_LIBRARY_PATH; Kaggle provides its own system libgfortran",
+ "index_files_sha256": {
+  "apf107.dat": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+  "ig_rz.dat": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486"
+ },
+ "index_files_match_d45_pins": true,
+ "kaggle_smoke_test_reproduction": {
+  "inputs": "2024-01-06T12:00 UT, ARUC 40.286/44.086, hbot 90, htop 2000, hstep 0.5, version 16 (evidence/iri2016_kaggle_verification_2026-09-19/verification_report.json)",
+  "kaggle_value_tecu": 37.373754526924806,
+  "wsl_value_tecu": 37.373754526924806,
+  "bit_identical": true
+ },
+ "generated_at_utc": "2026-09-20T09:05:51.273093+00:00"
+}

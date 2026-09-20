@@ -1,0 +1,9 @@
+{
+  "b01_mismatch_sensitivity.py": "bf1dc376d328176f861cd2791edf21f7bb731e31e6b6722aaf673c72c9247cea",
+  "b01_mismatch_sensitivity_results.json": "dfba7849e6c73394b38928f5c46a25fe63c9b1feb1167becf6dcb7fb45e884dd",
+  "b01_quadrature_convergence.py": "040479a260b004dd255fc03c43e488a1fad01ae5f7a7a8af5b82d00a07e4345e",
+  "b01_quadrature_convergence_results.json": "d133838618449f1e0b8016645aa6c0ca0b683f88d6e68ae81b6f9fe22fc606fd",
+  "environment.json": "a21f02484b389eb15035bf573dff8fb75a83ae179f299049d27e92ca7cc8f480",
+  "selection_verification.json": "c8ce781e2f9f226447fa656bbb181ad2401c6506580065ed99bc43f58c96a8ef",
+  "verify_selection.py": "851cdb936a700d1ae36fa152bc4b02a1ec6e9dbe0c2e4d9b2500d962c52c34cb"
+}

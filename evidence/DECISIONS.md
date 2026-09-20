@@ -2737,6 +2737,126 @@ and its 2026-09-19 annotation (the verified runtime); `CR-2026-09-19-SCI-DECISIO
 5. **Not changed.** No scientific value; no gate; D-45 as annotated stands; G-04 is not
    passed.
 
+**Addendum 2026-09-20 — item 4 resolved by resolution (a): the exception EXTENDS to the two
+walking-skeleton fixture runs executed inside the same B-01 environment.** Owner authorization,
+quoted: *"I authorize extending the Python 3.10 exception to the prerequisite fixture runs
+specifically required for B-01, provided their required dependencies and scientific behavior are
+compatible. Keep the main training/stage environment on Python 3.11. Preserve the receipt
+requirement: the B-01 fixtures and benchmark must use the same applicable environment identity.
+Do not bypass or weaken receipt checks."* Recorded on the owner's authority; no supervisor
+signature is claimed. Prepared at `governance/CHANGE_RECORD_2026-09-20_b01_prerequisites.md` §1.
+
+1. **Scope of the extension.** The `plumbing_7day` and `scientific_1month` runs of
+   `scripts/run_walking_skeleton.py` — measuring runs (`--emit-candidate`) and verification
+   runs alike, together with the seven Phase 1 stage-script subprocesses and the M10 contract
+   fixture they invoke — MAY execute inside the item-1 environment when, and only when, that
+   run's purpose is to produce the TE 9.2 receipts a B-01 `--generate-benchmark` run consumes.
+   The environment is the item-1 `virtualenv` (CPython 3.10.12) carrying, in addition to the
+   item-3 hash-pinned IRI set, every pin of `requirements.txt` installed unchanged. Model
+   training as a deliverable, every other stage run, and the governed local environment stay
+   on Python 3.11 with `requirements.txt`'s exact pins (TC-03d unchanged).
+2. **Compatibility condition — checked, not assumed.** A `pip` dry-run resolution for
+   `cp310` / `manylinux_2_17..2_35` x86-64 of `requirements.txt` plus `iricore==1.8.0`,
+   `fortranformat==2.0.3`, `pymap3d==3.2.0` resolved **50** packages with no conflict: every
+   one of the eight `requirements.txt` pins publishes a cp310 Linux wheel
+   (`tensorflow==2.21.0` requires-python `>=3.10`, wheel `manylinux_2_27`, satisfied by the
+   image's glibc 2.35); `iricore`'s own constraints (`numpy<2.0,>=1.25`, `fortranformat<3`,
+   `pymap3d[core]<4`) are met by the same `numpy==1.26.4` pin. No pin was altered. Two
+   limitations are recorded rather than hidden: (i) `requirements.txt` pins no transitive
+   dependency, so the resolved `keras` differs between interpreters (3.12.4 under 3.10 in the
+   dry run; 3.15.1 in the local 3.11 environment) — the environment lock's `pip freeze` records
+   what actually ran, and a receipt binds to it; (ii) "scientific behaviour compatible" is
+   asserted at the pin level (same TensorFlow, scikit-learn, numpy, pandas wheels for cp310
+   as for cp311) and is NOT a claim of bit-identical outputs across interpreters — which is
+   exactly why the receipt requirement below is preserved rather than relaxed.
+3. **Receipt requirement — preserved by construction, not by exemption.**
+   `fixture_gate.verify_receipt` is unchanged: a receipt is accepted only when its recorded
+   TE 13.1 environment identity (requirements hash, `pip freeze`, runtime versions, code
+   commit, config hashes, platform, nondeterministic ops) equals the consuming run's lock.
+   Running the fixtures and the benchmark in ONE environment is what makes that identity
+   satisfiable; nothing in the gate was widened, and a fixture receipt produced in any other
+   environment (the local 3.11 one included) still refuses a 3.10 generation run.
+4. **Mirrored in configuration.** `configs/experiment.yaml: benchmark_b01.runtime.interpreter_exception`
+   now lists the two fixture runs under `applies_to` with this addendum as their authority and
+   keeps model training and every other stage under `excluded`.
+5. **Consequence for the fixtures, stated so it is not misread.** The extension makes the
+   environment identity satisfiable; it does not make a receipt exist. Every other fixture
+   prerequisite — the walking-skeleton freeze acts (Q-31) and the stage-script refusal gates
+   enumerated in `CHANGE_RECORD_2026-09-20_b01_prerequisites.md` §2 — stands exactly as
+   before.
+
+---
+
+## D-50 — B-01 IRI-2016 validation tolerance: 1.0 TECU absolute per case (freeze; student decision)
+
+**Decision date:** 2026-09-20T12:27:01Z (the approval instant is the declaration time recorded
+below, never backdated — R-59 limb 2). **Decided by:** the project owner / student ("1.
+approved"). **Authority:** R-59 area 7 assigns the predeclared tolerance to the student;
+`governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md` (revision 2) is the full derivation.
+No supervisor signature is claimed or required for this item.
+
+**Decision.** `|adapter − official| ≤ 1.0 TECU` for every one of the eight R-59 cases, absolute,
+per case; the validation report also records the mean and maximum signed difference across the
+eight. Status `passed` only if all eight hold.
+
+**Basis (measured, not asserted; full detail in the proposal).** 288 non-December, non-R-59-case
+profiles on the pinned `iricore==1.8.0` wheel (Kaggle smoke-test value reproduced bit-identically)
+give: adapter − converged reference +0.004…+0.062 TECU; adapter − official under IRI's own
+`iri_tec` scheme at its "standard"/"best" step settings +0.006…+0.14 TECU; under its "fast"
+setting −0.06…−0.82 TECU at ≤ 38 TECU (the server's exact setting is unknown and declared as
+the one open assumption, with a predeclared sign-and-proportionality signature to recognise it
+without post-hoc reasoning). Configuration mismatches the validation exists to catch (wrong foF2
+model, topside option, B0 model, storm switch, integration ceiling) shift TEC by 1–7 TECU on at
+least half the profiles; the one exception is the hmF2 model (the form's default AMTB versus the
+IRI-2016-standard Shubin-COSMIC), which shifts TEC by at most 0.45 TECU and is therefore not
+caught by any per-case tolerance in the plausible range — handled procedurally (Shubin selected
+on the form; the collection sheet fixes this) rather than by tolerance.
+
+**What this does not do.** It does not absorb a scientific mismatch. If any of the eight cases
+fails, the report is written `status: failed`, generation stays blocked, and the cause is
+investigated from the recorded output headers (server index version, echoed integration limits)
+and, where the hmF2 column was recorded, that model choice — the implementation is never switched
+and the tolerance never widened after the fact (TE §18.2). D-47's `8.0e-12 sfu` F10.7
+recomputation tolerance is a distinct quantity (sfu, floating-point reproduction) and is not
+reused here.
+
+**Recorded.** `configs/experiment.yaml: benchmark_b01.validation_report.tolerance_tecu = 1.0`,
+`tolerance_declared_at_utc = "2026-09-20T12:27:01Z"`. The report builder (`build_validation_report`)
+refuses to run while either field is `TBD` and refuses a declaration that does not precede the
+comparison; both conditions are now satisfied for a comparison run FROM this instant forward.
+
+---
+
+## D-51 — `experiment.yaml: horizons: [1]` is transcribed from TE §2.1 (transcription)
+
+**Decision date:** 2026-09-20. **Authorized by:** the project decision owner ("3. approved",
+given against `governance/CHANGE_RECORD_2026-09-20_b01_prerequisites.md` §2.5 item 5, which
+presented the value and its source), exercised under the standing student/supervisor authority
+equivalence recorded for this workspace (D-1 addendum). **Authority for the VALUE:** TE §2.1,
+row "Optional horizon": *"`experiment.yaml` shall expose `horizons: [1]` with `24` implemented
+and testable but **not** included in the default run list."* (Q-03, Q-33).
+
+**Decision.** `configs/experiment.yaml: horizons = [1]`. **No scientific value is chosen here**;
+the list is a verbatim copy of TE §2.1's already-frozen text, exactly as D-38 copied
+`embargo_hours` from TE §7.1. `src/models/train.py: read_horizons` reads it and refuses while
+absent or `TBD` (R-99: the horizon reaches every model from this field, never from a literal).
+The +24 h horizon stays implemented and testable but outside the default list; adding it is a
+config change only, and TE §2.1 bars it from the default list before the minimum thesis is
+complete and frozen.
+
+**Governance condition, stated precisely — same pattern as D-1's addendum and D-31.** TE §18.3
+precondition 3 (and D-31's table) names *horizons* among the six items the supervisor signs
+before affected components run. D-38's `embargo_hours` transcription carried a joint
+owner-and-supervisor instruction of record; this transcription carries the owner's approval
+under the recorded delegation. **No signed document, email or minute from Dr. Reza Saraf
+Shirazi exists for this item, and none is represented as existing.** If the examining
+committee requires an independent supervisor signature distinct from the delegation, that
+requirement is outside this repository's control and is recorded here so a reader can judge it.
+
+**Effect on the fixture ladder.** Stage 06's first refusal ("`horizons` absent or unresolved",
+`CR-2026-09-20-B01-PREREQS` §2.2 row k) is cleared; its next refusal, `models.selected`, is the
+tuning run's output and not a freeze item.
+
 ---
 
 ## D-1 addendum — countersignature status of the coordinate-to-cell rule

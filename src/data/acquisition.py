@@ -104,6 +104,7 @@ Governance
 
 from __future__ import annotations
 
+import csv
 import datetime as _dt
 import hashlib
 import json
@@ -115,6 +116,7 @@ from pathlib import Path
 from typing import Any, Final
 
 from src.data.config import IntegrityError, ReleaseError
+from src.data.release import sha256_of_file
 
 __all__ = [
     "AcquisitionError",
@@ -133,6 +135,13 @@ __all__ = [
     "TransportResult",
     "RetrievalClient",
     "PROVENANCE_CLASSES",
+    "cited_stations",
+    "read_records_csv",
+    "select_station_records",
+    "select_records_within_window",
+    "verify_declared_inputs",
+    "write_fixture_read_manifest",
+    "FIXTURE_READ_MANIFEST_NAME",
     "DRIVER_INVENTORY_FIELDS",
     "LOCKED_YEAR",
     "LOCKED_MONTH",
@@ -678,7 +687,7 @@ class RetrievalClient:
                 break
             self._backoff(attempt)
 
-        retrieval_date = _dt.datetime.now(_dt.UTC).date().isoformat()
+        retrieval_date = _dt.datetime.now(_dt.timezone.utc).date().isoformat()
         record: dict[str, Any] = {
             # TE 13.3's six source_files items (R-34 as corrected 2026-08-25, DATA-09):
             "provider": str(spec["provider"]),
@@ -1281,6 +1290,195 @@ def assert_records_within_window(
                 f"never on the folder a file was filed under (R-31; FR-WS-3)",
             )
     return len(records)
+
+
+def select_records_within_window(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    start: _dt.date,
+    end: _dt.date,
+    timestamp_key: str = "timestamp",
+) -> list[Mapping[str, Any]]:
+    """R-31's window form as a SELECTION: the records whose OBSERVATION DATE lies in
+    `[start, end]`, inclusive, read through the ONE record-date reader (`_record_date`).
+
+    Added additively for `fixtures-and-reproducibility` on the same sibling-edit precedent
+    as `assert_records_within_window` (CR-2026-09-20-B01-PREREQS §2): a fixture's cited
+    window is a sub-range of the month file it reads (D-11's seven days inside the
+    November file; the month files also carry provider edge records dated in the adjacent
+    month), so the orchestrator SELECTS the in-window records on record dates and only then
+    ASSERTS the assembled set with the predicate above — the Option-B reads-narrowing
+    already ruled for 00/01/02/04 (CR-2026-09-13), applied to the orchestrator's own
+    assembly. The directory a record was filed under plays no role (TEC-09; ML-07). A record
+    whose date cannot be established fails closed inside `_record_date`, never silently
+    dropped.
+
+    Raises
+    ------
+    AcquisitionError
+        `start` after `end`; a record whose date cannot be established.
+    """
+    if start > end:
+        raise AcquisitionError(
+            f"window {start.isoformat()}..{end.isoformat()}", "start is after end"
+        )
+    return [r for r in records if start <= _record_date(r, timestamp_key) <= end]
+
+
+# =======================================================================================
+# Fixture-run input: the month's declared derived artifacts, verified at use
+# =======================================================================================
+# Moved here from scripts/run_walking_skeleton.py under freeze-package item 1, option (a)
+# (CR-2026-09-20-B01-PREREQS 2.5; owner ruling 2026-09-20), so the orchestrator and a
+# fixture-scoped stage 00 share ONE verification home instead of two copies.
+
+
+def _month_manifest_entries(payload: Mapping[str, Any]) -> Mapping[str, str]:
+    """Accept the flat `{name: sha256}` shape the existing evidence carries, or acquisition's
+    `{"derived_artifacts": {...}}` shape."""
+    if isinstance(payload.get("derived_artifacts"), Mapping):
+        return {str(k): str(v) for k, v in payload["derived_artifacts"].items()}
+    return {str(k): str(v) for k, v in payload.items() if isinstance(v, str)}
+
+
+def verify_declared_inputs(scope: Any, *, workspace: Path) -> dict[str, Any]:
+    """R-135 control 12 / limb 2: every declared derived artifact (`inputs.prepared_vtec` of
+    a fixture scope) verifies against the month's `sha256_manifest.json` AND against its
+    bytes on disk, BEFORE anything reads it. `scope` is a loaded fixture manifest or identity
+    declaration (it exposes `.data` and `.path`)."""
+    inputs = scope.data.get("inputs")
+    declared = inputs.get("prepared_vtec") if isinstance(inputs, Mapping) else None
+    if not isinstance(declared, Mapping):
+        raise IntegrityError(
+            scope.path,
+            "inputs.prepared_vtec is required: the month's declared derived artifacts with their "
+            "SHA-256 are the eligibility evidence re-verified at use (team.md; R-135 limb 2)",
+        )
+    evidence_dir = Path(workspace) / str(declared.get("evidence_dir", ""))
+    month_manifest = evidence_dir / str(declared.get("sha256_manifest", "sha256_manifest.json"))
+    if not month_manifest.is_file():
+        raise IntegrityError(
+            month_manifest,
+            "the month's sha256_manifest.json is absent; eligibility is judged on derived-"
+            "artifact verification and cannot be assumed from the selection record",
+        )
+    try:
+        entries = _month_manifest_entries(json.loads(month_manifest.read_text(encoding="utf-8")))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise IntegrityError(month_manifest, f"unreadable ({exc})") from exc
+    files = declared.get("files")
+    if not isinstance(files, Mapping) or not files:
+        raise IntegrityError(scope.path, "inputs.prepared_vtec.files must map artifact -> sha256")
+    verified: dict[str, str] = {}
+    for name, declared_hash in files.items():
+        recorded = entries.get(str(name))
+        if recorded is None:
+            raise IntegrityError(
+                month_manifest, f"declared artifact {name!r} is not hash-listed by the month"
+            )
+        if str(declared_hash).lower() != recorded.lower():
+            raise IntegrityError(
+                evidence_dir / str(name),
+                f"declared SHA-256 {declared_hash} disagrees with the month's recorded {recorded} "
+                f"(R-135 control 12)",
+            )
+        artifact = evidence_dir / str(name)
+        if not artifact.is_file():
+            raise IntegrityError(artifact, "declared derived artifact is absent from the evidence")
+        actual = sha256_of_file(artifact)
+        if actual != recorded.lower():
+            raise IntegrityError(
+                artifact,
+                f"bytes hash to {actual} but the month's sha256_manifest.json records {recorded}; "
+                f"the eligibility check re-executed at use FAILS before the fixture runs "
+                f"(R-135 control 12; team.md, CHAIR-02)",
+            )
+        verified[str(name)] = actual
+    records_file = str(declared.get("records_file", ""))
+    if records_file not in verified:
+        raise IntegrityError(
+            scope.path,
+            f"inputs.prepared_vtec.records_file {records_file!r} is not one of the verified "
+            f"declared artifacts {sorted(verified)}",
+        )
+    return {
+        "evidence_dir": str(evidence_dir),
+        "sha256_manifest": str(month_manifest),
+        "verified": verified,
+        "records_file": records_file,
+    }
+
+
+def cited_stations(scope: Any) -> list[str]:
+    """The station(s) a fixture scope cites: a single-station `station_citation.station_id`
+    (the plumbing fixture, TC-03f) or the all-station `identity.stations` list."""
+    identity = scope.identity
+    citation = identity.get("station_citation")
+    if isinstance(citation, Mapping):
+        return [str(citation["station_id"])]
+    return [str(st) for st in identity["stations"]]
+
+
+def select_station_records(
+    rows: Sequence[Mapping[str, Any]], stations: Sequence[str], *, station_key: str = "station"
+) -> list[Mapping[str, Any]]:
+    """Select the cited stations' records -- SELECTION, before the assembled input is asserted."""
+    wanted = {str(st) for st in stations}
+    return [row for row in rows if str(row.get(station_key, "")) in wanted]
+
+
+def read_records_csv(path: Path) -> list[dict[str, str]]:
+    """The month's raw-records CSV as row dicts (every value a string; no parsing here)."""
+    with Path(path).open(encoding="utf-8", newline="") as handle:
+        return [dict(row) for row in csv.DictReader(handle)]
+
+
+FIXTURE_READ_MANIFEST_NAME: Final[str] = "fixture_read_manifest.json"
+
+
+def write_fixture_read_manifest(
+    path: Path,
+    *,
+    identity: Mapping[str, Any],
+    fixture_inputs: Mapping[str, Any],
+    month_request_manifest: Path | None,
+    producing_interpreter: str,
+) -> Path:
+    """Write `fixture_read_manifest.json`: what a fixture-scoped stage 00 READ.
+
+    This is NOT a `request_manifest.json`: nothing was requested from a provider, so R-35's
+    `madrigalWeb_version` check (a retrieval fact) does not apply and is not imitated. The
+    month's own recorded `madrigalWeb_version` is copied VERBATIM from its request manifest
+    when one exists (for the pre-TC-06 months that is the literal `"unknown"`, which is the
+    recorded state and is never replaced by a plausible value). Every value passes the W-9
+    redaction chokepoint.
+
+    Raises
+    ------
+    AcquisitionError
+        an empty `producing_interpreter`; a redaction-chokepoint refusal.
+    """
+    if not str(producing_interpreter).strip():
+        raise AcquisitionError(str(path), "producing_interpreter must be recorded (R-36)")
+    recorded_version: str | None = None
+    if month_request_manifest is not None and Path(month_request_manifest).is_file():
+        try:
+            recorded = json.loads(Path(month_request_manifest).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise AcquisitionError(str(month_request_manifest), f"unreadable ({exc})") from exc
+        value = recorded.get("madrigalWeb_version") if isinstance(recorded, Mapping) else None
+        recorded_version = None if value is None else str(value)
+    payload: dict[str, Any] = {
+        "kind": "fixture_read_manifest",
+        "identity": dict(identity),
+        "retrieval_performed": False,
+        "provenance_class": "derived_only",
+        "fixture_inputs": dict(fixture_inputs),
+        "month_recorded_madrigalWeb_version": recorded_version,
+        "producing_interpreter": producing_interpreter,
+    }
+    guard_egress(payload, context=f"fixture_read_manifest[{Path(path).name}]")
+    return _write_json(Path(path), payload)
 
 
 # =======================================================================================

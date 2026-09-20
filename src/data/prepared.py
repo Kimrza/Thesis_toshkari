@@ -893,7 +893,7 @@ def cell_bounds(index: int) -> str:
 def hour_start_utc(ut1_unix: float) -> str:
     """UTC normalization: the ISO hour start `[h, h+1)` containing `ut1_unix`."""
     hour = int(ut1_unix // 3600) * 3600
-    stamp = dt.datetime.fromtimestamp(hour, dt.UTC)
+    stamp = dt.datetime.fromtimestamp(hour, dt.timezone.utc)
     return stamp.strftime("%Y-%m-%dT%H:00:00Z")
 
 
