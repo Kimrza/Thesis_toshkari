@@ -28,8 +28,13 @@ identities by name, and asserting `dst` stays `DIAGNOSTIC_ONLY_SERIES`.
 
 **Executed:** stage 05's refusal moved from `permitted_producers: incomplete: no
 permitted-producer entry for dictionary row(s) ['ap60_safe', 'ap_safe', 'dst',
-'f107_81_trailing', 'f107_safe', 'hp60_safe', 'kp_safe']` to its own release-input loader —
-`features-and-splits`' deliberate TE §18.3 stop-and-report, a different unit's obligation.
+'f107_81_trailing', 'f107_safe', 'hp60_safe', 'kp_safe']` to a different, earlier stop that
+belongs to another unit. *(Corrected in this body 2026-09-22 rather than only in the
+addendum: the first draft of this paragraph named `_load_release_inputs` as the new stop.
+Measured on the fixture run recorded in the addendum, the actual new stop is the missing
+apparatus-partition declaration in `tests/fixtures/plumbing_7day/identity_declaration.yaml`
+(R-137), which precedes the loader. The claim that the permitted-producer list is no longer
+the blocker is unchanged and correct; the name of what replaced it was wrong.)*
 
 ## 2. The provider-version census, RUN (D-64; Recommendations 8 and 22)
 
