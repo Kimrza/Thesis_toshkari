@@ -46,7 +46,14 @@ horizons: [1] # D-51 (2026-09-20); TE §2.1
 # were transcribed; no implementer may fill it by convenience (Vision §1.2; TE §1.1).
 # Declared 2026-09-20 under GOV-2026-09-20-CG-01 Recommendation 17, owner-authorised.
 # Draft transcription decision: CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md §4.4.
-window_length_hours: "TBD — freeze gate"
+# TRANSCRIBED 2026-09-21 (CR-2026-09-21-RECONCILIATION §1) on the owner's instruction to
+# transcribe approved values without asking again. This is a COPY of a frozen value, not a
+# choice: Vision §8.1 states "History window: 24 hours primary, with a 48-hour sensitivity
+# evaluated only after the primary configuration is frozen … History length is not a tuned
+# hyperparameter", and TE §7.2's own ablation table carries the same 24 as ABL-HIST48's
+# `primary_remains`. Same class of act as D-38 (embargo_hours) and D-51 (horizons).
+# The 48-hour variant reaches the pipeline ONLY as ABL-HIST48, after the primary freeze.
+window_length_hours: 24 # D-57 (APPROVED and COUNTERSIGNED 2026-09-21); Vision §8.1; TE §7.2 ABL-HIST48 "primary remains 24 h"
 
 # --- frozen hyperparameter grids (D-121, Vision §14.2 line 1206: "Exact frozen grids:
 # ridge 6, RF 18, LSTM 16 combinations, with fixed training settings" — Approved).
@@ -113,13 +120,107 @@ models:
     min_improvement_tecu: 1.0e-4 # setting 6
     checkpoint_policy: "best_checkpoint" # setting 7 — restoration of the lowest-validation-RMSE
     # checkpoint, never the last epoch (R-94; WS-15; TA-13)
-  declared_baseline_per_track: "TBD — freeze gate" # Vision §8.7 / D-124 — not transcribed here
-  selection: "TBD — freeze gate" # Vision §8.7 / D-124: mean per-fold skill, 1% simplicity rule — not transcribed here
+  # DECIDED 2026-09-21 by the project decision owner. Vision §8.7 requires that "the declared
+  # baseline per track is named in configuration before tuning begins" and approves the rule
+  # (D-124) without naming a baseline; this names it. PERSISTENCE is chosen because it is
+  # already one of the three MANDATORY difficulty controls (Vision §2.4 tier 2; PC-03/PC-04),
+  # is defined on every partition, and needs no fit — so the selection criterion can never be
+  # compared against a baseline that itself failed to fit.
+  declared_baseline_per_track:
+    decision: "D-58"   # PROPOSED number; owner decision of 2026-09-21
+    all_tracks: "persistence"
+    source: "Vision §8.7 (the naming obligation); Vision §2.4 tier 2 (persistence as a mandatory control)"
+  # TRANSCRIBED 2026-09-21 (CR-2026-09-21-RECONCILIATION §2) from **D-124**, which Vision
+  # §14.2 records as **Approved**: "Select on mean per-fold skill versus a declared baseline
+  # across F1–F4; prefer the simpler configuration within 1%; refit without changing
+  # hyperparameters." Vision §8.7 states the same rule in prose and adds the bound that no
+  # December result may influence this criterion. A copy of an approved rule, not a choice.
+  selection:
+    decision: "D-124"
+    source: "Vision §8.7; Vision §14.2 decision table row D-124 (Approved)"
+    criterion: "mean_per_fold_skill_vs_declared_baseline"
+    folds: ["F1", "F2", "F3", "F4"]          # January–November only
+    simplicity_margin: 0.01                   # prefer the simpler configuration within 1%
+    refit_changes_no_hyperparameter: true
+    december_may_influence: false             # Vision §8.7; Vision §8.3
   # The SELECTED configuration per track (R-101: chosen on mean per-fold skill over F1–F4,
   # January–November only; refit changes no hyperparameter; frozen before G-05 among TE §7.0B's
   # immutable items). Written by the tuning run's selection record, never by an implementer;
   # 06_train_and_predict.py REFUSES naming this field while it is unset. Shape only (W-9).
   selected: "TBD — freeze gate"
+  # --- M-03 climatology key (owner decision of 2026-09-20; CR-2026-09-20-CONFIG-BLOCKS §1) --
+  # THE DEFECT THIS CLOSES. GOV-2026-09-20-CG-01 Recommendation 2: M-03's key had carried
+  # month, and a month-bearing climatology can predict for NO scored month — every partition's
+  # validation month lies strictly after its own training range under the expanding window
+  # (D-38/R-80), so every scored row looked up a key the training data cannot contain. M-03 is
+  # one of the three MANDATORY difficulty controls (Vision §2.4 tier 2; PC-03/PC-04), so an
+  # M-03 that yields no prediction empties the comparison-wide mask for every comparison it
+  # belongs to. Month is therefore REMOVED from the key, by the owner's decision.
+  #
+  # The rule, as the owner gave it: the mean of the target grouped by STATION and HOUR,
+  # fitted exclusively on each partition's own training data. Nothing here is computed from a
+  # scored row.
+  #
+  # `src/models/climatology.py` implements exactly this and refuses anything else: a key field
+  # it cannot compute refuses BY NAME (so a month-bearing key cannot be re-adopted by editing
+  # this file alone — it would need an implementation and a re-examination of the ordering
+  # argument), a key in a different order refuses, and `fitted_on` other than the one token
+  # refuses as a LeakageError. Missing keys at prediction time stay MISSING (`missing_
+  # climatology_keys` on the frame), never interpolated or filled.
+  climatology:
+    decision: "D-55"   # APPROVED and COUNTERSIGNED 2026-09-21 (owner approval; supervisor countersignature as reported by the student). CR-2026-09-21-CLIMATOLOGY-REFIT §1.
+    source: "owner ruling of 2026-09-20 on GOV-2026-09-20-CG-01 Recommendation 2"
+    # The ordered grouping key. Month is absent BY DECISION, not by omission.
+    key: ["station", "hour"]
+    # R-98 / NFR-LEAK-01: the fit sees each partition's training rows and nothing else. The
+    # token is the only one the module implements; no configuration value widens the fit.
+    fitted_on: "training_partition_only"
+    # The governed time convention is unchanged: `hour` is the UTC hour of
+    # `interval_start_utc`, the same instant every other Phase 1 artifact is keyed on
+    # (D-16's hourly interval; D-17's target row). No local-solar-time variant is introduced
+    # here — longitude reaches the model only through `lst_sin`/`lst_cos` (TE §7.2).
+    time_convention: "utc_hour_of_interval_start_utc"
+    # The limitation this key carries, recorded so a reader meets it with the decision rather
+    # than in a footnote. It travels on the fitted object and on every prediction frame as
+    # `src/models/climatology.py: SEASONAL_LIMITATION`.
+    seasonal_limitation: >-
+      A station-and-hour mean carries NO seasonal term. It cannot represent December's
+      diurnal amplitude or level differing from the January-November training mean, and it
+      is not a seasonal climatology. This is the deliberate cost of a key that can predict
+      for every scored month at all: the month-bearing alternative predicts for none of
+      them under the expanding-window splits. Reported with the M-03 result, never omitted.
+  # --- the refit epoch count (owner decision of 2026-09-20; CR-2026-09-20-CONFIG-BLOCKS §2) -
+  # THE DEFECT THIS CLOSES. GOV-2026-09-20-CG-01 Recommendation 5: the LSTM's early stopping
+  # and checkpoint restoration read the December score bundle, which would let December select
+  # a hyperparameter — the exact channel Vision §8.3 and project.md § Forbidden close.
+  #
+  # THE RULE IS THE FROZEN OBJECT; THE NUMBER IS ITS OUTPUT. The owner's rule, verbatim in
+  # effect: the final epoch count is the MEDIAN best-validation epoch across the predefined
+  # pre-December folds (F1-F4) and the final seeds, for the SELECTED configuration, ROUNDED
+  # HALF UPWARD. Implemented once, at `src/models/train.py: refit_epoch_count`, and named by
+  # `REFIT_EPOCH_RULE_ID`; `assert_refit_epochs_match_rule` re-derives it from the recorded
+  # fold/seed epochs and refuses a transcribed value that is not the rule's own output.
+  #
+  # `epochs` STAYS `TBD — freeze gate` DELIBERATELY, and that is not an unresolved decision.
+  # The value does not exist until the pre-December fold fits have recorded their restored
+  # epochs (`Checkpoint.epoch`, R-94). It is derived from those results, frozen under its own
+  # D-number BEFORE the final refit and before G-05, and transcribed here. Nothing reads this
+  # field except the refit itself, so the sentinel blocks no earlier stage: the validation
+  # runs that PRODUCE the number run with `epochs` still unset.
+  #
+  # The final refit then trains for exactly that many epochs on the permitted January-November
+  # REFIT training data, with NO validation set and NO early stopping — so no December row can
+  # reach a stopping decision. December is inference-only.
+  refit:
+    decision: "D-56"   # APPROVED and COUNTERSIGNED 2026-09-21 (owner approval; supervisor countersignature as reported by the student). CR-2026-09-21-CLIMATOLOGY-REFIT §2.
+    source: "owner ruling of 2026-09-20 on GOV-2026-09-20-CG-01 Recommendation 5"
+    rule: "median_best_validation_epoch_across_folds_and_seeds_round_half_up"
+    rule_inputs: "best-validation (restored) epoch of each (fold, seed) pair over F1–F4, selected configuration only"
+    rounding: "half_up"
+    december_role: "inference_only"  # no validation set, no early stopping, at refit
+    # Derived from the recorded fold/seed epochs, frozen under its own D-number before the
+    # final refit and before G-05. Never chosen, never defaulted (Vision §1.2; TE §1.1).
+    epochs: "TBD — freeze gate"
 
 # --- estimand (Vision §2.3; TE §1.3) -------------------------------------------------------
 # Transcribed VERBATIM from the frozen orientation/weighting by statistical-inference
@@ -268,7 +369,11 @@ regimes:
   # WHICH December day range governs D-13's comparison count is a Student + Supervisor gate
   # item (GOV-2026-08-28-FD-01 Rec 15; R-124/W-2 point 5: mechanism written, value routed).
   # While the sentinel stands, the audit-count consistency path REFUSES naming this field.
-  december_day_range: "TBD — freeze gate"
+  # DECIDED 2026-09-21 by the project decision owner and the supervisor (the Student +
+  # Supervisor gate item GOV-2026-08-28-FD-01 Rec 15 routed). The range matches D-28's locked
+  # SCORED set exactly — 2-31 December 2022, 30 days — so D-13's comparison count describes
+  # precisely the set that is scored, rather than a different December.
+  december_day_range: "2022-12-02..2022-12-31"   # D-59 (proposed); matches D-28's scored set
   # D-17's observation-quality strata fields — referenced by their decision (D-17
   # § Observation-quality strata), not re-enumerated as new content; the sixteen-field
   # target-row contract itself stays in D-17. An enumerated set, never free strings (R-127).
@@ -382,3 +487,92 @@ benchmark_b01:
     tolerance_tecu: 1.0 # D-50 (2026-09-20): student-approved, per governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md
     tolerance_declared_at_utc: "2026-09-20T12:27:01Z" # the approval instant; never backdated (R-59 limb 2)
     official_interface: "IRI-2016 official web interface (irimodel.org / CCMC instant run), 5-10 samples spanning sites, day/night, quiet/disturbed (R-59 area 6)"
+
+# --- reporting: the FR-P1-05-10 top-1% sensitivity ----------------------------------------
+# NOT RESOLVED, and deliberately written as sentinels rather than left absent, so the two
+# choices a human still owes are visible at the point of use (W-9: writing a sentinel is not
+# choosing a value). `src/evaluation/diagnostics.py: read_top1pct_declaration` refuses on
+# either sentinel and names the field, so nothing runs on a default.
+#
+# WHAT IS ALREADY SETTLED, and is NOT being re-asked:
+#   * ranking variable  — the absolute error |y_hat - y_true| of each masked row. Fixed by
+#     FR-P1-05-10's own wording ("top 1% of absolute errors removed").
+#   * tie handling      — ties break by (station, interval_start_utc) ascending, so the
+#     removal is deterministic on both governed platforms (WS-17 posture). Implemented.
+#   * how many rows     — k = ceil(removed_fraction * n): `ceil`, never round or floor, so a
+#     declared removal never silently removes nothing on a small support. Implemented.
+#   * exclusion and comparison procedure — the removed rows are dropped and every metric is
+#     RECOMPUTED on the remainder; the sensitivity is reported as its own labelled figure and
+#     is NEVER merged with the primary result (Vision §2.4 honesty rule). Implemented.
+#   * a support on which the rule would remove every row refuses; the remainder must be
+#     non-empty for the recomputed metrics to exist. Implemented.
+#
+# WHAT IS STILL OWED — two values, both the owner's/supervisor's:
+#
+# 1. `removed_fraction` — the "1%" itself, as a literal fraction (0.01 is the obvious
+#    reading of "top 1%", but the literal belongs in a freeze act, not in an implementer's
+#    edit: TC-03e, TE §18.3).
+#
+# 2. `scope` — WHOSE top 1%. FR-P1-05-10 does not say, and under the project's equal-station
+#    weighting (Vision §2.3) the two readings differ materially:
+#      - "comparison_wide": rank every masked row across all three stations together and drop
+#        the largest fraction. The literal reading of the requirement's wording. A station
+#        with systematically larger errors loses a larger share of its rows, so the
+#        equal-station mean is then taken over UNEQUAL per-station supports.
+#      - "per_station": rank within each station and drop that station's own largest fraction.
+#        Supports stay proportionate and equal-station weighting keeps its meaning, but the
+#        rows removed are not the comparison's largest errors.
+#    `comparison_wide` is the module's coded DEFAULT because it is the literal reading; it is
+#    a default, not a decision, and this field is what the gate rules on.
+#    Routed as GOV-2026-09-20-CG-01 Recommendation 21 / dispositions §5 item 14 — SUPERVISOR,
+#    due before G-06. Nothing in Phase 1 before that gate reads this block.
+reporting:
+  top1pct_sensitivity:
+    # DECIDED 2026-09-21 by the project decision owner, recorded at
+    # governance/CHANGE_RECORD_2026-09-21_top1pct.md (CR-2026-09-21-TOP1PCT). This closes
+    # GOV-2026-09-20-CG-01 Recommendation 21 / dispositions §5 item 14, which routed the
+    # scope question to the gate because FR-P1-05-10 says "top 1% of absolute errors
+    # removed" without saying WHOSE top 1%.
+    decision: "D-54"   # APPROVED and COUNTERSIGNED 2026-09-21. CR-2026-09-21-TOP1PCT.
+    decided_at_utc: "2026-09-21"
+    removed_fraction: 0.01          # the "1%" of FR-P1-05-10, as a literal fraction
+    scope: "comparison_wide"        # one of: comparison_wide | per_station
+    # The owner's stated reason for comparison_wide: it is the literal reading of the
+    # requirement's own wording. The consequence is recorded rather than glossed — a station
+    # with systematically larger errors loses a larger share of its rows, so the
+    # equal-station mean is taken over unequal per-station supports. That is why the
+    # per-station removed/retained counts below are MANDATORY output, not optional.
+    #
+    # Already settled and unchanged by this decision (all implemented):
+    #   ranking variable  : absolute error |y_hat - y_true| of each masked row
+    #   tie handling      : (station, interval_start_utc) ascending — deterministic
+    #   rounding          : k = ceil(removed_fraction * n); never round or floor
+    same_retained_rows_for_every_model: true   # one retained set, applied to ALL compared models
+    # HOW several members' rankings become that ONE set. `top1pct_removed_keys` ranks a
+    # SINGLE member's own errors, so without this rule each model would be scored on a
+    # different support — the very thing the comparison-wide mask exists to prevent
+    # (NFR-FAIR-01). The owner's decision fixes that the retained rows are shared; it does
+    # not fix HOW they are combined, and the two available rules differ:
+    #   union_of_member_top_k   — remove the union of each member's own top-k. A row that is
+    #                             any model's worst goes for all. Favours no model, but the
+    #                             effective removed fraction then EXCEEDS 0.01 (reported as
+    #                             `effective_removed_fraction`, never hidden).
+    #   rank_by_max_member_error — rank each row once by its worst error across members and
+    #                             remove the top k. Exactly k rows go, so the declared 1%
+    #                             holds exactly, and no single member's ranking decides alone.
+    # OPEN — owner/supervisor, before G-06. `top1pct_comparison_removed_keys` refuses while
+    # this is unset rather than defaulting to either (TE §18.3).
+    # DECIDED 2026-09-21 by the project decision owner: rank each masked row ONCE by its
+    # worst absolute error across the compared members, then remove the top k. Exactly
+    # k = ceil(0.01 * n) rows go, so the declared 1% holds EXACTLY and no single member's
+    # ranking decides the removed set alone. The union rule was the alternative and was not
+    # chosen; it would have removed more than the declared fraction.
+    combination: "rank_by_max_member_error"
+    recompute: "equal_station_weighted"        # the established metrics, recomputed on the remainder
+    report_counts_per_station: true            # removed and retained counts, per station
+    refuse_if_any_station_loses_all_support: true
+    # BOUNDED USE. Supplementary sensitivity analysis only. It never changes the primary
+    # results, never selects a model, and never tunes a parameter (Vision §2.4 honesty rule;
+    # Vision §8.3's selection channel). Recorded BEFORE locked evaluation, as required.
+    role: "supplementary_sensitivity_only"
+    may_inform_selection_or_tuning: false

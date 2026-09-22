@@ -166,6 +166,10 @@ __all__ = [
     "derived_rmse_reduction",
     "read_top1pct_declaration",
     "top1pct_removed_keys",
+    "TOP1PCT_COMBINATIONS",
+    "top1pct_comparison_removed_keys",
+    "top1pct_station_counts",
+    "top1pct_comparison_block",
     "compute_top1pct_sensitivity_metrics",
     "build_primary_table",
     "build_breakdown_artifact",
@@ -1991,3 +1995,209 @@ def register_notebook_conclusion(
             "conclusion_text": str(conclusion_text),
         }
     )
+
+
+# =========================================================================================
+# The COMPARISON-LEVEL top-1% sensitivity (CR-2026-09-21-TOP1PCT, owner decision 2026-09-21)
+#
+# WHAT THE OWNER'S DECISION ADDED that the per-member functions above do not provide:
+#
+#   "Apply the same retained rows to all compared models, recompute the established
+#    equal-station-weighted metrics, and report removed/retained counts per station.
+#    Refuse an undefined comparison if a station loses all support."
+#
+# `top1pct_removed_keys` ranks a SINGLE member's own absolute errors, so each member would
+# get a different removed set and the models would then be compared on different supports --
+# exactly the thing a comparison-wide mask exists to prevent (NFR-FAIR-01). The functions
+# below compute ONE removed set for the whole comparison and apply it to every member.
+# =========================================================================================
+
+#: How several members' rankings combine into the ONE removed set the comparison shares.
+#: A scientific choice, so it is declared in `configs/experiment.yaml`, never defaulted here.
+TOP1PCT_COMBINATIONS: tuple[str, ...] = ("union_of_member_top_k", "rank_by_max_member_error")
+
+
+def top1pct_comparison_removed_keys(
+    mask: Any,
+    member_ids: Sequence[str],
+    *,
+    removed_fraction: float,
+    scope: str,
+    combination: str,
+) -> tuple[tuple[str, str], ...]:
+    """The ONE `(station, interval_start_utc)` set removed from EVERY compared member.
+
+    The two combinations, stated exactly so neither is re-derived by a reader:
+
+    * ``union_of_member_top_k`` -- take each member's own top-`k` by `top1pct_removed_keys`,
+      then remove the UNION. A row that is any model's worst is removed for all. The removed
+      count is then >= `k` and the effective removed fraction exceeds `removed_fraction`,
+      which is reported (`effective_removed_fraction`) rather than hidden.
+    * ``rank_by_max_member_error`` -- rank each row ONCE by the maximum absolute error across
+      the compared members, then remove the top `k`. Exactly `k` rows go, so the declared
+      fraction holds, and no single member's ranking decides the set alone.
+
+    Both share the settled rule: `k = ceil(removed_fraction * n)`, ties broken by
+    `(station, interval_start_utc)` ascending, and under ``per_station`` the ranking runs
+    once per station over that station's own rows.
+
+    Raises
+    ------
+    RegimeError
+        an unrecognised scope or combination; an empty member list; a support the rule would
+        empty; and -- the owner's explicit requirement -- a comparison in which ANY station
+        loses all of its rows, which is an undefined comparison, not a small one.
+    """
+    if str(combination) not in TOP1PCT_COMBINATIONS:
+        raise RegimeError(
+            "top-1% sensitivity",
+            f"combination {combination!r} is not one of {list(TOP1PCT_COMBINATIONS)}; the "
+            f"rule by which several members' rankings become ONE removed set is a declared "
+            f"scientific choice (configs/experiment.yaml: "
+            f"reporting.top1pct_sensitivity.combination), never defaulted here (TE §18.3)",
+        )
+    members = [str(m) for m in member_ids]
+    if not members:
+        raise RegimeError(
+            "top-1% sensitivity",
+            "no members supplied; a comparison-level sensitivity needs the members it is "
+            "shared across",
+        )
+    if str(scope) not in TOP1PCT_SCOPES:
+        raise RegimeError(
+            "top-1% sensitivity",
+            f"scope {scope!r} is not one of {list(TOP1PCT_SCOPES)} (Recommendation 21)",
+        )
+
+    if str(combination) == "union_of_member_top_k":
+        removed: set[tuple[str, str]] = set()
+        for member_id in members:
+            removed.update(
+                top1pct_removed_keys(
+                    mask, member_id, removed_fraction=removed_fraction, scope=scope
+                )
+            )
+        keys = tuple(sorted(removed))
+    else:
+        rows_by_member = {m: _member_rows(mask, m) for m in members}
+        worst: dict[tuple[str, str], float] = {}
+        for member_rows in rows_by_member.values():
+            for station, stamp, y_true, y_hat in member_rows:
+                key = (station, stamp)
+                error = abs(y_hat - y_true)
+                if error > worst.get(key, float("-inf")):
+                    worst[key] = error
+
+        def _take(group: Sequence[tuple[str, str]], label: str) -> list[tuple[str, str]]:
+            count = math.ceil(float(removed_fraction) * len(group))
+            if count >= len(group):
+                raise RegimeError(
+                    f"top-1% sensitivity over {label}",
+                    f"the declared removed_fraction {removed_fraction!r} removes {count} of "
+                    f"{len(group)} row(s), leaving no remainder; a sensitivity over zero "
+                    f"rows is not a sensitivity (FR-P1-05-10)",
+                )
+            ordered = sorted(group, key=lambda key: (-worst[key], key[0], key[1]))
+            return list(ordered[:count])
+
+        all_keys = sorted(worst)
+        if str(scope) == "per_station":
+            selected: list[tuple[str, str]] = []
+            by_station: dict[str, list[tuple[str, str]]] = {}
+            for key in all_keys:
+                by_station.setdefault(key[0], []).append(key)
+            for station in sorted(by_station):
+                selected.extend(_take(by_station[station], f"station {station}"))
+            keys = tuple(sorted(selected))
+        else:
+            keys = tuple(sorted(_take(all_keys, "the comparison-wide masked set")))
+
+    _assert_no_station_emptied(mask, members[0], keys)
+    return keys
+
+
+def _assert_no_station_emptied(
+    mask: Any, member_id: str, removed: Sequence[tuple[str, str]]
+) -> None:
+    """The owner's refusal: a station that loses ALL its rows makes the comparison undefined.
+
+    Equal-station weighting averages per-station figures, so a station with no retained row
+    has no figure to contribute and the equal-station mean is not defined over it. Refusing
+    is the only honest outcome: silently averaging over the survivors would change the
+    estimand without saying so.
+    """
+    removed_set = set(removed)
+    retained: dict[str, int] = {}
+    for station, stamp, _y_true, _y_hat in _member_rows(mask, member_id):
+        retained[station] = retained.get(station, 0) + (0 if (station, stamp) in removed_set else 1)
+    emptied = sorted(station for station, count in retained.items() if count == 0)
+    if emptied:
+        raise RegimeError(
+            f"top-1% sensitivity over mask {getattr(mask, 'mask_id', '?')}",
+            f"station(s) {emptied} retain no rows after removal; under equal-station "
+            f"weighting a station with no retained row contributes no figure, so the "
+            f"comparison is UNDEFINED rather than merely smaller -- refused instead of "
+            f"averaged over the survivors (owner decision 2026-09-21)",
+        )
+
+
+def top1pct_station_counts(
+    mask: Any, member_id: str, removed: Sequence[tuple[str, str]]
+) -> dict[str, dict[str, int]]:
+    """Removed and retained row counts PER STATION — mandatory output of the owner's decision.
+
+    Under `comparison_wide` the removal is deliberately not proportionate across stations: a
+    station with systematically larger errors loses a larger share. These counts are what
+    makes that visible to a reader instead of leaving it to be inferred, which is why the
+    decision records them as required rather than optional.
+    """
+    removed_set = set(removed)
+    counts: dict[str, dict[str, int]] = {}
+    for station, stamp, _y_true, _y_hat in _member_rows(mask, member_id):
+        entry = counts.setdefault(station, {"removed": 0, "retained": 0})
+        entry["removed" if (station, stamp) in removed_set else "retained"] += 1
+    return {station: counts[station] for station in sorted(counts)}
+
+
+def top1pct_comparison_block(
+    *,
+    mask: Any,
+    member_ids: Sequence[str],
+    removed_fraction: float,
+    scope: str,
+    combination: str,
+) -> dict[str, Any]:
+    """The whole sensitivity for a comparison: one removed set, every member recomputed.
+
+    Emitted BESIDE the primary figures and labelled `sensitivity`, never merged with them.
+    The block carries `role: supplementary_sensitivity_only` and
+    `may_inform_selection_or_tuning: false` as data, so a downstream consumer reads the
+    bound rather than having to know it (Vision §2.4 honesty rule; Vision §8.3's selection
+    channel -- this figure never selects a model or tunes a parameter).
+    """
+    members = [str(m) for m in member_ids]
+    removed = top1pct_comparison_removed_keys(
+        mask,
+        members,
+        removed_fraction=removed_fraction,
+        scope=scope,
+        combination=combination,
+    )
+    total = len(_member_rows(mask, members[0]))
+    return {
+        "label": "sensitivity",
+        "role": "supplementary_sensitivity_only",
+        "may_inform_selection_or_tuning": False,
+        "removed_fraction": float(removed_fraction),
+        "effective_removed_fraction": (len(removed) / total) if total else 0.0,
+        "scope": str(scope),
+        "combination": str(combination),
+        "rows_removed": len(removed),
+        "rows_retained": total - len(removed),
+        "removed_keys": [list(key) for key in removed],
+        "station_counts": top1pct_station_counts(mask, members[0], removed),
+        "members": {
+            member_id: compute_member_metrics(mask, member_id, excluded_keys=removed)
+            for member_id in members
+        },
+    }

@@ -1,0 +1,40 @@
+{
+ "source": {
+  "file": "evidence\\igrf13_coefficients_2026-09-21\\igrf13coeffs.txt",
+  "sha256": "460b8d8beb9b4df84febe4f0b639f0dd54dccfe8ff0970616287b015fa721425",
+  "url": "https://www.ngdc.noaa.gov/IAGA/vmod/coeffs/igrf13coeffs.txt",
+  "retrieved": "2026-09-21"
+ },
+ "method": "centered-dipole geomagnetic coordinates from the degree-1 IGRF-13 coefficients (g10, g11, h11) at epoch 2022.5, linearly extrapolated from the 2020.0 values with the IGRF-13 2020-2025 secular variation; north geomagnetic pole: colatitude theta0 = acos(-g10/B0), east longitude lambda0 = atan2(-h11, -g11), B0 = sqrt(g10^2+g11^2+h11^2); MAG frame per Hapgood (1992): Z along the dipole axis (north), Y = Z x (geographic south pole) direction, X completes, so the geographic north pole lies at geomagnetic longitude 180; geomagnetic latitude = asin(Z component), longitude = atan2(Y, X) in [0, 360). Boulder control (40.0N, 254.7E) -> (47.7, 322.2), the textbook value. NOT quasi-dipole, NOT AACGM, NOT corrected geomagnetic: those need a full-field tracing library the governed environment does not pin.",
+ "epochs": {
+  "2022.5": {
+   "g10_nT": -29390.55,
+   "g11_nT": -1432.4,
+   "h11_nT": 4587.75,
+   "B0_nT": 29780.93,
+   "north_geomagnetic_pole_lat_deg": 80.713,
+   "north_geomagnetic_pole_lon_deg_east": 287.34,
+   "stations": {
+    "ARUC": {
+     "geodetic_lat": 40.286,
+     "geodetic_lon": 44.086,
+     "geomagnetic_lat_deg": 35.642,
+     "geomagnetic_lon_deg_east": 123.046
+    },
+    "BSHM": {
+     "geodetic_lat": 32.778987,
+     "geodetic_lon": 35.022987,
+     "geomagnetic_lat_deg": 29.544,
+     "geomagnetic_lon_deg_east": 112.963
+    },
+    "NICO": {
+     "geodetic_lat": 35.140989,
+     "geodetic_lon": 33.39645,
+     "geomagnetic_lat_deg": 32.11,
+     "geomagnetic_lon_deg_east": 111.913
+    }
+   }
+  }
+ },
+ "epoch_sensitivity_note": "moving the epoch from 2022.5 to 2022.0 changes every station value by less than 0.02 degrees (secular variation of the dipole terms is 5.7/7.4/-25.9 nT per year)"
+}

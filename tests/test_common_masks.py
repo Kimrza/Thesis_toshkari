@@ -1508,7 +1508,10 @@ def test_rec20_budget_contract_mismatch_names_every_missing_field_at_once(
     tmp_path: Path,
 ) -> None:
     """NEGATIVE CONTROL for Recommendation 20's consumer half. The mutant is the budget
-    `src/data/prepared.build_uncertainty_budget` actually returns today: it states
+    `src/data/prepared.build_uncertainty_budget` returned BEFORE its 2026-09-21 reshape
+    (the producer half; the real output now passes `_assert_budget`, see
+    tests/test_prepared_target_schema.py::test_real_budget_passes_the_consumer_contract):
+    it states
     `applicable`, `not_applicable`, `bounds_statement` and `completeness`, and shares only
     `asymmetry_statement` with this consumer. The refusal must name EVERY missing field in
     one message — a one-at-a-time refusal turns one contract mismatch into four runs."""

@@ -88,10 +88,12 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import os
 import re
+import shutil
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Final
 
@@ -144,6 +146,11 @@ __all__ = [
     "compose_candidate_manifest",
     "write_candidate_manifest",
     "manifest_path_for",
+    "candidate_path_for",
+    "promote_candidate_manifest",
+    "CANDIDATE_NAME_TEMPLATE",
+    "SUPERSEDED_NAME_TEMPLATE",
+    "PROMOTION_RECORD_NAME",
     "fixture_root_for",
 ]
 
@@ -157,6 +164,26 @@ FIXTURE_IDS: Final[tuple[str, ...]] = (PLUMBING_FIXTURE_ID, SCIENTIFIC_FIXTURE_I
 MANIFEST_NAME: Final[str] = "fixture_manifest.yaml"
 #: SD-X-01 step 1: the mechanical half of the freeze record, written ONLY by the owner's act.
 SIBLING_HASH_NAME: Final[str] = "fixture_manifest.sha256"
+#: A measuring run's OWN output path, distinct from the reference manifest above
+#: (`CR-2026-09-20-FIXTURE-CANDIDATE-PATH`, owner-approved 2026-09-20).
+#:
+#: WHY THIS EXISTS. R-134 obligation 3 forbids overwriting the manifest at `MANIFEST_NAME`,
+#: and `write_candidate_manifest` enforced that with a bare `path.exists()` check. Once the
+#: Recommendation 37 remediation authored a STRUCTURAL SKELETON at that path -- sentinels
+#: only, no measured value -- the two halves of the fixture lifecycle refused each other: a
+#: comparison run refused because the skeleton is not loadable, and the measuring run that
+#: would produce the measured values refused because "a manifest already exists". Neither
+#: half was wrong; the collision was, and it blocked dispositions §5 item 8 entirely.
+#:
+#: The candidate now lands at its own per-run path and the reference manifest is never
+#: touched by a measuring run. Promotion is a separate, explicit act
+#: (`promote_candidate_manifest`), and the owner's Q-31 freeze remains a third act beyond
+#: that -- a promoted candidate is still `status: candidate`.
+CANDIDATE_NAME_TEMPLATE: Final[str] = "fixture_manifest.candidate_{run_id}.yaml"
+#: Where a superseded reference manifest is preserved when a candidate is promoted over it.
+SUPERSEDED_NAME_TEMPLATE: Final[str] = "fixture_manifest.superseded_{stamp}.yaml"
+#: The provenance record a promotion writes beside the manifest it installed.
+PROMOTION_RECORD_NAME: Final[str] = "fixture_manifest.promotions.jsonl"
 #: TE 15.4: "Every output is hash-listed in `artifact_manifest.json`."
 ARTIFACT_MANIFEST_NAME: Final[str] = "artifact_manifest.json"
 #: TE 15.4's tree root, relative to the workspace: `artifacts/walking_skeleton/<fixture_id>/`.
@@ -502,6 +529,43 @@ def manifest_path_for(workspace: Path, fixture_id: str) -> Path:
     """`<workspace>/tests/fixtures/<fixture_id>/fixture_manifest.yaml` (TE 12; R-122)."""
     _require_fixture_id(fixture_id, resource="fixture_id")
     return Path(workspace) / FIXTURES_ROOT / fixture_id / MANIFEST_NAME
+
+
+def candidate_path_for(workspace: Path, fixture_id: str, run_id: str) -> Path:
+    """A measuring run's own candidate path, one per run id.
+
+    The run id is part of the filename, so two measuring runs never collide and no candidate
+    is ever overwritten -- `write_candidate_manifest`'s existence refusal still stands over
+    this path, and here it means "this run already wrote one", which is a genuine integrity
+    failure rather than the lifecycle deadlock the shared path produced.
+    """
+    _require_fixture_id(fixture_id, resource="fixture_id")
+    safe = _safe_run_id(run_id)
+    return (
+        Path(workspace)
+        / FIXTURES_ROOT
+        / fixture_id
+        / CANDIDATE_NAME_TEMPLATE.format(run_id=safe)
+    )
+
+
+def _safe_run_id(run_id: object) -> str:
+    """A filename-safe run id: alphanumerics, dot, dash and underscore survive.
+
+    A composed `measuring_run_id` joins several run ids with `+`, and an aggregated id can be
+    long; both are mapped here rather than at the call site so every candidate path is formed
+    one way. An empty or all-substituted id is refused rather than silently named `_`.
+    """
+    text = str(run_id).strip()
+    if not text:
+        raise IntegrityError("measuring run id", "is empty; a candidate path needs a run id")
+    safe = "".join(ch if (ch.isalnum() or ch in "._-") else "-" for ch in text)
+    if not safe.strip("-"):
+        raise IntegrityError(
+            f"measuring run id {text!r}",
+            "contains no character usable in a filename; a candidate path needs a run id",
+        )
+    return safe[:120]
 
 
 def fixture_root_for(workspace: Path, fixture_id: str) -> Path:
@@ -1067,6 +1131,24 @@ def validate_manifest_mapping(
     fixture_id = _require_fixture_id(
         data.get("fixture_id"), resource=f"{manifest_path}: fixture_id"
     )
+    # No `TBD — freeze gate` value survives validation, anywhere in the mapping.
+    #
+    # FOUND BY TEST, 2026-09-20 (CR-2026-09-20-FIXTURE-CANDIDATE-PATH). `_validate_quantity`
+    # refuses a measured field that carries no `measuring_run_id`, which is what caught the
+    # Recommendation 37 skeletons -- but a field carrying a run id AND the sentinel as its
+    # VALUE loaded clean. A synthetic manifest with `runtime.cpu_total.min = "TBD — freeze
+    # gate"` was accepted by `load_fixture_manifest`, so an unmeasured bound could have
+    # reached a comparison run's runtime-range assertion. The sentinel means "no value has
+    # been measured", and that is never a value a fixture is compared against.
+    unmeasured = _sentinel_fields(data)
+    if unmeasured:
+        raise _refuse(
+            f"{manifest_path}: {unmeasured[0]}",
+            f"carries the `{TBD_SENTINEL}` sentinel"
+            + (f" (and {len(unmeasured) - 1} other field(s))" if len(unmeasured) > 1 else "")
+            + "; a manifest is measured from a fixture run and frozen, never compared against "
+            "an unmeasured placeholder (TE 15.1; R-134 obligation 1)",
+        )
     _validate_status_and_sibling(manifest_path, data, file_sha256=file_sha256)
     for area_key, area_name, quantities in CONTENT_AREAS:
         block = data.get(area_key)
@@ -1588,6 +1670,114 @@ def write_candidate_manifest(path: Path, data: Mapping[str, Any]) -> Path:
         encoding="utf-8",
     )
     return target
+
+
+def promote_candidate_manifest(
+    candidate_path: Path,
+    manifest_path: Path,
+    *,
+    promoted_by: str,
+    authorization: str,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Install a validated candidate as the reference manifest, preserving what it replaces.
+
+    THE THIRD ACT, and what it is NOT. The fixture lifecycle is three separate acts:
+    a measuring run WRITES a candidate at its own path; this function INSTALLS a candidate at
+    the reference path; and the owner's Q-31 act FREEZES it. This performs only the middle
+    one. The installed file keeps `status: candidate` -- promotion never writes `frozen`,
+    which is `R-134` obligation 2 and remains the owner's alone.
+
+    Refusals, each a separate limb so a caller learns which one fired:
+
+    * the candidate must parse, validate against the full schema, and carry `status:
+      candidate` -- a `frozen` file is never promoted by code;
+    * it must carry NO `TBD — freeze gate` sentinel anywhere: an unmeasured candidate is
+      exactly what must not become the reference a comparison run reads;
+    * an existing reference manifest is PRESERVED, never overwritten -- it is renamed to
+      `fixture_manifest.superseded_<utc>.yaml` first, and a promotion whose preservation
+      target already exists refuses rather than clobbering the earlier preservation;
+    * a `fixture_manifest.sha256` sibling belonging to the superseded file is carried across
+      with it, so a freeze record never ends up describing a different manifest.
+
+    Every promotion appends one row to `fixture_manifest.promotions.jsonl` naming the source
+    candidate, its SHA-256, the file it superseded (if any), the actor and the authorization.
+    Recorded under `CR-2026-09-20-FIXTURE-CANDIDATE-PATH`.
+    """
+    candidate_path = Path(candidate_path)
+    manifest_path = Path(manifest_path)
+    stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
+
+    if not candidate_path.is_file():
+        raise _refuse(candidate_path, "no candidate manifest exists at this path")
+
+    data = _parse_yaml_text(candidate_path, candidate_path.read_text(encoding="utf-8"))
+    if data.get("status") != CANDIDATE:
+        raise _refuse(
+            candidate_path,
+            f"carries status {data.get('status')!r}; only a {CANDIDATE!r} manifest is promoted "
+            f"-- a frozen manifest is the owner's Q-31 act and is never re-installed by code "
+            f"(R-134 obligation 2)",
+        )
+
+    sentinel_fields = _sentinel_fields(data)
+    if sentinel_fields:
+        raise _refuse(
+            candidate_path,
+            f"carries {len(sentinel_fields)} unmeasured field(s) -- {', '.join(sentinel_fields[:5])}"
+            f"{' …' if len(sentinel_fields) > 5 else ''}: a candidate reaches the reference path "
+            f"only when every measured quantity came from a measuring run (TE 15.1)",
+        )
+
+    validate_manifest_mapping(data, manifest_path=candidate_path, file_sha256=None)
+
+    superseded: str | None = None
+    if manifest_path.exists():
+        preserved = manifest_path.with_name(SUPERSEDED_NAME_TEMPLATE.format(stamp=stamp))
+        if preserved.exists():
+            raise _refuse(
+                preserved,
+                "a superseded manifest already exists at this preservation path; an earlier "
+                "preservation is never overwritten (R-134 obligation 3)",
+            )
+        manifest_path.replace(preserved)
+        superseded = preserved.name
+        sibling = manifest_path.with_name(SIBLING_HASH_NAME)
+        if sibling.exists():
+            sibling.replace(preserved.with_suffix(preserved.suffix + ".sha256"))
+
+    shutil.copyfile(candidate_path, manifest_path)
+
+    record = {
+        "promoted_at_utc": stamp,
+        "fixture_manifest": manifest_path.name,
+        "from_candidate": candidate_path.name,
+        "candidate_sha256": sha256_of_file(candidate_path),
+        "superseded": superseded,
+        "status_installed": CANDIDATE,
+        "promoted_by": promoted_by,
+        "authorization": authorization,
+    }
+    ledger = manifest_path.with_name(PROMOTION_RECORD_NAME)
+    with ledger.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    return record
+
+
+def _sentinel_fields(data: Any, prefix: str = "") -> list[str]:
+    """Every dotted path in `data` whose value is the `TBD — freeze gate` sentinel."""
+    found: list[str] = []
+    if isinstance(data, Mapping):
+        for key, value in data.items():
+            found.extend(_sentinel_fields(value, f"{prefix}{key}."))
+    elif isinstance(data, list | tuple):
+        for index, value in enumerate(data):
+            found.extend(_sentinel_fields(value, f"{prefix}{index}."))
+    elif isinstance(data, str) and data.strip() == TBD_SENTINEL:
+        found.append(prefix.rstrip("."))
+    return found
 
 
 def window_days(manifest: FixtureManifest | IdentityDeclaration) -> tuple[date, ...]:

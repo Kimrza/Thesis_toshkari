@@ -223,21 +223,92 @@ _WRITE_MARKERS = frozenset(
 )
 
 
+def _call_name(node: ast.Call) -> str:
+    func = node.func
+    return func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
+
+
+def _is_write_call(node: ast.Call) -> bool:
+    name = _call_name(node)
+    if name == "open" and len(node.args) >= 2:
+        mode = node.args[1]
+        if isinstance(mode, ast.Constant) and isinstance(mode.value, str):
+            return any(ch in mode.value for ch in "wax+")
+    return name in _WRITE_MARKERS
+
+
 def _first_write_lineno(tree: ast.AST) -> int | None:
     first: int | None = None
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call):
-            func = node.func
-            name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
-            called_open_for_write = False
-            if name == "open" and len(node.args) >= 2:
-                mode = node.args[1]
-                if isinstance(mode, ast.Constant) and isinstance(mode.value, str):
-                    called_open_for_write = any(ch in mode.value for ch in "wax+")
-            if name in _WRITE_MARKERS or called_open_for_write:
-                if first is None or node.lineno < first:
-                    first = node.lineno
+        if isinstance(node, ast.Call) and _is_write_call(node):
+            if first is None or node.lineno < first:
+                first = node.lineno
     return first
+
+
+def _first_unguarded_write_lineno(tree: ast.Module) -> int | None:
+    """The first write reached in EXECUTION order without a guard call before it.
+
+    WHY THIS EXISTS, and why `_first_write_lineno` alone is the wrong test (derived
+    2026-09-20 from the first execution of this suite under the governed Python 3.11
+    pin; the suite had never been run when the check was written).
+
+    R-24's obligation is that `assert_no_raw_fields` RUNS before the first write runs.
+    Comparing the smallest write line number against the smallest guard line number is
+    a proxy for that, and it is wrong in BOTH directions:
+
+      * False positive, observed: `scripts/07_evaluate_and_report.py` was reported as
+        "first write (line 1040) precedes the first assert_no_raw_fields call (line
+        1213)". Line 1040 is inside `_report_set` (744-1077), which is *defined* above
+        but *called* below the guard: `_run` (1292) guards at :1295 and only then
+        reaches `_report_set` through `_evaluate_partition`; the fixture entry point
+        `_run_fixture_scale` (1186) guards at :1213 before the same descent. Both
+        execution paths satisfy R-24. The script was never in violation.
+      * False negative, unobserved and the more dangerous half: a writer helper defined
+        BELOW the guard line but called BEFORE the guard would have a larger line
+        number and clear the line-order check while writing unguarded at run time.
+
+    So this walks the call graph from the module body in statement order, carrying a
+    `guarded` flag: a call to `assert_no_raw_fields` sets it for everything that follows
+    on that path, a call to a module-local function descends with the current flag, and
+    a write reached while the flag is false is the violation. Recursion is cut by a
+    visiting set. Calls the checker cannot resolve to a module-local function are
+    stepped over, which keeps the check conservative in the same direction the original
+    was: it can only clear a script whose resolvable paths guard first.
+    """
+    functions: dict[str, ast.FunctionDef | ast.AsyncFunctionDef] = {
+        node.name: node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    }
+
+    def walk_body(
+        body: list[ast.stmt], guarded: bool, visiting: frozenset[str]
+    ) -> tuple[int | None, bool]:
+        """Return (first unguarded write line on this path, guarded state on exit)."""
+        for stmt in body:
+            if isinstance(stmt, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+                continue  # a definition executes nothing; its body is walked when called
+            for node in ast.walk(stmt):
+                if not isinstance(node, ast.Call):
+                    continue
+                name = _call_name(node)
+                if name == "assert_no_raw_fields":
+                    guarded = True
+                    continue
+                if _is_write_call(node) and not guarded:
+                    return node.lineno, guarded
+                target = functions.get(name)
+                if target is not None and name not in visiting:
+                    found, guarded = walk_body(
+                        target.body, guarded, visiting | {name}
+                    )
+                    if found is not None:
+                        return found, guarded
+        return None, guarded
+
+    found, _ = walk_body(tree.body, False, frozenset())
+    return found
 
 
 def _first_guard_call_lineno(tree: ast.AST) -> int | None:
@@ -274,13 +345,19 @@ def _producing_script_violations(scripts_dir: Path) -> tuple[list[str], dict[str
             offenders[script.name] = f"does not parse, so its guard call cannot be checked: {exc}"
             continue
         guard_line = _first_guard_call_lineno(tree)
-        write_line = _first_write_lineno(tree)
         if guard_line is None:
+            # Unchanged from the original check, deliberately: a producing script that
+            # never calls the guard is an offender whether or not a write was detected.
+            # Narrowing this to write-bearing scripts would let a producing script whose
+            # write shape the marker set does not recognise clear the check silently.
             offenders[script.name] = "never calls assert_no_raw_fields"
-        elif write_line is not None and write_line < guard_line:
+            continue
+        unguarded_line = _first_unguarded_write_lineno(tree)
+        if unguarded_line is not None:
             offenders[script.name] = (
-                f"first write (line {write_line}) precedes the first "
-                f"assert_no_raw_fields call (line {guard_line})"
+                f"first write (line {unguarded_line}) precedes the first "
+                f"assert_no_raw_fields call (line {guard_line}) on the execution path "
+                f"that reaches it"
             )
     return checked, offenders
 
@@ -358,6 +435,55 @@ def test_a_compliant_producing_script_passes(tmp_path: Path) -> None:
         "from src.data.phase_contract import assert_no_raw_fields\n\n"
         'assert_no_raw_fields(["vtec_tecu"], phase=1)\n'
         'Path("out.csv").write_text("vtec_tecu\\n", encoding="utf-8")\n',
+        encoding="utf-8",
+    )
+    checked, offenders = _producing_script_violations(tmp_path)
+    assert checked == [_SYNTHETIC_SCRIPT_NAME]
+    assert offenders == {}
+
+
+def test_a_write_in_a_helper_called_before_the_guard_is_detected(tmp_path: Path) -> None:
+    """Negative control 4: the write is in a helper DEFINED BELOW the guard line.
+
+    This is the shape the superseded line-order check could not see. `_emit` writes at a
+    LARGER line number than the `assert_no_raw_fields` call, so `min(write) < min(guard)`
+    is false and the old check cleared the script -- while at run time `main` calls
+    `_emit` first and writes unguarded. Added 2026-09-20 with the execution-order walk.
+    """
+    (tmp_path / _SYNTHETIC_SCRIPT_NAME).write_text(
+        '"""Synthetic script whose unguarded write hides in a later-defined helper."""\n'
+        "from pathlib import Path\n\n"
+        "from src.data.phase_contract import assert_no_raw_fields\n\n"
+        "def main():\n"
+        "    _emit()\n"
+        '    assert_no_raw_fields(["vtec_tecu"], phase=1)\n\n'
+        "def _emit():\n"
+        '    Path("out.csv").write_text("vtec_tecu\\n", encoding="utf-8")\n\n'
+        "main()\n",
+        encoding="utf-8",
+    )
+    checked, offenders = _producing_script_violations(tmp_path)
+    assert checked == [_SYNTHETIC_SCRIPT_NAME]
+    assert "precedes" in offenders[_SYNTHETIC_SCRIPT_NAME]
+
+
+def test_a_write_in_a_helper_called_after_the_guard_passes(tmp_path: Path) -> None:
+    """Positive control for the same walk: helper DEFINED ABOVE, CALLED AFTER the guard.
+
+    `scripts/07_evaluate_and_report.py`'s real shape, reduced. The superseded check
+    reported this as a violation; it is not one, and the walk must clear it without
+    clearing the control above.
+    """
+    (tmp_path / _SYNTHETIC_SCRIPT_NAME).write_text(
+        '"""Synthetic compliant script whose writer is defined above its entry point."""\n'
+        "from pathlib import Path\n\n"
+        "from src.data.phase_contract import assert_no_raw_fields\n\n"
+        "def _emit():\n"
+        '    Path("out.csv").write_text("vtec_tecu\\n", encoding="utf-8")\n\n'
+        "def main():\n"
+        '    assert_no_raw_fields(["vtec_tecu"], phase=1)\n'
+        "    _emit()\n\n"
+        "main()\n",
         encoding="utf-8",
     )
     checked, offenders = _producing_script_violations(tmp_path)

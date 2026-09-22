@@ -1,0 +1,33 @@
+ M aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/laptop-tv4ugfbc-2742bd6d5bde.md
+ M artifacts/registry/experiment_registry.jsonl
+ M configs/data.yaml
+ M configs/experiment.yaml
+ M scripts/merge_coverage_year.py
+ M scripts/run_walking_skeleton.py
+ M src/data/fixture_manifest.py
+ M tests/test_clean_run.py
+ M tests/test_locked_test_guard.py
+ M tests/test_phase_contract.py
+ M tests/test_prepared_target_schema.py
+ M tests/test_train_only_transforms.py
+?? artifacts/acquisition/
+?? artifacts/exec_evidence/run_2026-09-20/
+?? artifacts/inventory/
+?? artifacts/run_snapshots/20260920T194613Z-f989a80f/
+?? artifacts/run_snapshots/20260920T194647Z-f524af45/
+?? artifacts/run_snapshots/20260920T194726Z-a8f77b99/
+?? artifacts/run_snapshots/20260920T194748Z-6717127f/
+?? artifacts/run_snapshots/20260920T201156Z-3d384872/
+?? artifacts/run_snapshots/20260920T201201Z-1c4d0038/
+?? artifacts/run_snapshots/20260920T201206Z-f2b24e9d/
+?? artifacts/run_snapshots/20260920T201231Z-5e6581de/
+?? artifacts/run_snapshots/20260920T201617Z-3d35b4d2/
+?? artifacts/run_snapshots/20260920T201629Z-a78e82fd/
+?? artifacts/run_snapshots/20260920T201634Z-d092181c/
+?? artifacts/run_snapshots/20260920T201639Z-34289174/
+?? artifacts/run_snapshots/20260920T201644Z-deecfc7d/
+?? artifacts/run_snapshots/20260920T201704Z-a76fa010/
+?? artifacts/run_snapshots/20260920T202145Z-77faba02/
+?? artifacts/walking_skeleton/
+?? governance/CHANGE_RECORD_2026-09-20_config_blocks.md
+?? governance/CHANGE_RECORD_2026-09-20_fixture_candidate_path.md

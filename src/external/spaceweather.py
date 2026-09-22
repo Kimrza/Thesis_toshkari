@@ -136,6 +136,7 @@ from src.data.release import sha256_of_file
 __all__ = [
     "DIAGNOSTIC_ONLY_SERIES",
     "DECLARED_STATUS_ONLY_SERIES",
+    "DRIVER_PRODUCERS",
     "PROVENANCE_FIELDS",
     "GRADE_USES",
     "trailing_mean",
@@ -167,6 +168,27 @@ __all__ = [
 #: Dst is diagnostic/hindcast-only, never a confirmatory ML feature (TC-11; D-10.1's
 #: series). A classification, not a scientific value: the rule is Vision's, frozen.
 DIAGNOSTIC_ONLY_SERIES: frozenset[str] = frozenset({"dst"})
+
+#: The producing-artifact identity of every driver-class TE 6.2 row (D-63, 2026-09-21;
+#: closes the seven rows `configs/features.yaml: permitted_producers` deferred under D-35).
+#: Each identity names the ONE provider product the governing decision already fixes for
+#: that row -- a transcription of D-10.1 (providers), D-39 (Kp/ap: the archived settled
+#: nowcast `Kp_now2022.wdc`, DOI 10.5880/Kp.0001), D-40 (Hp60/ap60: Hpo.0002 V2.0, the
+#: contemporaneous product; V3.0 is a comparator only), D-21/D-22/D-23/D-25 (F10.7: the
+#: NRCan observed flux, project-derived daily median) and D-10.1 (Dst: Kyoto WDC, one
+#: release grade). The driver release that `05_build_features_and_splits.py` reads by
+#: manifest MUST stamp `producing_artifact` with exactly these identities; `build_features`
+#: refuses any other (row, producer) pair (SD-F-01). The config block transcribes this
+#: constant and `tests/test_feature_availability.py` asserts the two cannot drift.
+DRIVER_PRODUCERS: Mapping[str, str] = {
+    "kp_safe": "gfz_kp_ap_nowcast_2022",
+    "ap_safe": "gfz_kp_ap_nowcast_2022",
+    "hp60_safe": "gfz_hp60ap60_v2_2022",
+    "ap60_safe": "gfz_hp60ap60_v2_2022",
+    "f107_safe": "nrcan_f107_observed_daily_median_2022",
+    "f107_81_trailing": "nrcan_f107_observed_daily_median_2022",
+    "dst": "kyoto_wdc_dst_2022",
+}
 
 #: Series whose reanalysed-value verifiability is DECLARED-STATUS ONLY (R-63's
 #: Constraint): F10.7 (D-22: seven columns, no provenance column; D-21: publication

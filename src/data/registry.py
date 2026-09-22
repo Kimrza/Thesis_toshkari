@@ -64,6 +64,7 @@ from src.data.config import TBD_SENTINEL, ConfigSnapshot, RegistryError
 
 __all__ = [
     "SECTION_6_2_FIELDS",
+    "GEOMAGNETIC_FIELDS",
     "PHASE2_ONLY_REGISTRY_FIELDS",
     "CELL_RULE_ID",
     "Station",
@@ -90,7 +91,17 @@ SECTION_6_2_FIELDS: Final[tuple[str, ...]] = (
     "observable_codes",
     "hardware_changes_2022",
     "igrf_version",
+    "geomagnetic_lat",
+    "geomagnetic_lon",
 )
+
+#: Vision 6.2's "Geomagnetic coordinates (IGRF, pinned version)" column, absent from this
+#: contract until GOV-2026-09-20-CG-01 Recommendation 13 (option 1: a field with a refusal,
+#: mirroring `observable_codes`). Values are the Student's Q-06 freeze, transcribed into
+#: `configs/data.yaml` per station with provenance; the pair is REQUIRED in both phases and
+#: refused when absent, blank or `TBD — freeze gate` — never computed here (TC-03e: no
+#: coordinate lives in source) and never defaulted (R-45).
+GEOMAGNETIC_FIELDS: Final[tuple[str, ...]] = ("geomagnetic_lat", "geomagnetic_lon")
 
 #: The identifier of D-1's frozen coordinate-to-cell rule. The config's `cell_rule`
 #: value must equal this identifier once the freeze event transcribes it; any other
@@ -142,6 +153,10 @@ class Station:
     igrf_version: str  # pinned, never defaulted
     cell: tuple[int, int]  # (floor(lat), floor(lon)), half-open, D-1
     provenance: Mapping[str, str] = field(default_factory=dict)  # R-46 amendment
+    #: Vision 6.2 geomagnetic coordinates under the pinned IGRF generation (Rec 13). `None`
+    #: means unresolved; `assert_registry_resolved` refuses it by name.
+    geomagnetic_lat: float | None = None
+    geomagnetic_lon: float | None = None
 
 
 @dataclass(frozen=True)
@@ -238,9 +253,7 @@ def _parse_intervals(
     return tuple(parsed)
 
 
-def _intervals_cover_year(
-    intervals: Sequence[tuple[_dt.date, _dt.date, str]], year: int
-) -> bool:
+def _intervals_cover_year(intervals: Sequence[tuple[_dt.date, _dt.date, str]], year: int) -> bool:
     """Whether the union of intervals covers [Jan 1, Dec 31] of `year`."""
     needed = _dt.date(year, 1, 1)
     year_end = _dt.date(year, 12, 31)
@@ -294,8 +307,7 @@ def load_registry(snapshot: ConfigSnapshot) -> Mapping[str, Station]:
     if not isinstance(stations_block, Mapping) or not stations_block:
         raise RegistryError(
             "configs/data.yaml:stations",
-            "stations must be a non-empty mapping of station_id to its transcribed "
-            "6.2 entry",
+            "stations must be a non-empty mapping of station_id to its transcribed " "6.2 entry",
         )
 
     cell_rule = data.get("cell_rule")
@@ -366,6 +378,22 @@ def load_registry(snapshot: ConfigSnapshot) -> Mapping[str, Station]:
             for entry in hardware_raw:
                 stamp, note = entry  # type: ignore[misc]
                 hardware.append((_dt.date.fromisoformat(str(stamp)), str(note)))
+        geomagnetic: dict[str, float | None] = {}
+        for name in GEOMAGNETIC_FIELDS:
+            value = raw.get(name)
+            if value is None or (
+                isinstance(value, str) and (not value.strip() or value.strip() == TBD_SENTINEL)
+            ):
+                geomagnetic[name] = None
+            else:
+                try:
+                    geomagnetic[name] = float(value)  # type: ignore[arg-type]
+                except (TypeError, ValueError):
+                    raise RegistryError(
+                        sid,
+                        f"{name} {value!r} is not a number; a geomagnetic coordinate is a "
+                        f"transcribed decimal degree, never a label (6.2; R-45)",
+                    ) from None
         registry[sid] = Station(
             station_id=sid,
             lat=lat,
@@ -387,6 +415,8 @@ def load_registry(snapshot: ConfigSnapshot) -> Mapping[str, Station]:
             igrf_version=igrf_text,
             cell=computed_cell,
             provenance=provenance,
+            geomagnetic_lat=geomagnetic["geomagnetic_lat"],
+            geomagnetic_lon=geomagnetic["geomagnetic_lon"],
         )
     return registry
 
@@ -448,8 +478,7 @@ def assert_registry_resolved(registry: Mapping[str, Station], *, phase: int = 2)
         if not station.igrf_version.strip():
             raise RegistryError(
                 sid,
-                "igrf_version is empty; an absent version FAILS, it never falls back "
-                "(R-45)",
+                "igrf_version is empty; an absent version FAILS, it never falls back " "(R-45)",
             )
         if station.igrf_version.strip() == TBD_SENTINEL:
             raise RegistryError(
@@ -464,6 +493,20 @@ def assert_registry_resolved(registry: Mapping[str, Station], *, phase: int = 2)
                 f"the distinction that matters is between no value and a value chosen "
                 f"for you, and both are refused (R-45, TS-I-01)",
             )
+        unresolved_geomagnetic = [
+            name for name in GEOMAGNETIC_FIELDS if getattr(station, name) is None
+        ]
+        if unresolved_geomagnetic:
+            raise RegistryError(
+                sid,
+                "geomagnetic coordinate(s) unresolved (absent or TBD — freeze gate): "
+                + ", ".join(unresolved_geomagnetic)
+                + " — Vision 6.2's 'Geomagnetic coordinates (IGRF, pinned version)' column "
+                "is a Student freeze transcribed with provenance, never computed or "
+                "defaulted here (Rec 13; R-45)",
+            )
+        if not -90.0 <= float(station.geomagnetic_lat) <= 90.0:  # type: ignore[arg-type]
+            raise RegistryError(sid, "geomagnetic_lat is outside [-90, 90] (6.2; R-45)")
         missing_provenance = [
             name
             for name in SECTION_6_2_FIELDS

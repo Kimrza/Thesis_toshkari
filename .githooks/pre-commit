@@ -13,13 +13,17 @@
 #
 # Enable with:  git config core.hooksPath .githooks
 #
-# NOT YET ENABLED. `git config core.hooksPath` is UNSET, `.git/hooks/` holds only Git's
-# stock samples, and no commit in this repository's history has been gated by this hook
-# (Recommendation 35). Enabling it is a STUDENT act — CR-2026-09-20-GOV-CG-01-DISPOSITIONS
-# §5 item 4 — and no agent has run or may run that command. Its stated precondition, the
-# Recommendation 30 restricted-case deselection in §2 below, LANDED 2026-09-20, so the
-# sequencing bar is clear: enabling the hook no longer makes every commit perform a
-# December restricted read. Record the activation date and the first commit it gated.
+# ENABLED 2026-09-21 (`git config core.hooksPath .githooks`, run on the project decision
+# owner's explicit instruction of that date — CR-2026-09-20-GOV-CG-01-DISPOSITIONS §5
+# item 4; Recommendation 35). Precondition satisfied first: the Recommendation 30
+# restricted-case deselection in §2 below landed 2026-09-20, so enabling the hook does not
+# make a commit perform a December restricted read. The first commit this hook gated is
+# the commit that carries this header. Two facts about the machine this was enabled on:
+# `gitleaks` 8.18.4 was installed to ~/bin the same day (the pinned version; the hook
+# refuses any other), and the interpreter the hook finds as `python` must be the governed
+# CPython 3.11 environment (`tec-thesis-311`) for the critical set to be meaningful —
+# commit with that environment first on PATH; an interpreter without the pinned
+# dependencies fails closed here rather than silently passing a hollow set.
 
 set -e
 

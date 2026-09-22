@@ -122,6 +122,11 @@ __all__ = [
     "build_coverage_report",
     "build_data_quality_block",
     "build_uncertainty_budget",
+    "resolve_budget_rule",
+    "combine_budget_scalars",
+    "RECORDED_NOT_APPLICABLE",
+    "BUDGET_COMBINATIONS",
+    "BUDGET_STATISTICS",
     "assert_budget_complete",
     "write_target_rows_csv",
     "read_target_rows_csv",
@@ -1078,7 +1083,7 @@ def standardize_hourly_target(
         rows.append(row)
 
     coverage = build_coverage_report(rows, invalid_reasons=invalid_reasons)
-    budget = build_uncertainty_budget(rows)
+    budget = build_uncertainty_budget(rows, budget_rule=resolve_budget_rule(data_config))
     assert_budget_complete(budget)
     quality = build_data_quality_block(
         coverage_report=coverage,
@@ -1148,13 +1153,110 @@ def build_coverage_report(
     }
 
 
-def build_uncertainty_budget(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+#: The literal every consumer-side `phase2_quantities` value must equal
+#: (`src/evaluation/diagnostics._RECORDED_NOT_APPLICABLE`; Recommendation 20).
+RECORDED_NOT_APPLICABLE: Final[str] = "recorded not-applicable"
+
+#: The combination rules `budget_value` may be frozen under (dispositions §4.5): how the
+#: two Phase 1-applicable per-content scalars become ONE TECU magnitude. Closed set; the
+#: choice itself is a TE §18.2 forbidden-choice item, read from configuration, never
+#: defaulted here.
+BUDGET_COMBINATIONS: Final[tuple[str, ...]] = ("sum", "quadrature", "max")
+#: The per-content summary statistics the rule may name (over the standardized rows).
+BUDGET_STATISTICS: Final[tuple[str, ...]] = ("median", "p95", "max")
+
+
+def _percentile(ordered: Sequence[float], q: float) -> float:
+    """Linear-interpolated percentile over an ascending sequence (no numpy at this layer)."""
+    if not ordered:
+        raise StandardizationError("uncertainty budget", "percentile of an empty sequence")
+    position = (len(ordered) - 1) * q / 100.0
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    weight = position - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+
+
+def _statistic(values: Sequence[float], statistic: str) -> float:
+    ordered = sorted(values)
+    if statistic == "max":
+        return ordered[-1]
+    if statistic == "median":
+        return _percentile(ordered, 50.0)
+    if statistic == "p95":
+        return _percentile(ordered, 95.0)
+    raise StandardizationError("uncertainty budget", f"unknown statistic {statistic!r}")
+
+
+def resolve_budget_rule(data_config: Mapping[str, Any]) -> Mapping[str, Any] | None:
+    """`configs/data.yaml: target.uncertainty_budget` — the frozen `budget_value` rule, or None.
+
+    Returns `None` while the block is absent or any of its fields is `TBD — freeze gate`
+    (the rule is OWED, dispositions §4.5): the producer then emits `budget_value: None`
+    with the owed decision named, and `practical_relevance_statement` refuses honestly.
+    A present block must cite a decision and name a statistic and a combination from the
+    closed sets; anything else is refused by name rather than read loosely.
+    """
+    target = data_config.get("target")
+    block = target.get("uncertainty_budget") if isinstance(target, Mapping) else None
+    if not isinstance(block, Mapping):
+        return None
+    fields = {k: block.get(k) for k in ("decision", "statistic", "combination")}
+    unset = (None, "", TBD_SENTINEL)
+    if any(v is None or (isinstance(v, str) and v.strip() in unset) for v in fields.values()):
+        return None
+    if str(fields["statistic"]) not in BUDGET_STATISTICS:
+        raise StandardizationError(
+            "configs/data.yaml target.uncertainty_budget.statistic",
+            f"{fields['statistic']!r} is not one of {list(BUDGET_STATISTICS)}",
+        )
+    if str(fields["combination"]) not in BUDGET_COMBINATIONS:
+        raise StandardizationError(
+            "configs/data.yaml target.uncertainty_budget.combination",
+            f"{fields['combination']!r} is not one of {list(BUDGET_COMBINATIONS)}",
+        )
+    if not str(fields["decision"]).startswith("D-"):
+        raise StandardizationError(
+            "configs/data.yaml target.uncertainty_budget.decision",
+            "must cite the D-number that froze the rule (TE 18.2)",
+        )
+    return {k: str(v) for k, v in fields.items()}
+
+
+def combine_budget_scalars(scalars: Mapping[str, float], combination: str) -> float:
+    """The frozen combination applied to the per-content scalars (all TECU)."""
+    values = [float(v) for v in scalars.values()]
+    if combination == "sum":
+        return sum(values)
+    if combination == "quadrature":
+        return math.sqrt(sum(v * v for v in values))
+    if combination == "max":
+        return max(values)
+    raise StandardizationError("uncertainty budget", f"unknown combination {combination!r}")
+
+
+def build_uncertainty_budget(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    budget_rule: Mapping[str, Any] | None = None,
+    artifact_id: str = "uncertainty_budget",
+) -> dict[str, Any]:
     """W-7 / R-72: two applicable contents, the asymmetry statement, four not-applicable.
 
     The budget STATES ITS BOUNDS rather than truncating: the observed ranges of the two
     applicable quantities are reported as computed — a budget that silently clips
     under-reports. The four Phase 2 contents are recorded not-applicable WITH their
     reason, never emitted empty.
+
+    Shape (Recommendation 20, producer half, 2026-09-21): ONE artifact shape project-wide.
+    The consumer-required fields — `artifact_id`, `phase1_contents` (keyed by content,
+    each carrying its statement AND its measured scalars), `phase2_quantities` (a mapping
+    whose every value is the literal `recorded not-applicable`), `units` and
+    `budget_value` — are emitted beside the R-72 fields (`applicable`, `not_applicable`,
+    `bounds_statement`, `completeness`) that `assert_budget_complete` checks. `budget_value`
+    is computed ONLY under a frozen rule (`budget_rule`, resolved from `configs/data.yaml:
+    target.uncertainty_budget` by `resolve_budget_rule`); without one it is `None` and
+    `budget_value_rule` names the owed decision, so the consumer refuses by name (§4.5).
     """
     dtec_values = [float(row["provider_dtec_summary"]) for row in rows]
     spread_values = [float(row["within_hour_spread_tecu"]) for row in rows]
@@ -1167,7 +1269,78 @@ def build_uncertainty_budget(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any
             f"— reported as computed, never truncated or clipped to a bound (R-72)"
         )
 
+    def _measured(values: Sequence[float]) -> dict[str, Any]:
+        if not values:
+            return {"rows": 0}
+        ordered = sorted(values)
+        return {
+            "rows": len(ordered),
+            "min": ordered[0],
+            "max": ordered[-1],
+            "median": _percentile(ordered, 50.0),
+            "p95": _percentile(ordered, 95.0),
+        }
+
+    measured = {
+        "provider_reported_uncertainty": _measured(dtec_values),
+        "within_hour_aggregation_spread": _measured(spread_values),
+    }
+    budget_value: float | None = None
+    rule_record: dict[str, Any]
+    if budget_rule is None:
+        rule_record = {
+            "status": "owed",
+            "owner": "Student + Supervisor countersignature (TE 18.2 forbidden choice)",
+            "where": (
+                "configs/data.yaml: target.uncertainty_budget {decision, statistic, combination}"
+            ),
+            "reference": (
+                "GOV-2026-09-20-CG-01 Recommendation 20; "
+                "CR-2026-09-20-GOV-CG-01-DISPOSITIONS §4.5"
+            ),
+        }
+    elif not rows:
+        rule_record = {**dict(budget_rule), "status": "frozen; no rows, so no value"}
+    else:
+        statistic = str(budget_rule["statistic"])
+        scalars = {
+            content: _statistic(values, statistic)
+            for content, values in (
+                ("provider_reported_uncertainty", dtec_values),
+                ("within_hour_aggregation_spread", spread_values),
+            )
+        }
+        budget_value = combine_budget_scalars(scalars, str(budget_rule["combination"]))
+        rule_record = {
+            **dict(budget_rule),
+            "status": "frozen",
+            "per_content_scalars_tecu": scalars,
+        }
+
     return {
+        "artifact_id": artifact_id,
+        "units": "TECU",
+        "phase1_contents": {
+            "provider_reported_uncertainty": {
+                "statement": (
+                    "provider-reported dtec, summarised per hour as provider_dtec_summary "
+                    "(D-19 statistic: median); " + _bounds(dtec_values)
+                ),
+                "measured_tecu": measured["provider_reported_uncertainty"],
+            },
+            "within_hour_aggregation_spread": {
+                "statement": (
+                    "within-hour spread of contributing samples, within_hour_spread_tecu "
+                    "(D-19 statistic: range, max minus min); " + _bounds(spread_values)
+                ),
+                "measured_tecu": measured["within_hour_aggregation_spread"],
+            },
+        },
+        "phase2_quantities": {
+            content: RECORDED_NOT_APPLICABLE for content in PHASE2_ONLY_UNCERTAINTY_CONTENTS
+        },
+        "budget_value": budget_value,
+        "budget_value_rule": rule_record,
         "applicable": {
             "provider_reported_uncertainty": (
                 "provider-reported dtec, summarised per hour as provider_dtec_summary "

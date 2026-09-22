@@ -1,0 +1,295 @@
+# configs/features.yaml — one of the four governed configs (TE §12; TC-03e).
+#
+# Foundation owns no feature science. Every scientific field here carries the
+# literal `TBD — freeze gate` sentinel until the owning unit
+# (features-and-splits) transcribes its frozen values under their D-numbers.
+# Writing a sentinel is not choosing a value (W-9); assert_no_tbd (§18.3)
+# refuses a run whose stage requires an unresolved field.
+#
+# The binding feature rules that will govern this file when filled (recorded so
+# the sentinel is not mistaken for an open question): availability lags
+# Kp/ap3 >= 3h, Hp60/ap60 >= 1h, F10.7 previous-day observed with a TRAILING
+# (never centered) 81-day mean (D-10.3, TC-10); Dst diagnostic/hindcast-only,
+# never a confirmatory feature (TC-11); no iri_* field ever (NFR-IRI-01); no
+# SSN; carry-forward of missing drivers bounded at 3 hours then exclude (TC-09);
+# longitude only through lst_sin/lst_cos (TE §7.2).
+#
+# No machine path may appear in this file (R-16, ADR-07).
+
+schema_version: "1.0.0"
+
+# feature_set_id — FROZEN 2026-09-21 (D-60), the project decision owner's approval of the
+# proposal at governance/proposed/FEATURE_IDS_PROPOSAL_2026-09-21.md. An identity stamp, not
+# a scientific value: it travels on every dataset, mask and comparison so a reader can tell
+# which feature contract produced them. A change to the dictionary below means a NEW id
+# (FS-P1-2022-v2), never an edit of this one.
+feature_set_id: "FS-P1-2022-v1"
+
+# feature_dictionary — FROZEN 2026-09-21 (D-60). 21 named fields over 13 of TE §6.2's rows.
+#
+# WHAT IS TRANSCRIPTION AND WHAT WAS CHOSEN. The input space was already closed in two places
+# that agree: TE §6.2's dictionary table, and `src/features/build.py: SECTION_6_2_ROWS` as a
+# frozen constant. The rows, the exact lag set [1,2,3,24] and the `none` normalizations are
+# COPIES. One thing was chosen: the seven rows whose TE §6.2 Normalization column reads the
+# conditional "Train-only if scaled" resolve to `train_only_standardize` — the owner's
+# approval of 2026-09-21, on the reasons recorded in the proposal (Ridge and the LSTM are
+# scale-sensitive across drivers spanning Kp 0–9 to F10.7 in the hundreds; RF is
+# scale-invariant so it costs nothing; train-only fitting is the leakage-safe direction and
+# is fitted per fold on training rows only, NFR-LEAK-01).
+#
+# DELIBERATELY ABSENT, each for a stated reason — absence here is a decision, not an omission:
+#   * `dst`            — TE §6.2: "Diagnostic / hindcast-only. Not a confirmatory feature."
+#                        Declaring it would place it in the model input space.
+#   * `ssn_*`          — TE §6.2: "Removed. Not used anywhere." REMOVED_ROWS refuses it by name.
+#   * `target_support` — diagnostic by default; model use "requires explicit G-04 approval",
+#                        and G-04 is not passed. Target-hour quality fields are permanently
+#                        forbidden as features regardless.
+#   * raw longitude    — enters only through lst_sin/lst_cos (TE §7.2).
+#   * anything IRI-bearing — the denial mechanism refuses it; WS-10 proves the refusal.
+feature_dictionary:
+  # --- target-derived lags (TE §6.2 row `vtec_lag`; exact lags [1,2,3,24], strictly causal) -
+  vtec_lag_1h:
+    dictionary_row: "vtec_lag"
+    lag_hours: 1
+    normalization: "train_only_standardize"
+  vtec_lag_2h:
+    dictionary_row: "vtec_lag"
+    lag_hours: 2
+    normalization: "train_only_standardize"
+  vtec_lag_3h:
+    dictionary_row: "vtec_lag"
+    lag_hours: 3
+    normalization: "train_only_standardize"
+  vtec_lag_24h:
+    dictionary_row: "vtec_lag"
+    lag_hours: 24
+    normalization: "train_only_standardize"
+  # --- the LSTM sequence tensor (TE §6.2 states its normalization outright) -----------------
+  vtec_seq_24:
+    dictionary_row: "vtec_seq_24"
+    sequence_steps: 24
+    normalization: "train_only_standardize"
+  # --- cyclical time encodings (TE §6.2 Normalization column: "None") -----------------------
+  utc_hour_sin:
+    dictionary_row: "utc_hour_sin"
+    normalization: "none"
+  utc_hour_cos:
+    dictionary_row: "utc_hour_cos"
+    normalization: "none"
+  doy_sin:
+    dictionary_row: "doy_sin"
+    normalization: "none"
+  doy_cos:
+    dictionary_row: "doy_cos"
+    normalization: "none"
+  # --- local solar time: THE ONLY channel through which longitude enters any model ----------
+  lst_sin:
+    dictionary_row: "lst_sin"
+    normalization: "none"
+  lst_cos:
+    dictionary_row: "lst_cos"
+    normalization: "none"
+  # --- station identity (TE §6.2 Normalization column: "None") ------------------------------
+  station_onehot_ARUC:
+    dictionary_row: "station_onehot"
+    station_id: "ARUC"
+    normalization: "none"
+  station_onehot_BSHM:
+    dictionary_row: "station_onehot"
+    station_id: "BSHM"
+    normalization: "none"
+  station_onehot_NICO:
+    dictionary_row: "station_onehot"
+    station_id: "NICO"
+    normalization: "none"
+  # --- station latitude: "Train-only if scaled" -> train_only_standardize (owner, 2026-09-21)
+  station_lat:
+    dictionary_row: "station_lat"
+    normalization: "train_only_standardize"
+  # --- forecast-safe drivers: "Train-only if scaled" -> train_only_standardize --------------
+  # Every driver names its source_series; the lag floors themselves live in availability_lags
+  # below (D-25/D-42/D-43/D-46), not here.
+  kp_safe:
+    dictionary_row: "kp_safe"
+    source_series: "kp"
+    normalization: "train_only_standardize"
+  ap_safe:
+    dictionary_row: "ap_safe"
+    source_series: "ap"
+    normalization: "train_only_standardize"
+  hp60_safe:
+    dictionary_row: "hp60_safe"
+    source_series: "hp60"
+    normalization: "train_only_standardize"
+  ap60_safe:
+    dictionary_row: "ap60_safe"
+    source_series: "ap60"
+    normalization: "train_only_standardize"
+  f107_safe:
+    dictionary_row: "f107_safe"
+    source_series: "f107_daily_median"
+    normalization: "train_only_standardize"
+  # The TRAILING 81-day mean. A centered mean is prohibited — it uses future days and is a
+  # defect, not a fallback (TE §6.2; project.md § Forbidden).
+  f107_81_trailing:
+    dictionary_row: "f107_81_trailing"
+    source_series: "f107_daily_median"
+    normalization: "train_only_standardize"
+availability_lags:
+  # Transcribed 2026-09-19 (CR-2026-09-19-SCI-DECISIONS §6/§9, item 6 of the owner's
+  # 2026-09-19 authorization) per D-25 (rule), D-42 (floors as project assumptions),
+  # D-43 (interval-END reference instant), D-46 (composition, reading B), D-47
+  # (tolerance and domain). D-42/D-43/D-46 are TE §18.2 Student + Supervisor items:
+  # supervisor countersigned 2026-09-19 per the student's report
+  # (governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md). This transcription does not
+  # by itself pass G-04 or certify any *_safe feature leakage-free.
+  #
+  # lag_reference_instant, selection_rule and window.recomputation_input_bound_sfu are
+  # REQUIRED fields (D-43/D-44/D-47), validated by the reader
+  # (src/features/availability.py:read_availability_lags) against closed sets and,
+  # for selection_rule/lag_reference_instant, cross-checked at build_features time
+  # against the driver's actual attrs["selection"] (src/features/build.py); for
+  # recomputation_input_bound_sfu, wired into the real build_availability_matrix call
+  # to assert_anchor_recomputed (CR-2026-09-19-SCI-DECISIONS-P3,
+  # tests/test_feature_availability.py::test_build_availability_matrix_actually_applies_the_configured_input_bound
+  # and ::test_config_declared_selection_mechanics_are_cross_checked_against_the_driver).
+  kp_safe:
+    safe_lag_hours: 3                        # D-10.3 / D-116; D-42 floor accepted as an assumption
+    lag_reference_instant: "interval_end_utc"   # D-43: completion + 3 h
+    selection_rule: "latest_completed_interval_plus_lag"   # D-44 (spaceweather.select_lagged_series)
+    release_status_required: "nowcast"       # D-39: archived settled nowcast (Kp_now2022.wdc)
+    publication_latency_statement: >-
+      GFZ Kp_now2022.wdc (DOI 10.5880/Kp.0001) carries no per-value publication timestamp; the
+      3-hour floor after interval completion is a project assumption for a retrospective study
+      (D-42, D-43), not a demonstrated publication or revision-completion bound; results using
+      this archive do not establish exact operational replay or absence of revision-related
+      look-ahead.
+  ap_safe:
+    safe_lag_hours: 3
+    lag_reference_instant: "interval_end_utc"
+    selection_rule: "latest_completed_interval_plus_lag"
+    release_status_required: "nowcast"
+    publication_latency_statement: >-
+      GFZ Kp_now2022.wdc (DOI 10.5880/Kp.0001) carries no per-value publication timestamp; the
+      3-hour floor after interval completion is a project assumption for a retrospective study
+      (D-42, D-43), not a demonstrated publication or revision-completion bound; results using
+      this archive do not establish exact operational replay or absence of revision-related
+      look-ahead.
+  hp60_safe:
+    safe_lag_hours: 1
+    lag_reference_instant: "interval_end_utc"   # D-43: completion + 1 h
+    selection_rule: "latest_completed_interval_plus_lag"
+    release_status_required: "hpo_v2.0_contemporaneous"   # D-40: Hpo.0002 V2.0; V3.0 is a comparator only
+    publication_latency_statement: >-
+      GFZ Hp60ap60doi_2022.txt V2.0 (DOI 10.5880/Hpo.0002) carries no publication timestamp and no
+      definitive grade; the 1-hour floor after interval completion is a project assumption for a
+      retrospective study (D-42, D-43); V3.0 (DOI 10.5880/Hpo.0003) is a later algorithm-recomputed
+      comparator, never an input.
+  ap60_safe:
+    safe_lag_hours: 1
+    lag_reference_instant: "interval_end_utc"
+    selection_rule: "latest_completed_interval_plus_lag"
+    release_status_required: "hpo_v2.0_contemporaneous"
+    publication_latency_statement: >-
+      GFZ Hp60ap60doi_2022.txt V2.0 (DOI 10.5880/Hpo.0002) carries no publication timestamp and no
+      definitive grade; the 1-hour floor after interval completion is a project assumption for a
+      retrospective study (D-42, D-43); V3.0 (DOI 10.5880/Hpo.0003) is a later algorithm-recomputed
+      comparator, never an input.
+  f107_safe:
+    availability_rule: "previous_day_median_midnight_utc"   # D-25 (Route 1); no scalar lag
+    release_status_required: "observed"      # NRCan fluxobsflux; project-derived daily median (D-21/D-22/D-23)
+    publication_latency_statement: >-
+      fluxtable.txt carries no publication timestamp; availability_ts(median(D-1)) = 00:00 UTC on D is
+      an explicit project assumption (D-25), 1-2 h after the day's last reading (23 UT Mar-Oct, 22 UT
+      Nov-Feb); publication latency unverified (EC1-R-4 open).
+  f107_81_trailing:
+    availability_rule: "previous_day_median_midnight_utc"   # A2: window end day derived from the rule
+    release_status_required: "observed"
+    window:
+      kind: "trailing"                       # never centered (TE §6.2)
+      days: 81
+      source: "f107_daily_median"            # the D-21 series the producer releases
+      recomputation_tolerance: 8.0e-12       # D-47, sfu, absolute
+      recomputation_input_bound_sfu: 400     # D-47 applicability condition (not a physical maximum)
+    publication_latency_statement: >-
+      fluxtable.txt carries no publication timestamp; availability_ts(median(D-1)) = 00:00 UTC on D is
+      an explicit project assumption (D-25); the window's constituents are the same daily medians.
+# normalization — FROZEN 2026-09-21 (D-60). The DEFAULT posture; the per-field column in
+# `feature_dictionary` above is what `build_features` actually reads. Setting the default to
+# the train-only form means a field added later without an explicit column inherits the
+# leakage-safe behaviour rather than the silent one (NFR-LEAK-01).
+normalization: "train_only_standardize"
+
+# D-46 (reading B; supervisor countersigned 2026-09-19 per the student's report).
+carry_forward_bound_hours: 3                 # TE §6.2 / TC-09 (D-116)
+carry_forward_composition: "clock_hours"     # D-46; inclusive boundary, clock from the missing value's expected availability instant
+
+# --- permitted-producer list (POLICY frozen; 18 of 18 rows transcribed, D-35 + D-63) ----
+# features-and-splits SD-F-01 (Q1 = A) / code-generation Q3 = A (2026-09-05): per §6.2
+# dictionary row, the producing artifact(s) permitted to supply a column of that row,
+# keyed per (row, producer) pair. Read by the SEPARATE loader
+# src/features/build.py:load_permitted_producers, never through ConfigSnapshot.
+# While a REQUESTED row has no entry, build_features REFUSES naming that row and NO
+# feature matrix is produced.
+#
+# THE LEAKAGE-SAFE POLICY, frozen by the project decision owner's ruling of 2026-09-10
+# ADOPTED as **D-35** (2026-09-10); prepared at
+# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
+# evidence/DECISIONS.md. A feature may be produced for a row only if it is
+# available at the forecast origin; carries no future target TEC; needs no locked-December
+# access; respects its declared safe lag; introduces no future information through
+# preprocessing (train-only fitting where any fitting occurs); is deterministic where
+# determinism is required; and is compatible with the 1-hour-ahead forecast. Feature
+# philosophy: local historical VTEC, temporal features, and legitimately-available
+# solar/geomagnetic drivers — no IRI-derived anything, no future leakage. Every clause is
+# existing binding text (Vision §6; TE §6.2; D-10.3; TC-09; NFR-IRI-01; NFR-LEAK-01;
+# FR-P1-04-10; TE §6.2's REMOVED `ssn` row) — this block transcribes, it does not create.
+#
+# The eleven rows below are the rows whose PRODUCING ARTIFACT the implemented contract
+# itself fixes (code constants and the released target identity), so each entry is a
+# transcription rather than a choice (D-35, 2026-09-10).
+#
+# The seven driver-class rows — kp_safe, ap_safe, hp60_safe, ap60_safe, f107_safe,
+# f107_81_trailing, dst — were DELIBERATELY ABSENT under D-35 (a producing-artifact
+# identity for a release that did not exist). CLOSED 2026-09-21 under **D-63** (owner
+# instruction: complete the seven entries from the decisions and contracts). Each identity
+# names the ONE provider product the governing decision already fixes for that row, so the
+# entry is a transcription, not an invention: D-10.1 (providers: Kp/ap3 → GFZ Potsdam;
+# Dst → Kyoto WDC; F10.7 → NRCan observed flux); D-39 (Kp/ap: the archived settled nowcast
+# Kp_now2022.wdc, DOI 10.5880/Kp.0001 — `release_status_required: nowcast` below); D-40
+# (Hp60/ap60: Hpo.0002 V2.0, the contemporaneous product; V3.0 is a comparator only —
+# `release_status_required: hpo_v2.0_contemporaneous` below); D-21/D-22/D-23/D-25 (F10.7:
+# the project-derived daily median of NRCan observed flux — both F10.7 rows draw on the
+# same released series, `source_series: f107_daily_median`); D-10.1 (Dst: one release
+# grade, diagnostic/hindcast-only — DIAGNOSTIC_ONLY_SERIES still bars it from modelling
+# input; a producer entry admits PROVENANCE, never a modelling role). The identities are
+# the code constant src/external/spaceweather.py:DRIVER_PRODUCERS; the driver release that
+# 05 reads by manifest MUST stamp `producing_artifact` with exactly these values, and
+# tests/test_feature_availability.py asserts config and constant cannot drift.
+permitted_producers:
+  # target-derived rows — the released D-17 Phase 1 hourly target, read by manifest by
+  # 05/06/07; lagged/sequence VTEC is target history strictly BEFORE the forecast origin.
+  vtec_lag: ["phase1_hourly_target"]
+  vtec_seq_24: ["phase1_hourly_target"]
+  # the support field travels on the same target release; R-78 still governs ADMISSION.
+  target_support: ["phase1_hourly_target"]
+  # time rows — TIMESTAMP_PRODUCER in src/features/build.py: a pure function of the
+  # record's own interval_start_utc, so no external artifact and no future information.
+  utc_hour_sin: ["record_timestamp"]
+  utc_hour_cos: ["record_timestamp"]
+  doy_sin: ["record_timestamp"]
+  doy_cos: ["record_timestamp"]
+  # station rows — STATION_REGISTRY_PRODUCER, gated by assert_registry_resolved. Local
+  # solar time is the ONLY route longitude may take into the input space (FR-P1-04-10).
+  lst_sin: ["station_registry"]
+  lst_cos: ["station_registry"]
+  station_onehot: ["station_registry"]
+  station_lat: ["station_registry"]
+  # driver rows — D-63 (2026-09-21); identities = spaceweather.DRIVER_PRODUCERS.
+  kp_safe: ["gfz_kp_ap_nowcast_2022"]
+  ap_safe: ["gfz_kp_ap_nowcast_2022"]
+  hp60_safe: ["gfz_hp60ap60_v2_2022"]
+  ap60_safe: ["gfz_hp60ap60_v2_2022"]
+  f107_safe: ["nrcan_f107_observed_daily_median_2022"]
+  f107_81_trailing: ["nrcan_f107_observed_daily_median_2022"]
+  dst: ["kyoto_wdc_dst_2022"]

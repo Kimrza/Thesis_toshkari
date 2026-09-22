@@ -1,0 +1,116 @@
+{
+  "artifact_class": "data_quality_block",
+  "lineage_caveat": "The Phase 1 target is location-sampled gridded VTEC (Madrigal cell), never receiver-specific station-observed VTEC, and it carries its own distinct target_definition_id. The Phase 1 grid-cell target population is not the Phase 2 IPP target population: no numerical equivalence between the Phase 1 and Phase 2 targets is claimed, and Phase 2 is a fixed-protocol replication on a new target lineage, not a second statistically independent blind test (Vision 2.2, 6.6). Part of any measured IRI or GIM difference is a geometry and sampling artefact rather than skill: Phase 1 compares a grid cell against a station-coordinate evaluation, Phase 2 an IPP cloud against a zenith estimate (Vision 6.6).",
+  "payload": {
+    "documentation": {
+      "fill_values": "gaps are explicit NaN at acquisition (D-5); standardization interpolates, smooths and fills NOTHING",
+      "signs": "VTEC is non-negative; a negative value is impossible, not small — an unexplained negative is rejected (R-71 content 2)",
+      "times": "UTC throughout; interval_start_utc is the hour start of the half-open interval [h, h+1)",
+      "units": "vtec_tecu, within_hour_spread_tecu, provider_dtec_summary in TECU"
+    },
+    "missingness_and_support": {
+      "invalid_reasons": {
+        "BSHM:32:35:2022-11-02T10:00:00Z": [
+          "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+        ],
+        "BSHM:32:35:2022-11-03T14:00:00Z": [
+          "within_hour_spread_tecu 11.036400000000004 above D-19 range bound 10.0"
+        ],
+        "BSHM:32:35:2022-11-05T07:00:00Z": [
+          "within_hour_spread_tecu 11.557000000000002 above D-19 range bound 10.0"
+        ],
+        "BSHM:32:35:2022-11-05T14:00:00Z": [
+          "within_hour_spread_tecu 11.9789 above D-19 range bound 10.0"
+        ],
+        "BSHM:32:35:2022-11-05T23:00:00Z": [
+          "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+        ],
+        "BSHM:32:35:2022-11-06T14:00:00Z": [
+          "within_hour_spread_tecu 10.3552 above D-19 range bound 10.0"
+        ],
+        "BSHM:32:35:2022-11-06T23:00:00Z": [
+          "largest_internal_gap_s 2700.0 above D-19 maximum 1800.0"
+        ],
+        "BSHM:32:35:2022-11-07T14:00:00Z": [
+          "within_hour_spread_tecu 10.949300000000001 above D-19 range bound 10.0"
+        ],
+        "BSHM:32:35:2022-11-07T16:00:00Z": [
+          "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+        ],
+        "BSHM:32:35:2022-11-07T23:00:00Z": [
+          "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+        ]
+      },
+      "keying_note": "keyed to the same cell and month identifiers the G-P1A record uses (R-71); different keying is how two reports about one dataset become impossible to reconcile",
+      "keys": [
+        "station",
+        "cell_gdlat",
+        "cell_glon",
+        "month"
+      ],
+      "per_cell_month": [
+        {
+          "cell_gdlat": 32,
+          "cell_glon": 35,
+          "invalid_rows": 10,
+          "month": "2022-11",
+          "rows": 168,
+          "station": "BSHM",
+          "valid_rows": 158
+        }
+      ]
+    },
+    "negative_vtec": {
+      "explained": [],
+      "policy": "unexplained rejected with an explicit raise naming the record; explained accepted with the explanation recorded here"
+    },
+    "processor_qc_flags": {
+      "aggregation_flags": [],
+      "not_applicable_classes": [
+        "package-level QC (Phase 2 — recorded not-applicable, never emitted empty)",
+        "DCB QC (Phase 2)",
+        "arc and cycle-slip QC (Phase 2)",
+        "elevation QC (Phase 2)",
+        "mapping-function QC (Phase 2)"
+      ]
+    },
+    "uncertainty_budget": {
+      "applicable": {
+        "provider_reported_uncertainty": "provider-reported dtec, summarised per hour as provider_dtec_summary (D-19 statistic: median); observed over 168 row(s): min 0.3761675, max 1.3049 — reported as computed, never truncated or clipped to a bound (R-72)",
+        "within_hour_aggregation_spread": "within-hour spread of contributing samples, within_hour_spread_tecu (D-19 statistic: range, max minus min); observed over 168 row(s): min 0.23772000000000038, max 11.9789 — reported as computed, never truncated or clipped to a bound (R-72)"
+      },
+      "asymmetry_statement": "A slowly varying per-station-day bias partially cancels in the paired difference but does not cancel in the derived percentage summary, because it inflates the reference denominator.",
+      "bounds_statement": "This budget covers the Phase 1-applicable set only (two of Vision 6.9's six contents plus the asymmetry statement); Vision 6.9 states its list without a phase qualifier, and the phase qualifier runs through Vision 15.2 — recorded so the gap reads as governed rather than as non-compliance. Values are stated as computed; nothing is truncated.",
+      "completeness": {
+        "asserted": true,
+        "phase1_applicable": [
+          "provider_reported_uncertainty",
+          "within_hour_aggregation_spread"
+        ]
+      },
+      "not_applicable": [
+        {
+          "content": "per-satellite residual spread",
+          "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+        },
+        {
+          "content": "per-IPP sampling dispersion",
+          "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+        },
+        {
+          "content": "zenith and elevation geometry uncertainty",
+          "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+        },
+        {
+          "content": "mapping-function contribution",
+          "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+        }
+      ]
+    },
+    "unexplained_discrepancies": []
+  },
+  "phase_id": "P1A",
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "target_label": "location-sampled gridded VTEC"
+}

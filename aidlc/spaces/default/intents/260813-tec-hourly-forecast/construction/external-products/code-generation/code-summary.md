@@ -824,3 +824,255 @@ Nothing here discharges a WS or TA row, generates an IRI benchmark or GIM compar
 advances G-04. The gate verdict for `GOV-2026-09-20-CG-01` stands at **`FAIL`**, and the
 standing reviewer `NOT-READY` on this unit (Recommendation 3) is untouched: clearing it
 needs a fresh reviewer dispatch and a human turn that post-dates the resulting verdict.
+
+## Post-receipt amendment — 2026-09-21 (the terminal Critical's remedy, disclosed; D-63 driver producer identities; smoke-workspace helper)
+
+*Appended under `project.md` `code-generation:gf-3` and `code-generation:fr-2` (re-derive
+the unit's own state at review time and write the correction into the BODY). Nothing above
+is rewritten. Baseline for every diff figure: `HEAD = de1732f`, measured by
+`git diff --numstat HEAD` and printed before assertion.*
+
+### 1. The Critical that the terminal NOT-READY (2026-09-13, iteration 2) rests on was remedied the same day, and this record never said so
+
+The verdict's five-link chain — `run_walking_skeleton.py` injects `--fixture-manifest` into
+every Phase 1 invocation; `04`'s `_declared_data_window()` declares the full calendar year;
+`require_fixture_receipts` → `assert_declared_window_within_scope` refuses a declaration
+outside the 7-day / 1-month scope; therefore no plumbing receipt can be written and
+WS-20/TA-17 are unreachable — was repaired under `CR-2026-09-13-04-FIXTURE-WINDOW`
+(owner ruling "APPROVE OPTION (A)", 2026-09-13), committed in `1c692a4`. Read directly from
+the current file, not from the change record: `scripts/04_build_external_products.py`
+`_stage_entry` now branches on `fixture_manifest is not None` — on a fixture run the
+scope's cited window (`load_fixture_scope(fixture_manifest).window`) is BOTH the
+declaration passed to `require_receipts_for_snapshot` and the audit's read bound, and
+`_declared_data_window()` (the full year) is consulted only on the non-fixture path. Its
+docstring records the earlier state as "the deadlock that ruling resolves". The
+declaration is therefore inside the scope by construction, link 3 of the chain no longer
+fires, and the reason the reviewer withheld READY — "the pipeline cannot complete its
+mandated fixture ladder" — is no longer true of `04`.
+
+What this amendment does NOT claim: that the ladder now completes end to end. It does not
+— it stopped on 2026-09-21 at `05`'s permitted-producer refusal (now closed, §2) and next
+stops at `05`'s deliberately unbuilt release-input loader (`_load_release_inputs`, a
+`features-and-splits` module, TE 18.3 stop-and-report). Those are other units' obligations;
+this unit's `04` step is no longer the reason the ladder cannot pass.
+
+The stage-04 driver-audit path has still not been executed inside the ladder (the
+registry carries no `external-products` row); the Critical is closed by code read, and the
+fixture run is the execution-owed evidence.
+
+### 2. D-63 — the seven driver-class permitted-producer identities (this unit's module)
+
+`src/external/spaceweather.py` **+22 / −0**: a new constant `DRIVER_PRODUCERS`
+(exported) mapping each driver-class TE 6.2 row to the ONE producing-artifact identity its
+governing decision fixes — `kp_safe`/`ap_safe` → `gfz_kp_ap_nowcast_2022` (D-39: the
+archived settled nowcast `Kp_now2022.wdc`, DOI 10.5880/Kp.0001); `hp60_safe`/`ap60_safe` →
+`gfz_hp60ap60_v2_2022` (D-40: Hpo.0002 V2.0; V3.0 is a comparator only);
+`f107_safe`/`f107_81_trailing` → `nrcan_f107_observed_daily_median_2022` (D-21/D-22/D-23/
+D-25: both rows draw on the one released daily-median series); `dst` → `kyoto_wdc_dst_2022`
+(D-10.1; still `DIAGNOSTIC_ONLY_SERIES` — a producer entry admits provenance, never a
+modelling role). `configs/features.yaml: permitted_producers` transcribes the seven
+(**18 of 18** rows now carried; header and rationale comment rewritten, the D-35 "deliberately
+absent" paragraph replaced by the D-63 closure paragraph). `tests/test_feature_availability.py`
+(**+49 / −35**; `features-and-splits`' module — cross-unit edit, disclosed here because the
+constant it pins is this unit's): the D-35 exact-eighteen-rows test now expects the union
+and asserts `spaceweather.DRIVER_PRODUCERS` equals the literal transcription; the
+"still fails closed on every deferred driver row" control is REPLACED (the rows are no
+longer deferred) by `test_permitted_producers_driver_rows_admit_only_their_decision_fixed_producer`,
+which pins one producer per row, refuses the definitive-grade and V3.0 identities by name,
+and asserts `dst` stays diagnostic-only. The obligation this creates on the driver-release
+producer (an unbuilt module; the ladder's `05` reads it by manifest) is stated on the
+constant: it MUST stamp `producing_artifact` with exactly these values.
+
+Decision status: **D-63 is a PROPOSED number** written into `evidence/DECISIONS.md` on the
+project decision owner's explicit instruction of 2026-09-21 ("complete the configs for the
+7 permitted_producers fields based on decisions and contracts"); its text states that each
+identity is a transcription of an already-approved product selection, not a new scientific
+choice. No supervisor countersignature is claimed for D-63 — D-41's precedent (producer
+identities are not a TE §18.2 row) applies.
+
+### 3. `tests/test_external_drivers.py` **+30 / −2** — smoke-workspace helper
+
+`configs/data.yaml: declared_sources` went from `[]` to eleven hash-declared month entries
+on 2026-09-21 (Recommendations 8 and 22; the provider-version census run). The
+subprocess controls here run `04` against a temporary `TEC_WORKSPACE_ROOT` with the REAL
+`configs/`, so `assert_declared_sources_exist` — which resolves paths against the workspace
+— refused eleven absent files BEFORE the governed refusal each control is written to
+observe (12 of the module's controls failed in the first 2026-09-21 full-suite run, all at
+`_assert_full_scale_refusal:1112` with "the refusal names none of the governed refusals").
+`_mirror_declared_sources` now hard-links (copy fallback) every declared source into the
+smoke workspace so the preflight sees the same bytes production sees; nothing is
+fabricated — a path the real workspace lacks stays absent and is named exactly as in
+production. **81** `def test_` functions in this module after the change (65 at the 2026-09-19
+amendment; the 16 added on 2026-09-20 by the first remediation pass — this change adds a
+helper and no test function; counted by `grep -c "^def test_"` and printed before
+assertion). All 81 pass under the governed pin (session-3 suite run, `junit_session3.xml`).
+
+### 4. What is unchanged
+
+`src/external/iri.py`, `src/external/gim.py`, `scripts/04_build_external_products.py`
+(zero diff against `de1732f`), `tests/test_iri_denial.py` (22 functions). No WS or TA row is
+claimed discharged. B-01's R-59 limb 1 is still open (case 5's official value is
+uncollected; `iricore` still uninstallable locally). G-04 is not passed.
+
+## Adversarial re-review (2026-09-21) — fresh dispatch after GOV-2026-09-20-CG-01 Recommendation 3
+
+**Verdict:** READY
+**Reviewer:** aidlc-architecture-reviewer-agent
+**Date:** 2026-09-21T19:24:40Z
+**Iteration:** fresh dispatch (post-Recommendation 3)
+
+### Verification performed
+
+**1. The terminal Critical's remedy, re-traced link by link against the CURRENT tree (not
+the artifact's own account of it).**
+
+- `scripts/04_build_external_products.py` `_stage_entry` (lines 347–422) read in full. It now
+  branches on `fixture_manifest is not None` (line 382): on a fixture run it calls
+  `load_fixture_scope(fixture_manifest)` (line 387) and sets `audit_window = scope.window`,
+  `declared_window = audit_window` (line 390) — the declaration passed to
+  `require_receipts_for_snapshot` is now the SAME object as the scope's own cited window,
+  never the hardcoded full-year window from `_declared_data_window()` (line 344), which is
+  reached only on the `else` branch (line 392, non-fixture path).
+- `src/data/fixture_gate.py::assert_declared_window_within_scope` (lines 209–251) read in
+  full: it asserts the declared start/end lie inside `scope.window` via
+  `assert_records_within_window`. Because the fixture-run declared window is now literally
+  `scope.window` itself (same tuple), this check is satisfied by construction — link 3 of the
+  2026-09-13 chain ("declares the full year" → "refuses against every fixture scope") no
+  longer fires; the premise it depended on (`_declared_data_window()` engaged on the fixture
+  path) is now false by the `else` branch.
+- `require_receipts_for_snapshot` → `require_fixture_receipts` (lines 587–706 of
+  `fixture_gate.py`) confirmed to only invoke `assert_declared_window_within_scope` when
+  `declared_window is not None` (line 615), and the call is otherwise unmodified — the gate
+  itself was not loosened, only `04`'s own declaration was corrected. `run_walking_skeleton.py`
+  and `src/data/fixture_manifest.py` (the other two links in the chain) are unmodified per
+  `git diff --numstat HEAD` — the remedy is entirely local to `04`'s own `_stage_entry`, exactly
+  as this unit's amendment (§1) claims.
+- Commit history confirms authorship and timing: `git log --oneline -- scripts/04_build_external_products.py`
+  shows `8d4297d "04 fixture-window repair (Option a): scope-derived audit windowing on
+  fixture runs (CR-2026-09-13-04-FIXTURE-WINDOW)"`, between `0e002cd` (the commit the
+  2026-09-13 terminal NOT-READY verdict was verified against) and the current-HEAD-adjacent
+  `1c692a4`. `governance/CHANGE_RECORD_2026-09-13_04_fixture_window.md` opens with
+  `**Authority:** the project decision owner's ruling of 2026-09-13, … "OWNER RULING — APPROVE
+  OPTION (A)"` — the disposition this unit's Finding 1 (2026-09-13, iteration 2) explicitly
+  named as one of the three legitimate remedies. **The Critical is genuinely closed by code
+  that exists, on disk, today**, not merely asserted.
+
+**2. The PRIMARY artifact's disclosure of that remedy, checked figure by figure.**
+
+Every diff and count figure asserted in "Post-receipt amendment — 2026-09-21" was
+independently re-derived, not taken on the artifact's word:
+
+| Claim | Independent re-derivation | Result |
+|---|---|---|
+| `src/external/spaceweather.py` +22/−0 (D-63) | `git diff --numstat HEAD -- src/external/spaceweather.py` | **22 0** — exact match |
+| `tests/test_external_drivers.py` +30/−2 | `git diff --numstat HEAD -- tests/test_external_drivers.py` | **30 2** — exact match |
+| `scripts/04_build_external_products.py`, `src/external/iri.py`, `src/external/gim.py`, `tests/test_iri_denial.py` — zero diff against HEAD | `git diff --numstat HEAD` over all four | **no output for any of the four** — zero diff confirmed |
+| `configs/data.yaml` — eleven hash-declared source entries | direct read, counted `- path:` entries in the `declared_sources:` block (lines 453 onward) | **11** — exact match |
+| `configs/features.yaml: permitted_producers` — 18 of 18 rows | direct read of lines 269–295, counted by category (3 target + 4 time + 4 station + 7 driver) | **18** — exact match |
+| `tests/test_external_drivers.py` — 81 `def test_` functions, 2,307 lines | `grep -c "^def test_"` and `wc -l` | **81** and **2307** — both match (2,307 also reconciles arithmetically against the artifact's own prior-stated 2,279 + this pass's declared +30/−2) |
+| `tests/test_iri_denial.py` — 22 `def test_` functions | `grep -c "^def test_"` | **22** — exact match |
+| `DRIVER_PRODUCERS` — 7 entries, the exact identities named | direct read of `src/external/spaceweather.py` lines 183–191 | **7 entries, identities match the table verbatim** (`gfz_kp_ap_nowcast_2022` ×2, `gfz_hp60ap60_v2_2022` ×2, `nrcan_f107_observed_daily_median_2022` ×2, `kyoto_wdc_dst_2022` ×1) |
+| `dst` stays `DIAGNOSTIC_ONLY_SERIES`, never overridden by a producer entry | direct read of `spaceweather.py` line 170 and its one call site at line 960 (`if series_id in DIAGNOSTIC_ONLY_SERIES and use == "modelling_input"`) | confirmed — the producer-identity map and the diagnostic-only refusal are independent structures; a `DRIVER_PRODUCERS` entry for `dst` does not and cannot suppress the modelling-input refusal |
+| D-63 recorded in `evidence/DECISIONS.md`, proposed (no supervisor countersignature claimed) | direct read of the D-63 entry (line 3289) and its gate-table summary row (line 3603) | confirmed; summary row states "Not required under TE §18.2 … student instruction 2026-09-21" |
+
+No discrepancy found between the artifact's claimed figures and the repository's actual
+state. This is a materially more careful disclosure than the 2026-09-13 predecessor's Major
+finding (an un-derived "nine" explanation) — every number here was printed from a live
+command before being asserted, consistent with `project.md`'s count-derivation rule.
+
+**3. The smoke-workspace helper (`_mirror_declared_sources`), read in full.** Confirmed it
+hard-links (falling back to a copy) each `configs/data.yaml: declared_sources` path from the
+real repository into the temporary smoke workspace, and does nothing for a path the real tree
+lacks — no bytes are fabricated, and a genuinely-absent source is still reported absent by the
+governed refusal it feeds. This closes the honest gap the artifact itself names: without it,
+the new eleven-entry `declared_sources` list (added for Recommendations 8/22, a sibling
+lane's provider-version census) would make every non-fixture subprocess control in this
+file's suite fail at `assert_declared_sources_exist` before reaching the refusal each control
+is written to observe.
+
+**4. Standing invariants, re-checked directly against the current tree.**
+
+- `grep -rn "iri_" src/features src/models` → hits only in `src/features/build.py` (lines
+  17, 280, 339, 342, 348), all part of the denial guard's own refusal logic
+  (`lowered.startswith("iri_")`, raising); no leaked field.
+- `grep -rn "^\s*from src.external import\|^\s*import src.external" src` → exactly one hit,
+  `src/evaluation/metrics.py:506`, `from src.external import gim` (deferred, function-scoped;
+  the line number has drifted from the artifact's last-cited `:477` because of intervening
+  unrelated edits to that file by its owning unit, but it remains the single import and the
+  same evaluation-time-only shape). No import of `src.external.iri` anywhere in `src/`.
+- `src/external/spaceweather.py::trailing_mean` (lines 222–234) read in full: window is
+  `[end_day-(window_days-1), end_day]` by construction; no `centered` implementation exists.
+- No WS/TA acceptance row (WS-09, WS-10, WS-11, TA-07, TA-36) is claimed discharged anywhere
+  in the current artifact — confirmed by grep across the file; the "Nothing discharged" line
+  (§ "Governance stop") and the newest amendment's §4 both still list them as `Pending`/not
+  claimed.
+
+**5. Test execution — done directly, in the governed environment, exceeding this unit's own
+static-only bound for the 2026-09-19/20/21 amendments.** Ran
+`CUDA_VISIBLE_DEVICES="" PYTHONHASHSEED=0 …/tec-thesis-311/python.exe -m pytest -q
+tests/test_external_drivers.py tests/test_iri_denial.py -p no:cacheprovider` myself: **all
+tests passed, exit code 0**, no failures or errors reported (progress dots only, no `F`/`E`
+markers). One observation, not a defect: the pytest run's own progress markers total 104
+collected items against 81+22=103 `def test_` functions; this is consistent with ordinary
+parametrization inside one of the 103 functions and does not contradict any count the artifact
+actually asserts (it asserts function counts via `grep -c "^def test_"`, never a pytest
+item-collection total).
+
+### Findings
+
+| # | Severity | Location | Finding | Recommendation |
+|---|---|---|---|---|
+| 1 | Major | `code-generation-plan.md`, "Gate finding, raised 2026-09-13" section (lines 164–195, the plan's final section) | This unit's companion plan artifact — named in `code-summary.md`'s own header ("Plan: `code-generation-plan.md`") and part of this unit's produced artifact set — still asserts the Critical as open and unremedied: "**`scripts/04_build_external_products.py` cannot pass the walking-skeleton fixture ladder** … **The owner ruled on 2026-09-13: record it as a gate finding and rule later. No code moves on it in this pass.**" This is now stale: `CR-2026-09-13-04-FIXTURE-WINDOW` (Option a) was implemented and committed the same day (`8d4297d`), and the fix is correctly disclosed in `code-summary.md`'s own "Post-receipt amendment — 2026-09-21" §1 (verified above). The plan file itself was never updated to record the remedy or point to the amendment. A reader who consults the plan alone — which is exactly what the plan exists for, as the step-by-step record of what was decided and done — is told the Critical is still open with "no code moves on it," which is no longer true. This is the same failure mode `project.md`'s sweep-every-representation corrections exist to catch (`units-generation:re-1`, `functional-design:fd-2026-08-30-sweep-derive-sites`), recurring here between two files of the same unit's own artifact set rather than across units. It does not affect the correctness of the remedy itself (verified sound above), and it is disclosed nowhere as a known gap, which is what keeps this at Major rather than a mere Minor — an omission the artifact does not itself flag is more costly to a reader than one it names. | Append a short dated note to `code-generation-plan.md`'s "Gate finding" section recording that `CR-2026-09-13-04-FIXTURE-WINDOW` Option (a) was implemented in `8d4297d` the same day, with a pointer to `code-summary.md`'s "Post-receipt amendment — 2026-09-21" §1 for the verified detail. |
+| 2 | Note | `code-summary.md`, "What this amendment does NOT do" (§1, 2026-09-21) | Correctly and conservatively scoped: the amendment does not claim the full ladder completes end-to-end (stage `05`'s unbuilt release-input loader is named as the next stop), does not claim the stage-04 driver-audit path has actually been executed inside the ladder, and does not claim any WS/TA row discharged. This framing is accurate against the code as read — recorded as a Note, not a defect, because it is exactly the honest-disclosure standard this unit has held across every prior pass. | None — no action needed. |
+| 3 | Note | D-63, `evidence/DECISIONS.md`, `configs/features.yaml` | D-63 is disclosed throughout as a PROPOSED number on student instruction, explicitly not a TE §18.2 row (D-41 precedent cited), with no supervisor countersignature claimed. This is a gate-routed disposition question for the human, not a defect in this unit's artifact — recorded as a Note per the dispatch's instruction to route disclosed-and-deferred obligations owned by other decision-makers to the gate rather than treat them as this unit's defects. | Route to the gate: confirm D-63's "not a §18.2 row" reading before it is relied on at a freeze gate. |
+
+### Judgment
+
+The 2026-09-13 terminal NOT-READY rested on exactly one verified, unremedied Critical: the
+five-link chain proving `scripts/04_build_external_products.py` could never complete inside
+the walking-skeleton ladder. That chain has been independently re-traced against the CURRENT
+`_stage_entry` (not the artifact's narrative of it) and the third link — the fixture-run
+declaration equaling the full calendar year — no longer holds: the declaration is now the
+fixture scope's own cited window, satisfying `assert_declared_window_within_scope` by
+construction. The remedy is real code, committed (`8d4297d`), not a proposal or a narrative
+correction. Every other claim this unit's artifact makes about its own current state — the
+D-63 driver-producer identities, the smoke-workspace helper, the diff and count figures, the
+standing IRI/GIM/trailing-mean invariants — was independently re-derived from the repository
+directly (not taken on the artifact's word) and held exactly as claimed, including a live
+execution of this unit's owned test suite in the governed environment (103 functions, all
+passing, exit 0), which exceeds the static-only bound the artifact itself has operated under
+since 2026-09-20. The one finding that survives — the plan file's stale "unremedied, no code
+moves on it" claim — is a documentation-consistency gap between two files of the same unit's
+own artifact set, not a correctness or gate-safety defect, and does not itself misstate what
+IS true of the code (the correct, current account lives in `code-summary.md`, which is the
+PRIMARY artifact this stage's protocol treats as authoritative). Consistent with this unit's
+own precedent (the 2026-09-11 pass, where a comparable single documentation-staleness Major did
+not on its own move the verdict), READY is the correct verdict: the ground the 2026-09-13
+NOT-READY stood on is gone, verified independently rather than accepted on report, and nothing
+newly found rises to a correctness or gate-safety Critical or a second Major.
+
+### Coverage limits
+
+- Did not re-open `component-dependency.md`'s `tests/*` blanket-row discrepancy (owned by
+  `inception/application-design`, outside this unit's read scope) beyond confirming it remains
+  disclosed as gate-routed.
+- Did not independently re-verify the ~10 SD-E-00…SD-E-07 coverage-table rows beyond the prior
+  passes' spot-checks; nothing in the 2026-09-19/20/21 amendments touches that surface.
+- Did not read `src/features/build.py`, `src/features/transforms.py` or
+  `src/features/availability.py` (the consuming-side wiring for the four spaceweather.py
+  guards, `features-and-splits`-owned) beyond the two spot-checks the dispatch's carve-out
+  permits (`dst`'s diagnostic-only enforcement site, and the D-63 test transcription in
+  `tests/test_feature_availability.py`) — their own correctness is that unit's own review's
+  responsibility.
+- Did not execute `scripts/run_walking_skeleton.py` itself (the dispatch scoped execution to
+  `tests/test_external_drivers.py` and `tests/test_iri_denial.py` only, and explicitly excluded
+  the three restricted-root-reading test modules); the Critical's remedy was verified by
+  reading the control flow directly and by the fact that no test in this unit's own two
+  executed modules exercises the walking-skeleton entry point end to end. `run_walking_skeleton.py`
+  itself was read (not executed) to confirm it still injects `--fixture-manifest` unconditionally
+  and that `lifecycle_arguments` still does not narrow `04`'s invocation — both unchanged from
+  the 2026-09-13 verification.
+- Did not read anything under `evidence/locked_test_restricted/`, per the dispatch's explicit
+  exclusion.
+
+**Verdict: READY**

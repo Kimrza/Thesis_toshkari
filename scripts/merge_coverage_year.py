@@ -118,10 +118,24 @@ def _access_record():
 
     purpose is coverage_audit: the merge derives coverage counts and never inspects model
     performance -- the performance-blind class Vision section 8.3 permits before G-05.
+
+    retrieved_at_utc is stamped HERE, at call time, on every call (Recommendation 1). It
+    carried the literal placeholder 'recorded-at-call-time-by-the-runner' until 2026-09-20,
+    which is the constant all 5,964 historical rows of
+    evidence/test_run_access_log.jsonl carry and the reason FR-P1-02-3 / VAL-2's
+    log-then-read ordering was unverifiable from the artifact that records it. The two
+    producers named in src/data/locked_test.py's _assert_parseable_retrieved_at were fixed
+    that day; this third one was missed and only surfaced when the suite was first executed
+    (2026-09-20, Python 3.11.16), because the guard REFUSES the placeholder -- so the
+    script could not route a restricted path at all.
+
+    This value is the caller's own claim and is not trusted evidence: the guard stamps its
+    own logged_at_utc immediately before the fsync, and that is the field the ordering
+    check reads.
     """
     return AccessRecord(
         run_id='merge_coverage_year',
-        retrieved_at_utc='recorded-at-call-time-by-the-runner',
+        retrieved_at_utc=datetime.now(timezone.utc).isoformat(),
         scope='per-month acquisition artifacts, including December 2022 under D-15',
         purpose='coverage_audit',
         performance_inspected=False,

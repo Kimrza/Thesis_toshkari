@@ -2898,6 +2898,542 @@ stage 00 completes (`records_read_from_month_file` 18,183; `records_in_window` 1
 
 ---
 
+---
+
+## D-53 — The documented-QC operation list is closed at five operations (freeze)
+
+**Decision date:** 2026-09-21. **Approved by:** the project decision owner ("approved,
+proceed"; "Transcribe existing approvals now"), and **countersigned by the supervisor on the
+student's report of the same date**. No separately signed document artifact exists in the
+workspace and none is claimed. **Authority:** FR-P1-03-1 (the closed four-transformation set);
+R-64; TE §7.0A P1-03 ("preserve provider values; apply only documented QC, UTC normalization,
+cell selection and frozen hourly aggregation; never … silently interpolate missing cells");
+R-71 content 2 / NFR-DQ-01; **D-19** (all four threshold values); **D-5** and **D-10.2** (gaps).
+
+**Decision.** `configs/data.yaml: qc_operations` is frozen as the closed list of exactly five
+documented-QC operations, the first of FR-P1-03-1's four permitted transformations:
+
+| # | Operation | Effect | Governing record |
+|---|---|---|---|
+| 1 | `reject_unexplained_negative_vtec` | **Rejects** the row unless a recorded explanation accompanies it; an explained negative is accepted with its explanation carried in the data-quality block | R-71 content 2; NFR-DQ-01 |
+| 2 | `flag_valid_observation_count_below_minimum` | Marks `target_valid: false` with the reason, below **3** samples | D-19 |
+| 3 | `flag_within_hour_spread_above_range_bound` | Marks `target_valid: false` above a **10.0 TECU** range | D-19 |
+| 4 | `flag_largest_internal_gap_above_maximum` | Marks `target_valid: false` above **1800 s** | D-19 |
+| 5 | `flag_provider_dtec_summary_above_level` | Records a **quality flag only**; does not invalidate the row, above **1.5 TECU** median `dtec` | D-19 |
+
+**What is new here, stated exactly.** All five operations were already approved and already
+implemented in `src/data/prepared.py: standardize_hourly_target`. **The only new act is the
+closure of the list** — naming these five as the complete documented-QC set, so that an
+operation outside it fails exactly as a fifth transformation would
+(`assert_qc_operation_permitted`; R-64). **No threshold was invented and no provider value is
+modified**: three of the five only flag or record, and none alters `vtec_tecu`.
+
+Two facts are recorded in the block so their absence is not misread as an omission:
+`preserves_provider_values: true`, and `gap_policy: explicit_nan_never_filled` (D-5; D-10.2) —
+there is no gap-filling operation to enumerate because gaps are never filled, at acquisition or
+at standardization.
+
+**Also transcribed under this act:** `configs/data.yaml: target.support_thresholds`, all four of
+**D-19's** rows with their measured basis and `basis_window: "January-November 2022"`. Copies of
+values approved 2026-08-21; December was excluded by construction in D-19's own measurement, and
+`resolve_support_thresholds` refuses a basis that references December.
+
+**Verified by execution** (2026-09-21, CPython 3.11.16): `assert_qc_operations_frozen` accepts
+the block and reports five operations; all four thresholds resolve with their statistics and
+roles; and a control confirms an operation outside the list is refused by name. Change record:
+`governance/CHANGE_RECORD_2026-09-21_qc_and_support.md`.
+
+---
+
+## D-54 — The top-1% sensitivity: 1% of absolute errors, comparison-wide, one retained set (freeze)
+
+**Decision date:** 2026-09-21. **Decided by:** the project decision owner; **countersigned by the
+supervisor on the student's report of the same date**. No separately signed document artifact
+exists and none is claimed. **Authority:** FR-P1-05-10; Vision §2.3 (equal-station weighting);
+Vision §2.4 (the binding honesty rule); Vision §8.3 (the selection channel). Closes
+`GOV-2026-09-20-CG-01` **Recommendation 21** and dispositions §5 item 14.
+
+**Decision.** `removed_fraction: 0.01`, `scope: comparison_wide`, with:
+
+* the **same retained rows applied to every compared model**;
+* the established **equal-station-weighted** metrics recomputed on the remainder;
+* **removed and retained counts reported per station**;
+* an **undefined comparison refused** when any station retains no rows;
+* the figure bounded as a **supplementary sensitivity only** — it never changes the primary
+  results, never selects a model, and never tunes a parameter.
+
+**Unchanged and not re-decided** (each already implemented): the ranking variable is the absolute
+error |ŷ − y| of each masked row; ties break by `(station, interval_start_utc)` ascending;
+`k = ceil(removed_fraction × n)`, never `round` or `floor`; removed rows are dropped and every
+metric **recomputed** on the remainder; a support the rule would empty refuses.
+
+**The consequence of `comparison_wide`, recorded rather than glossed.** Ranking all three stations
+together is the literal reading of FR-P1-05-10's wording. It is also **not proportionate**: a
+station with systematically larger errors loses a larger share of its rows, so the equal-station
+mean is then taken over unequal per-station supports. That is precisely why the per-station counts
+are mandatory output rather than optional — the asymmetry is made visible instead of inferred.
+
+**The combination rule (decided 2026-09-21, same act).** The decision fixes that the retained rows
+are shared; **how** several members' rankings become that one set was a second choice, resolved as
+`rank_by_max_member_error`: each masked row is ranked once by its worst absolute error across the
+compared members, and the top `k` removed. Exactly `k` rows go, so the declared 1% holds exactly
+and no single member's ranking decides the set alone. The alternative, `union_of_member_top_k`,
+was not chosen; it would have removed more than the declared fraction.
+
+**What had to be built.** `top1pct_removed_keys` ranked a **single member's** own errors, so each
+model would have been scored on a **different support** — the very thing the comparison-wide mask
+exists to prevent (NFR-FAIR-01). Four functions were added to `src/evaluation/diagnostics.py`:
+`top1pct_comparison_removed_keys`, `_assert_no_station_emptied`, `top1pct_station_counts` and
+`top1pct_comparison_block`, the last carrying `role: supplementary_sensitivity_only` and
+`may_inform_selection_or_tuning: false` as data. Seven controls, including negative controls for
+the station-emptied refusal and for an undeclared combination rule.
+
+**Recorded before locked evaluation**, as required. Change record:
+`governance/CHANGE_RECORD_2026-09-21_top1pct.md`.
+
+---
+
+## D-55 — M-03 climatology: station-and-hour mean, fitted on training partitions only (freeze)
+
+**Decision date:** 2026-09-21 (reaffirming the previously approved key). **Approved by:** the
+project decision owner; **countersigned by the supervisor on the student's report of the same
+date**. No separately signed document artifact exists and none is claimed. **Authority:** Vision
+§2.4 tier 2 and PC-03/PC-04 (M-03 is a mandatory difficulty control); R-98 / NFR-LEAK-01;
+D-16/D-17 (the hourly interval and the target row); D-38 / R-80 (the expanding-window splits).
+Closes `GOV-2026-09-20-CG-01` **Recommendation 2**.
+
+**Decision.** M-03's climatology key is the mean of the target grouped by **station and hour**,
+fitted **exclusively on each partition's own training data**. **Month is removed from the key.**
+
+**Why month is removed.** A month-bearing key can predict for **no** scored month: under the
+expanding-window splits every partition's validation month lies strictly after its own training
+range, so every scored row looked up a key the training data cannot contain. Because M-03 is one
+of the three mandatory difficulty controls, an M-03 that yields no prediction empties the
+comparison-wide mask for every comparison it belongs to.
+
+**Limitation, mandatory wherever M-03 is reported.** A station-and-hour mean carries **no seasonal
+term**. It cannot represent December's diurnal amplitude or level differing from the
+January–November training mean, and it is **not** a seasonal climatology. This is the deliberate
+cost of a key that can predict for every scored month at all.
+
+**Time convention unchanged:** `hour` is the UTC hour of `interval_start_utc` (D-16's hourly
+interval; D-17's target row). No local-solar-time variant is introduced; longitude reaches the
+model only through `lst_sin`/`lst_cos` (TE §7.2).
+
+**Enforcement.** `src/models/climatology.py` refuses a key field it cannot compute **by name**, so
+a month-bearing key cannot be re-adopted by editing configuration alone; refuses a key in a
+different order; and refuses any `fitted_on` other than `training_partition_only` as a
+`LeakageError`. Missing keys at prediction time stay **missing** (`missing_climatology_keys` on the
+frame), never interpolated or filled. Change record:
+`governance/CHANGE_RECORD_2026-09-21_climatology_refit_and_reconciliation.md` §1.
+
+---
+
+## D-56 — The refit epoch rule: median best-validation epoch across folds and seeds, rounded half up (freeze)
+
+**Decision date:** 2026-09-21 (reaffirming the previously approved rule). **Approved by:** the
+project decision owner; **countersigned by the supervisor on the student's report of the same
+date**. No separately signed document artifact exists and none is claimed. **Authority:** Vision
+§8.3 (December never informs selection); TE §7.0B; R-94 (best-checkpoint restoration).
+Closes `GOV-2026-09-20-CG-01` **Recommendation 5**'s rule limb.
+
+**Decision.** The final refit's epoch count is the **median best-validation epoch across the
+predefined pre-December folds (F1–F4) and the final seeds, for the selected configuration, rounded
+half upward**.
+
+**The rule is the frozen object; the number is its output.** The inputs are the epochs the fold
+fits actually restored (`Checkpoint.epoch`, the lowest-validation-RMSE epoch, R-94) — one per
+(fold, seed) pair, all pre-December. The resulting integer is transcribed into
+`configs/experiment.yaml: models.refit.epochs` under its own D-number **before the final refit and
+before G-05**. It is **not required before the validation runs that produce it**: nothing but the
+refit reads the field, so the folds run with it unset.
+
+**December's role.** The refit trains for exactly that many epochs on the permitted
+January–November REFIT training data, with **no validation set and no early stopping**, so no
+December row can reach a stopping decision. **December is inference-only.**
+
+**Enforcement.** `refit_epoch_count` implements the rule once; `assert_refit_epochs_match_rule`
+re-derives it from the recorded fold/seed epochs and refuses a transcribed value that is not the
+rule's own output. Rounding is half **up** by integer arithmetic, not `round()` (which rounds half
+to even). **Verified by execution** 2026-09-21: the rule over `[5, 7, 8, 10]` returns **8**
+(median 7.5). Change record: `…_climatology_refit_and_reconciliation.md` §2.
+
+---
+
+## D-57 — `window_length_hours` is 24 (transcription)
+
+**Decision date:** 2026-09-21. **Authorized by:** the project decision owner ("transcribe approved
+values without asking again"); **countersigned by the supervisor on the student's report of the
+same date**. No separately signed document artifact exists and none is claimed. **Authority:**
+Vision §8.1 — *"History window: 24 hours primary … **History length is not a tuned
+hyperparameter**"*; TE §7.2's ablation table, where ABL-HIST48's `primary_remains` reads 24 h.
+
+**Decision.** `configs/experiment.yaml: window_length_hours = 24`. **No scientific value is chosen
+here**: this is a copy of an already-frozen one, the same class of act as **D-38**
+(`embargo_hours`) and **D-51** (`horizons`). The 48-hour variant reaches the pipeline only as
+**ABL-HIST48**, and only after the primary configuration is frozen.
+
+**Verified by execution** 2026-09-21: `read_window_length(snapshot, sequence_steps=24)` returns 24,
+and the leakage guard still refuses a mismatched sequence length (`sequence_steps=48` raises
+`LeakageError`) — transcribing the value did not disarm the check that protected it. Change
+record: `…_climatology_refit_and_reconciliation.md` § `CR-2026-09-21-RECONCILIATION` §1.
+
+---
+
+## D-58 — The declared baseline per track is persistence (freeze)
+
+**Decision date:** 2026-09-21. **Decided by:** the project decision owner; **countersigned by the
+supervisor on the student's report of the same date**. No separately signed document artifact
+exists and none is claimed. **Authority:** Vision §8.7 — *"The declared baseline per track is named
+in configuration before tuning begins"* — and **D-124**, which approves the selection rule without
+naming a baseline; Vision §2.4 tier 2 and PC-03/PC-04 (persistence as a mandatory control).
+
+**Decision.** **Persistence** is the declared baseline for every track.
+
+**Why.** It is already one of the three mandatory difficulty controls, it is defined on every
+partition, and it requires no fit — so the selection criterion can never be compared against a
+baseline that itself failed to fit. Vision §8.7 fixes the obligation to name a baseline in
+configuration; this decision supplies the name it left open.
+
+**Transcribed alongside it** (a copy of **D-124**, recorded as *Approved* in Vision §14.2): the
+selection rule itself — select on mean per-fold skill versus the declared baseline across F1–F4;
+prefer the simpler configuration within **1%**; refit without changing any hyperparameter; and no
+December result may influence the criterion (Vision §8.7; Vision §8.3).
+
+---
+
+## D-59 — The December day range governing D-13's comparison count is 2–31 December 2022 (freeze)
+
+**Decision date:** 2026-09-21. **Decided by:** the project decision owner **and the supervisor**
+(the student reports the supervisor's countersignature of the same date); this is the **Student +
+Supervisor** gate item `GOV-2026-08-28-FD-01` **Recommendation 15** routed. No separately signed
+document artifact exists and none is claimed. **Authority:** **D-28** (the locked scored set);
+D-13 (the independent-storm-event threshold); Vision §9.3.
+
+**Decision.** `configs/experiment.yaml: regimes.december_day_range = "2022-12-02..2022-12-31"`.
+
+**Why this range.** It matches **D-28's locked scored set exactly** — 2–31 December 2022, thirty
+days — so D-13's comparison count describes precisely the set that is scored, rather than a
+different December. D-28's own three grounds for the 30-day set (physical, statistical, and the
+load-bearing arithmetic that 720 hours is divisible by both 24 and 48, which 744 is not) carry
+over unchanged; nothing about the scored set is reopened here.
+
+**This is not a locked-test access.** Fixing a day range reads no December target value. The
+required pre-G-05 December coverage and regime audit remains performance-blind and remains a
+precondition of G-05 (Vision §8.3; Vision §11; R-13).
+
+**Verified by execution** 2026-09-21: `read_december_day_range` resolves the field to
+2022-12-02 … 2022-12-31, thirty days inclusive. The refusal that protected the field while it was
+unfrozen is **kept as a negative control** on a synthetic config — a sentinel, an absent value and
+an unparseable string each still refuse by name.
+
+---
+
+## D-60 — The Phase 1 feature set: `FS-P1-2022-v1`, 21 fields over 13 dictionary rows (freeze)
+
+**Decision date:** 2026-09-21. **Approved by:** the project decision owner ("i approve of all the 7
+train_only_standardize feature names"), against the proposal at
+`governance/proposed/FEATURE_IDS_PROPOSAL_2026-09-21.md`; **countersigned by the supervisor on the
+student's report of the same date**. No separately signed document artifact exists and none is
+claimed. **Authority:** TE §6.2 (the dictionary table); `src/features/build.py:
+SECTION_6_2_ROWS` (the same row identities as a frozen constant); NFR-LEAK-01; TE §7.2.
+
+**Decision.** `configs/features.yaml` takes `feature_set_id: "FS-P1-2022-v1"`, the 21-field
+`feature_dictionary` below, and `normalization: "train_only_standardize"` as the declared default
+posture.
+
+**What is transcription and what was chosen.** The input space was already closed in two places
+that agree — TE §6.2's table and `SECTION_6_2_ROWS`. The rows, the exact lag set `[1,2,3,24]`, and
+the `none` normalizations are **copies**. **One thing was chosen**: the seven rows whose TE §6.2
+Normalization column reads the conditional *"Train-only if scaled"* — `station_lat`, `kp_safe`,
+`ap_safe`, `hp60_safe`, `ap60_safe`, `f107_safe`, `f107_81_trailing` — resolve to
+`train_only_standardize`, because Ridge and the LSTM are scale-sensitive across drivers spanning
+Kp 0–9 to F10.7 in the hundreds; Random Forest is scale-invariant so it costs nothing; and
+train-only fitting is the leakage-safe direction, fitted per fold on training rows only.
+
+**The 21 fields.** `vtec_lag_1h/2h/3h/24h` (row `vtec_lag`, exact lags 1/2/3/24);
+`vtec_seq_24` (24 steps); `utc_hour_sin`, `utc_hour_cos`, `doy_sin`, `doy_cos`, `lst_sin`,
+`lst_cos`; `station_onehot_ARUC/BSHM/NICO`; `station_lat`; `kp_safe`, `ap_safe`, `hp60_safe`,
+`ap60_safe`, `f107_safe`, `f107_81_trailing`. Thirteen rows expand to 21 fields because
+`vtec_lag` yields four and `station_onehot` three.
+
+**Deliberately absent, each a decision rather than an omission.** `dst` — diagnostic/hindcast-only,
+never a confirmatory feature. `ssn_*` — removed; `REMOVED_ROWS` refuses it by name.
+`target_support` (`valid_observation_count`, spread/gap/QC fields) — diagnostic by default; model
+use *"requires explicit G-04 approval"*, and **G-04 is not passed**; target-hour quality fields are
+permanently forbidden as features regardless. Raw longitude in any form — it enters only through
+`lst_sin`/`lst_cos`. Anything IRI-bearing — refused by the denial mechanism WS-10 proves.
+
+**A change to this dictionary means a NEW `feature_set_id`** (`FS-P1-2022-v2`), never an edit of
+this one.
+
+**Verified by execution** 2026-09-21: `load_feature_dictionary` accepts all 21 fields
+(12 `train_only_standardize`, 9 `none`).
+
+**What this does NOT discharge.** G-04 is not passed; no support field becomes a feature; the
+target contract is unchanged; and `configs/data.yaml: stations.*.observable_codes` remains
+untranscribed, so `assert_registry_resolved` still refuses on that one field.
+
+---
+
+## D-61 — Stage 00 publishes the release the downstream stages consume (option A; freeze)
+
+**Decision date:** 2026-09-21. **Ruled by:** the project decision owner ("for release issue i
+choose option A and based on D-52 is okay to be written like this"), against the four options at
+`governance/proposed/RELEASE_PRODUCER_OPTIONS_2026-09-21.md`; **countersigned by the supervisor on
+the student's report of the same date**. No separately signed document artifact exists and none is
+claimed. **Authority:** TE §13.3 (the release field contract); **D-29** (`dataset_version`
+derivation); R-13 (no overwrite); R-44 (releases consumed by manifest and hash, never bare paths);
+**D-52**, as read below.
+
+**The defect this closes.** `src/data/release.py: write_release` was a complete, tested,
+TE §13.3-conformant writer with **no production caller anywhere** — verified 2026-09-21 by grep
+over `scripts/`, `src/`, `notebooks/` and `kaggle/`: only two test modules called it. Meanwhile
+`01_inventory_and_registry.py` reported `release_manifests_found: 0` and
+`02_standardize_prepared_target.py` **refused** ("no released provider input exists under the
+release root … refusing rather than fabricating input"). Both refusals were correct; the producer
+had simply never been wired, so the Phase 1 sequence could not advance past stage 01.
+
+**Decision.** **Stage 00 releases what it acquired.** After every existing assertion — the
+declared inputs re-verified, the records selected on record dates, no locked-month record present,
+every record inside the cited window — the fixture path publishes the verified rows as an
+immutable release under `artifacts/releases/<fixture_id>_<utc stamp>/`.
+
+**The D-52 reading, as ruled.** D-52's "no transport" prohibits **transport of provider bytes**,
+not writes as such. A fixture run still contacts no provider and still reads only the scope's
+verified derived artifacts; what it now also does is publish those verified rows so the stages
+downstream have the input their contract requires. D-52 is not amended, reopened or narrowed.
+
+**What the release carries.** All fourteen TE §13.3 fields, populated from this run's own facts or
+from a governed config field; `dataset_version` is **derived** by `write_release` from the
+release's content hash (D-29) and a caller-supplied value is refused. Two shapes are recorded
+because they were judgement calls, not scientific values:
+
+* **`fold_ids` / `mask_ids` / `feature_set_ids`** carry the literal
+  `NOT_YET_ASSIGNED_stage_00_precedes_splits_masks_features`. Stage 00 precedes folds, masks and
+  features, so no such id exists; TE §13.3 requires all fourteen fields non-empty and
+  `write_release` refuses an empty list. The token is deliberately **unusable** as a real
+  identifier, so it can never be mistaken for one, and every consuming stage asserts a real id at
+  its own boundary.
+* **`selected_cell_bounds`** records the D-1 **cell** (integers plus bound strings), not the raw
+  lat/lon floats: R-11 refuses floats in the canonical content representation, because
+  platform-dependent float serialization would break the byte-identical two-platform requirement —
+  and the cell, not the coordinate, is what the Phase 1 target is sampled on (D-1; D-17).
+
+**The released file is a CSV carrying exactly the five provider columns plus the station key**, and
+the writer **refuses** a row missing any of them rather than substituting a blank (D-17; R-44).
+Found by execution: the first version released the rows as JSON, which
+`load_released_provider_rows` **silently skips** rather than refuses, so stage 02 ran to
+`completed` with `rows: 0` — a vacuous success. The consumer's silent skip is recorded here as an
+observation against that function, not fixed by this decision.
+
+**Verified by execution, 2026-09-21, CPython 3.11.16.** Stage 00 released **1,810 BSHM records**
+from the November 2022 plumbing window, `dataset_version` `737a0f7ee7ea`. Stage 01 then reported
+`release_manifests_found: 1` (from 0). Stage 02 **completed** and produced the first Phase 1
+hourly target this project has made: **168 rows** — exactly BSHM's 168/168 hourly bins under
+D-11 — spanning 2022-11-01T00:00Z to 2022-11-07T23:00Z, 158 of 168 `target_valid`, all sixteen
+D-17 fields plus the lineage caveat, stamped `P1A / GNSS_VTEC / GRIDDed_VTEC_1H`.
+
+**Transcribed on the way, both pure copies:** `configs/data.yaml: target.aggregation` (D-16's
+median with its citation) and `target.contract` (D-17's sixteen fields and eight excluded classes).
+
+**Discharges no gate.** No fixture has been measured, no receipt written, WS-20/TA-17 stay
+`Pending`, and this is not a G-05 act. Change record:
+`governance/CHANGE_RECORD_2026-09-21_release_option_a.md`.
+
+---
+
+## D-62 — `observable_codes` is not required for Phase 1 and is formally deferred to Phase 2 (ruling)
+
+**Decision date:** 2026-09-21. **Ruled by:** the project decision owner ("`observable_codes` is not
+required for Phase 1 and should be formally deferred to Phase 2"); **countersigned by the
+supervisor on the student's report of the same date**. No separately signed document artifact
+exists and none is claimed. **Authority:** Vision §6.2 (the station-registry field set); R-45 /
+R-46; TE §7.0 (the Phase 1 hard prohibition — RINEX headers are Phase 2 material).
+
+**Decision.** `observable_codes` is **not a Phase 1 requirement**. It remains a Vision §6.2 field
+and remains **required for Phase 2**, where the RINEX headers that state it are legitimately read.
+The deferral is formal: the field is not dropped, not defaulted, and not filled.
+
+**Why it is deferrable.** No Phase 1 path consumes it — the Phase 1 target is the provider's
+gridded VTEC product, which carries no observable codes — and reading a 2022 RINEX header to
+obtain them would itself be Phase 2 work that TE §7.0 bars Phase 1 from performing. Recording an
+invented or inferred value would be worse than the deferral, since nothing in Phase 1 could check
+it.
+
+**The mechanism already existed and is now the ruling's home.**
+`src/data/registry.py: PHASE2_ONLY_REGISTRY_FIELDS = ("observable_codes",)` with
+`assert_registry_resolved(..., phase=...)`: under `phase=1` the field is not required; the
+**default `phase=2` is the full, unchanged R-45 check**, so nothing is weakened for Phase 2. It was
+introduced under `CR-2026-09-20-B01-PREREQS` §5 with no D-number; this decision gives it one.
+
+**A correction recorded with the ruling.** `observable_codes` was reported (2026-09-21, in this
+session) as the field blocking Phase 1 registry resolution. **Measured, it was not**: under
+`phase=1` the registry refused on **missing provenance values for `hardware_changes_2022` and
+`igrf_version`** — presence is not provenance (R-46, W-2a) — while `observable_codes` was already
+exempt. Both provenance values were transcribed the same day from sources already recorded in the
+config: the official site logs' Sections 3–4 (the 2022-covering entries span the year with no
+change inside it, so the empty `hardware_changes_2022` is a **measured absence**, not an unfilled
+field) and the project-wide IGRF-13 pin with its coefficient-file hashes.
+
+**Verified by execution, 2026-09-21.** With the provenance transcribed, the real
+`configs/data.yaml` registry **RESOLVES under `phase=1`** and **still refuses under `phase=2`**
+naming `observable_codes`. Both directions are asserted by
+`tests/test_station_registry.py::test_the_real_config_registry_resolves_under_phase_1_and_still_refuses_under_phase_2`,
+so a deferral that quietly became a deletion would fail the suite.
+
+**What is owed at Phase 2.** `observable_codes` must be transcribed for all three stations from
+the 2022 RINEX headers before any Phase 2 registry resolution passes. This decision creates that
+obligation explicitly; it does not discharge it.
+
+## D-63 — The seven driver-class permitted-producer identities (transcription; closes D-35 limb 3)
+
+**Decision date:** 2026-09-21. **Decided by:** the project decision owner, by explicit instruction
+("complete the configs for the 7 permitted_producers fields that need completing based on
+decisions and contracts"). **Countersignature:** not required under TE §18.2 — no row covers a
+producer-artifact identity; D-41's precedent (sole-signed) applies. **Authority:** D-35 (the
+leakage-safe policy and its eleven contract-fixed rows, limb 3 leaving the seven driver rows
+unassigned "until the driver release exists"); D-10.1 (providers); D-39 (Kp/ap product);
+D-40 (Hp60/ap60 product); D-21/D-22/D-23/D-25 (F10.7 daily median and availability); TC-11
+(Dst diagnostic-only); SD-F-01.
+
+**Decision.** `configs/features.yaml: permitted_producers` carries one producing-artifact
+identity for each of the seven driver-class TE §6.2 rows, the code constant
+`src/external/spaceweather.py: DRIVER_PRODUCERS` being the identity's home and the config its
+transcription:
+
+| Row(s) | Producing artifact | Product the decision already fixes |
+|---|---|---|
+| `kp_safe`, `ap_safe` | `gfz_kp_ap_nowcast_2022` | D-39: archived settled nowcast `Kp_now2022.wdc`, DOI 10.5880/Kp.0001 (`release_status_required: nowcast`) |
+| `hp60_safe`, `ap60_safe` | `gfz_hp60ap60_v2_2022` | D-40: `Hp60ap60doi_2022.txt` under DOI 10.5880/Hpo.0002 V2.0; V3.0 is a comparator only |
+| `f107_safe`, `f107_81_trailing` | `nrcan_f107_observed_daily_median_2022` | D-21/D-22/D-23/D-25: NRCan observed flux, project-derived daily median (`source_series: f107_daily_median` for both rows) |
+| `dst` | `kyoto_wdc_dst_2022` | D-10.1: Kyoto WDC, one release grade; still `DIAGNOSTIC_ONLY_SERIES` — a producer entry admits PROVENANCE, never a modelling role |
+
+**Why a transcription and not a choice.** D-35 withheld these entries because an identity for a
+release that did not exist "could later refuse a legitimately produced feature". Each identity
+above names exactly the one provider product a prior decision already selected for that row, and
+nothing else — the choice of product was made under D-39/D-40/D-21–D-25/D-10.1; this decision
+only gives the chosen product the artifact name `build_features` will check. The obligation it
+creates is on the (unbuilt) driver-release producer that stage 05 reads by manifest: it MUST
+stamp `producing_artifact` with exactly these values, and `build_features` refuses any other
+(row, producer) pair (SD-F-01).
+
+**Verified by execution, 2026-09-21.** `load_permitted_producers(configs/)` resolves all 18
+rows; `tests/test_feature_availability.py` asserts config = constant = literal transcription in
+three independent statements, one producer per driver row, the definitive-grade and V3.0
+identities refused by name, and `dst` diagnostic-only. Stage 05's next refusal moved from
+`permitted_producers: incomplete` to its own release-input loader — the correct next
+stop-and-report (TE §18.3), owned by `features-and-splits`. Change record:
+`governance/CHANGE_RECORD_2026-09-21_gov_cg01_closure_pass.md` §1.
+
+---
+
+## D-64 — The Phase 1 prepared-VTEC evidence draws on two provider product versions; the measured distribution (census RUN; limitation recorded)
+
+**Decision date:** 2026-09-21. **Census run by:** the agent on the project decision owner's
+explicit instruction (dispositions §5 item 6; `GOV-2026-09-20-CG-01` Recommendation 8, owner
+ruling Option 1). **Decided by:** the project decision owner — the STUDENT limb (the census and
+its recording). **Supervisor limb** (acceptance of the limitation, §4.3 "Disposition (b)"):
+**countersignature status OPEN**; not claimed. **Authority:** TE §5.1 (version or release
+status per entry); TE §5.2; `team.md` DATA-07; `CR-2026-09-20-GOV-CG-01-DISPOSITIONS` §4.3,
+whose `<INSERT FROM CENSUS RUN>` placeholder this decision fills.
+
+**Measured** (`src/data/inventory.py: provider_suffix_census`, read-only over each month's
+`madrigal_coverage_raw_records.csv` `file` column, dates attributed from record timestamps,
+never from a directory name; printed before assertion; machine-readable copies at
+`evidence/provider_version_census_2026-09-21/census_by_month.json` and, as re-measured by
+stage 01, `artifacts/inventory/source_inventory.json`):
+
+| Month | Records | `g.001` | `g.002` | Mixed | Days carrying more than one token | `g.001` days (whole provider file each) |
+|---|---|---|---|---|---|---|
+| 2022-01 | 20,808 | — | 20,808 | no | 0 | — |
+| 2022-02 | 18,143 | — | 18,143 | no | 0 | — |
+| 2022-03 | 19,097 | — | 19,097 | no | 0 | — |
+| 2022-04 | 18,990 | 613 | 18,377 | **yes** | 0 | 04-21 |
+| 2022-05 | 19,802 | — | 19,802 | no | 0 | — |
+| 2022-06 | 18,194 | 580 | 17,614 | **yes** | 0 | 06-16 |
+| 2022-07 | 18,732 | 1,712 | 17,020 | **yes** | 0 | 07-13, 07-14, 07-18 |
+| 2022-08 | 19,127 | 610 | 18,517 | **yes** | 0 | 08-15 |
+| 2022-09 | 18,249 | — | 18,249 | no | 0 | — |
+| 2022-10 | 19,062 | — | 19,062 | no | 0 | — |
+| 2022-11 | 18,183 | 1,896 | 16,287 | **yes** | 0 | 11-13, 11-28, 11-29 |
+
+Totals over the eleven non-December months: 208,387 records; `g.001` 5,411 (nine provider
+files, nine whole days); `g.002` 202,976; `records_unrecognised_version` 0 in every month.
+These agree exactly with the board's own per-month figures (Recommendation 8) and are now
+recorded in a governed place. **Two facts the census adds** that the board's figures did not
+carry: (i) **no day mixes versions** — every `g.001` occurrence is a whole provider file
+(one day), so the mix is a per-day reissue pattern, not a mid-day switch; (ii) the November
+mix touches **2022-11-13, 11-28 and 11-29**, none of which lies inside D-11's plumbing window
+(2022-11-01..07), so the plumbing fixture's input is single-version (`g.002`) by measurement.
+**December** (the locked month, restricted root) was NOT read by this census; the board's
+figure — 743 `g.003` records, all dated 2022-12-31 — stands as the board recorded it and is
+re-measurable only through the audit's logged chokepoint.
+
+**Recorded as** `release_status_versions` on each of the eleven `declared_sources` entries in
+`configs/data.yaml`, which stage 01 re-measures on every run and REFUSES if the observed set
+departs from the declaration (`assert_sources_unmixed_or_recorded` — the first production
+call site of R-52 prohibition 2; `assert_unmixed_sources` composes the refusal).
+
+**Disposition, per §4.3.** Option (b) is the standing default: **the mix is a limitation
+bounding every claim**, stated wherever a coverage figure or comparison result from this
+evidence is reported, until the provider certifies g.001/g.002/g.003 physically equivalent for
+instrument 8000 kindat 3500 (option (a)), which no one has obtained. Whether the December
+`g.003` day is in-contract is a question this decision records as **open** — it cannot be
+settled without reading December, and reading December is a G-05-gated act.
+
+---
+
+## D-65 — Geomagnetic coordinates of the three stations under the pinned IGRF-13 (freeze, Q-06)
+
+**Decision date:** 2026-09-21. **Frozen by:** the project decision owner, the Student, by
+explicit instruction ("determine the IGRF coordinates, pin them, and record them in the station
+contract") — TE §18.2 Q-06 assigns any station coordinate to the Student. **Supervisor
+countersignature** for the Vision §6.2 registry column: **status OPEN**; not claimed.
+**Authority:** Vision §6.2 ("Geomagnetic coordinates (IGRF, pinned version)" — "computed with
+one pinned IGRF version"); Vision D-106 (Q-06); `GOV-2026-09-20-CG-01` Recommendation 13
+(option 1); `configs/data.yaml: igrf_version = IGRF-13` (transcribed 2026-09-19).
+
+**Decision.** Centered-dipole geomagnetic coordinates, epoch **2022.5**, from the degree-1
+IGRF-13 coefficients:
+
+| Station | Geodetic (D-1) | Geomagnetic latitude | Geomagnetic longitude (east) |
+|---|---|---|---|
+| ARUC | 40.286 N, 44.086 E | **35.642** | **123.046** |
+| BSHM | 32.778987 N, 35.022987 E | **29.544** | **112.963** |
+| NICO | 35.140989 N, 33.396450 E | **32.110** | **111.913** |
+
+**Derivation, printed before assertion** (`evidence/igrf13_coefficients_2026-09-21/
+dipole_geomagnetic_coordinates.json`): coefficient source NOAA NCEI `igrf13coeffs.txt`
+(sha256 `460b8d8beb9b4df84febe4f0b639f0dd54dccfe8ff0970616287b015fa721425`, retrieved
+2026-09-21; g₁⁰ = −29404.8, g₁¹ = −1450.9, h₁¹ = 4652.5 nT at 2020.0 — the same IGRF-13
+2020.0 g₁⁰ the pinned iricore wheel's `igrf2020.dat` carries — with secular variation
++5.7 / +7.4 / −25.9 nT yr⁻¹), extrapolated to 2022.5: B₀ = 29,780.9 nT; north geomagnetic
+pole at colatitude acos(−g₁⁰/B₀), longitude atan2(−h₁¹, −g₁¹) → **80.713 N, 287.340 E**;
+MAG frame per Hapgood (1992): Z along the dipole axis, the geographic north pole at
+geomagnetic longitude 180°; latitude = asin(Z-component), longitude = atan2(Y, X) in
+[0, 360). Control: Boulder (40.0 N, 254.7 E) → (47.7, 322.2), the textbook value.
+Sensitivity: epoch 2022.0 instead of 2022.5 moves every value by < 0.02°.
+
+**What these are and are not.** Centered-dipole coordinates — the quantity "geomagnetic
+coordinates under IGRF" denotes when nothing further is specified, computable from the pinned
+generation alone with no additional dependency. They are **not** quasi-dipole, AACGM or
+corrected-geomagnetic coordinates, which need a full-field tracing library the governed
+environment does not pin; if a Phase 2 consumer needs one of those, it records the change
+under its own D-number (`configs/data.yaml` igrf_version comment). No Phase 1 executable path
+consumes these values — they satisfy the §6.2 registry contract (`Station.geomagnetic_lat` /
+`geomagnetic_lon`, refused by `assert_registry_resolved` when absent or `TBD — freeze gate`,
+in both phases) and describe the regime: all three stations sit at mid geomagnetic latitudes
+(29.5°–35.6°), consistent with Vision §2.5's "mid-latitude Eastern Mediterranean–South
+Caucasus sector" claim boundary.
+
+**Verified by execution, 2026-09-21.** The real `configs/data.yaml` registry resolves under
+`phase=1` with the two new fields and their provenance; three negative controls in
+`tests/test_station_registry.py` prove an absent, a `TBD` and a non-numeric value are each
+refused by name.
+
+---
+
 ## D-49 addendum — Python 3.10 compatibility of the CODE, found and closed on the first Kaggle run
 
 **2026-09-20.** The D-49 extension (fixture runs in the 3.10 venv) was recorded after a
@@ -3054,3 +3590,16 @@ exposed to challenge and should be read first.
 | D-47 Recomputation tolerance 8.0e-12 sfu, certified for constituents ≤ 400 sfu | **Not required (Q6 numerical parameter of the Student's window contract)** | 2026-09-19 | (N+1)·2⁻⁵²·B = 7.28e-12 rounded up; ε = 2u explained; verified against an exact `Fraction` reference (max 1.9e-13), repr round trip, must-fail perturbations; B = 400 is an applicability condition — out-of-domain constituents fail the certification clearly and are never clipped. *[Corrected 2026-09-19, `CR-2026-09-19-SCI-DECISIONS-P2`: "transcription pending (item 9)" described the pre-2026-09-19 state; `window.recomputation_tolerance` and `window.recomputation_input_bound_sfu` were transcribed into `configs/features.yaml`'s `f107_81_trailing` row 2026-09-19 (item 6 of that record).]* |
 | D-48 December custody scan: structural detection; driver-exclusion class 5 with content + provenance conditions | **Not required — R-26 class list amended by the owner under the D-30 precedent; no target value involved** | 2026-09-19 | Structural detection for JSON (`{y, m}`, month keys, literals), WDC/Hpo/isprint/CSV formats; Markdown reported as outside automated inspection; class 5 = `audit_gfz_*` raw captures + comparison report, content-validated and provenance-checked, fail-closed on mixed content; narrower than the prepared text; excluded files inventoried as exposure, never licensed for use. Implemented and verified. |
 | D-49 B-01 execution-environment exception: CPython 3.10.12 for the isolated Kaggle IRI-2016 environment only | **Owner approval 2026-09-19; no supervisor signature claimed** — TE §8.1 / TC-03d excepted for one environment | 2026-09-19 | `iricore==1.8.0` cp310 wheel `f452b223…`; index pins `cdf4d5df…` / `fbbed304…`; scope excludes training, fixtures, every other stage; fixture-receipt identity coupling recorded, unresolved (two admissible resolutions) |
+| D-53 Documented-QC list closed at five operations | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | `configs/data.yaml: qc_operations` frozen at five: `reject_unexplained_negative_vtec` (R-71 content 2 / NFR-DQ-01) and D-19's four threshold checks — three marking `target_valid: false` with a reason, one flag-only. **All five were already approved and already implemented; the NEW act is the CLOSURE**, so an operation outside the list fails like a fifth transformation (R-64). **No threshold invented, no provider value modified.** `preserves_provider_values: true` and `gap_policy: explicit_nan_never_filled` (D-5, D-10.2) recorded so their absence is not read as omission. **Also transcribed:** `target.support_thresholds`, all four D-19 rows with their measured basis and `basis_window: January-November 2022` (December excluded by construction in D-19's own measurement). Verified by execution 2026-09-21 including a fifth-operation refusal control. |
+| D-54 Top-1% sensitivity: 0.01, comparison-wide, one shared retained set | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | Closes `GOV-2026-09-20-CG-01` Rec 21 / dispositions §5 item 14. `removed_fraction: 0.01`, `scope: comparison_wide`, combination `rank_by_max_member_error` (exactly `k = ceil(0.01·n)` rows removed, so the declared 1% holds exactly). **Same retained rows for every compared model**; equal-station-weighted metrics recomputed on the remainder; **removed/retained counts per station mandatory**; an **undefined comparison refused** when a station retains no rows. Ranking variable, tie handling and `ceil` rounding unchanged. **Bounded: supplementary sensitivity only — never changes the primary results, selects a model, or tunes a parameter.** Required four new functions because the existing path ranked a single member's own errors, which would have scored each model on a different support (NFR-FAIR-01). **Recorded before locked evaluation.** |
+| D-55 M-03 climatology: station-and-hour mean, training-only | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | Closes `GOV-2026-09-20-CG-01` Rec 2. Key = **station, hour**; `fitted_on: training_partition_only`; **month REMOVED**. A month-bearing key can predict for **no** scored month — under the expanding-window splits every validation month lies after its own training range — and M-03 is a mandatory difficulty control, so that emptied the comparison-wide mask. **Mandatory limitation wherever M-03 is reported:** a station-and-hour mean carries no seasonal term and is not a seasonal climatology. UTC hour of `interval_start_utc` unchanged (D-16/D-17). The module refuses an unimplementable key field **by name**, refuses a reordered key, and refuses any other `fitted_on` as a `LeakageError`; missing keys stay missing, never filled. |
+| D-56 Refit epoch rule: median best-validation epoch, half up | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | Closes `GOV-2026-09-20-CG-01` Rec 5's rule limb. **The rule is the frozen object; the number is its output.** Median best-validation (restored) epoch across F1–F4 and the final seeds for the selected configuration, rounded **half upward** by integer arithmetic. `models.refit.epochs` stays `TBD — freeze gate` **deliberately** — the value cannot exist until the folds have run, is transcribed under its own D-number before the final refit and before G-05, and is **not required before the validation runs that produce it**. The refit trains for exactly that many epochs on January–November data with **no validation set and no early stopping**; **December is inference-only**. `assert_refit_epochs_match_rule` refuses a transcribed value that is not the rule's output. Verified: `[5,7,8,10] → 8`. |
+| D-57 `window_length_hours` = 24 | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | **Transcription, not a choice** — Vision §8.1 ("History window: 24 hours primary … History length is not a tuned hyperparameter") and TE §7.2's ablation table, where ABL-HIST48's `primary_remains` reads 24 h. Same class of act as D-38 (`embargo_hours`) and D-51 (`horizons`). The 48-hour variant reaches the pipeline only as ABL-HIST48, after the primary freeze. Verified by execution: `read_window_length(…, sequence_steps=24)` returns 24 and a mismatched sequence length still raises `LeakageError` — the transcription did not disarm the guard. |
+| D-58 Declared baseline per track = persistence | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | Vision §8.7 requires the baseline be **named in configuration before tuning begins** and D-124 approves the selection rule without naming one; this supplies the name. **Persistence**, because it is already a mandatory difficulty control (Vision §2.4 tier 2; PC-03/PC-04), is defined on every partition, and needs no fit — so the criterion can never be compared against a baseline that itself failed to fit. **Transcribed alongside it (a copy of D-124, recorded Approved in Vision §14.2):** select on mean per-fold skill vs the declared baseline across F1–F4; prefer the simpler configuration within **1%**; refit changes no hyperparameter; **no December result may influence the criterion**. |
+| D-59 December day range = 2022-12-02 .. 2022-12-31 | **Student states supervisor countersigned, 2026-09-21** — the Student + Supervisor gate item `GOV-2026-08-28-FD-01` Rec 15; no separately signed artifact exists or is claimed | 2026-09-21 | Matches **D-28's locked scored set exactly** (30 days), so D-13's comparison count describes precisely the set that is scored. D-28's three grounds for the 30-day set carry over unchanged; nothing about the scored set is reopened. **Not a locked-test access** — fixing a day range reads no December target value, and the required pre-G-05 coverage/regime audit stays performance-blind. Verified: `read_december_day_range` resolves to 30 inclusive days; the unfrozen-state refusal is **kept as a negative control** on a synthetic config. |
+| D-60 Phase 1 feature set `FS-P1-2022-v1` — 21 fields over 13 rows | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | The input space was already closed twice over (TE §6.2's table; `SECTION_6_2_ROWS`), so rows, the exact lag set `[1,2,3,24]` and the `none` normalizations are **copies**. **One thing was chosen:** the seven rows reading the conditional "Train-only if scaled" (`station_lat`, `kp_safe`, `ap_safe`, `hp60_safe`, `ap60_safe`, `f107_safe`, `f107_81_trailing`) resolve to `train_only_standardize` — Ridge/LSTM are scale-sensitive across Kp 0–9 to F10.7 in the hundreds, RF is scale-invariant, and train-only fitting is the leakage-safe direction. **Deliberately absent, each a decision:** `dst` (diagnostic-only), `ssn_*` (removed, refused by name), all `target_support` fields (**G-04 not passed**; target-hour quality fields permanently forbidden), raw longitude (only via `lst_sin`/`lst_cos`), anything IRI-bearing. A dictionary change means a **new** `feature_set_id`. Verified: `load_feature_dictionary` accepts 21 fields (12 standardize / 9 none). **Discharges no gate**; `observable_codes` remains untranscribed. |
+| D-61 Stage 00 publishes the release (option A) | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | Closes the missing-producer defect: `write_release` was complete, tested and **called by nothing in production** (verified by grep over `scripts/`, `src/`, `notebooks/`, `kaggle/` — only two test modules), while stages 01 and 02 both consume releases, so the sequence could not pass stage 01. **Stage 00 now releases what it acquired**, after every existing assertion. **D-52 read as ruled:** "no transport" bars transport of PROVIDER BYTES, not writes — no provider is contacted and only verified derived artifacts are read. `dataset_version` derived (D-29); R-13 no-overwrite intact. Two recorded judgement calls: `fold_ids`/`mask_ids`/`feature_set_ids` carry a deliberately unusable `NOT_YET_ASSIGNED_…` token (stage 00 precedes all three; TE §13.3 forbids empty), and `selected_cell_bounds` records the D-1 CELL, not raw floats (R-11). The released file is a CSV with exactly the six provider columns, refusing a row missing any rather than blanking it — **found by execution**, since the first JSON version was SILENTLY SKIPPED by the consumer and stage 02 'completed' with `rows: 0`. **Executed:** 1,810 BSHM records released (`737a0f7ee7ea`); stage 01 `release_manifests_found` 0 → 1; stage 02 completed with **168 rows = BSHM's 168/168 D-11 bins**, 158 valid, full D-17 contract, stamped `P1A/GNSS_VTEC/GRIDDed_VTEC_1H`. Also transcribed en route: `target.aggregation` (D-16) and `target.contract` (D-17). **Discharges no gate; not a G-05 act.** |
+| D-62 `observable_codes` deferred to Phase 2 | **Student states supervisor countersigned, 2026-09-21** — no separately signed artifact exists or is claimed | 2026-09-21 | **Not required for Phase 1; formally deferred to Phase 2**, where the RINEX headers stating it are legitimately read (TE §7.0 bars Phase 1 from reading them). Not dropped, not defaulted, not filled — it stays a Vision §6.2 field and stays REQUIRED for Phase 2. The mechanism already existed without a D-number (`PHASE2_ONLY_REGISTRY_FIELDS`; `assert_registry_resolved(phase=…)`, whose **default `phase=2` is the full unchanged R-45 check**); this ruling is its home. **Correction recorded with the ruling:** `observable_codes` was reported in-session as the Phase 1 blocker and **measurement showed it was not** — Phase 1 refused on MISSING PROVENANCE for `hardware_changes_2022` and `igrf_version` (presence is not provenance, R-46/W-2a), while `observable_codes` was already exempt. Both provenance values transcribed the same day from sources already in the config (site-log Sections 3–4, where the 2022-covering entries span the year with no change inside it, so the empty list is a MEASURED ABSENCE; and the project-wide IGRF-13 pin with its coefficient hashes). **Executed:** the real registry now RESOLVES under `phase=1` and STILL REFUSES under `phase=2` naming the field; both directions asserted by a new control, so a deferral that became a deletion would fail the suite. **Owed at Phase 2:** transcribe `observable_codes` for all three stations from the 2022 RINEX headers. |
+| D-63 Seven driver-class permitted-producer identities | **Not required under TE §18.2 (producer identity; D-41 precedent) — student instruction 2026-09-21** | 2026-09-21 | Closes D-35 limb 3. Each identity names the ONE product a prior decision already selected (D-39 nowcast Kp/ap; D-40 Hpo.0002 V2.0; D-21–D-25 NRCan daily median; D-10.1 Kyoto Dst, still diagnostic-only): a transcription, not a choice. Home: `spaceweather.DRIVER_PRODUCERS`; config = constant = test literal asserted three ways. Obligation created on the unbuilt driver release: stamp `producing_artifact` with exactly these values. Stage 05's refusal moved to its own release-input loader. |
+| D-64 Provider product-version census — measured distribution; limitation recorded | **Student limb done 2026-09-21 (census run + recording); Supervisor limb (limitation acceptance, §4.3 option b) — countersignature status OPEN** | 2026-09-21 | Eleven non-December months measured: 208,387 records; `g.001` 5,411 in nine whole provider files (2022-04-21; 06-16; 07-13/14/18; 08-15; 11-13/28/29); `g.002` 202,976; **no day mixes versions**; the plumbing window 11-01..07 is single-version by measurement. December not read (restricted root); the board's 743 `g.003` on 2022-12-31 stands as recorded. Recorded as `release_status_versions` on eleven `declared_sources` entries, re-measured and enforced by stage 01 on every run. Option (b) stands: the mix bounds every claim until the provider certifies equivalence. |
+| D-65 Geomagnetic coordinates under pinned IGRF-13 (Q-06) | **Student freeze 2026-09-21 by instruction; Supervisor countersignature for the §6.2 column — status OPEN** | 2026-09-21 | Centered-dipole, epoch 2022.5, from NOAA NCEI `igrf13coeffs.txt` (sha256 `460b8d8b…`): ARUC 35.642 / 123.046; BSHM 29.544 / 112.963; NICO 32.110 / 111.913 (lat / east lon). Pole 80.713 N, 287.340 E; Hapgood-1992 frame; Boulder control reproduces the textbook value. NOT quasi-dipole/AACGM. Fields `geomagnetic_lat`/`geomagnetic_lon` added to the Station contract with provenance, refused when absent or TBD in both phases (Rec 13 option 1). No Phase 1 path consumes them. |

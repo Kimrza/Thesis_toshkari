@@ -775,9 +775,12 @@ def test_optionb_02_row_window_bound_behavioural_and_wired() -> None:
         {"interval_start_utc": "2022-03-01T00:00:00Z", "station_id": "ARUC"},
         {"interval_start_utc": "2022-03-31T23:00:00Z", "station_id": "NICO"},
     ]
-    assert assert_records_within_window(
-        inside, start=window[0], end=window[1], timestamp_key="interval_start_utc"
-    ) == 2
+    assert (
+        assert_records_within_window(
+            inside, start=window[0], end=window[1], timestamp_key="interval_start_utc"
+        )
+        == 2
+    )
     outside = [*inside, {"interval_start_utc": "2022-11-03T00:00:00Z", "station_id": "BSHM"}]
     with pytest.raises(AcquisitionError, match="2022-11-03"):
         assert_records_within_window(
@@ -802,3 +805,216 @@ def test_optionb_02_row_window_bound_behavioural_and_wired() -> None:
         "byte-identical to the pre-repair behaviour"
     )
     assert 'timestamp_key="interval_start_utc"' in run_source
+
+
+# =========================================================================================
+# The transcribed target identity agrees with the owner declarations it was copied from
+# (CR-2026-09-20-CONFIG-BLOCKS §3). `configs/data.yaml: target.identity` is a TRANSCRIPTION,
+# so the only thing that can go wrong with it is drift from its source -- and drift is
+# invisible without this check, because both sides read plausibly on their own.
+# =========================================================================================
+
+
+def _yaml_load(path: Path) -> dict:
+    import yaml
+
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def test_transcribed_target_identity_matches_both_owner_declarations() -> None:
+    """The three TEC-05 ids in config are EXACTLY the owner's, in both fixture declarations.
+
+    The declarations are the owner's Q-31 acts (D-11, D-14, CR-2026-09-13-000102-FIXTURE-
+    WINDOW). If the two declarations ever disagree with each other, that is a defect too --
+    one target definition governs Phase 1 (TE §13; R-70) -- so they are compared to each
+    other as well as to the config.
+    """
+    configured = _yaml_load(REPO_ROOT / "configs" / "data.yaml")["target"]["identity"]
+    keys = ("phase_id", "source_id", "target_definition_id")
+
+    declared: dict[str, dict[str, str]] = {}
+    for fixture_id in ("plumbing_7day", "scientific_1month"):
+        path = REPO_ROOT / "tests" / "fixtures" / fixture_id / "identity_declaration.yaml"
+        assert path.is_file(), f"owner identity declaration absent: {path}"
+        identity = _yaml_load(path)["identity"]
+        declared[fixture_id] = {key: identity[key] for key in keys}
+
+    first, second = declared["plumbing_7day"], declared["scientific_1month"]
+    assert first == second, (
+        f"the two owner declarations disagree on the target identity: {first} vs {second}; "
+        f"one target definition governs Phase 1 (R-70)"
+    )
+    assert {key: configured[key] for key in keys} == first, (
+        f"configs/data.yaml target.identity {configured} drifted from the owner declaration "
+        f"{first} it was transcribed from (CR-2026-09-20-CONFIG-BLOCKS §3)"
+    )
+
+
+def test_the_transcribed_identity_is_what_the_resolver_returns() -> None:
+    """The copy is bound to the field the pipeline actually reads, not just to the file."""
+    from src.data.config import load_configs
+    from src.data.prepared import resolve_target_identity
+
+    snapshot = load_configs(REPO_ROOT / "configs", phase=1)
+    resolved = resolve_target_identity(snapshot.data)
+    declared = _yaml_load(
+        REPO_ROOT / "tests" / "fixtures" / "plumbing_7day" / "identity_declaration.yaml"
+    )["identity"]
+    assert resolved == {
+        "phase_id": declared["phase_id"],
+        "source_id": declared["source_id"],
+        "target_definition_id": declared["target_definition_id"],
+    }
+
+
+def test_the_resolver_still_refuses_an_absent_or_unresolved_identity() -> None:
+    """NEGATIVE CONTROL. Transcribing a value must not disarm the refusal that protected it:
+    R-70's stamp obligation is enforced for every caller, not satisfied once and forgotten."""
+    from src.data.prepared import resolve_target_identity
+
+    with pytest.raises(StandardizationError):
+        resolve_target_identity({})
+    with pytest.raises(StandardizationError):
+        resolve_target_identity({"target": {"identity": {"phase_id": "P1A"}}})
+    with pytest.raises(StandardizationError):
+        resolve_target_identity(
+            {
+                "target": {
+                    "identity": {
+                        "phase_id": "P1A",
+                        "source_id": TBD_SENTINEL,
+                        "target_definition_id": "GRIDDed_VTEC_1H",
+                    }
+                }
+            }
+        )
+
+
+# --------------------------------------------------------------------------------------
+# Recommendation 20 (producer half, 2026-09-21): ONE budget shape project-wide
+# --------------------------------------------------------------------------------------
+
+
+def test_real_budget_passes_the_consumer_contract() -> None:
+    """Closure evidence named by the finding: the REAL producer output passes the
+    consumer-side `_assert_budget` unchanged — no adapter, no hand-built fixture."""
+    from src.evaluation.diagnostics import _assert_budget
+
+    budget = _standardize().uncertainty_budget
+    _assert_budget(budget)  # must not raise
+    assert budget["units"] == "TECU"
+    assert budget["artifact_id"]
+    assert set(budget["phase1_contents"]) == {
+        "provider_reported_uncertainty",
+        "within_hour_aggregation_spread",
+    }
+    for content in budget["phase1_contents"].values():
+        assert content["statement"] and content["measured_tecu"]["rows"] > 0
+    assert set(budget["phase2_quantities"].values()) == {"recorded not-applicable"}
+    assert_budget_complete(budget)  # the R-72 limb is still satisfied by the same artifact
+
+
+def test_budget_value_is_none_and_names_the_owed_rule_while_unfrozen() -> None:
+    from src.data.prepared import resolve_budget_rule
+
+    config = _frozen_config()
+    assert resolve_budget_rule(config) is None  # no block at all
+    config["target"]["uncertainty_budget"] = {  # type: ignore[index]
+        "decision": "TBD — freeze gate",
+        "statistic": "TBD — freeze gate",
+        "combination": "TBD — freeze gate",
+    }
+    assert resolve_budget_rule(config) is None  # a sentinel block is the same as none
+    budget = _standardize(config).uncertainty_budget
+    assert budget["budget_value"] is None
+    assert budget["budget_value_rule"]["status"] == "owed"
+    assert "4.5" in budget["budget_value_rule"]["reference"]
+
+
+@pytest.mark.parametrize(
+    ("statistic", "combination"),
+    [("median", "quadrature"), ("median", "sum"), ("p95", "max"), ("max", "sum")],
+)
+def test_budget_value_follows_the_frozen_rule_exactly(statistic: str, combination: str) -> None:
+    """The value is the RULE's output, recomputed here from the same rows by an
+    independent path (`statistics` + arithmetic), so a drift in either side fails."""
+    import math
+    import statistics as st
+
+    config = _frozen_config()
+    config["target"]["uncertainty_budget"] = {  # type: ignore[index]
+        "decision": "D-90",  # synthetic decision number: a test double, not a freeze
+        "statistic": statistic,
+        "combination": combination,
+    }
+    result = _standardize(config)
+    budget = result.uncertainty_budget
+    dtec = [float(r["provider_dtec_summary"]) for r in result.rows]
+    spread = [float(r["within_hour_spread_tecu"]) for r in result.rows]
+
+    def stat(values: list[float]) -> float:
+        if statistic == "median":
+            return st.median(values)
+        if statistic == "max":
+            return max(values)
+        ordered = sorted(values)
+        pos = (len(ordered) - 1) * 0.95
+        lo = int(pos)
+        hi = min(lo + 1, len(ordered) - 1)
+        return ordered[lo] * (1 - (pos - lo)) + ordered[hi] * (pos - lo)
+
+    a, b = stat(dtec), stat(spread)
+    expected = {"sum": a + b, "quadrature": math.hypot(a, b), "max": max(a, b)}[combination]
+    assert budget["budget_value"] == pytest.approx(expected)
+    assert budget["budget_value_rule"]["status"] == "frozen"
+    assert budget["budget_value_rule"]["per_content_scalars_tecu"] == pytest.approx(
+        {"provider_reported_uncertainty": a, "within_hour_aggregation_spread": b}
+    )
+
+
+def test_budget_rule_outside_the_closed_sets_is_refused_by_name() -> None:
+    from src.data.prepared import resolve_budget_rule
+
+    config = _frozen_config()
+    config["target"]["uncertainty_budget"] = {  # type: ignore[index]
+        "decision": "D-90",
+        "statistic": "mean",
+        "combination": "quadrature",
+    }
+    with pytest.raises(StandardizationError) as excinfo:
+        resolve_budget_rule(config)
+    assert "statistic" in str(excinfo.value)
+    config["target"]["uncertainty_budget"]["combination"] = "average"  # type: ignore[index]
+    config["target"]["uncertainty_budget"]["statistic"] = "median"  # type: ignore[index]
+    with pytest.raises(StandardizationError) as excinfo:
+        resolve_budget_rule(config)
+    assert "combination" in str(excinfo.value)
+    config["target"]["uncertainty_budget"]["combination"] = "quadrature"  # type: ignore[index]
+    config["target"]["uncertainty_budget"]["decision"] = "approved"  # type: ignore[index]
+    with pytest.raises(StandardizationError) as excinfo:
+        resolve_budget_rule(config)
+    assert "D-number" in str(excinfo.value)
+
+
+def test_practical_relevance_refuses_naming_the_owed_rule_on_the_real_budget() -> None:
+    """The §5.3 second conjunct fails HONESTLY on the real artifact while the rule is
+    owed: the refusal names the missing rule and its owner (Recommendation 20)."""
+    import datetime as _dt
+
+    from src.data.config import IntegrityError
+    from src.evaluation.diagnostics import practical_relevance_statement
+
+    budget = _standardize().uncertainty_budget
+    assert budget["budget_value"] is None
+    with pytest.raises(IntegrityError) as excinfo:
+        practical_relevance_statement(
+            threshold_record={
+                "recorded_at_utc": "2026-01-01T00:00:00+00:00",
+                "units": "TECU",
+                "reference_magnitude": {"value": 0.5, "units": "TECU"},
+            },
+            budget_artifact=budget,
+            measured_improvement={"value": 1.0, "units": "TECU", "derived": True},
+            g06_receipt_utc=_dt.datetime(2026, 12, 1, tzinfo=_dt.timezone.utc),
+        )
+    assert "budget_value" in str(excinfo.value) and "18.2" in str(excinfo.value)

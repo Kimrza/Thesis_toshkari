@@ -1,0 +1,370 @@
+# configs/data.yaml — one of the four governed configs (TE §12; TC-03e).
+#
+# Only values frozen under an approved D-number are transcribed here, citing
+# that D-number. Every unfrozen scientific field carries the literal sentinel
+# `TBD — freeze gate` — writing a sentinel is not choosing a value (W-9), and
+# no implementer may fill one by convenience (Vision §1.2; TE §1.1). The
+# owning unit's Bolt transcribes its own frozen values (station coordinates,
+# cell bounds, target contract, support thresholds) with their D-numbers;
+# foundation does not transcribe values it does not own.
+#
+# No machine path may appear in this file (R-16, ADR-07): all roots below are
+# RELATIVE and are resolved against the platform workspace root at run time by
+# resolve_platform_roots (W-8). Relocating the workspace never changes this
+# file's hash.
+
+schema_version: "1.0.0"
+
+# --- repository-layout roots (engineering values, not scientific constants) -----------
+roots:
+  # The SINGLE authoritative release root D-29's verify-on-write check
+  # enumerates (SD-04, Q2=A — owner decision at a §18.3 stop-and-report point).
+  # Relative to the platform workspace root; a write_release that cannot reach
+  # the resolved root REFUSES rather than treating it as empty.
+  release_root: "artifacts/releases"
+  # Where per-run config snapshots are written (W-2 step 3).
+  snapshot_root: "artifacts/run_snapshots"
+  # The experiment registry directory (TE §13.4).
+  registry_root: "artifacts/registry"
+
+# --- release identity (mechanism frozen by D-29, 2026-08-28) ---------------------------
+release:
+  # dataset_version = first 12 hex characters of content_hash, verify-on-write
+  # uniqueness over the single authoritative release root. D-29.
+  version_encoding: "sha256-prefix-12hex" # D-29
+  decision: "D-29"
+
+# --- scientific fields owned by downstream units (unfrozen HERE by design) -------------
+# Station registry, coordinate-to-cell rule and cell bounds: frozen by D-1/D-8
+# in evidence/DECISIONS.md, but their config transcription is
+# inventory-and-registry's migration obligation (team.md § Code Style, Q11=B)
+# and is validated against the official IGS site logs before being treated as
+# final. They are NOT transcribed by foundation. (Updated 2026-09-10: `cell_rule` HAS
+# since been transcribed — by the project decision owner's ruling, not by foundation —
+# see the note at the field itself; `stations` is unchanged and still unresolved.)
+# stations — TRANSCRIBED 2026-09-19 on the project decision owner's instruction ("transcribe
+# existing authoritative values … with provenance"). Field by field:
+#   * lat / lon: D-1's APPROVED values (evidence/DECISIONS.md D-1, IGS network pages), now
+#     VALIDATED against the official IGS site logs (Vision §6.2's highest-ranked source; D-1's
+#     "site-log validation outstanding" is closed by this check): ARUC log +401708.60/+0440508.10
+#     = 40.285722/44.085583 (Δ 0.0003°/0.0004°), BSHM +324644.35/+0350122.75 = 32.778986/35.022986
+#     (Δ ≤ 0.000001°), NICO +350827.56/+0332347.22 = 35.140989/33.396450 (Δ 0). No cell changes
+#     (D-1 rule). The approved D-1 values are what is transcribed; the site-log values are
+#     recorded beside them, never averaged (Vision §6.2 conflict rule). Site logs retrieved
+#     2026-09-19 from https://files.igs.org/pub/station/log/ and hashed (SHA-256 below); copies in
+#     evidence/station_registry_sources_2026-09-19/.
+#   * ellipsoidal_height_m, domes, receiver/antenna/firmware intervals: the official site log
+#     (Sections 1–4). Only the entries covering calendar 2022 are transcribed; no hardware or
+#     firmware change falls inside 2022 at any station (hardware_changes_2022: []).
+#   * sampling_interval_s: the 2022 IGS daily observation files are distributed as
+#     <STATION>_R_2022DDD0000_01D_30S_MO.crx.gz (BKG IGS data centre listing for 2022-001,
+#     retrieved 2026-09-19) — 30 s.
+#   * observable_codes: NOT transcribed — Vision §6.2 requires them but no governing record or
+#     site log states them; they are read from a 2022 RINEX header, which is Phase 2 material
+#     (TE §7.0). `load_registry` does not need them; `assert_registry_resolved` (features.build)
+#     still refuses on this one field until the student supplies them.
+#   * B-01 convention: IRI-2016 is evaluated at these STATION coordinates, never at a cell
+#     centre (D-45; Vision §6.6 discloses the cell-vs-station geometry).
+stations:
+  ARUC:
+    lat: 40.286
+    lon: 44.086
+    ellipsoidal_height_m: 1222.0
+    domes: "12312M002"
+    sampling_interval_s: 30
+    receiver_intervals:
+      - ["2021-01-29", "2023-02-28", "SEPT POLARX5 s/n 3013438"]
+    antenna_intervals:
+      - ["2013-11-08", "2099-12-31", "ASH701945C_M SCIS (current, no removal date)"]
+    firmware_intervals:
+      - ["2021-01-29", "2023-02-28", "5.4.0"]
+    hardware_changes_2022: []
+    provenance:
+      lat: "D-1 (approved 40.286); official site log aruc00arm_20260317.log sha256 858aa54b36b43011f48f0329cce7a3f974dfbd5adb752e2fc02d6746a5f5ef25 gives +401708.60 = 40.285722"
+      lon: "D-1 (approved 44.086); official site log gives +0440508.10 = 44.085583"
+      ellipsoidal_height_m: "official site log aruc00arm_20260317.log Section 2 'Elevation (m)' 1222.0"
+      domes: "official site log aruc00arm_20260317.log Section 1 'IERS DOMES Number'"
+      sampling_interval_s: "IGS daily file name ARUC00ARM_R_20220010000_01D_30S_MO.crx.gz (BKG IGS data centre, 2022-001)"
+      receiver_intervals: "official site log Section 3 (entry covering 2022)"
+      antenna_intervals: "official site log Section 4 (entry covering 2022)"
+      firmware_intervals: "official site log Section 3 'Firmware Version' (entry covering 2022)"
+  BSHM:
+    lat: 32.778987
+    lon: 35.022987
+    ellipsoidal_height_m: 225.1
+    domes: "20705M001"
+    sampling_interval_s: 30
+    receiver_intervals:
+      - ["2021-08-24", "2023-03-30", "SEPT POLARX5 s/n 3013570"]
+    antenna_intervals:
+      - ["2009-07-20", "2099-12-31", "TRM59800.00 SCIS (current, no removal date)"]
+    firmware_intervals:
+      - ["2021-08-24", "2023-03-30", "5.4.0"]
+    hardware_changes_2022: []
+    provenance:
+      lat: "D-1 (approved 32.778987); official site log bshm00isr_20260422.log sha256 d0dae80429fac5cc065b6bfdec87d2f948754d3d243b9e8dfb74c1005d37770f gives +324644.35 = 32.778986"
+      lon: "D-1 (approved 35.022987); official site log gives +0350122.75 = 35.022986"
+      ellipsoidal_height_m: "official site log bshm00isr_20260422.log Section 2 'Elevation (m)' 225.1"
+      domes: "official site log bshm00isr_20260422.log Section 1 'IERS DOMES Number'"
+      sampling_interval_s: "IGS daily file name BSHM00ISR_R_20220010000_01D_30S_MO.crx.gz (BKG IGS data centre, 2022-001)"
+      receiver_intervals: "official site log Section 3 (entry covering 2022)"
+      antenna_intervals: "official site log Section 4 (entry covering 2022)"
+      firmware_intervals: "official site log Section 3 'Firmware Version' (entry covering 2022)"
+  NICO:
+    lat: 35.140989
+    lon: 33.396450
+    ellipsoidal_height_m: 190.1
+    domes: "14302M001"
+    sampling_interval_s: 30
+    receiver_intervals:
+      - ["2021-12-13", "2023-02-14", "LEICA GR50 s/n 1830231"]
+    antenna_intervals:
+      - ["2013-07-16", "2099-12-31", "LEIAR25.R4 LEIT (current, no removal date)"]
+    firmware_intervals:
+      - ["2021-12-13", "2023-02-14", "4.51/7.710"]
+    hardware_changes_2022: []
+    provenance:
+      lat: "D-1 (approved 35.140989); official site log nico00cyp_20251027.log sha256 2740b73a695c5a4a3faab3a989407893b4786735587c4c41ee036f9c2f3d719a gives +350827.56 = 35.140989"
+      lon: "D-1 (approved 33.396450); official site log gives +0332347.22 = 33.396450"
+      ellipsoidal_height_m: "official site log nico00cyp_20251027.log Section 2 'Elevation (m)' 190.1"
+      domes: "official site log nico00cyp_20251027.log Section 1 'IERS DOMES Number'"
+      sampling_interval_s: "IGS daily file name NICO00CYP_R_20220010000_01D_30S_MO.crx.gz (BKG IGS data centre, 2022-001)"
+      receiver_intervals: "official site log Section 3 (entry covering 2022)"
+      antenna_intervals: "official site log Section 4 (entry covering 2022)"
+      firmware_intervals: "official site log Section 3 'Firmware Version' (entry covering 2022)"
+# igrf_version — TRANSCRIBED 2026-09-19 (owner instruction: "verify that the declared IGRF
+# version matches the actual IRI-2016 implementation"). The ONLY IGRF consumer in the Phase 1
+# executable path is IRI-2016 itself as compiled into the pinned iricore 1.8.0 wheel
+# (experiment.yaml: benchmark_b01.runtime): iri2016/igrf.for "2020.01 03/05/20 Updating to
+# IGRF-13 (2020)", FELDCOF wired to dgrf1945…dgrf2015 + igrf2020.dat + igrf2020s.dat; for 2022 it
+# interpolates igrf2020.dat (g10 = -29404.8 nT, the IGRF-13 2020.0 value) with the igrf2020s
+# secular variation. Coefficient-file hashes: igrf2020.dat 5c5288ede8987252…, igrf2020s.dat
+# 40abaa5990a20487…, dgrf2015.dat bfa50177d289f007… (full values in the change record). No
+# project module computes geomagnetic coordinates in Phase 1; a Phase 2 consumer must use this
+# same generation or record a change under a D-number.
+igrf_version: "IGRF-13"
+# cell_rule — FROZEN as the EXISTING convention by the project decision owner's ruling of
+# 2026-09-10, ADOPTED as **D-33** (2026-09-10). Prepared at
+# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
+# evidence/DECISIONS.md. TE §18.2 assigns this rule to Student + Supervisor, so a
+# SUPERVISOR COUNTERSIGNATURE IS REQUIRED AND NOT YET GIVEN. The value is the identifier
+# already declared in
+# src/data/registry.py (CELL_RULE_ID) for the convention already in use — a 1° × 1° cell
+# identified by its lower-left (floor) corner, half-open in both axes:
+#   cell = [floor(lat), floor(lat)+1) × [floor(lon), floor(lon)+1)
+# (notebooks/madrigal_phase1_coverage_audit.ipynb cell 4, verbatim). No grid was invented
+# and no station was moved. The notebook's own caveat is NOT discharged by this freeze:
+# confirm the convention against the real bin edges Madrigal returns before relying on it.
+cell_rule: "floor-half-open-d1" # D-33 (2026-09-10); TE §18.2 countersignature NOT YET GIVEN
+
+# --- the six frozen partitions (ADR-11; R-80's closed six-value space) -------------------
+# TRANSCRIPTION into the live source of truth, approved by the project decision owner on
+# 2026-09-10. This is NOT a new split calendar: `src/data/splits.py: build_partitions` is the
+# only consumer, `configs/experiment.yaml: folds` is inert (no reader) and is deliberately
+# left unresolved so no second source of truth exists.
+#
+# PROVENANCE, kept distinct per the owner's ruling:
+#   * F1-F4 and REFIT — train_start, train_end and validation_month are specified DIRECTLY by
+#     TE §7.1's split-configuration table ("1 January-31 March 2022 | 24 hours | April 2022",
+#     and so on; final refit "1 January-30 November 2022", evaluated nowhere per FR-P1-04-14).
+#   * DEC — TE §7.1 shows "—" for the locked row's TRAINING interval, so its bounds are NOT
+#     transcribed from it. They are DETERMINED by existing constraints the validator enforces:
+#     `train_start == study_start` (TE §7.1's expanding window from one origin, D-8) and
+#     `DEC.train_end == REFIT.train_end` (R-80, Recommendation 25 — a locked-month fit is
+#     unrepresentable by the field). Exactly one value is admissible for each.
+# The embargo is NOT repeated here: its single home is `configs/experiment.yaml:
+# embargo_hours`, read by `build_partitions` and applied to every partition (TE §7.1's
+# "24 hours" column). No validator or split rule is altered by this transcription.
+partitions:
+  F1:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-03-31
+    validation_month: 2022-04-01
+  F2:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-06-30
+    validation_month: 2022-07-01
+  F3:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-09-30
+    validation_month: 2022-10-01
+  F4:
+    kind: "fold"
+    train_start: 2022-01-01
+    train_end: 2022-10-31
+    validation_month: 2022-11-01
+  REFIT:
+    kind: "refit"
+    train_start: 2022-01-01
+    train_end: 2022-11-30
+    validation_month: null # scored nowhere (FR-P1-04-14; ADR-11 M5 — only REFIT carries null)
+  DEC:
+    kind: "locked"
+    train_start: 2022-01-01 # determined: study start (expanding window, D-8)
+    train_end: 2022-11-30 # determined: == REFIT.train_end (R-80)
+    validation_month: 2022-12-01
+
+# The D-144-frozen Madrigal acquisition identity (transcribed 2026-09-13 on the owner's
+# FINAL RULING, CR-2026-09-13-000102-FIXTURE-WINDOW). Values are register-derived only:
+# instrument and kindat verbatim from D-3/D-144 (kindat 3505 line-of-sight and 3506 site
+# list are EXCLUDED by the same decision); the parameter list is the EXECUTED five-column
+# identity D-17 records as "confirmed identical across all twelve monthly request
+# manifests" — the owner ruled AGAINST D-4's nine-parameter list, whose four-driver limb
+# was superseded by D-10 (drivers come from their governed external sources, never the
+# Madrigal request). Read by REQUIRED_FIELDS_MAP[("acquisition", 1)]'s TE 18.3 preflight;
+# scripts RESOLVE these, never choose them (R-30).
+# window_start/window_end are DELIBERATELY ABSENT: fixture runs derive their window from
+# the fixture scope (Option B, same CR), and this pair stays reserved for the future real
+# re-acquisition window (DATA-07 work) so the field's meaning is never overloaded.
+acquisition:
+  experiment: 8000 # D-3/D-144: Madrigal instrument 8000, World-wide GNSS Receiver Network
+  kindat: 3500 # D-3/D-144: "TEC binned 1 degree by 1 degree by 5 min"
+  parameters: [ut1_unix, gdlat, glon, tec, dtec] # executed five (D-17; D-10) — not D-4's nine
+
+# --- target identity: the three TEC-05 definition IDs stamped on every artifact -----------
+# TRANSCRIBED 2026-09-20 (CR-2026-09-20-CONFIG-BLOCKS §3). No value is chosen here: all three
+# are COPIED from the owner's own identity declarations, where they were already approved.
+#
+# PROVENANCE, derived and printed before transcription rather than carried from prose. The
+# identical triple appears in BOTH owner-authored Q-31 identity declarations —
+#   tests/fixtures/plumbing_7day/identity_declaration.yaml:39-41
+#   tests/fixtures/scientific_1month/identity_declaration.yaml:37-39
+# — frozen under D-11/D-14 and CR-2026-09-13-000102-FIXTURE-WINDOW, and one of the three
+# (`target_definition_id`) is ALREADY transcribed into configs/experiment.yaml under
+# `benchmark_b01`, where B-01 is scored against that same target definition. Transcribing
+# them here creates no second source of truth: it moves an already-approved identity to the
+# field `src/data/prepared.py: resolve_target_identity` actually reads, and
+# `tests/test_prepared_target_schema.py` asserts the copy is exact in both directions.
+#
+# WHY IT WAS OWED. TE §13 and R-70 require `phase_id`, `source_id` and `target_definition_id`
+# on every dataset, prediction, mask and comparison; the resolver refuses while `target:` is
+# absent, which — since the Recommendation 24 remediation routed stage 01's audit path
+# through it — made even the REQUIRED pre-G-05 December coverage audit unrunnable
+# (GOV-2026-09-20-CG-01 remediation manifest, escalation 2). That refusal is correct
+# fail-early behaviour; what was missing was this transcription.
+#
+# `target_definition_id` names LOCATION-SAMPLED GRIDDED VTEC and never receiver-specific
+# station-observed VTEC (Vision §6.6; project.md § Forbidden). The label prose itself lives in
+# `src/data/prepared.py: TARGET_LABEL`, which refuses the prohibited fragments recursively;
+# this field is the identity that label is bound to, not a second copy of the label.
+target:
+  identity:
+    phase_id: "P1A"
+    source_id: "GNSS_VTEC"
+    target_definition_id: "GRIDDed_VTEC_1H"
+  provenance:
+    transcribed_from:
+      - "tests/fixtures/plumbing_7day/identity_declaration.yaml"
+      - "tests/fixtures/scientific_1month/identity_declaration.yaml"
+    decisions: ["D-11", "D-14", "CR-2026-09-13-000102-FIXTURE-WINDOW"]
+    change_record: "CR-2026-09-20-CONFIG-BLOCKS §3"
+
+  # --- D-16's hourly aggregation statistic ------------------------------------------------
+  # TRANSCRIBED 2026-09-21 (CR-2026-09-21-RELEASE-OPTION-A). A COPY of D-16, approved
+  # 2026-08-21: the Phase 1 hourly value is the MEDIAN of the valid provider VTEC samples
+  # inside the UTC hour for the station's frozen cell. No value is chosen here.
+  # `resolve_aggregation_statistic` refuses a statistic without its D-16 citation, because a
+  # statistic carrying no citation is a recorded default (R-65, FR-P1-03-1 second limb), and
+  # refuses anything that is not D-16's median — a mean, or the zenith-weighted variant,
+  # which stays deferred as not computable on the five-column product with nothing
+  # substituted for the unavailable information (Vision §6.6).
+  aggregation:
+    statistic: "median"
+    decision: "D-16"
+
+  # --- D-19's four support thresholds -----------------------------------------------------
+  # TRANSCRIBED 2026-09-21 (CR-2026-09-21-QC-AND-SUPPORT §2). Every value, statistic and
+  # basis figure below is COPIED from D-19 (evidence/DECISIONS.md:925-985), approved
+  # 2026-08-21. No value is chosen here and no threshold is invented.
+  #
+  # D-19 measured these from 23,709 deduplicated cell-hours over JANUARY-NOVEMBER 2022 only,
+  # all three cells. December was excluded BY CONSTRUCTION — deriving a governed constant
+  # from the locked month would let it influence the freeze set, so that measurement was not
+  # a locked-test access. `resolve_support_thresholds` refuses a basis that so much as
+  # mentions December, and refuses a value whose statistic or D-number citation has drifted
+  # from the decision that froze it: the basis travels WITH the value, because a threshold
+  # without its measured basis is indistinguishable from a chosen one (R-68).
+  support_thresholds:
+    valid_observation_count:
+      statistic: "minimum"          # D-19 contract: role = validity
+      value: 3                      # contributing samples per cell-hour
+      basis: "min 1, p05 3, p10 4, median 9, max 12 over 23,709 deduplicated cell-hours; retention 95.24%"
+      basis_window: "January-November 2022"
+      decision: "D-19"
+    within_hour_spread_tecu:
+      statistic: "range"            # max − min of contributing samples; role = validity
+      value: 10.0
+      basis: "min 0, median 2.357, p95 6.873, p99 9.616, max 51.206 TECU; threshold set at p99 to flag outliers, not reshape the dataset"
+      basis_window: "January-November 2022"
+      decision: "D-19"
+    largest_internal_gap_s:
+      statistic: "maximum"          # role = validity
+      value: 1800                   # 30 min: tolerates five consecutive missing 5-minute slots
+      basis: "median 300 s (confirming the 5-minute native cadence), p95 2100, p99 3600; retention 93.39%. TE §6.1's provisional 1200 s keeps 85.81%; 2400 s (96.76%) judged too permissive to detect a real outage"
+      basis_window: "January-November 2022"
+      decision: "D-19"
+    provider_dtec_summary:
+      statistic: "median"           # of provider-reported dtec; role = FLAG, not validity
+      value: 1.5
+      basis: "min 0.355, median 0.920, p95 1.305, p99 1.314, max 5.553 TECU; flag level at p99"
+      basis_window: "January-November 2022"
+      decision: "D-19"
+
+# --- documented-QC operation list (FR-P1-03-1 transformation 1) ----------------------------
+# FROZEN 2026-09-21 under the project decision owner's explicit approval of that date,
+# recorded at governance/CHANGE_RECORD_2026-09-21_qc_and_support.md (CR-2026-09-21-QC-AND-
+# SUPPORT §1). `assert_qc_operations_frozen` requires a D-number citation AND a non-empty
+# enumerated list — never mere non-emptiness, since a list filled by convenience satisfies
+# "non-empty" and is exactly what TE §18.2 forbids.
+#
+# WHAT IS NEW HERE AND WHAT IS NOT. Every operation below was ALREADY approved and is
+# ALREADY implemented in `src/data/prepared.py: standardize_hourly_target`; this list is the
+# closure act that names them as a closed set, so that an operation outside it fails like a
+# fifth transformation would (R-64, via `assert_qc_operation_permitted`). NO new scientific
+# choice is made, no threshold is invented, and no provider value is modified: three of the
+# five operations only FLAG or RECORD, and none alters `vtec_tecu`.
+#
+# `documented_qc` is transformation 1 of FR-P1-03-1's closed four-transformation set; the
+# other three (UTC normalization, cell selection, hourly aggregation) are closed in code and
+# are not QC operations.
+qc_operations:
+  decision: "D-53"   # APPROVED and COUNTERSIGNED 2026-09-21. CR-2026-09-21-QC-AND-SUPPORT §1.
+  frozen_at_utc: "2026-09-21"
+  operations:
+    # 1. R-71 content 2 / NFR-DQ-01. A negative VTEC is not a small value but an impossible
+    #    one: it is REJECTED unless a recorded explanation accompanies it, and an explained
+    #    negative is accepted with its explanation carried in the data-quality block. The
+    #    run raises on an unexplained negative rather than dropping it quietly.
+    - "reject_unexplained_negative_vtec"
+    # 2-4. D-19's three VALIDITY thresholds. Each marks `target_valid: false` and records the
+    #    reason; the row is retained with its reason, never deleted and never repaired.
+    - "flag_valid_observation_count_below_minimum"
+    - "flag_within_hour_spread_above_range_bound"
+    - "flag_largest_internal_gap_above_maximum"
+    # 5. D-19's FLAG-only threshold. Records a quality flag; does NOT invalidate the row.
+    - "flag_provider_dtec_summary_above_level"
+  # The operations are quality marks on provider values, never edits to them. Recorded
+  # explicitly because the distinction is the whole point of P1-03 ("preserve provider
+  # values; apply only documented QC …; never … silently interpolate missing cells").
+  preserves_provider_values: true
+  # D-5 (gap policy) and D-10.2: gaps stay explicit NaN. No interpolation, smoothing or
+  # fill is performed at acquisition or standardization, so no gap-filling operation exists
+  # to enumerate — stated so its absence reads as the decision it is, not an omission.
+  gap_policy: "explicit_nan_never_filled"   # D-5; D-10.2
+  provenance:
+    previously_approved:
+      reject_unexplained_negative_vtec: "R-71 content 2; NFR-DQ-01"
+      flag_valid_observation_count_below_minimum: "D-19 (minimum 3)"
+      flag_within_hour_spread_above_range_bound: "D-19 (range, 10.0 TECU)"
+      flag_largest_internal_gap_above_maximum: "D-19 (maximum 1800 s)"
+      flag_provider_dtec_summary_above_level: "D-19 (median, 1.5 TECU flag level)"
+    new_in_this_act: "the CLOSURE of the list itself — naming these five as the complete documented-QC set (FR-P1-03-1 transformation 1; R-64). No operation, threshold or value is new."
+    change_record: "CR-2026-09-21-QC-AND-SUPPORT §1"
+
+# Declared input sources with hashes (assert_declared_sources_exist walks these;
+# a declared hash that does not resolve is a failure, never a warning). Empty:
+# nothing is declared yet; acquisition declares its inputs when it lands.
+declared_sources: []

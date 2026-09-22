@@ -1,0 +1,13 @@
+{
+  "derived_artifact_count": 4,
+  "hash_count": 4,
+  "manifest": "sha256_manifest.json",
+  "phase_id": "P1A",
+  "producing_interpreter": "3.11.16 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:36:16) [MSC v.1942 64 bit (AMD64)]",
+  "provenance_class": "derived_only",
+  "provider_file_count": 0,
+  "provider_files": {},
+  "schema": "TE-13.3 path-to-sha256; metadata sidecar v1",
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H"
+}

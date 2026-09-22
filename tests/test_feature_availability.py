@@ -49,13 +49,6 @@ if str(REPO_ROOT) not in sys.path:
 if str(REPO_ROOT / "tests") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "tests"))
 
-from test_split_embargo import (  # noqa: E402
-    SYNTH_WINDOW_HOURS,
-    SYNTH_YEAR,
-    synthetic_partitions,
-    synthetic_snapshot,
-)
-
 from src.data.config import (  # noqa: E402
     TBD_SENTINEL,
     AlignmentError,
@@ -66,19 +59,20 @@ from src.data.config import (  # noqa: E402
     RegistryError,
 )
 from src.data.splits import RecordFrame, partition_by_id, training_range  # noqa: E402
+from src.external import spaceweather  # noqa: E402
+from src.features import build  # noqa: E402
 from src.features.availability import (  # noqa: E402
     AVAILABILITY_RULE_PREVIOUS_DAY_MEDIAN_MIDNIGHT_UTC,
     AvailabilityRow,
-    latest_eligible_window_end,
     assert_anchor_recomputed,
     assert_dst_diagnostic_only,
     assert_lags_safe,
     assert_release_status_not_backfilled,
     assert_trailing_not_centered,
     build_availability_matrix,
+    latest_eligible_window_end,
     read_availability_lags,
 )
-from src.features import build  # noqa: E402
 from src.features.build import (  # noqa: E402
     SECTION_6_2_ROWS,
     FrameSpec,
@@ -93,6 +87,13 @@ from src.features.windows import (  # noqa: E402
     build_comparison_mask,
     build_windows,
     read_window_length,
+)
+
+from test_split_embargo import (  # noqa: E402
+    SYNTH_WINDOW_HOURS,
+    SYNTH_YEAR,
+    synthetic_partitions,
+    synthetic_snapshot,
 )
 
 UTC = dt.timezone.utc
@@ -1282,7 +1283,7 @@ def test_config_declared_selection_mechanics_are_cross_checked_against_the_drive
 def test_dst_declared_as_a_model_input_fails() -> None:
     with pytest.raises(LeakageError):
         assert_dst_diagnostic_only({"dst_index": "driver"})
-    assert_dst_diagnostic_only({"dst_index": "diagnostic", "kp_safe": "driver"}) is None
+    assert assert_dst_diagnostic_only({"dst_index": "diagnostic", "kp_safe": "driver"}) is None
 
 
 def test_ssn_is_absent_from_src_identifiers_and_the_dictionary_rows() -> None:
@@ -1455,22 +1456,27 @@ _CONTRACT_FIXED_PRODUCERS: dict[str, str] = {
     "station_onehot": "station_registry",
     "station_lat": "station_registry",
 }
-#: The seven driver-class rows deliberately left unassigned until the driver release
-#: exists (D-35 limb 3): NOT rejected on policy grounds, and still fail-closed.
-_DEFERRED_DRIVER_ROWS: tuple[str, ...] = (
-    "kp_safe",
-    "ap_safe",
-    "hp60_safe",
-    "ap60_safe",
-    "f107_safe",
-    "f107_81_trailing",
-    "dst",
-)
+#: The seven driver-class rows D-35 limb 3 left unassigned until the driver release
+#: existed, CLOSED 2026-09-21 under D-63 with the producer each takes — enumerated here
+#: literally (never imported from the config it checks) so that config, the code
+#: constant `spaceweather.DRIVER_PRODUCERS` and this transcription are three independent
+#: statements that must agree.
+_DRIVER_PRODUCERS: dict[str, str] = {
+    "kp_safe": "gfz_kp_ap_nowcast_2022",
+    "ap_safe": "gfz_kp_ap_nowcast_2022",
+    "hp60_safe": "gfz_hp60ap60_v2_2022",
+    "ap60_safe": "gfz_hp60ap60_v2_2022",
+    "f107_safe": "nrcan_f107_observed_daily_median_2022",
+    "f107_81_trailing": "nrcan_f107_observed_daily_median_2022",
+    "dst": "kyoto_wdc_dst_2022",
+}
+_DRIVER_ROWS: tuple[str, ...] = tuple(_DRIVER_PRODUCERS)
 
 
 def test_permitted_producers_real_features_yaml_carries_exactly_the_contract_fixed_rows() -> None:
-    """Owner ruling 2026-09-10, adopted as D-35: the repository's own block now carries the
-    eleven contract-fixed rows with their contract-fixed producers, and NOTHING else.
+    """D-35 (2026-09-10) fixed eleven rows; D-63 (2026-09-21) closed the seven driver rows.
+    The repository's own block now carries exactly those eighteen rows with their
+    decision-fixed producers, and NOTHING else.
 
     Asserted by set-difference in both directions, so an added row (a producer assigned
     without a decision) and a dropped row both fail. The producer strings are compared to
@@ -1478,25 +1484,33 @@ def test_permitted_producers_real_features_yaml_carries_exactly_the_contract_fix
     """
     pytest.importorskip("yaml")
     producers = load_permitted_producers(REPO_ROOT / "configs")
-    missing = sorted(set(_CONTRACT_FIXED_PRODUCERS) - set(producers))
-    extra = sorted(set(producers) - set(_CONTRACT_FIXED_PRODUCERS))
+    expected_all = {**_CONTRACT_FIXED_PRODUCERS, **_DRIVER_PRODUCERS}
+    missing = sorted(set(expected_all) - set(producers))
+    extra = sorted(set(producers) - set(expected_all))
     assert missing == [] and extra == [], f"missing {missing}, extra {extra}"
-    for row, expected in _CONTRACT_FIXED_PRODUCERS.items():
+    for row, expected in expected_all.items():
         assert tuple(producers[row]) == (expected,), row
     # the transcription agrees with the code constants it came from
     assert build.STATION_REGISTRY_PRODUCER == "station_registry"
     assert build.TIMESTAMP_PRODUCER == "record_timestamp"
+    assert dict(spaceweather.DRIVER_PRODUCERS) == _DRIVER_PRODUCERS
 
 
-def test_permitted_producers_still_fails_closed_on_every_deferred_driver_row() -> None:
-    """The seven driver rows are UNASSIGNED, not admitted: any run requesting one refuses
-    naming exactly the missing rows, and no feature matrix is produced (SD-F-01)."""
+def test_permitted_producers_driver_rows_admit_only_their_decision_fixed_producer() -> None:
+    """D-63 admits PROVENANCE, never a role: each driver row resolves to exactly one
+    producer, a frame stamped with any other producing_artifact is refused by
+    `build_features`' (row, producer) check, and `dst` stays diagnostic-only (TC-11)."""
     pytest.importorskip("yaml")
-    for row in _DEFERRED_DRIVER_ROWS:
-        with pytest.raises(LeakageError) as excinfo:
-            load_permitted_producers(REPO_ROOT / "configs", dictionary_rows=["vtec_lag", row])
-        message = str(excinfo.value)
-        assert row in message and "no feature matrix is produced" in message.lower()
+    producers = load_permitted_producers(REPO_ROOT / "configs", dictionary_rows=list(_DRIVER_ROWS))
+    for row in _DRIVER_ROWS:
+        assert producers[row] == (_DRIVER_PRODUCERS[row],), row
+        assert "gfz_kp_ap_definitive_2022" not in producers[row]  # D-39: nowcast, not definitive
+        assert "gfz_hp60ap60_v3_2022" not in producers[row]  # D-40: V3.0 is a comparator only
+    assert "dst" in spaceweather.DIAGNOSTIC_ONLY_SERIES
+    # the two F10.7 rows and the two Kp/ap rows share one released product each
+    assert producers["f107_safe"] == producers["f107_81_trailing"]
+    assert producers["kp_safe"] == producers["ap_safe"]
+    assert producers["hp60_safe"] == producers["ap60_safe"]
 
 
 def test_permitted_producers_admit_no_removed_or_iri_or_longitude_row() -> None:
@@ -1693,7 +1707,7 @@ def test_window_length_placed_in_a_grid_fails() -> None:
         read_window_length(
             synthetic_snapshot(experiment={"grids": grids}), sequence_steps=SYNTH_WINDOW_HOURS
         )
-    assert_window_length_grid_free({"grids": {"M-04": {"alpha": [0.1, 1.0]}}}) is None
+    assert assert_window_length_grid_free({"grids": {"M-04": {"alpha": [0.1, 1.0]}}}) is None
 
 
 def test_one_definition_emits_both_representations_and_counts_exclusions() -> None:

@@ -1,0 +1,41 @@
+{
+  "artifact_class": "uncertainty_budget",
+  "lineage_caveat": "The Phase 1 target is location-sampled gridded VTEC (Madrigal cell), never receiver-specific station-observed VTEC, and it carries its own distinct target_definition_id. The Phase 1 grid-cell target population is not the Phase 2 IPP target population: no numerical equivalence between the Phase 1 and Phase 2 targets is claimed, and Phase 2 is a fixed-protocol replication on a new target lineage, not a second statistically independent blind test (Vision 2.2, 6.6). Part of any measured IRI or GIM difference is a geometry and sampling artefact rather than skill: Phase 1 compares a grid cell against a station-coordinate evaluation, Phase 2 an IPP cloud against a zenith estimate (Vision 6.6).",
+  "payload": {
+    "applicable": {
+      "provider_reported_uncertainty": "provider-reported dtec, summarised per hour as provider_dtec_summary (D-19 statistic: median); observed over 168 row(s): min 0.3761675, max 1.3049 — reported as computed, never truncated or clipped to a bound (R-72)",
+      "within_hour_aggregation_spread": "within-hour spread of contributing samples, within_hour_spread_tecu (D-19 statistic: range, max minus min); observed over 168 row(s): min 0.23772000000000038, max 11.9789 — reported as computed, never truncated or clipped to a bound (R-72)"
+    },
+    "asymmetry_statement": "A slowly varying per-station-day bias partially cancels in the paired difference but does not cancel in the derived percentage summary, because it inflates the reference denominator.",
+    "bounds_statement": "This budget covers the Phase 1-applicable set only (two of Vision 6.9's six contents plus the asymmetry statement); Vision 6.9 states its list without a phase qualifier, and the phase qualifier runs through Vision 15.2 — recorded so the gap reads as governed rather than as non-compliance. Values are stated as computed; nothing is truncated.",
+    "completeness": {
+      "asserted": true,
+      "phase1_applicable": [
+        "provider_reported_uncertainty",
+        "within_hour_aggregation_spread"
+      ]
+    },
+    "not_applicable": [
+      {
+        "content": "per-satellite residual spread",
+        "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+      },
+      {
+        "content": "per-IPP sampling dispersion",
+        "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+      },
+      {
+        "content": "zenith and elevation geometry uncertainty",
+        "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+      },
+      {
+        "content": "mapping-function contribution",
+        "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
+      }
+    ]
+  },
+  "phase_id": "P1A",
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "target_label": "location-sampled gridded VTEC"
+}

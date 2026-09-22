@@ -192,3 +192,32 @@ than the refusal — and is rejected outright rather than offered.
 
 **The owner ruled on 2026-09-13: record it as a gate finding and rule later.** No code
 moves on it in this pass.
+
+---
+
+### Dated pointer, 2026-09-21 — the Gate finding above is CLOSED; its account here is stale
+
+*Appended on the 2026-09-21 re-review's one surviving Major finding (documentation
+consistency between this plan and the unit's PRIMARY artifact). Nothing above is rewritten:
+the plan records what was true when the owner ruled "record it, rule later" on 2026-09-13,
+and that record stands as history.*
+
+**What changed.** The owner ruled later the same day — "OWNER RULING — APPROVE OPTION (A)",
+`governance/CHANGE_RECORD_2026-09-13_04_fixture_window.md` — adopting remedy **(a)**:
+scope-derived windowing of `04`'s audit on fixture runs. Implemented in commit `8d4297d`
+(`scripts/04_build_external_products.py::_stage_entry`): on a fixture run the fixture
+scope's cited window is BOTH the declared window and the audit's read bound, so the
+declaration lies inside the scope by construction and no full-year window is declared under
+a 7-day or 1-month scope. `_declared_data_window()` (the calendar year) is now reached only
+on the non-fixture path. The change record's governance inspection found **no D-number
+required**: no frozen scientific value changes — D-8's claim boundary still governs the
+governed full-year audit, D-11/D-14's fixture windows are read and never written, and the
+fixture-scoped artifact is TC-03f plumbing evidence.
+
+**Therefore the sentence "No code moves on it in this pass" is true of the 2026-09-13
+pass only** and must not be read as the current state. The accurate, verified account —
+the five-link chain re-traced link by link against the current code — is in
+`code-summary.md` § "Post-receipt amendment — 2026-09-21" and § "Adversarial re-review
+(2026-09-21)". The `04` step is no longer the reason the ladder cannot complete; the
+remaining stops are other units' (`features-and-splits`' release-input loader) and the
+fixture run is the execution-owed evidence.

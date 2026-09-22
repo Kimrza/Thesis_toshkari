@@ -316,7 +316,10 @@ def test_untransformed_bundle_is_refused_by_every_consumer_entry() -> None:
     with pytest.raises(LeakageError) as excinfo:
         assert_consumable(raw)
     assert "untransformed" in str(excinfo.value)
-    assert_consumable(_bundle(_score_spec("F1"), transform_id="T-F1")) is None
+    # `assert` added 2026-09-20: this line was a bare expression statement, so the call ran
+    # (and would still have raised on a refusal) but its `is None` result was discarded and
+    # verified nothing. Found by `ruff` B015 during the first governed-environment run.
+    assert assert_consumable(_bundle(_score_spec("F1"), transform_id="T-F1")) is None
 
 
 def test_train_role_bundle_reaching_an_evaluation_comparison_fails() -> None:

@@ -1,0 +1,60 @@
+{
+  "artifact_class": "coverage_report",
+  "lineage_caveat": "The Phase 1 target is location-sampled gridded VTEC (Madrigal cell), never receiver-specific station-observed VTEC, and it carries its own distinct target_definition_id. The Phase 1 grid-cell target population is not the Phase 2 IPP target population: no numerical equivalence between the Phase 1 and Phase 2 targets is claimed, and Phase 2 is a fixed-protocol replication on a new target lineage, not a second statistically independent blind test (Vision 2.2, 6.6). Part of any measured IRI or GIM difference is a geometry and sampling artefact rather than skill: Phase 1 compares a grid cell against a station-coordinate evaluation, Phase 2 an IPP cloud against a zenith estimate (Vision 6.6).",
+  "payload": {
+    "invalid_reasons": {
+      "BSHM:32:35:2022-11-02T10:00:00Z": [
+        "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+      ],
+      "BSHM:32:35:2022-11-03T14:00:00Z": [
+        "within_hour_spread_tecu 11.036400000000004 above D-19 range bound 10.0"
+      ],
+      "BSHM:32:35:2022-11-05T07:00:00Z": [
+        "within_hour_spread_tecu 11.557000000000002 above D-19 range bound 10.0"
+      ],
+      "BSHM:32:35:2022-11-05T14:00:00Z": [
+        "within_hour_spread_tecu 11.9789 above D-19 range bound 10.0"
+      ],
+      "BSHM:32:35:2022-11-05T23:00:00Z": [
+        "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+      ],
+      "BSHM:32:35:2022-11-06T14:00:00Z": [
+        "within_hour_spread_tecu 10.3552 above D-19 range bound 10.0"
+      ],
+      "BSHM:32:35:2022-11-06T23:00:00Z": [
+        "largest_internal_gap_s 2700.0 above D-19 maximum 1800.0"
+      ],
+      "BSHM:32:35:2022-11-07T14:00:00Z": [
+        "within_hour_spread_tecu 10.949300000000001 above D-19 range bound 10.0"
+      ],
+      "BSHM:32:35:2022-11-07T16:00:00Z": [
+        "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+      ],
+      "BSHM:32:35:2022-11-07T23:00:00Z": [
+        "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"
+      ]
+    },
+    "keying_note": "keyed to the same cell and month identifiers the G-P1A record uses (R-71); different keying is how two reports about one dataset become impossible to reconcile",
+    "keys": [
+      "station",
+      "cell_gdlat",
+      "cell_glon",
+      "month"
+    ],
+    "per_cell_month": [
+      {
+        "cell_gdlat": 32,
+        "cell_glon": 35,
+        "invalid_rows": 10,
+        "month": "2022-11",
+        "rows": 168,
+        "station": "BSHM",
+        "valid_rows": 158
+      }
+    ]
+  },
+  "phase_id": "P1A",
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "target_label": "location-sampled gridded VTEC"
+}

@@ -1758,21 +1758,78 @@ def _config_tbd_reason(config_name: str, text: str, fields: tuple[str, ...]) -> 
     offender is reported FIRST; it never decides WHICH field is named, because the named
     field is always the one whose own value failed (the defect this replaces).
     """
+    # The stdlib text check runs FIRST and still owns the scalar cases, because it is what
+    # this module could rely on when pyyaml was uninstallable here (D-38 records that
+    # constraint). pyyaml IS installed in the governed 3.11 environment as of 2026-09-20, so
+    # a field it cannot read as a scalar -- a block mapping such as `stations:` or
+    # `qc_operations:` -- is now resolved through the real loader instead of reported as a
+    # limitation of the checker. Reporting the checker's own blind spot as though it were the
+    # project's first unmet precondition tells the reader nothing about the project.
     for field in fields:
         state, detail = _config_field_state(text, field)
         if state == _RESOLVED:
             continue
         if state == _UNRESOLVED:
             return (
-                f"configs/{config_name}: {field} is `{TBD_SENTINEL}`; every stage "
-                f"entry refuses at assert_no_tbd and writes an aborted row (TE 18.3: "
-                f"stop and report, never default)"
+                f"configs/{config_name}: {field} is `{TBD_SENTINEL}`; the stage that reads "
+                f"it refuses and writes an aborted row (TE 18.3: stop and report, never "
+                f"default)"
+            )
+        loaded_state, loaded_detail = _config_field_state_via_loader(config_name, field)
+        if loaded_state == _RESOLVED:
+            continue
+        if loaded_state == _UNRESOLVED:
+            return (
+                f"configs/{config_name}: {field} is unresolved ({loaded_detail}); the stage "
+                f"that reads it refuses and writes an aborted row (TE 18.3)"
             )
         return (
-            f"configs/{config_name}: {field}'s own value cannot be read by this stdlib "
-            f"check ({detail}); it says so rather than guessing (TE 18.3)"
+            f"configs/{config_name}: {field}'s own value cannot be read "
+            f"({detail}; {loaded_detail}); it says so rather than guessing (TE 18.3)"
         )
     return None
+
+
+def _config_field_state_via_loader(config_name: str, field: str) -> tuple[str, str]:
+    """`_config_field_state` for a field whose value is a block, read with pyyaml.
+
+    Resolved means: present, not None, not the sentinel, and -- for a mapping -- carrying at
+    least one key whose own value is not the sentinel. A block that exists but is entirely
+    sentinels is UNRESOLVED, which is the state `qc_operations` and `stations` are actually
+    in when they are unfrozen, and the state a bare text scan cannot see.
+    """
+    try:
+        import yaml
+    except ImportError:  # pragma: no cover - the caller already reports an absent pyyaml
+        return _UNDETERMINED, "pyyaml is not importable"
+    path = REPO_ROOT / "configs" / config_name
+    if not path.is_file():
+        # The caller handed synthetic text for a config that does not exist on disk (the
+        # reader's own controls do this). There is nothing to load, so the stdlib check's
+        # verdict stands rather than being replaced by a statement about a missing file.
+        return _UNDETERMINED, f"no {config_name} on disk to load"
+    try:
+        loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return _UNDETERMINED, f"{config_name} does not parse: {exc}"
+    if not isinstance(loaded, dict) or field not in loaded:
+        return _UNRESOLVED, f"`{field}` is absent from {config_name}"
+    value = loaded[field]
+    if value is None:
+        return _UNRESOLVED, f"`{field}` is null"
+    if isinstance(value, str) and value.strip() == TBD_SENTINEL:
+        return _UNRESOLVED, f"`{field}` is the sentinel"
+    if isinstance(value, dict):
+        if not value:
+            return _UNRESOLVED, f"`{field}` is an empty mapping"
+        live = [
+            key
+            for key, item in value.items()
+            if not (isinstance(item, str) and item.strip() == TBD_SENTINEL)
+        ]
+        if not live:
+            return _UNRESOLVED, f"every key under `{field}` is the sentinel"
+    return _RESOLVED, f"`{field}` resolves to a {type(value).__name__}"
 
 
 def _completion_preconditions() -> str | None:
@@ -1788,15 +1845,49 @@ def _completion_preconditions() -> str | None:
             )
     for fid in FIXTURE_IDS:
         manifest_path = REPO_ROOT / "tests" / "fixtures" / fid / MANIFEST_NAME
+        # EXISTENCE IS NOT THE PRECONDITION; LOADABILITY IS (2026-09-21).
+        #
+        # This checked `is_file()` only, which was the same thing while no manifest existed
+        # at all. Since the Recommendation 37 remediation authored the structural skeletons,
+        # a file exists at both paths and neither is loadable — so the completion test stopped
+        # skipping, ran the real clean run, and FAILED on the orchestrator's correct preflight
+        # refusal ("inputs.site_log.value carries the `TBD — freeze gate` sentinel (and 71
+        # other field(s))"). That abort is the honest current state, not a defect: a comparison
+        # run needs a MEASURED manifest, and producing one is a measuring run followed by the
+        # owner's Q-31 freeze. A precondition that a skeleton satisfies is not a precondition.
+        if manifest_path.is_file():
+            try:
+                load_fixture_manifest(manifest_path)
+            except IntegrityError as exc:
+                return (
+                    f"{manifest_path.relative_to(REPO_ROOT)} exists but is not loadable "
+                    f"({str(exc).split(': ', 2)[-1][:120]}…): it is the Recommendation 37 "
+                    f"STRUCTURAL SKELETON, not a measured manifest. A measuring run "
+                    f"(`--emit-candidate --identity …`), then promotion, then the owner's "
+                    f"Q-31 freeze are owed before a comparison run can be made"
+                )
         if not manifest_path.is_file():
             return (
                 f"no fixture manifest exists at {manifest_path.relative_to(REPO_ROOT)}: the "
                 f"manifest is emitted by a measuring run and frozen by the owner's Q-31 act "
                 f"(BLK-02) — never authored by hand"
             )
+    # `folds` was listed here and is REMOVED (2026-09-20, measured before asserting).
+    #
+    # It is not a precondition of anything. It has no reader in `src/` or `scripts/`, it is in
+    # NO `REQUIRED_FIELDS_MAP` entry — so `assert_no_tbd` never sees it — and the owner ruled
+    # on 2026-09-10 (recorded in D-38) that it stays `TBD — freeze gate` deliberately, so that
+    # `configs/data.yaml: partitions` remains the single source of truth for the split
+    # calendar. Listing it made this scanner report a permanently unmeetable precondition and
+    # attribute a false mechanism to it ("every stage entry refuses at assert_no_tbd"), which
+    # masked the real first blocker underneath. Verified by execution on 2026-09-20:
+    # `scripts/01_inventory_and_registry.py` ran to completion inside the fixture sequence
+    # with `folds` still `TBD — freeze gate`, and the sequence then stopped at
+    # `configs/data.yaml qc_operations` — the genuine first unmet precondition, which this
+    # scanner now reaches instead.
     for config_name, fields in (
-        ("experiment.yaml", ("folds", "embargo_hours")),
-        ("data.yaml", ("stations", "cell_rule")),
+        ("experiment.yaml", ("embargo_hours",)),
+        ("data.yaml", ("stations", "cell_rule", "qc_operations")),
     ):
         config_path = REPO_ROOT / "configs" / config_name
         if not config_path.is_file():
@@ -1911,16 +2002,49 @@ def test_precondition_reports_an_unreadable_field_instead_of_guessing():
         assert "cannot be read" in reason and TBD_SENTINEL not in reason
 
 
-def test_fixture_trees_exist_without_manifests():
-    """W-10 / BLK-02: the two fixture trees exist and carry NO fixture_manifest.yaml —
-    the manifests come from a measuring run and the freeze acts are the owner's."""
+def test_fixture_manifests_are_structural_only_and_carry_no_measured_value():
+    """W-10 / BLK-02: no MEASURED fixture value may be authored by hand.
+
+    WHAT CHANGED AND WHY (2026-09-20, first execution of this suite under the governed
+    3.11 pin). This test previously asserted that `fixture_manifest.yaml` must NOT EXIST,
+    as a proxy for BLK-02. The approved governance remediation of Recommendation 37 then
+    authored both manifests as STRUCTURAL skeletons — every measured quantity written as
+    the literal `TBD — freeze gate` sentinel, zero values invented — because
+    `src/data/fixture_manifest.py` was a 1,700-line loader with no file anywhere in the
+    repository to load. File absence and BLK-02 had come apart, so the check is rebound to
+    BLK-02 itself rather than to its former proxy.
+
+    The rebinding is stronger, not weaker, in the direction that matters: absence could
+    only ever say "nobody has written one", while this asserts, for each manifest that
+    does exist, that the sentinel is present AND that `load_fixture_manifest` REFUSES it
+    by name at a measured field. A hand-authored measured value would load clean, and
+    would be caught here; under the old test it would have been caught only if someone
+    also happened to notice the file.
+
+    The owner's Q-31 freeze act and the measuring run remain the only routes to a loadable
+    manifest (dispositions §5 item 8), and until they happen the refusal below is the
+    correct state of both fixtures, not a defect.
+    """
     for fid in FIXTURE_IDS:
         tree = REPO_ROOT / "tests" / "fixtures" / fid
         assert tree.is_dir(), f"fixture tree absent: {tree}"
-        assert not (tree / MANIFEST_NAME).exists(), (
-            f"{tree / MANIFEST_NAME} exists: no manifest may be authored by hand (BLK-02)"
-        )
         assert (tree / "README.md").is_file()
+
+        manifest = tree / MANIFEST_NAME
+        if not manifest.exists():
+            continue  # absence is still permitted: nothing has been authored by hand
+
+        text = manifest.read_text(encoding="utf-8")
+        assert TBD_SENTINEL in text, (
+            f"{manifest} exists but carries no `{TBD_SENTINEL}` sentinel: a manifest with "
+            f"no owed value is a FROZEN manifest, which only the owner's Q-31 act and a "
+            f"measuring run may produce (BLK-02, TE §15.1)"
+        )
+        with pytest.raises(IntegrityError) as excinfo:
+            load_fixture_manifest(manifest)
+        assert "measured" in str(excinfo.value), (
+            f"{manifest} was refused, but not at a measured field: {excinfo.value}"
+        )
 
 
 def test_required_output_enumeration_is_20_and_19():
@@ -2365,6 +2489,20 @@ def _apparatus_config_tree(root: Path, *, window: tuple[str, str] | None) -> Pat
             },
             "declared_sources": [],
             "acquisition": acquisition,
+            # The synthetic tree carries the fields the D-61 release step resolves, so the
+            # apparatus exercises the real code path rather than stopping at a config the
+            # fixture simply never declared (2026-09-21). Synthetic values, deliberately
+            # NOT the project's real identity, so a reader cannot mistake apparatus output
+            # for governed output.
+            "target": {
+                "identity": {
+                    "phase_id": "P1A-SYNTH",
+                    "source_id": "SYNTH_SOURCE",
+                    "target_definition_id": "SYNTH_TARGET_DEF",
+                }
+            },
+            "cell_rule": "floor-half-open-d1",
+            "stations": {"SYNT": {"lat": 32.0, "lon": 35.0}},
         },
         "features.yaml": {"schema_version": "1.0.0"},
         "experiment.yaml": {"schema_version": "1.0.0"},
@@ -2535,8 +2673,17 @@ def test_item1_option_a_00_fixture_run_reads_verified_artifacts_and_writes_deriv
     module, entry, evidence_dir, files = _fixture_scoped_00_apparatus(
         tmp_path,
         monkeypatch,
+        # The synthetic month now carries the SIX provider columns a real month file
+        # carries (2026-09-21). The two-column shape predated the D-61 release step, which
+        # refuses to write a release row missing a provider column rather than substituting
+        # an empty value (D-17, R-44) — so the fixture had stopped representing the input it
+        # stands in for. The values are synthetic but well-formed.
         records_text=(
-            "date,station\n2001-10-31,SYNT\n2001-11-02,SYNT\n2001-11-03,SYNT\n2001-11-03,OTHR\n"
+            "date,station,ut1_unix,gdlat,glon,tec,dtec\n"
+            "2001-10-31,SYNT,1004486400,32.0,35.0,10.5,1.1\n"
+            "2001-11-02,SYNT,1004659200,32.0,35.0,11.5,1.2\n"
+            "2001-11-03,SYNT,1004745600,32.0,35.0,12.5,1.3\n"
+            "2001-11-03,OTHR,1004745600,40.0,44.0,13.5,1.4\n"
         ),
     )
     calls = []
@@ -2951,22 +3098,38 @@ REPRODUCTION_PATH = REPO_ROOT / "REPRODUCTION.md"
 #: documentation gap rather than a code defect — Recommendation 44's stated risk.
 PYTHONHASHSEED_LINE = "export PYTHONHASHSEED=0"
 
+#: The second half of the sequence-fence selector. `PYTHONHASHSEED_LINE` alone matches both
+#: REPRODUCTION.md's §3 stage sequence and its §4 local-test block, and both are correct to
+#: carry the export; only the sequence fence runs the walking skeleton.
+SEQUENCE_FENCE_MARKER = "run_walking_skeleton.py"
+
 
 def _guide_fence_segments() -> tuple[list[list[str]], list[list[str]]]:
     """Parse REPRODUCTION.md's §13.2 fence into (Phase 1, Phase 2) python invocations.
 
     Deliberately the same parse as `_fence_segments`, applied to the guide instead of the TE,
     so the two results are directly comparable. The guide carries more than one ```bash```
-    fence (§0 has an install block), so the sequence fence is selected by content — the one
-    containing the `export PYTHONHASHSEED=0` line — rather than by position.
+    fence, so the sequence fence is selected by content rather than by position.
+
+    THE SELECTOR, and why it is no longer `PYTHONHASHSEED_LINE` alone (derived 2026-09-20,
+    first execution of this suite under the governed 3.11 pin). `export PYTHONHASHSEED=0` is
+    correctly present in TWO fences: §3's stage sequence and §4's "Running the tests locally"
+    block, which is right — a reproducer must export it before pytest too, and deleting it
+    from §4 to make a test pass would damage the guide to protect the checker. The selector
+    is therefore narrowed to the fence that also carries the walking-skeleton invocation,
+    which only the sequence fence has. Both conditions are asserted, so a future guide that
+    drops the export from the sequence fence still fails rather than silently selecting the
+    wrong block.
     """
     text = REPRODUCTION_PATH.read_text(encoding="utf-8", errors="replace")
     fences = re.findall(r"```bash\n(.*?)```", text, re.DOTALL)
     assert fences, "REPRODUCTION.md contains no ```bash fence"
-    candidates = [f for f in fences if PYTHONHASHSEED_LINE in f]
+    candidates = [
+        f for f in fences if PYTHONHASHSEED_LINE in f and SEQUENCE_FENCE_MARKER in f
+    ]
     assert len(candidates) == 1, (
-        f"expected exactly one sequence fence in REPRODUCTION.md (the one carrying "
-        f"{PYTHONHASHSEED_LINE!r}); found {len(candidates)}"
+        f"expected exactly one sequence fence in REPRODUCTION.md (the one carrying both "
+        f"{PYTHONHASHSEED_LINE!r} and {SEQUENCE_FENCE_MARKER!r}); found {len(candidates)}"
     )
     phase = 1
     segments: dict[int, list[list[str]]] = {1: [], 2: []}
@@ -3065,3 +3228,226 @@ def test_rec44_the_three_way_comparison_detects_a_drifted_guide() -> None:
             argv[argv.index("--phase") + 1] = "2"
             break
     assert reflagged != te_phase1, "a changed --phase flag was not detected"
+
+
+# =========================================================================================
+# The candidate-path lifecycle (CR-2026-09-20-FIXTURE-CANDIDATE-PATH, owner-approved)
+#
+# THE DEADLOCK THESE CLOSE. `write_candidate_manifest` refused any measuring run while a file
+# existed at the REFERENCE path, and the Recommendation 37 remediation authored a structural
+# skeleton there. A comparison run then refused the skeleton as unloadable, and the measuring
+# run that would have replaced it refused because the skeleton existed -- so dispositions
+# section 5 item 8 could not be performed at all. The amendment gives a measuring run its own
+# per-run candidate path and makes installation a separate, recorded act. Every test below is
+# synthetic: no fixture is run, no measured value is invented, nothing under
+# `tests/fixtures/` is touched.
+# =========================================================================================
+
+
+from src.data.fixture_manifest import manifest_path_for  # noqa: E402
+
+
+def _candidate_mapping(root: Path, fixture_id: str = PLUMBING_FIXTURE_ID) -> dict[str, Any]:
+    """A complete, valid `status: candidate` mapping over a synthetic output tree."""
+    return build_manifest_mapping(fixture_id, root, status=CANDIDATE)
+
+
+def test_candidate_path_is_per_run_and_is_not_the_reference_manifest(tmp_path):
+    """The whole point of the amendment: a measuring run writes somewhere else."""
+    from src.data.fixture_manifest import candidate_path_for
+
+    first = candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-A")
+    second = candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-B")
+    reference = manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID)
+
+    assert first != second, "two measuring runs must not collide on one candidate path"
+    assert first != reference and second != reference
+    assert first.parent == reference.parent, "the candidate stays beside its fixture"
+    assert first.name == "fixture_manifest.candidate_run-A.yaml"
+
+
+def test_candidate_run_id_is_made_filename_safe_and_an_empty_one_is_refused(tmp_path):
+    """A composed `measuring_run_id` joins ids with `+`; an id with no usable character is
+    refused rather than silently collapsing every run onto one path."""
+    from src.data.fixture_manifest import candidate_path_for
+
+    joined = candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-A+run-B")
+    assert "+" not in joined.name and "run-A-run-B" in joined.name
+    for bad in ("", "   ", "+++"):
+        with pytest.raises(IntegrityError):
+            candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, bad)
+
+
+def test_a_measuring_run_writes_its_candidate_while_a_skeleton_holds_the_reference_path(
+    tmp_path,
+):
+    """THE DEADLOCK CONTROL. A sentinel-bearing skeleton sits at the reference path, exactly
+    as Recommendation 37 left the real trees, and the candidate write SUCCEEDS anyway."""
+    from src.data.fixture_manifest import candidate_path_for, write_candidate_manifest
+
+    root = tmp_path / "tests" / "fixtures" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    skeleton = manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID)
+    skeleton.write_text(f'status: candidate\nruntime: "{TBD_SENTINEL}"\n', encoding="utf-8")
+    skeleton_before = skeleton.read_text(encoding="utf-8")
+
+    candidate = _candidate_mapping(root)
+    written = write_candidate_manifest(
+        candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-A"), candidate
+    )
+
+    assert written.is_file()
+    assert (
+        skeleton.read_text(encoding="utf-8") == skeleton_before
+    ), "the reference manifest must be untouched by a measuring run"
+
+
+def test_a_second_write_at_the_same_candidate_path_is_still_refused(tmp_path):
+    """R-134 obligation 3 is preserved, narrowed to the path where it means something."""
+    from src.data.fixture_manifest import candidate_path_for, write_candidate_manifest
+
+    root = tmp_path / "tests" / "fixtures" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    target = candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-A")
+    write_candidate_manifest(target, _candidate_mapping(root))
+    with pytest.raises(IntegrityError) as excinfo:
+        write_candidate_manifest(target, _candidate_mapping(root))
+    assert "already exists" in str(excinfo.value)
+
+
+def test_promotion_installs_the_candidate_preserves_the_old_manifest_and_records_it(tmp_path):
+    """The success path: install, preserve, record -- and the installed file is NOT frozen."""
+    from src.data.fixture_manifest import (
+        PROMOTION_RECORD_NAME,
+        candidate_path_for,
+        promote_candidate_manifest,
+        write_candidate_manifest,
+    )
+
+    root = tmp_path / "tests" / "fixtures" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    reference = manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID)
+    reference.write_text(f'status: candidate\nruntime: "{TBD_SENTINEL}"\n', encoding="utf-8")
+    superseded_text = reference.read_text(encoding="utf-8")
+
+    candidate_path = candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-A")
+    write_candidate_manifest(candidate_path, _candidate_mapping(root))
+
+    record = promote_candidate_manifest(
+        candidate_path,
+        reference,
+        promoted_by="Kimia Rezaei (student)",
+        authorization="CR-2026-09-20-FIXTURE-CANDIDATE-PATH",
+    )
+
+    installed = json.loads(reference.read_text(encoding="utf-8"))
+    assert installed["status"] == CANDIDATE, "promotion never writes `frozen` (R-134 ob. 2)"
+    assert TBD_SENTINEL not in reference.read_text(encoding="utf-8")
+    assert candidate_path.is_file(), "the source candidate is preserved, not moved"
+
+    preserved = root / record["superseded"]
+    assert preserved.is_file() and preserved.read_text(encoding="utf-8") == superseded_text
+
+    ledger = [
+        json.loads(line)
+        for line in (root / PROMOTION_RECORD_NAME).read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(ledger) == 1
+    assert ledger[0]["from_candidate"] == candidate_path.name
+    assert ledger[0]["authorization"] == "CR-2026-09-20-FIXTURE-CANDIDATE-PATH"
+    assert len(ledger[0]["candidate_sha256"]) == 64
+
+
+def test_promotion_refuses_a_candidate_carrying_an_unmeasured_field(tmp_path):
+    """NEGATIVE CONTROL. The skeleton must never become the reference by promotion either."""
+    from src.data.fixture_manifest import promote_candidate_manifest
+
+    root = tmp_path / "tests" / "fixtures" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    unmeasured = _candidate_mapping(root)
+    unmeasured["runtime"]["cpu_total"]["min"] = TBD_SENTINEL
+    candidate_path = root / "fixture_manifest.candidate_run-A.yaml"
+    candidate_path.write_text(json.dumps(unmeasured, indent=2, default=str), encoding="utf-8")
+
+    with pytest.raises(IntegrityError) as excinfo:
+        promote_candidate_manifest(
+            candidate_path,
+            manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID),
+            promoted_by="tester",
+            authorization="synthetic",
+        )
+    assert "unmeasured" in str(excinfo.value)
+    assert not manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID).exists()
+
+
+def test_promotion_refuses_a_frozen_source_and_a_missing_one(tmp_path):
+    """NEGATIVE CONTROL. Freezing is the owner's Q-31 act; code never re-installs a frozen
+    manifest, and a promotion of nothing is refused by name."""
+    from src.data.fixture_manifest import promote_candidate_manifest
+
+    root = tmp_path / "tests" / "fixtures" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    frozen = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=FROZEN)
+    frozen_path = root / "fixture_manifest.candidate_run-A.yaml"
+    frozen_path.write_text(json.dumps(frozen, indent=2, default=str), encoding="utf-8")
+
+    with pytest.raises(IntegrityError) as excinfo:
+        promote_candidate_manifest(
+            frozen_path,
+            manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID),
+            promoted_by="tester",
+            authorization="synthetic",
+        )
+    assert "frozen" in str(excinfo.value).lower()
+
+    with pytest.raises(IntegrityError):
+        promote_candidate_manifest(
+            root / "fixture_manifest.candidate_absent.yaml",
+            manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID),
+            promoted_by="tester",
+            authorization="synthetic",
+        )
+
+
+def test_promotion_refuses_rather_than_overwriting_an_earlier_preservation(tmp_path):
+    """NEGATIVE CONTROL. Two promotions inside one second must not silently destroy the
+    first preservation -- the stamp is second-resolution, so the collision is real."""
+    import datetime as _dt
+
+    from src.data.fixture_manifest import (
+        candidate_path_for,
+        promote_candidate_manifest,
+        write_candidate_manifest,
+    )
+
+    root = tmp_path / "tests" / "fixtures" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    reference = manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID)
+    reference.write_text("status: candidate\nfirst: yes\n", encoding="utf-8")
+    fixed = _dt.datetime(2026, 9, 20, 12, 0, 0, tzinfo=_dt.timezone.utc)
+
+    first = candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-A")
+    write_candidate_manifest(first, _candidate_mapping(root))
+    promote_candidate_manifest(first, reference, promoted_by="t", authorization="s", now=fixed)
+
+    second = candidate_path_for(tmp_path, PLUMBING_FIXTURE_ID, "run-B")
+    write_candidate_manifest(second, _candidate_mapping(root))
+    with pytest.raises(IntegrityError) as excinfo:
+        promote_candidate_manifest(
+            second, reference, promoted_by="t", authorization="s", now=fixed
+        )
+    assert "already exists" in str(excinfo.value)
+
+
+def test_comparison_mode_still_refuses_an_incomplete_reference_manifest(tmp_path):
+    """THE HALF THAT MUST NOT MOVE. Widening the measuring path must not widen the read
+    path: a sentinel-bearing reference manifest is still refused by the one loader."""
+    root = tmp_path / "tests" / "fixtures" / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True)
+    reference = manifest_path_for(tmp_path, PLUMBING_FIXTURE_ID)
+    incomplete = _candidate_mapping(root)
+    incomplete["runtime"]["cpu_total"]["min"] = TBD_SENTINEL
+    reference.write_text(json.dumps(incomplete, indent=2, default=str), encoding="utf-8")
+
+    with pytest.raises(IntegrityError):
+        load_fixture_manifest(reference)

@@ -34,9 +34,11 @@ Run: pytest tests/test_regimes_and_reporting.py -rs
 from __future__ import annotations
 
 import ast
+import dataclasses
 import datetime as dt
 import inspect
 import json
+import math
 import sys
 import tempfile
 from pathlib import Path
@@ -434,7 +436,12 @@ def test_regimes_transcription_matches_frozen_values() -> None:
     assert block["independence_min_quiet_hours"] == 24  # >=24 h of Kp<4 (D-13)
     assert block["independent_storm_event_threshold"] == 3  # D-13
     assert "GFZ" in str(block["count_source"]) and "D-11" in str(block["count_source"])
-    assert str(block["december_day_range"]).strip() == TBD_SENTINEL  # routed, not decided
+    # FROZEN 2026-09-21 (D-59, proposed number; Student + Supervisor, the gate item
+    # GOV-2026-08-28-FD-01 Rec 15 routed). It was the `TBD — freeze gate` sentinel until then,
+    # and this assertion is rebound from the sentinel to the frozen value rather than deleted.
+    # The range matches D-28's locked SCORED set exactly, so D-13's comparison count describes
+    # precisely the set that is scored: 2-31 December 2022, thirty days.
+    assert str(block["december_day_range"]).strip() == "2022-12-02..2022-12-31"
     assert list(block["d17_quality_strata"]["fields"]) == [
         "valid_observation_count",
         "within_hour_spread_tecu",
@@ -564,12 +571,31 @@ def test_unactivated_count_refuses_naming_the_block() -> None:
 # =======================================================================================
 
 
-def test_december_day_range_tbd_refuses_stop_and_report() -> None:
-    """The REAL config's day range is the `TBD — freeze gate` sentinel: the mechanism is
-    built, the value is routed (Rec 15; TE §18.3) — the refusal names the field."""
-    with pytest.raises(RegimeError) as excinfo:
-        read_december_day_range(CONFIG)
-    assert "december_day_range" in str(excinfo.value)
+def test_december_day_range_resolves_to_d28s_thirty_day_scored_set() -> None:
+    """FROZEN 2026-09-21 (D-59): the real config resolves, and to D-28's set exactly.
+
+    This test asserted the refusal while the value was routed. The freeze does not retire
+    it — it rebinds it to the decided value AND keeps the refusal alive below, on a synthetic
+    config, so the guard that protected the field is still proven rather than merely retired
+    along with the sentinel it once caught.
+    """
+    start, end = read_december_day_range(CONFIG)
+    assert (start.isoformat(), end.isoformat()) == ("2022-12-02", "2022-12-31")
+    assert (end - start).days + 1 == 30, "D-28's scored set is thirty days"
+
+
+def test_an_unfrozen_or_unparseable_december_day_range_still_refuses() -> None:
+    """NEGATIVE CONTROL, kept after the freeze (Rec 15; TE §18.3).
+
+    A sentinel, an absent value and an unparseable string must each still refuse by name.
+    Freezing a value is not licence to stop checking that the unfrozen state is caught — the
+    guard has to keep working for anyone who edits the field later.
+    """
+    for bad in (TBD_SENTINEL, None, "2022-12-02 to 2022-12-31"):
+        unfrozen = dataclasses.replace(CONFIG, december_day_range=bad)
+        with pytest.raises(RegimeError) as excinfo:
+            read_december_day_range(unfrozen)
+        assert "december_day_range" in str(excinfo.value)
 
 
 def test_audit_read_requires_registration_and_bars_dst_source() -> None:
@@ -2023,3 +2049,197 @@ def test_regime_error_declared_once_at_the_r01_site() -> None:
 
     assert regimes.RegimeError is base_regime_error
     assert report_guards.RegimeError is base_regime_error
+
+
+# =========================================================================================
+# The comparison-level top-1% sensitivity (CR-2026-09-21-TOP1PCT, owner decision 2026-09-21)
+#
+# The decision fixed four things the per-member functions did not provide: ONE retained set
+# shared by every compared model, the established equal-station-weighted metrics recomputed
+# on it, removed/retained counts PER STATION, and a refusal when a station loses all support.
+# Each has its own test, and each refusal has a negative control.
+# =========================================================================================
+
+
+class _SkewedMask(_Mask):
+    """A mask whose members disagree about WHICH rows are worst.
+
+    The shared-set requirement is untestable on the flat `_Mask`, where every member's error
+    is a constant offset and every ranking therefore agrees. Here `M-A` is worst on one row
+    and `M-B` on another, so a per-member removal would give the two models DIFFERENT
+    supports -- the defect the owner's decision closes.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        rows = list(self.masked_rows)
+        for index, row in enumerate(rows):
+            truth = row["y_true"]
+            row["y_hats"] = {
+                "M-A": truth + (50.0 if index == 0 else 1.0),
+                "M-B": truth + (50.0 if index == 1 else 1.0),
+            }
+        self.masked_rows = tuple(rows)
+
+
+def test_the_comparison_removes_one_shared_set_not_a_set_per_member() -> None:
+    """The owner's first requirement: the same retained rows for every compared model."""
+    from src.evaluation.diagnostics import (
+        top1pct_comparison_removed_keys,
+        top1pct_removed_keys,
+    )
+
+    mask = _SkewedMask()
+    per_a = top1pct_removed_keys(mask, "M-A", removed_fraction=0.05, scope="comparison_wide")
+    per_b = top1pct_removed_keys(mask, "M-B", removed_fraction=0.05, scope="comparison_wide")
+    assert per_a != per_b, "fixture does not exercise the defect: members must disagree"
+
+    shared = top1pct_comparison_removed_keys(
+        mask,
+        ["M-A", "M-B"],
+        removed_fraction=0.05,
+        scope="comparison_wide",
+        combination="union_of_member_top_k",
+    )
+    assert set(per_a) <= set(shared) and set(per_b) <= set(shared)
+    # One set, whichever member it is asked about — that is the whole requirement.
+    assert shared == top1pct_comparison_removed_keys(
+        mask,
+        ["M-B", "M-A"],
+        removed_fraction=0.05,
+        scope="comparison_wide",
+        combination="union_of_member_top_k",
+    )
+
+
+def test_rank_by_max_member_error_removes_exactly_k_rows() -> None:
+    """The second combination holds the declared fraction exactly, where the union cannot."""
+    from src.evaluation.diagnostics import top1pct_comparison_removed_keys
+
+    mask = _SkewedMask()
+    total = len(mask.masked_rows)
+    expected_k = math.ceil(0.05 * total)
+    keys = top1pct_comparison_removed_keys(
+        mask,
+        ["M-A", "M-B"],
+        removed_fraction=0.05,
+        scope="comparison_wide",
+        combination="rank_by_max_member_error",
+    )
+    assert len(keys) == expected_k
+    union = top1pct_comparison_removed_keys(
+        mask,
+        ["M-A", "M-B"],
+        removed_fraction=0.05,
+        scope="comparison_wide",
+        combination="union_of_member_top_k",
+    )
+    assert len(union) > len(keys), "the union is the combination that can exceed k"
+
+
+def test_the_combination_rule_is_declared_and_never_defaulted() -> None:
+    """NEGATIVE CONTROL. HOW the members combine is a scientific choice: an unset or
+    unrecognised value refuses by name rather than silently picking one (TE §18.3)."""
+    from src.evaluation.diagnostics import top1pct_comparison_removed_keys
+
+    mask = _SkewedMask()
+    for bad in ("TBD — freeze gate", "", "whatever_seems_right"):
+        with pytest.raises(RegimeError) as excinfo:
+            top1pct_comparison_removed_keys(
+                mask,
+                ["M-A", "M-B"],
+                removed_fraction=0.05,
+                scope="comparison_wide",
+                combination=bad,
+            )
+        assert "combination" in str(excinfo.value)
+
+
+def test_per_station_removed_and_retained_counts_are_reported() -> None:
+    """The owner's third requirement, and the reason it is mandatory rather than optional:
+    under `comparison_wide` the removal is deliberately NOT proportionate across stations."""
+    from src.evaluation.diagnostics import (
+        top1pct_comparison_removed_keys,
+        top1pct_station_counts,
+    )
+
+    mask = _Mask()
+    keys = top1pct_comparison_removed_keys(
+        mask,
+        ["M-A", "M-B"],
+        removed_fraction=0.05,
+        scope="comparison_wide",
+        combination="union_of_member_top_k",
+    )
+    counts = top1pct_station_counts(mask, "M-A", keys)
+    assert set(counts) == set(STATIONS)
+    for station, entry in counts.items():
+        assert entry["removed"] + entry["retained"] == 6, station
+    assert sum(entry["removed"] for entry in counts.values()) == len(keys)
+
+
+def test_a_station_left_with_no_retained_row_refuses_the_comparison() -> None:
+    """NEGATIVE CONTROL for the owner's fourth requirement. Equal-station weighting averages
+    per-station figures, so a station with no retained row has no figure to contribute: the
+    comparison is UNDEFINED, not merely smaller, and is refused rather than averaged over
+    the survivors."""
+    from src.evaluation.diagnostics import top1pct_comparison_removed_keys
+
+    mask = _Mask()
+    # S3 carries the largest y_true offset, so a comparison-wide removal large enough to
+    # empty one station empties that one first.
+    with pytest.raises(RegimeError) as excinfo:
+        top1pct_comparison_removed_keys(
+            mask,
+            ["M-A", "M-B"],
+            removed_fraction=0.34,
+            scope="comparison_wide",
+            combination="union_of_member_top_k",
+        )
+    message = str(excinfo.value)
+    assert "retain no rows" in message and "UNDEFINED" in message
+
+
+def test_the_block_recomputes_every_member_on_the_shared_remainder() -> None:
+    """The metrics limb: every compared member is recomputed on the SAME retained rows, and
+    the block carries its own bound as data."""
+    from src.evaluation.diagnostics import compute_member_metrics, top1pct_comparison_block
+
+    mask = _SkewedMask()
+    block = top1pct_comparison_block(
+        mask=mask,
+        member_ids=["M-A", "M-B"],
+        removed_fraction=0.05,
+        scope="comparison_wide",
+        combination="rank_by_max_member_error",
+    )
+    assert block["label"] == "sensitivity"
+    assert block["role"] == "supplementary_sensitivity_only"
+    assert block["may_inform_selection_or_tuning"] is False
+    assert block["rows_removed"] + block["rows_retained"] == len(mask.masked_rows)
+    assert set(block["members"]) == {"M-A", "M-B"}
+    assert set(block["station_counts"]) == set(STATIONS)
+
+    removed = [tuple(key) for key in block["removed_keys"]]
+    for member_id, metrics in block["members"].items():
+        expected = compute_member_metrics(mask, member_id, excluded_keys=removed)
+        assert metrics["rmse"] == expected["rmse"], member_id
+
+
+def test_the_union_reports_its_effective_fraction_rather_than_hiding_it() -> None:
+    """The union can remove more than the declared 1%. That is a property of the rule, not a
+    defect, and it is REPORTED — a declared 0.01 beside a silently larger actual removal is
+    exactly the kind of quiet mismatch this project refuses."""
+    from src.evaluation.diagnostics import top1pct_comparison_block
+
+    mask = _SkewedMask()
+    block = top1pct_comparison_block(
+        mask=mask,
+        member_ids=["M-A", "M-B"],
+        removed_fraction=0.05,
+        scope="comparison_wide",
+        combination="union_of_member_top_k",
+    )
+    assert block["removed_fraction"] == 0.05
+    assert block["effective_removed_fraction"] > 0.05
+    assert block["effective_removed_fraction"] == block["rows_removed"] / len(mask.masked_rows)

@@ -53,13 +53,15 @@ Boundaries this script holds
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
+import json
 import os
 import sys
 import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -104,7 +106,14 @@ from src.data.experiment_registry import (  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
-from src.data.prepared import resolve_target_identity  # noqa: E402
+from src.data.prepared import (  # noqa: E402
+    D16_STATISTIC,
+    PROVIDER_COLUMNS,
+    cell_bounds,
+    cell_of,
+    resolve_target_identity,
+)
+from src.data.release import sha256_of_file, write_release  # noqa: E402
 
 #: The manifest/artifact field names this run produces. Screened through R-23's
 #: produced-field limb BEFORE the first write (R-24): a Phase 1 artifact may carry no
@@ -434,6 +443,226 @@ def _build_transport() -> Any:
     )
 
 
+# =======================================================================================
+# The release step (D-61, option A; CR-2026-09-21-RELEASE-OPTION-A)
+#
+# WHY IT LIVES HERE. `src/data/release.py: write_release` was a complete, tested, TE 13.3
+# conformant writer with NO production caller anywhere -- verified 2026-09-21 by grep over
+# `scripts/`, `src/`, `notebooks/` and `kaggle/`: only two test modules called it. Meanwhile
+# `01_inventory_and_registry.py` reported `release_manifests_found: 0` and
+# `02_standardize_prepared_target.py` REFUSED ("no released provider input exists under the
+# release root ... refusing rather than fabricating input"), so the Phase 1 sequence could
+# not advance past stage 01. Both refusals were correct; the producer was simply never wired.
+#
+# The owner chose option A on 2026-09-21 -- stage 00 releases what it acquired -- and ruled
+# that D-52's "no transport" prohibits transport of PROVIDER BYTES, not writes as such. A
+# fixture run still contacts no provider and still reads only the scope's verified derived
+# artifacts; what it now also does is publish those verified rows as an immutable release so
+# the stages downstream have the input their contract requires.
+#
+# NOTHING IS FABRICATED. Every manifest field is populated from this run's own facts or from
+# a governed config field. `dataset_version` is deliberately absent -- `write_release`
+# DERIVES it from the release's own content hash (D-29) and refuses a caller-supplied value.
+# =======================================================================================
+
+
+
+#: Recorded in a stage-00 release where a fold, mask or feature-set id does not exist yet.
+#: Deliberately unusable as a real identifier, so it can never be mistaken for one.
+_STAGE00_ID_PLACEHOLDER: Final[str] = "NOT_YET_ASSIGNED_stage_00_precedes_splits_masks_features"
+
+
+def _cell_descriptor(station_cfg: Mapping[str, Any]) -> dict[str, Any]:
+    """The station's selected cell as integers and bound strings — never raw floats (R-11)."""
+    lat, lon = station_cfg.get("lat"), station_cfg.get("lon")
+    if lat is None or lon is None:
+        return {"resolved": False, "reason": "station coordinates unresolved in configs/data.yaml"}
+    cell_lat, cell_lon = cell_of(float(lat), float(lon))
+    return {
+        "resolved": True,
+        "cell_gdlat": cell_lat,
+        "cell_glon": cell_lon,
+        "cell_lat_bounds": cell_bounds(cell_lat),
+        "cell_lon_bounds": cell_bounds(cell_lon),
+        "rule": "floor-half-open-d1",
+    }
+
+
+def _release_manifest(
+    *,
+    snapshot: Any,
+    verification: Mapping[str, Any],
+    evidence_dir: Path,
+    records: Sequence[Mapping[str, Any]],
+    stations: Sequence[str],
+    audit_window: tuple[Any, Any],
+    output_files: Mapping[str, str],
+) -> dict[str, Any]:
+    """The twelve caller-supplied TE 13.3 fields for a fixture run's release."""
+    identity = resolve_target_identity(snapshot.data)
+    data_cfg = snapshot.data
+    acquisition_cfg = data_cfg["acquisition"]
+
+    retrieval_date = "not recorded in the month's request manifest"
+    month_request = evidence_dir / "request_manifest.json"
+    if month_request.is_file():
+        try:
+            loaded = json.loads(month_request.read_text(encoding="utf-8"))
+            retrieval_date = str(loaded.get("retrieved_at_utc") or retrieval_date)
+        except (OSError, ValueError):
+            pass
+
+    # source_files: the DERIVED artifacts this run verified and read. A fixture run reads no
+    # provider bytes (D-52), so `provider` says so rather than claiming a transfer that did
+    # not happen.
+    source_files = [
+        {
+            "provider": "madrigal_derived_artifact",
+            "citation": "D-6 (Madrigal / MIT Haystack citation and acknowledgement)",
+            "location_date": (
+                f"{evidence_dir.name} "
+                f"{audit_window[0].isoformat()}..{audit_window[1].isoformat()}"
+            ),
+            "filename": str(name),
+            "retrieval_date": retrieval_date,
+            "sha256": str(digest),
+        }
+        for name, digest in sorted(dict(verification["verified"]).items())
+    ]
+
+    stations_cfg = data_cfg.get("stations") or {}
+    processing = {
+        "phase_id": identity["phase_id"],
+        "target_definition_id": identity["target_definition_id"],
+        "provider_experiment_kindat": (
+            f"{acquisition_cfg['experiment']}/{acquisition_cfg['kindat']}"
+        ),
+        "parameters": list(acquisition_cfg["parameters"]),
+        "station_coordinate_to_cell_rule": str(data_cfg["cell_rule"]),
+        # The CELL each station's coordinate selects under D-1's floor rule, with the
+        # cell's own bounds as strings. Deliberately NOT the raw lat/lon floats: R-11
+        # refuses floats in the canonical content representation, because
+        # platform-dependent float serialization would break the byte-identical
+        # two-platform requirement — and the cell, not the coordinate, is what the Phase 1
+        # target is actually sampled on (D-1; D-17).
+        "selected_cell_bounds": {
+            station: _cell_descriptor(stations_cfg.get(station) or {})
+            for station in stations
+        },
+        # D-16's frozen statistic, as an IDENTITY. Stage 00 aggregates nothing; the key
+        # records which aggregation the released rows are destined for, which is what lets a
+        # downstream consumer refuse a mismatch instead of discovering one.
+        "hourly_aggregation": D16_STATISTIC,
+    }
+
+    by_station: dict[str, int] = {}
+    for record in records:
+        key = str(record.get("station") or record.get("station_id") or "unattributed")
+        by_station[key] = by_station.get(key, 0) + 1
+
+    return {
+        "source_manifest_id": (
+            f"{evidence_dir.name}:{Path(verification['sha256_manifest']).name}"
+        ),
+        "source_files": source_files,
+        "processing": processing,
+        "schema_version": str(data_cfg.get("schema_version", "")),
+        "units": {"tec": "TECU", "dtec": "TECU", "ut1_unix": "s"},
+        "row_counts": {
+            "by_station": by_station,
+            "by_month": {evidence_dir.name.replace("audit_evidence_", ""): len(records)},
+            # Stage 00 precedes splitting and QC. These axes carry the stage's own position
+            # explicitly rather than being omitted, so a reader meets a fact, not a gap.
+            "by_split": {"unsplit_stage_00": len(records)},
+            "by_qc_stage": {"pre_documented_qc": len(records)},
+        },
+        "exclusions_qc_summary": [
+            {
+                "reason": (
+                    "records outside the fixture's cited window, excluded on RECORD DATES "
+                    "(Option B; never on the folder a record was filed under)"
+                ),
+                "count": int(verification.get("records_excluded_out_of_window", 0)),
+            }
+        ],
+        "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        # Stage 00 precedes folds, masks and features, so no such id EXISTS yet. TE 13.3
+        # requires all fourteen fields non-empty, and `write_release` refuses an empty list,
+        # so the stage's position is stated as an explicit token rather than either
+        # fabricating an id or leaving the field empty. It is a POSITION, not a scientific
+        # value: `NOT_YET_ASSIGNED` is unusable as a fold, mask or feature-set identifier,
+        # and every consuming stage asserts a real id at its own boundary.
+        "fold_ids": [_STAGE00_ID_PLACEHOLDER],
+        "mask_ids": [_STAGE00_ID_PLACEHOLDER],
+        "feature_set_ids": [_STAGE00_ID_PLACEHOLDER],
+        "output_files": dict(output_files),
+        "change_record_id": "CR-2026-09-21-RELEASE-OPTION-A",
+    }
+
+
+def _write_fixture_release(
+    *,
+    snapshot: Any,
+    scope: Any,
+    verification: Mapping[str, Any],
+    evidence_dir: Path,
+    workspace: Path,
+    records: Sequence[Mapping[str, Any]],
+    stations: Sequence[str],
+    audit_window: tuple[Any, Any],
+) -> dict[str, Any]:
+    """Publish this run's verified rows as an immutable release under the release root.
+
+    The release directory is named for the fixture and this run, so a re-run never collides
+    with an earlier release: R-13 refuses a directory that already holds one, and TE 13.3
+    requires a NEW version rather than an overwrite.
+    """
+    release_root = Path(snapshot.resolved_roots["artifacts"]) / "releases"
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    directory = release_root / f"{scope.fixture_id}_{stamp}"
+    directory.mkdir(parents=True, exist_ok=False)
+
+    # The released file is a CSV carrying EXACTLY the five provider columns plus the station
+    # key, because that is what the consumer requires: `load_released_provider_rows` reads
+    # only `.csv` output files and refuses any whose header is not exactly
+    # `PROVIDER_COLUMNS` (R-44; D-17). Found by execution — the first version of this step
+    # released the rows as JSON, which the consumer SKIPS rather than refuses, so stage 02
+    # ran to "completed" with `rows: 0`: a vacuous success. Columns are written in sorted
+    # order so the bytes are deterministic across platforms.
+    rows_path = directory / "prepared_vtec_records.csv"
+    columns = sorted(PROVIDER_COLUMNS)
+    with rows_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore")
+        writer.writeheader()
+        for record in records:
+            missing = [column for column in columns if record.get(column) in (None, "")]
+            if missing:
+                raise IntegrityError(
+                    rows_path,
+                    f"a verified record is missing provider column(s) {missing}; the "
+                    f"release carries exactly the five provider columns plus the station "
+                    f"key and no value is substituted for an absent one (D-17, R-44)",
+                )
+            writer.writerow({column: record[column] for column in columns})
+    output_files = {rows_path.name: sha256_of_file(rows_path)}
+
+    manifest = _release_manifest(
+        snapshot=snapshot,
+        verification=verification,
+        evidence_dir=evidence_dir,
+        records=records,
+        stations=stations,
+        audit_window=audit_window,
+        output_files=output_files,
+    )
+    written = write_release(directory, manifest, release_root=release_root)
+    return {
+        "release_dir": str(directory.relative_to(workspace)),
+        "dataset_version": written["dataset_version"],
+        "rows_released": len(records),
+    }
+
+
 def _run_fixture_scoped(
     entry: Mapping[str, Any], *, workspace: Path, out_dir: Path
 ) -> dict[str, Any]:
@@ -516,12 +745,27 @@ def _run_fixture_scoped(
         producing_interpreter=sys.version,
         stamps=stamps,
     )
+    # D-61 option A: publish the verified rows as an immutable release, so stages 01 and 02
+    # have the input their contract requires (R-44: releases by manifest and hash, never
+    # bare paths). Runs AFTER every assertion above, so nothing is released that was not
+    # first verified, window-checked and proven free of locked-month records.
+    release = _write_fixture_release(
+        snapshot=snapshot,
+        scope=scope,
+        verification=verification,
+        evidence_dir=evidence_dir,
+        workspace=workspace,
+        records=records,
+        stations=stations,
+        audit_window=audit_window,
+    )
     return {
         "workspace": str(workspace),
         "fixture_read_manifest": str(read_manifest),
         "sha256_manifest": str(sha256_manifest),
         "client": "none (fixture-scoped read of verified derived artifacts)",
         "fixture_inputs": fixture_inputs,
+        "release": release,
     }
 
 

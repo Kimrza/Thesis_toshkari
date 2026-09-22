@@ -156,6 +156,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     FixtureManifest,
     IdentityDeclaration,
     assert_run_level_ranges,
+    candidate_path_for,
     collect_stage_measurements,
     compare_required_outputs,
     compose_candidate_manifest,
@@ -165,6 +166,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     load_measuring_results,
     manifest_path_for,
     output_matches,
+    promote_candidate_manifest,
     required_outputs_for,
     window_days,
     write_candidate_manifest,
@@ -335,6 +337,34 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--promote-candidate",
+        type=Path,
+        default=None,
+        help=(
+            "INSTALL a measured candidate as the reference fixture_manifest.yaml and exit "
+            "(CR-2026-09-20-FIXTURE-CANDIDATE-PATH). Runs no fixture. The candidate must "
+            "validate and carry no `TBD — freeze gate`; an existing reference manifest is "
+            "preserved as fixture_manifest.superseded_<utc>.yaml and every promotion is "
+            "recorded. The installed file stays `status: candidate` — freezing is the "
+            "owner's Q-31 act and is never performed here"
+        ),
+    )
+    parser.add_argument(
+        "--promoted-by",
+        type=str,
+        default=None,
+        help="who performed the promotion; required with --promote-candidate",
+    )
+    parser.add_argument(
+        "--authorization",
+        type=str,
+        default=None,
+        help=(
+            "the record authorising this promotion (a D-number or change-record id); "
+            "required with --promote-candidate"
+        ),
+    )
+    parser.add_argument(
         "--code-commit",
         type=str,
         default=None,
@@ -362,6 +392,16 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     if args.measuring_runs and not args.emit_candidate:
         parser.error("--measuring-runs aggregates measuring results for --emit-candidate only "
                      "(board Rec 5); a comparison run composes nothing")
+    if args.promote_candidate is not None:
+        if args.emit_candidate:
+            parser.error("--promote-candidate installs an ALREADY-MEASURED candidate and runs no "
+                         "fixture; it never combines with --emit-candidate, so that measuring and "
+                         "installing stay two separate, separately authorised acts")
+        if not args.promoted_by or not args.authorization:
+            parser.error("--promote-candidate requires --promoted-by and --authorization: a "
+                         "promotion is a recorded act, and an unattributed one is not one")
+    elif args.promoted_by or args.authorization:
+        parser.error("--promoted-by and --authorization are read only by --promote-candidate")
     return args
 
 
@@ -749,11 +789,16 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             "a comparison run reads a fixture manifest; a declaration states no expectation — "
             "run with --emit-candidate to measure",
         )
-    if args.emit_candidate and manifest_path_for(workspace, args.fixture).exists():
-        raise IntegrityError(
-            manifest_path_for(workspace, args.fixture),
-            "a manifest already exists; it is preserved, never overwritten (R-134 obligation 3)",
-        )
+    # A measuring run no longer refuses because a file exists at the REFERENCE path.
+    # `CR-2026-09-20-FIXTURE-CANDIDATE-PATH` (owner-approved 2026-09-20) narrowly amends
+    # R-134 obligation 3: the obligation is that a manifest is never OVERWRITTEN, and it is
+    # now met by construction -- the candidate goes to `candidate_path_for(...)`, one path per
+    # run id, and `write_candidate_manifest` still refuses an existing file THERE. The
+    # reference manifest is touched only by the separate `--promote-candidate` act, which
+    # preserves what it replaces. The blanket `.exists()` check that used to stand here was
+    # what deadlocked the lifecycle once the Recommendation 37 structural skeletons landed:
+    # the comparison run refused an unloadable skeleton, and the measuring run that would
+    # replace it refused because the skeleton existed.
 
     # 2. Identity by citation, checked against the register; the freeze record when frozen.
     decisions = workspace / DECISIONS_PATH
@@ -983,8 +1028,11 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             manifest_path_for(workspace, args.fixture).parent,
         ),
     )
-    written = write_candidate_manifest(manifest_path_for(workspace, args.fixture), candidate)
+    written = write_candidate_manifest(
+        candidate_path_for(workspace, args.fixture, run_id), candidate
+    )
     summary["candidate_manifest"] = str(written)
+    summary["candidate_is_reference"] = False
     summary["measuring_run_ids"] = sorted(seen_run_ids)
     return summary
 
@@ -992,6 +1040,29 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
 def main() -> int:
     ensure_process_determinism(sys.argv)  # FIRST statement, before any framework import
     args = _parse_args(sys.argv[1:])
+
+    if args.promote_candidate is not None:
+        # The promotion act, deliberately BEFORE the stage entry: it runs no fixture, reads no
+        # config and needs no environment lock — it installs an already-measured candidate and
+        # records that it did. Every refusal lives in `promote_candidate_manifest`.
+        workspace = Path(os.environ.get("TEC_WORKSPACE_ROOT") or Path.cwd())
+        candidate = (
+            args.promote_candidate
+            if args.promote_candidate.is_absolute()
+            else workspace / args.promote_candidate
+        )
+        try:
+            record = promote_candidate_manifest(
+                candidate,
+                manifest_path_for(workspace, args.fixture),
+                promoted_by=args.promoted_by,
+                authorization=args.authorization,
+            )
+        except IntegrityError as exc:
+            print(f"run_walking_skeleton: promotion refused: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
 
     try:
         probe_workspace = Path(os.environ.get("TEC_WORKSPACE_ROOT") or Path.cwd())

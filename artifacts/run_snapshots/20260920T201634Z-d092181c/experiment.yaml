@@ -1,0 +1,501 @@
+# configs/experiment.yaml — one of the four governed configs (TE §12; TC-03e).
+#
+# Foundation owns no experiment science. Every scientific field carries the
+# literal `TBD — freeze gate` sentinel until its owning unit transcribes the
+# frozen value under its D-number (folds/embargo: features-and-splits; grids and
+# model configuration: models-and-baselines; estimand and bootstrap parameters:
+# statistical-inference/evaluation-and-comparison; ablations: TE §7.2 named
+# runs). No implementer may fill a sentinel by convenience (Vision §1.2;
+# TE §1.1); grids are exact and committed before G-05 and never change after
+# December is seen (project.md § Forbidden).
+#
+# No machine path may appear in this file (R-16, ADR-07).
+
+schema_version: "1.0.0"
+
+# `folds` is deliberately left unresolved. It has NO reader anywhere in `src/` or `scripts/`;
+# the live split calendar is `configs/data.yaml: partitions`, read by
+# `src/data/splits.py: build_partitions`. Populating this field would create a second source
+# of truth for the same calendar. Owner ruling, 2026-09-10: leave TBD, do not remove.
+folds: "TBD — freeze gate"
+# embargo_hours — TRANSCRIBED from TE §7.1's split-configuration table, whose Embargo column
+# reads "24 hours" on every fold row (F1, F2, F3, F4). Authorized for transcription by the
+# project decision owner and the supervisor on 2026-09-10 and recorded as **D-38**. This is a
+# copy of an already-frozen value, not a choice: `build_partitions` applies it to all six
+# partitions and refuses rather than defaulting when it is unresolved (TE §18.3).
+embargo_hours: 24 # D-38 (2026-09-10); TE §7.1 "24 hours"
+# horizons — TRANSCRIBED from TE §2.1 ("`experiment.yaml` shall expose `horizons: [1]` with
+# `24` implemented and testable but **not** included in the default run list"). A copy of an
+# already-frozen value, not a choice. Authorized for transcription by the project decision
+# owner on 2026-09-20 ("3. approved" against CR-2026-09-20-B01-PREREQS §2.5 item 5) under the
+# workspace's recorded student/supervisor authority equivalence (D-1 addendum; D-31
+# precondition 3 names horizons among the supervisor-signed items and records that no
+# independent supervisor signature artifact exists — none is claimed here either). Recorded
+# as **D-51**. `read_horizons` (src/models/train.py) refuses while this is absent or TBD; the
+# +24 h horizon needs a config change here, never a code change (TE §2.1, Q-33).
+horizons: [1] # D-51 (2026-09-20); TE §2.1
+
+# window_length_hours — DECLARED, NOT TRANSCRIBED. The primary 24-hour history window is a
+# frozen, non-tuned value (Vision §8.1 "History length is not a tuned hyperparameter") and one
+# of TE §7.0B's protected hashes. This key was ABSENT, not TBD: `read_window_length`
+# (src/features/windows.py) refused only at runtime, after the run had started, and an absent
+# key states nothing — `assert_no_tbd` can report "(absent)" only for a field it was given, and
+# `required_fields_for` did not list it. The sentinel is this project's machine-readable
+# statement that a value is owed to a named owner at a named gate. Transcribing the frozen 24
+# is an OWNER ACT requiring authorization, exactly as D-38 (embargo_hours) and D-51 (horizons)
+# were transcribed; no implementer may fill it by convenience (Vision §1.2; TE §1.1).
+# Declared 2026-09-20 under GOV-2026-09-20-CG-01 Recommendation 17, owner-authorised.
+# Draft transcription decision: CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md §4.4.
+window_length_hours: "TBD — freeze gate"
+
+# --- frozen hyperparameter grids (D-121, Vision §14.2 line 1206: "Exact frozen grids:
+# ridge 6, RF 18, LSTM 16 combinations, with fixed training settings" — Approved).
+# Contents transcribed VERBATIM from Vision §8.6 "Frozen Hyperparameter Grids" (the grid
+# table) by models-and-baselines code-generation Q5=A (2026-09-06), recorded in
+# governance/CHANGE_RECORD_2026-09-06_BLK03_confirmatory_contract.md. This is a COPY of an
+# approved decision under its D-number, exactly as seeds.yaml copies D-122; no value was
+# chosen here. §8.6: "Grids are exact, committed to configuration before G-05, and identical
+# in structure across families. No broad automated architecture optimization is permitted,
+# and no range may be changed after December is seen." The grid lives ONCE, here; what is
+# frozen and compared before G-05 is its hash (R-96); `combinations` is D-121's own count
+# and the code asserts the enumerated product of the axes equals it (content, not only
+# immutability).
+grids:
+  decision: "D-121"
+  source: "Vision §8.6, grid table; Vision §14.2 line 1206"
+  ridge: # M-04 — Vision §8.6 row "Ridge | alpha ∈ {0.01, 0.1, 1, 10, 100, 1000} | 6"
+    model_id: "M-04"
+    axes:
+      alpha: [0.01, 0.1, 1, 10, 100, 1000]
+    combinations: 6 # D-121
+  random_forest: # M-05 — Vision §8.6 row "Random Forest | n_estimators ∈ {300, 600} ×
+    # max_depth ∈ {8, 16, None} × min_samples_leaf ∈ {1, 5, 20}, max_features = sqrt | 18"
+    model_id: "M-05"
+    direct_only: true # D-120 / TE §8.2: direct RF only; residual RF removed
+    axes:
+      n_estimators: [300, 600]
+      max_depth: [8, 16, null] # `None` in §8.6 is YAML `null`
+      min_samples_leaf: [1, 5, 20]
+    fixed:
+      max_features: "sqrt" # §8.6: "max_features = sqrt"
+    combinations: 18 # D-121
+  lstm: # M-06 — Vision §8.6 row "LSTM | layers ∈ {1, 2} × units ∈ {32, 64} ×
+    # learning_rate ∈ {1e-3, 3e-4} × batch_size ∈ {64, 256} | 16"
+    model_id: "M-06"
+    direct_only: true # D-120 / TE §8.2: compact direct LSTM only; residual LSTM and GRU removed
+    axes:
+      layers: [1, 2]
+      units: [32, 64]
+      learning_rate: [1.0e-3, 3.0e-4]
+      batch_size: [64, 256]
+    combinations: 16 # D-121
+
+# --- model configuration -----------------------------------------------------------------
+# Only the seven fixed LSTM training settings are transcribed (Vision §8.6, the sentence
+# immediately below the grid table, quoted verbatim in `source_text`; D-121 "with fixed
+# training settings"). Everything else under `models` that D-121 / §8.6 does not fix stays
+# `TBD — freeze gate`: the per-track declared baseline of Vision §8.7 / D-124 is named in
+# configuration before tuning begins and is its owner's transcription, not this pass's.
+models:
+  lstm_fixed_settings:
+    decision: "D-121"
+    source: "Vision §8.6, fixed LSTM training settings sentence"
+    source_text: >-
+      Fixed LSTM training settings: dropout 0.2, Adam optimizer, MSE loss, maximum 100
+      epochs, early-stopping patience 10 epochs monitored on validation RMSE, minimum
+      improvement tolerance 1e-4 TECU, best-checkpoint restoration rather than last epoch.
+    dropout: 0.2 # setting 1
+    optimizer: "Adam" # setting 2
+    loss: "MSE" # setting 3
+    max_epochs: 100 # setting 4
+    early_stopping_patience: 10 # setting 5 — patience in epochs …
+    early_stopping_monitor: "validation_rmse" # … monitored on validation RMSE
+    min_improvement_tecu: 1.0e-4 # setting 6
+    checkpoint_policy: "best_checkpoint" # setting 7 — restoration of the lowest-validation-RMSE
+    # checkpoint, never the last epoch (R-94; WS-15; TA-13)
+  declared_baseline_per_track: "TBD — freeze gate" # Vision §8.7 / D-124 — not transcribed here
+  selection: "TBD — freeze gate" # Vision §8.7 / D-124: mean per-fold skill, 1% simplicity rule — not transcribed here
+  # The SELECTED configuration per track (R-101: chosen on mean per-fold skill over F1–F4,
+  # January–November only; refit changes no hyperparameter; frozen before G-05 among TE §7.0B's
+  # immutable items). Written by the tuning run's selection record, never by an implementer;
+  # 06_train_and_predict.py REFUSES naming this field while it is unset. Shape only (W-9).
+  selected: "TBD — freeze gate"
+  # --- M-03 climatology key (owner decision of 2026-09-20; CR-2026-09-20-CONFIG-BLOCKS §1) --
+  # THE DEFECT THIS CLOSES. GOV-2026-09-20-CG-01 Recommendation 2: M-03's key had carried
+  # month, and a month-bearing climatology can predict for NO scored month — every partition's
+  # validation month lies strictly after its own training range under the expanding window
+  # (D-38/R-80), so every scored row looked up a key the training data cannot contain. M-03 is
+  # one of the three MANDATORY difficulty controls (Vision §2.4 tier 2; PC-03/PC-04), so an
+  # M-03 that yields no prediction empties the comparison-wide mask for every comparison it
+  # belongs to. Month is therefore REMOVED from the key, by the owner's decision.
+  #
+  # The rule, as the owner gave it: the mean of the target grouped by STATION and HOUR,
+  # fitted exclusively on each partition's own training data. Nothing here is computed from a
+  # scored row.
+  #
+  # `src/models/climatology.py` implements exactly this and refuses anything else: a key field
+  # it cannot compute refuses BY NAME (so a month-bearing key cannot be re-adopted by editing
+  # this file alone — it would need an implementation and a re-examination of the ordering
+  # argument), a key in a different order refuses, and `fitted_on` other than the one token
+  # refuses as a LeakageError. Missing keys at prediction time stay MISSING (`missing_
+  # climatology_keys` on the frame), never interpolated or filled.
+  climatology:
+    decision: "CR-2026-09-20-CONFIG-BLOCKS §1 (proposed D-number pending owner adoption; supervisor countersignature OPEN)"
+    source: "owner ruling of 2026-09-20 on GOV-2026-09-20-CG-01 Recommendation 2"
+    # The ordered grouping key. Month is absent BY DECISION, not by omission.
+    key: ["station", "hour"]
+    # R-98 / NFR-LEAK-01: the fit sees each partition's training rows and nothing else. The
+    # token is the only one the module implements; no configuration value widens the fit.
+    fitted_on: "training_partition_only"
+    # The governed time convention is unchanged: `hour` is the UTC hour of
+    # `interval_start_utc`, the same instant every other Phase 1 artifact is keyed on
+    # (D-16's hourly interval; D-17's target row). No local-solar-time variant is introduced
+    # here — longitude reaches the model only through `lst_sin`/`lst_cos` (TE §7.2).
+    time_convention: "utc_hour_of_interval_start_utc"
+    # The limitation this key carries, recorded so a reader meets it with the decision rather
+    # than in a footnote. It travels on the fitted object and on every prediction frame as
+    # `src/models/climatology.py: SEASONAL_LIMITATION`.
+    seasonal_limitation: >-
+      A station-and-hour mean carries NO seasonal term. It cannot represent December's
+      diurnal amplitude or level differing from the January-November training mean, and it
+      is not a seasonal climatology. This is the deliberate cost of a key that can predict
+      for every scored month at all: the month-bearing alternative predicts for none of
+      them under the expanding-window splits. Reported with the M-03 result, never omitted.
+  # --- the refit epoch count (owner decision of 2026-09-20; CR-2026-09-20-CONFIG-BLOCKS §2) -
+  # THE DEFECT THIS CLOSES. GOV-2026-09-20-CG-01 Recommendation 5: the LSTM's early stopping
+  # and checkpoint restoration read the December score bundle, which would let December select
+  # a hyperparameter — the exact channel Vision §8.3 and project.md § Forbidden close.
+  #
+  # THE RULE IS THE FROZEN OBJECT; THE NUMBER IS ITS OUTPUT. The owner's rule, verbatim in
+  # effect: the final epoch count is the MEDIAN best-validation epoch across the predefined
+  # pre-December folds (F1-F4) and the final seeds, for the SELECTED configuration, ROUNDED
+  # HALF UPWARD. Implemented once, at `src/models/train.py: refit_epoch_count`, and named by
+  # `REFIT_EPOCH_RULE_ID`; `assert_refit_epochs_match_rule` re-derives it from the recorded
+  # fold/seed epochs and refuses a transcribed value that is not the rule's own output.
+  #
+  # `epochs` STAYS `TBD — freeze gate` DELIBERATELY, and that is not an unresolved decision.
+  # The value does not exist until the pre-December fold fits have recorded their restored
+  # epochs (`Checkpoint.epoch`, R-94). It is derived from those results, frozen under its own
+  # D-number BEFORE the final refit and before G-05, and transcribed here. Nothing reads this
+  # field except the refit itself, so the sentinel blocks no earlier stage: the validation
+  # runs that PRODUCE the number run with `epochs` still unset.
+  #
+  # The final refit then trains for exactly that many epochs on the permitted January-November
+  # REFIT training data, with NO validation set and NO early stopping — so no December row can
+  # reach a stopping decision. December is inference-only.
+  refit:
+    decision: "CR-2026-09-20-CONFIG-BLOCKS §2 (proposed D-number pending owner adoption; supervisor countersignature OPEN)"
+    source: "owner ruling of 2026-09-20 on GOV-2026-09-20-CG-01 Recommendation 5"
+    rule: "median_best_validation_epoch_across_folds_and_seeds_round_half_up"
+    rule_inputs: "best-validation (restored) epoch of each (fold, seed) pair over F1–F4, selected configuration only"
+    rounding: "half_up"
+    december_role: "inference_only"  # no validation set, no early stopping, at refit
+    # Derived from the recorded fold/seed epochs, frozen under its own D-number before the
+    # final refit and before G-05. Never chosen, never defaulted (Vision §1.2; TE §1.1).
+    epochs: "TBD — freeze gate"
+
+# --- estimand (Vision §2.3; TE §1.3) -------------------------------------------------------
+# Transcribed VERBATIM from the frozen orientation/weighting by statistical-inference
+# code-generation Q4=A (2026-09-06), recorded in
+# governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md. This is a COPY of an
+# approved decision under citation, exactly as seeds.yaml copies D-122; no value was chosen
+# here. The sibling's code (src/evaluation/metrics.py EstimandResult) already refuses any
+# other orientation/weighting/sentence, so config-versus-code drift is caught by test.
+estimand:
+  decision: "CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS (proposed D-number pending owner adoption)"
+  source: "Vision §2.3; TE §1.3"
+  orientation: "benchmark_minus_model" # Vision §2.3: mean within-station difference of squared errors, benchmark minus model
+  weighting: "equal_station" # Vision §2.3 / TE §1.3: unweighted mean of the per-station values
+  sign_convention_sentence: "positive values favour the model: the differential is benchmark minus model"
+
+# --- bootstrap (TE §13.6; TC-19 binding: hard; D-122; D-28's 720-h scored-set arithmetic) ---
+# Frozen values transcribed and the three gate confirmations recorded by
+# statistical-inference code-generation Q1=A/Q2=A/Q3=A/Q4=A (2026-09-06), per
+# governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md. NEVER substitute a
+# within-station or naive bootstrap (project.md § Forbidden; the Q-27 rejection): the
+# within-station variant exists in code ONLY as the quarantined widening comparator, never
+# a reported interval. The seed is NOT here: 20221201 lives in seeds.yaml (seed_key below;
+# D-122; ADR-05 carve-out — seed_everything never touches it). TE §15.3's reduced fixture
+# replicate count is an apparatus constant of the fixture manifest, NOT a field here
+# (GOV-2026-08-28-FD-01 Recommendation 24). The 48-hour sensitivity's run_id is the owner's
+# TE §7.2 registration act and is not transcribed here.
+bootstrap:
+  decision: "CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS (proposed D-number pending owner adoption)"
+  source: "TE §13.6; TC-19; D-122; D-28"
+  block_hours: 24 # TE §13.6: 24-hour blocks carrying all three stations together; 30 blocks on DEC
+  replicates: 10000 # TE §13.6 / TC-19: 10,000 replicates (the rejected variant's 2,000 never resurrected)
+  confidence_level: 0.95 # TE §13.6: report 95% confidence intervals
+  sensitivity_block_hours: 48 # TE §13.6 / TA-14: the predeclared 48-hour sensitivity; 15 blocks on DEC
+  seed_key: "seeds.bootstrap" # D-122: 20221201 in seeds.yaml; ADR-05 carve-out
+  interval_method: "percentile" # Q1=A: 2.5th/97.5th percentiles of the replicate set (R-119)
+  block_scheme: "fixed_nonoverlapping" # Q2=A: contiguous non-overlapping partition aligned to the scored range (R-115; Rec 26)
+  correlation_series: "paired_error_pearson_all_pairs" # Q3=A: Pearson on d_s(t), all three station pairs (R-121)
+
+# --- comparison sets (R-106; NFR-FAIR-01/TC-16: one comparison-wide mask per declared set) --
+# Memberships CONFIRMED by the project decision owner at the evaluation-and-comparison
+# code-generation gate (Q1=A, 2026-09-06), recorded in
+# governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md with a proposed D-number for
+# evidence/DECISIONS.md (owner adopts or edits; no agent writes the register). Grounding:
+# Vision §2.4 tiers 1–3 (primary + difficulty controls; GIM; ridge/RF learned-model tier),
+# §8.4's model table (M-04 ridge, M-05 direct RF, M-06 LSTM), §8.9's matched-window and
+# matched-learned-model clauses. Separate sets, separate masks, NEVER merged silently — a
+# secondary comparator's availability must not shrink the primary scored set
+# (GOV-2026-08-28-FD-01 Recommendation 19). The mask builder checks passed predictions
+# against the declared set EXACTLY (missing/extra/duplicate/merged all refuse); tests
+# re-read the member counts 5 / 2 / 3 from this block, never from a source literal.
+comparison_sets:
+  decision: "CR-2026-09-06-R106-COMPARISON-SETS (proposed D-number pending owner adoption)"
+  source: "Vision §2.4 tiers 1–3; Vision §8.4 model table; Vision §8.9 matched-window clause"
+  primary:
+    member_ids: ["M-01", "M-02", "M-03", "M-06", "B-01"] # 5 members, one mask
+    model_id: "M-06"
+    benchmark_ids: ["B-01", "M-01", "M-02", "M-03"] # B-01 plus the three difficulty controls
+  gim:
+    member_ids: ["M-06", "C-01"] # 2 members, its own mask (Vision §6.10; TE §5.2)
+    model_id: "M-06"
+    benchmark_ids: ["C-01"] # evaluation-time-only comparator, never presumed independent
+  tier3:
+    member_ids: ["M-04", "M-05", "M-06"] # 3 members, its own mask (Vision §2.4 tier 3, §8.9)
+    model_id: "M-06"
+    benchmark_ids: ["M-04", "M-05"] # ridge and direct RF, matched causal window (§8.9)
+
+# --- ablation registry (TE §7.2 "Ablation registry (Q-18, Q-17, Q-11)") -------------------
+# TE §7.2: "Ablations are named, predeclared runs, not exploratory experiments invented after
+# results are seen. Each is registered in experiment.yaml with its own run ID and executes on
+# frozen January–November folds only, using identical folds, masks, tuning budget, and the
+# mean-skill selection rule of Vision §8.7." The FIVE named entries below transcribe §7.2's
+# table — identities, Phase-1 reachability, the §7.2 question and configuration change
+# quoted, and the two named constraints. What §7.2 does NOT fix stays `TBD — freeze gate`:
+# each entry's `run_id` and `registered_at` (R-97: registered with a run ID BEFORE the
+# freeze) are the owner's registration act, not this pass's. Five named, four reachable in
+# Phase 1 — stated both ways so the count is not quietly reduced (R-97). No ablation
+# configuration may be promoted to primary once the locked test is opened (TE §7.2).
+ablations:
+  source: "TE §7.2 ablation registry table"
+  entries:
+    ABL-NODOY:
+      question: "Does December skill depend on a seasonal encoding the model has seen only once?"
+      configuration_change: "Drop doy_sin, doy_cos; all else identical"
+      primary_remains: "Full feature set"
+      phase1_reachable: true
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-DIFF:
+      question: "Does a first-difference target improve learning?"
+      configuration_change: >-
+        Target becomes y_{t+1} - y_t; predictions inverse-transformed to absolute TECU before
+        any metric is computed
+      primary_remains: "Raw TECU"
+      phase1_reachable: true
+      inverse_before_metric: true # TE §7.2 implementation rule; D-27 (inverse is ABL-DIFF's alone)
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-NOSW:
+      question: "Do forecast-safe space-weather features add value beyond lagged VTEC and time?"
+      configuration_change: "Drop kp_safe, ap_safe, hp60_safe, ap60_safe, f107_safe, f107_81_trailing"
+      primary_remains: "Full feature set"
+      phase1_reachable: true
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-HIST48:
+      question: "Is 24 h the right history length?"
+      configuration_change: "48 h window and 48-step sequence. Runs only after the primary configuration is frozen."
+      primary_remains: "24 h"
+      phase1_reachable: true
+      after_primary_freeze_only: true # TE §7.2 (bold in the source); R-97
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+    ABL-ZENITH:
+      question: "Does zenith-weighted aggregation change the target materially?"
+      configuration_change: "Zenith-weighted hourly aggregate (Vision §6.6); representative days only"
+      primary_remains: "IPP median"
+      phase1_reachable: false
+      phase_deferral: "Phase 2 — varies the hourly aggregation of the target, a choice that does not exist on the Phase 1 location-sampled gridded target (domain-entities § 8; R-97)"
+      run_id: "TBD — freeze gate"
+      registered_at: "TBD — freeze gate"
+
+# --- regimes (Vision §9.3; D-13; D-11) -----------------------------------------------------
+# Transcribed VERBATIM from Vision §9.3's frozen thresholds and storm-event rule and D-13's
+# demotion threshold by regimes-diagnostics-reporting code-generation Q1=A (2026-09-06),
+# recorded in governance/CHANGE_RECORD_2026-09-06_R123_regimes_and_reporting.md. This is a
+# COPY of frozen decisions under citation, exactly as the grids block copies D-121; no value
+# was chosen here, and a test asserts the copy's exactness (the only new claim Q1=A makes).
+# The classifier and count_storm_events in src/evaluation/regimes.py read ONLY this block via
+# ConfigSnapshot — no threshold literal exists in source (TC-03e; FR-P1-05-18 clause 3 by
+# construction). D-11 bars any provisional-Dst-derived figure from a G-05 regime count; the
+# count source is GFZ Kp/Hp60 at a recorded release grade (D-13 "Source of the count").
+regimes:
+  decision: "CR-2026-09-06-R123-REGIMES-AND-REPORTING (proposed D-number pending owner adoption)"
+  source: "Vision §9.3; D-13; D-11"
+  thresholds:
+    quiet_kp_below: 4 # Vision §9.3: Quiet: Kp < 4
+    disturbed_kp_min: 4 # Vision §9.3: Disturbed: Kp >= 4
+    storm_kp_min: 5 # Vision §9.3: Storm: Kp >= 5
+  event_window:
+    pre_hours: 12 # Vision §9.3: reporting window −12 h …
+    post_hours: 24 # … to +24 h around each event
+  event_definition: "contiguous interval of Kp>=5" # Vision §9.3 storm event rule; D-13
+  independence_min_quiet_hours: 24 # Vision §9.3 / D-13: independent if separated by >=24 h of Kp<4
+  independent_storm_event_threshold: 3 # D-13: >=3 independent December storm events, else demotion
+  count_source: "GFZ Kp/Hp60 at a recorded release grade; provisional Dst barred (D-11)" # D-13
+  # WHICH December day range governs D-13's comparison count is a Student + Supervisor gate
+  # item (GOV-2026-08-28-FD-01 Rec 15; R-124/W-2 point 5: mechanism written, value routed).
+  # While the sentinel stands, the audit-count consistency path REFUSES naming this field.
+  december_day_range: "TBD — freeze gate"
+  # D-17's observation-quality strata fields — referenced by their decision (D-17
+  # § Observation-quality strata), not re-enumerated as new content; the sixteen-field
+  # target-row contract itself stays in D-17. An enumerated set, never free strings (R-127).
+  d17_quality_strata:
+    decision: "D-17"
+    fields: ["valid_observation_count", "within_hour_spread_tecu", "provider_dtec_summary"]
+
+# practical_relevance_threshold — the SENTINEL IS THE DECIDED STATE, not an open question.
+# The project decision owner ruled on 2026-09-10 that NO numeric threshold is set and that
+# the RULE is the frozen object — ADOPTED as **D-34** (2026-09-10); prepared at
+# governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
+# evidence/DECISIONS.md. The protocol, transcribed from Vision §5.4 and PC-09 unchanged:
+#   1. Ten percent RMSE reduction is a NAMED REFERENCE MAGNITUDE, not a pass/fail rule and
+#      not a hypothesis.
+#   2. Practical relevance is reported DESCRIPTIVELY unless the supervisor explicitly
+#      approves a threshold (PC-09, binding: hard).
+#   3. An approved reference or threshold shall not correspond to an RMSE difference
+#      smaller than the target uncertainty budget of Vision §6.9; if it does, practical
+#      relevance is reported descriptively only.
+#   4. No threshold may be introduced, changed or reinterpreted after December is opened
+#      (Vision §5.4; PC-09; project.md § Forbidden).
+#   5. Significance and usefulness stay distinct: the confirmatory claim is the paired loss
+#      differential with its 95% interval (Vision §2.3/§5.5); a practical-relevance
+#      statement is descriptive commentary beside it, never a second test.
+# Any future numeric requires an explicit supervisor approval and its own D-number, and is
+# barred once December is opened. No implementer may fill this by convenience (TE §1.1).
+practical_relevance_threshold: "TBD — freeze gate" # D-34: DECIDED — no threshold approved
+
+# --- benchmark_b01: the IRI-2016 execution contract (D-45 and its 2026-09-19 annotation) --
+# B-01 is GENERATED, NOT TRAINED (R-59). Every value here is transcribed from D-45 as
+# annotated on the project decision owner's authorization of 2026-09-19 (evidence/DECISIONS.md
+# D-45 annotation; evidence/iri2016_kaggle_verification_2026-09-19/). `src/external/iri.py`
+# reads this block through the one config loader; nothing below is hidden in source.
+#   * iri_version 16 is passed EXPLICITLY on every call: the installed iricore default is 20.
+#   * htop_km is the ONLY altitude value the project freezes (Vision §6.11, "explicit 2000 km
+#     altitude ceiling"). hbot_km / hstep_km are iricore.vtec's own wrapper defaults, recorded
+#     here so the executed call is fully declared — they are disclosed, not project-frozen.
+#   * index_file_pins are the D-45 item 1 freeze pins for release 1.8.0, measured on Kaggle
+#     2026-09-19 before and after the smoke test and re-measured on the same wheel bytes;
+#     iricore.update() is never run after this pin. The adapter verifies the FULL hashes of
+#     the files actually consumed before an execution session and re-verifies them after.
+#   * runtime.python records the ABI of the only published Linux wheel (cp310). The governed
+#     interpreter pin is 3.11 (TC-03d); a B-01 generation session under 3.10 is therefore an
+#     environment deviation recorded in that run's lock — see D-45 annotation item 1.
+#   * validation_report.tolerance_tecu is R-59 area 7's PREDECLARED tolerance: a scientific
+#     value owned by the student, frozen WITH its declaration timestamp BEFORE the comparison
+#     runs. No implementer may fill it by convenience (TE §1.1); the report builder refuses
+#     while it is TBD.
+benchmark_b01:
+  benchmark_id: "B-01"
+  label: "generated, not trained" # R-59 constraint; model/config inventory
+  decision: "D-45 (student selection 2026-09-19; supervisor approval reported and countersigned per the entry; runtime annotation owner-authorized 2026-09-19)"
+  source: "Vision §6.11; TE §6.2 row iri2016_t_plus_1_tecu; external-products R-59"
+  iri_version: 16
+  integration:
+    htop_km: 2000.0 # Vision §6.11 frozen ceiling (project-frozen)
+    hbot_km: 90.0 # iricore.vtec wrapper default (disclosed, not project-frozen)
+    hstep_km: 0.5 # iricore.vtec wrapper default (disclosed, not project-frozen)
+  oarr_overrides: {} # D-45 item 1: no oarr override of F10.7 daily/81-day, Rz12 or IG12
+  output_field: "iri2016_t_plus_1_tecu" # TE §6.2 dictionary row
+  output_units: "TECU" # iricore.tec._integrate_ne: sum(Ne*step_km) * 1e3 * 1e-16
+  index_semantics: "retrospective, centered, same-day (D-45 item 2): adjusted 20 UT target-day F10.7; centered 81-/365-day means; centered 12-month IG12/Rz12 (file Rz12 x 0.7 inside IRI for months >= 2014-01); target-day 3-hourly ap; disclosed, never replaced"
+  runtime:
+    package: "iricore"
+    release: "1.8.0"
+    wheel_filename: "iricore-1.8.0-cp310-cp310-manylinux_2_35_x86_64.whl"
+    wheel_sha256: "f452b22316891d87ee766dba266de6a07e4e6008ab515ffed902ea8b5446a874"
+    python: "3.10"
+    installed_default_iri_version: 20
+    # interpreter_exception — APPROVED by the project decision owner 2026-09-19 ("I approve
+    # CPython 3.10.12 for the isolated Kaggle B-01 IRI execution environment, using the
+    # verified, pinned iricore installation"), recorded as D-49 in evidence/DECISIONS.md.
+    # EXTENDED 2026-09-20 (D-49 addendum, owner-authorized: "I authorize extending the Python
+    # 3.10 exception to the prerequisite fixture runs specifically required for B-01 …
+    # Preserve the receipt requirement"): the two walking-skeleton fixture runs that produce
+    # the TE 9.2 receipts a B-01 --generate-benchmark run consumes execute in the SAME
+    # environment, which additionally carries requirements.txt's exact pins (cp310 wheels;
+    # dry-run resolution of 50 packages, no conflict — D-49 addendum item 2). Model training,
+    # every other stage run and the governed local environment stay Python 3.11 (TC-03d).
+    # RECEIPT REQUIREMENT PRESERVED (fixture_gate.verify_receipt, SD-X-02 — unchanged): a
+    # receipt is accepted only when its recorded environment identity equals the caller
+    # run's lock; one environment for fixtures and benchmark makes that satisfiable by
+    # construction, and a receipt from any other environment still refuses.
+    interpreter_exception:
+      approved_by: "project decision owner (student), 2026-09-19; extension to the B-01 fixture runs 2026-09-20"
+      decision: "D-49 (with the 2026-09-20 addendum)"
+      interpreter: "CPython 3.10.12 (Kaggle image /usr/bin/python3.10, virtualenv-isolated)"
+      applies_to:
+        - "B-01 isolated execution environment: 04_build_external_products.py --verify-runtime, --build-validation-report, --generate-benchmark"
+        - "the plumbing_7day and scientific_1month runs of scripts/run_walking_skeleton.py (measuring and verification runs, their seven Phase 1 stage-script subprocesses and the M10 contract fixture) executed inside that same environment to produce the TE 9.2 receipts B-01 consumes (D-49 addendum 2026-09-20, item 1)"
+      environment_pins: "requirements.txt (exact pins, installed unchanged) plus the hash-pinned IRI set below; the run's own pip freeze is the identity"
+      excluded: ["model training as a deliverable", "every other stage run", "the governed local environment"]
+      verified_runtime_identity: "evidence/iri2016_kaggle_verification_2026-09-19/verification_report.json (kernel 3.12.13; venv 3.10.12; virtualenv seeds pip 26.2.1 / setuptools 84.0.0)"
+    companions:
+      numpy: {version: "1.26.4", sha256: "ffa75af20b44f8dba823498024771d5ac50620e6915abac414251bd971b4529f"}
+      fortranformat: {version: "2.0.3", sha256: "88c8e7a3eac16c23420e8a1c4b21ddc7108f48e8dcbd2e0da6c8ecc48b051bb2"}
+      pymap3d: {version: "3.2.0", sha256: "fccd44f2f6021a95adec19771c603b8dac104eab120d863c463d76b9bc298669"}
+  index_file_pins:
+    apf107.dat: "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674"
+    ig_rz.dat: "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486"
+  target_grid:
+    year: 2022 # D-8 claim boundary
+    cadence_hours: 1 # TE §6.2 hourly target
+    location_rule: "station coordinates from data.yaml: stations (D-1); Phase 1 evaluates IRI at the station coordinate against the gridded-cell target — the spatial-representativeness mismatch is disclosed wherever the comparison is reported (Vision §6.6)"
+  stamps:
+    phase_id: "P1A"
+    source_id: "IRI2016_B01"
+    target_definition_id: "GRIDDed_VTEC_1H" # the comparison's target definition (tests/fixtures identity declaration); B-01 is scored on that target
+  validation_report:
+    name: "iri_implementation_validation_report"
+    tolerance_tecu: 1.0 # D-50 (2026-09-20): student-approved, per governance/proposed/B01_TOLERANCE_PROPOSAL_2026-09-19.md
+    tolerance_declared_at_utc: "2026-09-20T12:27:01Z" # the approval instant; never backdated (R-59 limb 2)
+    official_interface: "IRI-2016 official web interface (irimodel.org / CCMC instant run), 5-10 samples spanning sites, day/night, quiet/disturbed (R-59 area 6)"
+
+# --- reporting: the FR-P1-05-10 top-1% sensitivity ----------------------------------------
+# NOT RESOLVED, and deliberately written as sentinels rather than left absent, so the two
+# choices a human still owes are visible at the point of use (W-9: writing a sentinel is not
+# choosing a value). `src/evaluation/diagnostics.py: read_top1pct_declaration` refuses on
+# either sentinel and names the field, so nothing runs on a default.
+#
+# WHAT IS ALREADY SETTLED, and is NOT being re-asked:
+#   * ranking variable  — the absolute error |y_hat - y_true| of each masked row. Fixed by
+#     FR-P1-05-10's own wording ("top 1% of absolute errors removed").
+#   * tie handling      — ties break by (station, interval_start_utc) ascending, so the
+#     removal is deterministic on both governed platforms (WS-17 posture). Implemented.
+#   * how many rows     — k = ceil(removed_fraction * n): `ceil`, never round or floor, so a
+#     declared removal never silently removes nothing on a small support. Implemented.
+#   * exclusion and comparison procedure — the removed rows are dropped and every metric is
+#     RECOMPUTED on the remainder; the sensitivity is reported as its own labelled figure and
+#     is NEVER merged with the primary result (Vision §2.4 honesty rule). Implemented.
+#   * a support on which the rule would remove every row refuses; the remainder must be
+#     non-empty for the recomputed metrics to exist. Implemented.
+#
+# WHAT IS STILL OWED — two values, both the owner's/supervisor's:
+#
+# 1. `removed_fraction` — the "1%" itself, as a literal fraction (0.01 is the obvious
+#    reading of "top 1%", but the literal belongs in a freeze act, not in an implementer's
+#    edit: TC-03e, TE §18.3).
+#
+# 2. `scope` — WHOSE top 1%. FR-P1-05-10 does not say, and under the project's equal-station
+#    weighting (Vision §2.3) the two readings differ materially:
+#      - "comparison_wide": rank every masked row across all three stations together and drop
+#        the largest fraction. The literal reading of the requirement's wording. A station
+#        with systematically larger errors loses a larger share of its rows, so the
+#        equal-station mean is then taken over UNEQUAL per-station supports.
+#      - "per_station": rank within each station and drop that station's own largest fraction.
+#        Supports stay proportionate and equal-station weighting keeps its meaning, but the
+#        rows removed are not the comparison's largest errors.
+#    `comparison_wide` is the module's coded DEFAULT because it is the literal reading; it is
+#    a default, not a decision, and this field is what the gate rules on.
+#    Routed as GOV-2026-09-20-CG-01 Recommendation 21 / dispositions §5 item 14 — SUPERVISOR,
+#    due before G-06. Nothing in Phase 1 before that gate reads this block.
+reporting:
+  top1pct_sensitivity:
+    decision: "OPEN — GOV-2026-09-20-CG-01 Rec 21; dispositions §5 item 14 (Supervisor, before G-06)"
+    removed_fraction: "TBD — freeze gate"
+    scope: "TBD — freeze gate" # one of: comparison_wide | per_station

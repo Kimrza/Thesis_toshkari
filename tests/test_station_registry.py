@@ -70,6 +70,8 @@ def _station_entry(**overrides: object) -> dict:
         "sampling_interval_s": 30,
         "observable_codes": ["C1C"],
         "hardware_changes_2022": [],
+        "geomagnetic_lat": 12.5,
+        "geomagnetic_lon": 95.0,
         "provenance": {name: "synthetic-fixture" for name in SECTION_6_2_FIELDS},
     }
     entry.update(overrides)
@@ -100,9 +102,49 @@ def _station(**overrides: object) -> Station:
         "igrf_version": "SYN-PIN-1",
         "cell": (10, 20),
         "provenance": {name: "synthetic-fixture" for name in SECTION_6_2_FIELDS},
+        "geomagnetic_lat": 12.5,
+        "geomagnetic_lon": 95.0,
     }
     values.update(overrides)
     return Station(**values)
+
+
+# --- Rec 13 (GOV-2026-09-20-CG-01): the geomagnetic-coordinate column is a field with a
+# refusal, never a silent omission ---------------------------------------------------------
+
+
+def test_absent_geomagnetic_coordinates_are_refused_by_name_in_both_phases(tmp_path: Path) -> None:
+    data = _frozen_data()
+    del data["stations"]["SYNA"]["geomagnetic_lat"]
+    registry = load_registry(_snapshot(tmp_path, data))
+    assert registry["SYNA"].geomagnetic_lat is None  # loads as unresolved, never defaulted
+    for phase in (1, 2):
+        with pytest.raises(RegistryError) as excinfo:
+            assert_registry_resolved(registry, phase=phase)
+        assert "geomagnetic_lat" in str(excinfo.value) and "TBD" in str(excinfo.value)
+
+
+def test_tbd_geomagnetic_coordinate_is_refused(tmp_path: Path) -> None:
+    data = _frozen_data(geomagnetic_lon=TBD_SENTINEL)
+    registry = load_registry(_snapshot(tmp_path, data))
+    with pytest.raises(RegistryError) as excinfo:
+        assert_registry_resolved(registry, phase=1)
+    assert "geomagnetic_lon" in str(excinfo.value)
+
+
+def test_non_numeric_geomagnetic_coordinate_is_refused_at_load(tmp_path: Path) -> None:
+    with pytest.raises(RegistryError) as excinfo:
+        load_registry(_snapshot(tmp_path, _frozen_data(geomagnetic_lat="mid-latitude")))
+    assert "geomagnetic_lat" in str(excinfo.value)
+
+
+def test_geomagnetic_coordinates_need_provenance_like_every_6_2_field() -> None:
+    station = _station(
+        provenance={n: "synthetic-fixture" for n in SECTION_6_2_FIELDS if n != "geomagnetic_lat"}
+    )
+    with pytest.raises(RegistryError) as excinfo:
+        assert_registry_resolved({"SYNA": station}, phase=1)
+    assert "geomagnetic_lat" in str(excinfo.value) and "provenance" in str(excinfo.value)
 
 
 # --- Q2 = A: the runtime refusals while the freeze-gate sentinels stand ------------------
@@ -387,3 +429,33 @@ def test_dropped_station_fails_the_migration_diff() -> None:
     literal = {"SYNA": {"lat": 10.25}, "SYNB": {"lat": 11.25}}
     with pytest.raises(RegistryError):
         assert_migration_unchanged(literal, {"SYNA": {"lat": 10.25}})
+
+
+def test_the_real_config_registry_resolves_under_phase_1_and_still_refuses_under_phase_2() -> None:
+    """D-62: the deferral, bound to the REAL configs rather than to synthetic stations.
+
+    The controls above prove the phase scoping works on a synthetic registry. This one proves
+    it is TRUE OF THIS PROJECT'S OWN `configs/data.yaml`, which is what the ruling actually
+    decided: `observable_codes` is not required for Phase 1 and is formally deferred to
+    Phase 2. Both directions are asserted, because a deferral that quietly became a deletion
+    would pass a Phase-1-only check.
+
+    It also pins the provenance limb, which is what was genuinely blocking Phase 1 before
+    2026-09-21 — `hardware_changes_2022` and `igrf_version` carried values with no recorded
+    source, and `observable_codes` was never the Phase 1 blocker at all.
+    """
+    from pathlib import Path as _Path
+
+    from src.data.config import load_configs
+
+    snapshot = load_configs(_Path(__file__).resolve().parent.parent / "configs", phase=1)
+    registry = load_registry(snapshot)
+    assert sorted(registry) == ["ARUC", "BSHM", "NICO"]
+
+    assert_registry_resolved(registry, phase=1)  # must NOT raise
+
+    with pytest.raises(RegistryError) as excinfo:
+        assert_registry_resolved(registry, phase=2)
+    assert "observable_codes" in str(
+        excinfo.value
+    ), "Phase 2 must still refuse: the field is DEFERRED to Phase 2, not dropped"

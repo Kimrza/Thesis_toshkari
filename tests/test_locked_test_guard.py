@@ -936,6 +936,14 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         # beside them are inside automated inspection and pass it).
         "iri2016_kaggle_verification_2026-09-19/RETURN_RECORD.md",
         "iri2016_kaggle_verification_2026-09-19/validation/README.md",
+        # 2026-09-20, first execution of this suite under the governed 3.11 pin: the
+        # Recommendation 1 remediation added the supersession notice beside the closed
+        # access log. It lands here because it is a Markdown record, which is the
+        # disposition every `.md` above carries -- not because of its content: derived
+        # 2026-09-20 and printed before assertion, it matches `vtec|tecu` 0 times and
+        # carries no `2022-12-DD` date at all. The closed log it describes is itself
+        # unmodified (5,964 rows, sha256 985f0671..., verified before and after this run).
+        "test_run_access_log.SUPERSEDED_2026-09-20.md",
     }
     assert not [e for e in inventory if e.disposition == "flagged"]
 

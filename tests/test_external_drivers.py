@@ -1008,12 +1008,40 @@ def test_tuning_call_injection_is_caught() -> None:
 # =========================================================================================
 
 
+def _mirror_declared_sources(workspace: Path) -> None:
+    """Make every `configs/data.yaml: declared_sources` path resolve inside the smoke
+    workspace, so `assert_declared_sources_exist` (TE 18.3, step 5) sees the SAME bytes the
+    real workspace declares and the test observes the refusal it is written for, not an
+    absent-source refusal. Hard-linked where the filesystem allows (no bytes duplicated),
+    copied otherwise; nothing is fabricated — a path the real workspace lacks stays absent
+    here too, and the preflight then names it exactly as it would in production."""
+    try:
+        import yaml
+    except ImportError:  # the pyyaml refusal is itself one of the governed refusals
+        return
+    data = yaml.safe_load((REPO_ROOT / "configs" / "data.yaml").read_text(encoding="utf-8"))
+    for entry in data.get("declared_sources") or []:
+        if not isinstance(entry, dict) or "path" not in entry:
+            continue
+        source = REPO_ROOT / str(entry["path"])
+        if not source.is_file():
+            continue
+        target = workspace / str(entry["path"])
+        target.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.link(source, target)
+        except OSError:
+            shutil.copyfile(source, target)
+
+
 def _workspace(tmp_path: Path) -> Path:
-    """A temporary workspace: requirements.txt copied (the lock hashes it); no git
-    tree, so --code-commit is passed explicitly (config.py's documented Kaggle shape)."""
+    """A temporary workspace: requirements.txt copied (the lock hashes it) and the
+    declared sources mirrored (the preflight hashes them); no git tree, so --code-commit
+    is passed explicitly (config.py's documented Kaggle shape)."""
     workspace = tmp_path / "ws"
     workspace.mkdir()
     shutil.copyfile(REPO_ROOT / "requirements.txt", workspace / "requirements.txt")
+    _mirror_declared_sources(workspace)
     return workspace
 
 

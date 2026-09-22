@@ -84,7 +84,7 @@ These are drafts. A decision is not real until the student gives it a D-number i
 
 ### 4.3 Proposed — provider product-version census *(student freeze; supervisor acceptance of the limitation)*
 
-> **Decision.** The Phase 1 prepared-VTEC evidence is recorded as drawing on more than one Madrigal product-processing version. The measured per-month and per-day distribution is `<INSERT FROM CENSUS RUN — do not transcribe from this draft>`.
+> **Decision.** The Phase 1 prepared-VTEC evidence is recorded as drawing on more than one Madrigal product-processing version. The measured per-month and per-day distribution is — **filled from the census RUN of 2026-09-21** (D-64; `evidence/provider_version_census_2026-09-21/census_by_month.json`): eleven non-December months, 208,387 records; `g.001` 5,411 records in nine whole provider files — 2022-04-21 (613), 06-16 (580), 07-13 (591), 07-14 (537), 07-18 (584), 08-15 (610), 11-13 (569), 11-28 (712), 11-29 (615); `g.002` 202,976; zero days carry more than one token; zero unrecognised tokens. December was not read (restricted root); the board's 743 `g.003` records on 2022-12-31 stand as recorded. Adopted as **D-64** on 2026-09-21; the supervisor's acceptance of the limitation (option b) remains an open countersignature.
 >
 > **Observed before the census.** Five of eleven non-December months carry a g.001/g.002 mix — 2022-04 (613 / 18,377), -06 (580 / 17,614), -07 (1,712 / 17,020), -08 (610 / 18,517), -11 (1,896 / 16,287) — and the FULL merge additionally carries 743 g.003 records, **all dated 2022-12-31**, inside the locked test month. The mix appears in no configuration, no manifest, no prior decision and no change record; `grep "g.001"` over every Markdown file in the workspace returned zero matches.
 >

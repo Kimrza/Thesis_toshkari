@@ -1,0 +1,11 @@
+ M aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/laptop-tv4ugfbc-2742bd6d5bde.md
+ M artifacts/registry/experiment_registry.jsonl
+ M scripts/merge_coverage_year.py
+ M tests/test_clean_run.py
+ M tests/test_locked_test_guard.py
+ M tests/test_phase_contract.py
+?? artifacts/exec_evidence/run_2026-09-20/
+?? artifacts/run_snapshots/20260920T194613Z-f989a80f/
+?? artifacts/run_snapshots/20260920T194647Z-f524af45/
+?? artifacts/run_snapshots/20260920T194726Z-a8f77b99/
+?? artifacts/run_snapshots/20260920T194748Z-6717127f/
