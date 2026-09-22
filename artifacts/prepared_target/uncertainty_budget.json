@@ -6,8 +6,16 @@
       "provider_reported_uncertainty": "provider-reported dtec, summarised per hour as provider_dtec_summary (D-19 statistic: median); observed over 168 row(s): min 0.3761675, max 1.3049 — reported as computed, never truncated or clipped to a bound (R-72)",
       "within_hour_aggregation_spread": "within-hour spread of contributing samples, within_hour_spread_tecu (D-19 statistic: range, max minus min); observed over 168 row(s): min 0.23772000000000038, max 11.9789 — reported as computed, never truncated or clipped to a bound (R-72)"
     },
+    "artifact_id": "uncertainty_budget",
     "asymmetry_statement": "A slowly varying per-station-day bias partially cancels in the paired difference but does not cancel in the derived percentage summary, because it inflates the reference denominator.",
     "bounds_statement": "This budget covers the Phase 1-applicable set only (two of Vision 6.9's six contents plus the asymmetry statement); Vision 6.9 states its list without a phase qualifier, and the phase qualifier runs through Vision 15.2 — recorded so the gap reads as governed rather than as non-compliance. Values are stated as computed; nothing is truncated.",
+    "budget_value": null,
+    "budget_value_rule": {
+      "owner": "Student + Supervisor countersignature (TE 18.2 forbidden choice)",
+      "reference": "GOV-2026-09-20-CG-01 Recommendation 20; CR-2026-09-20-GOV-CG-01-DISPOSITIONS §4.5",
+      "status": "owed",
+      "where": "configs/data.yaml: target.uncertainty_budget {decision, statistic, combination}"
+    },
     "completeness": {
       "asserted": true,
       "phase1_applicable": [
@@ -32,7 +40,36 @@
         "content": "mapping-function contribution",
         "reason": "a Phase 2 quantity: not derivable from the five-column gridded product (ut1_unix, gdlat, glon, tec, dtec; D-17 audit 2026-08-21) — recorded not-applicable rather than emitted empty (R-72)"
       }
-    ]
+    ],
+    "phase1_contents": {
+      "provider_reported_uncertainty": {
+        "measured_tecu": {
+          "max": 1.3049,
+          "median": 0.5382530000000001,
+          "min": 0.3761675,
+          "p95": 0.92366075,
+          "rows": 168
+        },
+        "statement": "provider-reported dtec, summarised per hour as provider_dtec_summary (D-19 statistic: median); observed over 168 row(s): min 0.3761675, max 1.3049 — reported as computed, never truncated or clipped to a bound (R-72)"
+      },
+      "within_hour_aggregation_spread": {
+        "measured_tecu": {
+          "max": 11.9789,
+          "median": 2.58258,
+          "min": 0.23772000000000038,
+          "p95": 8.617095000000003,
+          "rows": 168
+        },
+        "statement": "within-hour spread of contributing samples, within_hour_spread_tecu (D-19 statistic: range, max minus min); observed over 168 row(s): min 0.23772000000000038, max 11.9789 — reported as computed, never truncated or clipped to a bound (R-72)"
+      }
+    },
+    "phase2_quantities": {
+      "mapping-function contribution": "recorded not-applicable",
+      "per-IPP sampling dispersion": "recorded not-applicable",
+      "per-satellite residual spread": "recorded not-applicable",
+      "zenith and elevation geometry uncertainty": "recorded not-applicable"
+    },
+    "units": "TECU"
   },
   "phase_id": "P1A",
   "source_id": "GNSS_VTEC",

@@ -1076,3 +1076,23 @@ newly found rises to a correctness or gate-safety Critical or a second Major.
   exclusion.
 
 **Verdict: READY**
+
+## Post-receipt addendum — 2026-09-22 (stage 04 completed inside the fixture ladder)
+
+*Appended after the READY verdict above; it adds execution evidence and changes no verdict.*
+
+The 2026-09-21 re-review closed the 2026-09-13 Critical by code read and recorded the
+fixture run as the execution-owed evidence. That run has now happened, under the governed
+pin (conda `tec-thesis-311`, CPython 3.11.16, `CUDA_VISIBLE_DEVICES=""`,
+`PYTHONHASHSEED=0`), at commit `cda8869`: the measuring invocation of
+`run_walking_skeleton.py` reached `04_build_external_products.py` and the registry records
+`external-products-20260922T192501Z-442d1b08` **completed** — the first `external-products`
+row this registry has ever carried. The declared window on that run was the fixture scope's
+own, and `assert_declared_window_within_scope` did not fire.
+
+The ladder then stopped at stage 05 on a missing apparatus-partition declaration in
+`tests/fixtures/plumbing_7day/identity_declaration.yaml` (R-137) — a Q-31 declaration act
+owned by the Student, in another unit's scope. This unit's step is not the blocker.
+
+Still unchanged: no WS or TA row is claimed discharged, B-01's R-59 limb 1 is open, and G-04
+is not passed.

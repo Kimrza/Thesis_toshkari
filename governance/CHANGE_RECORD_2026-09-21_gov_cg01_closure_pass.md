@@ -198,3 +198,35 @@ was filled from a decision that already existed, and the ones that remain
 registration stamps, `practical_relevance_threshold`) were left standing. No human-signed
 record was edited to match a later derivation. No `PreFlight/` document was edited. No
 history was rewritten and no tag was moved.
+
+---
+
+## Addendum — 2026-09-22, measured after the closure commit `cda8869`
+
+A measuring fixture run (`run_walking_skeleton.py --config configs/ --fixture plumbing_7day
+--emit-candidate --identity tests/fixtures/plumbing_7day/identity_declaration.yaml`) was
+executed under the governed pin to establish where the ladder now stops. Registry rows, all
+appended and attributable:
+
+| Stage | Outcome |
+|---|---|
+| `acquisition` (00) | **completed** |
+| `inventory-and-registry` (01) | **completed** |
+| `target-standardization` (02) | **completed** |
+| `external-products` (04) | **completed** |
+| `features-and-splits` (05) | aborted — `tests/fixtures/plumbing_7day/identity_declaration.yaml`: *"no apparatus partition declaration; stages 05-07 run a fixture at fixture scale over the manifest's declared apparatus partitions, never over a frozen id (R-137)"* |
+
+**Two facts this establishes.** First, **stage 04 completed inside the fixture ladder** —
+the execution evidence the 2026-09-21 reviewer recorded as owed for the 2026-09-13 Critical.
+The step that could never complete now does; the remedy is confirmed by running it, not only
+by reading it. Second, the ladder's current stop is an **owner-authored declaration field**,
+not code: the fixture identity declaration carries no apparatus-partition block, which R-137
+requires before stages 05–07 can run at fixture scale. That is a Q-31 fixture-declaration act
+(Student), and no agent supplies it — the log is at
+`artifacts/exec_evidence/run_2026-09-21/measuring_run_after_d63.log`.
+
+Consequently the two `fixture_manifest.yaml` files still carry only `TBD — freeze gate`
+sentinels and **no measured field is populated**: dispositions §5 item 8 (populate the
+measured fields from a fixture run) remains open, now blocked on the apparatus-partition
+declaration rather than on the deadlock `CR-2026-09-20-FIXTURE-CANDIDATE-PATH` removed or on
+the permitted-producer list D-63 closed.
