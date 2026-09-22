@@ -235,3 +235,90 @@ sentinels and **no measured field is populated**: dispositions §5 item 8 (popul
 measured fields from a fixture run) remains open, now blocked on the apparatus-partition
 declaration rather than on the deadlock `CR-2026-09-20-FIXTURE-CANDIDATE-PATH` removed or on
 the permitted-producer list D-63 closed.
+
+---
+
+## Addendum 2 — 2026-09-22/23, the owner's three follow-up items
+
+### A. Apparatus partitions for `plumbing_7day` (owner: Option A)
+
+Written into `tests/fixtures/plumbing_7day/identity_declaration.yaml`, mirroring
+`scientific_1month`'s own precedent (two expanding folds) and adding the one refit the
+project's fixtures otherwise never exercise:
+
+| id | kind | train | validation_month | scored, after the 24 h embargo |
+|---|---|---|---|---|
+| `FIX-NOV-FOLD-01` | fold | 2022-11-01..03 | 2022-11-04 | 11-05..07 (72 h) |
+| `FIX-NOV-FOLD-02` | fold | 2022-11-01..05 | 2022-11-06 | 11-07 (24 h) |
+| `FIX-NOV-REFIT` | refit | 2022-11-01..07 | null | scored nowhere (FR-P1-04-14) |
+
+Every id is outside the six frozen ids (R-137 control 15); no partition is `locked`; both
+training ranges lie inside D-11's cited window; at most one refit. **No D-number:** the
+scientific fixture's apparatus block carries none either, and these are apparatus constants
+(R-122), not scientific values — the window and station they sit inside are D-11's and
+D-20's and are unchanged.
+
+**Disclosed, not hidden:** fold-01's scored range overlaps fold-02's, because
+`validation_month_range` runs to end-of-month while the fixture is seven days. Fixture 2 has
+the identical overlap. The plumbing fixture is TC-03f smoke and never scientific evidence, so
+this changes nothing it is used for.
+
+**Executed.** The measuring run accepted the block and advanced: stage 05 no longer refuses
+at the apparatus declaration. It now stops one step further on, at
+`artifacts/releases/phase1_hourly_target/release_manifest.json` — **no released Phase 1
+hourly target exists**. Stage 02 writes its target to `artifacts/prepared_target/` and does
+not publish it as a release, so the 02→05 boundary has the same missing-producer shape D-61
+closed at the 00→01/02 boundary. **Option B (drop the refit) and Option C (single fold) were
+therefore never needed and were not tried** — the refit is not what stopped the run.
+
+**Open, and it is an owner decision, not an oversight:** whether D-61's ruling ("the stage
+publishes the release the downstream stages consume", option A) extends to stage 02
+publishing `phase1_hourly_target`, or whether that wants its own D-number. Until it is
+ruled, the ladder cannot reach the measured fixture fields, so dispositions §5 item 8 stays
+open — now blocked on this, not on the apparatus declaration.
+
+### B. B-01 case 5 collected; the samples file is complete
+
+`kaggle/official_reference_outputs/case_5_BSHM_20220804T12Z.txt` was collected by the
+Student on 2026-09-22 at the corrected hour. Verified by the **server-echoed header**, never
+by the filename: `2022/ -216/12.0UT  geog Lat/Long/Alt= 32.8/  35.0/ 300.0` — day-of-year
+216 = 4 August, 12 UT, BSHM. `parse_official_outputs.py` matched **8/8** cases by header and
+wrote `kaggle/b01_validation_samples.json`: ARUC 12.1 / 4.0 / 4.6, BSHM 33.1 / 29.2, NICO
+8.5 / 4.1 / 21.7 TECU, each with its `t/%` and hmF2 diagnostic. The rejected wrong-hour file
+is retained as evidence of the attempt.
+
+R-59 limb 1 is **still open**: no adapter value exists for any case (`iricore` is
+uninstallable locally), so no paired comparison has run and no validation report exists.
+`kaggle/HOW_TO_RUN_B01_VALIDATION.md` is the step-by-step for the session that closes it.
+One correction recorded there rather than repeated: the predeclared tolerance is **already
+frozen** — `tolerance_tecu: 1.0`, `tolerance_declared_at_utc: "2026-09-20T12:27:01Z"` (D-50)
+— so nothing is owed before the session, and the declaration already precedes any comparison
+(R-59 limb 2).
+
+### C. TC-03g's production caller now exists (Recommendation 28)
+
+`scripts/gate_in_session.py`, following the `gate_*.py` convention `gate_secret_scan.py` and
+`gate_preflight_report.py` already set. It refuses a non-Kaggle platform **before running
+anything** (rather than after both fixtures, which is when `require_in_session_gate` would
+have refused it), runs the critical set with the three restricted readers deselected by the
+pre-commit hook's own criterion, runs both fixtures in TE §9.2 order with the second only
+after the first passes, emits the gate result, and then passes it straight back through
+`require_in_session_gate` against this session's own lock and the frozen manifests in force.
+It offers no flag to skip a fixture, and a test asserts that it never grows one.
+
+`tests/test_in_session_gate.py` — ten controls: the must-not-fire acceptance case, then
+control 30 (a `local` stamp), control 31 (another session's `code_commit`; other
+`config_hashes`), control 32 (a result predating a manifest re-freeze), a non-gate payload,
+the deselection list by name, the no-skip-flag check, the platform refusal proven by
+asserting **no subprocess is launched**, and the one-parser check (the junit summary reuses
+`preflight_report.read_junit_module_outcomes` rather than growing a second parser to drift
+from it — `nfr-design` c58).
+
+The consuming side needed nothing: `build_environment_and_cpu_preflight_report` already
+refuses when no gate result is supplied (Recommendation 28's first limb, closed 2026-09-20).
+
+**Found by the suite, not by review:** the new script's own docstring carried the
+restricted-root path as a literal, and `tests/test_locked_test_guard.py`'s R-28 one-door
+control failed on it immediately. Rephrased to name D-15 and `src/data/locked_test.py`
+instead — the second time in three days that control has caught a new module, which is the
+guard working as designed.

@@ -53,5 +53,25 @@
    },
    "citation": "the month's four declared derived artifacts and their SHA-256 as recorded in evidence/audit_evidence_2022-11/sha256_manifest.json (team.md § Walking Skeleton eligibility criterion; R-135 limb 2); DATA-07 caveat applies — derived-artifact verification, not retrieval verification"
   }
+ },
+ "apparatus_partitions": {
+  "FIX-NOV-FOLD-01": {
+   "kind": "fold",
+   "train_start": "2022-11-01",
+   "train_end": "2022-11-03",
+   "validation_month": "2022-11-04"
+  },
+  "FIX-NOV-FOLD-02": {
+   "kind": "fold",
+   "train_start": "2022-11-01",
+   "train_end": "2022-11-05",
+   "validation_month": "2022-11-06"
+  },
+  "FIX-NOV-REFIT": {
+   "kind": "refit",
+   "train_start": "2022-11-01",
+   "train_end": "2022-11-07",
+   "validation_month": null
+  }
  }
 }

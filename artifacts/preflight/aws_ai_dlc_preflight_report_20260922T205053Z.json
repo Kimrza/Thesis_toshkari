@@ -1,0 +1,221 @@
+{
+ "artifact_class": "aws_ai_dlc_preflight_report",
+ "gate": "G-09 Agent preflight",
+ "acceptance_row": "TA-23",
+ "requirement": "FR-WS-7",
+ "authority": "TE 18.3; Vision 13.1; foundation W-3 / R-02",
+ "generated_at_utc": "2026-09-22T20:50:53.489783+00:00",
+ "phase": 1,
+ "code_commit": "e20c44b77da134994693ecf41d4b9ddd71aeb618",
+ "config_hashes": {
+  "data.yaml": "ff984e9f2e2af89fd05b94575eaef5802cf53a0b0d20027694bb8c638a1ebe9a",
+  "features.yaml": "6aace4025a40f5553528c528c3b949f8868e7f6b466a5a40fd6984c68127539d",
+  "experiment.yaml": "6d4bca204d9177aff75d62ee5b8717625c839172460652271dce170785511ba5",
+  "seeds.yaml": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166"
+ },
+ "limbs": {
+  "zero_tbd": {
+   "status": "passed",
+   "required_fields": [
+    "data.acquisition.experiment",
+    "data.acquisition.kindat",
+    "data.acquisition.parameters",
+    "seeds.bootstrap",
+    "seeds.development",
+    "seeds.final"
+   ],
+   "offenders": []
+  },
+  "declared_sources": {
+   "status": "passed",
+   "problems": []
+  },
+  "critical_tests": {
+   "junit": "artifacts\\exec_evidence\\run_2026-09-22\\junit_final.xml",
+   "status": "absent",
+   "not_passed_by_name": [
+    "release hashes: absent"
+   ],
+   "tests": [
+    {
+     "name": "target contract and DCB sign",
+     "status": "passed",
+     "modules": {
+      "tests/test_prepared_target_schema.py": {
+       "status": "passed",
+       "passed": 74,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      },
+      "tests/test_hourly_target.py": {
+       "status": "deferred",
+       "phase": 2
+      },
+      "tests/test_dcb_sign.py": {
+       "status": "deferred",
+       "phase": 2
+      }
+     }
+    },
+    {
+     "name": "availability lags",
+     "status": "passed",
+     "modules": {
+      "tests/test_feature_availability.py": {
+       "status": "passed",
+       "passed": 85,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      }
+     }
+    },
+    {
+     "name": "IRI-free denial",
+     "status": "passed",
+     "modules": {
+      "tests/test_iri_denial.py": {
+       "status": "passed",
+       "passed": 22,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      }
+     }
+    },
+    {
+     "name": "split embargo",
+     "status": "passed",
+     "modules": {
+      "tests/test_split_embargo.py": {
+       "status": "passed",
+       "passed": 36,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      }
+     }
+    },
+    {
+     "name": "train-only transforms",
+     "status": "passed",
+     "modules": {
+      "tests/test_train_only_transforms.py": {
+       "status": "passed",
+       "passed": 31,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      }
+     }
+    },
+    {
+     "name": "comparison-wide masks and matched windows",
+     "status": "passed",
+     "modules": {
+      "tests/test_common_masks.py": {
+       "status": "passed",
+       "passed": 75,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      }
+     }
+    },
+    {
+     "name": "checkpoint restore",
+     "status": "passed",
+     "modules": {
+      "tests/test_checkpoint_restore.py": {
+       "status": "passed",
+       "passed": 12,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      }
+     }
+    },
+    {
+     "name": "vector bootstrap",
+     "status": "passed",
+     "modules": {
+      "tests/test_bootstrap.py": {
+       "status": "passed",
+       "passed": 37,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 0
+      }
+     }
+    },
+    {
+     "name": "release hashes",
+     "status": "absent",
+     "modules": {
+      "tests/test_release_hashes.py": {
+       "status": "absent"
+      }
+     }
+    },
+    {
+     "name": "locked-test access guard",
+     "status": "passed",
+     "modules": {
+      "tests/test_locked_test_guard.py": {
+       "status": "passed",
+       "passed": 65,
+       "failed": 0,
+       "errors": 0,
+       "skipped": 1
+      }
+     }
+    }
+   ],
+   "criterion": "TE 18.3: no failing critical test; absent evidence is absent, never passed"
+  },
+  "supervisor_signoff": {
+   "status": "passed",
+   "record": "governance\\G09_SUPERVISOR_SIGNOFF_RECORD.yaml",
+   "problems": [],
+   "items": {
+    "scientific_hierarchy": {
+     "decision": "D-31; Vision D-101, D-102, D-120 (Q-01, Q-02, Q-20)",
+     "statement": "Independent local ML is the primary story with IRI-2016 an external benchmark only; the focused model ladder with mandatory co-reported difficulty controls (Vision \u00a72.4). Signed under the recorded student/supervisor authority equivalence at D-31 (2026-08-28), which records precondition 3 as met on that basis; no separately signed artifact exists or is claimed.",
+     "recorded_at": "2026-09-21"
+    },
+    "iri_role": {
+     "decision": "D-45 (IRI-2016 benchmark, standard index inputs); Vision D-101/D-102; \u00a76.11",
+     "statement": "Student states the supervisor countersigned D-45 on 2026-09-19 (governance/COUNTERSIGNATURE_REQUEST_2026-09-19.md; evidence/DECISIONS.md countersignature ledger row D-45). IRI enters at evaluation time only, never as an input, target, residual or architectural element.",
+     "recorded_at": "2026-09-21"
+    },
+    "horizons": {
+     "decision": "D-51 (`horizons: [1]`, transcribed from TE \u00a72.1) and D-51 addendum",
+     "statement": "Student states, 2026-09-20, that the freeze-package items including D-51 \"are both approved by student and supervisor also countersigned\" (D-51 addendum \u2014 countersignature statement of record).",
+     "recorded_at": "2026-09-21"
+    },
+    "estimand": {
+     "decision": "D-31; Vision D-126 (Q-26 paired loss differential, benchmark minus model, equal-station weighting)",
+     "statement": "The paired loss differential with 95% CI as the confirmatory estimand, equal-station weighting primary (Vision \u00a72.3; TE \u00a71.3). Vision's own row reads \"supervisor sign-off pending\"; signed under the recorded authority equivalence at D-31 (2026-08-28), which records precondition 3 as met on that basis. No separately signed artifact exists or is claimed.",
+     "recorded_at": "2026-09-21"
+    },
+    "seeds": {
+     "decision": "Vision D-122 (Q-22); configs/seeds.yaml",
+     "statement": "Development seed 42; final seeds {1337, 2024, 7}; the element-wise three-seed mean is the confirmatory prediction. Vision D-122 row: \"supervisor sign-off closed 2026-08-22 by the project owner under the recorded student/supervisor authority equivalence (CR-2026-08-22-TE-AMEND; GOV-2026-08-22-REM-01 Rec 4)\". Seed values unchanged since.",
+     "recorded_at": "2026-09-21"
+    },
+    "locked_test_protocol": {
+     "decision": "D-15, D-28, D-59; Vision D-125 (Q-25), \u00a75.3, \u00a78.3",
+     "statement": "One-shot, hash-before-metrics December evaluation after G-05 (D-28: scored set 2\u201331 December 2022, 30 days, approved 2026-08-28 under the recorded authority equivalence); custody relocation D-15 (2026-08-21, same basis); D-59 day range \u2014 student states the supervisor countersigned 2026-09-21 (countersignature ledger row D-59). G-05 is NOT signed and the locked set has not been opened.",
+     "recorded_at": "2026-09-21"
+    }
+   }
+  }
+ },
+ "verdict": "not_green",
+ "limbs_not_passed": [
+  "critical_tests"
+ ],
+ "self_certification_bar": "a limb with no collected evidence renders absent, never passed; the verdict is green only when all four limbs are passed (R-02)",
+ "authorises": "nothing \u2014 G-09 is a supervisor gate; this artifact is its evidence, not its signature"
+}
