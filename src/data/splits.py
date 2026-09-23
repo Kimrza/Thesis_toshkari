@@ -59,11 +59,11 @@ from dataclasses import dataclass
 from typing import Any, Final
 
 from src.data.config import (
-    StrEnum,
     TBD_SENTINEL,
     ConfigSnapshot,
     LockedTestError,
     PartitionError,
+    StrEnum,
 )
 
 __all__ = [
@@ -511,10 +511,28 @@ class RecordFrame(list):
 
 
 def _take_rows(frame: Any, indices: Sequence[int]) -> Any:
+    """A row subset of `frame`, carrying the source frame's `attrs` forward.
+
+    Taking a subset of rows changes WHICH ROWS a frame holds and never WHO PRODUCED THEM,
+    so the provenance travels with it. Before 2026-09-23 it did not: the embargo-trimmed
+    score frame came back as a bare `RecordFrame` with no `producing_artifact`, and
+    `build_features` refused it — correctly, because SD-E-03 flips the default so ABSENT
+    provenance fails rather than passing (a laundered value must forge a stamp, not merely
+    delete one). Found by running the fixture ladder, not by reading: every caller that
+    passed a frame straight through was unaffected, and only the embargo path subsets.
+    """
     if hasattr(frame, "iloc"):
-        return frame.iloc[list(indices)].reset_index(drop=True)
+        taken = frame.iloc[list(indices)].reset_index(drop=True)
+        source_attrs = getattr(frame, "attrs", None)
+        if isinstance(source_attrs, dict) and hasattr(taken, "attrs"):
+            taken.attrs.update(source_attrs)
+        return taken
     rows = list(frame)
-    return RecordFrame(rows[i] for i in indices)
+    taken = RecordFrame(rows[i] for i in indices)
+    source_attrs = getattr(frame, "attrs", None)
+    if isinstance(source_attrs, dict):
+        taken.attrs.update(source_attrs)
+    return taken
 
 
 def apply_embargo(

@@ -285,3 +285,126 @@ exactly; or remove them, since the current fixture run reproduces equivalent con
 is a decision rather than a drift.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
+
+---
+
+## §5 — STOP: a single-station fixture cannot fit `station_lat`, whose frozen normalization is train-only standardize
+
+*Raised 2026-09-23 after §1 and §3 were approved and the loader was built. The ladder now
+reaches the feature build and gets all the way through it — this is the first thing it
+cannot resolve without you.*
+
+### What happens
+
+`plumbing_7day` is a **one-station** fixture (D-20: BSHM), so `station_lat` is the same
+value in every row. D-60 freezes its normalization as `train_only_standardize`, and
+`fit_transforms` refuses a constant column by design:
+
+> "has zero variance over the training range; a scale for a constant column cannot be
+> chosen by convenience — declare it `normalization: none` in the dictionary or fix the
+> input (TE §18.2)"
+
+That refusal is **correct**. A constant column has no scale to fit, and inventing one is
+exactly what TE §18.2 forbids. But it means the plumbing fixture cannot build a transformed
+bundle for any partition, so the ladder stops here.
+
+### Why this is yours and not mine
+
+Both escapes change something frozen:
+
+* setting `station_lat` to `normalization: none` would change a D-60 value for the
+  **governed** run too, where three stations make it genuinely variable — a scientific
+  change, and not defensible;
+* giving the plumbing fixture more than one station would change **D-20**, which froze the
+  single-station choice under Q-31 and TC-03f.
+
+### The options
+
+1. **Fixture-scoped normalization override.** The fixture declares, in its own manifest,
+   that `station_lat` is `none` **for this fixture only**, as an apparatus constant (R-122)
+   with the reason recorded: a one-station fixture has no station spread to scale by. The
+   governed dictionary is untouched. *Recommended* — it keeps the frozen value frozen, puts
+   the deviation in the apparatus where the fixture's other apparatus constants already
+   live, and is visible in the manifest a reviewer reads.
+2. **Give the plumbing fixture a second station.** Makes `station_lat` genuinely variable
+   and needs no override, but reopens D-20 and changes what the seven-day smoke test is.
+3. **Exclude `station_lat` from the fixture's feature set.** Smaller than (2) but it means
+   the fixture stops exercising the station-registry path for that field, which is part of
+   what the smoke test exists to exercise.
+
+Under (1) nothing scientific moves: the dictionary, the producing artifact and the governed
+behaviour are unchanged, and the scientific fixture (three stations) is unaffected either
+way.
+
+### A defect this surfaced, already fixed — worth reading even if you pick (2) or (3)
+
+The refusal above fired for **one** partition and not the other two, which should have been
+impossible for a column that is constant in all three. Derived and printed:
+
+```
+48 identical values of 32.778987
+  mean == value?            False
+  computed variance          2.0194839173657902e-28      (strictly positive)
+  passes `variance <= 0.0`?  True        <-- the guard let it through
+  scale                      1.4210854715202004e-14
+  standardised value         1.0         <-- every row, exactly
+```
+
+The guard tested `variance <= 0.0`. For a constant column the computed mean differs from the
+value in the last bits, so the variance comes out at 1e-28 rather than 0, the guard **passes**,
+and the column is standardised by a scale of 1e-14 — turning every row into exactly `1.0`.
+A meaningless number wearing a plausible face, which is worse than a refusal. One partition
+happened to cancel exactly and refused; the other two sailed through and wrote bundles.
+
+Fixed in `src/features/transforms.py`: constancy is now tested **directly** (`min == max`,
+exact for floats) with the variance test kept after it. The existing control used three
+values of `1.0`, whose mean is exact and whose variance is exactly `0.0` — it passed under
+either guard and never exercised the escape, which is why this survived. A new control uses
+the fixture's own literals (BSHM's latitude, 48 rows), asserts the computed variance really
+is positive before asserting the refusal, and tells a future reader to recompute the
+literals rather than delete the test if the escape ever closes. A must-not-fire limb pins
+that a column with real spread still fits.
+
+**This fix is a defect repair, not a decision, and is already in.** It also makes the
+refusal above fire for every partition rather than one, which is why the fixture now stops
+cleanly instead of writing two bundles of noise.
+
+**Decision required — Approve / Reject / Modify / Postpone.**
+
+### Where the ladder stands, measured
+
+Stages **00, 01, 02, 04** complete; **05 builds the feature matrix**. Before it stops at
+`station_lat` it has already produced, for `FIX-NOV-FOLD-01`, a **48 × 46** matrix carrying
+all 21 dictionary fields with per-column provenance resolved against the permitted-producer
+list — `kp_safe`/`ap_safe` → `gfz_kp_ap_nowcast_2022`, `hp60_safe`/`ap60_safe` →
+`gfz_hp60ap60_v2_2022`, `f107_safe`/`f107_81_trailing` →
+`nrcan_f107_observed_daily_median_2022`, the `vtec_*` rows → `phase1_hourly_target`, time
+rows → `record_timestamp`, station rows → `station_registry` — plus the 24-step sequence
+tensor, **zero** carry-forward exclusions and **zero** driver rows excluded. The availability
+matrix, the lag assertions and the 81-day anchor recomputation all passed on real released
+data.
+
+Three things were needed along the way and are recorded as implementation rather than
+decision, each because its value was uniquely determined by something already frozen:
+
+* **`source_column: "vtec_tecu"`** on the four `vtec_lag_*` fields and `vtec_seq_24`.
+  `build_features` requires it (`:957`, `:959`) and `load_feature_dictionary` validates it
+  only for support fields, so its absence was invisible until a matrix was built. D-17
+  defines exactly one VTEC column, so the value was not chosen.
+* **`_take_rows` now carries the frame's `attrs`**. The embargo-trimmed score frame came
+  back stripped of `producing_artifact` and `build_features` refused it — correctly, since
+  SD-E-03 flips the default so absent provenance fails. Subsetting rows changes which rows,
+  never who produced them.
+* **A measuring counterpart for WS-13's value-level parity limb.** The tolerance is measured
+  from the fixtures and frozen, never invented (TE §15.1), so `assert_window_parity` refuses
+  while it is unset — leaving a measuring run unable to produce the number the freeze needs.
+  `measure_window_parity` runs the shape and ordering limbs and **reports** the largest
+  observed difference instead of comparing it; stage 05 folds it into the fixture
+  measurements. Measuring and asserting are two functions on purpose, and **WS-13 stays
+  Pending**: a measurement is not a passed check.
+
+**One apparatus adjustment inside the shape you approved:** `FIX-NOV-FOLD-02`'s validation
+day moved from 2022-11-06 to 2022-11-05. At 11-06 the fold scored 2022-11-07 alone, whose
+24-step window history is exactly the day the 24-hour embargo removes, so the assembled
+score frame came back empty and R-74 refused it. The one-day shift is forced by the frozen
+window length and embargo; the fold stays expanding and no scientific value moves.

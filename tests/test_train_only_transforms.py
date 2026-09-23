@@ -51,16 +51,7 @@ if str(REPO_ROOT) not in sys.path:
 if str(REPO_ROOT / "tests") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "tests"))
 
-from test_split_embargo import (  # noqa: E402
-    SYNTH_YEAR,
-    synthetic_partitions,
-    synthetic_snapshot,
-)
-
 from src.data.config import IntegrityError, LeakageError, PartitionError  # noqa: E402
-from src.external.spaceweather import (  # noqa: E402
-    assert_carry_forward_conservation,
-)
 from src.data.splits import (  # noqa: E402
     LOCKED_ID,
     PARTITION_IDS,
@@ -69,6 +60,9 @@ from src.data.splits import (  # noqa: E402
     partition_by_id,
     training_range,
     validation_month_range,
+)
+from src.external.spaceweather import (  # noqa: E402
+    assert_carry_forward_conservation,
 )
 from src.features.build import (  # noqa: E402
     FeatureBundle,
@@ -86,6 +80,12 @@ from src.features.transforms import (  # noqa: E402
     carry_forward,
     fit_transforms,
     transform_id_for,
+)
+
+from test_split_embargo import (  # noqa: E402
+    SYNTH_YEAR,
+    synthetic_partitions,
+    synthetic_snapshot,
 )
 
 UTC = dt.timezone.utc
@@ -306,6 +306,58 @@ def test_zero_variance_column_is_refused_not_defaulted() -> None:
     with pytest.raises(IntegrityError) as excinfo:
         fit_transforms(bundle, partition=_p("F1"))
     assert "zero variance" in str(excinfo.value)
+
+
+def test_constant_column_whose_computed_variance_is_float_noise_is_refused() -> None:
+    """The escape the control above could not catch, added 2026-09-23 after the fixture
+    ladder walked straight through it.
+
+    `test_zero_variance_column_is_refused_not_defaulted` uses three values of 1.0, for which
+    the mean is exact and the computed variance is exactly 0.0 — so it passes under either
+    guard and never exercised the real failure. A single-station fixture's `station_lat` is
+    48 identical values of 32.778987: the mean differs from the value in the last bits, the
+    computed variance is 2.0e-28 (strictly positive), the old `variance <= 0.0` test PASSED,
+    and the column was standardised by a scale of 1.4e-14 — turning every row into exactly
+    1.0, a meaningless number wearing a plausible face.
+
+    The literals here are the fixture's own: BSHM's latitude from `configs/data.yaml` and
+    the row count the fold actually built. A synthetic value with fewer significant digits
+    would cancel exactly and reproduce the old test rather than this one.
+    """
+    latitude = 32.778987
+    rows = 48
+    values = [latitude] * rows
+    mean = sum(values) / rows
+    variance = sum((v - mean) ** 2 for v in values) / rows
+    assert variance > 0.0, (
+        "the escape this control exists for is gone: recompute the literals rather than "
+        "deleting the test, because the guard it protects is now untested"
+    )
+
+    bundle = FeatureBundle(
+        matrix=RecordFrame([{"station_lat": latitude} for _ in range(rows)]),
+        tensor=[],
+        spec=_train_spec("F1"),
+        transform_id=None,
+        standardized_columns=("station_lat",),
+    )
+    with pytest.raises(IntegrityError) as excinfo:
+        fit_transforms(bundle, partition=_p("F1"))
+    assert "zero variance" in str(excinfo.value)
+
+
+def test_a_column_with_real_spread_still_fits() -> None:
+    """The must-not-fire limb: the constancy test must not refuse a column that varies."""
+    bundle = FeatureBundle(
+        matrix=RecordFrame([{"a": 1.0}, {"a": 2.0}, {"a": 3.0}]),
+        tensor=[],
+        spec=_train_spec("F1"),
+        transform_id=None,
+        standardized_columns=("a",),
+    )
+    transform = fit_transforms(bundle, partition=_p("F1"))
+    assert transform.means["a"] == 2.0
+    assert transform.scales["a"] > 0.0
 
 
 # --- (d): the untransformed bundle is never consumable -----------------------------------

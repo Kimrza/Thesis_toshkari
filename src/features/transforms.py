@@ -190,7 +190,21 @@ def fit_transforms(bundle: FeatureBundle, *, partition: Partition) -> Transform:
             )
         mean = sum(values) / len(values)
         variance = sum((v - mean) ** 2 for v in values) / len(values)
-        if variance <= 0.0:
+        # CONSTANCY IS TESTED DIRECTLY, not inferred from the computed variance.
+        #
+        # `variance <= 0.0` was the whole test until 2026-09-23, and a constant column
+        # ESCAPES it through floating-point noise: for 48 identical values of 32.778987
+        # (a single-station fixture's `station_lat`) the computed mean differs from the
+        # value in the last bits, variance comes out 2.0e-28 — strictly positive — the
+        # guard passes, and the column is then standardised by a scale of 1.4e-14, turning
+        # every row into exactly 1.0. A meaningless number with a plausible face, which is
+        # worse than a refusal. Found by running the fixture ladder: one partition happened
+        # to cancel exactly and refused, the others sailed through with the 1.0s.
+        #
+        # `min == max` is exact for floats and says what the rule means: a column with one
+        # distinct value has no scale to fit. The variance test is KEPT after it, because
+        # it still catches a column that is not literally constant yet has no usable spread.
+        if min(values) == max(values) or variance <= 0.0:
             raise IntegrityError(
                 f"bundle {spec.partition_id}/{spec.role} column {column!r}",
                 "has zero variance over the training range; a scale for a constant column "
