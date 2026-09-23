@@ -844,6 +844,15 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             # parity difference instead of asserting against a number that does not exist.
             # WS-13 stays Pending either way — a measurement is not a passed check.
             "measure_parity": args.parity_tolerance is None,
+            # The fixture's own apparatus normalization overrides (R-122), read from the
+            # scope this run is bound to. A governed run reaches `build_features` by a path
+            # that carries no fixture scope, so it can never pick one up: the deviation is
+            # confined to the apparatus that needs it and `configs/features.yaml` stays
+            # frozen exactly as D-60 left it (owner ruling 2026-09-23, §5 option 1).
+            "apparatus_unstandardized": {
+                str(column): str(entry["reason"])
+                for column, entry in scope.apparatus_normalization.items()
+            },
             # registry gate scoped to this run's phase (Phase 1 does not require the
             # Phase-2-only observable_codes; CR-2026-09-20-B01-PREREQS §5)
             "phase": args.phase,

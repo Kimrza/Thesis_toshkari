@@ -371,6 +371,45 @@ cleanly instead of writing two bundles of noise.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
 
+> ## ✅ RULED 2026-09-23 — option 1 approved by the owner, and implemented
+>
+> **The mechanism.** A fixture scope may carry an `apparatus_normalization` block declaring
+> a column `normalization: none` **for that fixture**, with the reason recorded.
+> `configs/features.yaml` is untouched — `station_lat` is still `train_only_standardize`,
+> exactly as D-60 froze it — and a governed run reaches `build_features` by a path that
+> carries no fixture scope, so it can never pick an override up. Declared in
+> `tests/fixtures/plumbing_7day/identity_declaration.yaml`, beside the apparatus partitions,
+> as R-122 apparatus constants.
+>
+> **The override is closed to `none`.** It can only ever REMOVE a standardisation the
+> dictionary declares, never introduce or alter one — an apparatus file that could set
+> `train_only_standardize` would be adding a scientific transform, which is what keeping the
+> deviation out of `configs/features.yaml` exists to prevent (TE §18.2).
+>
+> **It is a claim the code checks, not a licence.** `fit_transforms` verifies that each
+> overridden column really is constant over the fitting range and refuses when it is not,
+> quoting the declared reason back. Without that limb an override would be a way to silently
+> drop a genuine train-only standardisation while wearing an apparatus label — a
+> leakage-shaped change (NFR-LEAK-01) that raises nothing and improves the numbers.
+> `build_features` checks the other half: an override naming no dictionary field, or naming
+> one the dictionary already declares `none`, is refused rather than ignored, so a typo can
+> never read as a discharged obligation.
+>
+> **Measured result.** Stage 05 now **completes** for all three apparatus partitions, writing
+> eight bundles plus `fixture_measurements.json`. `station_lat` carries BSHM's true
+> `32.778987` in every bundle including the transformed ones — the override removes the
+> scale, it does not corrupt the value — while `kp_safe` is still standardised
+> (`1.667 → -1.2045`), so the deviation is confined to the one declared column. WS-13's
+> value-level parity measured **0.0 TECU** over 8 bundles, which is the number a tolerance
+> freeze needs; WS-13 stays Pending, because a measurement is not a passed check.
+>
+> **Controls added**, in this project's negative-control-per-rule idiom: the override
+> honoured for a genuinely constant column (and leaving its neighbour standardised); the
+> override **refused** when the column has real spread; `build_features` refusing an unknown
+> field and refusing a no-op override; the manifest validator refusing any value but `none`
+> and refusing a missing reason; and a pin on the shipped declaration carrying exactly the
+> one column approved here. Full suite: no new failures, no new lint findings.
+
 ### Where the ladder stands, measured
 
 Stages **00, 01, 02, 04** complete; **05 builds the feature matrix**. Before it stops at
@@ -408,3 +447,191 @@ day moved from 2022-11-06 to 2022-11-05. At 11-06 the fold scored 2022-11-07 alo
 24-step window history is exactly the day the 24-hour embargo removes, so the assembled
 score frame came back empty and R-74 refused it. The one-day shift is forced by the frozen
 window length and embargo; the fold stays expanding and no scientific value moves.
+
+---
+
+## §6 — Disposition: four committed feature bundles carry the pre-fix `station_lat = 1.0` noise
+
+*Raised 2026-09-23 on re-running the ladder after the §1/§3 approval. Recorded, not acted
+on: these are committed artifacts, and the standing instruction of 2026-09-23 is not to
+delete or alter committed artifacts without a separate ruling.*
+
+### What is on disk, measured
+
+`artifacts/walking_skeleton/plumbing_7day/features/` holds **24 tracked files**, last
+committed in `5aaf655` (2026-09-23 19:24), written at 19:20 — *before* the constancy-guard
+repair described in §5 landed at 19:24. Read back just now:
+
+```
+FIX-NOV-FOLD-01__score__T-FIX-NOV-FOLD-01      station_lat=[1.]          n=48
+FIX-NOV-FOLD-01__train__T-FIX-NOV-FOLD-01      station_lat=[1.]          n=48
+FIX-NOV-FOLD-01__train__untransformed          station_lat=[32.778987]   n=48
+FIX-NOV-FOLD-02__score__T-FIX-NOV-FOLD-02      station_lat=[1.]          n=24
+FIX-NOV-FOLD-02__train__T-FIX-NOV-FOLD-02      station_lat=[1.]          n=72
+FIX-NOV-FOLD-02__train__untransformed          station_lat=[32.778987]   n=72
+```
+
+The four **transformed** bundles carry `station_lat` standardised to exactly `1.0` — the
+meaningless value §5 derives, produced by dividing a constant column by a scale of
+`1.4e-14`. The two **untransformed** bundles carry BSHM's true latitude and are unaffected.
+
+These are exactly the "two bundles of noise" §5 says the repair prevents. The repair
+prevents new ones; it does not reach the ones already written and committed.
+
+> ## ⚠ STATUS CHANGED 2026-09-23 — §6 IS NOW THE BLOCKER
+>
+> When this section was written the stale bundles cost nothing. With §5 ruled and
+> implemented they are what stops the ladder: stage 05 gets all the way through the feature
+> build and then refuses at the write —
+>
+> > `artifacts\walking_skeleton\plumbing_7dayeatures\FIX-NOV-FOLD-01__train__untransformed:
+> > bundle directory already exists; a bundle is never overwritten (TE §13.3)`
+>
+> — which is the correct refusal. Stage 05 was proved to complete by running it into a
+> scratch directory outside the repository, so nothing about §5 is unverified; what cannot
+> happen without a ruling here is the ladder writing its bundles where 06 and 07 read them.
+>
+> There is also a second reason this now matters more than tidiness: if the ladder were
+> allowed to continue past these directories, **stage 06 would read the pre-fix bundles** —
+> the ones whose `station_lat` is `1.0` — and train on them.
+>
+> I was wrong to describe this section as having "no urgency"; that was true only while §5
+> was unruled. Nothing was deleted.
+
+### Why this is a disposition question and not a defect to fix
+
+Nothing here is wrong with the code as it now stands — a re-run cannot reproduce these
+files, because the repaired guard refuses before any bundle is written. The question is
+only what happens to artifacts already in the history. They are **fixture-path** artifacts
+(`artifacts/walking_skeleton/`), never the governed root, and the plumbing fixture is a
+smoke test and never scientific evidence (TC-03f), so nothing scientific rests on them.
+
+### The options
+
+1. **Delete the four transformed bundles, keep the two untransformed.** Removes the noise
+   while keeping what is still true. *Recommended* — a bundle whose only numeric content is
+   an artefact of a repaired defect has no reader it can serve correctly, and leaving it
+   where a future run writes its successors invites it being read as one.
+2. **Delete all 24 files and let the ladder rewrite them once §5 is ruled.** Cleanest, and
+   the fixture path is reproducible by construction, but it discards the untransformed
+   matrices that are currently the only on-disk evidence that the §1/§3 fix works.
+3. **Leave everything and record the caveat here only.** Consistent with the standing
+   instruction and costs nothing today, but the `1.0` columns stay readable by anyone who
+   opens the fixture path without reading this file.
+
+**Decision required — Approve / Reject / Modify / Postpone.**
+
+> ## ✅ RULED 2026-09-23 — option 1 approved and executed, and it does NOT clear the block
+>
+> **Done, exactly as ruled.** The four transformed bundles are deleted — 16 tracked files,
+> four per directory (`fixture_stamp.json`, `matrix.parquet`, `spec.json`, `tensor.npy`) —
+> and the two untransformed bundles are kept, 8 tracked files. The deletions are unstaged in
+> the working tree; nothing was committed, and `git checkout` restores them until you commit.
+>
+> **CORRECTION, measured rather than reasoned.** Option 1 removes the noise but does **not**
+> unblock the ladder, and my status box above implied a ruling here would. Stage 05 was
+> re-run against the real bundle path after the deletion and refuses at the same place:
+>
+> > `…features\FIX-NOV-FOLD-01__train__untransformed: bundle directory already exists; a
+> > bundle is never overwritten (TE §13.3)`
+>
+> The refusal names an **untransformed** bundle — one of the two option 1 keeps. Stage 05
+> writes each partition's raw bundle BEFORE its transformed one, so the first write of the
+> run hits a kept directory. Nothing was written by that aborted run: the refusal precedes
+> every write, and the tree still shows exactly the 16 deletions.
+>
+> **A fact that changes the balance of the remaining choice.** Option 2's stated cost was
+> that deleting all 24 "discards the untransformed matrices that are currently the only
+> on-disk evidence that the §1/§3 fix works". That is no longer true on either half:
+>
+> * the §1/§3 fix is now evidenced by the scratch run recorded in §5, independent of these
+>   files; and
+> * the two kept bundles are **pre-mechanism artifacts** — their `spec.json` carries no
+>   `apparatus_unstandardized` key (verified by reading it), because they were written
+>   before the override existed. Every bundle written from now on records it. So they are
+>   not simply "still true"; they are stale in their metadata, and a re-run reproduces
+>   equivalent untransformed matrices with the record attached.
+>
+> **What is still owed:** a ruling on the two kept untransformed bundles. Deleting them is
+> what clears the block, and is option 2 in substance. Nothing further was deleted.
+>
+> ---
+>
+> ## ✅ SUPERSEDED BY OPTION 2, RULED AND EXECUTED 2026-09-23 — the block is cleared
+>
+> The owner ruled option 2 and directed a stage 05 re-run with no commit. The two remaining
+> untransformed bundles were deleted (all 24 tracked files gone, directory empty), and
+> **stage 05 then completed, exit 0**, writing:
+>
+> | Bundle | Rows | `station_lat` | `apparatus_unstandardized` |
+> |---|---|---|---|
+> | `FIX-NOV-FOLD-01__train__untransformed` | 48 | 32.778987 | `station_lat` |
+> | `FIX-NOV-FOLD-01__train__T-…` | 48 | 32.778987 | `station_lat` |
+> | `FIX-NOV-FOLD-01__score__T-…` | 48 | 32.778987 | `station_lat` |
+> | `FIX-NOV-FOLD-02__train__untransformed` | 72 | 32.778987 | `station_lat` |
+> | `FIX-NOV-FOLD-02__train__T-…` | 72 | 32.778987 | `station_lat` |
+> | `FIX-NOV-FOLD-02__score__T-…` | 24 | 32.778987 | `station_lat` |
+> | `FIX-NOV-REFIT__train__untransformed` | 144 | 32.778987 | `station_lat` |
+> | `FIX-NOV-REFIT__train__T-…` | 144 | 32.778987 | `station_lat` |
+>
+> plus `apparatus_split_manifest.json` (three partitions; embargo exclusions 24 rows on each
+> fold) and `fixture_measurements.json` (WS-13 value-level parity **0.0 TECU** over 8
+> bundles, `status: measured, not frozen; WS-13 Pending`).
+>
+> **`FIX-NOV-REFIT` exists for the first time.** The pre-fix run never reached the refit
+> partition, so both its bundles are new files rather than replacements.
+>
+> **What the diff proves, without needing to be argued.** For the two untransformed bundles
+> only `spec.json` differs from the committed version — `matrix.parquet` is **byte-identical**
+> — so the override changed no data, only the record that it applied. In the transformed
+> bundles `matrix.parquet` and `spec.json` differ (the `station_lat = 1.0` artefact is gone,
+> replaced by the true 32.778987) while `tensor.npy` and `fixture_stamp.json` are
+> byte-identical, `station_lat` being no sequence field. Every bundle's `spec.json` now
+> carries `apparatus_unstandardized: {station_lat: …}`, so the deviation is disclosed in the
+> artifact a reader opens rather than only in this file.
+>
+> **Not committed**, per the owner's instruction. The experiment registry took 20 further
+> appended rows with nothing removed (NFR-AUD-01).
+
+---
+
+## §7 — For your awareness: three suite failures, all pre-existing, one inside a §18.3 critical module
+
+*Measured 2026-09-23 on the full suite at `996a5f9`. Raised because one of the three sits in
+a module §18.3 names in its critical set, not because anything in this session caused it.*
+
+### What fails
+
+The suite runs to completion (3 skips) with **three** failures:
+
+| Test | Module last touched | Cause |
+|---|---|---|
+| `test_no_restricted_read_in_this_module_bypasses_the_chokepoint` | `tests/test_phase_boundary.py` — `4cdd549`, 09-20 | the scan flags **its own** `Path(__file__).read_text()` at line 667 |
+| `test_no_restricted_read_in_this_module_bypasses_the_chokepoint` | `tests/test_release_hashes.py` — `4cdd549`, 09-20 | same self-referential shape |
+| `test_the_test_mode_access_log_also_reconciles_when_it_exists` | `tests/test_locked_test_guard.py` — `cda8869`, 09-22 | `run_id "test_phase_boundary"` is absent from the orphan whitelist |
+
+**None of the three touches anything changed in this session.** The first two read their own
+source and scan it with a function defined in the same file; both files predate this work by
+three days, so their result is deterministic and independent of it. The third fails because
+`tests/test_phase_boundary.py:117` writes `run_id="test_phase_boundary"` into the shared
+test-mode access log (75 such rows have accumulated) while
+`HISTORICAL_TEST_ORPHANS` in `tests/test_locked_test_guard.py` whitelists exactly two
+run_ids — `test_release_hashes` and `test_acquisition_window`. `test_phase_boundary` was
+never added, so any suite run in which that module has executed fails this reconciliation.
+
+### Why it is raised rather than fixed
+
+`test_locked_test_guard.py` is the module behind **"locked-test access guard"**, one of the
+ten items §18.3 names in its critical set, and that gate's criterion is *"zero unresolved P0
+fields and no failing critical test."* A failing test in that module is therefore gate-
+relevant even though its cause is test isolation rather than a defect in the guard itself —
+the guard's own behavioural tests pass. Stating that distinction is the point: the gate reads
+pass/fail, and the honest report is that the module is currently red for a reason that has
+nothing to do with December access control.
+
+Fixing it means either adding `test_phase_boundary` to the orphan whitelist with its reason,
+or stopping that module writing to the shared log. Both are edits to the locked-test-guard
+family under a frozen receipt, and neither is inside what was approved for this session, so
+neither was made.
+
+**Decision required — Approve / Reject / Modify / Postpone.**

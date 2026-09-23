@@ -1827,6 +1827,11 @@ HISTORICAL_TEST_ORPHANS = {
         "module opens no registry run. See "
         "evidence/test_run_access_log.SUPERSEDED_2026-09-20.md"
     ),
+    "test_phase_boundary": (
+        "tests/test_phase_boundary.py:117 writes run_id=\"test_phase_boundary\" into the "
+        "shared test-mode access log on every run; a pytest module opens no registry run. "
+        "See governance/RULING_REQUEST_2026-09-23_CONSTRUCTION_STOPS.md"
+    ),
 }
 
 

@@ -116,6 +116,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     build_apparatus_partitions,
     compare_required_outputs,
     load_fixture_manifest,
+    load_fixture_scope,
     required_outputs_for,
     validate_manifest_mapping,
 )
@@ -3451,3 +3452,61 @@ def test_comparison_mode_still_refuses_an_incomplete_reference_manifest(tmp_path
 
     with pytest.raises(IntegrityError):
         load_fixture_manifest(reference)
+
+
+# =========================================================================================
+# The apparatus normalization override (owner ruling 2026-09-23, §5 option 1)
+# =========================================================================================
+#
+# The override lets a fixture declare a column `normalization: none` FOR ITSELF, because an
+# apparatus can make a column constant that the governed dictionary has every reason to
+# standardise. Its whole safety rests on being unable to do anything ELSE, so these controls
+# pin the two ways it could become a back door into a frozen scientific value.
+
+
+def test_apparatus_normalization_may_only_ever_remove_a_standardization(tmp_path):
+    """`none` is the only permitted value: an override never introduces or alters a scale.
+
+    If `train_only_standardize` were accepted here, an apparatus file would be able to add a
+    scientific transform the frozen dictionary does not declare — which is exactly what
+    keeping the deviation OUT of `configs/features.yaml` is for (TE 18.2).
+    """
+    root = tmp_path / "addsascale"
+    root.mkdir()
+    data = build_manifest_mapping(SCIENTIFIC_FIXTURE_ID, root, status=CANDIDATE)
+    data["apparatus_normalization"] = {
+        "station_lat": {"normalization": "train_only_standardize", "reason": "because I say so"}
+    }
+    with pytest.raises(IntegrityError, match="only ever REMOVES"):
+        validate_manifest_mapping(data, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+
+
+def test_apparatus_normalization_requires_the_reason_to_be_recorded(tmp_path):
+    """An override without its stated apparatus ground is refused.
+
+    The reason is not decoration: it is the only place the apparatus fact that makes the
+    override necessary is written down, and `fit_transforms` quotes it back when the claim
+    turns out to be false.
+    """
+    root = tmp_path / "noreason"
+    root.mkdir()
+    data = build_manifest_mapping(SCIENTIFIC_FIXTURE_ID, root, status=CANDIDATE)
+    data["apparatus_normalization"] = {"station_lat": {"normalization": "none"}}
+    with pytest.raises(IntegrityError, match="non-empty `reason`"):
+        validate_manifest_mapping(data, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+
+
+def test_the_plumbing_fixture_declares_exactly_the_one_override_the_ruling_approved(tmp_path):
+    """The shipped declaration, read through THE loader — not a hand-built mapping.
+
+    Pins the scope of what was approved: one column, `none`, with a reason. A second entry
+    appearing here later is a change to what the apparatus deviates on, and should be
+    noticed rather than inherited silently.
+    """
+    declaration = load_fixture_scope(
+        REPO_ROOT / "tests" / "fixtures" / "plumbing_7day" / "identity_declaration.yaml"
+    )
+    override = dict(declaration.apparatus_normalization)
+    assert list(override) == ["station_lat"]
+    assert override["station_lat"]["normalization"] == "none"
+    assert "one station" in override["station_lat"]["reason"].lower()

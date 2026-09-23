@@ -586,3 +586,58 @@ def test_frame_spec_refuses_naive_or_inverted_bounds() -> None:
         FrameSpec("F1", "train", _ts(2, 1), _ts(1, 1))
     with pytest.raises(PartitionError):
         FrameSpec("F1", "evaluate", _ts(1, 1), _ts(2, 1))  # type: ignore[arg-type]
+
+
+# --- the apparatus normalization override (owner ruling 2026-09-23, §5 option 1) ----------
+#
+# A fixture may declare a column `normalization: none` FOR ITSELF, because an apparatus can
+# make a column constant that the governed dictionary has every reason to standardise:
+# `plumbing_7day` runs one station (D-20), so `station_lat` holds one distinct value. The
+# override is a CLAIM about the apparatus, and `fit_transforms` is where the claim meets the
+# values — so the controls below are the pair this project requires: the violation is caught,
+# and the lawful case still works.
+
+
+def test_apparatus_unstandardized_column_is_left_alone_when_it_really_is_constant() -> None:
+    """The lawful case: the fixture's own numbers, and the column keeps its TRUE value.
+
+    This is the exact configuration the plumbing ladder runs — 48 identical values of BSHM's
+    latitude — and the point of the assertion is not merely that `fit_transforms` returns:
+    it is that `station_lat` is absent from the fitted transform, so nothing later divides it
+    by a 1.4e-14 scale and turns it into 1.0.
+    """
+    latitude = 32.778987
+    bundle = FeatureBundle(
+        matrix=RecordFrame([{"station_lat": latitude, "kp_safe": float(i)} for i in range(48)]),
+        tensor=[],
+        spec=_train_spec("F1"),
+        transform_id=None,
+        standardized_columns=("kp_safe",),
+        apparatus_unstandardized={"station_lat": "one-station fixture (D-20: BSHM)"},
+    )
+    transform = fit_transforms(bundle, partition=_p("F1"))
+    assert "station_lat" not in transform.columns
+    assert "kp_safe" in transform.columns, "the override must not disturb a neighbouring column"
+
+
+def test_apparatus_override_is_refused_when_the_column_actually_has_spread() -> None:
+    """THE negative control: an override never removes a standardisation a column needs.
+
+    Without this limb the override would be a way to silently drop a genuine train-only
+    standardisation while wearing an apparatus label — a leakage-shaped change (NFR-LEAK-01)
+    that raises nothing and produces better-looking numbers. The refusal must name the
+    spread, so a reader sees the premise was false rather than merely unproven.
+    """
+    bundle = FeatureBundle(
+        matrix=RecordFrame([{"station_lat": 32.0}, {"station_lat": 35.0}, {"station_lat": 40.0}]),
+        tensor=[],
+        spec=_train_spec("F1"),
+        transform_id=None,
+        standardized_columns=(),
+        apparatus_unstandardized={"station_lat": "claimed constant, but it is not"},
+    )
+    with pytest.raises(IntegrityError) as excinfo:
+        fit_transforms(bundle, partition=_p("F1"))
+    message = str(excinfo.value)
+    assert "premise of the override is false" in message
+    assert "32.0" in message and "40.0" in message

@@ -238,6 +238,7 @@ def _build(
     drivers: dict[str, Any] | None = None,
     matrix: Any = None,
     spec: FrameSpec | None = None,
+    apparatus_unstandardized: dict[str, str] | None = None,
 ) -> Any:
     """The ONE call every control in this module goes through: the designated enforcement
     boundary, with exactly one input mutated per test."""
@@ -253,6 +254,7 @@ def _build(
         partitions=PARTITIONS,
         snapshot=snapshot,
         parity_tolerance=0.0,
+        apparatus_unstandardized=apparatus_unstandardized,
     )
 
 
@@ -847,3 +849,38 @@ def test_tc12_build_features_invokes_the_joined_grid_guard_on_the_post_join_fram
     assert any(
         cells == {"S1", "S2"} for cells in stations_by_epoch.values()
     ), "the guard was handed a frame with no shared epoch across cells; it would pass vacuously"
+
+
+# --- the apparatus normalization override, at this boundary (ruling 2026-09-23, §5) -------
+#
+# `fit_transforms` checks that an overridden column really is constant. THIS boundary checks
+# the other half — that the override names something real and does something. Both refusals
+# exist because an override that is quietly ignored is indistinguishable, to a reader, from
+# one that was honoured.
+
+
+def test_apparatus_override_naming_an_unknown_field_is_refused() -> None:
+    """A typo must not read as a discharged obligation.
+
+    Ignoring an unrecognised name would leave the fixture's manifest asserting a deviation
+    that never happened, and the run would then refuse on the constant column anyway — with
+    a message pointing at the dictionary rather than at the misspelling.
+    """
+    with pytest.raises(IntegrityError, match="names no field in the TE 6.2 dictionary"):
+        _build(apparatus_unstandardized={"statoin_lat": "typo"})
+
+
+def test_apparatus_override_of_an_already_unstandardized_field_is_refused() -> None:
+    """A no-op override is refused rather than accepted silently.
+
+    An override whose field the dictionary ALREADY declares `none` changes nothing, so
+    accepting it would let a manifest record an apparatus deviation that does not exist.
+    """
+    features = _features()
+    target_field = next(
+        name
+        for name, entry in features["feature_dictionary"].items()
+        if str(entry.get("normalization")) == "none"
+    )
+    with pytest.raises(IntegrityError, match="already declares normalization"):
+        _build(apparatus_unstandardized={target_field: "changes nothing"})

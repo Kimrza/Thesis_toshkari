@@ -238,6 +238,10 @@ class FeatureBundle:
     standardized_columns: tuple[str, ...] = ()
     sequence_columns: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     tensor_features: tuple[str, ...] = ()
+    #: Columns this APPARATUS left unstandardised, mapped to the declared reason. Empty on
+    #: every governed run; non-empty only where a fixture scope declared an override and
+    #: `fit_transforms` verified the column really is constant.
+    apparatus_unstandardized: Mapping[str, str] = field(default_factory=dict)
     #: The largest |matrix − tensor| observed, present ONLY on a measuring run
     #: (`measure_parity=True` with no frozen tolerance). `None` on every asserting run, so
     #: a reader cannot mistake a measurement for a passed comparison.
@@ -866,6 +870,7 @@ def build_features(
     transform: Transform | None = None,
     parity_tolerance: float | None = None,
     measure_parity: bool = False,
+    apparatus_unstandardized: Mapping[str, str] | None = None,
     timestamp_column: str = "interval_start_utc",
     station_column: str = "station_id",
     phase: int = 2,
@@ -1090,10 +1095,47 @@ def build_features(
             )
 
     # --- transform (inside build_features, before both representations) -----------------
+    #
+    # APPARATUS OVERRIDE (fixture runs only; §5 option 1, owner ruling 2026-09-23). A fixture
+    # may declare a column `normalization: none` FOR THAT FIXTURE, because an apparatus can
+    # make a column constant that the governed dictionary has every reason to standardise:
+    # `plumbing_7day` runs one station (D-20), so `station_lat` has one distinct value and no
+    # scale to fit. `configs/features.yaml` is untouched, and a governed run carries no
+    # fixture scope to read an override from, so this cannot reach one.
+    #
+    # Each name is checked against the dictionary before it is honoured. An override naming
+    # an unknown field, or a field the dictionary ALREADY declares `none`, is refused rather
+    # than ignored: silently accepting a no-op override is how a typo comes to look like a
+    # discharged obligation. The remaining premise — that the column really is constant —
+    # is verified where the values are, by `fit_transforms`.
+    overrides = dict(apparatus_unstandardized or {})
+    for name in sorted(overrides):
+        entry = feature_set.get(name)
+        if entry is None:
+            raise IntegrityError(
+                f"apparatus normalization override {name!r}",
+                "names no field in the TE 6.2 dictionary; an override adjusts a declared "
+                "field for one apparatus and never introduces one",
+            )
+        if str(entry["normalization"]) != _STANDARDIZE:
+            raise IntegrityError(
+                f"apparatus normalization override {name!r}",
+                f"the dictionary already declares normalization "
+                f"{str(entry['normalization'])!r}, so the override changes nothing; a no-op "
+                f"override is refused rather than ignored",
+            )
+        if name in sequence_fields:
+            raise IntegrityError(
+                f"apparatus normalization override {name!r}",
+                "is a sequence field, whose flattened columns and tensor slice share one "
+                "standardisation; overriding it is out of this mechanism's scope",
+            )
     standardized = tuple(
         n
         for n, e in feature_set.items()
-        if str(e["normalization"]) == _STANDARDIZE and n not in sequence_fields
+        if str(e["normalization"]) == _STANDARDIZE
+        and n not in sequence_fields
+        and n not in overrides
     ) + tuple(
         c
         for n in sequence_fields
@@ -1189,6 +1231,7 @@ def build_features(
         identity=identity,
         excluded_counts=excluded,
         standardized_columns=standardized,
+        apparatus_unstandardized=dict(overrides),
         sequence_columns=dict(windowed.sequence_columns),
         tensor_features=tuple(windowed.tensor_features),
         measured_parity_diff=measured_parity,
@@ -1233,6 +1276,7 @@ def _spec_payload(bundle: FeatureBundle) -> dict[str, Any]:
         "provenance": {k: dict(v) for k, v in bundle.provenance.items()},
         "excluded_counts": dict(bundle.excluded_counts),
         "standardized_columns": list(bundle.standardized_columns),
+        "apparatus_unstandardized": dict(bundle.apparatus_unstandardized),
         "sequence_columns": {k: list(v) for k, v in bundle.sequence_columns.items()},
         "tensor_features": list(bundle.tensor_features),
     }
@@ -1340,6 +1384,7 @@ def load_bundle(directory: Path) -> FeatureBundle:
         identity=identity,
         excluded_counts={str(k): int(v) for k, v in payload.get("excluded_counts", {}).items()},
         standardized_columns=tuple(payload.get("standardized_columns", [])),
+        apparatus_unstandardized=dict(payload.get("apparatus_unstandardized", {})),
         sequence_columns={
             str(k): tuple(v) for k, v in payload.get("sequence_columns", {}).items()
         },

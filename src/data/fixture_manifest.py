@@ -118,6 +118,8 @@ __all__ = [
     "Quantity",
     "CONTENT_AREAS",
     "AREA_KEYS",
+    "APPARATUS_NORMALIZATION_KEY",
+    "APPARATUS_NORMALIZATION_VALUE",
     "PHASE2_ONLY_QUANTITIES",
     "REQUIRED_OUTPUTS",
     "SCIENTIFIC_ONLY_OUTPUTS",
@@ -362,6 +364,11 @@ CONTENT_AREAS: Final[tuple[tuple[str, str, tuple[Quantity, ...]], ...]] = (
 
 AREA_KEYS: Final[tuple[str, ...]] = tuple(key for key, _name, _qs in CONTENT_AREAS)
 
+#: The apparatus normalization-override block, and the ONLY value it may carry. See
+#: `_validate_apparatus_normalization` for why the value is closed to `none`.
+APPARATUS_NORMALIZATION_KEY: Final[str] = "apparatus_normalization"
+APPARATUS_NORMALIZATION_VALUE: Final[str] = "none"
+
 #: Derived from the table above, never carried: every (area, quantity) that may be recorded
 #: `not_applicable` on a Phase 1 manifest.
 PHASE2_ONLY_QUANTITIES: Final[tuple[tuple[str, str], ...]] = tuple(
@@ -465,6 +472,11 @@ class FixtureManifest:
     @property
     def apparatus_partitions(self) -> Mapping[str, Mapping[str, Any]]:
         block = self.data.get("apparatus_partitions")
+        return block if isinstance(block, Mapping) else {}
+
+    @property
+    def apparatus_normalization(self) -> Mapping[str, Mapping[str, Any]]:
+        block = self.data.get(APPARATUS_NORMALIZATION_KEY)
         return block if isinstance(block, Mapping) else {}
 
     @property
@@ -995,6 +1007,61 @@ def _validate_apparatus_partitions(
         raise _refuse(res, "at most one apparatus refit")
 
 
+def _validate_apparatus_normalization(
+    manifest_path: Path, fixture_id: str, data: Mapping[str, Any]
+) -> None:
+    """Validate `apparatus_normalization`: a fixture's per-column normalization override.
+
+    An apparatus constant (R-122), not a scientific value — it states nothing about the
+    governed dictionary and never reaches a governed run, which carries no fixture scope to
+    read it from. It exists for the case an apparatus creates and the dictionary cannot know
+    about: a one-station fixture's station-invariant column has ONE distinct value, so there
+    is no scale to fit, and `fit_transforms` refuses it rather than inventing one (TE 18.2).
+
+    The override may only ever be `none` — it REMOVES a standardisation the dictionary
+    declares, and can never introduce or alter one. An override that could set
+    `train_only_standardize` would be an apparatus file changing a scientific transform,
+    which is exactly what keeping the deviation out of `configs/features.yaml` is for.
+
+    It is a CLAIM, not a licence: `fit_transforms` verifies that each overridden column is
+    genuinely constant in the fitting bundle and refuses when it is not, so an override can
+    never silently drop the standardisation of a column that has real spread.
+    """
+    block = data.get(APPARATUS_NORMALIZATION_KEY)
+    res = f"{manifest_path}: {APPARATUS_NORMALIZATION_KEY}"
+    if block is None:
+        return
+    if not isinstance(block, Mapping) or not block:
+        raise _refuse(res, "a non-empty mapping column -> declaration is required")
+    for column, entry in block.items():
+        cres = f"{res}.{column}"
+        if not isinstance(entry, Mapping):
+            raise _refuse(cres, "declaration must be a mapping")
+        stray = sorted(set(entry) - {"normalization", "reason"})
+        if stray:
+            raise _refuse(
+                cres,
+                f"carries {stray}; an override declares exactly `normalization` and the "
+                f"`reason` the apparatus makes it necessary",
+            )
+        value = entry.get("normalization")
+        if str(value) != APPARATUS_NORMALIZATION_VALUE:
+            raise _refuse(
+                cres,
+                f"normalization {value!r} is not {APPARATUS_NORMALIZATION_VALUE!r}; an "
+                f"apparatus override only ever REMOVES a standardisation the dictionary "
+                f"declares — introducing or altering one is a scientific change and belongs "
+                f"to configs/features.yaml under its own decision (TE 18.2)",
+            )
+        reason = entry.get("reason")
+        if not isinstance(reason, str) or not reason.strip():
+            raise _refuse(
+                cres,
+                "a non-empty `reason` is required; the apparatus fact that makes the "
+                "override necessary is recorded with it, never left to be inferred",
+            )
+
+
 def _window_of(data: Mapping[str, Any], manifest_path: Path) -> tuple[date, date]:
     citation = data["identity"]["window_citation"]
     return (
@@ -1194,6 +1261,7 @@ def validate_manifest_mapping(
     _validate_identity(manifest_path, fixture_id, data)
     _validate_required_outputs(manifest_path, fixture_id, data)
     _validate_apparatus_partitions(manifest_path, fixture_id, data)
+    _validate_apparatus_normalization(manifest_path, fixture_id, data)
     _validate_fixture_bootstrap(manifest_path, fixture_id, data)
     listing_path, present = _validate_hash_listing(manifest_path, fixture_id, data)
     return fixture_id, str(data["status"]), listing_path, present
@@ -1859,6 +1927,11 @@ class IdentityDeclaration:
         return block if isinstance(block, Mapping) else {}
 
     @property
+    def apparatus_normalization(self) -> Mapping[str, Mapping[str, Any]]:
+        block = self.data.get(APPARATUS_NORMALIZATION_KEY)
+        return block if isinstance(block, Mapping) else {}
+
+    @property
     def fixture_bootstrap(self) -> Mapping[str, Any] | None:
         block = self.data.get("fixture_bootstrap")
         return block if isinstance(block, Mapping) else None
@@ -1960,6 +2033,7 @@ def load_identity_declaration(
         )
     _validate_identity(declaration_path, fixture_id, data)
     _validate_apparatus_partitions(declaration_path, fixture_id, data)
+    _validate_apparatus_normalization(declaration_path, fixture_id, data)
     _validate_fixture_bootstrap(declaration_path, fixture_id, data)
     return IdentityDeclaration(
         path=declaration_path, fixture_id=fixture_id, sha256=file_sha256, data=data

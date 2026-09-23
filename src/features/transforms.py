@@ -135,8 +135,11 @@ def fit_transforms(bundle: FeatureBundle, *, partition: Partition) -> Transform:
         either direction. Over-wide is information flow outright; a strict subset is a fit
         that silently departs from the declared fold protocol (R-83's negative control).
     IntegrityError
-        an empty matrix (a fit over zero rows is not a fit), or a declared standardised
-        column with zero variance (a scale cannot be chosen for it by convenience).
+        an empty matrix (a fit over zero rows is not a fit); a declared standardised column
+        with zero variance (a scale cannot be chosen for it by convenience); or a column the
+        bundle declares apparatus-unstandardised that nonetheless has spread over the
+        training range (the override's premise is false, and an override never removes a
+        standardisation a column genuinely needs).
     """
     spec = bundle.spec
     if spec.partition_id != partition.partition_id:
@@ -178,6 +181,31 @@ def fit_transforms(bundle: FeatureBundle, *, partition: Partition) -> Transform:
             f"bundle {spec.partition_id}/{spec.role}",
             "matrix is empty; a transform fitted over zero rows is a check that never ran",
         )
+    # THE APPARATUS OVERRIDE IS A CLAIM, AND THIS IS WHERE IT IS CHECKED.
+    #
+    # A fixture may declare a column `normalization: none` for itself because its apparatus
+    # makes that column constant — one station, so one `station_lat`. `build_features` has
+    # already checked that each name is a real dictionary field the dictionary standardises;
+    # what it cannot check is the PREMISE, because the premise is about values.
+    #
+    # So it is checked here, against the fitting bundle, with the same `min == max` test the
+    # refusal below uses. An override whose column turns out to have real spread is refused:
+    # without this, an override would be a way to silently drop a genuine standardisation,
+    # which is a leakage-shaped change wearing an apparatus label. The refusal names the
+    # spread so a reader can see the premise was false rather than merely unproven.
+    for column, reason in sorted(dict(bundle.apparatus_unstandardized).items()):
+        values = [float(v) for v in column_values(bundle.matrix, column)]
+        if not values:
+            continue
+        if min(values) != max(values):
+            raise IntegrityError(
+                f"bundle {spec.partition_id}/{spec.role} column {column!r}",
+                f"is declared apparatus-unstandardised on the stated ground {reason!r}, but "
+                f"carries values spanning [{min(values)!r}, {max(values)!r}] over the "
+                f"training range — the premise of the override is false here, and an "
+                f"override never removes a standardisation a column genuinely needs",
+            )
+
     means: dict[str, float] = {}
     scales: dict[str, float] = {}
     for column in columns:

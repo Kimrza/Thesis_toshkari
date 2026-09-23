@@ -1,4 +1,7 @@
 {
+  "apparatus_unstandardized": {
+    "station_lat": "plumbing_7day runs ONE station (D-20: BSHM, cell 32/35), so station_lat holds a single distinct value in every row and there is no station spread to scale by. configs/features.yaml declares it train_only_standardize, which is right for the governed run and for scientific_1month, where three stations make it genuinely variable; fit_transforms correctly refuses to invent a scale for a constant column (TE 18.2). Apparatus constant (R-122), not a scientific value: the governed dictionary, D-60 and the producing artifact are untouched, and a governed run carries no fixture scope to read this from. The claim that the column IS constant is verified by fit_transforms against this fixture's own values, not taken on trust. Owner ruling 2026-09-23, RULING_REQUEST_2026-09-23_CONSTRUCTION_STOPS.md section 5 option 1."
+  },
   "columns": [
     "vtec_lag_1h",
     "vtec_lag_2h",
@@ -323,7 +326,6 @@
     "vtec_lag_2h",
     "vtec_lag_3h",
     "vtec_lag_24h",
-    "station_lat",
     "kp_safe",
     "ap_safe",
     "hp60_safe",
