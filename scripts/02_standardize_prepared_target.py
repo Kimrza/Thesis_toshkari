@@ -93,7 +93,10 @@ from src.data.experiment_registry import (  # noqa: E402
     record_abort_honestly,
 )
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
-from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
+from src.data.fixture_manifest import (  # noqa: E402
+    load_fixture_scope,
+    release_root_for,
+)
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.prepared import (  # noqa: E402
     LINEAGE_CAVEAT_FIELD,
@@ -614,10 +617,13 @@ def _publish_target_release(
     fixture_scope_id: str | None,
 ) -> dict[str, Any]:
     """Publish the standardized target as the release 05/06/07 read by manifest and hash."""
-    release_root = Path(
-        snapshot.resolved_roots.get(
-            "release_root", snapshot.resolved_roots["artifacts"] / "releases"
-        )
+    # Owner ruling 2026-09-23: ONE resolver for the release root — a fixture run
+    # releases under the walking-skeleton root, a governed run under
+    # artifacts/releases/, and the directory NAMES inside it are untouched.
+    release_root = release_root_for(
+        Path(snapshot.resolved_roots["workspace"]),
+        artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
+        fixture_id=fixture_scope_id,
     )
     directory = release_root / TARGET_RELEASE_DIR
     manifest_path = directory / MANIFEST_NAME
@@ -688,10 +694,13 @@ def _run_standardize(entry: Mapping[str, Any]) -> dict[str, Any]:
     # Q2 = A: refuse to RUN while qc_operations is TBD — before any output write.
     assert_qc_operations_frozen(snapshot.data)
 
-    release_root = Path(
-        snapshot.resolved_roots.get(
-            "release_root", snapshot.resolved_roots["artifacts"] / "releases"
-        )
+    # Owner ruling 2026-09-23: ONE resolver for the release root — a fixture run
+    # releases under the walking-skeleton root, a governed run under
+    # artifacts/releases/, and the directory NAMES inside it are untouched.
+    release_root = release_root_for(
+        Path(snapshot.resolved_roots["workspace"]),
+        artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
+        fixture_id=entry.get("fixture_scope_id"),
     )
     provider_rows = load_released_provider_rows(release_root)
     result = standardize_hourly_target(

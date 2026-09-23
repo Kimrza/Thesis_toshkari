@@ -109,6 +109,7 @@ __all__ = [
     "SIBLING_HASH_NAME",
     "ARTIFACT_MANIFEST_NAME",
     "WALKING_SKELETON_ROOT",
+    "release_root_for",
     "FIXTURES_ROOT",
     "MANIFEST_STATUSES",
     "CANDIDATE",
@@ -572,6 +573,34 @@ def fixture_root_for(workspace: Path, fixture_id: str) -> Path:
     """`<workspace>/artifacts/walking_skeleton/<fixture_id>/` (TE 15.4)."""
     _require_fixture_id(fixture_id, resource="fixture_id")
     return Path(workspace) / WALKING_SKELETON_ROOT / fixture_id
+
+
+def release_root_for(
+    workspace: Path, *, artifacts_root: Path, fixture_id: str | None
+) -> Path:
+    """THE one resolution of a run's release root (owner ruling, 2026-09-23).
+
+    A GOVERNED run releases under `<artifacts>/releases/`. A FIXTURE run releases under
+    `<workspace>/artifacts/walking_skeleton/<fixture_id>/releases/` — the same quarantine
+    `CR-2026-09-13-04-FIXTURE-WINDOW` already applies to the stage-04 audit artifact, now
+    extended to the releases beside it (TC-03f: fixture output is plumbing evidence, never
+    governed evidence).
+
+    **The directory NAMES inside the root are untouched**, and deliberately so: `05`, `06`
+    and `07` resolve `<release root>/phase1_hourly_target/release_manifest.json` literally,
+    and each driver release's directory name IS its D-63 producing-artifact identity, which
+    `build_features` matches `producing_artifact` against. Renaming per run would break the
+    check that makes provenance work, so the ROOT carries the distinction and the name
+    carries the identity. Every producer and every consumer resolves through this function,
+    so a fixture run cannot occupy a governed citation and a governed run cannot read a
+    fixture's release: before this existed, a seven-day fixture run published to the
+    governed path and a later full-year run would have met R-13's different-content refusal
+    — the right refusal reporting a collision that should not have been possible.
+    """
+    if fixture_id is None:
+        return Path(artifacts_root) / "releases"
+    _require_fixture_id(fixture_id, resource="fixture_id")
+    return fixture_root_for(workspace, fixture_id) / "releases"
 
 
 def _require_fixture_id(fixture_id: object, *, resource: str) -> str:

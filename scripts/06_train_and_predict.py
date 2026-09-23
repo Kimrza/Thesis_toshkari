@@ -136,6 +136,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     build_apparatus_partitions,
     load_fixture_scope,
     read_embargo_hours,
+    release_root_for,
 )
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
@@ -353,6 +354,15 @@ def _stage_entry(
         "determinism": determinism,
         "lock": lock,
         "receipts_gate": receipts_gate,
+        # The fixture scope this run is bound to, or None for a governed run. Carried on
+        # the entry because it selects the RELEASE ROOT this stage reads from (owner ruling
+        # 2026-09-23): a fixture run reads the fixture's own releases, a governed run reads
+        # the governed ones, and neither can reach the other's.
+        "fixture_scope_id": (
+            load_fixture_scope(fixture_manifest).fixture_id
+            if fixture_manifest is not None
+            else None
+        ),
     }
 
 
@@ -413,14 +423,22 @@ def _registry_row(
 # =======================================================================================
 
 
-def _load_target_by_manifest(snapshot: Any) -> Any:
+def _load_target_by_manifest(snapshot: Any, *, fixture_scope_id: str | None) -> Any:
     """The released Phase 1 hourly target, read BY MANIFEST from the release root.
 
     An upstream unit's artifact (`target-standardization`). A missing release refuses; and the
     loader itself is reached only after every governed value upstream is frozen -- none is
     today -- so this stops here rather than defaulting a reader (TE 18.3), exactly as `05` does.
     """
-    release_root = Path(snapshot.resolved_roots.get("release_root", ""))
+    # Owner ruling 2026-09-23: ONE resolver for the release root. On a fixture run the
+    # releases live under the walking-skeleton root, so this stage reads the fixture's
+    # own releases and never a governed citation (and vice versa). The directory name
+    # below is unchanged: it is the contract three stages resolve literally.
+    release_root = release_root_for(
+        Path(snapshot.resolved_roots["workspace"]),
+        artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
+        fixture_id=fixture_scope_id,
+    )
     manifest = release_root / "phase1_hourly_target" / "release_manifest.json"
     if not manifest.is_file():
         raise IntegrityError(
@@ -969,7 +987,7 @@ def _run_fixture_scale(
 
     partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
     bundle_root = _fixture_bundle_root(snapshot, args)  # 05's apparatus manifest, by name
-    fixture_target = _load_target_by_manifest(snapshot)  # the fixture-scale released target
+    fixture_target = _load_target_by_manifest(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))  # the fixture-scale released target
     out_root = workspace / args.predictions_out  # deterministic: no per-run segment (Rec 4)
 
     written: list[str] = []
@@ -1079,7 +1097,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     # 2. Inputs by manifest -- refuse honestly while none exists.
     partitions = build_partitions(snapshot)
     bundle_root = _bundle_root(snapshot, args)
-    released_target = _load_target_by_manifest(snapshot)  # January–November; never DEC's
+    released_target = _load_target_by_manifest(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))  # January–November; never DEC's
     out_root = workspace / args.predictions_out / run_id
     models_root = workspace / args.fitted_models_root
 

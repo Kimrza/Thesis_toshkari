@@ -80,6 +80,7 @@ import argparse
 import csv
 import datetime as dt
 import json
+import math
 import re
 import sys
 import uuid
@@ -111,6 +112,7 @@ from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
     WALKING_SKELETON_ROOT,
     load_fixture_scope,
+    release_root_for,
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.prepared import resolve_target_identity  # noqa: E402
@@ -122,6 +124,7 @@ from src.data.release import (  # noqa: E402
     write_release,
 )
 from src.external.spaceweather import write_driver_manifest  # noqa: E402
+from src.features.availability import read_availability_lags  # noqa: E402
 
 STAGE = "external-products"
 PHASE_DEFAULT = 1
@@ -1120,6 +1123,7 @@ def _driver_release_manifest(
     absent: int,
     output_files: Mapping[str, str],
     fixture_scope_id: str | None,
+    covered: tuple[dt.date, dt.date],
 ) -> dict[str, Any]:
     """The thirteen caller-supplied TE 13.3 fields for one driver release."""
     identity = resolve_target_identity(snapshot.data)
@@ -1175,7 +1179,12 @@ def _driver_release_manifest(
         # it from the directory name.
         "producing_artifact": spec["artifact"],
         "release_status": spec["release_status"],
+        # Two windows, deliberately distinct: `window` is what this run SERVES (the audit
+        # window), `covered_window` is what the release CARRIES — wider by exactly the
+        # history the frozen feature contract requires (the 81-day trailing window and the
+        # safe lags), so a feature at the first served origin has its constituents.
         "window": {"start": window[0].isoformat(), "end": window[1].isoformat()},
+        "covered_window": {"start": covered[0].isoformat(), "end": covered[1].isoformat()},
         # TC-03f, stamped ON the release rather than left to the directory name. A fixture
         # run publishes the fixture's window -- seven days, not a year -- under the same
         # governed citation a full-year run would use, and a reader who meets this manifest
@@ -1189,6 +1198,41 @@ def _driver_release_manifest(
     }
 
 
+def _history_extended_window(
+    snapshot: Any, *, window: tuple[dt.date, dt.date], rows_for: str
+) -> tuple[dt.date, dt.date]:
+    """The window a driver release must COVER, which is wider than the window it SERVES.
+
+    A feature computed at an origin inside the declared window reads driver history from
+    BEFORE it: `f107_81_trailing` averages the 81 days ending at the safe-lagged day, and a
+    `*_safe` series selects the latest interval whose end plus its safe lag is at or before
+    the origin. A release bounded to the served window alone cannot answer at its own first
+    origins — the 81-day mean would have seven days of constituents, and the first hours of
+    a fixture would silently carry no driver value at all and be dropped.
+
+    The extension is READ from the frozen contract (`configs/features.yaml`:
+    `availability_lags.<feature>.window.days` and `.safe_lag_hours`), never chosen here: it
+    is the history the feature contract already requires, so covering it is arithmetic, not
+    a scientific decision. One day is added beyond the lag so a lag expressed in hours
+    cannot leave the first origin of a day unanswerable.
+    """
+    lags = read_availability_lags(snapshot)
+    days_back = 0
+    for feature, entry in lags.items():
+        series = "f107" if feature.startswith("f107") else feature.split("_")[0]
+        if series != rows_for.split("_")[0]:
+            continue
+        window_block = entry.get("window")
+        if isinstance(window_block, Mapping) and "days" in window_block:
+            days_back = max(days_back, int(window_block["days"]) - 1)
+        lag_hours = entry.get("safe_lag_hours")
+        if lag_hours is not None and not isinstance(lag_hours, bool):
+            days_back = max(days_back, math.ceil(float(lag_hours) / 24.0))
+        if entry.get("availability_rule") is not None:
+            days_back = max(days_back, 1)  # D-25: the previous day's median
+    return (window[0] - dt.timedelta(days=days_back + 1), window[1])
+
+
 def _publish_driver_releases(
     *, entry: Mapping[str, Any], evidence_root: Path, gfz_root: Path
 ) -> list[dict[str, Any]]:
@@ -1198,10 +1242,13 @@ def _publish_driver_releases(
     snapshot = entry["snapshot"]
     window: tuple[dt.date, dt.date] = entry["audit_window"]
     workspace = Path(snapshot.resolved_roots["workspace"])
-    release_root = Path(
-        snapshot.resolved_roots.get(
-            "release_root", snapshot.resolved_roots["artifacts"] / "releases"
-        )
+    # Owner ruling 2026-09-23: ONE resolver for the release root — a fixture run
+    # releases under the walking-skeleton root, a governed run under
+    # artifacts/releases/, and the directory NAMES inside it are untouched.
+    release_root = release_root_for(
+        workspace,
+        artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
+        fixture_id=entry.get("fixture_scope_id"),
     )
     known = set(DRIVER_PRODUCERS.values())
     published: list[dict[str, Any]] = []
@@ -1220,6 +1267,9 @@ def _publish_driver_releases(
         absent = 0
         extra: dict[str, Any] = {}
         sources: list[Path] = []
+        covered = _history_extended_window(
+            snapshot, window=window, rows_for=str(spec["rows_for"])
+        )
         if spec["rows_for"] == "kp_ap":
             source = gfz_root / "Kp_now2022.wdc"
             if not source.is_file():
@@ -1232,7 +1282,7 @@ def _publish_driver_releases(
                 )
                 continue
             rows, absent = _interval_rows(
-                parse_kp_ap_wdc(source), window=window, cadence_hours=3, value_names=("kp", "ap")
+                parse_kp_ap_wdc(source), window=covered, cadence_hours=3, value_names=("kp", "ap")
             )
             sources = [source]
         elif spec["rows_for"] == "hp60_ap60":
@@ -1247,7 +1297,7 @@ def _publish_driver_releases(
                 )
                 continue
             rows, absent = _interval_rows(
-                parse_hpo_v2(source), window=window, cadence_hours=1, value_names=("hp60", "ap60")
+                parse_hpo_v2(source), window=covered, cadence_hours=1, value_names=("hp60", "ap60")
             )
             sources = [source]
         elif spec["rows_for"] == "f107":
@@ -1261,11 +1311,11 @@ def _publish_driver_releases(
                     }
                 )
                 continue
-            rows, extra = _f107_rows(source, window=window)
+            rows, extra = _f107_rows(source, window=covered)
             sources = [source]
         else:
             kyoto = evidence_root / "kyoto_dst"
-            rows, absent = _dst_rows(kyoto, window=window)
+            rows, absent = _dst_rows(kyoto, window=covered)
             sources = sorted(
                 path
                 for path in kyoto.glob("dst_provisional_*.html")
@@ -1310,6 +1360,7 @@ def _publish_driver_releases(
             source_files=source_files,
             rows=rows,
             absent=absent,
+            covered=covered,
             output_files={rows_path.name: sha256_of_file(rows_path)},
             fixture_scope_id=entry.get("fixture_scope_id"),
         )

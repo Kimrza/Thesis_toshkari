@@ -131,9 +131,30 @@ feature_dictionary:
     normalization: "train_only_standardize"
   # The TRAILING 81-day mean. A centered mean is prohibited — it uses future days and is a
   # defect, not a fallback (TE §6.2; project.md § Forbidden).
+  #
+  # `source_series` CORRECTED 2026-09-23 on the project decision owner's ruling, under
+  # D-60's existing scope (no new D-number; no scientific value or rule changes). It read
+  # `f107_daily_median`, the SAME key `f107_safe` above declares — and `build_features`
+  # resolves a driver field's values by `source_series`
+  # (`src/features/build.py:978`, assigned per field at `:1038`), so one key returning one
+  # frame would have given BOTH fields identical values and the 81-day mean would never
+  # have been computed at all. The availability limb does recompute the mean
+  # (`assert_anchor_recomputed`), but it checks the availability ROWS, not the feature
+  # COLUMN, and the column's provenance stamp is identical either way — both rows
+  # legitimately come from `nrcan_f107_observed_daily_median_2022` (D-63). Naming the
+  # trailing field's own series is what lets the loader hand it the trailing series it
+  # already computes for the anchor limb.
+  #
+  # Everything else D-60 froze is unchanged and deliberately so: the dictionary_row id, the
+  # normalization, the producing artifact (D-63), the availability rule and the window block
+  # below (whose `source` stays `f107_daily_median` — the DAILY values the 81-day mean is
+  # recomputed from, which is a different thing from the series this field's values come
+  # from). Counts derived and printed before and after the edit: **21 fields** and the
+  # same set of `dictionary_row` values, both unchanged — this edit renames one
+  # `source_series` string and nothing else.
   f107_81_trailing:
     dictionary_row: "f107_81_trailing"
-    source_series: "f107_daily_median"
+    source_series: "f107_81_trailing_mean"
     normalization: "train_only_standardize"
 availability_lags:
   # Transcribed 2026-09-19 (CR-2026-09-19-SCI-DECISIONS §6/§9, item 6 of the owner's

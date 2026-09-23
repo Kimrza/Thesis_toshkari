@@ -104,7 +104,10 @@ from src.data.experiment_registry import (  # noqa: E402
     record_abort_honestly,
 )
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
-from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
+from src.data.fixture_manifest import (  # noqa: E402
+    load_fixture_scope,
+    release_root_for,
+)
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.prepared import (  # noqa: E402
     D16_STATISTIC,
@@ -617,7 +620,14 @@ def _write_fixture_release(
     with an earlier release: R-13 refuses a directory that already holds one, and TE 13.3
     requires a NEW version rather than an overwrite.
     """
-    release_root = Path(snapshot.resolved_roots["artifacts"]) / "releases"
+    # Owner ruling 2026-09-23: a fixture run releases under the walking-skeleton root,
+    # a governed run under artifacts/releases/. ONE resolver, so a fixture release can
+    # never occupy a governed citation and a governed run can never read a fixture's.
+    release_root = release_root_for(
+        workspace,
+        artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
+        fixture_id=scope.fixture_id,
+    )
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     directory = release_root / f"{scope.fixture_id}_{stamp}"
     directory.mkdir(parents=True, exist_ok=False)

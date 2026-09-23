@@ -101,6 +101,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.data.acquisition import (  # noqa: E402
+    count_gaps,
+    store_gaps_as_nan,
+)
 from src.data.config import (  # noqa: E402
     IntegrityError,
     LockedTestError,
@@ -118,9 +122,10 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
-from src.data.acquisition import (  # noqa: E402
-    count_gaps,
-    store_gaps_as_nan,
+from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_manifest import (  # noqa: E402
+    load_fixture_scope,
+    release_root_for,
 )
 from src.data.inventory import (  # noqa: E402
     AUDIT_MONTHS,
@@ -139,8 +144,6 @@ from src.data.inventory import (  # noqa: E402
     validate_schema,
     write_source_inventory,
 )
-from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
-from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.locked_test import RESTRICTED_ROOT  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.prepared import resolve_target_identity  # noqa: E402
@@ -608,10 +611,13 @@ def _run_inventory(entry: Mapping[str, Any]) -> dict[str, Any]:
     snapshot = entry["snapshot"]
     stamps = _resolve_stamps(snapshot)
     workspace = Path(snapshot.resolved_roots["workspace"])
-    release_root = Path(
-        snapshot.resolved_roots.get(
-            "release_root", snapshot.resolved_roots["artifacts"] / "releases"
-        )
+    # Owner ruling 2026-09-23: a fixture run releases under the walking-skeleton root,
+    # a governed run under artifacts/releases/. ONE resolver, so a fixture release can
+    # never occupy a governed citation and a governed run can never read a fixture's.
+    release_root = release_root_for(
+        workspace,
+        artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
+        fixture_id=entry.get("fixture_scope_id"),
     )
     out_path = Path(snapshot.resolved_roots["artifacts"]) / "inventory" / "source_inventory.json"
 

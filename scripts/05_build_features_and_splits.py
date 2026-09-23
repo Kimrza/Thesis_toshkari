@@ -113,6 +113,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     build_apparatus_partitions,
     load_fixture_scope,
     read_embargo_hours,
+    release_root_for,
 )
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
@@ -336,6 +337,15 @@ def _stage_entry(
         "determinism": determinism,
         "lock": lock,
         "receipts_gate": receipts_gate,
+        # The fixture scope this run is bound to, or None for a governed run. Carried on
+        # the entry because it selects the RELEASE ROOT this stage reads from (owner ruling
+        # 2026-09-23): a fixture run reads the fixture's own releases, a governed run reads
+        # the governed ones, and neither can reach the other's.
+        "fixture_scope_id": (
+            load_fixture_scope(fixture_manifest).fixture_id
+            if fixture_manifest is not None
+            else None
+        ),
     }
 
 
@@ -390,13 +400,23 @@ def _registry_row(
 # =======================================================================================
 
 
-def _load_release_inputs(snapshot: Any) -> tuple[Any, Mapping[str, Any]]:
+def _load_release_inputs(
+    snapshot: Any, *, fixture_scope_id: str | None
+) -> tuple[Any, Mapping[str, Any]]:
     """The target frame and the driver series, read BY MANIFEST from the release root.
 
     Both are upstream units' artifacts (`target-standardization`, `external-products`).
     A missing release refuses: this script never constructs a target or a driver itself.
     """
-    release_root = Path(snapshot.resolved_roots.get("release_root", ""))
+    # Owner ruling 2026-09-23: ONE resolver for the release root. On a fixture run the
+    # releases live under the walking-skeleton root, so this stage reads the fixture's
+    # own releases and never a governed citation (and vice versa). The directory name
+    # below is unchanged: it is the contract three stages resolve literally.
+    release_root = release_root_for(
+        Path(snapshot.resolved_roots["workspace"]),
+        artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
+        fixture_id=fixture_scope_id,
+    )
     target_manifest = release_root / "phase1_hourly_target" / "release_manifest.json"
     if not target_manifest.is_file():
         raise IntegrityError(
@@ -536,7 +556,7 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
     stamp_base = stamp_for_manifest(scope)
 
-    target, drivers = _load_release_inputs(snapshot)  # refuses honestly today (TE 18.3)
+    target, drivers = _load_release_inputs(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))  # refuses honestly today (TE 18.3)
     matrix = build_availability_matrix(snapshot, drivers=drivers)
     assert_lags_safe(matrix)
     registry = load_registry(snapshot)
@@ -646,7 +666,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     partitions = build_partitions(snapshot)
 
     # 3. Inputs by manifest, the availability matrix and its three limbs.
-    target, drivers = _load_release_inputs(snapshot)
+    target, drivers = _load_release_inputs(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))
     matrix = build_availability_matrix(snapshot, drivers=drivers)
     assert_lags_safe(matrix)
     registry = load_registry(snapshot)

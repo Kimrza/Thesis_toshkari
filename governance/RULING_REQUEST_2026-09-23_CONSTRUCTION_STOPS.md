@@ -181,3 +181,107 @@ existing fixture releases, in one pass, with the consumers updated together so n
 intermediate state exists where a stage looks in the wrong place.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
+
+---
+
+## §3 — STOP (second, same class as §1): `f107_safe`'s series and the trailing window's `source` are one key, and the two consumers need different ROW SHAPES from it
+
+*Raised 2026-09-23, after §1 and §2 were approved and implemented. Found while writing the
+loader §1 unblocked — not by review, but by working out what the two consumers actually
+require from each key.*
+
+### What was found
+
+§1 fixed the two F10.7 **fields** sharing one `source_series`. One layer down, the same key
+is still doing two jobs — this time for two *consumers* that need incompatible row shapes:
+
+| Consumer | Reads | Needs from `f107_daily_median` |
+|---|---|---|
+| `build_features` (for `f107_safe`) | `_hourly_series` — requires `interval_start_utc` + `value` per row, refuses a row without them (`build.py:674`) | a value at **every hourly epoch** of the served window (168 rows for the fixture) |
+| `build_availability_matrix` (trailing limb) | `_daily_values` — requires `day` + `value` per row (`availability.py:636`) | a value for **every day of the 81-day window** (88 days for the fixture) |
+
+Both resolve the same key: `feature_dictionary.f107_safe.source_series` and
+`availability_lags.f107_81_trailing.window.source` are both `"f107_daily_median"` (printed
+from the config). One frame cannot be both without lying about one of them:
+
+* **per-day rows** (88 rows, one per covered day) satisfy `_daily_values`, but give
+  `f107_safe` a value only at each day's 00:00 — and the frozen carry-forward bound is
+  **3 hours** (TC-09), so hours 04:00–23:00 would carry no driver value and every such row
+  would be dropped from the feature matrix. Five sixths of the fixture's rows, silently.
+* **per-epoch rows** (168 rows) satisfy `f107_safe`, but then `_daily_values` sees only the
+  ~7 distinct eligible days, and `trailing_mean` refuses — correctly — that a
+  81-day window has 7 constituents (TC-20: a missing window day is never filled).
+
+### Why I stopped rather than choosing
+
+Either fix edits a field D-60/D-47 froze, exactly as §1 did, and the choice of *which*
+field to rename is a contract decision rather than an implementation detail. I have not
+touched either.
+
+### The two ways out
+
+1. **Give `f107_safe` its own `source_series`** — e.g. `f107_safe_at_origin` — leaving
+   `f107_daily_median` to mean what its name says and what D-21 defines: the daily series,
+   which is exactly what `window.source` needs. *Recommended:* the daily median is the
+   thing D-21 froze and the thing the trailing window recomputes from, so the plain name
+   should keep the plain meaning; the per-origin selection is the derived object and should
+   carry the qualified name. Symmetrical with §1, where the derived (trailing) object took
+   the qualified name and the source kept the plain one.
+2. **Repoint `window.source`** to a new daily key — e.g. `f107_daily_median_by_day` —
+   leaving `f107_safe` on the plain name. Same one-line cost, but it names the *source* as
+   the special case and leaves two keys that both sound like the daily series, which is the
+   confusion this pair has already produced twice.
+
+Under either, nothing scientific moves: D-21's median rule, D-25's availability rule,
+D-47's tolerance and input bound, the 81-day window, the normalizations and the D-63
+producing artifact are all untouched, and the field and row counts stay at 21 and their
+current set.
+
+**Recommendation: option 1**, adopted under D-60's existing scope as §1 was, with no new
+D-number unless you want one.
+
+### What is already done and works, so you can see where this sits
+
+Both approved items are implemented, executed and committed:
+
+* **§2, the release-root split**: every producer and consumer now resolves through one
+  `release_root_for`. A fixture run writes and reads
+  `artifacts/walking_skeleton/<fixture_id>/releases/`; a governed run uses
+  `artifacts/releases/`. Directory names and D-63 identities are untouched. Verified by
+  running the ladder: stage 05's refusal now names the fixture path.
+* **§1, the dictionary**: `f107_81_trailing` carries `source_series: f107_81_trailing_mean`.
+  21 fields and the same `dictionary_row` set, derived and printed before and after.
+* **A consequence of the frozen contract, implemented and recorded rather than decided**:
+  a driver release must CARRY more than it SERVES, because a feature at the first served
+  origin reads history before it. Each release now covers its served window extended
+  backwards by exactly what `configs/features.yaml` declares — measured on the fixture:
+  F10.7 **2022-08-12..11-07 (88 days = the 81-day window + the 7 served days)**, Kp/ap and
+  Hp60/ap60 two days, Dst one. The manifests carry `window` (served) and `covered_window`
+  (carried) as distinct fields. The numbers come from the frozen 81 and the frozen lags;
+  none was chosen here.
+
+**The loader itself is not written.** Stage 05's stub is untouched, so there is no
+half-built path anywhere.
+
+**Decision required — Approve / Reject / Modify / Postpone.**
+
+---
+
+## §4 — Disposition question: five pre-ruling fixture releases still sit under the governed root
+
+`artifacts/releases/` currently holds `plumbing_7day_<stamp>/` ×5 plus
+`phase1_hourly_target/` and the four driver directories — all published by fixture runs
+*before* §2's ruling, all committed. §2 stops any new one appearing there, but does not
+move the existing ones.
+
+I deleted them while re-running, then **restored them from git**: removing committed
+release artifacts is a destructive act on published evidence and is yours to authorise, not
+mine to tidy. Three options: leave them as pre-ruling historical artifacts (a reader sees
+duplicates of the current fixture releases, which the manifests' `evidence_class` already
+marks as `fixture_plumbing`); `git mv` them under the fixture root, preserving bytes
+exactly; or remove them, since the current fixture run reproduces equivalent content.
+
+**No urgency and no correctness consequence** — nothing reads them any more. Recorded so it
+is a decision rather than a drift.
+
+**Decision required — Approve / Reject / Modify / Postpone.**

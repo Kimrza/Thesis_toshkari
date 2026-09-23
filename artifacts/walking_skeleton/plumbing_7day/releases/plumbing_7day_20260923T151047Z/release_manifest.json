@@ -1,0 +1,103 @@
+{
+  "change_record_id": "CR-2026-09-21-RELEASE-OPTION-A",
+  "content_hash": "ed246781688ca77e4a2b4fe2804d96f4f873693fd68eeee66e92cabac148d135",
+  "created_at_utc": "2026-09-23T15:10:47.476392+00:00",
+  "dataset_version": "ed246781688c",
+  "exclusions_qc_summary": [
+    {
+      "count": 0,
+      "reason": "records outside the fixture's cited window, excluded on RECORD DATES (Option B; never on the folder a record was filed under)"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_00_precedes_splits_masks_features"
+  ],
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_00_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_00_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "prepared_vtec_records.csv": "fac835fca6b4d928cee468eecca452c0cfdfa4640342d0aafb321788a9f7899a"
+  },
+  "processing": {
+    "hourly_aggregation": "median",
+    "parameters": [
+      "ut1_unix",
+      "gdlat",
+      "glon",
+      "tec",
+      "dtec"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "8000/3500",
+    "selected_cell_bounds": {
+      "BSHM": {
+        "cell_gdlat": 32,
+        "cell_glon": 35,
+        "cell_lat_bounds": "[32, 33)",
+        "cell_lon_bounds": "[35, 36)",
+        "resolved": true,
+        "rule": "floor-half-open-d1"
+      }
+    },
+    "station_coordinate_to_cell_rule": "floor-half-open-d1",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "row_counts": {
+    "by_month": {
+      "2022-11": 1810
+    },
+    "by_qc_stage": {
+      "pre_documented_qc": 1810
+    },
+    "by_split": {
+      "unsplit_stage_00": 1810
+    },
+    "by_station": {
+      "BSHM": 1810
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "D-6 (Madrigal / MIT Haystack citation and acknowledgement)",
+      "filename": "madrigal_coverage_monthly.csv",
+      "location_date": "audit_evidence_2022-11 2022-11-01..2022-11-07",
+      "provider": "madrigal_derived_artifact",
+      "retrieval_date": "2026-08-12T20:50:37.907738+00:00",
+      "sha256": "ab14a2c23868dd6d1402e3903d8d665a7250d525d27efb4952aed54be46af2a8"
+    },
+    {
+      "citation": "D-6 (Madrigal / MIT Haystack citation and acknowledgement)",
+      "filename": "madrigal_coverage_raw_records.csv",
+      "location_date": "audit_evidence_2022-11 2022-11-01..2022-11-07",
+      "provider": "madrigal_derived_artifact",
+      "retrieval_date": "2026-08-12T20:50:37.907738+00:00",
+      "sha256": "570d1be5e22191bc3248873e711610b580a77ffb5dcbf7988eca92011e7baff9"
+    },
+    {
+      "citation": "D-6 (Madrigal / MIT Haystack citation and acknowledgement)",
+      "filename": "madrigal_coverage_summary.csv",
+      "location_date": "audit_evidence_2022-11 2022-11-01..2022-11-07",
+      "provider": "madrigal_derived_artifact",
+      "retrieval_date": "2026-08-12T20:50:37.907738+00:00",
+      "sha256": "02269afef517d719f9696625ca5aa0764466e6fc1c732d8836a7b792aa49e370"
+    },
+    {
+      "citation": "D-6 (Madrigal / MIT Haystack citation and acknowledgement)",
+      "filename": "request_manifest.json",
+      "location_date": "audit_evidence_2022-11 2022-11-01..2022-11-07",
+      "provider": "madrigal_derived_artifact",
+      "retrieval_date": "2026-08-12T20:50:37.907738+00:00",
+      "sha256": "ba13717f6e3e56203c07f7cab491edfedf64f6a6ea2530ed3af106340e12825e"
+    }
+  ],
+  "source_manifest_id": "audit_evidence_2022-11:sha256_manifest.json",
+  "units": {
+    "dtec": "TECU",
+    "tec": "TECU",
+    "ut1_unix": "s"
+  }
+}
