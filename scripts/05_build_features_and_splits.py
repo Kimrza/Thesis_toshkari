@@ -118,6 +118,7 @@ from src.data.fixture_manifest import (  # noqa: E402
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.registry import load_registry  # noqa: E402
+from src.data.release import verify_release  # noqa: E402
 from src.data.splits import (  # noqa: E402
     FITTING_PARTITION_IDS,
     LOCKED_ID,
@@ -134,8 +135,19 @@ from src.data.splits import (  # noqa: E402
     training_range,
     validation_month_range,
 )
+from src.external.spaceweather import (  # noqa: E402
+    SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG,
+    availability_rows_from_selection,
+    select_lagged_series,
+    trailing_mean,
+)
 from src.features._frames import records_of  # noqa: E402
-from src.features.availability import assert_lags_safe, build_availability_matrix  # noqa: E402
+from src.features.availability import (  # noqa: E402
+    assert_lags_safe,
+    build_availability_matrix,
+    latest_eligible_window_end,
+    read_availability_lags,
+)
 from src.features.build import (  # noqa: E402
     SECTION_6_2_ROWS,
     FrameSpec,
@@ -395,6 +407,32 @@ def _registry_row(
     return row
 
 
+#: The released target's producing artifact, as `configs/features.yaml`'s permitted-producer
+#: list names it for every target-derived row (D-35).
+TARGET_PRODUCER: str = "phase1_hourly_target"
+
+#: Each driver FEATURE's `source_series`, read from the frozen dictionary rather than
+#: restated, so this loader cannot drift from the contract `build_features` resolves.
+#: (Both F10.7 fields were corrected on 2026-09-23 to name their own series: see
+#: `configs/features.yaml` and RULING_REQUEST_2026-09-23_CONSTRUCTION_STOPS §1 and §3.)
+_SERIES_OF_FEATURE: dict[str, str] = {
+    "kp_safe": "kp",
+    "ap_safe": "ap",
+    "hp60_safe": "hp60",
+    "ap60_safe": "ap60",
+    "f107_safe": "f107_safe_at_origin",
+    "f107_81_trailing": "f107_81_trailing_mean",
+}
+
+#: Which D-63 release each provider series is parsed from.
+_ARTIFACT_OF_SERIES: dict[str, str] = {
+    "kp": "gfz_kp_ap_nowcast_2022",
+    "ap": "gfz_kp_ap_nowcast_2022",
+    "hp60": "gfz_hp60ap60_v2_2022",
+    "ap60": "gfz_hp60ap60_v2_2022",
+}
+
+
 # =======================================================================================
 # The run: refusals first, then the three-call sequence per fitting-capable partition
 # =======================================================================================
@@ -424,13 +462,239 @@ def _load_release_inputs(
             "no released Phase 1 hourly target manifest; features are built from a released "
             "target read by manifest and hash, never from a bare path (TE 13.3)",
         )
-    raise IntegrityError(
-        target_manifest,
-        "reading the released target and driver products into frames is reached only after "
-        "the permitted-producer list, the partitions and the availability lags are frozen; "
-        "none is today, so this path is unreachable and stops here rather than defaulting a "
-        "loader (TE 18.3)",
+    target = _released_frame(target_manifest, producing_artifact=TARGET_PRODUCER)
+    epochs = _target_epochs(target)
+    drivers = _load_driver_frames(snapshot, release_root=release_root, epochs=epochs)
+    return target, drivers
+
+
+# =======================================================================================
+# The release loader (owner rulings of 2026-09-23; D-61's option A at 02->05 and 04->05)
+# =======================================================================================
+#
+# WHAT THIS READS AND WHY IT IS SHAPED THIS WAY. Two consumers key `drivers` DIFFERENTLY,
+# and both keyings are supplied:
+#
+#   * `build_availability_matrix` keys by FEATURE (`kp_safe` ... `f107_81_trailing`) and
+#     reads availability rows -- `forecast_origin`, `observation_timestamp`,
+#     `publication_timestamp`, `release_status` -- plus `anchor_day` and `mean_value` for
+#     the trailing feature, which its third limb recomputes against (D-47);
+#   * `build_features` keys by `source_series` (`kp`, `ap`, `hp60`, `ap60`,
+#     `f107_safe_at_origin`, `f107_81_trailing_mean`) and reads `interval_start_utc` and
+#     `value` per row.
+#
+# `f107_daily_median` is supplied as the PLAIN DAILY SERIES (one row per covered day,
+# carrying `day` and `value`): it is the window source the trailing limb recomputes from,
+# and after the 2026-09-23 rulings no dictionary field names it, so nothing asks it to be
+# hourly as well.
+#
+# NO GOVERNED RULE IS RE-IMPLEMENTED HERE. The safe lag is applied ONCE, by
+# `spaceweather.select_lagged_series` (D-43/D-44); the eligible observation day under D-25
+# comes from `availability.latest_eligible_window_end`, the same function the anchor limb
+# checks against; the 81-day mean comes from `spaceweather.trailing_mean`, which is
+# trailing by construction. A second implementation of any of them would be the drift this
+# project has already paid for once (`nfr-design` c58).
+
+
+def _released_frame(manifest_path: Path, *, producing_artifact: str) -> Any:
+    """Read ONE released CSV into a `RecordFrame`, by manifest and hash, never by path.
+
+    `verify_release` re-checks the manifest contract and every recorded output hash before
+    a byte is parsed (R-44), so a release whose bytes changed under it refuses here rather
+    than flowing into a feature matrix. `producing_artifact` travels in the frame's attrs
+    because it is the producer half of the (row, producer) pair `build_features` resolves
+    against the permitted-producer list (SD-F-01; D-63 names the identities).
+    """
+    problems = verify_release(manifest_path)
+    if problems:
+        raise IntegrityError(
+            manifest_path,
+            "the release does not verify, so nothing is read from it: " + "; ".join(problems),
+        )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    outputs = sorted(
+        name for name in dict(manifest.get("output_files") or {}) if name.endswith(".csv")
     )
+    if len(outputs) != 1:
+        raise IntegrityError(
+            manifest_path,
+            f"expected exactly one released CSV to read, found {outputs}; a reader that "
+            f"picked one of several would be choosing its data by convention",
+        )
+    with (manifest_path.parent / outputs[0]).open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    frame = RecordFrame(rows)
+    frame.attrs["producing_artifact"] = producing_artifact
+    frame.attrs["dataset_version"] = str(manifest.get("dataset_version", ""))
+    frame.attrs["release_manifest"] = str(manifest_path)
+    return frame
+
+
+def _as_utc_stamp(value: Any, *, resource: str) -> dt.datetime:
+    stamp = dt.datetime.fromisoformat(str(value))
+    if stamp.tzinfo is None:
+        raise IntegrityError(resource, f"{value!r} is not timezone-aware; driver epochs are UTC")
+    return stamp.astimezone(dt.timezone.utc)
+
+
+def _target_epochs(target: Any) -> tuple[dt.datetime, ...]:
+    """The forecast origins the drivers must answer at: the released target's own epochs.
+
+    Taken from the target rather than generated from the window, so a driver series is
+    built for exactly the instants the features are built at -- a generated range would
+    silently answer at epochs the target does not carry.
+    """
+    seen: dict[dt.datetime, None] = {}
+    for index, record in enumerate(target):
+        seen.setdefault(
+            _as_utc_stamp(record["interval_start_utc"], resource=f"target row {index}"), None
+        )
+    return tuple(sorted(seen))
+
+
+def _interval_observations(frame: Any, *, value_column: str) -> list[dict[str, Any]]:
+    """Provider observations as `select_lagged_series` takes them: both boundaries and the
+    value, an absent value kept as `None` so the interval keeps its identity (D-5)."""
+    out: list[dict[str, Any]] = []
+    for index, record in enumerate(frame):
+        raw = record.get(value_column)
+        out.append(
+            {
+                "interval_start": _as_utc_stamp(
+                    record["interval_start_utc"], resource=f"{value_column} row {index}"
+                ),
+                "interval_end": _as_utc_stamp(
+                    record["interval_end_utc"], resource=f"{value_column} row {index}"
+                ),
+                "value": None if raw in (None, "") else float(raw),
+            }
+        )
+    return out
+
+
+def _daily_frame(frame: Any, *, producing_artifact: str) -> Any:
+    """The released F10.7 product as the plain daily series: `day` and `value` per row."""
+    rows = [
+        {
+            "day": record["day_utc"],
+            "value": (
+                None
+                if record["f107_daily_median"] in (None, "")
+                else float(record["f107_daily_median"])
+            ),
+        }
+        for record in frame
+    ]
+    daily = RecordFrame(rows)
+    daily.attrs["producing_artifact"] = producing_artifact
+    return daily
+
+
+def _daily_map(daily: Any) -> dict[dt.date, float]:
+    out: dict[dt.date, float] = {}
+    for record in daily:
+        if record["value"] is None:
+            continue
+        out[dt.date.fromisoformat(str(record["day"]))] = float(record["value"])
+    return out
+
+
+def _load_driver_frames(
+    snapshot: Any, *, release_root: Path, epochs: tuple[dt.datetime, ...]
+) -> dict[str, Any]:
+    """Every driver frame the two consumers need, from the four D-63 releases."""
+    lags = read_availability_lags(snapshot)
+    sources = {
+        "gfz_kp_ap_nowcast_2022": ("kp", "ap"),
+        "gfz_hp60ap60_v2_2022": ("hp60", "ap60"),
+        "nrcan_f107_observed_daily_median_2022": ("f107_daily_median",),
+    }
+    released: dict[str, Any] = {}
+    for artifact in sources:
+        manifest_path = release_root / artifact / "release_manifest.json"
+        if not manifest_path.is_file():
+            raise IntegrityError(
+                manifest_path,
+                f"no released driver product for {artifact!r}; features are built from "
+                f"released driver products read by manifest and hash (R-44), and D-63 names "
+                f"this producing artifact",
+            )
+        released[artifact] = _released_frame(manifest_path, producing_artifact=artifact)
+
+    f107_artifact = "nrcan_f107_observed_daily_median_2022"
+    daily = _daily_frame(released[f107_artifact], producing_artifact=f107_artifact)
+    daily_values = _daily_map(daily)
+    frames: dict[str, Any] = {"f107_daily_median": daily}
+
+    for feature, entry in lags.items():
+        status = str(entry["release_status_required"])
+        rule = entry.get("availability_rule")
+        window = entry.get("window")
+
+        if rule is None:
+            # --- interval-valued *_safe series (Kp/ap, Hp60/ap60) -----------------------
+            series = _SERIES_OF_FEATURE[feature]
+            artifact = _ARTIFACT_OF_SERIES[series]
+            observations = _interval_observations(released[artifact], value_column=series)
+            lag_hours = float(entry["safe_lag_hours"])
+            selection = select_lagged_series(
+                observations, epochs=epochs, safe_lag_hours=lag_hours
+            )
+            selected = RecordFrame(selection)
+            selected.attrs["producing_artifact"] = artifact
+            selected.attrs["observations"] = observations
+            selected.attrs["selection"] = {
+                "rule": SELECTION_RULE_LATEST_COMPLETED_PLUS_LAG,
+                "safe_lag_hours": lag_hours,
+                "lag_reference_instant": str(entry["lag_reference_instant"]),
+            }
+            frames[series] = selected
+            frames[feature] = RecordFrame(
+                availability_rows_from_selection(selection, release_status=status)
+            )
+            continue
+
+        # --- the two rule-bearing F10.7 features ---------------------------------------
+        # D-25's eligible observation day per origin, from THE function the anchor limb
+        # checks against — never a second derivation of the same rule.
+        anchors = {
+            epoch: latest_eligible_window_end(str(rule), epoch, resource=f"{feature} origin")
+            for epoch in epochs
+        }
+        value_rows: list[dict[str, Any]] = []
+        matrix_rows: list[dict[str, Any]] = []
+        for epoch in epochs:
+            anchor = anchors[epoch]
+            if window is None:
+                value = daily_values.get(anchor)
+            else:
+                value = trailing_mean(
+                    daily_values, end_day=anchor, window_days=int(window["days"])
+                )
+            value_rows.append({"interval_start_utc": epoch.isoformat(), "value": value})
+            if value is None:
+                continue
+            row: dict[str, Any] = {
+                "forecast_origin": epoch,
+                # The observation instant is the eligible DAY itself; the rule then places
+                # its availability at 00:00 of the following day, which
+                # `build_availability_matrix` applies (a rule is a floor, never a ceiling).
+                "observation_timestamp": dt.datetime(
+                    anchor.year, anchor.month, anchor.day, tzinfo=dt.timezone.utc
+                ),
+                "publication_timestamp": None,
+                "release_status": status,
+            }
+            if window is not None:
+                row["anchor_day"] = anchor.isoformat()
+                row["mean_value"] = value
+            matrix_rows.append(row)
+        series = _SERIES_OF_FEATURE[feature]
+        values = RecordFrame(value_rows)
+        values.attrs["producing_artifact"] = f107_artifact
+        frames[series] = values
+        frames[feature] = RecordFrame(matrix_rows)
+    return frames
 
 
 def _read_target_artifact(path: Path) -> Any:

@@ -48,25 +48,40 @@ feature_set_id: "FS-P1-2022-v1"
 #   * anything IRI-bearing — the denial mechanism refuses it; WS-10 proves the refusal.
 feature_dictionary:
   # --- target-derived lags (TE §6.2 row `vtec_lag`; exact lags [1,2,3,24], strictly causal) -
+  #
+  # `source_column` ADDED 2026-09-23 while implementing the release loader. `build_features`
+  # reads it for every lag and sequence field (`src/features/build.py:957` and `:959`) and
+  # raised `KeyError: 'source_column'` without it; `load_feature_dictionary` validates the
+  # key only for SUPPORT fields (`build.py:394`), so its absence here was invisible until a
+  # matrix was actually built. This is a required key whose value is UNIQUELY DETERMINED —
+  # D-17's contract defines exactly one VTEC column, `vtec_tecu` (`src/data/prepared.py`
+  # D17_FIELDS) — so filling it transcribes the target contract and chooses nothing. No
+  # scientific value, lag, step count or normalization changes, and the row ids, the field
+  # count (21) and the `dictionary_row` set are unchanged.
   vtec_lag_1h:
     dictionary_row: "vtec_lag"
+    source_column: "vtec_tecu"
     lag_hours: 1
     normalization: "train_only_standardize"
   vtec_lag_2h:
     dictionary_row: "vtec_lag"
+    source_column: "vtec_tecu"
     lag_hours: 2
     normalization: "train_only_standardize"
   vtec_lag_3h:
     dictionary_row: "vtec_lag"
+    source_column: "vtec_tecu"
     lag_hours: 3
     normalization: "train_only_standardize"
   vtec_lag_24h:
     dictionary_row: "vtec_lag"
+    source_column: "vtec_tecu"
     lag_hours: 24
     normalization: "train_only_standardize"
   # --- the LSTM sequence tensor (TE §6.2 states its normalization outright) -----------------
   vtec_seq_24:
     dictionary_row: "vtec_seq_24"
+    source_column: "vtec_tecu"
     sequence_steps: 24
     normalization: "train_only_standardize"
   # --- cyclical time encodings (TE §6.2 Normalization column: "None") -----------------------
@@ -125,9 +140,26 @@ feature_dictionary:
     dictionary_row: "ap60_safe"
     source_series: "ap60"
     normalization: "train_only_standardize"
+  # `source_series` CORRECTED 2026-09-23 on the owner's ruling, under D-60's existing scope
+  # (no new D-number; no scientific value or rule changes), for the same reason as the
+  # trailing row below and one layer deeper. It read `f107_daily_median` — the key
+  # `availability_lags.f107_81_trailing.window.source` also names — and the two consumers
+  # need incompatible ROW SHAPES from it: `build_features` reads a value at every hourly
+  # epoch (`_hourly_series`), while the trailing limb's `_daily_values` reads one value per
+  # day across the whole 81-day window. Per-day rows would leave hours 04:00-23:00 with no
+  # driver value under the frozen 3-hour carry-forward bound (TC-09) and drop those rows;
+  # per-epoch rows would give the 81-day window ~7 constituents and `trailing_mean` would
+  # refuse (TC-20: a missing window day is never filled).
+  #
+  # So the DERIVED object takes the qualified name and the SOURCE keeps the plain one:
+  # `f107_daily_median` remains the daily series D-21 defines and the trailing window
+  # recomputes from, and this field names the per-origin selection it actually consumes.
+  # Unchanged: the dictionary_row id, the D-25 availability rule, the normalization, and
+  # the D-63 producing artifact (`nrcan_f107_observed_daily_median_2022` — one released
+  # product still feeds both F10.7 fields; naming a series is not naming a producer).
   f107_safe:
     dictionary_row: "f107_safe"
-    source_series: "f107_daily_median"
+    source_series: "f107_safe_at_origin"
     normalization: "train_only_standardize"
   # The TRAILING 81-day mean. A centered mean is prohibited — it uses future days and is a
   # defect, not a fallback (TE §6.2; project.md § Forbidden).
