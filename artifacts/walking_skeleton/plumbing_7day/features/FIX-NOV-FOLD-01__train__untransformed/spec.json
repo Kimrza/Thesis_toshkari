@@ -1,0 +1,363 @@
+{
+  "columns": [
+    "vtec_lag_1h",
+    "vtec_lag_2h",
+    "vtec_lag_3h",
+    "vtec_lag_24h",
+    "vtec_seq_24_t-24",
+    "vtec_seq_24_t-23",
+    "vtec_seq_24_t-22",
+    "vtec_seq_24_t-21",
+    "vtec_seq_24_t-20",
+    "vtec_seq_24_t-19",
+    "vtec_seq_24_t-18",
+    "vtec_seq_24_t-17",
+    "vtec_seq_24_t-16",
+    "vtec_seq_24_t-15",
+    "vtec_seq_24_t-14",
+    "vtec_seq_24_t-13",
+    "vtec_seq_24_t-12",
+    "vtec_seq_24_t-11",
+    "vtec_seq_24_t-10",
+    "vtec_seq_24_t-9",
+    "vtec_seq_24_t-8",
+    "vtec_seq_24_t-7",
+    "vtec_seq_24_t-6",
+    "vtec_seq_24_t-5",
+    "vtec_seq_24_t-4",
+    "vtec_seq_24_t-3",
+    "vtec_seq_24_t-2",
+    "vtec_seq_24_t-1",
+    "utc_hour_sin",
+    "utc_hour_cos",
+    "doy_sin",
+    "doy_cos",
+    "lst_sin",
+    "lst_cos",
+    "station_onehot_ARUC",
+    "station_onehot_BSHM",
+    "station_onehot_NICO",
+    "station_lat",
+    "kp_safe",
+    "ap_safe",
+    "hp60_safe",
+    "ap60_safe",
+    "f107_safe",
+    "f107_81_trailing"
+  ],
+  "excluded_counts": {
+    "carry_forward_carried_ap60_safe": 0,
+    "carry_forward_carried_ap_safe": 0,
+    "carry_forward_carried_f107_81_trailing": 0,
+    "carry_forward_carried_f107_safe": 0,
+    "carry_forward_carried_hp60_safe": 0,
+    "carry_forward_carried_kp_safe": 0,
+    "carry_forward_excluded_ap60_safe": 0,
+    "carry_forward_excluded_ap_safe": 0,
+    "carry_forward_excluded_f107_81_trailing": 0,
+    "carry_forward_excluded_f107_safe": 0,
+    "carry_forward_excluded_hp60_safe": 0,
+    "carry_forward_excluded_kp_safe": 0,
+    "driver_rows_excluded": 0,
+    "excluded_before_scored_start": 24,
+    "excluded_incomplete_windows": 0
+  },
+  "partition_id": "FIX-NOV-FOLD-01",
+  "phase_id": "P1A",
+  "provenance": {
+    "ap60_safe": {
+      "dictionary_field": "ap60_safe",
+      "dictionary_row": "ap60_safe",
+      "producing_artifact": "gfz_hp60ap60_v2_2022"
+    },
+    "ap_safe": {
+      "dictionary_field": "ap_safe",
+      "dictionary_row": "ap_safe",
+      "producing_artifact": "gfz_kp_ap_nowcast_2022"
+    },
+    "doy_cos": {
+      "dictionary_field": "doy_cos",
+      "dictionary_row": "doy_cos",
+      "producing_artifact": "record_timestamp"
+    },
+    "doy_sin": {
+      "dictionary_field": "doy_sin",
+      "dictionary_row": "doy_sin",
+      "producing_artifact": "record_timestamp"
+    },
+    "f107_81_trailing": {
+      "dictionary_field": "f107_81_trailing",
+      "dictionary_row": "f107_81_trailing",
+      "producing_artifact": "nrcan_f107_observed_daily_median_2022"
+    },
+    "f107_safe": {
+      "dictionary_field": "f107_safe",
+      "dictionary_row": "f107_safe",
+      "producing_artifact": "nrcan_f107_observed_daily_median_2022"
+    },
+    "hp60_safe": {
+      "dictionary_field": "hp60_safe",
+      "dictionary_row": "hp60_safe",
+      "producing_artifact": "gfz_hp60ap60_v2_2022"
+    },
+    "kp_safe": {
+      "dictionary_field": "kp_safe",
+      "dictionary_row": "kp_safe",
+      "producing_artifact": "gfz_kp_ap_nowcast_2022"
+    },
+    "lst_cos": {
+      "dictionary_field": "lst_cos",
+      "dictionary_row": "lst_cos",
+      "producing_artifact": "station_registry"
+    },
+    "lst_sin": {
+      "dictionary_field": "lst_sin",
+      "dictionary_row": "lst_sin",
+      "producing_artifact": "station_registry"
+    },
+    "station_lat": {
+      "dictionary_field": "station_lat",
+      "dictionary_row": "station_lat",
+      "producing_artifact": "station_registry"
+    },
+    "station_onehot_ARUC": {
+      "dictionary_field": "station_onehot_ARUC",
+      "dictionary_row": "station_onehot",
+      "producing_artifact": "station_registry"
+    },
+    "station_onehot_BSHM": {
+      "dictionary_field": "station_onehot_BSHM",
+      "dictionary_row": "station_onehot",
+      "producing_artifact": "station_registry"
+    },
+    "station_onehot_NICO": {
+      "dictionary_field": "station_onehot_NICO",
+      "dictionary_row": "station_onehot",
+      "producing_artifact": "station_registry"
+    },
+    "utc_hour_cos": {
+      "dictionary_field": "utc_hour_cos",
+      "dictionary_row": "utc_hour_cos",
+      "producing_artifact": "record_timestamp"
+    },
+    "utc_hour_sin": {
+      "dictionary_field": "utc_hour_sin",
+      "dictionary_row": "utc_hour_sin",
+      "producing_artifact": "record_timestamp"
+    },
+    "vtec_lag_1h": {
+      "dictionary_field": "vtec_lag_1h",
+      "dictionary_row": "vtec_lag",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_lag_24h": {
+      "dictionary_field": "vtec_lag_24h",
+      "dictionary_row": "vtec_lag",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_lag_2h": {
+      "dictionary_field": "vtec_lag_2h",
+      "dictionary_row": "vtec_lag",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_lag_3h": {
+      "dictionary_field": "vtec_lag_3h",
+      "dictionary_row": "vtec_lag",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-1": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-10": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-11": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-12": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-13": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-14": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-15": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-16": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-17": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-18": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-19": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-2": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-20": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-21": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-22": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-23": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-24": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-3": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-4": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-5": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-6": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-7": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-8": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    },
+    "vtec_seq_24_t-9": {
+      "dictionary_field": "vtec_seq_24",
+      "dictionary_row": "vtec_seq_24",
+      "producing_artifact": "phase1_hourly_target"
+    }
+  },
+  "role": "train",
+  "scored_end": "2022-11-04T00:00:00+00:00",
+  "scored_start": "2022-11-01T00:00:00+00:00",
+  "sequence_columns": {
+    "vtec_seq_24": [
+      "vtec_seq_24_t-24",
+      "vtec_seq_24_t-23",
+      "vtec_seq_24_t-22",
+      "vtec_seq_24_t-21",
+      "vtec_seq_24_t-20",
+      "vtec_seq_24_t-19",
+      "vtec_seq_24_t-18",
+      "vtec_seq_24_t-17",
+      "vtec_seq_24_t-16",
+      "vtec_seq_24_t-15",
+      "vtec_seq_24_t-14",
+      "vtec_seq_24_t-13",
+      "vtec_seq_24_t-12",
+      "vtec_seq_24_t-11",
+      "vtec_seq_24_t-10",
+      "vtec_seq_24_t-9",
+      "vtec_seq_24_t-8",
+      "vtec_seq_24_t-7",
+      "vtec_seq_24_t-6",
+      "vtec_seq_24_t-5",
+      "vtec_seq_24_t-4",
+      "vtec_seq_24_t-3",
+      "vtec_seq_24_t-2",
+      "vtec_seq_24_t-1"
+    ]
+  },
+  "source_id": "GNSS_VTEC",
+  "standardized_columns": [
+    "vtec_lag_1h",
+    "vtec_lag_2h",
+    "vtec_lag_3h",
+    "vtec_lag_24h",
+    "station_lat",
+    "kp_safe",
+    "ap_safe",
+    "hp60_safe",
+    "ap60_safe",
+    "f107_safe",
+    "f107_81_trailing",
+    "vtec_seq_24_t-24",
+    "vtec_seq_24_t-23",
+    "vtec_seq_24_t-22",
+    "vtec_seq_24_t-21",
+    "vtec_seq_24_t-20",
+    "vtec_seq_24_t-19",
+    "vtec_seq_24_t-18",
+    "vtec_seq_24_t-17",
+    "vtec_seq_24_t-16",
+    "vtec_seq_24_t-15",
+    "vtec_seq_24_t-14",
+    "vtec_seq_24_t-13",
+    "vtec_seq_24_t-12",
+    "vtec_seq_24_t-11",
+    "vtec_seq_24_t-10",
+    "vtec_seq_24_t-9",
+    "vtec_seq_24_t-8",
+    "vtec_seq_24_t-7",
+    "vtec_seq_24_t-6",
+    "vtec_seq_24_t-5",
+    "vtec_seq_24_t-4",
+    "vtec_seq_24_t-3",
+    "vtec_seq_24_t-2",
+    "vtec_seq_24_t-1"
+  ],
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "tensor_features": [
+    "vtec_seq_24"
+  ],
+  "transform_id": null
+}
