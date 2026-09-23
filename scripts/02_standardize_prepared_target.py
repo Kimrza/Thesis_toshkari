@@ -64,6 +64,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import sys
 import uuid
 from collections.abc import Mapping
@@ -74,6 +75,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.data.acquisition import assert_records_within_window  # noqa: E402
 from src.data.config import (  # noqa: E402
     IntegrityError,
     assert_declared_sources_exist,
@@ -90,7 +92,6 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
-from src.data.acquisition import assert_records_within_window  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import load_fixture_scope  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
@@ -101,6 +102,14 @@ from src.data.prepared import (  # noqa: E402
     standardize_hourly_target,
     write_json_artifact,
     write_target_rows_csv,
+)
+from src.data.release import (  # noqa: E402
+    MANIFEST_NAME,
+    ReleaseError,
+    content_hash_of,
+    sha256_of_file,
+    verify_release,
+    write_release,
 )
 
 STAGE = "target-standardization"
@@ -149,7 +158,55 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "not_applicable",
     "bounds_statement",
     "completeness",
+    # TE 13.3 release-manifest field names, produced by the target release this stage now
+    # publishes (see _publish_target_release). Declared to R-23's produced-field guard for
+    # the same reason stage 00 declares its own: the guard screens the names this run can
+    # write, and a field written but undeclared is the hole it exists to close.
+    "source_manifest_id",
+    "source_files",
+    "processing",
+    "schema_version",
+    "units",
+    "row_counts",
+    "exclusions_qc_summary",
+    "fold_ids",
+    "mask_ids",
+    "feature_set_ids",
+    "output_files",
+    "change_record_id",
+    "created_at_utc",
+    "provider",
+    "citation",
+    "location_date",
+    "filename",
+    "retrieval_date",
+    "sha256",
+    "reason",
+    "count",
+    "provider_experiment_kindat",
+    "parameters",
+    "station_coordinate_to_cell_rule",
+    "selected_cell_bounds",
+    "hourly_aggregation",
+    "by_station",
+    "by_month",
+    "by_split",
+    "by_qc_stage",
 )
+
+#: The ONE directory 05, 06 and 07 read the released Phase 1 hourly target from. Each
+#: resolves `release_root / TARGET_RELEASE_DIR / release_manifest.json` literally, so the
+#: name is the contract between this stage and all three consumers, not a preference.
+TARGET_RELEASE_DIR: str = "phase1_hourly_target"
+
+#: Recorded where a fold, mask or feature-set id does not exist yet. Stage 02 precedes all
+#: three (splits are 05's, masks are the comparison's, the feature set is the dictionary's),
+#: and TE 13.3 requires all fourteen fields non-empty. Deliberately unusable as a real
+#: identifier, exactly as stage 00's own placeholder is, so it can never be mistaken for one.
+_STAGE02_ID_PLACEHOLDER: str = "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+
+#: Stage 02's own change record.
+_TARGET_RELEASE_CHANGE_RECORD: str = "CR-2026-09-23-TARGET-RELEASE-OPTION-A"
 
 
 def _assert_phase1_field_contract() -> None:
@@ -348,6 +405,256 @@ def _registry_row(
     return row
 
 
+# =======================================================================================
+# The target release (D-61's option A, applied at the 02 -> 05/06/07 boundary)
+# =======================================================================================
+#
+# WHY IT LIVES HERE. D-61 (2026-09-21) closed the identical defect one boundary upstream:
+# `write_release` was complete and tested with no production caller, so stage 02 refused
+# for want of a released provider input. Stage 00 now publishes what it acquired. The same
+# shape reappeared at THIS boundary the moment the ladder advanced: `05`, `06` and `07`
+# each resolve `release_root/phase1_hourly_target/release_manifest.json` literally and
+# refuse when it is absent, and nothing published it. The owner ruled option A again on
+# 2026-09-23 -- the stage publishes the release the downstream stages consume.
+#
+# NOTHING IS FABRICATED. `source_files` is built from the CONSUMED release manifests, whose
+# bytes `load_released_provider_rows` has already verified through `verify_release`;
+# `processing` carries the consumed release's own seven Phase 1 keys with the aggregation
+# statistic this run actually applied; `row_counts` and `exclusions_qc_summary` are this
+# run's measured outcome. `dataset_version` is absent by construction -- `write_release`
+# derives it from the release's own content hash (D-29) and refuses a caller-supplied one.
+#
+# RE-RUNS AND R-13. The consumers fix the directory name, so a re-run cannot simply write a
+# new version beside the old one. R-13 refuses to overwrite a release, and this function
+# never asks it to: when a release already exists there, the would-be manifest's
+# `content_hash` is computed and compared against the published one. Identical content
+# republishes NOTHING and reports that (the content hash excludes `created_at_utc`, so an
+# identical run is identical by construction). DIFFERENT content REFUSES, naming both
+# hashes -- a changed target under an unchanged citation is exactly what TE 13.3's
+# "stored under a NEW version rather than overwritten" forbids, and choosing that new
+# version is an owner act, not this script's.
+
+
+def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str, Any]]]:
+    """Every verified release under the root, as (manifest path, manifest) pairs.
+
+    The same enumeration `load_released_provider_rows` performs, re-run here so the release
+    this stage publishes can name its inputs. `verify_release` is re-applied rather than
+    assumed: the rows were verified when they were read, and the manifest is being cited
+    now, so it is checked now.
+    """
+    out: list[tuple[Path, dict[str, Any]]] = []
+    manifests = sorted(release_root.rglob(MANIFEST_NAME)) if release_root.is_dir() else []
+    for manifest_path in manifests:
+        if manifest_path.parent.name == TARGET_RELEASE_DIR:
+            continue  # this stage's own output is never its own input
+        problems = verify_release(manifest_path)
+        if problems:
+            raise IntegrityError(
+                manifest_path,
+                "a consumed release does not verify, so it cannot be cited as a source of "
+                f"the target release: {'; '.join(problems)}",
+            )
+        out.append((manifest_path, json.loads(manifest_path.read_text(encoding="utf-8"))))
+    return out
+
+
+def _target_release_manifest(
+    *,
+    snapshot: Any,
+    result: Any,
+    consumed: list[tuple[Path, dict[str, Any]]],
+    output_files: Mapping[str, str],
+) -> dict[str, Any]:
+    """The thirteen caller-supplied TE 13.3 fields for the Phase 1 hourly target release."""
+    if not consumed:
+        raise IntegrityError(
+            "target release",
+            "no consumed release to cite as a source; the target release names the provider "
+            "release it was standardized from, never an empty source set (TE 13.3, R-44)",
+        )
+
+    source_files: list[dict[str, Any]] = []
+    for manifest_path, manifest in consumed:
+        version = str(manifest.get("dataset_version", ""))
+        content = str(manifest.get("content_hash", ""))
+        created = str(manifest.get("created_at_utc", ""))
+        for name, digest in sorted(dict(manifest.get("output_files") or {}).items()):
+            source_files.append(
+                {
+                    # The immediate provider of these bytes is the project's own stage-00
+                    # release; the ORIGINAL provider travels in that release's own
+                    # source_files and is not re-asserted here as if re-retrieved.
+                    "provider": "project release (stage 00 acquisition)",
+                    "citation": (
+                        f"consumed release dataset_version {version}, content_hash {content}"
+                    ),
+                    "location_date": f"{manifest_path.parent.name} (created {created})",
+                    "filename": str(name),
+                    "retrieval_date": created,
+                    "sha256": str(digest),
+                }
+            )
+
+    # `processing`: the consumed release's own seven Phase 1 keys, with the identity
+    # re-resolved from config (never carried) and the aggregation statistic recorded as the
+    # one this run APPLIED -- stage 00 records it as a destination, stage 02 performs it.
+    identity = result.identity
+    first = dict(consumed[0][1].get("processing") or {})
+    processing = {
+        "phase_id": identity["phase_id"],
+        "target_definition_id": identity["target_definition_id"],
+        "provider_experiment_kindat": first.get("provider_experiment_kindat", ""),
+        "parameters": list(first.get("parameters") or []),
+        "station_coordinate_to_cell_rule": first.get("station_coordinate_to_cell_rule", ""),
+        "selected_cell_bounds": dict(first.get("selected_cell_bounds") or {}),
+        "hourly_aggregation": first.get("hourly_aggregation", ""),
+    }
+
+    rows = list(result.rows)
+    by_station: dict[str, int] = {}
+    by_month: dict[str, int] = {}
+    valid = 0
+    for row in rows:
+        station = str(row["station_id"])
+        by_station[station] = by_station.get(station, 0) + 1
+        month = str(row["interval_start_utc"])[:7]
+        by_month[month] = by_month.get(month, 0) + 1
+        if row.get("target_valid"):
+            valid += 1
+
+    # `exclusions_qc_summary`: the MEASURED documented-QC outcome, one entry per reason
+    # class, derived from the coverage report's own `invalid_reasons` rather than restated.
+    # A row invalidated for two reasons counts under each: the field reports why rows were
+    # excluded, not a partition of them.
+    # `result.coverage_report` is the RAW report; `payload` is the wrapper
+    # `write_json_artifact` adds on the way to disk. Read the raw shape and fall back to the
+    # wrapped one, because reading only the wrapper silently yielded zero reasons beside a
+    # `by_qc_stage` count of ten invalid rows -- a contradiction inside one manifest, found
+    # by running the stage rather than by reading it.
+    reasons: dict[str, int] = {}
+    report = dict(result.coverage_report)
+    entries_by_row = dict(report.get("invalid_reasons") or {}) or dict(
+        dict(report.get("payload") or {}).get("invalid_reasons") or {}
+    )
+    for entries in entries_by_row.values():
+        for entry in entries:
+            # Group by the RULE violated, not by the measured value. The raw reason reads
+            # "largest_internal_gap_s 2400.0 above D-19 maximum 1800.0"; keying on the whole
+            # string produced one "class" per distinct float (seven entries for ten rows,
+            # four of them singletons), which is a listing rather than a summary. The field
+            # and the bound are the class; the value is the instance.
+            text = str(entry).strip()
+            field = text.split(" ", 1)[0]
+            for keyword in (" above ", " below "):
+                if keyword in text:
+                    reasons_key = f"{field}{keyword}{text.split(keyword, 1)[1]}"
+                    break
+            else:
+                reasons_key = text
+            reasons[reasons_key] = reasons.get(reasons_key, 0) + 1
+    exclusions = [{"reason": reason, "count": count} for reason, count in sorted(reasons.items())]
+    if not exclusions:
+        exclusions = [
+            {
+                "reason": (
+                    "no row was invalidated by documented QC in this run (D-53's five "
+                    "operations applied; a measured absence, not an unfilled field)"
+                ),
+                "count": 0,
+            }
+        ]
+
+    return {
+        "source_manifest_id": ";".join(
+            sorted(str(m.get("dataset_version", "")) for _p, m in consumed)
+        ),
+        "source_files": source_files,
+        "processing": processing,
+        "schema_version": str(snapshot.data.get("schema_version", "")),
+        "units": {
+            "vtec_tecu": "TECU",
+            "within_hour_spread_tecu": "TECU",
+            "largest_internal_gap_s": "s",
+        },
+        "row_counts": {
+            "by_station": by_station,
+            "by_month": by_month,
+            # Stage 02 precedes splitting; the axis carries the stage's position explicitly
+            # rather than being omitted, so a reader meets a fact rather than a gap.
+            "by_split": {"unsplit_stage_02": len(rows)},
+            "by_qc_stage": {
+                "post_documented_qc_valid": valid,
+                "post_documented_qc_invalid": len(rows) - valid,
+            },
+        },
+        "exclusions_qc_summary": exclusions,
+        "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "fold_ids": [_STAGE02_ID_PLACEHOLDER],
+        "mask_ids": [_STAGE02_ID_PLACEHOLDER],
+        "feature_set_ids": [_STAGE02_ID_PLACEHOLDER],
+        "output_files": dict(output_files),
+        "change_record_id": _TARGET_RELEASE_CHANGE_RECORD,
+    }
+
+
+def _publish_target_release(
+    *, snapshot: Any, result: Any, out_dir: Path, target_path: Path
+) -> dict[str, Any]:
+    """Publish the standardized target as the release 05/06/07 read by manifest and hash."""
+    release_root = Path(
+        snapshot.resolved_roots.get(
+            "release_root", snapshot.resolved_roots["artifacts"] / "releases"
+        )
+    )
+    directory = release_root / TARGET_RELEASE_DIR
+    manifest_path = directory / MANIFEST_NAME
+    consumed = _consumed_release_manifests(release_root)
+
+    directory.mkdir(parents=True, exist_ok=True)
+    released_rows = write_target_rows_csv(directory / target_path.name, result.rows)
+    output_files = {released_rows.name: sha256_of_file(released_rows)}
+    manifest = _target_release_manifest(
+        snapshot=snapshot, result=result, consumed=consumed, output_files=output_files
+    )
+
+    if manifest_path.is_file():
+        published = json.loads(manifest_path.read_text(encoding="utf-8"))
+        would_be = content_hash_of(manifest)
+        existing = str(published.get("content_hash", ""))
+        if would_be == existing:
+            return {
+                "release_dir": str(directory),
+                "dataset_version": str(published.get("dataset_version", "")),
+                "rows_released": len(result.rows),
+                "republished": False,
+                "note": (
+                    "a release with identical content is already published here; R-13 "
+                    "refuses an overwrite and none was attempted (the content hash excludes "
+                    "created_at_utc, so an identical run is identical by construction)"
+                ),
+            }
+        raise IntegrityError(
+            manifest_path,
+            f"a DIFFERENT Phase 1 hourly target is already published under this citation "
+            f"(published content_hash {existing}, this run's {would_be}). TE 13.3 requires a "
+            f"new version rather than an overwrite, and the consumers read this directory by "
+            f"name, so choosing how to version it is an owner act -- refusing rather than "
+            f"republishing over a citation other artifacts may already cite (R-13)",
+        )
+
+    try:
+        written = write_release(directory, manifest, release_root=release_root)
+    except ReleaseError as exc:
+        raise IntegrityError(directory, f"the target release was refused: {exc}") from exc
+    return {
+        "release_dir": str(directory),
+        "dataset_version": written["dataset_version"],
+        "rows_released": len(result.rows),
+        "republished": True,
+    }
+
+
 def _run_standardize(entry: Mapping[str, Any]) -> dict[str, Any]:
     """W-1: the target-producing run — REFUSED while the QC list is unfrozen (Q2 = A).
 
@@ -413,12 +720,16 @@ def _run_standardize(entry: Mapping[str, Any]) -> dict[str, Any]:
         identity=result.identity,
         artifact_class="uncertainty_budget",
     )
+    release = _publish_target_release(
+        snapshot=snapshot, result=result, out_dir=out_dir, target_path=target_path
+    )
     return {
         "target": str(target_path),
         "coverage_report": str(coverage_path),
         "data_quality_block": str(quality_path),
         "uncertainty_budget": str(budget_path),
         "rows": len(result.rows),
+        "release": release,
     }
 
 

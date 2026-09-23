@@ -326,6 +326,12 @@ PROVIDER_COLUMNS: Final[tuple[str, ...]] = (
 )
 
 
+#: The release directory the STANDARDIZED target is published under (stage 02's own
+#: output; 05/06/07 read it by this exact name). Excluded from the provider-input
+#: enumeration below: a producer never consumes its own release.
+TARGET_RELEASE_DIR: Final[str] = "phase1_hourly_target"
+
+
 def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
     """Consume released provider input by release manifest and hash — never bare path.
 
@@ -342,7 +348,17 @@ def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
         and violated expectation on any verification failure.
     """
     release_root = Path(release_root)
-    manifests = sorted(release_root.rglob(MANIFEST_NAME)) if release_root.is_dir() else []
+    manifests = [
+        path
+        for path in (sorted(release_root.rglob(MANIFEST_NAME)) if release_root.is_dir() else [])
+        # The standardized target is published under the release root too (stage 02 is its
+        # producer, D-61's option A applied at the 02->05 boundary), and it is this loader's
+        # OUTPUT, never its input. Without this exclusion the second run of stage 02 reads
+        # its own previous release, finds the D-17 target columns where the five provider
+        # columns belong, and refuses -- which is the loader being right about the wrong
+        # file. Found by executing the stage twice.
+        if path.parent.name != TARGET_RELEASE_DIR
+    ]
     if not manifests:
         raise IntegrityError(
             release_root,
