@@ -68,6 +68,25 @@ printed in `requirements.txt`'s own block — and fixing it is a Student act owe
 
 PyTorch, R, Julia and MATLAB are prohibited (TE §8.3).
 
+**On this machine, use the `tec-thesis-311` conda environment — not the machine's
+default Python.** Activate it before running anything in this repository:
+
+```
+conda activate tec-thesis-311
+```
+
+`tec-thesis-311` (Python 3.11.16) already carries every pin in `requirements.txt` at
+the pinned version. The machine's default `python` on `PATH` resolves to Python 3.14,
+under which `pip install -r requirements.txt` fails: `numpy==1.26.4` has no prebuilt
+wheel for Python 3.14 on Windows, and building it from source requires a C/C++
+toolchain (`cl`/`gcc`/`clang`) that is not installed here.
+
+**Known gap, not silently worked around:** a from-scratch setup (a new machine, no
+`tec-thesis-311` env already present) needs Python 3.11 installed first — `py -3.11`
+currently reports no suitable runtime on this machine, so the governed interpreter
+pin has no fresh-install path here yet. Provisioning one is unresolved and owed
+separately from this note.
+
 ## Reproducing a run
 
 **`REPRODUCTION.md`** carries TE §13.2's ordered clean-run contract verbatim — including
