@@ -465,6 +465,7 @@ def _target_release_manifest(
     result: Any,
     consumed: list[tuple[Path, dict[str, Any]]],
     output_files: Mapping[str, str],
+    fixture_scope_id: str | None,
 ) -> dict[str, Any]:
     """The thirteen caller-supplied TE 13.3 fields for the Phase 1 hourly target release."""
     if not consumed:
@@ -595,11 +596,22 @@ def _target_release_manifest(
         "feature_set_ids": [_STAGE02_ID_PLACEHOLDER],
         "output_files": dict(output_files),
         "change_record_id": _TARGET_RELEASE_CHANGE_RECORD,
+        # TC-03f, stamped ON the release. A fixture run publishes the fixture's window
+        # under the citation 05/06/07 resolve by a FIXED name, so the directory cannot
+        # carry the distinction and the manifest must (see
+        # CR-2026-09-23-DRIVER-RELEASE-OPTION-A for the open naming question).
+        "evidence_class": "fixture_plumbing" if fixture_scope_id else "governed_run",
+        "fixture_scope_id": fixture_scope_id or "",
     }
 
 
 def _publish_target_release(
-    *, snapshot: Any, result: Any, out_dir: Path, target_path: Path
+    *,
+    snapshot: Any,
+    result: Any,
+    out_dir: Path,
+    target_path: Path,
+    fixture_scope_id: str | None,
 ) -> dict[str, Any]:
     """Publish the standardized target as the release 05/06/07 read by manifest and hash."""
     release_root = Path(
@@ -615,7 +627,11 @@ def _publish_target_release(
     released_rows = write_target_rows_csv(directory / target_path.name, result.rows)
     output_files = {released_rows.name: sha256_of_file(released_rows)}
     manifest = _target_release_manifest(
-        snapshot=snapshot, result=result, consumed=consumed, output_files=output_files
+        snapshot=snapshot,
+        result=result,
+        consumed=consumed,
+        output_files=output_files,
+        fixture_scope_id=fixture_scope_id,
     )
 
     if manifest_path.is_file():
@@ -721,7 +737,11 @@ def _run_standardize(entry: Mapping[str, Any]) -> dict[str, Any]:
         artifact_class="uncertainty_budget",
     )
     release = _publish_target_release(
-        snapshot=snapshot, result=result, out_dir=out_dir, target_path=target_path
+        snapshot=snapshot,
+        result=result,
+        out_dir=out_dir,
+        target_path=target_path,
+        fixture_scope_id=entry.get("fixture_scope_id"),
     )
     return {
         "target": str(target_path),

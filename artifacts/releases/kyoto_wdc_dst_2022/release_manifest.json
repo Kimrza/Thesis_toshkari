@@ -1,0 +1,74 @@
+{
+  "change_record_id": "CR-2026-09-23-DRIVER-RELEASE-OPTION-A",
+  "content_hash": "bdbd958aec686580da867e83a1e5ba002e49d0e03bdff05bb42881e56e55c0f7",
+  "created_at_utc": "2026-09-23T14:16:17.308340+00:00",
+  "dataset_version": "bdbd958aec68",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 0,
+      "reason": "provider value absent at this epoch: released as an explicit empty cell, never as the provider's sentinel and never filled (D-5; D-10.2)"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "plumbing_7day",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "dst_1h.csv": "5333dddc9ce0378c0d9250e25e88127c4de8b3f77515e4cdc6cff23383f83af3"
+  },
+  "processing": {
+    "hourly_aggregation": "none: values are released at the provider's own cadence, unaggregated",
+    "parameters": [
+      "dst_nt"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "selected_cell_bounds": {
+      "time_indexed_only": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here"
+    },
+    "station_coordinate_to_cell_rule": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "producing_artifact": "kyoto_wdc_dst_2022",
+  "release_status": "provisional (per the retrieved file names; D-10.1's grade rule)",
+  "row_counts": {
+    "by_month": {
+      "2022-11": 168
+    },
+    "by_qc_stage": {
+      "as_provided_no_qc_applied": 168
+    },
+    "by_split": {
+      "unsplit_stage_04": 168
+    },
+    "by_station": {
+      "time_indexed_no_station_axis": 168
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "D-10.1 (Kyoto WDC; one release grade, recorded before use)",
+      "filename": "dst_provisional_202211.html",
+      "location_date": "kyoto_dst (2022-11-01..2022-11-07)",
+      "provider": "KYOTO",
+      "retrieval_date": "dst",
+      "sha256": "56562cf040e1b12b7fae5156d2bd1e4f5d2489fb215071fdd5883143864fb592"
+    }
+  ],
+  "source_manifest_id": "kyoto_wdc_dst_2022:D-10.1 (Kyoto WDC; one release grade, recorded before use)",
+  "units": {
+    "dst_nt": "nT"
+  },
+  "window": {
+    "end": "2022-11-07",
+    "start": "2022-11-01"
+  }
+}

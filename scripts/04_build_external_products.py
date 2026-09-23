@@ -77,6 +77,7 @@ Boundaries this script holds
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
 import json
 import re
@@ -84,7 +85,7 @@ import sys
 import uuid
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -112,7 +113,14 @@ from src.data.fixture_manifest import (  # noqa: E402
     load_fixture_scope,
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
-from src.data.release import sha256_of_file  # noqa: E402
+from src.data.prepared import resolve_target_identity  # noqa: E402
+from src.data.release import (  # noqa: E402
+    MANIFEST_NAME,
+    ReleaseError,
+    content_hash_of,
+    sha256_of_file,
+    write_release,
+)
 from src.external.spaceweather import write_driver_manifest  # noqa: E402
 
 STAGE = "external-products"
@@ -850,10 +858,16 @@ def _run_driver_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dic
         missing_months=missing_months,
         produced_by="scripts/04_build_external_products.py",
     )
+    driver_releases = _publish_driver_releases(
+        entry=entry,
+        evidence_root=evidence_root,
+        gfz_root=workspace / "evidence" / "audit_gfz_2026-09-18",
+    )
     summary: dict[str, Any] = {
         "driver_manifest": str(manifest_path),
         "missing_month_entries": len(missing_months),
         "series_audited": len(series_entries),
+        "driver_releases": driver_releases,
     }
     if fixture_scope_id is not None:
         summary["evidence_class"] = "fixture_plumbing"
@@ -868,6 +882,478 @@ def _run_driver_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dic
             "test, TE 9.2)"
         )
     return summary
+
+
+# =======================================================================================
+# The driver releases (D-61's option A, applied at the 04 -> 05 boundary; D-63 identities)
+# =======================================================================================
+#
+# WHY IT LIVES HERE. This script has said so in its own words since 2026-09-18: the two GFZ
+# series "are NOT YET CONSUMED by this stage: no driver product is built from them here and
+# no producer artifact exists (D-41 identities only)". D-63 then named the producing-artifact
+# identity of every driver-class TE 6.2 row, and `configs/features.yaml: permitted_producers`
+# transcribes them, so `build_features` already knows which artifact each row must come from
+# — nothing published one. The owner ruled on 2026-09-23 that D-61's option A extends here:
+# the stage publishes the release the downstream stages consume, under the D-63 identities,
+# with no new D-number.
+#
+# ONE RELEASE PER PRODUCING ARTIFACT, named for the identity itself, so the mapping from
+# `permitted_producers` to a directory under the release root is the identity and not a
+# convention a reader has to learn.
+#
+# NOTHING IS FABRICATED, AND NOTHING IS FILLED. Values come from the provider bytes this run
+# has already hash-verified, through the ONE parser per format (src/external/spaceweather.py).
+# A provider missing marker is released as an EMPTY cell and counted — never as -1, never
+# interpolated, never carried forward (D-5; D-10.2: gaps are explicit NaN at acquisition,
+# and the 3-hour carry-forward is a FEATURE-time rule applied at the availability boundary,
+# not an acquisition-time fill). Rows are bounded to this run's audit window, so a fixture
+# run publishes the fixture's window and nothing wider.
+#
+# TC-12 IS VISIBLE IN THE SHAPE. A driver release carries one value per epoch and no station
+# axis at all: `row_counts.by_station` records `time_indexed_no_station_axis` rather than a
+# per-station count, because a driver series that could be counted per station is already
+# the defect TC-12 exists to prevent.
+#
+# RE-RUNS AND R-13, exactly as stage 02's target release: identical content republishes
+# nothing; different content REFUSES naming both hashes rather than overwriting a citation.
+
+
+#: The four D-63 producing-artifact identities, each with the series it carries, the
+#: evidence file it is parsed from, and the units of its columns. The identity strings are
+#: `src/external/spaceweather.py: DRIVER_PRODUCERS`' values and are asserted equal to them
+#: at publication time, so config, constant and release cannot drift apart.
+_DRIVER_RELEASES: Final[tuple[dict[str, Any], ...]] = (
+    {
+        "artifact": "gfz_kp_ap_nowcast_2022",
+        "rows_for": "kp_ap",
+        "file": "kp_ap_3h.csv",
+        "decision": "D-39 (archived settled nowcast Kp_now2022.wdc, DOI 10.5880/Kp.0001)",
+        "release_status": "nowcast",
+        "units": {"kp": "dimensionless (thirds)", "ap": "nT"},
+        "cadence_hours": 3,
+    },
+    {
+        "artifact": "gfz_hp60ap60_v2_2022",
+        "rows_for": "hp60_ap60",
+        "file": "hp60_ap60_1h.csv",
+        "decision": "D-40 (Hp60ap60doi_2022.txt V2.0, DOI 10.5880/Hpo.0002; V3.0 is a comparator only)",
+        "release_status": "hpo_v2.0_contemporaneous",
+        "units": {"hp60": "dimensionless (thirds)", "ap60": "nT"},
+        "cadence_hours": 1,
+    },
+    {
+        "artifact": "nrcan_f107_observed_daily_median_2022",
+        "rows_for": "f107",
+        "file": "f107_daily_median.csv",
+        "decision": "D-21/D-22/D-23 (NRCan observed flux; project-derived daily median)",
+        "release_status": "observed",
+        "units": {"f107_daily_median": "sfu"},
+        "cadence_hours": 24,
+    },
+    {
+        "artifact": "kyoto_wdc_dst_2022",
+        "rows_for": "dst",
+        "file": "dst_1h.csv",
+        "decision": "D-10.1 (Kyoto WDC; one release grade, recorded before use)",
+        "release_status": "provisional (per the retrieved file names; D-10.1's grade rule)",
+        "units": {"dst_nt": "nT"},
+        "cadence_hours": 1,
+    },
+)
+
+#: Recorded where a fold, mask or feature-set id does not exist yet — stage 04 precedes all
+#: three. Deliberately unusable as a real identifier, the same device stages 00 and 02 use.
+_STAGE04_ID_PLACEHOLDER: Final[str] = "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+
+_DRIVER_RELEASE_CHANGE_RECORD: Final[str] = "CR-2026-09-23-DRIVER-RELEASE-OPTION-A"
+
+#: What `processing`'s target-shaped keys mean for a driver release. TE 13.3 requires all
+#: seven keys non-empty, and four of them describe a gridded TARGET: a driver series has no
+#: cell, no provider experiment/kindat and no hourly target aggregation. Each therefore
+#: carries an explicit statement of non-applicability rather than a value borrowed from the
+#: target's release, which would be false, or an empty string, which `write_release` refuses.
+_DRIVER_NOT_APPLICABLE: Final[str] = (
+    "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per "
+    "epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no "
+    "provider experiment/kindat applies, and no hourly target aggregation is performed here"
+)
+
+
+def _utc(year: int, month: int, day: int, hour: int) -> str:
+    return dt.datetime(year, month, day, hour, tzinfo=dt.timezone.utc).isoformat()
+
+
+def _interval_rows(
+    parsed: Mapping[tuple[int, int, int, int], tuple[float, int]],
+    *,
+    window: tuple[dt.date, dt.date],
+    cadence_hours: int,
+    value_names: tuple[str, str],
+) -> tuple[list[dict[str, str]], int]:
+    """Interval-valued driver rows inside the window, and the count of ABSENT values.
+
+    Both provider boundaries are preserved on every row (D-43: the safe-lag reference
+    instant is the interval END, so a consumer that has only a start cannot apply the rule).
+    A provider missing marker becomes an EMPTY cell and is counted; it is never written as
+    the sentinel and never filled.
+    """
+    start, end = window
+    rows: list[dict[str, str]] = []
+    absent = 0
+    for (year, month, day, hour), values in sorted(parsed.items()):
+        moment = dt.date(year, month, day)
+        if not (start <= moment <= end):
+            continue
+        row = {
+            "interval_start_utc": _utc(year, month, day, hour),
+            "interval_end_utc": (
+                dt.datetime(year, month, day, hour, tzinfo=dt.timezone.utc)
+                + dt.timedelta(hours=cadence_hours)
+            ).isoformat(),
+        }
+        for name, value in zip(value_names, values, strict=True):
+            missing = float(value) < 0
+            absent += 1 if missing else 0
+            row[name] = "" if missing else str(value)
+        rows.append(row)
+    return rows, absent
+
+
+def _f107_rows(
+    flux_path: Path, *, window: tuple[dt.date, dt.date]
+) -> tuple[list[dict[str, str]], dict[str, Any]]:
+    """D-21's project-derived daily median of the OBSERVED flux, with D-22/D-23's flags.
+
+    The median is computed by `spaceweather.daily_medians_from_readings` — the module that
+    owns driver-product arithmetic — never re-implemented here. A day with no reading is
+    simply ABSENT from the release: no row is invented for it (D-5).
+    """
+    from src.external.spaceweather import daily_medians_from_readings
+
+    start, end = window
+    readings: list[dict[str, Any]] = []
+    with flux_path.open("r", encoding="utf-8", errors="replace") as handle:
+        for raw in handle:
+            line = raw.rstrip("\n")
+            if not line.strip() or line.lstrip().startswith(("fluxdate", "---")):
+                continue
+            match = _FLUX_RE.match(line)
+            if not match:
+                continue
+            day = dt.datetime.strptime(match.group("date"), "%Y%m%d").date()
+            if start <= day <= end:
+                readings.append(
+                    {"day": day, "time": match.group("time"), "value": float(match.group("obs"))}
+                )
+    derived = daily_medians_from_readings(readings)
+    medians = dict(derived["medians"])
+    duplicates = dict(derived["duplicate_days"])
+    spreads = dict(derived["high_spread_days"])
+    rows = [
+        {
+            "day_utc": day.isoformat(),
+            "f107_daily_median": str(value),
+            "duplicate_readings_averaged": str(duplicates.get(day, 0)),
+            "high_spread_pct": str(spreads[day]) if day in spreads else "",
+        }
+        for day, value in sorted(medians.items())
+    ]
+    expected = (end - start).days + 1
+    return rows, {
+        "readings_read": len(readings),
+        "days_released": len(rows),
+        "days_absent": expected - len(rows),
+        "duplicate_days": len(duplicates),
+        "high_spread_days": len(spreads),
+    }
+
+
+def _dst_rows(
+    kyoto_dir: Path, *, window: tuple[dt.date, dt.date]
+) -> tuple[list[dict[str, str]], int]:
+    """Hourly Dst from the retrieved Kyoto monthly tables, bounded to the window.
+
+    Dst stays DIAGNOSTIC-ONLY (TC-11; `DIAGNOSTIC_ONLY_SERIES`): publishing it as a release
+    records its provenance and admits nothing about its use, and the modelling-input bar is
+    `assert_grade_eligible`'s, not this function's. The provider's missing marker (|value|
+    >= 9999) becomes an empty cell and is counted.
+    """
+    start, end = window
+    rows: list[dict[str, str]] = []
+    absent = 0
+    for year, month in _months_in_window(window):
+        path = kyoto_dir / f"dst_provisional_{year}{month:02d}.html"
+        if not path.is_file():
+            continue
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            match = re.match(r"^\s*(\d{1,2})((?:\s+-?\d+){24})\s*$", line)
+            if not match:
+                continue
+            day = int(match.group(1))
+            try:
+                moment = dt.date(year, month, day)
+            except ValueError:
+                continue
+            if not (start <= moment <= end):
+                continue
+            values = [int(v) for v in match.group(2).split()]
+            for hour, value in enumerate(values):
+                missing = abs(value) >= 9999
+                absent += 1 if missing else 0
+                rows.append(
+                    {
+                        "interval_start_utc": _utc(year, month, day, hour),
+                        "dst_nt": "" if missing else str(value),
+                    }
+                )
+    rows.sort(key=lambda row: row["interval_start_utc"])
+    return rows, absent
+
+
+def _driver_release_manifest(
+    *,
+    spec: Mapping[str, Any],
+    snapshot: Any,
+    window: tuple[dt.date, dt.date],
+    source_files: list[dict[str, Any]],
+    rows: list[Mapping[str, str]],
+    absent: int,
+    output_files: Mapping[str, str],
+    fixture_scope_id: str | None,
+) -> dict[str, Any]:
+    """The thirteen caller-supplied TE 13.3 fields for one driver release."""
+    identity = resolve_target_identity(snapshot.data)
+    months: dict[str, int] = {}
+    key = "interval_start_utc" if rows and "interval_start_utc" in rows[0] else "day_utc"
+    for row in rows:
+        months[str(row[key])[:7]] = months.get(str(row[key])[:7], 0) + 1
+    return {
+        "source_manifest_id": f"{spec['artifact']}:{spec['decision']}",
+        "source_files": source_files,
+        "processing": {
+            # The identity stamps are the study's, so a driver release cannot be mistaken
+            # for another lineage's (TEC-05/R-70).
+            "phase_id": identity["phase_id"],
+            "target_definition_id": identity["target_definition_id"],
+            "provider_experiment_kindat": _DRIVER_NOT_APPLICABLE,
+            "parameters": sorted(spec["units"]),
+            "station_coordinate_to_cell_rule": _DRIVER_NOT_APPLICABLE,
+            "selected_cell_bounds": {"time_indexed_only": _DRIVER_NOT_APPLICABLE},
+            "hourly_aggregation": (
+                "project-derived daily median of the observed flux (D-21/D-22/D-23)"
+                if spec["rows_for"] == "f107"
+                else "none: values are released at the provider's own cadence, unaggregated"
+            ),
+        },
+        "schema_version": str(snapshot.data.get("schema_version", "")),
+        "units": dict(spec["units"]),
+        "row_counts": {
+            # TC-12 made visible: a driver series has no station axis, and a per-station
+            # count here would be the artefact the rule exists to prevent.
+            "by_station": {"time_indexed_no_station_axis": len(rows)},
+            "by_month": months,
+            "by_split": {"unsplit_stage_04": len(rows)},
+            "by_qc_stage": {"as_provided_no_qc_applied": len(rows)},
+        },
+        "exclusions_qc_summary": [
+            {
+                "reason": (
+                    "provider value absent at this epoch: released as an explicit empty "
+                    "cell, never as the provider's sentinel and never filled (D-5; D-10.2)"
+                ),
+                "count": int(absent),
+            }
+        ],
+        "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "fold_ids": [_STAGE04_ID_PLACEHOLDER],
+        "mask_ids": [_STAGE04_ID_PLACEHOLDER],
+        "feature_set_ids": [_STAGE04_ID_PLACEHOLDER],
+        "output_files": dict(output_files),
+        "change_record_id": _DRIVER_RELEASE_CHANGE_RECORD,
+        # Read by the feature build as the (row, producer) pair's producer half: the
+        # release states which D-63 identity it IS, rather than leaving a consumer to infer
+        # it from the directory name.
+        "producing_artifact": spec["artifact"],
+        "release_status": spec["release_status"],
+        "window": {"start": window[0].isoformat(), "end": window[1].isoformat()},
+        # TC-03f, stamped ON the release rather than left to the directory name. A fixture
+        # run publishes the fixture's window -- seven days, not a year -- under the same
+        # governed citation a full-year run would use, and a reader who meets this manifest
+        # without its run log must be able to tell the two apart. `window` above says how
+        # much; this says what KIND. The open naming question (whether a fixture-scoped
+        # release should live under a fixture-named directory, which the target release
+        # cannot do while 05/06/07 resolve its directory by a fixed name) is recorded in
+        # CR-2026-09-23-DRIVER-RELEASE-OPTION-A rather than decided here.
+        "evidence_class": "fixture_plumbing" if fixture_scope_id else "governed_run",
+        "fixture_scope_id": fixture_scope_id or "",
+    }
+
+
+def _publish_driver_releases(
+    *, entry: Mapping[str, Any], evidence_root: Path, gfz_root: Path
+) -> list[dict[str, Any]]:
+    """Publish one immutable release per D-63 producing artifact. Returns per-release facts."""
+    from src.external.spaceweather import DRIVER_PRODUCERS, parse_hpo_v2, parse_kp_ap_wdc
+
+    snapshot = entry["snapshot"]
+    window: tuple[dt.date, dt.date] = entry["audit_window"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    release_root = Path(
+        snapshot.resolved_roots.get(
+            "release_root", snapshot.resolved_roots["artifacts"] / "releases"
+        )
+    )
+    known = set(DRIVER_PRODUCERS.values())
+    published: list[dict[str, Any]] = []
+
+    for spec in _DRIVER_RELEASES:
+        artifact = str(spec["artifact"])
+        if artifact not in known:
+            raise IntegrityError(
+                artifact,
+                f"is not one of D-63's producing-artifact identities {sorted(known)}; a "
+                f"release published under an identity the permitted-producer list does not "
+                f"carry could never be admitted by build_features (SD-F-01)",
+            )
+
+        rows: list[dict[str, str]]
+        absent = 0
+        extra: dict[str, Any] = {}
+        sources: list[Path] = []
+        if spec["rows_for"] == "kp_ap":
+            source = gfz_root / "Kp_now2022.wdc"
+            if not source.is_file():
+                published.append(
+                    {
+                        "artifact": artifact,
+                        "published": False,
+                        "reason": f"{source.name} not retrieved",
+                    }
+                )
+                continue
+            rows, absent = _interval_rows(
+                parse_kp_ap_wdc(source), window=window, cadence_hours=3, value_names=("kp", "ap")
+            )
+            sources = [source]
+        elif spec["rows_for"] == "hp60_ap60":
+            source = gfz_root / "hp60ap60doi_2022_v2.txt"
+            if not source.is_file():
+                published.append(
+                    {
+                        "artifact": artifact,
+                        "published": False,
+                        "reason": f"{source.name} not retrieved",
+                    }
+                )
+                continue
+            rows, absent = _interval_rows(
+                parse_hpo_v2(source), window=window, cadence_hours=1, value_names=("hp60", "ap60")
+            )
+            sources = [source]
+        elif spec["rows_for"] == "f107":
+            source = evidence_root / "nrcan_f107" / "fluxtable.txt"
+            if not source.is_file():
+                published.append(
+                    {
+                        "artifact": artifact,
+                        "published": False,
+                        "reason": "fluxtable.txt not retrieved",
+                    }
+                )
+                continue
+            rows, extra = _f107_rows(source, window=window)
+            sources = [source]
+        else:
+            kyoto = evidence_root / "kyoto_dst"
+            rows, absent = _dst_rows(kyoto, window=window)
+            sources = sorted(
+                path
+                for path in kyoto.glob("dst_provisional_*.html")
+                if (parsed := _dst_month_from_name(path.name)) is not None
+                and window[0] <= dt.date(parsed[0], parsed[1], 1)
+                and dt.date(parsed[0], parsed[1], 1) <= window[1].replace(day=1)
+            )
+            if not rows:
+                published.append(
+                    {
+                        "artifact": artifact,
+                        "published": False,
+                        "reason": "no in-window Dst table retrieved",
+                    }
+                )
+                continue
+
+        source_files = [
+            {
+                "provider": artifact.split("_")[0].upper(),
+                "citation": spec["decision"],
+                "location_date": f"{path.parent.name} ({window[0].isoformat()}..{window[1].isoformat()})",
+                "filename": path.name,
+                "retrieval_date": path.parent.name.split("_")[-1],
+                "sha256": sha256_of_file(path),
+            }
+            for path in sources
+        ]
+
+        directory = release_root / artifact
+        directory.mkdir(parents=True, exist_ok=True)
+        rows_path = directory / str(spec["file"])
+        columns = list(rows[0])
+        with rows_path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=columns)
+            writer.writeheader()
+            writer.writerows(rows)
+        manifest = _driver_release_manifest(
+            spec=spec,
+            snapshot=snapshot,
+            window=window,
+            source_files=source_files,
+            rows=rows,
+            absent=absent,
+            output_files={rows_path.name: sha256_of_file(rows_path)},
+            fixture_scope_id=entry.get("fixture_scope_id"),
+        )
+
+        manifest_path = directory / MANIFEST_NAME
+        if manifest_path.is_file():
+            existing = json.loads(manifest_path.read_text(encoding="utf-8"))
+            would_be = content_hash_of(manifest)
+            if would_be == str(existing.get("content_hash", "")):
+                published.append(
+                    {
+                        "artifact": artifact,
+                        "published": False,
+                        "dataset_version": str(existing.get("dataset_version", "")),
+                        "rows": len(rows),
+                        "reason": "identical content already published; R-13 refuses an "
+                        "overwrite and none was attempted",
+                        **extra,
+                    }
+                )
+                continue
+            raise IntegrityError(
+                manifest_path,
+                f"a DIFFERENT driver product is already published under {artifact!r} "
+                f"(published content_hash {existing.get('content_hash', '')}, this run's "
+                f"{would_be}); TE 13.3 requires a new version rather than an overwrite, and "
+                f"choosing it is an owner act (R-13)",
+            )
+        try:
+            written = write_release(directory, manifest, release_root=release_root)
+        except ReleaseError as exc:
+            raise IntegrityError(directory, f"the {artifact} release was refused: {exc}") from exc
+        published.append(
+            {
+                "artifact": artifact,
+                "published": True,
+                "dataset_version": written["dataset_version"],
+                "rows": len(rows),
+                "absent_values": absent,
+                "release_dir": str(directory.relative_to(workspace)),
+                **extra,
+            }
+        )
+    return published
 
 
 # =======================================================================================

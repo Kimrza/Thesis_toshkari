@@ -122,7 +122,7 @@ import math
 from collections.abc import Callable, Collection, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from src.data.acquisition import guard_egress
 from src.data.config import (
@@ -137,6 +137,9 @@ __all__ = [
     "DIAGNOSTIC_ONLY_SERIES",
     "DECLARED_STATUS_ONLY_SERIES",
     "DRIVER_PRODUCERS",
+    "KP_MISSING",
+    "parse_kp_ap_wdc",
+    "parse_hpo_v2",
     "PROVENANCE_FIELDS",
     "GRADE_USES",
     "trailing_mean",
@@ -189,6 +192,81 @@ DRIVER_PRODUCERS: Mapping[str, str] = {
     "f107_81_trailing": "nrcan_f107_observed_daily_median_2022",
     "dst": "kyoto_wdc_dst_2022",
 }
+
+#: The provider's own missing marker in the WDC Kp/ap format. A value carrying it is
+#: ABSENT, and is released as an explicit empty cell — never as -1, and never filled
+#: (D-5; D-10.2: gaps are stored as explicit NaN at acquisition time).
+KP_MISSING: Final[int] = -1
+
+
+def _kp_thirds(code: int) -> float:
+    """WDC two-digit Kp code -> numeric thirds (Kp PDF section 5: 0/3/7 = 0, 1/3, 2/3)."""
+    whole, frac = divmod(code, 10)
+    thirds = {0: 0.0, 3: 1 / 3, 7: 2 / 3}
+    if frac not in thirds:
+        raise IntegrityError("Kp WDC code", f"{code!r} has an unrecognised thirds digit")
+    return round(whole + thirds[frac], 3)
+
+
+def parse_kp_ap_wdc(path: Path) -> dict[tuple[int, int, int, int], tuple[float, int]]:
+    """`Kp_*YYYY.wdc` -> {(y, m, d, interval start hour): (Kp, ap)}; fixed columns.
+
+    THE one home for this format (moved here 2026-09-23 from
+    `scripts/audit_gfz_drivers.py`, which now imports it): the audit script and the driver
+    release must read the provider's bytes identically, and two parsers of one format drift.
+    A duplicate epoch is an integrity failure, never a last-write-wins (TC-12).
+    """
+    out: dict[tuple[int, int, int, int], tuple[float, int]] = {}
+    for line_no, raw in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
+        if not raw.strip() or raw.startswith("#"):
+            continue
+        line = raw.rstrip("\n")
+        if len(line) < 62:
+            raise IntegrityError(f"{Path(path).name}:{line_no}", "WDC line shorter than 62 chars")
+        yy, mm, dd = int(line[0:2]), int(line[2:4]), int(line[4:6])
+        year = 1900 + yy if yy >= 32 else 2000 + yy
+        kps = [line[12 + 2 * i : 14 + 2 * i] for i in range(8)]
+        aps = [line[31 + 3 * i : 34 + 3 * i] for i in range(8)]
+        for slot in range(8):
+            kp_txt, ap_txt = kps[slot].strip(), aps[slot].strip()
+            kp_code = int(kp_txt) if kp_txt else KP_MISSING
+            ap_val = int(ap_txt) if ap_txt else KP_MISSING
+            key = (year, mm, dd, slot * 3)
+            if key in out:
+                raise IntegrityError(f"{Path(path).name}:{line_no}", f"duplicate epoch {key}")
+            kp_val = float(KP_MISSING) if kp_code < 0 else _kp_thirds(kp_code)
+            out[key] = (kp_val, ap_val)
+    return out
+
+
+def parse_hpo_v2(path: Path) -> dict[tuple[int, int, int, int], tuple[float, int]]:
+    """`Hp60ap60doi_YYYY.txt` -> {(y, m, d, interval start hour): (Hp60, ap60)}.
+
+    THE one home for this format (moved here 2026-09-23; see `parse_kp_ap_wdc`). D-40
+    selects the DOI 10.5880/Hpo.0002 V2.0 product; V3.0 is a comparator only and is never
+    parsed as an input by this function's callers.
+    """
+    out: dict[tuple[int, int, int, int], tuple[float, int]] = {}
+    for line_no, raw in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
+        if not raw.strip() or raw.startswith("#"):
+            continue
+        parts = raw.split()
+        if len(parts) != 10:
+            raise IntegrityError(
+                f"{Path(path).name}:{line_no}", f"expected 10 columns, got {len(parts)}"
+            )
+        year, mm, dd = int(parts[0]), int(parts[1]), int(parts[2])
+        start_hour = float(parts[3])
+        if start_hour != int(start_hour):
+            raise IntegrityError(
+                f"{Path(path).name}:{line_no}", f"non-integer start hour {parts[3]}"
+            )
+        key = (year, mm, dd, int(start_hour))
+        if key in out:
+            raise IntegrityError(f"{Path(path).name}:{line_no}", f"duplicate epoch {key}")
+        out[key] = (float(parts[7]), int(parts[8]))
+    return out
+
 
 #: Series whose reanalysed-value verifiability is DECLARED-STATUS ONLY (R-63's
 #: Constraint): F10.7 (D-22: seven columns, no provenance column; D-21: publication

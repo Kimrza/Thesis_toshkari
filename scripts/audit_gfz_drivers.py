@@ -142,10 +142,20 @@ from src.data.config import IntegrityError, _parse_yaml  # noqa: E402
 from src.data.experiment_registry import append_registry_event  # noqa: E402
 from src.data.prepared import resolve_target_identity  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
+from src.external.spaceweather import (  # noqa: E402
+    KP_MISSING as _KP_MISSING,
+)
 from src.external.spaceweather import assert_gfz_cross_products  # noqa: E402
+from src.external.spaceweather import (  # noqa: E402
+    parse_hpo_v2 as parse_hpo,
+)
+from src.external.spaceweather import (  # noqa: E402
+    parse_kp_ap_wdc as parse_wdc,
+)
 
 YEAR = 2022
-KP_MISSING = -1
+# KP_MISSING now lives with the parser it belongs to (src/external/spaceweather.py).
+KP_MISSING = _KP_MISSING
 HP_MISSING = -1.0
 USER_AGENT = "TEC-thesis-driver-audit (Kimia Rezaei; scripts/audit_gfz_drivers.py)"
 
@@ -251,60 +261,11 @@ def _urllib_transport(spec: Mapping[str, Any], offset: int, timeout: float) -> T
 # --- parsing --------------------------------------------------------------------------
 
 
-def _kp_third(code: int) -> float:
-    """WDC two-digit Kp code -> numeric thirds (PDF §5: 0/3/7 = 0, 1/3, 2/3)."""
-    whole, frac = divmod(code, 10)
-    thirds = {0: 0.0, 3: 1 / 3, 7: 2 / 3}
-    if frac not in thirds:
-        raise IntegrityError("Kp WDC code", f"{code!r} has an unrecognised thirds digit")
-    return round(whole + thirds[frac], 3)
-
-
-def parse_wdc(path: Path) -> dict[tuple[int, int, int, int], tuple[float, int]]:
-    """`Kp_*YYYY.wdc` -> {(y, m, d, start_hour): (Kp, ap)}; fixed columns per PDF §5."""
-    out: dict[tuple[int, int, int, int], tuple[float, int]] = {}
-    for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        if not raw.strip() or raw.startswith("#"):
-            continue
-        line = raw.rstrip("\n")
-        if len(line) < 62:
-            raise IntegrityError(f"{path.name}:{line_no}", "WDC line shorter than 62 chars")
-        yy, mm, dd = int(line[0:2]), int(line[2:4]), int(line[4:6])
-        year = 1900 + yy if yy >= 32 else 2000 + yy
-        kps = [line[12 + 2 * i : 14 + 2 * i] for i in range(8)]
-        aps = [line[31 + 3 * i : 34 + 3 * i] for i in range(8)]
-        for slot in range(8):
-            kp_txt, ap_txt = kps[slot].strip(), aps[slot].strip()
-            kp_code = int(kp_txt) if kp_txt else KP_MISSING
-            ap_val = int(ap_txt) if ap_txt else KP_MISSING
-            key = (year, mm, dd, slot * 3)
-            if key in out:
-                raise IntegrityError(f"{path.name}:{line_no}", f"duplicate epoch {key}")
-            kp_val = float(KP_MISSING) if kp_code < 0 else _kp_third(kp_code)
-            out[key] = (kp_val, ap_val)
-    return out
-
-
-def parse_hpo(path: Path) -> dict[tuple[int, int, int, int], tuple[float, int]]:
-    """`Hp60ap60doi_YYYY.txt` -> {(y, m, d, start_hour): (Hp60, ap60)}; blank-separated."""
-    out: dict[tuple[int, int, int, int], tuple[float, int]] = {}
-    for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        if not raw.strip() or raw.startswith("#"):
-            continue
-        parts = raw.split()
-        if len(parts) != 10:
-            raise IntegrityError(
-                f"{path.name}:{line_no}", f"expected 10 columns, got {len(parts)}"
-            )
-        year, mm, dd = int(parts[0]), int(parts[1]), int(parts[2])
-        start_hour = float(parts[3])
-        if start_hour != int(start_hour):
-            raise IntegrityError(f"{path.name}:{line_no}", f"non-integer start hour {parts[3]}")
-        key = (year, mm, dd, int(start_hour))
-        if key in out:
-            raise IntegrityError(f"{path.name}:{line_no}", f"duplicate epoch {key}")
-        out[key] = (float(parts[7]), int(parts[8]))
-    return out
+# The two provider-format parsers moved to src/external/spaceweather.py on 2026-09-23 and
+# are imported above: `parse_wdc` and `parse_hpo` are this script's historical names for
+# them, kept so nothing that reads this script has to learn a new one. ONE parser per
+# provider format exists, because the driver release and this audit must read the same
+# bytes the same way, and two copies drift (`nfr-design` c58).
 
 
 def _day(y: int, m: int, d: int) -> dict[str, int]:

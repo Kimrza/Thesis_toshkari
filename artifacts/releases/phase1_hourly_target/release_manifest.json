@@ -1,8 +1,9 @@
 {
   "change_record_id": "CR-2026-09-23-TARGET-RELEASE-OPTION-A",
-  "content_hash": "308ed84d70d5ad561de1e3faf59401d634aba445ec4f7c3419724fd5050c976d",
-  "created_at_utc": "2026-09-23T13:42:46.389319+00:00",
-  "dataset_version": "308ed84d70d5",
+  "content_hash": "6f25bd8076f126c3971954a553eb8452efd567aee6bb10f3884a009fc0fcbfd1",
+  "created_at_utc": "2026-09-23T14:15:58.535378+00:00",
+  "dataset_version": "6f25bd8076f1",
+  "evidence_class": "fixture_plumbing",
   "exclusions_qc_summary": [
     {
       "count": 5,
@@ -16,6 +17,7 @@
   "feature_set_ids": [
     "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
   ],
+  "fixture_scope_id": "plumbing_7day",
   "fold_ids": [
     "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
   ],
@@ -23,7 +25,7 @@
     "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
   ],
   "output_files": {
-    "hourly_target_phase1.csv": "29a626d6180db342ea23313338f27e5d6f4d837a041829f182646527b0c36309"
+    "hourly_target_phase1.csv": "80b961a764a00662ba2fc961efe471503b68c30ace39fb4b2ef021f87a807d9b"
   },
   "processing": {
     "hourly_aggregation": "median",
@@ -97,9 +99,17 @@
       "provider": "project release (stage 00 acquisition)",
       "retrieval_date": "2026-09-23T13:41:57.991347+00:00",
       "sha256": "fac835fca6b4d928cee468eecca452c0cfdfa4640342d0aafb321788a9f7899a"
+    },
+    {
+      "citation": "consumed release dataset_version ed246781688c, content_hash ed246781688ca77e4a2b4fe2804d96f4f873693fd68eeee66e92cabac148d135",
+      "filename": "prepared_vtec_records.csv",
+      "location_date": "plumbing_7day_20260923T141514Z (created 2026-09-23T14:15:14.569869+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-09-23T14:15:14.569869+00:00",
+      "sha256": "fac835fca6b4d928cee468eecca452c0cfdfa4640342d0aafb321788a9f7899a"
     }
   ],
-  "source_manifest_id": "ed246781688c;ed246781688c;ed246781688c;ed246781688c",
+  "source_manifest_id": "ed246781688c;ed246781688c;ed246781688c;ed246781688c;ed246781688c",
   "units": {
     "largest_internal_gap_s": "s",
     "vtec_tecu": "TECU",
