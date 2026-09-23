@@ -72,6 +72,7 @@ __all__ = [
     "flattened_column_name",
     "build_windows",
     "assert_window_parity",
+    "measure_window_parity",
     "ComparisonMask",
     "build_comparison_mask",
     "assert_mask_is_comparison_wide",
@@ -414,6 +415,47 @@ def assert_window_parity(
                         f"matrix and the sequence tensor must contain the same underlying "
                         f"window values (FR-P1-04-8, WS-13)",
                     )
+
+
+def measure_window_parity(
+    matrix_records: Sequence[Mapping[str, Any]],
+    tensor: Any,
+    *,
+    sequence_columns: Mapping[str, Sequence[str]],
+    tensor_features: Sequence[str],
+) -> float:
+    """WS-13's value-level limb run as a MEASUREMENT: the largest |matrix − tensor| observed.
+
+    The tolerance this project compares against is measured from the fixtures and frozen,
+    never invented (TE 15.1), so `assert_window_parity` refuses while it is unset — which
+    leaves a measuring run unable to produce the very number the freeze needs. This function
+    is that producer: it runs the SHAPE and ORDERING limbs exactly as the assertion does
+    (they need no tolerance and a measurement over a mismatched shape would be meaningless),
+    then returns the maximum absolute difference instead of comparing it to anything.
+
+    It asserts nothing about the value and therefore discharges no acceptance row: WS-13
+    stays Pending until a tolerance is frozen and `assert_window_parity` runs against it.
+    Measuring and asserting are kept as two functions on purpose — one that reports and one
+    that refuses — so a measuring run can never be mistaken for a passing check.
+    """
+    assert_window_parity(
+        matrix_records,
+        tensor,
+        sequence_columns=sequence_columns,
+        tensor_features=tensor_features,
+        # A tolerance of infinity runs the shape and ordering limbs and can fail no value
+        # comparison; the measurement below is what the caller actually reads.
+        tolerance=float("inf"),
+    )
+    nested = tensor_as_nested(tensor)
+    largest = 0.0
+    for row_index, record in enumerate(matrix_records):
+        for feature_index, name in enumerate(tensor_features):
+            for step_index, column in enumerate(sequence_columns[name]):
+                expected = float(nested[row_index][step_index][feature_index])
+                actual = float(record[column])
+                largest = max(largest, abs(expected - actual))
+    return largest
 
 
 # --- NFR-FAIR-01: one comparison-wide mask -----------------------------------------------

@@ -117,6 +117,7 @@ from src.features.transforms import (
 from src.features.windows import (
     assert_window_parity,
     build_windows,
+    measure_window_parity,
     read_window_length,
 )
 
@@ -237,6 +238,10 @@ class FeatureBundle:
     standardized_columns: tuple[str, ...] = ()
     sequence_columns: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     tensor_features: tuple[str, ...] = ()
+    #: The largest |matrix − tensor| observed, present ONLY on a measuring run
+    #: (`measure_parity=True` with no frozen tolerance). `None` on every asserting run, so
+    #: a reader cannot mistake a measurement for a passed comparison.
+    measured_parity_diff: float | None = None
 
 
 # --- config reads ------------------------------------------------------------------------
@@ -860,6 +865,7 @@ def build_features(
     snapshot: ConfigSnapshot,
     transform: Transform | None = None,
     parity_tolerance: float | None = None,
+    measure_parity: bool = False,
     timestamp_column: str = "interval_start_utc",
     station_column: str = "station_id",
     phase: int = 2,
@@ -1115,13 +1121,25 @@ def build_features(
     tensor = tensor_from_nested(
         nested, shape=(len(nested), window_hours, len(windowed.tensor_features))
     )
-    assert_window_parity(
-        assembled,
-        tensor,
-        sequence_columns=windowed.sequence_columns,
-        tensor_features=windowed.tensor_features,
-        tolerance=parity_tolerance,
-    )
+    measured_parity: float | None = None
+    if parity_tolerance is None and measure_parity:
+        # A MEASURING run (TE 15.1): the fixture's floating-point tolerance does not exist
+        # yet and is measured from this very run, so the value-level limb reports instead of
+        # asserting. Shape and ordering are still asserted — they need no tolerance.
+        measured_parity = measure_window_parity(
+            assembled,
+            tensor,
+            sequence_columns=windowed.sequence_columns,
+            tensor_features=windowed.tensor_features,
+        )
+    else:
+        assert_window_parity(
+            assembled,
+            tensor,
+            sequence_columns=windowed.sequence_columns,
+            tensor_features=windowed.tensor_features,
+            tolerance=parity_tolerance,
+        )
 
     # --- provenance: (row, producer) resolved per column, key set == column set --------
     provenance: dict[str, dict[str, str]] = {}
@@ -1173,6 +1191,7 @@ def build_features(
         standardized_columns=standardized,
         sequence_columns=dict(windowed.sequence_columns),
         tensor_features=tuple(windowed.tensor_features),
+        measured_parity_diff=measured_parity,
     )
 
 

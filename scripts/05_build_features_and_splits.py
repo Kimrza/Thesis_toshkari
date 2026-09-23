@@ -398,9 +398,7 @@ def _registry_row(
         "artifact_manifest_path": "",
         "prediction_hash": "",
         "locked_test_accessed": False,
-        "notes": (
-            "features-and-splits run (P1-04); DEC only through the G-05 signature guard"
-        ),
+        "notes": ("features-and-splits run (P1-04); DEC only through the G-05 signature guard"),
     }
     if reason:
         row["reason"] = reason
@@ -637,9 +635,7 @@ def _load_driver_frames(
             artifact = _ARTIFACT_OF_SERIES[series]
             observations = _interval_observations(released[artifact], value_column=series)
             lag_hours = float(entry["safe_lag_hours"])
-            selection = select_lagged_series(
-                observations, epochs=epochs, safe_lag_hours=lag_hours
-            )
+            selection = select_lagged_series(observations, epochs=epochs, safe_lag_hours=lag_hours)
             selected = RecordFrame(selection)
             selected.attrs["producing_artifact"] = artifact
             selected.attrs["observations"] = observations
@@ -820,7 +816,9 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     partitions = build_apparatus_partitions(scope, embargo_hours=read_embargo_hours(snapshot))
     stamp_base = stamp_for_manifest(scope)
 
-    target, drivers = _load_release_inputs(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))  # refuses honestly today (TE 18.3)
+    target, drivers = _load_release_inputs(
+        snapshot, fixture_scope_id=entry.get("fixture_scope_id")
+    )  # refuses honestly today (TE 18.3)
     matrix = build_availability_matrix(snapshot, drivers=drivers)
     assert_lags_safe(matrix)
     registry = load_registry(snapshot)
@@ -829,6 +827,7 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     written: list[str] = []
     excluded_embargo: dict[str, int] = {}
     scored_rows: list[int] = []
+    parity_diffs: list[float] = []
     for partition in partitions:
         pid = partition.partition_id
         train_start, train_end = training_range(partition)
@@ -840,6 +839,11 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             "partitions": partitions,
             "snapshot": snapshot,
             "parity_tolerance": args.parity_tolerance,
+            # TE 15.1: the fixture's floating-point tolerance is MEASURED from the fixture
+            # and frozen, never invented, so a run with no frozen tolerance measures the
+            # parity difference instead of asserting against a number that does not exist.
+            # WS-13 stays Pending either way — a measurement is not a passed check.
+            "measure_parity": args.parity_tolerance is None,
             # registry gate scoped to this run's phase (Phase 1 does not require the
             # Phase-2-only observable_codes; CR-2026-09-20-B01-PREREQS §5)
             "phase": args.phase,
@@ -848,6 +852,11 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
         raw = build_features(target, spec=train_spec, **common)
         transform = fit_transforms(raw, partition=partition)
         train = build_features(target, spec=train_spec, transform=transform, **common)
+        parity_diffs.extend(
+            bundle.measured_parity_diff
+            for bundle in (raw, train)
+            if bundle.measured_parity_diff is not None
+        )
         for bundle in (raw, train):
             bundle_dir = write_bundle(bundle, out_root)
             write_sibling_stamp(Path(bundle_dir), stamp)
@@ -862,6 +871,8 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             write_sibling_stamp(Path(bundle_dir), stamp)
             written.append(str(bundle_dir))
             scored_rows.append(len(records_of(score.matrix)))
+            if score.measured_parity_diff is not None:
+                parity_diffs.append(score.measured_parity_diff)
 
     if scored_rows:  # Rec 4: measurable here — scored feature-window rows per partition
         measurements_path = out_root / MEASUREMENTS_NAME
@@ -877,7 +888,27 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
                                 "max": max(scored_rows),
                                 "units": "rows",
                             }
-                        }
+                        },
+                        # TE 15.2 area: the fixture-derived floating-point tolerance for
+                        # WS-13's value-level limb. Reported as the LARGEST difference this
+                        # run observed between the flattened matrix and the sequence tensor;
+                        # freezing a tolerance from it is the owner's act, and until one is
+                        # frozen the limb is measured rather than asserted and WS-13 stays
+                        # Pending (TE 15.1: measured from the fixtures, never invented).
+                        **(
+                            {
+                                "permitted_floating_point_tolerances": {
+                                    "value_level_diff_tecu": {
+                                        "observed_max": max(parity_diffs),
+                                        "units": "TECU",
+                                        "measured_over_bundles": len(parity_diffs),
+                                        "status": "measured, not frozen; WS-13 Pending",
+                                    }
+                                }
+                            }
+                            if parity_diffs
+                            else {}
+                        ),
                     },
                 },
                 indent=2,
@@ -930,7 +961,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     partitions = build_partitions(snapshot)
 
     # 3. Inputs by manifest, the availability matrix and its three limbs.
-    target, drivers = _load_release_inputs(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))
+    target, drivers = _load_release_inputs(
+        snapshot, fixture_scope_id=entry.get("fixture_scope_id")
+    )
     matrix = build_availability_matrix(snapshot, drivers=drivers)
     assert_lags_safe(matrix)
     registry = load_registry(snapshot)
