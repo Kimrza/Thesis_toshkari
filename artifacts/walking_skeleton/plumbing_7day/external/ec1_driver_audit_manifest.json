@@ -43,7 +43,7 @@
         "source": "kyoto_dst/dst_provisional_2022MM.html (1 monthly files present)",
         "produced_by": "scripts/04_build_external_products.py",
         "stamp_class": "evidentiary",
-        "stamped_at_utc": "2026-09-23T15:36:02.132617+00:00"
+        "stamped_at_utc": "2026-09-23T15:38:05.904422+00:00"
       }
     },
     {
@@ -81,7 +81,7 @@
         "source": "nrcan_f107/fluxtable.txt",
         "produced_by": "scripts/04_build_external_products.py",
         "stamp_class": "evidentiary",
-        "stamped_at_utc": "2026-09-23T15:36:02.132617+00:00"
+        "stamped_at_utc": "2026-09-23T15:38:05.904422+00:00"
       }
     }
   ],

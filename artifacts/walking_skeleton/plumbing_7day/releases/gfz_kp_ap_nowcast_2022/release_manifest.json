@@ -1,0 +1,81 @@
+{
+  "change_record_id": "CR-2026-09-23-DRIVER-RELEASE-OPTION-A",
+  "content_hash": "b23eb09c9e7ce2bb45caa4301a622938321dc70924ae89bbb45cd269a6875c33",
+  "covered_window": {
+    "end": "2022-11-07",
+    "start": "2022-10-30"
+  },
+  "created_at_utc": "2026-09-23T15:38:05.933468+00:00",
+  "dataset_version": "b23eb09c9e7c",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 0,
+      "reason": "provider value absent at this epoch: released as an explicit empty cell, never as the provider's sentinel and never filled (D-5; D-10.2)"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "plumbing_7day",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "kp_ap_3h.csv": "2df7238eb765be76be95bba625afa14c0bacee1b7039da8f0ae3dc408d20d491"
+  },
+  "processing": {
+    "hourly_aggregation": "none: values are released at the provider's own cadence, unaggregated",
+    "parameters": [
+      "ap",
+      "kp"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "selected_cell_bounds": {
+      "time_indexed_only": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here"
+    },
+    "station_coordinate_to_cell_rule": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "producing_artifact": "gfz_kp_ap_nowcast_2022",
+  "release_status": "nowcast",
+  "row_counts": {
+    "by_month": {
+      "2022-10": 16,
+      "2022-11": 56
+    },
+    "by_qc_stage": {
+      "as_provided_no_qc_applied": 72
+    },
+    "by_split": {
+      "unsplit_stage_04": 72
+    },
+    "by_station": {
+      "time_indexed_no_station_axis": 72
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "D-39 (archived settled nowcast Kp_now2022.wdc, DOI 10.5880/Kp.0001)",
+      "filename": "Kp_now2022.wdc",
+      "location_date": "audit_gfz_2026-09-18 (2022-11-01..2022-11-07)",
+      "provider": "GFZ",
+      "retrieval_date": "2026-09-18",
+      "sha256": "7929d16aa1a14d35dff6759c02367746438b09dd084fdc731a4052af5a7475a4"
+    }
+  ],
+  "source_manifest_id": "gfz_kp_ap_nowcast_2022:D-39 (archived settled nowcast Kp_now2022.wdc, DOI 10.5880/Kp.0001)",
+  "units": {
+    "ap": "nT",
+    "kp": "dimensionless (thirds)"
+  },
+  "window": {
+    "end": "2022-11-07",
+    "start": "2022-11-01"
+  }
+}
