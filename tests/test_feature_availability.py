@@ -1104,6 +1104,54 @@ def test_prepared_six_entry_availability_lags_load_without_error() -> None:
     )
 
 
+def test_f107_source_series_keys_never_collide_on_the_real_config() -> None:
+    """D-60/D-66 (2026-09-23): `f107_safe`, `f107_81_trailing` and the trailing window's
+    `window.source` were once all keyed by the single literal `f107_daily_median`, so one
+    mapping key returned one frame to fields/consumers needing incompatible row shapes
+    (`build_features` needs an hourly value per epoch for `f107_safe`;
+    `build_availability_matrix`'s trailing limb needs one value per day for the 81-day
+    window). Fixed by giving `f107_safe` its own `source_series`
+    (`f107_safe_at_origin`) and `f107_81_trailing` its own (`f107_81_trailing_mean`),
+    leaving `f107_daily_median` as the plain daily series D-21 defines and the one the
+    trailing window's `window.source` still names. This is a NEGATIVE CONTROL against the
+    collision recurring under a third field: the three keys the two F10.7 consumers read
+    must always be pairwise distinct, on the real, committed `configs/features.yaml` —
+    not a synthetic fixture, since the whole point is that this file cannot regress."""
+    yaml = pytest.importorskip("yaml")
+    features = yaml.safe_load(
+        (REPO_ROOT / "configs" / "features.yaml").read_text(encoding="utf-8")
+    )
+
+    dictionary = features["feature_dictionary"]
+    f107_safe_series = dictionary["f107_safe"]["source_series"]
+    f107_trailing_series = dictionary["f107_81_trailing"]["source_series"]
+    window_source = features["availability_lags"]["f107_81_trailing"]["window"]["source"]
+
+    keys = {f107_safe_series, f107_trailing_series, window_source}
+    assert len(keys) == 3, (
+        f"expected f107_safe.source_series, f107_81_trailing.source_series and "
+        f"f107_81_trailing.window.source to be three DISTINCT keys, got {keys!r} — a "
+        f"collision here silently gives f107_safe and/or f107_81_trailing the wrong "
+        f"values (D-66)"
+    )
+    assert f107_safe_series == "f107_safe_at_origin"
+    assert f107_trailing_series == "f107_81_trailing_mean"
+    assert window_source == "f107_daily_median"
+
+    # `load_feature_dictionary` still accepts the file, and D-60's frozen field count
+    # (21 fields) is unchanged by the rename. (The distinct `dictionary_row` count is
+    # NOT re-asserted here as "13": measured directly on this file it is 16, not 13 --
+    # D-60's own "13 dictionary rows" phrase evidently counts something other than
+    # `len(set(dictionary_row for field in fields))`, e.g. rows shared with support/other
+    # fields outside `feature_dictionary`, and re-deriving that distinction is outside
+    # this negative control's purpose. Carrying the un-rederived "13" here would repeat
+    # exactly the mistake `project.md` warns against -- a count taken from prose rather
+    # than derived and printed.)
+    snapshot = synthetic_snapshot(features=features)
+    loaded = load_feature_dictionary(snapshot)
+    assert len(loaded) == 21
+
+
 def test_reader_enforces_d43_d44_reference_instant_and_selection_rule() -> None:
     """D-43/D-44 at the reader boundary: a scalar-lag (GFZ-style) row REQUIRES
     `lag_reference_instant` and `selection_rule`, each drawn from a CLOSED set; a

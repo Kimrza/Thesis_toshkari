@@ -120,6 +120,41 @@ supplying the two families with target history from 1 December.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
 
+> ## ⚠️ RULED 2026-09-24 (Student) — option B approved, but NOT YET CODE-CONSISTENT
+>
+> The Student approved the alternative: **amend D-28's disclosure from 30 to 29 days**,
+> zero additional December contact. Written into `evidence/DECISIONS.md` D-28 as a dated
+> amendment. **This ruling is not yet implementable as recorded**, for two reasons measured
+> 2026-09-24, both detailed in the D-28 amendment text and in
+> `governance/CHANGE_RECORD_2026-09-24_d28_29day_amendment.md`:
+>
+> 1. `src/evaluation/guards.py:scored_window_statement` derives its disclosed span from the
+>    ONE global `embargo_hours` value shared with the Mandated 24-hour fold embargo used by
+>    every partition — the code today still computes and enforces "30 days" for DEC; nothing
+>    currently produces 29 without either a December-specific mechanism (not built) or
+>    incorrectly widening the shared embargo for F1–F4 too (would violate the Mandated rule).
+> 2. **D-59** (Student+Supervisor countersigned 2026-09-21) explicitly freezes the December
+>    day range at 30 days and is live in `configs/experiment.yaml:376`
+>    (`december_day_range: "2022-12-02..2022-12-31"`), enforced by
+>    `src/evaluation/regimes.py:read_december_day_range`. This amendment **directly
+>    contradicts D-59** and does not resolve it — D-59 carries its own supervisor
+>    countersignature and was left untouched, since altering it is outside a Student-only
+>    ruling's authority.
+>
+> **Consequently, the planned 55-file "sweep to 29" was NOT performed** against the
+> project's substantive design/governance artifacts (functional-design docs, historical
+> change records, prior board reports) — doing so now would leave those files asserting 29
+> while the code and D-59 both still compute/enforce 30, which is a *worse* inconsistency
+> than the one this ruling set out to fix. Only this document and
+> `governance/REC_13_60_STATUS_2026-09-24.md` (both live tracking documents this thread
+> owns) were updated to reflect "ruled, blocked on D-59 reconciliation."
+>
+> **Needs from the owner before this can close:** a decision on reconciling D-59 with this
+> amendment — amend D-59 too (needs Supervisor, since it carries their countersignature),
+> revert to option A (the bounded 1-Dec read) after all, or hold this amendment as
+> aspirational/pending until D-59 is separately reopened. Full analysis in
+> `governance/CHANGE_RECORD_2026-09-24_d28_29day_amendment.md`.
+
 ---
 
 ## §3 — December-reading tests: the authorization occasion (Recommendation 32 and the deselected trio)
@@ -160,6 +195,64 @@ coverage audit — performance-blind, recorded, and not the one-shot event.
 cannot reach a green verdict without it.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
+
+> ## ✅ RULED 2026-09-24 — approved by the owner, executed
+>
+> **Run, once, under the governed environment.** `conda activate tec-thesis-311` (Python
+> 3.11.16 — the governed pin; confirmed by version check, not assumed) was located and used
+> after `README.md`'s 2026-09-24 documentation commit (`b894284`) recorded it. The three
+> named modules ran together with the rest of the Phase-1-reachable §18.3 critical set:
+> ```
+> pytest tests/test_prepared_target_schema.py tests/test_feature_availability.py
+>   tests/test_iri_denial.py tests/test_split_embargo.py tests/test_train_only_transforms.py
+>   tests/test_common_masks.py tests/test_checkpoint_restore.py tests/test_bootstrap.py
+>   tests/test_release_hashes.py tests/test_acquisition_window.py tests/test_phase_boundary.py
+>   tests/test_locked_test_guard.py --junitxml=artifacts/exec_evidence/run_2026-09-24/junit_final.xml
+> ```
+> **Result: 766 tests, 2 failures, 0 errors.** Both failures are the pre-existing,
+> already-documented self-referential chokepoint-scanner false positives in
+> `test_release_hashes.py` and `test_phase_boundary.py` (each module's own
+> `Path(__file__).read_text()` flags itself; see the 2026-09-23 note on this document's own
+> §7-equivalent). `test_acquisition_window.py`: clean. **`test_locked_test_guard.py`'s
+> orphan-reconciliation test, previously failing, now PASSES** (66/66) — measured, not
+> assumed; whatever closed it is not attributed here without further investigation, only the
+> observed state recorded.
+>
+> **Purpose recorded is `coverage_audit`, not `guard_verification`.** Each of the three
+> modules hardcodes its `AccessRecord.purpose` literal in its own source
+> (`tests/test_release_hashes.py:110`, `tests/test_acquisition_window.py:98`,
+> `tests/test_phase_boundary.py:125`). Introducing a new `"guard_verification"` value would
+> mean editing the three gate-critical modules themselves — exactly the class of change this
+> session's general rules say to flag rather than make unilaterally. The run proceeded under
+> the existing, already-accepted `coverage_audit` purpose value instead of inventing a new
+> one; `performance_inspected: false` is unchanged and correct either way.
+>
+> **Where the access rows landed.** Not `evidence/test_run_access_log.jsonl` — that file is
+> explicitly reserved for real governed accesses (module comment, all three files) and is
+> untouched (`git status` shows no change). The rows went to
+> `artifacts/exec_evidence/test_access_log.jsonl`, the dedicated, gitignored sidecar the
+> three modules route through (`ACCESS_LOG` constant, all three files) — this **is** Rec 1's
+> "Option 2 — separate the logs" disposition already in effect, not a defect. The sidecar grew
+> by 72 rows this run (1684 → 1756, measured before/after).
+>
+> **`aws_ai_dlc_preflight_report` updated**, from the junit evidence:
+> `artifacts/preflight/aws_ai_dlc_preflight_report_20260923T214427Z.json`. The "release
+> hashes" limb moved from **`absent`** (no run had ever produced evidence) to
+> **`failed`** — 233 passed, 1 failed (the known chokepoint false positive) — which is
+> honest, execution-backed evidence, not a green result. TE §18.3's own rule holds:
+> "absent evidence is absent, never passed." Overall verdict stays `not_green`
+> (`limbs_not_passed: ['critical_tests']`); the other three limbs (`zero_tbd`,
+> `declared_sources`, `supervisor_signoff`) are unaffected and still `passed`.
+>
+> **Not swept:** the TA-15 / acquisition-window-control / phase-boundary-control rows as
+> they appear inside dozens of per-unit AI-DLC artifacts (`functional-design`,
+> `nfr-design`, `code-summary.md` files across at least four units). The authoritative
+> evidence pointer is recorded here and in the fresh preflight report; a full textual sweep
+> of every per-unit mention is outside this pass's scope and is flagged, not silently
+> skipped, per `project.md`'s own sweep-completeness rule.
+>
+> **Disclosed to the Supervisor at the next gate**, as stated above. Independent of Layer‑2
+> §2 and of G-05.
 
 ---
 

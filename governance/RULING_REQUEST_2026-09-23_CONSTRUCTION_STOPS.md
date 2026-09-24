@@ -240,6 +240,36 @@ current set.
 **Recommendation: option 1**, adopted under D-60's existing scope as §1 was, with no new
 D-number unless you want one.
 
+> ## ✅ RULED 2026-09-24 — option 1 approved by the owner, and recorded
+>
+> The code change was already implemented and committed under this scope on 2026-09-23
+> (`configs/features.yaml`: `f107_safe.source_series` → `f107_safe_at_origin`); this
+> ruling supplies the missing owner decision, the D-number home (**D-66**, given its own
+> number rather than folded silently into D-60), and the verification obligation this
+> section required.
+>
+> **Verified 2026-09-24, not merely reasoned:** `load_feature_dictionary` still accepts 21
+> fields on the real `configs/features.yaml`. A new negative control asserts
+> `f107_safe.source_series`, `f107_81_trailing.source_series` and
+> `f107_81_trailing.window.source` are pairwise distinct
+> (`tests/test_feature_availability.py::test_f107_source_series_keys_never_collide_on_the_real_config`),
+> guarding this exact collision against recurring under a third field. Full
+> `test_feature_availability.py`: **86/86 passed**. On the already-committed fixture bundle
+> (`FIX-NOV-FOLD-01__train__untransformed`), `f107_safe` and `f107_81_trailing` are
+> confirmed to carry genuinely different measured values row-for-row — direct execution
+> evidence the fix produces the intended (non-collapsed) result, not only that the config
+> parses.
+>
+> **Not run**: the full 7-stage fixture ladder into a fresh scratch directory. The
+> committed bundles already reflect a completed run built under this exact fix (§6's
+> earlier record), which is stronger evidence than a fresh re-run would add, and re-running
+> in place would hit stage 05's correct "bundle never overwritten" refusal (TE §13.3)
+> against the same committed directories — so it was not attempted here.
+>
+> **D-66 text** is in `evidence/DECISIONS.md`. **Countersigned by the Student, 2026-09-24**
+> (updated here 2026-09-24; the countersignature/date line is no longer blank). See
+> `governance/CHANGE_RECORD_2026-09-24_ready_to_rule_drafts.md` §A for the drafting record.
+
 ### What is already done and works, so you can see where this sits
 
 Both approved items are implemented, executed and committed:
@@ -286,9 +316,18 @@ is a decision rather than a drift.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
 
----
-
-## §5 — STOP: a single-station fixture cannot fit `station_lat`, whose frozen normalization is train-only standardize
+> ## ✅ RULED 2026-09-24 — `git mv`, option (2)-equivalent, executed
+>
+> Confirmed first, by grep across every `.py` file, that nothing hardcodes
+> `artifacts/releases/plumbing_7day_*` (the release root split already made this
+> unreachable in production code, and no test module names a specific timestamp). All five
+> directories moved with `git mv` to
+> `artifacts/walking_skeleton/plumbing_7day/releases_preruling/<name>/`, preserving bytes
+> exactly — `git diff --cached --stat` shows **0 insertions, 0 deletions** across all ten
+> moved files, confirming byte-identity. `artifacts/releases/` now holds only the four
+> governed driver/target directories, no fixture-run directory remains under the governed
+> root. Not yet committed — left staged for the owner's own commit, per this project's
+> practice that a commit is a human act. — STOP: a single-station fixture cannot fit `station_lat`, whose frozen normalization is train-only standardize
 
 *Raised 2026-09-23 after §1 and §3 were approved and the loader was built. The ladder now
 reaches the feature build and gets all the way through it — this is the first thing it
@@ -635,3 +674,21 @@ family under a frozen receipt, and neither is inside what was approved for this 
 neither was made.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
+
+> ## Partially resolved by measurement, 2026-09-24; remainder STOPPED, not fixed
+>
+> **The third failure named above (`test_locked_test_guard.py`'s orphan reconciliation) no
+> longer reproduces**, measured under the governed `tec-thesis-311` (Python 3.11.16)
+> environment: `test_locked_test_guard.py` run alongside `test_phase_boundary.py` in the
+> same session — **66/66 passed**. Not attributed to any specific prior change here; only
+> the observed, current state is recorded. `HISTORICAL_TEST_ORPHANS` was left untouched.
+>
+> **The two self-referential chokepoint-scanner false positives are unchanged and were NOT
+> fixed.** Confirmed again under the governed environment: same two failures, same lines
+> (`test_release_hashes.py:606`, `test_phase_boundary.py:669`). Fixing either means editing
+> `UNRESTRICTED_READ_RECEIVERS`/`SOURCE_TREE_ONLY_READERS` inside the two named §18.3
+> critical modules themselves. This session's owner instruction was explicit that editing
+> the locked-test-guard family requires a STOP if it touches something frozen rather than a
+> silent workaround, and this section's own original text already states these edits are
+> "outside what was approved for this session" — so neither edit was made. **Flagged for a
+> separate ruling, not resolved here.**

@@ -32,3 +32,40 @@ regexes = [
     # The literal sentinel used across governed configs; matches nothing secret.
     '''TBD — freeze gate''',
 ]
+# --- DATA-16 / Recommendation 39: historical personal-email exception -----------------
+# Owner-approved 2026-09-24 (CHANGE_RECORD_2026-09-24_email_finding_rescoped.md §B-1,
+# option (a)). TOML forbids a second `[[allowlist]]` array-of-tables once `[allowlist]`
+# is already defined as a single table (verified: a `[[allowlist]]` attempt here fails
+# to parse — "Cannot overwrite a value"), so this exception is expressed as a `commits`
+# entry on THIS SAME table rather than the originally-drafted separate regex, to avoid
+# widening the `paths`/`regexes` entries above to every commit (gitleaks combines a
+# table's `paths`/`regexes`/`commits` with OR semantics: adding the email as a bare
+# `regexes` entry would have allowlisted it in ANY file at ANY commit, including the
+# two live commit-author-metadata quotes in
+# `features-and-splits/code-generation/code-summary.md` — exactly the overlap with
+# §B-3 the owner instructed to keep separate. Scoping by `commits` alone avoids that:
+# it exempts findings inside this one commit's diff, and does not touch or loosen the
+# `paths`/`regexes` entries declared above, which remain unconditional as before).
+#
+# Scope, exactly: ONE historical commit, the repository's initial commit, which
+# introduced the notebook carrying the literal (701 lines added, nothing else touched
+# — verified `git show --stat 33d231b`). Re-derived 2026-09-24, not carried from the
+# original (superseded) "four commits" claim in finding DATA-16 / Rec 39:
+#   commit  33d231b5ea83265ef26a9c8eb0e51b4431ea96ce  (2026-08-17, initial commit)
+#   file    notebooks/madrigal_phase1_coverage_audit.ipynb (only file this commit touched)
+# The next (and only other) commit touching that file, 4cdd549 (2026-09-20), already
+# removed the literal; it was redacted from the three live governance/requirements
+# markdown files that had been quoting it, 2026-09-24 (§B-1, same change record).
+#
+# Explicitly NOT covered here: the same email as commit-AUTHOR metadata (git
+# `author`/`committer` fields, not file content) on 101 of this repository's 102
+# commits. That is a structurally different surface no gitleaks content scan reaches,
+# and is accepted-and-disclosed separately under §B-3 of the same change record and the
+# G-09 gate record — never merged into this file-content entry.
+#
+# VERIFICATION CAVEAT: not re-verified against a live gitleaks 8.18.4 run this session
+# (no scan tool was invoked; verification here is by `git grep`/`git log` over blob
+# content, reported separately). The Student should confirm with
+# `scripts/gate_secret_scan.py` at the next gate run before treating TA-22 as passing
+# on the strength of this file alone.
+commits = ["33d231b5ea83265ef26a9c8eb0e51b4431ea96ce"]
