@@ -75,17 +75,24 @@ import hashlib
 import json
 import os
 import re
-from collections.abc import Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 from src.data.config import (
     CHARACTERISED_DURABILITY_PLATFORMS,
+    ConfigSnapshot,
     IntegrityError,
     LockedTestError,
     resolve_platform_roots,
 )
+
+# Deferred-style imports, added 2026-09-24 for `read_persistence_history_lookup` only.
+# Neither `src.data.splits` nor `src.features._frames` imports this module (verified by
+# grep before adding these), so this stays acyclic.
+from src.data.splits import verify_g05_signature  # noqa: E402
+from src.features._frames import records_of  # noqa: E402
 
 __all__ = [
     "RESTRICTED_ROOT",
@@ -102,6 +109,9 @@ __all__ = [
     "december_driver_exclusion_class",
     "DecemberCustodyEntry",
     "december_custody_inventory",
+    "PERSISTENCE_HISTORY_CALLERS",
+    "PERSISTENCE_HISTORY_DAY",
+    "read_persistence_history_lookup",
 ]
 
 RESTRICTED_ROOT: Final[str] = "evidence/locked_test_restricted"
@@ -250,6 +260,7 @@ PURPOSES: Final[frozenset[str]] = frozenset(
         "locked_evaluation",
         "acquisition_read",
         "acquisition_write",
+        "persistence_history",
     }
 )
 
@@ -520,6 +531,168 @@ def open_restricted(
         ) from exc
 
     return resolved
+
+
+#: D-28 option (b), `RULING_REQUEST_2026-09-21_GOV-CG-01_OPEN_ITEMS.md` §2 Option A (2026-09-24
+#: post-receipt amendment): the ONLY two model_ids that may invoke
+#: `read_persistence_history_lookup`. Both are the unfitted difficulty-control families whose
+#: `y_hat(t) = y(t - lag_hours)` lookup needs history strictly before the scored window's
+#: first row (`src.models.persistence`). Any other caller is refused by name.
+PERSISTENCE_HISTORY_CALLERS: Final[frozenset[str]] = frozenset({"M-01", "M-02"})
+
+#: The single day this mechanism may ever return values for -- 2022-12-01, the one day D-28's
+#: 24-hour embargo excludes from the scored window. Never widened: a caller asking for any
+#: other day is refused (condition (i) -- no 1-Dec row is ever SCORED is enforced by
+#: `src.models.persistence`'s own indexing, which never asks this function for a day inside
+#: the scored window in the first place; this bound is the second, independent check).
+PERSISTENCE_HISTORY_DAY: Final[str] = "2022-12-01"
+
+
+def read_persistence_history_lookup(
+    snapshot: ConfigSnapshot,
+    *,
+    model_id: str,
+    g05_signature: str | None,
+    path: Path,
+    loader: Callable[[], Any],
+    registry: Path,
+    now: _dt.datetime | None = None,
+) -> dict[tuple[str, _dt.datetime], float]:
+    """The bounded, logged, post-G-05 lookup of 2022-12-01 target history for M-01/M-02 ONLY.
+
+    D-28 option (b) (`governance/CHANGE_RECORD_2026-09-24_d28_option_a_bounded_read.md`):
+    recovers the disclosed 30-day scored set (D-28/D-59) without amending either decision, by
+    letting the two unfitted persistence baselines read exactly one day of history strictly
+    before the scored window they cannot otherwise forecast into. Five conditions, each
+    enforced here or at the one other place named:
+
+    1. No 1-Dec row is ever SCORED -- enforced independently, by construction, in
+       `src.models.persistence`: `persistence_rows` iterates `bundle_index(score_bundle)`,
+       whose index is the embargo-trimmed frame (2-31 Dec only); this function's returned
+       values are read from via `series.get((station, stamp - offset))`, never as a `stamp`
+       that could itself be scored. This function additionally refuses to return anything
+       outside `PERSISTENCE_HISTORY_DAY` as its own, second check.
+    2. Only M-01/M-02 -- `model_id not in PERSISTENCE_HISTORY_CALLERS` raises.
+    3. Routed through `open_restricted`, logged -- every call appends a real `AccessRecord`
+       with `purpose="persistence_history"`, `performance_inspected=False`,
+       `locked_test_accessed=True`, through the same one-door chokepoint every other
+       restricted-root read uses.
+    4. Gated to post-G-05 -- `g05_signature` is verified with the SAME `verify_g05_signature`
+       (`src.data.splits`) `materialise_locked_partition` already uses; a missing or
+       non-verifying signature refuses, exactly as the DEC partition materialiser does.
+    5. Frozen under its own D-number before use -- `configs/experiment.yaml:
+       persistence_history_lookup.authorized` must be `True` AND `.decision` must cite a
+       real D-number (a string starting with `"D-"`, mirroring `resolve_budget_rule`'s own
+       decision-citation check); absent, `False`, or a `TBD — freeze gate` sentinel on
+       EITHER field refuses. **This is the mechanism's own kill switch**: as drafted 2026-09-24
+       (`governance/CHANGE_RECORD_2026-09-24_d28_option_a_mechanism_built.md`). Ruled as
+       **D-68** (2026-09-24, `evidence/DECISIONS.md`): `configs/experiment.yaml` now carries
+       `authorized: true` / `decision: "D-68"`, and this function activates for calls that
+       also satisfy conditions (i)-(iv). Before D-68 it refused unconditionally on every
+       call, exactly as condition (v) requires; the kill switch remains live for any FUTURE
+       supersession (flipping `authorized` back to `false` re-inerts the mechanism).
+
+    Parameters
+    ----------
+    path
+        The actual restricted-root artifact this call reads (the same path the DEC loader's
+        own `open_restricted` call already logs against) -- passed through to `open_restricted`
+        so the access row names the real file, not a generic root (ADR-03/R-28: one door,
+        auditable).
+    loader
+        A zero-argument callable returning the UNEMBARGOED December target object (the same
+        shape `materialise_locked_partition`'s own loader returns, pre-embargo) -- this
+        function filters it to `PERSISTENCE_HISTORY_DAY` rows itself; the loader itself never
+        calls `open_restricted` again (this function already did, before calling it).
+
+    Raises
+    ------
+    LockedTestError
+        on any of the 5 conditions above; on a loader returning a row outside
+        `PERSISTENCE_HISTORY_DAY`.
+    IntegrityError
+        a target row missing the three D-17 columns this function reads (mirrors
+        `src.models.train.target_series`'s own check).
+    """
+    if model_id not in PERSISTENCE_HISTORY_CALLERS:
+        raise LockedTestError(
+            "read_persistence_history_lookup",
+            f"model_id {model_id!r} is not one of {sorted(PERSISTENCE_HISTORY_CALLERS)}; "
+            f"only the two unfitted persistence baselines may read 1-December history "
+            f"(condition (ii), D-28 option (b))",
+        )
+    experiment = snapshot.experiment if isinstance(snapshot.experiment, Mapping) else {}
+    block = experiment.get("persistence_history_lookup")
+    if not isinstance(block, Mapping):
+        raise LockedTestError(
+            "configs/experiment.yaml: persistence_history_lookup",
+            "absent; the mechanism refuses until its own D-number is ruled and this block "
+            "is authorized (condition (v), D-28 option (b))",
+        )
+    authorized = block.get("authorized")
+    decision = block.get("decision")
+    tbd = "TBD — freeze gate"
+    if authorized is not True or decision is None or str(decision).strip() in ("", tbd):
+        raise LockedTestError(
+            "configs/experiment.yaml: persistence_history_lookup",
+            f"authorized={authorized!r}, decision={decision!r}; both `authorized: true` and "
+            f"a real D-number citation are required before any read (condition (v)) -- "
+            f"absent, false, or 'TBD — freeze gate' on either field refuses",
+        )
+    if not str(decision).strip().startswith("D-"):
+        raise LockedTestError(
+            "configs/experiment.yaml: persistence_history_lookup.decision",
+            f"{decision!r} does not cite a D-number (must start with 'D-'); condition (v) "
+            f"requires the mechanism's own freeze, not a placeholder",
+        )
+    if not verify_g05_signature(snapshot, g05_signature):
+        raise LockedTestError(
+            "read_persistence_history_lookup",
+            "g05_signature is absent or fails verification against configs/data.yaml "
+            "gates.G-05; this mechanism activates only post-G-05 (condition (iv)), the same "
+            "gate materialise_locked_partition enforces for the scored DEC frame itself",
+        )
+    call_time = now if now is not None else _dt.datetime.now(_dt.timezone.utc)
+    record = AccessRecord(
+        run_id="persistence_history_lookup",
+        retrieved_at_utc=call_time.isoformat(),
+        scope="target rows for 2022-12-01 only, lookup history for M-01/M-02",
+        purpose="persistence_history",
+        performance_inspected=False,
+        locked_test_accessed=True,
+        authorization=f"D-28 option (b); model_id={model_id}; gated by its own D-number "
+        f"({decision}) and G-05",
+    )
+    open_restricted(path, record=record, registry=registry)
+    frame = loader()
+    if frame is None:
+        raise LockedTestError(
+            "read_persistence_history_lookup",
+            "loader returned no frame; the access is logged before this check, so a failed "
+            "load is a logged-but-empty read, never a silent skip",
+        )
+    out: dict[tuple[str, _dt.datetime], float] = {}
+    for index, row in enumerate(records_of(frame)):
+        for column in ("interval_start_utc", "station_id", "vtec_tecu"):
+            if column not in row:
+                raise IntegrityError(
+                    f"persistence-history row {index}",
+                    f"carries no {column!r}; the D-17 target frame is the value source",
+                )
+        stamp_raw = row["interval_start_utc"]
+        stamp = (
+            stamp_raw
+            if isinstance(stamp_raw, _dt.datetime)
+            else _dt.datetime.fromisoformat(str(stamp_raw).replace("Z", "+00:00"))
+        )
+        day = stamp.date().isoformat()
+        if day != PERSISTENCE_HISTORY_DAY:
+            continue
+        value = row["vtec_tecu"]
+        if value is None or (isinstance(value, float) and value != value):  # None or NaN
+            continue
+        out[(str(row["station_id"]), stamp)] = float(value)
+    return out
 
 
 def write_restricted(path: Path, payload: bytes, *, record: AccessRecord, registry: Path) -> Path:

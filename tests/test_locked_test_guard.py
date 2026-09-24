@@ -1962,3 +1962,261 @@ def test_every_row_of_the_closed_governed_log_is_performance_blind() -> None:
         f"{sorted(set(evaluations))}. The G-06 one-shot event has not occurred and no row "
         f"may be read as evidence that it did"
     )
+
+
+# --- D-28 option (b): `read_persistence_history_lookup` (2026-09-24, post-receipt ---------
+# --- amendment, governance-guards unit). 5 tests, one per enforced condition. -------------
+# Section 10's SD-C-02 precedent is the model: a new, additive capability disclosed and
+# tested in this same module, the READY receipt left standing as history.
+
+from src.data.locked_test import (  # noqa: E402
+    PERSISTENCE_HISTORY_CALLERS,
+    PERSISTENCE_HISTORY_DAY,
+    read_persistence_history_lookup,
+)
+
+_PH_SIGNATURE = "synthetic D-28-option-b G-05 signature -- never a real one"
+
+
+def _ph_signed_snapshot(*, authorized: bool = True, decision: str = "D-synthetic-ph"):
+    """A synthetic snapshot whose gates.G-05 verifies AND whose
+    persistence_history_lookup block is authorized -- both conditions (iv) and (v)
+    satisfied by default, so each test below can flip exactly the one condition it tests."""
+    return synthetic_snapshot(
+        data={
+            "gates": {
+                "G-05": {
+                    "status": "signed",
+                    "decision": "D-synthetic-ph",
+                    "signature_sha256": hashlib.sha256(_PH_SIGNATURE.encode("utf-8")).hexdigest(),
+                }
+            }
+        },
+        experiment={
+            "persistence_history_lookup": {"authorized": authorized, "decision": decision}
+        },
+    )
+
+
+def _ph_loader():
+    """Synthetic UNEMBARGOED December rows: 2 Dec (would be scored) and 1 Dec (history-only).
+    Real column names (interval_start_utc/station_id/vtec_tecu), synthetic values."""
+    rows = []
+    for day, hour_count in (("2022-12-01", 24), ("2022-12-02", 3)):
+        for h in range(hour_count):
+            rows.append(
+                {
+                    "interval_start_utc": f"{day}T{h:02d}:00:00Z",
+                    "station_id": "BSHM",
+                    "vtec_tecu": 5.0 + h,
+                }
+            )
+    return rows
+
+
+def _ph_tmp_registry() -> Path:
+    import tempfile
+
+    return Path(tempfile.mkdtemp()) / "persistence_history_access_log.jsonl"
+
+
+def test_ph_condition_i_never_returns_a_row_outside_1_december() -> None:
+    """(i) no 1-Dec row is ever SCORED -- this function's own second check: it silently
+    drops every row outside PERSISTENCE_HISTORY_DAY rather than returning it, so even a
+    loader that hands back the whole month cannot leak a 2-Dec (scorable) value out."""
+    lookup = read_persistence_history_lookup(
+        _ph_signed_snapshot(),
+        model_id="M-01",
+        g05_signature=_PH_SIGNATURE,
+        path=RESTRICTED_DIR,
+        loader=_ph_loader,
+        registry=_ph_tmp_registry(),
+    )
+    assert lookup, "expected at least the 24 synthetic 1-Dec rows"
+    for _station, stamp in lookup:
+        assert stamp.date().isoformat() == PERSISTENCE_HISTORY_DAY, (
+            f"a 2-Dec (or other) row reached the caller: {stamp}"
+        )
+    assert len(lookup) == 24, "expected exactly the 24 synthetic 1-Dec hours, no more"
+
+
+def test_ph_condition_ii_only_m01_m02_may_call_it() -> None:
+    """(ii) any model_id outside {M-01, M-02} is refused before any read is attempted."""
+    for bad_id in ("M-03", "M-06", "", "m-01", "M-01 "):
+        with pytest.raises(LockedTestError) as excinfo:
+            read_persistence_history_lookup(
+                _ph_signed_snapshot(),
+                model_id=bad_id,
+                g05_signature=_PH_SIGNATURE,
+                path=RESTRICTED_DIR,
+                loader=_ph_loader,
+                registry=_ph_tmp_registry(),
+            )
+        assert "not one of" in str(excinfo.value)
+    assert PERSISTENCE_HISTORY_CALLERS == frozenset({"M-01", "M-02"})
+    for good_id in sorted(PERSISTENCE_HISTORY_CALLERS):
+        lookup = read_persistence_history_lookup(
+            _ph_signed_snapshot(),
+            model_id=good_id,
+            g05_signature=_PH_SIGNATURE,
+            path=RESTRICTED_DIR,
+            loader=_ph_loader,
+            registry=_ph_tmp_registry(),
+        )
+        assert lookup
+
+
+def test_ph_condition_iii_logs_a_complete_access_record() -> None:
+    """(iii) routed through open_restricted; the registry receives one complete,
+    correctly-tagged row per call, with purpose="persistence_history"."""
+    registry = _ph_tmp_registry()
+    read_persistence_history_lookup(
+        _ph_signed_snapshot(),
+        model_id="M-02",
+        g05_signature=_PH_SIGNATURE,
+        path=RESTRICTED_DIR,
+        loader=_ph_loader,
+        registry=registry,
+    )
+    rows = [json.loads(line) for line in registry.read_text(encoding="utf-8").splitlines() if line]
+    assert len(rows) == 1, f"expected exactly one logged access row, got {len(rows)}"
+    row = rows[0]
+    assert row["purpose"] == "persistence_history"
+    assert row["locked_test_accessed"] is True
+    assert row["performance_inspected"] is False
+    assert row["run_id"] == "persistence_history_lookup"
+    assert "M-02" in row["authorization"]
+    assert row["scope"]
+    assert row["retrieved_at_utc"]
+
+
+def test_ph_condition_iv_blocked_pre_g05_succeeds_post_g05() -> None:
+    """(iv) pre-G-05: g05_signature=None refuses, and a non-verifying signature refuses,
+    with NO row appended to the registry either time. Post-G-05 (a verifying signature):
+    succeeds."""
+    registry = _ph_tmp_registry()
+    with pytest.raises(LockedTestError) as excinfo:
+        read_persistence_history_lookup(
+            _ph_signed_snapshot(),
+            model_id="M-01",
+            g05_signature=None,
+            path=RESTRICTED_DIR,
+            loader=_ph_loader,
+            registry=registry,
+        )
+    assert "g05_signature" in str(excinfo.value) or "verification" in str(excinfo.value)
+    with pytest.raises(LockedTestError):
+        read_persistence_history_lookup(
+            _ph_signed_snapshot(),
+            model_id="M-01",
+            g05_signature="the wrong artifact",
+            path=RESTRICTED_DIR,
+            loader=_ph_loader,
+            registry=registry,
+        )
+    assert not registry.exists() or registry.read_text(encoding="utf-8").strip() == "", (
+        "a pre-G-05 or non-verifying attempt must not append any access row"
+    )
+    lookup = read_persistence_history_lookup(
+        _ph_signed_snapshot(),
+        model_id="M-01",
+        g05_signature=_PH_SIGNATURE,
+        path=RESTRICTED_DIR,
+        loader=_ph_loader,
+        registry=registry,
+    )
+    assert lookup, "a verifying post-G-05 signature must succeed"
+
+
+def test_ph_condition_v_inert_until_its_own_d_number_is_authorized() -> None:
+    """(v) frozen under its own D-number before use -- the mechanism's kill switch.
+    authorized=False, a TBD decision, and a non-D-number decision string each refuse,
+    independent of conditions (i)-(iv) all being otherwise satisfied. This is the SAME
+    check configs/experiment.yaml ships today (authorized: false,
+    decision: "TBD - freeze gate") -- the mechanism is inert on the real config until
+    the owner rules and flips both fields."""
+    unauthorized = _ph_signed_snapshot(authorized=False)
+    with pytest.raises(LockedTestError) as excinfo:
+        read_persistence_history_lookup(
+            unauthorized,
+            model_id="M-01",
+            g05_signature=_PH_SIGNATURE,
+            path=RESTRICTED_DIR,
+            loader=_ph_loader,
+            registry=_ph_tmp_registry(),
+        )
+    assert "authorized" in str(excinfo.value)
+
+    tbd_decision = _ph_signed_snapshot(decision="TBD — freeze gate")
+    with pytest.raises(LockedTestError):
+        read_persistence_history_lookup(
+            tbd_decision,
+            model_id="M-01",
+            g05_signature=_PH_SIGNATURE,
+            path=RESTRICTED_DIR,
+            loader=_ph_loader,
+            registry=_ph_tmp_registry(),
+        )
+
+    not_a_d_number = _ph_signed_snapshot(decision="approved, verbally")
+    with pytest.raises(LockedTestError) as excinfo:
+        read_persistence_history_lookup(
+            not_a_d_number,
+            model_id="M-01",
+            g05_signature=_PH_SIGNATURE,
+            path=RESTRICTED_DIR,
+            loader=_ph_loader,
+            registry=_ph_tmp_registry(),
+        )
+    assert "D-number" in str(excinfo.value)
+
+    # positive control: both fields correct together succeed (already exercised by the
+    # other four tests above; restated here so this test alone proves the switch, not
+    # only its refusals).
+    lookup = read_persistence_history_lookup(
+        _ph_signed_snapshot(),
+        model_id="M-01",
+        g05_signature=_PH_SIGNATURE,
+        path=RESTRICTED_DIR,
+        loader=_ph_loader,
+        registry=_ph_tmp_registry(),
+    )
+    assert lookup
+
+
+def test_ph_the_real_config_reflects_its_actual_authorization_state() -> None:
+    """The mechanism's OWN config, as shipped, is checked against whatever it actually
+    says today -- not against a fixed assumption. D-68 (2026-09-24) authorized it: the
+    real config now carries `authorized: true` and cites the real D-number, and this
+    test asserts exactly that (not "unauthorized", which was the pre-D-68 state)."""
+    import yaml
+
+    real = yaml.safe_load(
+        (Path(__file__).resolve().parent.parent / "configs" / "experiment.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    block = real["persistence_history_lookup"]
+    assert block["authorized"] is True
+    assert str(block["decision"]).strip() == "D-68"
+    # positive control: the real config, read through the real function, actually works.
+    lookup = read_persistence_history_lookup(
+        synthetic_snapshot(
+            data={
+                "gates": {
+                    "G-05": {
+                        "status": "signed",
+                        "decision": "D-synthetic-real-config-check",
+                        "signature_sha256": hashlib.sha256(_PH_SIGNATURE.encode("utf-8")).hexdigest(),
+                    }
+                }
+            },
+            experiment={"persistence_history_lookup": block},
+        ),
+        model_id="M-01",
+        g05_signature=_PH_SIGNATURE,
+        path=RESTRICTED_DIR,
+        loader=_ph_loader,
+        registry=_ph_tmp_registry(),
+    )
+    assert lookup, "the real, committed config should permit a real call to succeed"

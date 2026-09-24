@@ -24,6 +24,16 @@ folds: "TBD — freeze gate"
 # copy of an already-frozen value, not a choice: `build_partitions` applies it to all six
 # partitions and refuses rather than defaulting when it is unresolved (TE §18.3).
 embargo_hours: 24 # D-38 (2026-09-10); TE §7.1 "24 hours"
+# persistence_history_lookup — D-28 option (b)'s own kill switch (condition (v)),
+# authorized 2026-09-24 as **D-68** (evidence/DECISIONS.md), Student-approved by
+# instruction, no separate supervisor signature claimed. `src.data.locked_test.
+# read_persistence_history_lookup` now activates for real DEC iterations, gated by
+# its other 4 independently-tested conditions (only M-01/M-02; routed through
+# `open_restricted`, logged; post-G-05 only; never returns a row outside 2022-12-01).
+# Wiring into the live prediction path: `governance/CHANGE_RECORD_2026-09-24_d28_option_a_wiring.md`.
+persistence_history_lookup:
+  authorized: true
+  decision: "D-68"
 # horizons — TRANSCRIBED from TE §2.1 ("`experiment.yaml` shall expose `horizons: [1]` with
 # `24` implemented and testable but **not** included in the default run list"). A copy of an
 # already-frozen value, not a choice. Authorized for transcription by the project decision

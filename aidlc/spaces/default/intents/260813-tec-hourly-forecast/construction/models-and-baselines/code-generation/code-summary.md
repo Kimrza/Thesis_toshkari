@@ -477,3 +477,47 @@ docstring and the § 11 section header) that the finding did not enumerate.
    before G-05.
 3. **Execution.** Nothing here has run. `ruff check` and the full suite in the governed
    Python 3.11 environment are the first execution any of this code will have had.
+
+## Post-receipt amendment — 2026-09-24 (D-28 option (b) / D-68: wiring the bounded 1-December persistence-history lookup)
+
+*Appended under `project.md` `code-generation:gf-3`. Nothing above is rewritten; the READY
+receipt stands as history. Authority: Student ruling — D-68 ruled, then explicit
+authorization same day to connect the mechanism to the live prediction path.*
+
+**What changed, measured (`git diff --numstat` vs the receipted state).** One file this
+unit owns: `scripts/06_train_and_predict.py`. New import
+(`PERSISTENCE_HISTORY_CALLERS`, `read_persistence_history_lookup` from
+`src.data.locked_test`); new helper `_persistence_history_augmented_target(...)`; three
+new optional keyword parameters on `_locked_predictions` (`g05_signature`, `locked_input`,
+`access_log`, all defaulting to `None`); the one production call site updated to pass
+`args.g05_signature`, `Path(args.locked_input)`, `access_log` — the same three values the
+script's existing DEC loader already uses for `materialise_locked_partition`, reused
+rather than re-derived.
+
+**Why.** D-68 (`evidence/DECISIONS.md`) authorizes the mechanism
+(`src.data.locked_test.read_persistence_history_lookup`, built in `governance-guards`'
+own file, disclosed in that unit's code-summary); this amendment connects it so M-01/M-02
+actually receive the 1-December lookup history during a real DEC iteration, recovering the
+full D-28/D-59 30-day scored set. Full design and rationale:
+`governance/CHANGE_RECORD_2026-09-24_d28_option_a_wiring.md`.
+
+**Verified, not merely reasoned.** New test
+`tests/test_models_smoke.py::test_persistence_history_augments_only_m01_m02_and_only_with_all_three_inputs`
+(monkeypatches the mechanism itself to isolate the wiring from its own already-tested 5
+conditions): confirms a non-M-01/M-02 model_id is untouched and the lookup is never
+invoked; M-01/M-02 with all three inputs receive an augmented frame carrying exactly the
+extra row(s); M-01/M-02 with any input missing raises rather than silently falling back.
+Full `tests/test_models_smoke.py`: 71/71 passed (70 existing + 1 new), 1 skipped
+(pre-existing, unrelated). `ruff check` on the modified file: clean — confirmed the initial
+run's one finding (a literal restricted-root path string tripping the R-28 one-door
+scanner) was in the TEST file, not this script, and was fixed there. Full §18.3 critical
+set plus every module touching this script, re-run together: submitted, see the wiring
+change record for the completed result.
+
+**What this amendment does NOT do.** It does not change `locked_target` itself or any
+FITTED family's target — `predict_from_fitted` still receives the plain, unaugmented
+`locked_target`; only M-01/M-02's own `fit_predict` call receives the augmented copy, built
+fresh per call and never persisted or mutated in place. It does not touch D-28 or D-59.
+It does not weaken any of D-68's 5 conditions, all still enforced inside
+`read_persistence_history_lookup` itself (owned and tested in `governance-guards`' own
+file) — this amendment only supplies real call-site arguments.

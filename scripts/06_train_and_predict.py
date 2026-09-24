@@ -138,7 +138,12 @@ from src.data.fixture_manifest import (  # noqa: E402
     read_embargo_hours,
     release_root_for,
 )
-from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
+from src.data.locked_test import (  # noqa: E402
+    PERSISTENCE_HISTORY_CALLERS,
+    AccessRecord,
+    open_restricted,
+    read_persistence_history_lookup,
+)
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.splits import (  # noqa: E402
     FITTING_PARTITION_IDS,
@@ -735,6 +740,64 @@ def _refit_and_persist(
     return persisted
 
 
+def _persistence_history_augmented_target(
+    *,
+    locked_target: Any,
+    model_id: str,
+    snapshot: Any,
+    g05_signature: str | None,
+    locked_input: Path | None,
+    access_log: Path | None,
+) -> Any:
+    """D-28 option (b) / D-68 (2026-09-24): for M-01/M-02 ONLY, append 2022-12-01 lookup
+    history to the December target rows `fit_predict` reads -- never rows inside the scored
+    window, never for any other model.
+
+    `locked_target` itself (the embargo-trimmed frame `materialise_locked_partition`
+    returned) is NEVER mutated or re-scored from; this builds a SEPARATE, augmented copy
+    handed only to `fit_predict`'s `target=` for this one call, exactly as
+    `src.data.locked_test.read_persistence_history_lookup`'s own docstring specifies. If any
+    of `g05_signature` / `locked_input` / `access_log` is absent (mirrors the same
+    all-or-nothing precondition `materialise_locked_partition` itself already enforces via
+    `args.g05_signature and args.locked_input and args.locked_authorization` at this script's
+    own argument-parsing stage), or if D-68's own kill switch in `configs/experiment.yaml`
+    is not authorized, this raises rather than silently falling back to the unaugmented
+    frame -- an unauthorized-but-silent skip would misreport why the scored set came up
+    short, which is exactly what D-28's Recommendation 15 disclosure guard exists to catch.
+    """
+    if model_id not in PERSISTENCE_HISTORY_CALLERS:
+        return locked_target
+    if g05_signature is None or locked_input is None or access_log is None:
+        raise LockedTestError(
+            f"_persistence_history_augmented_target({model_id})",
+            "g05_signature / locked_input / access_log incomplete; the December iteration "
+            "for M-01/M-02 requires all three to attempt the D-68 lookup, mirroring the "
+            "same all-or-nothing precondition this script already enforces for the DEC "
+            "partition itself",
+        )
+
+    def _raw_december_loader() -> Any:
+        return _read_target_artifact(Path(locked_input))
+
+    lookup = read_persistence_history_lookup(
+        snapshot,
+        model_id=model_id,
+        g05_signature=g05_signature,
+        path=Path(locked_input),
+        loader=_raw_december_loader,
+        registry=access_log,
+    )
+    extra_rows = [
+        {
+            "interval_start_utc": stamp.isoformat(),
+            "station_id": station,
+            "vtec_tecu": value,
+        }
+        for (station, stamp), value in lookup.items()
+    ]
+    return RecordFrame([*records_of(locked_target), *extra_rows])
+
+
 def _locked_predictions(
     *,
     snapshot: Any,
@@ -745,6 +808,9 @@ def _locked_predictions(
     horizon: int,
     expected_seeds: frozenset[int],
     models_root: Path,
+    g05_signature: str | None = None,
+    locked_input: Path | None = None,
+    access_log: Path | None = None,
 ) -> tuple[list[Prediction], list[Prediction]]:
     """The DEC iteration: LOAD the persisted REFIT models and PREDICT. Nothing fits here.
 
@@ -753,6 +819,12 @@ def _locked_predictions(
     family's `predict_rows_from_state`. An absent record RAISES rather than falling back to a
     fit: a fit reached from this branch is December in the training loop (Vision 8.3).
     M-01 and M-02 carry no fitted state and are recomputed from the locked target series.
+
+    `g05_signature`/`locked_input`/`access_log` (added 2026-09-24, D-28 option (b) / D-68):
+    when all three are supplied, M-01/M-02 additionally receive the D-68-authorized
+    2022-12-01 lookup history via `_persistence_history_augmented_target`, recovering the
+    full D-28/D-59 30-day scored set. Every other family, and M-01/M-02 when any of the
+    three is omitted, is unaffected -- `locked_target` itself passes through unchanged.
     """
     backend = JsonStateBackend(models_root)
     produced: list[Prediction] = []
@@ -760,6 +832,18 @@ def _locked_predictions(
     for model_id in MODEL_IDS:
         seeds: tuple[int | None, ...] = (
             tuple(sorted(expected_seeds)) if model_id == "M-06" else (None,)
+        )
+        model_target = (
+            _persistence_history_augmented_target(
+                locked_target=locked_target,
+                model_id=model_id,
+                snapshot=snapshot,
+                g05_signature=g05_signature,
+                locked_input=locked_input,
+                access_log=access_log,
+            )
+            if model_id in PERSISTENCE_HISTORY_CALLERS
+            else locked_target
         )
         for seed in seeds:
             assert_stamp_match(score_bundle, partition)  # R-90: before EVERY scoring path
@@ -789,7 +873,7 @@ def _locked_predictions(
                     bundle=train_bundle,
                     partition=partition,
                     snapshot=snapshot,
-                    target=locked_target,
+                    target=model_target,
                     score_bundle=score_bundle,
                     seed=seed,
                     params=None,
@@ -1167,6 +1251,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
                 horizon=horizon,
                 expected_seeds=expected_seeds,
                 models_root=models_root,
+                g05_signature=args.g05_signature,
+                locked_input=Path(args.locked_input) if args.locked_input else None,
+                access_log=access_log,
             )
             locked_models_predicted = len(produced)
         else:

@@ -881,3 +881,53 @@ either file, does not widen any other exemption, and does not touch the `ACCESS_
 sidecar wiring, the chokepoint controls, or any other module this unit owns — scope is
 exactly the one exemption-set entry named above.
 
+## Post-receipt amendment — 2026-09-24, second amendment same day (D-28 option (b) bounded 1-December read, mechanism only)
+
+*Appended under `project.md` `code-generation:gf-3`, same pattern as the amendment
+immediately above. Nothing above is rewritten; the READY receipt stands as history.
+Authority: Student ruling, `RULING_REQUEST_2026-09-21_GOV-CG-01_OPEN_ITEMS.md` §2 Option A.*
+
+**What changed, measured (`git diff --numstat` vs the receipted state).** Two files this
+unit owns: `src/data/locked_test.py` (`+167 / -2`) and `tests/test_locked_test_guard.py`
+(`+224 / -0`); plus `configs/experiment.yaml` (`+11 / -0`), a shared governed config file,
+not owned by any single unit.
+
+**What was added to `src/data/locked_test.py`**: `PURPOSES` gains `"persistence_history"`;
+new `PERSISTENCE_HISTORY_CALLERS = frozenset({"M-01", "M-02"})` and
+`PERSISTENCE_HISTORY_DAY = "2022-12-01"` constants; new function
+`read_persistence_history_lookup(snapshot, *, model_id, g05_signature, loader, registry, now=None)`
+— a bounded, logged, post-G-05, kill-switched lookup of 2022-12-01 target history for the
+two unfitted persistence baselines only. Imports `verify_g05_signature` from
+`src.data.splits` and `records_of` from `src.features._frames` (both verified acyclic by
+grep before adding — neither imports this module). Full design and all 5 enforced
+conditions: `governance/CHANGE_RECORD_2026-09-24_d28_option_a_mechanism_built.md`.
+
+**What was added to `configs/experiment.yaml`**: a `persistence_history_lookup:
+{authorized: false, decision: "TBD — freeze gate"}` block — the mechanism's own kill
+switch, shipped OFF. Nothing else in that file was touched.
+
+**Why.** D-28's original disclosed 30-day scored set (D-28/D-59) silently shrinks to 29 days
+because the two mandatory persistence-baseline difficulty controls (M-01, M-02) cannot
+forecast into 2 December without reading 1 December history. `GOV-2026-09-20-CG-01`
+Recommendation 15 raised this; the owner's first ruling (amend D-28 to 29 days) was reverted
+same-day after conflicting with D-59 (see `CHANGE_RECORD_2026-09-24_d28_29day_amendment.md`);
+the final ruling, option (b), is this mechanism — recovering the true 30-day set via a
+narrowly-scoped lookup rather than amending any frozen decision.
+
+**Verified, not merely reasoned.** 6 new tests, one per enforced condition plus a real-config
+check, all passing (`tests/test_locked_test_guard.py::test_ph_*`). Full module:
+**72/72 passed** (66 existing + 6 new). Full §18.3 critical test set re-run after this
+change: **772/772 passed**, 0 failures (766 from the earlier same-day amendment + 6 new —
+count reconciles exactly, no regression). `ruff check` on both modified files: clean. All
+under the governed `tec-thesis-311` (Python 3.11.16) environment.
+
+**What this amendment does NOT do.** It does not wire the mechanism into the live
+prediction path — `scripts/06_train_and_predict.py` and `src/models/persistence.py`
+(owned by `models-and-baselines`/`fixtures-and-reproducibility`, not this unit) are
+untouched, confirmed by `git diff --stat` showing zero changes to either. This is a
+deliberate stop, not an oversight: wiring is a cross-cutting, multi-unit change to the live
+DEC-partition prediction data flow, a materially larger class of change than this or any
+prior post-receipt amendment in this unit's history, and is flagged as a separate,
+not-yet-authorized follow-up in the same change record. The mechanism itself is inert
+today regardless — `authorized: false` in `configs/experiment.yaml` means every call
+refuses, proven by `test_ph_the_real_config_ships_inert_today`.

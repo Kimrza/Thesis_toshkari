@@ -1669,6 +1669,88 @@ def test_the_refit_epoch_count_is_a_frozen_rule_read_from_config() -> None:
         read_refit_epochs(_snapshot(models={"lstm_fixed_settings": SYNTH_SETTINGS}))
 
 
+def test_persistence_history_augments_only_m01_m02_and_only_with_all_three_inputs(
+    monkeypatch,
+) -> None:
+    """D-28 option (b) / D-68 wiring (2026-09-24): `_persistence_history_augmented_target`
+    is the thin orchestration layer between script 06 and
+    `src.data.locked_test.read_persistence_history_lookup` (already fully tested in
+    isolation, `tests/test_locked_test_guard.py`). This test proves the WIRING, not the
+    mechanism's own 5 conditions again: (a) a non-M-01/M-02 model_id is untouched and the
+    lookup is never called; (b) M-01/M-02 WITH all three inputs get an augmented frame
+    carrying the extra rows; (c) M-01/M-02 with any input missing raises rather than
+    silently returning the unaugmented frame."""
+    from src.data.locked_test import RESTRICTED_ROOT
+
+    restricted_path = Path(RESTRICTED_ROOT)  # never a literal (R-28: one door)
+    script = _load_script()
+    base_target = RecordFrame(
+        [{"interval_start_utc": "2022-12-02T00:00:00Z", "station_id": "BSHM", "vtec_tecu": 1.0}]
+    )
+    calls: list[str] = []
+
+    def fake_lookup(snapshot, *, model_id, g05_signature, path, loader, registry, now=None):
+        calls.append(model_id)
+        return {
+            (
+                "BSHM",
+                dt.datetime(2022, 12, 1, 5, tzinfo=dt.timezone.utc),
+            ): 9.5
+        }
+
+    monkeypatch.setattr(script, "read_persistence_history_lookup", fake_lookup)
+
+    # (a) must-not-fire: a non-caller model_id is untouched, lookup never invoked.
+    untouched = script._persistence_history_augmented_target(
+        locked_target=base_target,
+        model_id="M-03",
+        snapshot=_signed_snapshot(),
+        g05_signature="sig",
+        locked_input=restricted_path,
+        access_log=Path("registry.jsonl"),
+    )
+    assert untouched is base_target
+    assert calls == [], "the lookup must never be invoked for a non-M-01/M-02 model_id"
+
+    # (b) positive: M-01 with all three inputs gets the augmented frame.
+    augmented = script._persistence_history_augmented_target(
+        locked_target=base_target,
+        model_id="M-01",
+        snapshot=_signed_snapshot(),
+        g05_signature="sig",
+        locked_input=restricted_path,
+        access_log=Path("registry.jsonl"),
+    )
+    assert calls == ["M-01"]
+    rows = records_of(augmented)
+    assert len(rows) == 2, "expected the original row plus the one 1-Dec lookup row"
+    extra = [r for r in rows if r["interval_start_utc"].startswith("2022-12-01")]
+    assert len(extra) == 1 and extra[0]["vtec_tecu"] == 9.5
+    original = [r for r in rows if r["interval_start_utc"].startswith("2022-12-02")]
+    assert len(original) == 1 and original[0]["vtec_tecu"] == 1.0
+
+    # (c) negative: M-02 with any of the three missing raises, never silently unaugmented.
+    for missing_kwargs in (
+        {"g05_signature": None},
+        {"locked_input": None},
+        {"access_log": None},
+    ):
+        kwargs = {
+            "g05_signature": "sig",
+            "locked_input": restricted_path,
+            "access_log": Path("registry.jsonl"),
+        }
+        kwargs.update(missing_kwargs)
+        with pytest.raises(LockedTestError) as excinfo:
+            script._persistence_history_augmented_target(
+                locked_target=base_target,
+                model_id="M-02",
+                snapshot=_signed_snapshot(),
+                **kwargs,
+            )
+        assert "incomplete" in str(excinfo.value)
+
+
 def test_the_dec_iteration_with_no_persisted_refit_model_raises_rather_than_fitting(
     tmp_path: Path,
 ) -> None:
