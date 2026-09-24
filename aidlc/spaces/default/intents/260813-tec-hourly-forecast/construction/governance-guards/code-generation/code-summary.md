@@ -833,3 +833,51 @@ disclosed above.
 
 ⚠ Static only, as before: **no test was executed** — no interpreter exists on this clone —
 so "would now pass the new guards" is a source-level claim, not a run result.
+
+## Post-receipt amendment — 2026-09-24 (chokepoint scanner self-reference fix, unfreezing `PENDING_FOLLOWUPS.md` item 1)
+
+*Appended under `project.md` `code-generation:gf-3`, following the same pattern as this
+unit's own 2026-09-19 and 2026-09-20 amendments above. Nothing above is rewritten; the
+READY receipt stands as history. Authority: Student ruling.*
+
+**What changed, measured (`git diff --numstat` vs the receipted state).** One file this
+unit owns: `tests/test_phase_boundary.py`. `+9 / -0`: added
+`"test_no_restricted_read_in_this_module_bypasses_the_chokepoint"` to
+`SOURCE_TREE_ONLY_READERS`, exempting that one test function's body (which holds only its
+own `Path(__file__).read_text(...)` self-scan call) with a stated reason, per this
+scanner's own documented remediation path.
+
+**Why.** Same root cause and same finding as the sibling fix in `tests/test_release_hashes.py`
+(`foundation`'s own post-receipt amendment, same date, this session): the chokepoint
+scanner flagged its own positive-limb test reading its own module's source (`__file__`,
+under `tests/`, never under `evidence/locked_test_restricted/`) — a false positive, not a
+restricted-root read. `test_phase_boundary.py`'s scanner keys its exemption by enclosing
+function name (`SOURCE_TREE_ONLY_READERS`), not by receiver name
+(`test_release_hashes.py`'s `UNRESTRICTED_READ_RECEIVERS`), so the fix takes the shape that
+module's own mechanism specifies rather than mirroring the sibling's literally. First
+identified in `GOV-2026-09-20-CG-01` §7, tracked in `governance/PENDING_FOLLOWUPS.md` item
+1 pending this unfreeze — which also unblocked the D-28 option (b) bounded-read design
+(`governance/CHANGE_RECORD_2026-09-24_d28_option_a_bounded_read.md`), still separately
+gated and not built in this pass.
+
+**Verified, not merely reasoned — first EXECUTED verification on this unit's own chokepoint
+tests in this thread.** `test_the_exempt_readers_are_named_and_still_exist` (this module's
+own pinning test) confirms the new exemption name resolves to a real, callable function in
+the module. Full module run: 294/294 passed (`tests/test_phase_boundary.py` +
+`tests/test_release_hashes.py` together). Full §18.3 critical test set re-run after this
+change: **766/766 passed**, 0 failures — resolves both prior static-only caveats on this
+unit's earlier amendments ("no test was executed... a source-level claim, not a run
+result") for THIS specific fix, under the governed environment
+(`tec-thesis-311`, CPython 3.11.16) now available on this clone. Earlier amendments'
+own static-only caveats stand unchanged for the work they cover.
+
+**Also resolved by measurement, not by this change**: `test_locked_test_guard.py`'s
+previously-reported orphan-reconciliation failure (§7's third named issue) no longer
+reproduces — confirmed passing in the same 766-test run. Not attributed to this amendment;
+recorded as the observed current state.
+
+**What this amendment does NOT do.** It does not touch `scan_unguarded_reads`'s logic in
+either file, does not widen any other exemption, and does not touch the `ACCESS_LOG`
+sidecar wiring, the chokepoint controls, or any other module this unit owns — scope is
+exactly the one exemption-set entry named above.
+

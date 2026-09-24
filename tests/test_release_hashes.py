@@ -57,6 +57,9 @@ EVIDENCE_DIR = REPO_ROOT / "evidence"
 RESTRICTED_DIR = EVIDENCE_DIR / "locked_test_restricted"
 GITATTRIBUTES = REPO_ROOT / ".gitattributes"
 EC1_REPORT = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "ec1-audit-report.json"
+#: Added 2026-09-24, post-receipt amendment (`governance-guards` unit): this test module's
+#: own source path, under `tests/`, never under `evidence/locked_test_restricted/`.
+THIS_MODULE_SOURCE = Path(__file__)
 KYOTO_DIR = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "kyoto_dst"
 F107_FILE = EVIDENCE_DIR / "audit_ec1_2026-08-15" / "nrcan_f107" / "fluxtable.txt"
 
@@ -540,7 +543,13 @@ READ_METHODS = frozenset({"open", "read_bytes", "read_text"})
 
 #: Module-level constants provably OUTSIDE `evidence/locked_test_restricted/`. Asserted
 #: below rather than trusted.
-UNRESTRICTED_READ_RECEIVERS = frozenset({"EC1_REPORT", "GITATTRIBUTES"})
+#: `THIS_MODULE_SOURCE` (added 2026-09-24, post-receipt amendment, `governance-guards`
+#: unit): the receiver of the scanner's own `THIS_MODULE_SOURCE.read_text(...)` call
+#: below, exempted because it names this test file's own source under `tests/`, which
+#: cannot lie under `evidence/locked_test_restricted/` by construction (`tests/` is not
+#: under `evidence/`) -- a self-reference, not a restricted-root read. Fixes the scanner
+#: flagging its own scan target (`GOV-2026-09-20-CG-01` §7 / `PENDING_FOLLOWUPS.md` #1).
+UNRESTRICTED_READ_RECEIVERS = frozenset({"EC1_REPORT", "GITATTRIBUTES", "THIS_MODULE_SOURCE"})
 
 #: Local names bound from `_read_guarded(...)` earlier in their own function. Enumerated
 #: explicitly rather than inferred, so a rename cannot silently widen the exemption.
@@ -601,7 +610,7 @@ def test_no_restricted_read_in_this_module_bypasses_the_chokepoint() -> None:
     no `AccessRecord` -- fails this test at the line that does it.
     """
     offenders = scan_unguarded_reads(
-        Path(__file__).read_text(encoding="utf-8"), filename=__file__
+        THIS_MODULE_SOURCE.read_text(encoding="utf-8"), filename=__file__
     )
     assert not offenders, (
         "unguarded content reads in tests/test_release_hashes.py: "

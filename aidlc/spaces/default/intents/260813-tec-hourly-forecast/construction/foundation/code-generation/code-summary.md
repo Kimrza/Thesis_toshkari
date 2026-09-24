@@ -484,3 +484,41 @@ this lane's write scope, and **no row of either registry artifact was modified, 
 truncated or deleted**. **Owner act.**
 
 The gate verdict for `GOV-2026-09-20-CG-01` stands at **`FAIL`**. Nothing here advances it.
+
+## Post-receipt amendment — 2026-09-24 (chokepoint scanner self-reference fix, unfreezing `PENDING_FOLLOWUPS.md` item 1)
+
+*Appended under `project.md` `code-generation:gf-3`. Nothing above is rewritten; the READY
+receipt stands as history. Authority: Student ruling, following this project's own
+established post-receipt amendment pattern (see `governance-guards`'s own 2026-09-19 and
+2026-09-20 amendments below for precedent of the same mechanism on a sibling unit).*
+
+**What changed, measured (`git diff --numstat` vs the receipted state).** One file this
+unit owns: `tests/test_release_hashes.py`. `+7 / -2`: added a module-level
+`THIS_MODULE_SOURCE = Path(__file__)` constant beside the existing `EC1_REPORT`/
+`GITATTRIBUTES` unrestricted-read receivers, added it to `UNRESTRICTED_READ_RECEIVERS`,
+and changed `test_no_restricted_read_in_this_module_bypasses_the_chokepoint`'s call site
+from `Path(__file__).read_text(...)` to `THIS_MODULE_SOURCE.read_text(...)` so the
+scanner's own receiver-root extraction resolves a `Name`, not an anonymous `Call`.
+
+**Why.** The chokepoint scanner (`scan_unguarded_reads`, this same file) flagged its own
+positive-limb test's `Path(__file__).read_text(...)` call as an unguarded restricted-root
+read — a false positive: `__file__` resolves under `tests/`, never under
+`evidence/locked_test_restricted/`, so this was always a self-reference, not a restricted
+read. First identified in `GOV-2026-09-20-CG-01` §7 (raised, not fixed, in that session,
+since the owning units carried a terminal READY receipt) and tracked in
+`governance/PENDING_FOLLOWUPS.md` item 1 pending this unfreeze.
+
+**Verified, not merely reasoned.** `test_enumerated_unrestricted_receivers_really_are_outside_the_restricted_root`
+(this module's own pinning test) asserts every `UNRESTRICTED_READ_RECEIVERS` name is a
+`Path` and does not resolve under the restricted root — `THIS_MODULE_SOURCE` passes both.
+Full module run: 294/294 passed (`tests/test_release_hashes.py` + `tests/test_phase_boundary.py`
+together, the sibling fix landing in the same pass — see `governance-guards`'s own amendment
+below). Full §18.3 critical test set re-run after this change: **766/766 passed**, 0
+failures — the first fully green run of that set in this thread. Governed environment
+(`tec-thesis-311`, CPython 3.11.16).
+
+**What this amendment does NOT do.** It does not touch `scan_unguarded_reads`'s logic, does
+not widen any other exemption, does not touch `UNRESTRICTED_READ_RECEIVERS`'s other two
+entries, and does not certify anything about `GOV-2026-09-20-CG-01`'s standing `FAIL`
+verdict — that gate status is unaffected by this amendment and stands exactly as recorded
+above.

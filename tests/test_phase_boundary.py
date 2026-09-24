@@ -618,6 +618,16 @@ READ_METHODS = frozenset({"open", "read_bytes", "read_text"})
 SOURCE_TREE_ONLY_READERS = {
     "_imported_modules": "parses *.py under src/ | scripts/ | tmp_path for its AST",
     "_module_level_literal": "parses PREPARED_MODULE (src/data/prepared.py) for its AST",
+    # Added 2026-09-24, post-receipt amendment (`governance-guards` unit): the scanner's
+    # own positive-limb test reads THIS FILE's source via `Path(__file__).read_text(...)`
+    # to scan itself. `__file__` resolves under `tests/`, never under
+    # `evidence/locked_test_restricted/`, so this is a self-reference, not a restricted-
+    # root read. Fixes the scanner flagging its own scan target
+    # (`GOV-2026-09-20-CG-01` §7 / `PENDING_FOLLOWUPS.md` #1). The function's body holds
+    # only this one read, so the exemption is exact, not a general widening.
+    "test_no_restricted_read_in_this_module_bypasses_the_chokepoint": (
+        "reads this test file's own source (Path(__file__)) to scan it, not restricted content"
+    ),
 }
 
 
