@@ -279,9 +279,18 @@ target:
   # owed rule and `practical_relevance_statement` refuses; Vision §5.3's second conjunct
   # then fails visibly rather than silently never running. NO implementer fills this.
   uncertainty_budget:
-    decision: "TBD — freeze gate"
-    statistic: "TBD — freeze gate"
-    combination: "TBD — freeze gate"
+    # FULL freeze, 2026-09-24: D-67 (evidence/DECISIONS.md), Student-approved by
+    # instruction, no separate supervisor signature claimed. `resolve_budget_rule` now
+    # returns a usable rule for the first time; `practical_relevance_statement` stops
+    # refusing. Full literature review: governance/CHANGE_RECORD_2026-09-24_budget_value_merged.md.
+    # `combination: sum` chosen over quadrature because Phase 1 (gridded) and Phase 2
+    # (station-based) VTEC content share a documented common systematic error source —
+    # differential code bias (DCB) estimation — across the GNSS-derived TEC literature
+    # (see the merged change record for full citations); quadrature is only correct for
+    # independent components, and that independence is not established here.
+    decision: "D-67"
+    statistic: "p95"
+    combination: "sum"
   identity:
     phase_id: "P1A"
     source_id: "GNSS_VTEC"
