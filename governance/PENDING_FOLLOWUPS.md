@@ -1,14 +1,28 @@
 # Pending Follow-Ups (not yet due, do not action until triggered)
 
-## 1. Layer-1 §7 — chokepoint scanner self-exemption
-Trigger: the next time an `/aidlc` command is run in this repo (any AI-DLC stage
-command, not just this specific one).
-Action needed: remind the Student that `test_phase_boundary.py` and
-`test_release_hashes.py`'s self-reference false-positive fix requires an AI-DLC
-stage redo for the `governance-guards` and `foundation` units (both currently
-READY-frozen), not a simple edit. See CHANGE_RECORD_2026-09-24 thread for full
-context. Ask the Student whether to route this now as part of whatever /aidlc
-command was just run, or continue deferring.
+## 1a. Layer-1 §7 — chokepoint scanner self-exemption — CLOSED 2026-09-24
+Resolved via the project's own established "post-receipt amendment" pattern
+(`project.md` `code-generation:gf-3`) rather than an `aidlc-jump` redo — no
+workflow-wide reset was needed or performed. `tests/test_release_hashes.py`
+(`foundation`) and `tests/test_phase_boundary.py` (`governance-guards`) both
+fixed; both units' READY receipts stand as history with the fix appended and
+disclosed below them. Full §18.3 critical test set: **766/766 passed** under
+the governed `tec-thesis-311` environment — the first fully green run in this
+thread. `test_locked_test_guard.py`'s previously-reported orphan issue also no
+longer reproduces (unattributed, just observed). No further action needed.
+
+## 1b. D-28 option (b) bounded 1-December read — CLOSED 2026-09-24, ruled as D-68 and wired
+Built, tested (6 tests, all 5 conditions independently verified) and disclosed in
+`governance-guards`' code-summary via the same post-receipt amendment pattern.
+Ruled as **D-68** the same day (Student instruction, no separate supervisor
+signature claimed) — `configs/experiment.yaml: persistence_history_lookup` now
+`authorized: true`, `decision: "D-68"`. **Also connected to the live prediction
+path** the same day (explicit Student authorization): `scripts/06_train_and_predict.py`
+(`models-and-baselines`) now calls the mechanism for M-01/M-02 during the DEC
+iteration, with its own dedicated wiring test. Full history:
+`governance/CHANGE_RECORD_2026-09-24_d28_option_a_mechanism_built.md` (mechanism)
+and `governance/CHANGE_RECORD_2026-09-24_d28_option_a_wiring.md` (wiring). No
+further action needed.
 
 ## 2. GitHub Actions push/execution status (Rec 47)
 Trigger: the next time network/GitHub access is available in a session, or the
@@ -19,32 +33,23 @@ history alone cannot confirm this — requires an actual check of the remote/Act
 tab). This was flagged as OPEN-NEEDS-INVESTIGATION and not previously on anyone's
 radar in this governance thread as of 2026-09-24.
 
-## 3. D-28/D-59 scored-window conflict (added 2026-09-24)
-Trigger: before G-05, or the next time anyone touches December-partition code
-(`src/evaluation/guards.py`, `src/data/splits.py`, `src/evaluation/regimes.py`) or
-`configs/experiment.yaml`'s `embargo_hours`/`regimes.december_day_range` fields.
-Action needed: the Student ruled D-28 amended to 29 days (option B, zero additional
-December contact), but this directly contradicts D-59 (Student+Supervisor
-countersigned, 30 days, live in `configs/experiment.yaml:376`, enforced by
-`src/evaluation/regimes.py:read_december_day_range`), and the code's
-`scored_window_statement` still computes 30 days from the shared, Mandated
-24-hour `embargo_hours` value used by every partition. Full analysis:
-`governance/CHANGE_RECORD_2026-09-24_d28_29day_amendment.md`. The 45+ live
-project design/governance artifacts still correctly describe the system as 30
-days and were deliberately NOT swept to 29 — sweeping them now would be wrong
-until this conflict is resolved. Needs one of: amend D-59 too (Supervisor), revert
-to option A, or hold as pending. Do not silently sweep the remaining files to "29"
-without first resolving this.
+## 3. D-28/D-59 conflict — RESOLVED 2026-09-24 (kept here as closed history)
+The D-28 29-day amendment was reverted the same day it was drafted (conflicted with
+D-59, no working code path). Final disposition: **option (b)** — D-28 stays at its
+original 30 days, D-59 is untouched, and the true fix is D-68's bounded 1-December
+lookup read for M-01/M-02 only — now built, ruled and wired (see item 1b above).
+Full history: `governance/CHANGE_RECORD_2026-09-24_d28_29day_amendment.md` (the
+reverted amendment). No further action needed on D-28/D-59 themselves — both
+stand as originally frozen. This entry stays here only so a future reader doesn't
+have to reconstruct the history from chat.
 
-## 4. `budget_value` combination rule (added 2026-09-24)
-Trigger: before this value is needed for any Vision §5.3 practical-relevance
-computation, or the next time the Supervisor is available to rule on a §18.2
-forbidden-choice item.
-Action needed: no specific combination rule (statistic: median/p95/max;
-combination: sum/quadrature/max) has ever been proposed anywhere in this
-repository — confirmed by a full-repo search 2026-09-24 (every occurrence of
-`budget_value` describes it as open, unfixed, and routed to the Supervisor as a
-forbidden-choice item; none proposes actual values). Item 2 of the 2026-09-24
-session task stopped here rather than inventing a rule. The exact rule text is
-needed from the Student/Supervisor before `configs/data.yaml`'s
-`target.uncertainty_budget` block can be frozen.
+## 4. `budget_value` combination rule — CLOSED 2026-09-24, ruled as D-67
+A Consensus literature search (GUM/metrology combination-rule theory + GNSS/TEC
+differential-code-bias shared-systematic-error evidence) grounded a proposal for
+both open fields, which the Student approved and ruled as **D-67**
+(`evidence/DECISIONS.md`, no separate supervisor signature claimed):
+`statistic: p95`, `combination: sum`. `configs/data.yaml:
+target.uncertainty_budget.decision = "D-67"` — `resolve_budget_rule` now returns
+a usable rule for the first time. Full history:
+`governance/CHANGE_RECORD_2026-09-24_budget_value_merged.md` (superseding the two
+earlier single-field drafts). No further action needed.

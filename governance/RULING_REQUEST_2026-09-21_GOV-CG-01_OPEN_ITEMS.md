@@ -120,40 +120,29 @@ supplying the two families with target history from 1 December.
 
 **Decision required — Approve / Reject / Modify / Postpone.**
 
-> ## ⚠️ RULED 2026-09-24 (Student) — option B approved, but NOT YET CODE-CONSISTENT
+> ## ✅ RULED 2026-09-24 (Student), REVISED 2026-09-24 same day — option (b) approved
 >
-> The Student approved the alternative: **amend D-28's disclosure from 30 to 29 days**,
-> zero additional December contact. Written into `evidence/DECISIONS.md` D-28 as a dated
-> amendment. **This ruling is not yet implementable as recorded**, for two reasons measured
-> 2026-09-24, both detailed in the D-28 amendment text and in
-> `governance/CHANGE_RECORD_2026-09-24_d28_29day_amendment.md`:
+> **Superseded history, kept rather than deleted.** The Student first approved amending
+> D-28's disclosure to 29 days (zero additional December contact). That amendment was
+> drafted into `evidence/DECISIONS.md` D-28 the same day, then found to conflict with
+> D-59 (Student+Supervisor countersigned, live in config, code-enforced at 30 days) and
+> to have no working code path to actually produce 29 days without either a new
+> December-specific mechanism or incorrectly widening the shared, Mandated 24-hour fold
+> embargo. Full analysis: `governance/CHANGE_RECORD_2026-09-24_d28_29day_amendment.md`.
 >
-> 1. `src/evaluation/guards.py:scored_window_statement` derives its disclosed span from the
->    ONE global `embargo_hours` value shared with the Mandated 24-hour fold embargo used by
->    every partition — the code today still computes and enforces "30 days" for DEC; nothing
->    currently produces 29 without either a December-specific mechanism (not built) or
->    incorrectly widening the shared embargo for F1–F4 too (would violate the Mandated rule).
-> 2. **D-59** (Student+Supervisor countersigned 2026-09-21) explicitly freezes the December
->    day range at 30 days and is live in `configs/experiment.yaml:376`
->    (`december_day_range: "2022-12-02..2022-12-31"`), enforced by
->    `src/evaluation/regimes.py:read_december_day_range`. This amendment **directly
->    contradicts D-59** and does not resolve it — D-59 carries its own supervisor
->    countersignature and was left untouched, since altering it is outside a Student-only
->    ruling's authority.
+> **Final ruling, same day: option (b).** The 29-day amendment is **reverted** — D-28's
+> `evidence/DECISIONS.md` entry is back to its original 30-day text, D-59 is untouched,
+> `configs/experiment.yaml:376` is untouched. Instead, **this document's own Option A**
+> (the bounded, logged 1-December lookup read, drafted above but never implemented) is
+> now built: a narrowly-gated mechanism letting only M-01/M-02 read 1 December as
+> lookup-only history, post-G-05, under its own new D-number, recovering the true 30-day
+> scored set without amending anything else. Implementation, its 5 enforced conditions,
+> and the drafted D-number are in `governance/CHANGE_RECORD_2026-09-24_d28_option_a_bounded_read.md`.
 >
-> **Consequently, the planned 55-file "sweep to 29" was NOT performed** against the
-> project's substantive design/governance artifacts (functional-design docs, historical
-> change records, prior board reports) — doing so now would leave those files asserting 29
-> while the code and D-59 both still compute/enforce 30, which is a *worse* inconsistency
-> than the one this ruling set out to fix. Only this document and
-> `governance/REC_13_60_STATUS_2026-09-24.md` (both live tracking documents this thread
-> owns) were updated to reflect "ruled, blocked on D-59 reconciliation."
->
-> **Needs from the owner before this can close:** a decision on reconciling D-59 with this
-> amendment — amend D-59 too (needs Supervisor, since it carries their countersignature),
-> revert to option A (the bounded 1-Dec read) after all, or hold this amendment as
-> aspirational/pending until D-59 is separately reopened. Full analysis in
-> `governance/CHANGE_RECORD_2026-09-24_d28_29day_amendment.md`.
+> **The 55-file "sweep to 29" was never performed and stays unperformed** — correctly,
+> since the underlying figure never actually changed from 30. Only this document and
+> `governance/REC_13_60_STATUS_2026-09-24.md` were touched, both now updated to reflect
+> the final state (option A implemented, D-28/D-59 both stand as originally frozen).
 
 ---
 
