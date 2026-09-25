@@ -104,15 +104,15 @@ jobs:
       - name: Report the line-ending state of governed paths
         run: |
           git config core.autocrlf || true
-          git ls-files --eol evidence | head -20
+          git ls-files --eol evidence | head -20 || true
         shell: bash
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install pytest only
-        run: python -m pip install --upgrade pip pytest
+      - name: Install governed dependencies
+        run: python -m pip install --upgrade pip pytest -r requirements.txt
 
       - name: Release-hash verification (all manifests + EC-1 recorded hashes)
         run: python -m pytest tests/test_release_hashes.py -v -rs
