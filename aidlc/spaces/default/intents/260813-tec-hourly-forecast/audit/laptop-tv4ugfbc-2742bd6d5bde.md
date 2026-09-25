@@ -1807,3 +1807,104 @@
 **Duration ms**: 199
 
 ---
+
+## Session End
+**Timestamp**: 2026-09-25T13:50:50Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-09-25T13:50:50Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-09-25T13:50:50Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-09-25T13:50:50Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-09-25T13:50:50Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session End
+**Timestamp**: 2026-09-25T13:50:51Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-25T13:51:11Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-25T13:51:11Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Session End
+**Timestamp**: 2026-09-25T13:51:12Z
+**Event**: SESSION_ENDED
+**Reason**: other
+
+---
+
+## Session Resume
+**Timestamp**: 2026-09-25T13:51:18Z
+**Event**: SESSION_RESUMED
+**Source**: resume
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-25T13:51:35Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T13:51:38Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T13:52:46Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T13:52:58Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T13:57:55Z
+**Event**: HUMAN_TURN
+
+---
