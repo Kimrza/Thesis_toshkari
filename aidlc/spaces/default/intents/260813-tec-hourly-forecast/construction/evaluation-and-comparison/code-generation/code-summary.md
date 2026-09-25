@@ -1053,3 +1053,23 @@ shape `src/data/prepared.build_uncertainty_budget` actually returns through
 4. **Execution.** Nothing ran. WS-16, WS-17, TA-11, TA-13, TA-14 and TA-18 stay `Pending`;
    no acceptance row is claimed discharged; G-05 and G-06 remain `Blocked`.
 5. **The commit**, citing the D-numbers, remains the student's act.
+
+## 2026-09-25 cross-unit staleness addendum (gf-3, build-and-test item 4)
+
+`build-and-test`'s stage diary (`memory.md`, 2026-09-19T03:00:00Z entry) records this
+unit's `code-summary.md` as stale under its frozen receipt, listed alongside
+`acquisition`, `governance-guards`, `models-and-baselines`, `foundation`,
+`fixtures-and-reproducibility`, `regimes-diagnostics-reporting`, and
+`statistical-inference`, pending several owed owner decisions (D-42 supervisor
+countersignature, A3/A4 readings, G-3 adoption, the six-entry transcription
+go-ahead, `run_snapshots/` tracking policy). No further build-and-test-stage event
+between 2026-09-19 and this addendum's date names a specific line-level edit to a
+`produces[]` artifact of this unit beyond what its own review passes already
+disclose and reconcile in the body above (see this file's own dated review sections
+for line-count and staleness findings already closed in place). This addendum does
+not re-derive or claim to close the general 2026-09-19 staleness listing itself —
+that listing names owed *owner* decisions, not a specific code edit this stage made
+to this unit's files — and is recorded here as a plain disclosure per `project.md`
+`gf-3` rather than left unacknowledged. If a specific cross-unit code edit to this
+unit's files exists beyond what its own review sections already cover, it is not
+evidenced in `build-and-test`'s own artifacts as of this date.

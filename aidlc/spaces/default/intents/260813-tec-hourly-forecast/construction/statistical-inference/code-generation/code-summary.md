@@ -362,3 +362,21 @@ execution.**
    all in this pass. **WS-17, TA-13, TA-14 and TA-26 stay `Pending`** and no acceptance row
    is claimed discharged.
 4. **The commit** remains the student's act; `HEAD` is `ff5c683` with nothing staged.
+
+## 2026-09-25 cross-unit staleness addendum (gf-3, build-and-test item 4)
+
+`build-and-test`'s stage diary (`memory.md`, 2026-09-19T03:00:00Z entry) records this
+unit's `code-summary.md` as stale under its frozen receipt ("test fixture"), listed
+alongside `acquisition`, `governance-guards`, `evaluation-and-comparison`,
+`models-and-baselines`, `foundation`, and `fixtures-and-reproducibility`. This
+unit's own record already reconciles the specific instance of that staleness this
+file's own evidence identifies: the `configs/experiment.yaml` file-table cell (212
+lines) was stale against later sibling/owner commits (`17e0767`, `8efdfb5`,
+`9d3e853`, `f0d9e49`) transcribing D-33/D-35/D-36/D-38 into the same shared config
+file after this unit's step closed. That specific staleness was closed in place
+(Iteration-3 Minor #3, `project.md` `fr-2`): the file-table row now states both the
+current 275-line count and the historical 212-line count together. No further
+build-and-test-stage event between 2026-09-19 and this addendum's date names an
+additional specific line-level edit to this unit's own files beyond that already-
+closed instance. This addendum discloses per `project.md` `gf-3`; the receipt
+stands as history and is not reopened.

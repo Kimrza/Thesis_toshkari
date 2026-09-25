@@ -535,3 +535,26 @@ catching the site-log class at authoring time; `subprocess` added to the module'
 Paired mechanism: `.gitignore` gains `!evidence/**/*.log`. The three site-log hash rows remain
 red pending re-acquisition (blocked from this network; spec in `sitelog_index.json`).
 Verification: `rem1.xml`. Disclosure only; the receipt stands.
+
+## 2026-09-25 cross-unit staleness addendum (gf-3, build-and-test item 4)
+
+Following the 2026-09-24 addendum above (`tests/test_release_hashes.py` — the three
+site-log hash rows recorded as red, "pending re-acquisition"), that specific
+staleness is now closed:
+
+- **Item 1 (site-log custody) — CLOSED 2026-09-25.** The three IGS site logs
+  (`aruc00arm_20260317.log`, `bshm00isr_20260422.log`, `nico00cyp_20251027.log`) are
+  present on disk under `evidence/station_registry_sources_2026-09-19/`, committed
+  (`db15880`), and their SHA-256 hashes independently recomputed and matched against
+  `sitelog_index.json` exactly (all three, byte-for-byte). The `.gitignore:10`
+  negation (`!evidence/**/*.log`) is live and verified (`git check-ignore` reports no
+  match for any of the three files). `tests/test_release_hashes.py`: **235/235
+  passed**, zero regressions elsewhere. The previous "red pending re-acquisition"
+  statement in the 2026-09-24 addendum above is superseded by this closure, not
+  edited — both stand, dated, per the non-destructive addendum convention.
+- **Item 7 (§18.3 selection reconciliation) — ruled 2026-09-25.** `test_release_hashes.py`
+  is one of the ten module homes in the now-authoritative selection (b); fresh run
+  685/685 passed, 0 failed (D-69, `evidence/DECISIONS.md`).
+
+This addendum discloses per `project.md` `gf-3`; the receipt stands as history and is
+not reopened.

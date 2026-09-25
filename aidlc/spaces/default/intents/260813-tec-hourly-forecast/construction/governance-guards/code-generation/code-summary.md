@@ -947,3 +947,24 @@ Rec 16: the `PURPOSES` leading comment now enumerates six members citing D-68.
 four-module remediation run (`artifacts/exec_evidence/run_2026-09-24_git-ae-srv/rem1.xml`); the
 3 failures are foundation-lane site-log custody rows, not this unit's. This addendum discloses;
 the READY receipt above stands as history.
+
+## 2026-09-25 cross-unit staleness addendum (gf-3, build-and-test item 4)
+
+Following the 2026-09-24 addendum above (Rec 10's `run_id` threading through
+`locked_test.py` / `test_locked_test_guard.py`), two further build-and-test events
+touch this unit's evidence disclosure:
+
+- **Item 7 (§18.3 selection reconciliation, Rec 5) — ruled 2026-09-25.** Selection
+  (b), the ten-module §18.3 selection — which includes `test_locked_test_guard.py`,
+  this unit's own module — is now the designated authoritative critical set for
+  §18.3's "no failing critical test" gate criterion (D-69, `evidence/DECISIONS.md`).
+  Fresh run 2026-09-25: **685/685 passed, 0 failed, 0 errors, 0 skipped** (selection
+  (b) as a whole; `test_locked_test_guard.py` green within it) — no regression from
+  the 2026-09-24 figure.
+- **Item 1 (site-log custody) — CLOSED 2026-09-25.** The three-failure site-log rows
+  that `rem1.xml` (referenced in the 2026-09-24 addendum above) attributed to
+  "foundation-lane," not this unit's, are now closed (see `foundation`'s own
+  addendum). This unit's module carries no residual red rows from that class.
+
+This addendum discloses per `project.md` `gf-3`; the READY receipt stands as history
+and is not reopened.

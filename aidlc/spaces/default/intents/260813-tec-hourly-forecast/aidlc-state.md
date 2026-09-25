@@ -19,10 +19,30 @@
 - **Review Override**: 
 
 ## Workspace State
-- **Project Root**: c:\Users\s_inv\Desktop\test
+- **Project Root**: C:\Users\LOTUS\Desktop\Thesis_toshkari
 - **Languages**: Python 3.11
 - **Frameworks**: Unknown
 - **Build System**: Unknown
+
+<!--
+  Project Root corrected AGAIN 2026-09-25, hand-edit, on the Student's explicit
+  instruction (build-and-test item 5). Same constraint as 2026-08-22 below:
+  `aidlc-state.ts set` refuses direct writes to this field and no tool route
+  exists, so a hand-edit is the only available mechanism. This is a manual fix
+  that will go stale again on the next clone/machine switch — the tooling gap
+  itself (no sanctioned write path: build the tool vs. change the schema to
+  stop recording a machine-local absolute path in a version-controlled state
+  file) is flagged as a separate open question for the Student to decide later,
+  not resolved by this fix.
+
+  Value immediately BEFORE this edit (set 2026-08-22, itself now stale a second
+  time): c:\Users\s_inv\Desktop\test — confirmed not this session's root by
+  direct inspection: this session's actual working directory, holding
+  PreFlight/, evidence/, governance/, scripts/, notebooks/, tests/ and the
+  aidlc/ record tree this file lives in, is C:\Users\LOTUS\Desktop\Thesis_toshkari.
+  Only this field was touched; no lifecycle field, checkbox, phase, stage
+  pointer or governance record was touched.
+-->
 
 <!--
   Workspace-state corrections applied 2026-08-22 per governance report

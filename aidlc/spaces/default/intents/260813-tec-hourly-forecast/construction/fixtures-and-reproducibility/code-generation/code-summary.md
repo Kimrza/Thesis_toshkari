@@ -1288,3 +1288,22 @@ recorded here instead.
 `governance/CHANGE_RECORD_PROCEDURE.md` permits only with owner approval for the specific
 item), **or** let this section carry the correction alone. No third option is proposed and
 nothing is annotated pending the answer.
+
+## 2026-09-25 cross-unit staleness addendum (gf-3, build-and-test item 4)
+
+`build-and-test`'s stage diary (`memory.md`, 2026-09-19T03:00:00Z entry) records
+this unit's `code-summary.md` as stale under its frozen receipt, listed alongside
+`acquisition`, `governance-guards`, `evaluation-and-comparison`,
+`models-and-baselines`, `foundation`, and `statistical-inference`, pending several
+owed owner decisions (D-42 supervisor countersignature, A3/A4 readings, G-3
+adoption, the six-entry transcription go-ahead, `run_snapshots/` tracking policy).
+No further build-and-test-stage event between 2026-09-19 and this addendum's date
+names a specific line-level edit to a `produces[]` artifact of this unit beyond
+what its own review passes already disclose and reconcile in the body above. This
+addendum does not re-derive or claim to close the general 2026-09-19 staleness
+listing itself — that listing names owed *owner* decisions, not a specific code
+edit this stage made to this unit's files — and is recorded here as a plain
+disclosure per `project.md` `gf-3` rather than left unacknowledged. If a specific
+cross-unit code edit to this unit's files exists beyond what its own review
+sections already cover, it is not evidenced in `build-and-test`'s own artifacts as
+of this date.

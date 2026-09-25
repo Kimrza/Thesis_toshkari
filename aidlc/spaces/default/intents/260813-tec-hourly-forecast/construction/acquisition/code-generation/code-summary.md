@@ -611,3 +611,20 @@ invented, and a contrary ruling changes `configs/data.yaml`, not the script.
 * **The stage receipt above is not reopened.** This section is disclosure under the owner's
   `CR-2026-09-20-GOV-CG-01-DISPOSITIONS` authorisation; the `code-generation` gate verdict
   for `GOV-2026-09-20-CG-01` stands at **`FAIL`** and nothing here advances it.
+
+## 2026-09-25 cross-unit staleness addendum (gf-3, build-and-test item 4)
+
+`build-and-test`'s stage-diary and `build-test-results.md` § "Failure 1 (repaired)"
+record a cross-unit edit to this unit's test module under this unit's frozen receipt:
+`tests/test_acquisition.py::test_purposes_gained_the_two_acquisition_values_compatibly`
+failed (`assert 6 == 5`) because `src/data/locked_test.py:256`'s `PURPOSES` gained a
+sixth member, `persistence_history`, when D-68's bounded 1-December lookup mechanism
+was built 2026-09-24. `build-and-test` repaired the stale pin (5 → 6, with
+`persistence_history` asserted explicitly and D-68 cited in the test's docstring) under
+its Step 10 fix authority — an existing owner ruling, not a new decision. Module
+re-run after the fix: **69/69 passed**. This record's own test-count claims for
+`tests/test_acquisition.py` (56 `def test_` functions, as of this unit's own last
+review pass) do not reflect this one-test docstring/assertion amendment; the test
+count itself is unchanged (still 56 functions — the amendment edits an existing
+test's assertion and docstring, adds no new test). This addendum discloses per
+`project.md` `gf-3`; the READY receipt above stands as history and is not reopened.

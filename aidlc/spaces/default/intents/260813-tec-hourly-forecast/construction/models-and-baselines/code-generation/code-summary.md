@@ -535,3 +535,23 @@ Rec 10: `run_id` threaded through `_locked_predictions` → `_persistence_histor
 → the D-68 lookup; absent/empty refuses for M-01/M-02. `tests/test_models_smoke.py` — wiring test
 extended: asserts the run_id threading and the absent-run_id refusal. Verification:
 `rem1.xml` (445/448, failures elsewhere). Disclosure only; the receipt stands.
+
+## 2026-09-25 cross-unit staleness addendum (gf-3, build-and-test item 4)
+
+Following the 2026-09-24 addendum above (Rec 8 docstring rewrite, Rec 10 `run_id`
+threading into `src/models/persistence.py` / `scripts/06_train_and_predict.py` /
+`tests/test_models_smoke.py`), one further build-and-test event touches this unit's
+evidence disclosure:
+
+- **TF/matplotlib pin surface (readiness item 2) — CLOSED locally, 2026-09-25.**
+  `tensorflow==2.21.0` is now installed at the exact governed version in
+  `tec-thesis-311` (was unobtainable as of the 2026-09-24 run). This unit's
+  `src/models/lstm.py` TF-present paths are now exercisable in this environment for
+  the first time; no M-06 fit has run under this closure, and the TE §8.1
+  both-platform (Kaggle AND local) check remains outstanding (batched with item 3's
+  Q-31 freeze — see `build-test-results.md`'s Kaggle runbook). This does not change
+  any claim this unit's own artifact makes about M-06's fit status, which stays
+  `Pending`.
+
+This addendum discloses per `project.md` `gf-3`; the receipt stands as history and is
+not reopened.
