@@ -42,6 +42,7 @@ import ast
 import datetime as dt
 import hashlib
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -254,6 +255,41 @@ def test_declared_artifact_matches_its_recorded_hash(
         f"If this fails in a fresh clone, check `git check-attr -a {artifact.relative_to(REPO_ROOT)}` "
         f"reports `text: unset`; line-ending normalization is the known cause "
         f"(GOV-2026-08-20-RA-01 DATA-01)."
+    )
+
+
+def test_no_manifest_declared_file_is_gitignored() -> None:
+    """Never-again control for GOV-2026-09-24-BT-01 Rec 1 (ruled option 1, 2026-09-24).
+
+    The three IGS site logs of `station_registry_sources_2026-09-19` were declared in a
+    committed `sha256_manifest.json` while a generic `.gitignore` `*.log` pattern kept
+    their BYTES out of every commit — so every fresh clone failed hash verification
+    against files that only ever existed untracked on the authoring machine. This
+    control catches that class AT AUTHORING TIME, on the machine that still holds the
+    bytes: no file any tracked manifest declares may be matched by `.gitignore`.
+
+    Proven to bite: at pre-fix HEAD (before `.gitignore` gained `!evidence/**/*.log`),
+    the three site-log paths are ignored and this test fails; with the negation, it
+    passes. If it ever fires again, fix `.gitignore` — never the manifest.
+    """
+    declared = [manifest.parent / name for manifest, name, _ in _declared_artifacts()]
+    assert declared, "no declared artifacts collected; the manifest scan is broken"
+    batch = "\n".join(
+        str(p.relative_to(REPO_ROOT)).replace("\\", "/") for p in declared
+    ).encode("utf-8")
+    proc = subprocess.run(
+        ["git", "check-ignore", "--stdin"],
+        input=batch,
+        capture_output=True,
+        cwd=REPO_ROOT,
+    )
+    # exit 1 = nothing ignored (the pass state); 0 = at least one declared file ignored.
+    ignored = proc.stdout.decode("utf-8", "replace").strip()
+    assert proc.returncode == 1, (
+        f"manifest-declared evidence files are matched by .gitignore and would never be "
+        f"committed — the site-log defect recurring:\n{ignored}\n"
+        f"Fix .gitignore (a negation like `!evidence/**/*.log`); never drop the "
+        f"declaration from the manifest to silence this."
     )
 
 

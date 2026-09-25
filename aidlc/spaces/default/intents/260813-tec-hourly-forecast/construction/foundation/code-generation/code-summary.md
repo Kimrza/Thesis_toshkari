@@ -522,3 +522,16 @@ not widen any other exemption, does not touch `UNRESTRICTED_READ_RECEIVERS`'s ot
 entries, and does not certify anything about `GOV-2026-09-20-CG-01`'s standing `FAIL`
 verdict — that gate status is unaffected by this amendment and stands exactly as recorded
 above.
+
+---
+
+## Addendum 2026-09-24 — GOV-2026-09-24-BT-01 Rec 1 never-again control (post-receipt amendment, gf-3)
+
+Under the Student's Rec 1 ruling (option 1 + "make sure this issue never happens again",
+`governance/CHANGE_RECORD_2026-09-24_GOV-BT-01_rulings.md`): `tests/test_release_hashes.py`
+gains `test_no_manifest_declared_file_is_gitignored` — no file declared by any tracked
+`sha256_manifest.json` may be matched by `.gitignore` (asserted via `git check-ignore --stdin`),
+catching the site-log class at authoring time; `subprocess` added to the module's imports.
+Paired mechanism: `.gitignore` gains `!evidence/**/*.log`. The three site-log hash rows remain
+red pending re-acquisition (blocked from this network; spec in `sitelog_index.json`).
+Verification: `rem1.xml`. Disclosure only; the receipt stands.

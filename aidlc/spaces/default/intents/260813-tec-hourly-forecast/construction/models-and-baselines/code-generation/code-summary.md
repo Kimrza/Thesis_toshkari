@@ -521,3 +521,17 @@ fresh per call and never persisted or mutated in place. It does not touch D-28 o
 It does not weaken any of D-68's 5 conditions, all still enforced inside
 `read_persistence_history_lookup` itself (owned and tested in `governance-guards`' own
 file) — this amendment only supplies real call-site arguments.
+
+---
+
+## Addendum 2026-09-24 — GOV-2026-09-24-BT-01 remediation (post-receipt amendment, gf-3)
+
+Under the Student's rulings (`governance/CHANGE_RECORD_2026-09-24_GOV-BT-01_rulings.md`):
+`src/models/persistence.py:29–46` — Rec 8: the module docstring's "history is NOT supplied
+today… a supervisor question, routed separately" was the negation of the live D-68 state and is
+rewritten to describe the D-68 lookup (student-ruled, wired, post-G-05-gated, killable), with the
+module's own lookup-only behaviour explicitly unchanged. `scripts/06_train_and_predict.py` —
+Rec 10: `run_id` threaded through `_locked_predictions` → `_persistence_history_augmented_target`
+→ the D-68 lookup; absent/empty refuses for M-01/M-02. `tests/test_models_smoke.py` — wiring test
+extended: asserts the run_id threading and the absent-run_id refusal. Verification:
+`rem1.xml` (445/448, failures elsewhere). Disclosure only; the receipt stands.

@@ -931,3 +931,19 @@ prior post-receipt amendment in this unit's history, and is flagged as a separat
 not-yet-authorized follow-up in the same change record. The mechanism itself is inert
 today regardless — `authorized: false` in `configs/experiment.yaml` means every call
 refuses, proven by `test_ph_the_real_config_ships_inert_today`.
+
+---
+
+## Addendum 2026-09-24 — GOV-2026-09-24-BT-01 remediation (post-receipt amendment, gf-3)
+
+Under the Student's rulings on that report (`governance/CHANGE_RECORD_2026-09-24_GOV-BT-01_rulings.md`):
+`src/data/locked_test.py` — Rec 9: `read_persistence_history_lookup`'s Raises clause and the
+`PERSISTENCE_HISTORY_DAY` comment corrected to the tested drop semantics (behaviour unchanged);
+Rec 10: new required `run_id` keyword threaded onto the emitted `AccessRecord` (empty refuses);
+Rec 16: the `PURPOSES` leading comment now enumerates six members citing D-68.
+`tests/test_locked_test_guard.py` — every `read_persistence_history_lookup` call site passes
+`run_id=`; `test_ph_condition_iii` asserts the caller-supplied value; new
+`test_ph_run_id_is_caller_supplied_and_empty_refuses`. Module state after: 445/448 green in the
+four-module remediation run (`artifacts/exec_evidence/run_2026-09-24_git-ae-srv/rem1.xml`); the
+3 failures are foundation-lane site-log custody rows, not this unit's. This addendum discloses;
+the READY receipt above stands as history.

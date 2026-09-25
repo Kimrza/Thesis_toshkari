@@ -74,8 +74,6 @@
 - **Revision Count**: 33
 
 - **Skeleton Stance**: off
-- **Parked**: 2026-09-20T17:58:21Z
-- **Parked At Stage**: build-and-test
 ## Phase Progress
 <!-- Status values: Pending, Active, Verified, Skipped -->
 
@@ -119,7 +117,7 @@ Per unit: [TBD]
 - [x] nfr-design — EXECUTE
 - [ ] infrastructure-design — SKIP
 - [x] code-generation — EXECUTE
-- [-] build-and-test — EXECUTE
+- [?] build-and-test — EXECUTE
 - [ ] ci-pipeline — SKIP
 
 ### OPERATION PHASE
@@ -136,7 +134,7 @@ Per unit: [TBD]
 - **Current Stage**: build-and-test
 - **Next Stage**: performance-validation
 - **Status**: Running
-- **Last Updated**: 2026-09-20T17:58:21Z
+- **Last Updated**: 2026-09-25T08:46:13Z
 
 ## Session Resume Point
 - **Last Completed Stage**: code-generation

@@ -1688,9 +1688,13 @@ def test_persistence_history_augments_only_m01_m02_and_only_with_all_three_input
         [{"interval_start_utc": "2022-12-02T00:00:00Z", "station_id": "BSHM", "vtec_tecu": 1.0}]
     )
     calls: list[str] = []
+    seen_run_ids: list[str] = []
 
-    def fake_lookup(snapshot, *, model_id, g05_signature, path, loader, registry, now=None):
+    def fake_lookup(
+        snapshot, *, model_id, run_id, g05_signature, path, loader, registry, now=None
+    ):
         calls.append(model_id)
+        seen_run_ids.append(run_id)
         return {
             (
                 "BSHM",
@@ -1705,6 +1709,7 @@ def test_persistence_history_augments_only_m01_m02_and_only_with_all_three_input
         locked_target=base_target,
         model_id="M-03",
         snapshot=_signed_snapshot(),
+        run_id="wiring-test-run",
         g05_signature="sig",
         locked_input=restricted_path,
         access_log=Path("registry.jsonl"),
@@ -1717,11 +1722,14 @@ def test_persistence_history_augments_only_m01_m02_and_only_with_all_three_input
         locked_target=base_target,
         model_id="M-01",
         snapshot=_signed_snapshot(),
+        run_id="wiring-test-run",
         g05_signature="sig",
         locked_input=restricted_path,
         access_log=Path("registry.jsonl"),
     )
     assert calls == ["M-01"]
+    # Rec 10 (GOV-2026-09-24-BT-01): the wiring threads the governed run's own id through.
+    assert seen_run_ids == ["wiring-test-run"]
     rows = records_of(augmented)
     assert len(rows) == 2, "expected the original row plus the one 1-Dec lookup row"
     extra = [r for r in rows if r["interval_start_utc"].startswith("2022-12-01")]
@@ -1736,6 +1744,7 @@ def test_persistence_history_augments_only_m01_m02_and_only_with_all_three_input
         {"access_log": None},
     ):
         kwargs = {
+            "run_id": "wiring-test-run",
             "g05_signature": "sig",
             "locked_input": restricted_path,
             "access_log": Path("registry.jsonl"),
@@ -1749,6 +1758,20 @@ def test_persistence_history_augments_only_m01_m02_and_only_with_all_three_input
                 **kwargs,
             )
         assert "incomplete" in str(excinfo.value)
+
+    # Rec 10 second limb: an absent run_id refuses for M-01/M-02 (attribution by key,
+    # never by timestamp correlation), while a non-caller family is still untouched.
+    with pytest.raises(LockedTestError) as excinfo:
+        script._persistence_history_augmented_target(
+            locked_target=base_target,
+            model_id="M-02",
+            snapshot=_signed_snapshot(),
+            run_id=None,
+            g05_signature="sig",
+            locked_input=restricted_path,
+            access_log=Path("registry.jsonl"),
+        )
+    assert "run_id" in str(excinfo.value)
 
 
 def test_the_dec_iteration_with_no_persisted_refit_model_raises_rather_than_fitting(

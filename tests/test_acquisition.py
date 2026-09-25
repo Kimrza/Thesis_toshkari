@@ -1239,10 +1239,17 @@ def synthetic_boundary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 def test_purposes_gained_the_two_acquisition_values_compatibly() -> None:
-    """Q2=C's enum extension: the three Vision 8.3 values remain, two are added."""
+    """Q2=C's enum extension: the three Vision 8.3 values remain, two are added.
+
+    Amended 2026-09-24 (build-and-test): D-68 added a sixth member,
+    ``persistence_history`` (the bounded 1-December lookup read for M-01/M-02,
+    `governance/CHANGE_RECORD_2026-09-24_d28_option_a_mechanism_built.md`).
+    The pin moves 5 -> 6 to match the owner-ruled decision; this test still
+    refuses any UNRULED widening of the enum."""
     assert {"coverage_audit", "regime_audit", "locked_evaluation"} <= PURPOSES
     assert {"acquisition_read", "acquisition_write"} <= PURPOSES
-    assert len(PURPOSES) == 5
+    assert {"persistence_history"} <= PURPOSES  # D-68
+    assert len(PURPOSES) == 6
     # AccessRecord accepts the new purposes (the extension is compatible).
     assert _write_record().purpose == "acquisition_write"
 

@@ -253,6 +253,10 @@ def fail_unparseable(artifact: object, reason: str) -> None:
 #: acquisition write) was REJECTED because the access log's whole value is that a
 #: G-05 reviewer can read its rows as meaning what they say. `authorization` widens
 #: accordingly: for the acquisition purposes it names a D-number.
+#: PLUS the sixth member `persistence_history` (D-68, 2026-09-24): the bounded,
+#: post-G-05, M-01/M-02-only lookup read of 2022-12-01 target history —
+#: `read_persistence_history_lookup` below is its sole emitter (comment extended
+#: 2026-09-24 under `CR-2026-09-24-GOV-BT-01-RULINGS` Rec 16).
 PURPOSES: Final[frozenset[str]] = frozenset(
     {
         "coverage_audit",
@@ -541,10 +545,14 @@ def open_restricted(
 PERSISTENCE_HISTORY_CALLERS: Final[frozenset[str]] = frozenset({"M-01", "M-02"})
 
 #: The single day this mechanism may ever return values for -- 2022-12-01, the one day D-28's
-#: 24-hour embargo excludes from the scored window. Never widened: a caller asking for any
-#: other day is refused (condition (i) -- no 1-Dec row is ever SCORED is enforced by
-#: `src.models.persistence`'s own indexing, which never asks this function for a day inside
-#: the scored window in the first place; this bound is the second, independent check).
+#: 24-hour embargo excludes from the scored window. Never widened: rows outside this day are
+#: silently DROPPED from the returned mapping -- an output bound, not a refusal -- because the
+#: loader legitimately returns the whole unembargoed December frame (condition (i) -- no 1-Dec
+#: row is ever SCORED is enforced by `src.models.persistence`'s own indexing, which never asks
+#: this function for a day inside the scored window in the first place; this output bound is
+#: the second, independent check). Wording corrected 2026-09-24, Rec 9 of
+#: `GOV-2026-09-24-BT-01`: the earlier "is refused" here misdescribed the tested drop
+#: semantics.
 PERSISTENCE_HISTORY_DAY: Final[str] = "2022-12-01"
 
 
@@ -552,6 +560,7 @@ def read_persistence_history_lookup(
     snapshot: ConfigSnapshot,
     *,
     model_id: str,
+    run_id: str,
     g05_signature: str | None,
     path: Path,
     loader: Callable[[], Any],
@@ -594,6 +603,12 @@ def read_persistence_history_lookup(
 
     Parameters
     ----------
+    run_id
+        The governed run's own identifier, supplied by the caller that owns the run context
+        (the stage-06 wiring) -- it lands on the access row so a G-06 reviewer attributes the
+        read by key, never by timestamp correlation. A constant field on every row evidences
+        nothing (the `_assert_parseable_retrieved_at` lesson above); empty refuses via
+        `AccessRecord.__post_init__`. Added 2026-09-24, Rec 10 of `GOV-2026-09-24-BT-01`.
     path
         The actual restricted-root artifact this call reads (the same path the DEC loader's
         own `open_restricted` call already logs against) -- passed through to `open_restricted`
@@ -608,8 +623,11 @@ def read_persistence_history_lookup(
     Raises
     ------
     LockedTestError
-        on any of the 5 conditions above; on a loader returning a row outside
-        `PERSISTENCE_HISTORY_DAY`.
+        on any of the 5 conditions above. A loader row outside `PERSISTENCE_HISTORY_DAY`
+        does NOT raise: it is silently dropped from the returned mapping (the output bound
+        -- the loader legitimately returns the whole unembargoed December frame; see the
+        `PERSISTENCE_HISTORY_DAY` comment). Wording corrected 2026-09-24 (Rec 9,
+        `GOV-2026-09-24-BT-01`); the code's drop semantics are the tested, wired design.
     IntegrityError
         a target row missing the three D-17 columns this function reads (mirrors
         `src.models.train.target_series`'s own check).
@@ -654,7 +672,7 @@ def read_persistence_history_lookup(
         )
     call_time = now if now is not None else _dt.datetime.now(_dt.timezone.utc)
     record = AccessRecord(
-        run_id="persistence_history_lookup",
+        run_id=run_id,
         retrieved_at_utc=call_time.isoformat(),
         scope="target rows for 2022-12-01 only, lookup history for M-01/M-02",
         purpose="persistence_history",

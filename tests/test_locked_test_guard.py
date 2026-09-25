@@ -2027,6 +2027,7 @@ def test_ph_condition_i_never_returns_a_row_outside_1_december() -> None:
     lookup = read_persistence_history_lookup(
         _ph_signed_snapshot(),
         model_id="M-01",
+        run_id="test-ph-run",
         g05_signature=_PH_SIGNATURE,
         path=RESTRICTED_DIR,
         loader=_ph_loader,
@@ -2047,6 +2048,7 @@ def test_ph_condition_ii_only_m01_m02_may_call_it() -> None:
             read_persistence_history_lookup(
                 _ph_signed_snapshot(),
                 model_id=bad_id,
+                run_id="test-ph-run",
                 g05_signature=_PH_SIGNATURE,
                 path=RESTRICTED_DIR,
                 loader=_ph_loader,
@@ -2058,6 +2060,7 @@ def test_ph_condition_ii_only_m01_m02_may_call_it() -> None:
         lookup = read_persistence_history_lookup(
             _ph_signed_snapshot(),
             model_id=good_id,
+            run_id="test-ph-run",
             g05_signature=_PH_SIGNATURE,
             path=RESTRICTED_DIR,
             loader=_ph_loader,
@@ -2073,6 +2076,7 @@ def test_ph_condition_iii_logs_a_complete_access_record() -> None:
     read_persistence_history_lookup(
         _ph_signed_snapshot(),
         model_id="M-02",
+        run_id="test-ph-run",
         g05_signature=_PH_SIGNATURE,
         path=RESTRICTED_DIR,
         loader=_ph_loader,
@@ -2084,10 +2088,43 @@ def test_ph_condition_iii_logs_a_complete_access_record() -> None:
     assert row["purpose"] == "persistence_history"
     assert row["locked_test_accessed"] is True
     assert row["performance_inspected"] is False
-    assert row["run_id"] == "persistence_history_lookup"
+    # Rec 10 (GOV-2026-09-24-BT-01): the row carries the CALLER-supplied run_id, so a
+    # G-06 reviewer attributes the read by key — a constant on every row evidences nothing.
+    assert row["run_id"] == "test-ph-run"
     assert "M-02" in row["authorization"]
     assert row["scope"]
     assert row["retrieved_at_utc"]
+
+
+def test_ph_run_id_is_caller_supplied_and_empty_refuses() -> None:
+    """Rec 10 (GOV-2026-09-24-BT-01): attribution by key. Two limbs: (a) a distinct
+    caller-supplied run_id lands verbatim on the appended access row; (b) an empty
+    run_id refuses via AccessRecord's own emptiness check, with no row appended."""
+    registry = _ph_tmp_registry()
+    read_persistence_history_lookup(
+        _ph_signed_snapshot(),
+        model_id="M-01",
+        run_id="governed-run-2026-09-24T21Z",
+        g05_signature=_PH_SIGNATURE,
+        path=RESTRICTED_DIR,
+        loader=_ph_loader,
+        registry=registry,
+    )
+    rows = [json.loads(line) for line in registry.read_text(encoding="utf-8").splitlines() if line]
+    assert [r["run_id"] for r in rows] == ["governed-run-2026-09-24T21Z"]
+    empty_registry = _ph_tmp_registry()
+    with pytest.raises(LockedTestError) as excinfo:
+        read_persistence_history_lookup(
+            _ph_signed_snapshot(),
+            model_id="M-01",
+            run_id="",
+            g05_signature=_PH_SIGNATURE,
+            path=RESTRICTED_DIR,
+            loader=_ph_loader,
+            registry=empty_registry,
+        )
+    assert "run_id" in str(excinfo.value)
+    assert not empty_registry.exists() or not empty_registry.read_text(encoding="utf-8").strip()
 
 
 def test_ph_condition_iv_blocked_pre_g05_succeeds_post_g05() -> None:
@@ -2099,6 +2136,7 @@ def test_ph_condition_iv_blocked_pre_g05_succeeds_post_g05() -> None:
         read_persistence_history_lookup(
             _ph_signed_snapshot(),
             model_id="M-01",
+            run_id="test-ph-run",
             g05_signature=None,
             path=RESTRICTED_DIR,
             loader=_ph_loader,
@@ -2109,6 +2147,7 @@ def test_ph_condition_iv_blocked_pre_g05_succeeds_post_g05() -> None:
         read_persistence_history_lookup(
             _ph_signed_snapshot(),
             model_id="M-01",
+            run_id="test-ph-run",
             g05_signature="the wrong artifact",
             path=RESTRICTED_DIR,
             loader=_ph_loader,
@@ -2120,6 +2159,7 @@ def test_ph_condition_iv_blocked_pre_g05_succeeds_post_g05() -> None:
     lookup = read_persistence_history_lookup(
         _ph_signed_snapshot(),
         model_id="M-01",
+        run_id="test-ph-run",
         g05_signature=_PH_SIGNATURE,
         path=RESTRICTED_DIR,
         loader=_ph_loader,
@@ -2140,6 +2180,7 @@ def test_ph_condition_v_inert_until_its_own_d_number_is_authorized() -> None:
         read_persistence_history_lookup(
             unauthorized,
             model_id="M-01",
+            run_id="test-ph-run",
             g05_signature=_PH_SIGNATURE,
             path=RESTRICTED_DIR,
             loader=_ph_loader,
@@ -2152,6 +2193,7 @@ def test_ph_condition_v_inert_until_its_own_d_number_is_authorized() -> None:
         read_persistence_history_lookup(
             tbd_decision,
             model_id="M-01",
+            run_id="test-ph-run",
             g05_signature=_PH_SIGNATURE,
             path=RESTRICTED_DIR,
             loader=_ph_loader,
@@ -2163,6 +2205,7 @@ def test_ph_condition_v_inert_until_its_own_d_number_is_authorized() -> None:
         read_persistence_history_lookup(
             not_a_d_number,
             model_id="M-01",
+            run_id="test-ph-run",
             g05_signature=_PH_SIGNATURE,
             path=RESTRICTED_DIR,
             loader=_ph_loader,
@@ -2176,6 +2219,7 @@ def test_ph_condition_v_inert_until_its_own_d_number_is_authorized() -> None:
     lookup = read_persistence_history_lookup(
         _ph_signed_snapshot(),
         model_id="M-01",
+        run_id="test-ph-run",
         g05_signature=_PH_SIGNATURE,
         path=RESTRICTED_DIR,
         loader=_ph_loader,
@@ -2214,6 +2258,7 @@ def test_ph_the_real_config_reflects_its_actual_authorization_state() -> None:
             experiment={"persistence_history_lookup": block},
         ),
         model_id="M-01",
+        run_id="test-ph-run",
         g05_signature=_PH_SIGNATURE,
         path=RESTRICTED_DIR,
         loader=_ph_loader,

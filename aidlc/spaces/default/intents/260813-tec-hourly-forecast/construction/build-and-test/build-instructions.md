@@ -289,3 +289,71 @@ and different module bodies than it describes.
 - `requirements.txt` and `pyproject.toml` as read at commit `615a367`.
 - Per-unit `code-generation-plan.md` and `code-summary.md` under
   `<record>/construction/<unit>/code-generation/`.
+
+---
+
+## Addendum 2026-09-24 — environment reconstruction when PyPI is blocked (measured on this clone)
+
+Everything above this line was written 2026-09-13 at `615a367`. Measured again
+2026-09-24 at `41fd109`:
+
+- The governed environments earlier sessions used on this machine (conda
+  `tec-thesis-311` and its scratchpad siblings) lived under the Windows Temp
+  tree and **no longer exist** — Temp was cleaned between sessions. The
+  `README.md` note directing `conda activate tec-thesis-311` is therefore
+  aspirational on a fresh session until the environment is rebuilt.
+- Network split, re-probed this session: `pypi.org` times out;
+  `repo.anaconda.com` and `conda.anaconda.org` (conda-forge) return 200;
+  GitHub reachable. `pip install -r requirements.txt` is therefore
+  **not executable** here, and the working reconstruction path is conda-forge.
+
+**Reconstruction recipe (this session's measured path):**
+
+```powershell
+# 1. Miniconda, silent, user-scoped, no PATH changes
+Invoke-WebRequest https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -OutFile miniconda.exe
+Start-Process miniconda.exe -ArgumentList "/S","/InstallationType=JustMe","/AddToPath=0","/RegisterPython=0","/D=<env-root>\mc3" -Wait
+
+# 2. The governed pin set from conda-forge (PyPI-free) — the command that actually
+#    succeeded this session, byte-for-byte (Rec 2 of GOV-2026-09-24-BT-01, ruled
+#    option 1: an earlier draft of this addendum printed matplotlib-base=3.9.0 inside
+#    this command, which cannot resolve — see the refused install below)
+<env-root>\mc3\Scripts\conda.exe create -p <env-root>\tec311 -c conda-forge --override-channels -y `
+  python=3.11.16 numpy=1.26.4 pandas=2.1.4 pyyaml=6.0.1 scikit-learn=1.4.2 `
+  pyarrow=16.1.0 pytest=8.2.2 ruff=0.4.8
+
+# 3. Attempted and REFUSED, recorded separately: matplotlib 3.9.0 does not exist for
+#    win-64 on conda-forge (jumps 3.8.4 -> later) nor on anaconda main (starts at 3.9.2).
+#    The pin is owner-frozen (Rec 38): do NOT substitute 3.9.2. The rebuilt environment
+#    is matplotlib-absent until a PyPI-reachable host supplies the exact pin.
+#    (dry-run evidence: PackagesNotFoundInChannelsError: matplotlib-base=3.9.0)
+```
+
+**Known deviation, disclosed:** `tensorflow==2.21.0` has **no Windows
+conda-forge build** and PyPI is unreachable, so a locally rebuilt environment
+is TF-absent. The suite is written to run in both TF states
+(TF-absence-dependent tests assert the refusal path); M-06 training work and
+the TE §8.1 both-platform TF check remain owed to a host that can install the
+pinned wheel (Kaggle can). The environment lock for any run from a rebuilt
+environment must record this absence rather than imply the full pin set.
+
+The verified reconstruction outcome for this session, with versions read back
+from the created environment, is recorded in `build-test-results.md`.
+
+Three further corrections under the Student's 2026-09-24 rulings on
+`GOV-2026-09-24-BT-01` (`CR-2026-09-24-GOV-BT-01-RULINGS`):
+
+- **Step 6's ladder-state paragraph in the 2026-09-13 body is SUPERSEDED** (Rec 14):
+  the ladder is no longer "never completed on any host" and pyyaml is no longer the
+  blocker — stages 00, 01, 02, 04 and 05 have completed on the `plumbing_7day`
+  fixture path. See `integration-test-instructions.md` § Tier 1 for the measured
+  2026-09-24 ladder state.
+- **The body's pointer to `build-test-results.md` § "R-05" is dead** (Rec 15): that
+  section does not exist in the rewritten results file. The R-05 Windows exit-code
+  account lives in `governance/CHANGE_RECORD_2026-09-13_R05_windows_exit_code.md`.
+- **Commit procedure under the now-active pre-commit hook** (Rec 3, ruled option 2):
+  `core.hooksPath` is set to `.githooks` on this clone. The hook needs `python` with
+  `pytest` importable on `PATH`; this machine's default `python` is a Windows Store
+  stub, so prefix the governed environment for any commit, e.g. (Git Bash)
+  `PATH="/c/<env-root>/tec311:$PATH" git commit ...`. A commit from a bare shell is
+  blocked by the hook's own no-python message — by design (Q7=D), not a defect.

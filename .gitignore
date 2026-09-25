@@ -1,6 +1,13 @@
 # Logs
 logs
 *.log
+# Governed evidence is NEVER build noise: the generic `*.log` above swallowed the three
+# IGS site logs that evidence/station_registry_sources_2026-09-19/sha256_manifest.json
+# declares (committed 4253d51 without their bytes — GOV-2026-09-24-BT-01 Rec 1, ruled
+# option 1 with a never-again clause). Any *.log under evidence/ is evidence, not a log
+# file in the build sense; tests/test_release_hashes.py asserts no manifest-declared
+# file is ever gitignored.
+!evidence/**/*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

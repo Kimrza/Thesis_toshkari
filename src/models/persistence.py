@@ -30,20 +30,25 @@ Target history before the scored window — the locked partition's shortfall
 --------------------------------------------------------------------------
 Both families read target history STRICTLY BEFORE the row they forecast: M-01 needs
 `y(t - h)` and M-02 needs `y(t - 24 h)`, so the earliest scored hour of any window needs
-values from before that window's start. On the locked partition that history is NOT supplied
-today. `materialise_locked_partition` hands back the December frame with its first
-`embargo_hours` excluded (D-28), so the series this module reads begins at 2 December 00:00:
-at `h = 1` M-01 has nothing to read for 2 December 00:00, and M-02 has nothing to read for
-any of the twenty-four hours of 2 December. Those rows carry a MISSING `y_hat`, drop out of
-the comparison-wide intersection mask, and shorten the scored set by a day against the thirty
-days D-28 discloses.
+values from before that window's start. `materialise_locked_partition` hands back the
+December frame with its first `embargo_hours` excluded (D-28), so the series this module
+reads begins at 2 December 00:00 — and without more, M-01 has nothing to read for
+2 December 00:00 at `h = 1`, and M-02 nothing for any of 2 December's twenty-four hours.
 
-This module does not close that gap and must not: whether the two persistence families may
-read 1 December history for a 2 December forecast origin is a supervisor question about the
-locked-test boundary, routed separately. What detects the shortfall is the mask-coverage
-assertion in `require_locked_receipt` (`src/evaluation/guards.py`), which compares the scored
-set against the disclosed window rather than trusting it. The lookup behaviour here is
-deliberately unchanged: a missing source value stays missing and stays counted.
+Since 2026-09-24 that gap is closed OUTSIDE this module, by **D-68** (student-ruled;
+`evidence/DECISIONS.md`; no separate supervisor signature claimed): the stage-06 wiring
+(`scripts/06_train_and_predict.py: _persistence_history_augmented_target`) hands M-01/M-02 —
+and only them — an AUGMENTED copy of the locked target carrying the 2022-12-01 lookup rows,
+obtained through `src.data.locked_test.read_persistence_history_lookup`, which is bounded
+(M-01/M-02 only; returns 2022-12-01 rows only), post-G-05-gated, access-logged, and killable
+via `configs/experiment.yaml: persistence_history_lookup.authorized`. This module itself is
+UNCHANGED by D-68 and stays lookup-only: it never reads December history itself, a missing
+source value stays missing and stays counted, and the mask-coverage assertion in
+`require_locked_receipt` (`src/evaluation/guards.py`) still detects any shortfall rather than
+trusting the disclosed window. (Docstring corrected 2026-09-24 under the Student's Rec 8
+ruling, `GOV-2026-09-24-BT-01` / `CR-2026-09-24-GOV-BT-01-RULINGS`: the earlier text
+asserted the history "is NOT supplied today" and called the question "a supervisor question,
+routed separately" — both superseded by D-68's ruling and wiring on the same day.)
 
 Re-run behaviour
 ----------------

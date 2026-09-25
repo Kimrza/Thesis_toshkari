@@ -745,6 +745,7 @@ def _persistence_history_augmented_target(
     locked_target: Any,
     model_id: str,
     snapshot: Any,
+    run_id: str | None,
     g05_signature: str | None,
     locked_input: Path | None,
     access_log: Path | None,
@@ -775,6 +776,13 @@ def _persistence_history_augmented_target(
             "same all-or-nothing precondition this script already enforces for the DEC "
             "partition itself",
         )
+    if run_id is None or not str(run_id).strip():
+        raise LockedTestError(
+            f"_persistence_history_augmented_target({model_id})",
+            "run_id absent; every persistence_history access row must be attributable to "
+            "the governed run that made it by key, never by timestamp correlation "
+            "(NFR-AUD-01; Rec 10 of GOV-2026-09-24-BT-01)",
+        )
 
     def _raw_december_loader() -> Any:
         return _read_target_artifact(Path(locked_input))
@@ -782,6 +790,7 @@ def _persistence_history_augmented_target(
     lookup = read_persistence_history_lookup(
         snapshot,
         model_id=model_id,
+        run_id=run_id,
         g05_signature=g05_signature,
         path=Path(locked_input),
         loader=_raw_december_loader,
@@ -808,6 +817,7 @@ def _locked_predictions(
     horizon: int,
     expected_seeds: frozenset[int],
     models_root: Path,
+    run_id: str | None = None,
     g05_signature: str | None = None,
     locked_input: Path | None = None,
     access_log: Path | None = None,
@@ -838,6 +848,7 @@ def _locked_predictions(
                 locked_target=locked_target,
                 model_id=model_id,
                 snapshot=snapshot,
+                run_id=run_id,
                 g05_signature=g05_signature,
                 locked_input=locked_input,
                 access_log=access_log,
@@ -1251,6 +1262,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
                 horizon=horizon,
                 expected_seeds=expected_seeds,
                 models_root=models_root,
+                run_id=run_id,
                 g05_signature=args.g05_signature,
                 locked_input=Path(args.locked_input) if args.locked_input else None,
                 access_log=access_log,
