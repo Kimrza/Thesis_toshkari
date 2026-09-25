@@ -3510,3 +3510,114 @@ def test_the_plumbing_fixture_declares_exactly_the_one_override_the_ruling_appro
     assert list(override) == ["station_lat"]
     assert override["station_lat"]["normalization"] == "none"
     assert "one station" in override["station_lat"]["reason"].lower()
+
+
+# =========================================================================================
+# The apparatus hyperparameter block (CR-2026-09-25: breaks the fixture/tuning circular
+# refusal — `models.selected` is the governed tuning run's OUTPUT and the tuning run is
+# gated on these fixtures, so the fixture-scale grid point is an owner-frozen apparatus
+# constant, R-122). Every control here is a negative one: the block's whole safety rests on
+# being unable to become a back door into `models.selected` or a second grid.
+# =========================================================================================
+
+#: A valid apparatus grid point ENTRY shape (values are TEST APPARATUS, never governed).
+_APPARATUS_HP = {
+    "ridge": {
+        "params": {"alpha": 0.5},
+        "reason": "fixture-scale plumbing point (test apparatus)",
+        "citation": "D-905",
+    }
+}
+
+
+def test_apparatus_hyperparameter_tracks_mirror_grid_tracks() -> None:
+    """The identity enumeration and its original agree (the PHASE1_SEQUENCE pattern):
+    `fixture_manifest` must not import `src.models.train`, so the track names are mirrored
+    and THIS test is the drift guard."""
+    from src.data.fixture_manifest import APPARATUS_HYPERPARAMETER_TRACKS
+    from src.models.train import GRID_TRACKS
+
+    assert tuple(GRID_TRACKS) == APPARATUS_HYPERPARAMETER_TRACKS
+
+
+def test_apparatus_hyperparameters_refuse_an_unknown_track(tmp_path):
+    root = tmp_path / "unknowntrack"
+    root.mkdir()
+    data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    data["apparatus_hyperparameters"] = {
+        "gru": {"params": {"units": 4}, "reason": "removed family", "citation": "D-905"}
+    }
+    with pytest.raises(IntegrityError, match="unknown track"):
+        validate_manifest_mapping(data, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+
+
+def test_apparatus_hyperparameters_refuse_an_uncited_point(tmp_path):
+    """An uncited grid point is a selection with no record (TE 18.3): the citation is the
+    owner's freezing D-number, and shape validation refuses its absence outright."""
+    root = tmp_path / "uncited"
+    root.mkdir()
+    data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    entry = {k: dict(v) for k, v in _APPARATUS_HP.items()}
+    del entry["ridge"]["citation"]
+    data["apparatus_hyperparameters"] = entry
+    with pytest.raises(IntegrityError, match="freezing D-number"):
+        validate_manifest_mapping(data, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+
+
+def test_apparatus_hyperparameters_refuse_a_range_posing_as_a_point(tmp_path):
+    """One scalar per axis: a list here would be a second grid, and D-121 owns the one grid."""
+    root = tmp_path / "secondgrid"
+    root.mkdir()
+    data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    data["apparatus_hyperparameters"] = {
+        "ridge": {"params": {"alpha": [0.5, 2.0]}, "reason": "r", "citation": "D-905"}
+    }
+    with pytest.raises(IntegrityError, match="one scalar per axis"):
+        validate_manifest_mapping(data, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+
+
+def test_apparatus_hyperparameters_require_the_reason_to_be_recorded(tmp_path):
+    root = tmp_path / "noreasonhp"
+    root.mkdir()
+    data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    entry = {k: dict(v) for k, v in _APPARATUS_HP.items()}
+    del entry["ridge"]["reason"]
+    data["apparatus_hyperparameters"] = entry
+    with pytest.raises(IntegrityError, match="non-empty `reason`"):
+        validate_manifest_mapping(data, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+
+
+def test_a_valid_apparatus_hyperparameter_block_validates_on_both_scope_kinds(tmp_path):
+    root = tmp_path / "validhp"
+    root.mkdir()
+    data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    data["apparatus_hyperparameters"] = _APPARATUS_HP
+    validate_manifest_mapping(data, manifest_path=root / MANIFEST_NAME, file_sha256=None)
+
+
+def test_compose_carries_both_apparatus_blocks_into_the_candidate(tmp_path):
+    """FOUND WHILE ADDING THE BLOCK (CR-2026-09-25): `compose_candidate_manifest`'s extras
+    tuple carried only partitions and bootstrap, so a composed candidate silently LOST the
+    declaration's `apparatus_normalization` — a comparison run's `fit_transforms` would
+    then refuse the constant column the override exists for. Both apparatus blocks must
+    carry across exactly as declared."""
+    from src.data.fixture_manifest import compose_candidate_manifest
+
+    root = tmp_path / "carry"
+    root.mkdir()
+    declaration = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)
+    declaration["apparatus_normalization"] = {
+        "station_lat": {"normalization": "none", "reason": "one station (test apparatus)"}
+    }
+    declaration["apparatus_hyperparameters"] = _APPARATUS_HP
+    candidate = compose_candidate_manifest(
+        declaration,
+        fixture_id=PLUMBING_FIXTURE_ID,
+        measurements={},
+        measuring_run_id=RUN_ID,
+        outputs=list(declaration["required_outputs"]["outputs"]),
+        comparison_ledger=declaration["required_outputs"]["comparison_ledger"],
+        artifact_manifest_ref="artifact_manifest.json",
+    )
+    assert candidate["apparatus_normalization"] == declaration["apparatus_normalization"]
+    assert candidate["apparatus_hyperparameters"] == declaration["apparatus_hyperparameters"]

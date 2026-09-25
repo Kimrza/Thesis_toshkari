@@ -118,6 +118,8 @@ __all__ = [
     "Quantity",
     "CONTENT_AREAS",
     "AREA_KEYS",
+    "APPARATUS_HYPERPARAMETERS_KEY",
+    "APPARATUS_HYPERPARAMETER_TRACKS",
     "APPARATUS_NORMALIZATION_KEY",
     "APPARATUS_NORMALIZATION_VALUE",
     "PHASE2_ONLY_QUANTITIES",
@@ -369,6 +371,19 @@ AREA_KEYS: Final[tuple[str, ...]] = tuple(key for key, _name, _qs in CONTENT_ARE
 APPARATUS_NORMALIZATION_KEY: Final[str] = "apparatus_normalization"
 APPARATUS_NORMALIZATION_VALUE: Final[str] = "none"
 
+#: The apparatus hyperparameter block: one owner-frozen grid point per fitted track, read by
+#: the fixture-scale path of `06_train_and_predict.py` ONLY. An apparatus constant (R-122),
+#: not a scientific value: it never reaches a governed run (which carries no fixture scope),
+#: never writes `models.selected`, and every point must be a member of D-121's frozen grid
+#: (asserted at use via `assert_in_grid`, never here — grid knowledge lives in
+#: `src/models/train.py` and the data layer does not import it). See
+#: `_validate_apparatus_hyperparameters`.
+APPARATUS_HYPERPARAMETERS_KEY: Final[str] = "apparatus_hyperparameters"
+#: The three fitted grid tracks, mirrored from `src/models/train.py: GRID_TRACKS` as an
+#: identity enumeration (import would invert the data<-models dependency); agreement is
+#: asserted by test, the PHASE1_SEQUENCE pattern.
+APPARATUS_HYPERPARAMETER_TRACKS: Final[tuple[str, ...]] = ("ridge", "random_forest", "lstm")
+
 #: Derived from the table above, never carried: every (area, quantity) that may be recorded
 #: `not_applicable` on a Phase 1 manifest.
 PHASE2_ONLY_QUANTITIES: Final[tuple[tuple[str, str], ...]] = tuple(
@@ -477,6 +492,11 @@ class FixtureManifest:
     @property
     def apparatus_normalization(self) -> Mapping[str, Mapping[str, Any]]:
         block = self.data.get(APPARATUS_NORMALIZATION_KEY)
+        return block if isinstance(block, Mapping) else {}
+
+    @property
+    def apparatus_hyperparameters(self) -> Mapping[str, Mapping[str, Any]]:
+        block = self.data.get(APPARATUS_HYPERPARAMETERS_KEY)
         return block if isinstance(block, Mapping) else {}
 
     @property
@@ -1062,6 +1082,73 @@ def _validate_apparatus_normalization(
             )
 
 
+def _validate_apparatus_hyperparameters(
+    manifest_path: Path, fixture_id: str, data: Mapping[str, Any]
+) -> None:
+    """Validate `apparatus_hyperparameters`: the owner-frozen grid point per fitted track.
+
+    An apparatus constant (R-122), not a scientific value — the fixture-scale path of
+    `06_train_and_predict.py` is its ONLY reader. It exists because `models.selected` is the
+    governed tuning run's OUTPUT (R-101/D-124) and cannot exist before that run, while the
+    fixtures that gate the tuning run (TE 9.2) must fit M-04..M-06 to pass — the circular
+    refusal this block breaks. It states nothing about the governed selection, never reaches
+    a governed run (no fixture scope there), and is never copied into `configs/`.
+
+    Shape only, here: each entry names its `params` (the grid point), a non-empty `reason`,
+    and a `citation` (the owner's D-number freezing the point — the choice is a recorded
+    freeze act, TE 18.3, never a convenience default). GRID MEMBERSHIP is asserted at use by
+    `src/models/train.py: assert_in_grid` (R-96's analogue) — the data layer holds no grid.
+    """
+    block = data.get(APPARATUS_HYPERPARAMETERS_KEY)
+    res = f"{manifest_path}: {APPARATUS_HYPERPARAMETERS_KEY}"
+    if block is None:
+        return
+    if not isinstance(block, Mapping) or not block:
+        raise _refuse(res, "a non-empty mapping track -> declaration is required")
+    stray_tracks = sorted(set(block) - set(APPARATUS_HYPERPARAMETER_TRACKS))
+    if stray_tracks:
+        raise _refuse(
+            res,
+            f"carries unknown track(s) {stray_tracks}; the fitted grid tracks are "
+            f"{list(APPARATUS_HYPERPARAMETER_TRACKS)} (D-121's three families)",
+        )
+    for track, entry in block.items():
+        tres = f"{res}.{track}"
+        if not isinstance(entry, Mapping):
+            raise _refuse(tres, "declaration must be a mapping")
+        stray = sorted(set(entry) - {"params", "reason", "citation"})
+        if stray:
+            raise _refuse(
+                tres,
+                f"carries {stray}; an apparatus grid point declares exactly `params`, the "
+                f"`reason` the apparatus needs it, and the `citation` freezing it",
+            )
+        params = entry.get("params")
+        if not isinstance(params, Mapping) or not params:
+            raise _refuse(tres + ".params", "a non-empty mapping of grid axes is required")
+        for axis, value in params.items():
+            if isinstance(value, (Mapping, list, tuple, set)):
+                raise _refuse(
+                    f"{tres}.params.{axis}",
+                    "a grid point carries one scalar per axis, never a range or collection — "
+                    "a range here would be a second grid (D-121 owns the one grid)",
+                )
+        reason = entry.get("reason")
+        if not isinstance(reason, str) or not reason.strip():
+            raise _refuse(
+                tres,
+                "a non-empty `reason` is required; the apparatus fact that makes the point "
+                "necessary is recorded with it, never left to be inferred",
+            )
+        citation = entry.get("citation")
+        if not isinstance(citation, str) or not _DECISION_RE.match(citation.strip()):
+            raise _refuse(
+                tres + ".citation",
+                "the owner's freezing D-number is required (e.g. `D-11`); an uncited grid "
+                "point is a selection with no record (TE 18.3)",
+            )
+
+
 def _window_of(data: Mapping[str, Any], manifest_path: Path) -> tuple[date, date]:
     citation = data["identity"]["window_citation"]
     return (
@@ -1262,6 +1349,7 @@ def validate_manifest_mapping(
     _validate_required_outputs(manifest_path, fixture_id, data)
     _validate_apparatus_partitions(manifest_path, fixture_id, data)
     _validate_apparatus_normalization(manifest_path, fixture_id, data)
+    _validate_apparatus_hyperparameters(manifest_path, fixture_id, data)
     _validate_fixture_bootstrap(manifest_path, fixture_id, data)
     listing_path, present = _validate_hash_listing(manifest_path, fixture_id, data)
     return fixture_id, str(data["status"]), listing_path, present
@@ -1719,7 +1807,18 @@ def compose_candidate_manifest(
         for key, value in measured.items():
             block[key] = _stamp_measured(value, measuring_run_id)
         data[area_key] = block
-    for extra in ("apparatus_partitions", "fixture_bootstrap"):
+    # `apparatus_normalization` was DROPPED here until 2026-09-25: the extras tuple carried
+    # only partitions and bootstrap, so a composed candidate lost the override the
+    # declaration carried and a comparison run's `fit_transforms` would refuse the constant
+    # column the override exists for. Found while adding `apparatus_hyperparameters`
+    # (CR-2026-09-25, apparatus-hyperparameters change record); both apparatus blocks now
+    # carry across exactly as declared.
+    for extra in (
+        "apparatus_partitions",
+        APPARATUS_NORMALIZATION_KEY,
+        APPARATUS_HYPERPARAMETERS_KEY,
+        "fixture_bootstrap",
+    ):
         if extra in identity_declaration:
             data[extra] = identity_declaration[extra]
     data["required_outputs"] = {
@@ -1932,6 +2031,11 @@ class IdentityDeclaration:
         return block if isinstance(block, Mapping) else {}
 
     @property
+    def apparatus_hyperparameters(self) -> Mapping[str, Mapping[str, Any]]:
+        block = self.data.get(APPARATUS_HYPERPARAMETERS_KEY)
+        return block if isinstance(block, Mapping) else {}
+
+    @property
     def fixture_bootstrap(self) -> Mapping[str, Any] | None:
         block = self.data.get("fixture_bootstrap")
         return block if isinstance(block, Mapping) else None
@@ -2034,6 +2138,7 @@ def load_identity_declaration(
     _validate_identity(declaration_path, fixture_id, data)
     _validate_apparatus_partitions(declaration_path, fixture_id, data)
     _validate_apparatus_normalization(declaration_path, fixture_id, data)
+    _validate_apparatus_hyperparameters(declaration_path, fixture_id, data)
     _validate_fixture_bootstrap(declaration_path, fixture_id, data)
     return IdentityDeclaration(
         path=declaration_path, fixture_id=fixture_id, sha256=file_sha256, data=data

@@ -1433,6 +1433,74 @@ def test_the_dec_path_is_unreachable_without_the_g05_guard_and_the_three_argumen
     ), "06 writes no prior_period_exposure value (R-102a deviation box)"
 
 
+def test_fixture_scale_params_come_from_the_scope_never_models_selected() -> None:
+    """CR-2026-09-25: the fixture-scale grid point is the scope's apparatus constant.
+
+    Four limbs: M-01..M-03 stay `None`; a declared track resolves EVEN THOUGH this
+    snapshot carries no `models.selected` at all (independence from the governed field is
+    the point — the circular refusal is broken); an undeclared track REFUSES naming the
+    field, never defaulting (TE 18.3); an off-grid point refuses at `assert_in_grid`
+    (the apparatus picks among D-121's members, never invents one)."""
+    from types import SimpleNamespace
+
+    script = _load_script()
+    scope = SimpleNamespace(
+        path=Path("identity_declaration.yaml"),
+        apparatus_hyperparameters={
+            "ridge": {
+                "params": {"alpha": 0.5},
+                "reason": "fixture-scale plumbing point (test apparatus)",
+                "citation": "D-905",
+            }
+        },
+    )
+    assert script._apparatus_params(scope, SNAPSHOT, "M-01") is None
+    assert script._apparatus_params(scope, SNAPSHOT, "M-04") == {"alpha": 0.5}
+    # D-121 `fixed` entries complete the point from the ONE grid in config — the scope
+    # declares axes only, and the completed point must be a full grid member.
+    rf_scope = SimpleNamespace(
+        path=Path("identity_declaration.yaml"),
+        apparatus_hyperparameters={
+            "random_forest": {
+                "params": {"n_estimators": 3, "max_depth": 2, "min_samples_leaf": 1},
+                "reason": "axes-only point (test apparatus)",
+                "citation": "D-905",
+            }
+        },
+    )
+    resolved = script._apparatus_params(rf_scope, SNAPSHOT, "M-05")
+    assert resolved == {
+        "n_estimators": 3, "max_depth": 2, "min_samples_leaf": 1, "max_features": "sqrt",
+    }
+    contradicting = SimpleNamespace(
+        path=Path("identity_declaration.yaml"),
+        apparatus_hyperparameters={
+            "random_forest": {
+                "params": {
+                    "n_estimators": 3, "max_depth": 2, "min_samples_leaf": 1,
+                    "max_features": "log2",  # contradicts D-121's fixed value
+                },
+                "reason": "r",
+                "citation": "D-905",
+            }
+        },
+    )
+    with pytest.raises(IntegrityError, match="not a member"):
+        script._apparatus_params(contradicting, SNAPSHOT, "M-05")
+    with pytest.raises(IntegrityError) as excinfo:
+        script._apparatus_params(scope, SNAPSHOT, "M-05")
+    assert "apparatus_hyperparameters.random_forest" in str(excinfo.value)
+    assert "models.selected" in str(excinfo.value), "the refusal teaches the boundary"
+    off_grid = SimpleNamespace(
+        path=Path("identity_declaration.yaml"),
+        apparatus_hyperparameters={
+            "ridge": {"params": {"alpha": 7.5}, "reason": "r", "citation": "D-905"}
+        },
+    )
+    with pytest.raises(IntegrityError, match="not a member"):
+        script._apparatus_params(off_grid, SNAPSHOT, "M-04")
+
+
 # =======================================================================================
 # 13. The DEC iteration scores the frame the one door RETURNED (R-102a; SD-M-04; W-12)
 # =======================================================================================

@@ -80,5 +80,33 @@
    "reason": "plumbing_7day runs ONE station (D-20: BSHM, cell 32/35), so station_lat holds a single distinct value in every row and there is no station spread to scale by. configs/features.yaml declares it train_only_standardize, which is right for the governed run and for scientific_1month, where three stations make it genuinely variable; fit_transforms correctly refuses to invent a scale for a constant column (TE 18.2). Apparatus constant (R-122), not a scientific value: the governed dictionary, D-60 and the producing artifact are untouched, and a governed run carries no fixture scope to read this from. The claim that the column IS constant is verified by fit_transforms against this fixture's own values, not taken on trust. Owner ruling 2026-09-23, RULING_REQUEST_2026-09-23_CONSTRUCTION_STOPS.md section 5 option 1."
   }
  },
+ "apparatus_hyperparameters": {
+  "ridge": {
+   "params": {
+    "alpha": 0.01
+   },
+   "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale plumbing apparatus only (TC-03f: smoke evidence, never scientific evidence); never a prior, default, ranking signal, or shortlist for the governed selection, which stays models.selected, produced only by the governed January-November F1-F4 tuning run under D-124.",
+   "citation": "D-70"
+  },
+  "random_forest": {
+   "params": {
+    "n_estimators": 300,
+    "max_depth": 8,
+    "min_samples_leaf": 1
+   },
+   "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale plumbing apparatus only (TC-03f); never a prior, default, ranking signal, or shortlist for the governed selection.",
+   "citation": "D-70"
+  },
+  "lstm": {
+   "params": {
+    "layers": 1,
+    "units": 32,
+    "learning_rate": 0.001,
+    "batch_size": 64
+   },
+   "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale plumbing apparatus only (TC-03f); never a prior, default, ranking signal, or shortlist for the governed selection.",
+   "citation": "D-70"
+  }
+ },
  "apparatus_partitions_note": "Apparatus constants (R-122), not scientific values. Shape as the owner approved on 2026-09-21 (two expanding folds plus one refit). FIX-NOV-FOLD-02's validation day was 2022-11-06 until 2026-09-23 and is now 2022-11-05: measured on the first ladder run that reached the feature build, the 2022-11-06 choice left the fold scoring 2022-11-07 alone, whose 24-step window history is exactly the day the 24-hour embargo removes, so the assembled score frame came back EMPTY and R-74 refused it (an empty frame is a check that never ran). The one-day shift is forced by the frozen window length and embargo, not chosen: no scientific value, and the fold stays expanding."
 }

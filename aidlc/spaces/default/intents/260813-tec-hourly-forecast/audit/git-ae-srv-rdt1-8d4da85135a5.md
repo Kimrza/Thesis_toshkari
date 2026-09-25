@@ -36429,3 +36429,73 @@
 **Stage**: build-and-test
 
 ---
+
+## Session Start
+**Timestamp**: 2026-09-25T18:25:56Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T18:25:57Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T18:30:15Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-25T18:34:33Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a51f3b58fed26f8b5
+**Message**: Draft option A fully — code change scope, proposed D-number text, governance implications — before I decide
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T18:40:39Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-25T19:11:40Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: ace53410ec0b9fcbd
+**Message**: Adopted as D-125 in DECISIONS.md — write the block and run
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T19:16:38Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-25T19:17:48Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: 
+**Agent ID**: a13c77efa59287c40
+**Message**: done
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T19:21:52Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-25T19:24:52Z
+**Event**: HUMAN_TURN
+
+---

@@ -644,6 +644,49 @@ def _selected_params(snapshot: Any, model_id: str) -> Mapping[str, Any] | None:
     return dict(params)
 
 
+def _apparatus_params(
+    scope: Any, snapshot: Any, model_id: str
+) -> Mapping[str, Any] | None:
+    """The APPARATUS grid point for a fitted family at fixture scale, from the fixture
+    scope's `apparatus_hyperparameters.<track>` — never from `models.selected`.
+
+    `models.selected` is the governed tuning run's OUTPUT (R-101/D-124) and cannot exist
+    before that run; the fixtures that gate the tuning run (TE 9.2) must fit M-04..M-06 to
+    pass. This reads the owner-frozen apparatus point instead (an apparatus constant, R-122,
+    frozen under its own D-number — the scope loader refuses an uncited or malformed block).
+    The point must be a MEMBER of D-121's grid (`assert_in_grid`, R-96's analogue): the
+    apparatus may pick which frozen point exercises the plumbing, never invent one. Absent
+    block or track REFUSES naming the field — a default here would be a selection with no
+    record (TE 18.3). M-01..M-03 have no hyperparameters (`None`). The governed path is
+    untouched: `_selected_params` still owns it and still refuses while `models.selected`
+    is `TBD — freeze gate`.
+    """
+    track = next((t for t, mid in GRID_TRACKS.items() if mid == model_id), None)
+    if track is None:
+        return None
+    block = getattr(scope, "apparatus_hyperparameters", None) or {}
+    entry = block.get(track) if isinstance(block, Mapping) else None
+    if not isinstance(entry, Mapping) or not isinstance(entry.get("params"), Mapping):
+        raise IntegrityError(
+            f"{scope.path}: apparatus_hyperparameters.{track}",
+            f"absent or malformed; the fixture-scale grid point for {model_id} is an "
+            f"apparatus constant the owner freezes in the fixture scope under its own "
+            f"D-number (R-122) — never picked here by convenience (TE 18.3), and never "
+            f"`models.selected`, which stays the governed tuning run's output (R-101)",
+        )
+    params = dict(entry["params"])
+    # D-121's `fixed` values (e.g. random_forest `max_features: sqrt`) are members of every
+    # enumerated grid point but are NOT axes, so the scope declares the AXES only (D-70's
+    # positional rule) and the fixed entries are completed from the one grid the config
+    # carries — a second transcription in the scope would be a copy that can drift. A scope
+    # value that CONTRADICTS a fixed entry survives the merge and is refused by the
+    # membership check below.
+    fixed = snapshot.experiment.get("grids", {}).get(track, {}).get("fixed") or {}
+    params = {**dict(fixed), **params}
+    assert_in_grid(snapshot, track, params)  # the apparatus point is a D-121 grid member
+    return params
+
+
 def _prediction_payload(prediction: Prediction, *, horizon_hours: int) -> dict[str, Any]:
     attrs = frame_attrs(prediction.frame)
     return {
@@ -1133,8 +1176,11 @@ def _run_fixture_scale(
     `apparatus_partition_id` carried on each. NO locked path exists here: an apparatus
     partition is never `locked` (R-137; R-82), so no G-05 argument, no `open_restricted`,
     no receipt writer is reachable. The governed reads are unchanged (horizon, grids,
-    seeds, the released target by manifest), so today this path refuses exactly where the
-    full-year path does (TE 18.3, stop and report).
+    seeds, the released target by manifest) and refuse exactly where the full-year path
+    does (TE 18.3, stop and report) — with ONE deliberate exception (CR-2026-09-25):
+    hyperparameters come from the scope's `apparatus_hyperparameters` block via
+    `_apparatus_params`, never from `models.selected`, because the governed selection is
+    the tuning run's output and the tuning run is gated on these fixtures (TE 9.2).
 
     Board Rec 4 (ML-03, owner-authorised per CR-2026-09-07 §11.5; flagged for
     `models-and-baselines`' record): the fixture bundle root is validated against 05's
@@ -1178,7 +1224,10 @@ def _run_fixture_scale(
             seeds: tuple[int | None, ...] = (
                 tuple(sorted(expected_seeds)) if model_id == "M-06" else (None,)
             )
-            params = _selected_params(snapshot, model_id)
+            # Fixture scale reads the APPARATUS grid point from the scope, never
+            # `models.selected` (the governed tuning run's output, which the fixtures
+            # themselves gate — the circular refusal CR-2026-09-25 breaks).
+            params = _apparatus_params(scope, snapshot, model_id)
             for seed in seeds:
                 assert_stamp_match(score_bundle, partition)
                 prediction = fit_predict(
@@ -1345,7 +1394,7 @@ def _fit_candidate(
     score_bundle: Any,
     partition: Partition,
     snapshot: Any,
-    target: Any,
+    tune_target: Any,
     horizon: int,
     seed: int,
 ) -> Prediction:
@@ -1359,13 +1408,17 @@ def _fit_candidate(
     § "A second gap found, not fixed"). LSTM is fit by calling its family module directly,
     exactly as `fit_predict` would if it forwarded a backend.
     """
+    # The tune-scale target is threaded as `tune_target`, NEVER a local named `target`:
+    # test_models_smoke scans this file's source and refuses any scoring call whose target
+    # keyword is bound to a bare `target` name, so nothing here can silently consume the
+    # DEC path's pre-loop released target (R-102a).
     if track != "lstm":
         return fit_predict(
             model_id,
             bundle=train_bundle,
             partition=partition,
             snapshot=snapshot,
-            target=target,
+            target=tune_target,
             score_bundle=score_bundle,
             validation_bundle=score_bundle,
             seed=None,
@@ -1380,7 +1433,7 @@ def _fit_candidate(
         score_bundle=score_bundle,
         partition=partition,
         snapshot=snapshot,
-        target=target,
+        target=tune_target,
         seed=seed,
         params=params,
         horizon_hours=horizon,
@@ -1412,8 +1465,8 @@ def _run_tune(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
     horizon = resolve_horizon(snapshot, args.horizon)
     grid_counts = assert_grid_content(snapshot)  # R-96: config grid content before any fit
     bundle_root = _fixture_bundle_root(snapshot, args)
-    target = _load_target_by_manifest(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))
-    series = target_series(target)
+    tune_target = _load_target_by_manifest(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))
+    series = target_series(tune_target)
     final_seeds = sorted(_final_seeds(snapshot))
 
     baseline_block = snapshot.experiment.get("models", {}).get("declared_baseline_per_track")
@@ -1460,11 +1513,12 @@ def _run_tune(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
                 prediction = _fit_candidate(
                     track=track, model_id=model_id, params=params,
                     train_bundle=train_bundle, score_bundle=score_bundle, partition=fold,
-                    snapshot=snapshot, target=target, horizon=horizon, seed=seed or 0,
+                    snapshot=snapshot, tune_target=tune_target, horizon=horizon, seed=seed or 0,
                 )
                 baseline_prediction = fit_predict(
                     baseline_model_id, bundle=train_bundle, partition=fold, snapshot=snapshot,
-                    target=target, score_bundle=score_bundle, validation_bundle=score_bundle,
+                    target=tune_target, score_bundle=score_bundle,
+                    validation_bundle=score_bundle,
                     seed=None, params=None, horizon_hours=horizon,
                 )
                 elapsed = (dt.datetime.now(dt.timezone.utc) - t0).total_seconds()
