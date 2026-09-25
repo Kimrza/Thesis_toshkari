@@ -327,3 +327,66 @@ Evidence for this addendum:
 `.../crit.xml`; GitHub Actions API responses (`workflows`, `runs`, `jobs`
 for run `36139946731`) read live, not persisted as files (no local
 credential or token was used — the repository is public).
+
+## 2026-09-25 item 6 (Rec 47 GitHub check) — CLOSED
+
+Root cause found from Student-supplied full job logs (`.github/workflows/verify.yml` run
+`36145238473`, commit `53f1c32`): two workflow-definition bugs, neither a code defect.
+
+- **Ubuntu `exit code 141`:** `git ls-files --eol evidence | head -20` under the runner's
+  default `bash -e -o pipefail` — `head` closes the pipe after 20 lines, `git ls-files` gets
+  `SIGPIPE`, `pipefail` treats it as failure though the printed diagnostic output was already
+  correct. Fixed: appended `|| true` to the pipeline (`.github/workflows/verify.yml`).
+- **Windows `15 failed`:** all 15 failures were `ModuleNotFoundError: No module named 'yaml'`
+  (or transitively caused by it). The "Install pytest only" step installed bare `pytest`,
+  never `pyyaml` or `requirements.txt` — a CI environment gap, invisible locally because the
+  governed `tec-thesis-311` env has `pyyaml==6.0.1` per the pin. Fixed: step renamed "Install
+  governed dependencies", now runs `pip install --upgrade pip pytest -r requirements.txt`,
+  installing the same governed pin surface (TE §13.1) used by every local run in this
+  document.
+
+**Pushed and verified.** Student pushed `7357f3504466dd883249eefd9a7064267997e7a3`. Runs
+`36160927386` (ubuntu) and `36160926808` (windows) — both **`completed` / `success`**, every
+step green including "Full tests/ directory" on both OSes, confirmed via the public Actions
+API against this exact commit (not a stale one). Local pass now equals remote pass. Rec 47
+is closed.
+
+## 2026-09-25 item 9 (new) — W-6 step 8: Kaggle durability measurement blocks all restricted-root reads on Kaggle
+
+Discovered while attempting item 2's Kaggle-side pin verification (`kaggle/
+kaggle_tf_matplotlib_pin_verification.ipynb`, revisions 1-3). Tracked here as its own
+item, distinct from item 2, on the Student's explicit instruction — item 2 stays
+blocked on this dependency, not reclassified or closed.
+
+**Exact problem statement:** `CHARACTERISED_DURABILITY_PLATFORMS` (`src/data/config.py:482`)
+is a hardcoded empty `frozenset()`. `open_restricted()` (`src/data/locked_test.py:497`)
+refuses every call on any platform that is neither `"local"` nor in that set. Kaggle is
+refused unconditionally. Confirmed this session: this blocks `test_release_hashes.py`
+(at collection), and specific tests inside `test_common_masks.py` and
+`test_locked_test_guard.py` (at runtime) — 16 test failures/errors total, all one root
+cause.
+
+**Root cause:** the measurement that's supposed to populate
+`CHARACTERISED_DURABILITY_PLATFORMS` with `"kaggle"` — an in-Kaggle-session durability
+confirmation, per `governance-guards` R-25's pattern — has never been performed.
+Tracked as owed since 2026-08-28 (`GOV-2026-08-28-FD-01` Recommendation 39),
+reconfirmed by `GOV-2026-09-20-CG-01` Recommendation 57, ruled to the Student "before
+G-05" in that governance pass's dispositions (§5 item 10). Two further preconditions
+block even attempting it: (a) `emit_in_session_gate_result` isn't wired into
+`run_walking_skeleton.py` yet; (b) the scientific fixture can't run locally or on
+Kaggle until item 3's Q-31 freeze lands.
+
+**Current status:** open, owner-ruled, not yet actioned. Blocks: full item 2 closure
+(Kaggle both-platform check), any freeze-gate reliance on Kaggle-written registry
+rows, and — newly discovered this session — a wider slice of the §18.3 critical set on
+Kaggle than previously documented (three modules, not one: `test_release_hashes.py`,
+`test_common_masks.py`, `test_locked_test_guard.py`).
+
+**Sources:** `governance/reviews/GOV-2026-09-20-CG-01.md` Recommendation 57;
+`governance/CHANGE_RECORD_2026-09-20_GOV-CG-01_dispositions.md:120` (§5 item 10);
+`aidlc/.../construction/foundation/functional-design/business-logic-model.md` § W-6,
+§ Assumptions ("OPEN — Kaggle's durability semantics are characterised nowhere in this
+design"); `aidlc/.../construction/foundation/code-generation/code-summary.md:123`;
+`kaggle/HOW_TO_RUN_IN_SESSION_GATE.md` (the prepared, not-yet-run discharge runbook);
+this session's `crit_kaggle_nine_of_ten.xml` and `test_release_hashes_kaggle.xml`
+(2026-09-25).

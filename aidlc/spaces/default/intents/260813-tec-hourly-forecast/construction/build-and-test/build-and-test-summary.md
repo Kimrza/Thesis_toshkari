@@ -124,3 +124,16 @@ addendum"; this section is the summary-level pointer, not a restatement.)*
   § Forbidden.
 - `governance/PENDING_FOLLOWUPS.md`, `governance/REC_13_60_STATUS_2026-09-24.md`,
   `governance/RULING_REQUEST_2026-09-23_CONSTRUCTION_STOPS.md`.
+
+## 2026-09-25 item 9 (new, distinct from the pre-existing item 8) — W-6 step 8
+
+**Item 9 (W-6 step 8 — Kaggle durability measurement) — OPEN, newly tracked.** Full
+derivation in `build-test-results.md` § "2026-09-25 item 9 (new)". Discovered while
+attempting item 2's Kaggle pin verification: `CHARACTERISED_DURABILITY_PLATFORMS` is a
+hardcoded empty set in `src/data/config.py`, so `open_restricted()` refuses every
+restricted-root read on Kaggle unconditionally, blocking parts of three §18.3 critical
+modules (`test_release_hashes.py`, `test_common_masks.py`, `test_locked_test_guard.py`)
+— wider than previously documented. Already owner-ruled (`GOV-2026-09-20-CG-01`
+Recommendation 57, dispositions §5 item 10, "Student — before G-05") but not yet
+actioned; blocked itself on two further preconditions (in-session-gate wiring;
+item 3's Q-31 freeze). Item 2 stays blocked on this dependency, not reclassified.

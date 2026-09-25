@@ -555,3 +555,46 @@ evidence disclosure:
 
 This addendum discloses per `project.md` `gf-3`; the receipt stands as history and is
 not reopened.
+
+## 2026-09-25 cross-unit edit addendum (gf-3, build-and-test item 3)
+
+`src/models/train.py: _read_selection_block()` and one line of `select_configuration()` now read
+the owner-transcribed key names — `models.selection.simplicity_margin` (D-124, via
+`CR-2026-09-21-RECONCILIATION` §2) and the sibling `models.declared_baseline_per_track.all_tracks`
+(D-58) — instead of `selection.simplicity_tolerance_fraction` and `selection.declared_baseline`,
+which this unit wrote while all three fields were still `TBD — freeze gate` and which no governed
+record ever named. Against the real config the old names made `select_configuration()` refuse.
+`tests/test_models_smoke.py`: one synthetic snapshot updated to the transcribed names, and one new
+control, `test_selection_reads_the_real_transcribed_config_keys`, which reads the real file and pins
+the retired names as refused. Module run: **72 tests, 71 passed, 0 failed, 1 skipped**
+(pre-existing sklearn-present skip); the new control fails against HEAD's `train.py`, proving it
+bites. Full record: `governance/CHANGE_RECORD_2026-09-25_selection_block_key_names.md`. Edited
+under this unit's frozen receipt on the Student's explicit instruction (`project.md`
+`code-generation:c32`); the receipt stands as history and is not reopened. Test-count claims
+above this addendum (e.g. "55 passed") predate it and are not current.
+
+## 2026-09-25 second cross-unit edit addendum — target loader implemented, --tune added
+
+`scripts/06_train_and_predict.py: _load_target_by_manifest` was an unconditional stub (refused
+even when the release manifest existed) -- implemented for real this session: reads the
+manifest, calls `src/data/release.py: verify_release()`, reads the declared CSV(s), drops
+`target_valid != "True"` rows (D-5), returns a real frame. Verified against `plumbing_7day`'s
+actual release: 158/168 rows load (10 QC-dropped, matching the manifest's own recorded counts).
+
+Added `--tune`/`--probe`/`--tune-out` to the same script: a fixture-scale D-124 selection
+orchestrator (enumerate_grid -> fit_predict/lstm.fit_predict_rows -> CandidateScore ->
+select_configuration), resolving the fixture/models.selected deadlock per the Student's chosen
+option (fixture-scale, advisory-only, never written to configs/experiment.yaml). Disclosed, not
+fixed: `fit_predict()`'s approved signature carries no `CheckpointBackend` parameter, so LSTM
+cannot be fold-fitted through it at all (governed or fixture path) -- `_fit_candidate()` calls
+`lstm.fit_predict_rows` directly for that one track, in-memory backend, mirroring what
+`fit_predict` would do if it forwarded one. Complexity ordering for R-101's simplicity tie-break
+is PROPOSED (no governed record states a formula) and flagged as such in the code.
+
+Real probe run, plumbing_7day, one LSTM candidate/one fold: skill=-3.0040 (mechanism check, not
+a scientific result), ~35s per LSTM fit, ~50s total incl. one-time TF import. Ridge path
+direct-called, sub-second. A real bug (silent NaN skill from unfiltered persistence-model gap
+rows) was found and fixed during this verification. Full record:
+`governance/CHANGE_RECORD_2026-09-25_target_loader_implementation.md`. Edited under this unit's
+frozen receipt on the Student's explicit instruction; the receipt stands as history and is not
+reopened.

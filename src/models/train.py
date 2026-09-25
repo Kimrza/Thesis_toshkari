@@ -1319,15 +1319,29 @@ def _read_selection_block(snapshot: ConfigSnapshot) -> Mapping[str, Any]:
             "tolerance and declared baseline are configuration named BEFORE tuning begins, "
             "transcribed by their owner — stop and report, never default (TE 18.3; R-101)",
         )
-    for key in ("simplicity_tolerance_fraction", "declared_baseline"):
-        if _is_tbd(block.get(key)):
-            raise IntegrityError(
-                f"configs/experiment.yaml: models.selection.{key}", "absent or TBD — freeze gate"
-            )
-    tolerance = block["simplicity_tolerance_fraction"]
+    # Key names follow the owner's transcription (CR-2026-09-21-RECONCILIATION §2, D-124;
+    # D-58), not the pre-transcription guesses `simplicity_tolerance_fraction` and
+    # `selection.declared_baseline` this function first read, which no governed record
+    # ever named and which refused the real config (corrected 2026-09-25 on the Student's
+    # instruction, build-and-test item 3). The baseline lives in the sibling key D-58 fills.
+    if _is_tbd(block.get("simplicity_margin")):
+        raise IntegrityError(
+            "configs/experiment.yaml: models.selection.simplicity_margin",
+            "absent or TBD — freeze gate",
+        )
+    baseline_block = models.get("declared_baseline_per_track")
+    baseline = (
+        baseline_block.get("all_tracks") if isinstance(baseline_block, Mapping) else None
+    )
+    if _is_tbd(baseline):
+        raise IntegrityError(
+            "configs/experiment.yaml: models.declared_baseline_per_track.all_tracks",
+            "absent or TBD — freeze gate; D-58 names the declared baseline BEFORE tuning begins",
+        )
+    tolerance = block["simplicity_margin"]
     if isinstance(tolerance, bool) or not isinstance(tolerance, int | float) or tolerance < 0:
         raise IntegrityError(
-            "configs/experiment.yaml: models.selection.simplicity_tolerance_fraction",
+            "configs/experiment.yaml: models.selection.simplicity_margin",
             f"{tolerance!r} is not a non-negative number",
         )
     return block
@@ -1357,7 +1371,7 @@ def select_configuration(
     if not candidates:
         raise IntegrityError("select_configuration", "no candidates")
     block = _read_selection_block(snapshot)
-    tolerance = float(block["simplicity_tolerance_fraction"])
+    tolerance = float(block["simplicity_margin"])
     scored = [(mean_per_fold_skill(c, fold_ids=fold_ids), c) for c in candidates]
     best_skill = max(s for s, _ in scored)
     within = [c for s, c in scored if best_skill - s <= tolerance * abs(best_skill)]

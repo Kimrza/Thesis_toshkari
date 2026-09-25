@@ -1001,7 +1001,8 @@ def test_selection_prefers_the_simpler_configuration_within_the_configured_toler
     snapshot = _snapshot(
         models={
             "lstm_fixed_settings": SYNTH_SETTINGS,
-            "selection": {"simplicity_tolerance_fraction": 0.05, "declared_baseline": "M-01"},
+            "selection": {"simplicity_margin": 0.05},
+            "declared_baseline_per_track": {"all_tracks": "persistence"},
         }
     )
     assert select_configuration([simple, complex_], snapshot=snapshot, fold_ids=folds) is simple
@@ -1010,6 +1011,39 @@ def test_selection_prefers_the_simpler_configuration_within_the_configured_toler
     assert_refit_unchanged({"alpha": 2.0}, {"alpha": 2.0})
     with pytest.raises(IntegrityError):
         assert_refit_unchanged({"alpha": 2.0}, {"alpha": 0.5})
+
+
+def test_selection_reads_the_real_transcribed_config_keys() -> None:
+    """Regression control (2026-09-25, build-and-test item 3). The reader once expected
+    `selection.simplicity_tolerance_fraction` and `selection.declared_baseline`, names no
+    governed record gave; the owner's transcription (CR-2026-09-21-RECONCILIATION §2, D-124;
+    D-58) wrote `selection.simplicity_margin` and the sibling `declared_baseline_per_track`.
+    Every selection test used a synthetic snapshot, so the real file was never read here.
+    This test reads it, and pins that the retired names are refused, not silently accepted."""
+    yaml = pytest.importorskip("yaml")
+    parsed = yaml.safe_load((REPO_ROOT / "configs" / "experiment.yaml").read_text("utf-8"))
+    snapshot = dataclasses.replace(SNAPSHOT, experiment=parsed)
+    folds = tuple(parsed["models"]["selection"]["folds"])
+    assert folds == ("F1", "F2", "F3", "F4")
+    only = CandidateScore({"alpha": 1.0}, {f: 0.1 for f in folds}, complexity=1.0)
+    assert select_configuration([only], snapshot=snapshot, fold_ids=folds) is only
+
+    retired = _snapshot(
+        models={
+            "lstm_fixed_settings": SYNTH_SETTINGS,
+            "selection": {"simplicity_tolerance_fraction": 0.05, "declared_baseline": "M-01"},
+        }
+    )
+    with pytest.raises(IntegrityError) as excinfo:
+        select_configuration([only], snapshot=retired, fold_ids=folds)
+    assert "simplicity_margin" in str(excinfo.value)
+
+    no_baseline = _snapshot(
+        models={"lstm_fixed_settings": SYNTH_SETTINGS, "selection": {"simplicity_margin": 0.01}}
+    )
+    with pytest.raises(IntegrityError) as excinfo:
+        select_configuration([only], snapshot=no_baseline, fold_ids=folds)
+    assert "declared_baseline_per_track" in str(excinfo.value)
 
 
 # =======================================================================================

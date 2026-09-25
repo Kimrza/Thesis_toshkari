@@ -104,7 +104,7 @@ import sys
 import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -145,12 +145,14 @@ from src.data.locked_test import (  # noqa: E402
     read_persistence_history_lookup,
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
+from src.data.release import verify_release  # noqa: E402
 from src.data.splits import (  # noqa: E402
     FITTING_PARTITION_IDS,
     LOCKED_ID,
     PARTITION_IDS,
     REFIT_ID,
     Partition,
+    PartitionKind,
     RecordFrame,
     build_partitions,
     materialise_locked_partition,
@@ -158,7 +160,7 @@ from src.data.splits import (  # noqa: E402
     training_range,
     validation_month_range,
 )
-from src.features._frames import frame_attrs, records_of  # noqa: E402
+from src.features._frames import frame_attrs, frame_from_records, records_of  # noqa: E402
 from src.features.build import FrameSpec, bundle_directory_name, load_bundle  # noqa: E402
 from src.features.transforms import transform_id_for  # noqa: E402
 from src.models.train import (  # noqa: E402
@@ -166,18 +168,23 @@ from src.models.train import (  # noqa: E402
     GRID_TRACKS,
     MODEL_IDS,
     TBD_SENTINEL,
+    CandidateScore,
     JsonStateBackend,
     Prediction,
     assert_grid_content,
     assert_in_grid,
     assert_locked_exit_allowed,
     assert_stamp_match,
+    enumerate_grid,
     expected_transform_id,
     fit_and_persist,
     fit_predict,
     load_fitted_model,
+    mean_per_fold_skill,
     predict_from_fitted,
     resolve_horizon,
+    select_configuration,
+    target_series,
     three_seed_mean,
     write_prediction_hash_receipt,
 )
@@ -317,12 +324,44 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "`models-and-baselines`' record (fixtures-and-reproducibility CR-2026-09-07)"
         ),
     )
+    parser.add_argument(
+        "--tune",
+        action="store_true",
+        help=(
+            "run D-124's selection (mean per-fold skill vs the declared baseline, per grid "
+            "track) over the fixture's own apparatus folds instead of a governed fit/predict "
+            "run. FIXTURE-SCALE ONLY (requires --fixture-manifest): proves the selection "
+            "mechanism on real fixture data without writing the governed models.selected "
+            "field, which only a full-year F1-F4 run may freeze (build-and-test item 3)"
+        ),
+    )
+    parser.add_argument(
+        "--probe",
+        action="store_true",
+        help=(
+            "with --tune: run exactly one LSTM candidate on exactly one apparatus fold, for "
+            "timing before committing to the full grid sweep"
+        ),
+    )
+    parser.add_argument(
+        "--tune-out",
+        type=Path,
+        default=None,
+        help="where --tune writes its result JSON (default: under --predictions-out)",
+    )
     args = parser.parse_args(argv)
     if args.fixture_manifest is not None and args.partition:
         parser.error(
             "--fixture-manifest runs the manifest's declared apparatus partitions; a frozen "
             "--partition id alongside it is a contradiction (R-137's two-way quarantine)"
         )
+    if args.tune and args.fixture_manifest is None:
+        parser.error(
+            "--tune runs at fixture scale only, per the owner's resolution of the fixture / "
+            "models.selected deadlock (build-and-test item 3): it needs --fixture-manifest"
+        )
+    if args.probe and not args.tune:
+        parser.error("--probe only means something with --tune")
     wanted = tuple(args.partition) if args.partition else FITTING_PARTITION_IDS
     if LOCKED_ID in wanted and not (
         args.g05_signature and args.locked_input and args.locked_authorization
@@ -428,12 +467,34 @@ def _registry_row(
 # =======================================================================================
 
 
+#: The released target CSV's columns this loader reads. Superset of `train.py`'s three
+#: TARGET_* identities (`interval_start_utc`, `station_id`, `vtec_tecu`) plus the three
+#: NFR-TDEF-01 identity stamps every downstream frame is asserted to carry.
+_TARGET_COLUMNS: Final[tuple[str, ...]] = (
+    "interval_start_utc",
+    "station_id",
+    "vtec_tecu",
+    "target_valid",
+    "phase_id",
+    "source_id",
+    "target_definition_id",
+)
+
+
 def _load_target_by_manifest(snapshot: Any, *, fixture_scope_id: str | None) -> Any:
     """The released Phase 1 hourly target, read BY MANIFEST from the release root.
 
-    An upstream unit's artifact (`target-standardization`). A missing release refuses; and the
-    loader itself is reached only after every governed value upstream is frozen -- none is
-    today -- so this stops here rather than defaulting a reader (TE 18.3), exactly as `05` does.
+    An upstream unit's artifact (`target-standardization`). A missing release refuses.
+    `verify_release` re-derives the manifest's own claims (required §13.3 fields, every
+    declared output file's SHA-256, and R-11's content-hash/dataset_version correspondence)
+    before a single byte is trusted (TE §13.3) -- the same check `test_release_hashes.py`
+    runs, called here rather than duplicated. Only rows with `target_valid == "True"` are
+    kept; a QC-invalid row is dropped, never imputed (D-5).
+
+    Implemented 2026-09-25 (build-and-test item 3, Student's explicit instruction). Before
+    this the function refused unconditionally, even once the release existed on disk --
+    the reason no prediction has ever been written for `plumbing_7day`, fixture or
+    governed. See `governance/CHANGE_RECORD_2026-09-25_target_loader_implementation.md`.
     """
     # Owner ruling 2026-09-23: ONE resolver for the release root. On a fixture run the
     # releases live under the walking-skeleton root, so this stage reads the fixture's
@@ -444,19 +505,37 @@ def _load_target_by_manifest(snapshot: Any, *, fixture_scope_id: str | None) -> 
         artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
         fixture_id=fixture_scope_id,
     )
-    manifest = release_root / "phase1_hourly_target" / "release_manifest.json"
+    release_dir = release_root / "phase1_hourly_target"
+    manifest = release_dir / "release_manifest.json"
     if not manifest.is_file():
         raise IntegrityError(
             manifest,
             "no released Phase 1 hourly target manifest; labels are read from a released target "
             "by manifest and hash, never from a bare path (TE 13.3)",
         )
-    raise IntegrityError(
-        manifest,
-        "reading the released target into a frame is reached only after the permitted-producer "
-        "list, the partitions, the availability lags and the horizons are frozen; none is "
-        "today, so this path stops here rather than defaulting a loader (TE 18.3)",
-    )
+    problems = verify_release(manifest)
+    if problems:
+        raise IntegrityError(
+            manifest,
+            "the released target manifest does not verify (TE 13.3; R-11): " + "; ".join(problems),
+        )
+    parsed = json.loads(manifest.read_text(encoding="utf-8"))
+    output_files = parsed.get("output_files")
+    if not isinstance(output_files, Mapping) or not output_files:
+        raise IntegrityError(manifest, "output_files is absent or empty after verification")
+    records: list[dict[str, Any]] = []
+    for rel_path in sorted(output_files):
+        csv_path = release_dir / rel_path
+        with csv_path.open("r", encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                if str(row.get("target_valid", "")).strip() != "True":
+                    continue  # D-5: a QC-invalid row is dropped, never imputed
+                records.append({name: row.get(name) for name in _TARGET_COLUMNS})
+    if not records:
+        raise IntegrityError(
+            manifest, "the released target carries zero rows with target_valid == 'True'"
+        )
+    return frame_from_records(records, columns=_TARGET_COLUMNS)
 
 
 def _bundle_root(snapshot: Any, args: argparse.Namespace) -> Path:
@@ -1173,7 +1252,296 @@ def _run_fixture_scale(
     return {"horizon_hours": horizon, "grid_counts": grid_counts, "predictions_written": written}
 
 
+# =======================================================================================
+# --tune: D-124's selection at fixture scale (build-and-test item 3)
+# =======================================================================================
+
+
+class _InMemoryCheckpointBackend:
+    """A `CheckpointBackend` (`src/models/checkpoint.py`) that holds per-epoch weights in a
+    dict for the lifetime of one fold fit, never on disk. Fold-fit checkpointing has no
+    approved persistence format (`TS-M-01` freezes the REFIT format only, and this is never
+    a refit) -- this is scratch state for `checkpoint.restore` to pick from, discarded when
+    the candidate's fold fit returns."""
+
+    def __init__(self) -> None:
+        self._store: dict[str, Any] = {}
+        self._next = 0
+
+    def save(self, *, epoch: int, weights: Any) -> str:
+        ref = f"epoch-{epoch}-{self._next}"
+        self._next += 1
+        self._store[ref] = weights
+        return ref
+
+    def load(self, payload_ref: str) -> Any:
+        return self._store[payload_ref]
+
+
+#: PROPOSED complexity ordering for R-101's "prefer the simpler configuration within the
+#: margin" rule -- no governed record (functional design, business rules, or a change
+#: record) states a formula. Lower is simpler. Flagged as proposed, not committed; the
+#: owner may replace it without touching the selection mechanism itself.
+def _proposed_complexity(track: str, params: Mapping[str, Any]) -> float:
+    if track == "ridge":
+        return 1.0 / float(params["alpha"])  # smaller alpha = less regularised = more complex
+    if track == "random_forest":
+        depth = params["max_depth"]
+        depth_factor = 32.0 if depth is None else float(depth)
+        return float(params["n_estimators"]) * depth_factor
+    if track == "lstm":
+        return float(params["layers"]) * float(params["units"])
+    raise IntegrityError(f"grid track {track!r}", "no complexity proxy defined")
+
+
+def _rmse(
+    prediction: Prediction, series: Mapping[tuple[str, dt.datetime], float]
+) -> tuple[float, dict[str, int]]:
+    """RMSE of one prediction against the D-17 target series, matched on
+    `(station, interval_start_utc)`. Two classes of row are dropped, never imputed (D-5),
+    both non-fatal completeness shortfalls rather than errors: a row the target series has
+    no value for, and a row whose own `y_hat` is a legitimate MISSING marker -- `None` or
+    `NaN` -- which M-01/M-02 emit by design when a fold's short training window carries no
+    history at the required lag (`src/models/persistence.py`). A silently-NaN RMSE (found
+    on this script's first real run, plumbing_7day, FIX-NOV-FOLD-01) is exactly the
+    unflagged-shortfall failure mode `team.md`'s two-tier posture forbids."""
+    squared_errors: list[float] = []
+    dropped_missing_prediction = 0
+    dropped_missing_target = 0
+    for row in records_of(prediction.frame):
+        y_hat = row["y_hat"]
+        if y_hat is None or (isinstance(y_hat, float) and y_hat != y_hat):  # None or NaN
+            dropped_missing_prediction += 1
+            continue
+        station = str(row["station"])
+        ts = dt.datetime.fromisoformat(str(row["interval_start_utc"]).replace("Z", "+00:00"))
+        target_value = series.get((station, ts))
+        if target_value is None:
+            dropped_missing_target += 1
+            continue
+        squared_errors.append((float(y_hat) - target_value) ** 2)
+    if not squared_errors:
+        raise IntegrityError(
+            f"prediction {prediction.model_id}/{prediction.partition_id}",
+            f"no row matched the target series (dropped {dropped_missing_prediction} missing "
+            f"y_hat, {dropped_missing_target} missing target); RMSE over zero rows is not a "
+            f"measurement",
+        )
+    rmse = (sum(squared_errors) / len(squared_errors)) ** 0.5
+    dropped = {
+        "missing_prediction": dropped_missing_prediction,
+        "missing_target": dropped_missing_target,
+        "scored_rows": len(squared_errors),
+    }
+    return rmse, dropped
+
+
+def _fit_candidate(
+    *,
+    track: str,
+    model_id: str,
+    params: Mapping[str, Any],
+    train_bundle: Any,
+    score_bundle: Any,
+    partition: Partition,
+    snapshot: Any,
+    target: Any,
+    horizon: int,
+    seed: int,
+) -> Prediction:
+    """Fit-then-predict one grid point on one apparatus fold.
+
+    Ridge and Random Forest go through the approved generic `fit_predict` (`train.py`).
+    LSTM does NOT: `fit_predict`'s approved signature carries no `CheckpointBackend`
+    parameter, so it can never reach a fold's best-checkpoint restoration (R-94) -- a real,
+    separate gap in the generic dispatcher, disclosed here rather than routed around
+    silently (see `governance/CHANGE_RECORD_2026-09-25_target_loader_implementation.md`
+    § "A second gap found, not fixed"). LSTM is fit by calling its family module directly,
+    exactly as `fit_predict` would if it forwarded a backend.
+    """
+    if track != "lstm":
+        return fit_predict(
+            model_id,
+            bundle=train_bundle,
+            partition=partition,
+            snapshot=snapshot,
+            target=target,
+            score_bundle=score_bundle,
+            validation_bundle=score_bundle,
+            seed=None,
+            params=params,
+            horizon_hours=horizon,
+        )
+    from src.models import lstm as _lstm  # lazy import (R-05); TF loads only when reached
+
+    return _lstm.fit_predict_rows(
+        model_id,
+        bundle=train_bundle,
+        score_bundle=score_bundle,
+        partition=partition,
+        snapshot=snapshot,
+        target=target,
+        seed=seed,
+        params=params,
+        horizon_hours=horizon,
+        validation_bundle=score_bundle,
+        backend=_InMemoryCheckpointBackend(),
+    )
+
+
+def _run_tune(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:
+    """D-124's selection rule (R-101), over the fixture's own apparatus folds.
+
+    FIXTURE SCALE ONLY. Writes nothing to `configs/experiment.yaml`: this session's job is
+    to prove the selection mechanism runs against real (if fixture-scale) data, never to
+    freeze a governed value, which only the Student may do, from a full January-November
+    F1-F4 run (`project.md` § Forbidden). The result file is advisory and clearly labelled;
+    nothing here is copied into `models.selected` or `models.refit.epochs` by this script.
+    """
+    _assert_phase1_field_contract(args.phase)
+    snapshot = entry["snapshot"]
+    scope = load_fixture_scope(Path(args.fixture_manifest))
+    embargo_hours = read_embargo_hours(snapshot)
+    partitions = build_apparatus_partitions(scope, embargo_hours=embargo_hours)
+    fold_partitions = [p for p in partitions if p.kind == PartitionKind.fold]
+    if not fold_partitions:
+        raise IntegrityError(
+            args.fixture_manifest, "the fixture declares no apparatus fold partitions to tune on"
+        )
+
+    horizon = resolve_horizon(snapshot, args.horizon)
+    grid_counts = assert_grid_content(snapshot)  # R-96: config grid content before any fit
+    bundle_root = _fixture_bundle_root(snapshot, args)
+    target = _load_target_by_manifest(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))
+    series = target_series(target)
+    final_seeds = sorted(_final_seeds(snapshot))
+
+    baseline_block = snapshot.experiment.get("models", {}).get("declared_baseline_per_track")
+    baseline = baseline_block.get("all_tracks") if isinstance(baseline_block, Mapping) else None
+    if baseline != "persistence":
+        raise IntegrityError(
+            "configs/experiment.yaml: models.declared_baseline_per_track.all_tracks",
+            f"is {baseline!r}, not 'persistence' -- D-58 names the only baseline this script "
+            f"knows how to score against (TE line 456: M-01 is Persistence)",
+        )
+    baseline_model_id = "M-01"
+
+    if args.probe:
+        tracks = ("lstm",)
+        fold_partitions = fold_partitions[:1]
+    else:
+        tracks = tuple(GRID_TRACKS)
+
+    print(
+        f"06_train_and_predict --tune: {len(tracks)} track(s), "
+        f"{len(fold_partitions)} apparatus fold(s), probe={args.probe}"
+    )
+
+    per_track_results: dict[str, Any] = {}
+    all_candidate_audit: list[dict[str, Any]] = []
+    for track in tracks:
+        model_id = GRID_TRACKS[track]
+        candidates = list(enumerate_grid(snapshot, track))
+        if args.probe:
+            candidates = candidates[:1]
+        print(f"  track={track} model_id={model_id} candidates={len(candidates)}")
+
+        scored: list[CandidateScore] = []
+        for params in candidates:
+            fold_skill: dict[str, float] = {}
+            for fold in fold_partitions:
+                assert_in_grid(snapshot, track, params)
+                train_bundle, score_bundle = _bundle_pair(bundle_root, fold, partitions)
+                if score_bundle is None:
+                    continue
+                assert_stamp_match(score_bundle, fold)
+                seed = final_seeds[0] if model_id == "M-06" else None
+                t0 = dt.datetime.now(dt.timezone.utc)
+                prediction = _fit_candidate(
+                    track=track, model_id=model_id, params=params,
+                    train_bundle=train_bundle, score_bundle=score_bundle, partition=fold,
+                    snapshot=snapshot, target=target, horizon=horizon, seed=seed or 0,
+                )
+                baseline_prediction = fit_predict(
+                    baseline_model_id, bundle=train_bundle, partition=fold, snapshot=snapshot,
+                    target=target, score_bundle=score_bundle, validation_bundle=score_bundle,
+                    seed=None, params=None, horizon_hours=horizon,
+                )
+                elapsed = (dt.datetime.now(dt.timezone.utc) - t0).total_seconds()
+                rmse_model, dropped_model = _rmse(prediction, series)
+                rmse_baseline, dropped_baseline = _rmse(baseline_prediction, series)
+                skill = 1.0 - (rmse_model / rmse_baseline)
+                fold_skill[fold.partition_id] = skill
+                print(
+                    f"    {track} {params} fold={fold.partition_id} "
+                    f"rmse={rmse_model:.4f} skill={skill:.4f} ({elapsed:.1f}s) "
+                    f"dropped_model={dropped_model} dropped_baseline={dropped_baseline}"
+                )
+                all_candidate_audit.append(
+                    {
+                        "track": track, "params": dict(params), "fold_id": fold.partition_id,
+                        "rmse": rmse_model, "baseline_rmse": rmse_baseline, "skill": skill,
+                        "seconds": elapsed, "dropped_rows_model": dropped_model,
+                        "dropped_rows_baseline": dropped_baseline,
+                    }
+                )
+            if fold_skill:
+                scored.append(
+                    CandidateScore(
+                        params=params, fold_skill=fold_skill,
+                        complexity=_proposed_complexity(track, params),
+                    )
+                )
+        if args.probe:
+            per_track_results[track] = {"probe_only": True, "candidates_run": len(scored)}
+            continue
+        winner = select_configuration(
+            scored, snapshot=snapshot,
+            fold_ids=[f.partition_id for f in fold_partitions],
+        )
+        per_track_results[track] = {
+            "params": dict(winner.params),
+            "mean_skill": mean_per_fold_skill(
+                winner, fold_ids=[f.partition_id for f in fold_partitions]
+            ),
+            "fold_skill": dict(winner.fold_skill),
+            "candidates_evaluated": len(scored),
+        }
+
+    result = {
+        "advisory": True,
+        "governed": False,
+        "note": (
+            "FIXTURE-SCALE selection, not a governed F1-F4 run. Never copy directly into "
+            "configs/experiment.yaml: models.selected without a real full-year tuning pass "
+            "(project.md § Forbidden; build-and-test item 3)."
+        ),
+        "fixture_id": scope.fixture_id if hasattr(scope, "fixture_id") else None,
+        "run_id": run_id,
+        "probe": args.probe,
+        "apparatus_fold_ids": [f.partition_id for f in fold_partitions],
+        "horizon_hours": horizon,
+        "grid_counts": grid_counts,
+        "declared_baseline": baseline,
+        "per_track": per_track_results,
+        "candidate_audit": all_candidate_audit,
+    }
+
+    out_path = args.tune_out
+    if out_path is None:
+        workspace = Path(snapshot.resolved_roots["workspace"])
+        out_path = workspace / args.predictions_out / "tuning" / "tuning_result.json"
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(result, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    print(f"06_train_and_predict --tune: wrote {out_path}")
+
+    return {"tune_result_path": str(out_path), "tracks_run": list(tracks), "probe": args.probe}
+
+
 def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:
+    if args.tune:
+        return _run_tune(entry, args, run_id=run_id)  # fixture-scale D-124 selection only
     if args.fixture_manifest is not None:
         return _run_fixture_scale(entry, args, run_id=run_id)  # Q4 = A: the ONE fixture entry
     _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
