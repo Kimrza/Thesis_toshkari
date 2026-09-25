@@ -82,6 +82,37 @@ record.)*
    commits need the governed environment on `PATH`; procedure in
    `build-instructions.md`.
 
+## 2026-09-25 remediation addendum
+
+*(Full derivation in `build-test-results.md` § "2026-09-25 remediation
+addendum"; this section is the summary-level pointer, not a restatement.)*
+
+- **Item 1 (site-log custody) — CLOSED.** All three site logs recovered,
+  hash-verified, committed, `.gitignore` negation live,
+  `test_release_hashes.py` 235/235. This was the only condition this stage's
+  prior CONDITIONAL PASS named by number; it no longer holds the verdict
+  down on its own.
+- **Item 2 (TF/matplotlib absent) — CLOSED locally.** Both now installed at
+  exact governed versions in `tec-thesis-311`; pin surface 9/9. The Kaggle
+  both-platform check is still owed and is not this addendum's to close.
+- **Item 3 (WS-20/TA-17 clean-run) — still Pending**, confirmed by a fresh
+  `test_clean_run.py` skip naming the same unmet precondition
+  (scientific-fixture manifest still `TBD — freeze gate`).
+- **Item 6 (Rec 47 GitHub check) — investigated, not closed.** The workflow
+  IS live on GitHub (49 runs); its latest run, at a commit two behind this
+  session's HEAD, failed on the exact site-log defect fixed above. No run
+  exists yet against the fix. Closing this needs a push, which this
+  session is not authorized to do.
+- **Item 8 (pre-commit hook) — reconfirmed active**, unchanged.
+- Fresh full-suite counts: **1584 total, 1580 passed, 0 failed, 0 errors, 4
+  skipped** (`full.xml`, 424.5 s). Fresh §18.3 ten-module selection (b):
+  **685/685 passed, 0 failed, 0 skipped** (`crit.xml`, 55.8 s).
+- **Overall verdict: still CONDITIONAL PASS**, not upgraded to PASS — the
+  remaining open conditions (items 3, 4, 5, 6, 7 above) are unresolved by
+  this addendum and several are external to this stage (Student freeze
+  acts, a push, the Kaggle run). Reliance on this stage's evidence at a
+  freeze gate remains prohibited until those close.
+
 ## Sources
 
 - Per-unit `code-generation-plan.md` and `code-summary.md` under

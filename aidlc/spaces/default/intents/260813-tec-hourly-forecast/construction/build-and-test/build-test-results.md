@@ -215,3 +215,115 @@ receipts — an owner question, recorded in the stage diary's Open questions.
 - `governance/PENDING_FOLLOWUPS.md` §1a (the 2026-09-24 766/766 critical run);
   `governance/CHANGE_RECORD_2026-09-24_d28_option_a_mechanism_built.md` (D-68).
 - `.gitignore:3`; commit `4253d51`; `evidence/station_registry_sources_2026-09-19/`.
+
+## 2026-09-25 remediation addendum (verified against current HEAD, not overwriting the rows above)
+
+Executed under continued Student authorization (code/doc fixes, evidence
+recovery, permitted fixture runs, targeted verification, local commits — no
+locked-December access, no governance weakening, no scope change, no
+push). Every count below is read programmatically from a fresh junit XML
+persisted this session, never carried from prose.
+
+**Site-log custody finding (Rec 1) — CLOSED.** The three IGS site logs
+(`aruc00arm_20260317.log`, `bshm00isr_20260422.log`, `nico00cyp_20251027.log`)
+are present on disk under `evidence/station_registry_sources_2026-09-19/`,
+already committed (`db15880`, prior to this session), and their SHA-256
+hashes were independently recomputed this session and match
+`sitelog_index.json` exactly (all three, byte-for-byte). The `.gitignore:10`
+negation (`!evidence/**/*.log`) is in place and verified live —
+`git check-ignore` reports no match for any of the three files.
+`tests/test_release_hashes.py` (option 1's closing control):
+**235/235 passed** (`crit.xml`'s predecessor confirms zero regressions
+elsewhere). This closes option 1 of the three dispositions recorded above —
+no manifest amendment or standing-red acceptance was needed.
+
+**TF/matplotlib pin surface (readiness item 2) — CLOSED.** This clone's
+network reaches `pypi.org` (200) and `files.igs.org` (302) this session,
+unlike the prior blocked-network sessions. `pip show` in the governed
+`tec-thesis-311` env confirms both previously-unobtainable pins are now
+installed at the exact governed versions: `matplotlib==3.9.0`,
+`tensorflow==2.21.0`. Combined with the seven pins already exact, the pin
+surface is now **9 of 9 exact** (was 7/9). `src/evaluation/plots.py` and
+`src/models/lstm.py`'s TF-present paths are now exercisable in this
+environment; the TE §8.1 both-platform (Kaggle AND local) check for M-06
+still needs its own dedicated exercise run, which this remediation pass did
+not additionally perform.
+
+**Full suite, fresh run (`run_2026-09-25_bt-remediation/full.xml`):**
+**1584 total, 1580 passed, 0 failed, 0 errors, 4 skipped**, 424.5 s wall
+time. Every field sums (1580+0+4=1584) — this resolves the readiness-item-2
+count ambiguity in the summary's prior "1584 tests, 1581 passed, 3 failed, 6
+skipped" line (which itself summed to 1590, not 1584, and predates this
+session's fixes). The four skips, read from the XML's `<skipped>` messages,
+not narrated: `test_clean_run.py::test_clean_run_completion_or_skip_with_named_reason`
+(the scientific fixture manifest still carries the `TBD — freeze gate`
+sentinel — Q-31 freeze owed, WS-20/TA-17 stay Pending, item 3 below),
+`test_models_smoke.py::test_ridge_and_forest_refuse_by_name_when_sklearn_is_absent`
+and `test_regimes_and_reporting.py::test_render_figure_refuses_naming_pin_surface_when_matplotlib_absent`
+(both negative-absence controls now unreachable because the packages ARE
+present — an artifact of the pin surface closing, not a weakened
+assertion), and `test_release_contract.py::test_missing_required_field_is_refused[dataset_version]`
+(a parametrized case whose field is derived, not user-supplied — pre-existing,
+unrelated to this remediation).
+
+**§18.3 critical-set, fresh run (`crit.xml`, the same ten-module selection
+(b) recorded above):** **685 total, 685 passed, 0 failed, 0 errors, 0
+skipped**, 55.8 s. §18.3's "no failing critical test" precondition is
+satisfied for selection (b) as of this commit. Selections (a) and (c) are
+unchanged by this addendum and remain the Student's to reconcile (Rec 5) —
+this addendum verifies (b) only and does not resolve which of (a)/(b)/(c) is
+"the" §18.3 run.
+
+**Rec 47 (GitHub check) — investigated, NOT closed; local pass ≠ remote
+pass.** With GitHub reachable this session, a read-only check (no push) via
+the public Actions API confirms `.github/workflows/verify.yml` **is** pushed
+and active on `github.com/Kimrza/Thesis_toshkari` (workflow id `339264561`,
+49 runs) — the "committed but not pushed" note above is stale. Its most
+recent run (`36139946731`, triggered by commit `29ed3119932410f18d5582f1ddb058c5b13262f7`,
+i.e. two commits behind this session's HEAD) **FAILED** at the
+"Release-hash verification" step — the exact site-log custody defect closed
+above, but at a commit predating that fix (the fix landed in `db15880`,
+after `29ed311`). No CI run exists yet against `db15880` or the current HEAD,
+because neither has been pushed. Equating this session's local green run
+with a GitHub check pass would be exactly the error this task warned
+against; it is not made here. **Remaining external action:** push the
+current HEAD (student's action, outside this session's authorization) so
+`verify.yml` runs against the fixed commit and either confirms or reopens
+the finding.
+
+**`run_snapshots/` tracking policy — confirmed already applied, no drift.**
+`artifacts/run_snapshots/` is tracked in git (696 files, 19 MB, small
+per-run YAML config snapshots only — `data.yaml`, `experiment.yaml`,
+`features.yaml`, `seeds.yaml` per run, no data/model bytes), not covered by
+any `.gitignore` rule (`git check-ignore` confirms no match). This already
+matches the requested policy (track small reproducibility records in git;
+large outputs elsewhere) — Rec 11's disclosure-only disposition from
+`GOV-2026-09-24-BT-01` stands as the last ruling on this; no further owner
+decision or ignore-rule change is owed.
+
+**Fixture stages 06/07 — still blocked, confirmed by inspection, not
+executed.** `configs/experiment.yaml` still carries `folds: "TBD — freeze
+gate"`, `models.selected: "TBD — freeze gate"`, and `models.lstm.epochs:
+"TBD — freeze gate"`. `project.md` § Forbidden bars filling a
+`TBD — freeze gate` value by convenience; both `05_build_features_and_splits.py`
+and `06_train_and_predict.py` refuse on these fields by design. This is the
+same blocker `run_walking_skeleton.py`'s module docstring already documents
+for the scientific fixture. Stages 00–05's existing evidence on
+`plumbing_7day` is untouched; nothing under this addendum ran, scored, or
+otherwise touched locked-December data.
+
+**Readiness items 4, 5, 7 — unchanged by this addendum.** Cross-unit
+staleness (item 4) is not newly created by anything in this pass (no
+`produces[]` artifact of another unit's frozen receipt was touched). The
+`aidlc-state.md` Project Root field (item 5) has no sanctioned direct-write
+path from this session (same constraint recorded 2026-08-22) and is left as
+is; this session's actual root, `C:\Users\LOTUS\Desktop\Thesis_toshkari`, is
+recorded here for the audit trail rather than hand-edited into the state
+file. Item 7 (Rec 5's §18.3 selection reconciliation) is unchanged — routed
+to the Student, not decided here.
+
+Evidence for this addendum:
+`artifacts/exec_evidence/run_2026-09-25_bt-remediation/full.xml`,
+`.../crit.xml`; GitHub Actions API responses (`workflows`, `runs`, `jobs`
+for run `36139946731`) read live, not persisted as files (no local
+credential or token was used — the repository is public).
