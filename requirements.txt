@@ -34,6 +34,11 @@ scikit-learn==1.4.2
 # (Kaggle AND local) check are OWED — freezing the pin makes M-06's guard pass; it does
 # not make the environment exist.
 tensorflow==2.21.0
+# ml_dtypes: ENGINEERING pin approved by the project decision owner 2026-09-26 (same
+# class as scikit-learn's Q3=A precedent). TF 2.21.0 permits >=0.5.1,<1.0.0; the
+# 0.6.0 wheel pip's resolver otherwise selects requires numpy>=2.0.0, which conflicts
+# with the governed numpy==1.26.4. 0.5.3 requires numpy>=1.23.3 on Python 3.11.
+ml_dtypes==0.5.3
 
 # --- figures (TE §8.1, Required) ------------------------------------------------------
 # matplotlib: the only third-party package that EXECUTES in src/ (src/evaluation/plots.py,

@@ -1,0 +1,9 @@
+﻿environment lock (TE S13.1) -- emitted by environment/bootstrap_env.ps1
+utc: 20260925T211836Z
+prefix: C:\Users\s_sch\AppData\Local\tec-envs\tec311
+requirements.txt sha256: 8e118c233dd3ceeed1952e70ca9d392e532b5ab3c27e6295a86c931173bad180
+environment/conda-win64.lock sha256: f104768a7ad949335cd8a3432908dd4b8d648898235f0629c4fe370f0c4c95cc
+mode: offline (verified local store)
+governed deviations, disclosed per addendum 2026-09-24:
+  matplotlib==3.9.0 ABSENT (no win-64 conda-forge build; owner pin -- do not substitute)
+  tensorflow==2.21.0 ABSENT (no Windows conda build; PyPI unreachable; owed to Kaggle)

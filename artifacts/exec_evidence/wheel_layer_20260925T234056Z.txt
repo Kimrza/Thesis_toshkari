@@ -1,0 +1,6 @@
+﻿pip-wheel layer installed by environment/install_wheels.ps1
+utc: 20260925T234056Z
+prefix: C:\Users\s_sch\AppData\Local\tec-envs\tec311
+wheels-win64.lock sha256: cb0593b0005f6df84df962235ad8e8ee8be94d5478fea1667912dfd275e01c57
+targets: matplotlib==3.9.0, tensorflow==2.21.0
+tensorflow==2.21.0: installed from wheelhouse

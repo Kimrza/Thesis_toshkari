@@ -1,0 +1,6 @@
+﻿pip-wheel layer installed by environment/install_wheels.ps1
+utc: 20260925T223904Z
+prefix: C:\Users\s_sch\AppData\Local\tec-envs\tec311
+wheels-win64.lock sha256: 08457fe7fd41d2c1504f26109266751a972746658db546bd7bb29a37f93dad05
+targets: matplotlib==3.9.0
+tensorflow==2.21.0: ABSENT -- no native Windows artifact exists (tensorflow-intel ended at 2.18.0); owed to Kaggle
