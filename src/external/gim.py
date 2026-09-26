@@ -38,13 +38,20 @@ The four obligations (R-60), and where each stands after D-72:
 3. the map-product-to-map-product limitation AND the spatial-representativeness
    mismatch are EMITTED BY THE REPORTING PATH ITSELF (`render_comparison_report`) --
    a sentence a human must remember does not survive a new report being added;
-4. never tuned and then claimed independent: a PARTIAL control plus a NAMED residual.
-   The grep-class check that no fitting, tuning, optimiser or parameter-search call
-   appears in this module lives in `tests/test_external_drivers.py`; the report states
-   no tuning occurred with the independence claim citing the overlap audit. ⚠ THE
-   RESIDUAL, GENUINELY UNCOVERED: tuning performed OUTSIDE this module and its result
-   pasted in as a constant is reached by no check and remains a reporting-discipline
-   obligation, named here rather than papered over (R-60).
+4. never tuned and then claimed independent: TWO partial controls plus a NAMED,
+   narrowed-not-closed residual. `tests/test_external_drivers.py` carries (a) a
+   grep-class AST check that no fitting, tuning, optimiser or parameter-search
+   CALL appears in this module, and (b), added 2026-09-26, a second AST check
+   that no bare numeric literal here is assigned to, or passed as a keyword
+   argument named like, a common ML hyperparameter -- closing the realistic
+   disguise (a tuned constant kept its telltale name) without touching this
+   module's real, named physical/format constants (the 15 deg/hour Earth
+   rotation rate, the 9999 IONEX missing-data sentinel, the grid geometry).
+   The report states no tuning occurred with the independence claim citing the
+   overlap audit. ⚠ THE RESIDUAL, NARROWED BUT NOT CLOSED: a tuning result
+   pasted in under an innocuous, non-hyperparameter-shaped name (`k = 0.037`)
+   evades both checks and is reached by no mechanical control -- named here
+   rather than papered over, exactly as before this narrowing (R-60).
 
 The `gim_network_overlap_flag` disclosure is UNCONDITIONAL and its trigger is the
 COMPARISON'S EXISTENCE (Vision 6.10: "No independence claim may be made before that
@@ -241,6 +248,26 @@ def evaluate_generation_gates(
         )
 
 
+def overlap_audit_content_hash(overlap_audit: Mapping[str, Any]) -> str:
+    """SHA-256 of `overlap_audit`'s canonical JSON form -- deliberately IDENTICAL
+    to `src.evaluation.metrics._audit_content_hash`'s algorithm
+    (`json.dumps(dict(x), sort_keys=True, separators=(",", ":"), default=str)`
+    then sha256 hexdigest), duplicated here rather than imported, because
+    `metrics.py` is the consumer of `gim.py` (TE 12's allowlist), never the
+    reverse -- gim.py must not depend on src.evaluation. Both sides computing
+    the same hash over the same dict is what SD-C-04's containment check
+    (control 32) actually verifies; a divergent algorithm on either side would
+    make every real comparison fail that check, silently, until read closely.
+    """
+    import hashlib
+    import json as _json
+
+    canonical = _json.dumps(
+        dict(overlap_audit), sort_keys=True, separators=(",", ":"), default=str
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def generate_comparator(
     *,
     interpolation_rule: str | None,
@@ -332,6 +359,15 @@ def generate_comparator(
     )
     result["map_to_map_statement"] = MAP_TO_MAP_STATEMENT
     result["spatial_representativeness_statement"] = SPATIAL_REPRESENTATIVENESS_STATEMENT
+    # SD-C-04 containment (control 32, src.evaluation.metrics._gim_disclosure_block):
+    # this comparator records WHICH registered overlap-audit result it was generated
+    # against, by id and content hash, so a later consumer can prove the audit it cites
+    # is the audit that actually existed at generation time -- not a clock comparison,
+    # a content comparison. `overlap_audit` already passed `evaluate_generation_gates`
+    # above (its recorded_at_utc precedes this attempt), so this is additive evidence,
+    # not a new gate.
+    result["overlap_audit_id"] = overlap_audit.get("audit_id", "")
+    result["overlap_audit_sha256"] = overlap_audit_content_hash(overlap_audit)
     return result
 
 
@@ -979,6 +1015,12 @@ def compute_overlap_audit(
         any_overlap = any_overlap or present
     recorded = recorded_at_utc or dt.datetime.now(dt.timezone.utc)
     return {
+        # `audit_id`: the stable identifier `src.evaluation.metrics._gim_disclosure_block`
+        # (SD-C-04, control 32) reads as `overlap_audit.get("audit_id", "")` and compares
+        # against the comparator's OWN recorded `overlap_audit_id` -- the containment check
+        # this dict must support for real downstream consumption, distinct from (and in
+        # addition to) `evaluate_generation_gates`'s clock-based `recorded_at_utc` ordering.
+        "audit_id": f"gim-overlap-audit-{recorded.strftime('%Y-%m-%d-%H-%M-%S')}",
         "gim_network_overlap_flag": any_overlap,
         "recorded_at_utc": recorded.isoformat(),
         "rule": (
@@ -1035,8 +1077,10 @@ def render_comparison_report(
             "No fitting, tuning, optimisation or parameter search was performed on "
             "the GIM comparator (C-01 is generated, not trained); the independence "
             "claim, if any, cites the gim_network_overlap_flag audit recorded above "
-            "and is never made before it (R-60 obligation 4 -- partial control; "
-            "tuning performed outside gim.py and pasted in as a constant is reached "
-            "by no check and remains a reporting-discipline obligation)"
+            "and is never made before it (R-60 obligation 4 -- two partial AST "
+            "controls, 2026-09-26: no fitting/tuning call, and no bare numeric "
+            "literal named like a hyperparameter; a tuning result pasted in under "
+            "an innocuous name is reached by neither and remains a "
+            "reporting-discipline obligation, narrowed but not closed)"
         ),
     }

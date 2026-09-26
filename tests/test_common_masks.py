@@ -1356,6 +1356,58 @@ def test_gim_disclosure_happy_path_carries_flag_and_containment(tmp_path: Path) 
     assert block["overlap_audit_sha256"]
 
 
+#: Real gim.py output (2026-09-26, D-72/D-73), not hand-typed synthetic data --
+#: proves the actual producer's output is consumable by this actual consumer,
+#: not merely that two independently-authored fixtures happen to share a shape.
+_REAL_GIM_EVIDENCE_DIR = REPO_ROOT / "evidence" / "r60_gim_gate_inputs"
+
+
+@pytest.mark.skipif(
+    not (_REAL_GIM_EVIDENCE_DIR / "R60_generated_comparison_2026-09-26.json").is_file(),
+    reason="real generated GIM comparison evidence not present on this clone",
+)
+def test_real_gim_comparator_output_passes_downstream_containment_check(
+    tmp_path: Path,
+) -> None:
+    """The REAL `--generate-comparison` output (src/external/gim.py, D-72's frozen
+    rule "C", D-73's overlap-flag definition), fed through the actual
+    `build_metrics_artifact` consumer this project ships -- not a hand-typed
+    synthetic audit/provenance pair reproducing the same shape by construction.
+    Closes the producer/consumer seam this file's own §7b banner names: one real
+    producer output, pushed through one real consumer.
+    """
+    overlap_audit_path = _REAL_GIM_EVIDENCE_DIR / "R60_overlap_audit_result_2026-09-26.json"
+    comparison_path = _REAL_GIM_EVIDENCE_DIR / "R60_generated_comparison_2026-09-26.json"
+    real_overlap_audit = json.loads(overlap_audit_path.read_text(encoding="utf-8-sig"))
+    real_report = json.loads(comparison_path.read_text(encoding="utf-8-sig"))
+    real_comparator_provenance = {
+        "overlap_audit_id": real_report["comparison"]["overlap_audit_id"],
+        "overlap_audit_sha256": real_report["comparison"]["overlap_audit_sha256"],
+    }
+    assert real_comparator_provenance["overlap_audit_id"], (
+        "the real report must actually carry containment fields, or this test "
+        "would silently pass on empty strings"
+    )
+
+    mask, registry, estimands = _artifact_inputs(tmp_path, "gimset")
+    artifact = build_metrics_artifact(
+        set_id="gimset",
+        declared_sets=SYNTH_SETS,
+        mask=mask,
+        registry=registry,
+        estimands=estimands,
+        gim_overlap_audit=real_overlap_audit,
+        gim_comparator_provenance=real_comparator_provenance,
+    )
+    # Must not refuse -- the real audit_id/hash the real generator recorded must
+    # match what the real audit object itself hashes to, independently recomputed
+    # here by build_metrics_artifact's own containment check (SD-C-04, control 32).
+    assert_metrics_artifact(artifact, declared_sets=SYNTH_SETS)
+    block = artifact["comparisons"][0]["gim_overlap_disclosure"]
+    assert block["gim_network_overlap_flag"] == real_overlap_audit["gim_network_overlap_flag"]
+    assert block["overlap_audit_id"] == real_overlap_audit["audit_id"]
+
+
 def test_metrics_artifact_write_is_refuse_to_overwrite(tmp_path: Path) -> None:
     mask, registry, estimands = _artifact_inputs(tmp_path)
     artifact = build_metrics_artifact(

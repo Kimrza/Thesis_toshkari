@@ -1,6 +1,7 @@
 {
+  "audit_id": "gim-overlap-audit-2026-09-26-14-47-22",
   "gim_network_overlap_flag": true,
-  "recorded_at_utc": "2026-09-26T14:34:28.364982+00:00",
+  "recorded_at_utc": "2026-09-26T14:47:22.986676+00:00",
   "rule": "presence (D-73, owner-confirmed 2026-09-26): True iff any target station's own 4-char IGS code appears in the audited CODE contributing-station network -- NOT an independence claim; does not detect overlap via a nearby tied receiver whose code differs from the target station's own code (named residual, D-73)",
   "source_description": "evidence\\r60_gim_gate_inputs\\code_network_stations_2022_jan-nov_union.txt",
   "per_station": {

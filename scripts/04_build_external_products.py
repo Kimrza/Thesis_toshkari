@@ -412,6 +412,41 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help="output path for --generate-comparison's rendered report",
     )
     parser.add_argument(
+        "--build-gim-comparator-release",
+        action="store_true",
+        help=(
+            "build the real gim_comparator.parquet release: rule-C interpolation "
+            "(D-72) across --stations and [--start-date, --end-date] hourly, "
+            "gated by --hand-check-file/--overlap-audit-file, against the real "
+            "IONEX bundle at --ionex-bundle-dir. Published via write_release "
+            "(TE 13.3, same mechanism as the driver releases)"
+        ),
+    )
+    parser.add_argument(
+        "--ionex-bundle-dir",
+        type=Path,
+        default=Path("evidence/gim_code_final_2022"),
+        help="workspace-relative directory of acquired IONEX files, for --build-gim-comparator-release",
+    )
+    parser.add_argument(
+        "--stations",
+        type=str,
+        default="ARUC,BSHM,NICO",
+        help="comma-separated station names for --build-gim-comparator-release",
+    )
+    parser.add_argument(
+        "--start-date",
+        type=str,
+        default=None,
+        help="ISO date (YYYY-MM-DD), inclusive, for --build-gim-comparator-release",
+    )
+    parser.add_argument(
+        "--end-date",
+        type=str,
+        default=None,
+        help="ISO date (YYYY-MM-DD), inclusive, for --build-gim-comparator-release",
+    )
+    parser.add_argument(
         "--gate-state",
         type=Path,
         default=None,
@@ -1945,6 +1980,276 @@ def _generate_comparison(entry: Mapping[str, Any], args: argparse.Namespace) -> 
     return {"comparison_report": str(out_path), "value_tecu": result["value_tecu"]}
 
 
+#: `gim_comparator.parquet`'s D-63-style producing-artifact identity, for the same
+#: reason the four driver releases each have one: `permitted_producers`-style admission
+#: needs a name to check against, not a directory-naming convention a reader has to learn.
+_GIM_COMPARATOR_ARTIFACT: Final[str] = "gim_comparator_C-01_2022"
+
+
+def _gim_comparator_release_manifest(
+    *,
+    snapshot: Any,
+    rows: list[dict[str, Any]],
+    excluded: list[dict[str, Any]],
+    output_files: Mapping[str, str],
+    fixture_scope_id: str | None,
+) -> dict[str, Any]:
+    """The TE 13.3 manifest for `gim_comparator.parquet`, same 13-field shape as
+    `_driver_release_manifest` (this script's own established pattern for a
+    stage-04-produced derived artifact). `comparison_class`/`units` for this
+    file's entry in a fixture's `fixture_manifest.yaml` remain `TBD -- freeze
+    gate` (fixtures-and-reproducibility's own outstanding work, unrelated to
+    and not resolved by this release) -- this manifest is the GOVERNED,
+    non-fixture release, published independently of that fixture-scoped gate.
+    """
+    identity = resolve_target_identity(snapshot.data)
+    stations = sorted({str(r["station"]) for r in rows})
+    months: dict[str, int] = {}
+    for row in rows:
+        months[str(row["target_epoch_utc"])[:7]] = months.get(str(row["target_epoch_utc"])[:7], 0) + 1
+    return {
+        "source_manifest_id": f"{_GIM_COMPARATOR_ARTIFACT}:D-72,D-73",
+        "source_files": [
+            {
+                "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+                "citation": (
+                    "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ "
+                    "(permanent archive path; per-day directory + verbatim filename below)"
+                ),
+                "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+                "filename": str(r["ionex_file"]),
+                "retrieval_date": "2026-09-26",
+                "sha256": str(r["ionex_sha256"]),
+            }
+            for r in {row["ionex_file"]: row for row in rows}.values()
+        ],
+        "processing": {
+            "phase_id": identity["phase_id"],
+            "target_definition_id": identity["target_definition_id"],
+            "provider_experiment_kindat": (
+                "not applicable: CODE final GIM IONEX product, not a Madrigal experiment"
+            ),
+            "parameters": ["value_tecu"],
+            "station_coordinate_to_cell_rule": (
+                "not applicable: GIM comparator reads the grid at the station's own D-1 "
+                "coordinate via bilinear interpolation (rule C, D-72), never a cell "
+                "assignment"
+            ),
+            "selected_cell_bounds": {"not_applicable": "see station_coordinate_to_cell_rule"},
+            "hourly_aggregation": (
+                "none: one interpolated value per requested station-epoch, generated "
+                "on demand, not aggregated from finer-grained readings"
+            ),
+        },
+        "schema_version": str(snapshot.data.get("schema_version", "")),
+        "units": {"value_tecu": "TECU"},
+        "row_counts": {
+            "by_station": {s: sum(1 for r in rows if r["station"] == s) for s in stations},
+            "by_month": months,
+            "by_split": {"unsplit_stage_04": len(rows)},
+            "by_qc_stage": {"generated_rule_c_gated": len(rows)},
+        },
+        "exclusions_qc_summary": [
+            {
+                "reason": (
+                    "generation refused for this station-epoch (gate violation, missing "
+                    "grid data, or out-of-range coordinate); excluded rather than "
+                    "silently substituted or defaulted (R-60)"
+                ),
+                "count": len(excluded),
+            }
+        ],
+        "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "fold_ids": [_STAGE04_ID_PLACEHOLDER],
+        "mask_ids": [_STAGE04_ID_PLACEHOLDER],
+        "feature_set_ids": [_STAGE04_ID_PLACEHOLDER],
+        "output_files": dict(output_files),
+        "change_record_id": "D-72,D-73 (evidence/DECISIONS.md)",
+        "producing_artifact": _GIM_COMPARATOR_ARTIFACT,
+        "release_status": "generated_not_trained",
+        "window": {
+            "start": min(str(r["target_epoch_utc"]) for r in rows) if rows else "",
+            "end": max(str(r["target_epoch_utc"]) for r in rows) if rows else "",
+        },
+        "covered_window": {
+            "start": min(str(r["target_epoch_utc"]) for r in rows) if rows else "",
+            "end": max(str(r["target_epoch_utc"]) for r in rows) if rows else "",
+        },
+        "evidence_class": "fixture_plumbing" if fixture_scope_id else "governed_run",
+        "fixture_scope_id": fixture_scope_id or "",
+        "map_to_map_statement": (
+            "The Phase 1 GIM comparison is explicitly a map-product-to-map-product "
+            "comparison; it cannot validate receiver-level station VTEC or serve as an "
+            "independent target check."
+        ),
+        "stations_covered": stations,
+    }
+
+
+def _build_gim_comparator_release(
+    entry: Mapping[str, Any], args: argparse.Namespace
+) -> dict[str, Any]:
+    """Build the real, hash-verified `gim_comparator.parquet` release: rule-C
+    interpolation (D-72), gated by real hand-check + overlap-audit evidence
+    (D-73), across every station in --stations and every hour in
+    [--start-date, --end-date], against the real acquired IONEX bundle.
+    Per-row failures are recorded as exclusions (never silently dropped); the
+    release refuses only if EVERY row failed. Published via `write_release`,
+    the same TE 13.3 mechanism the driver releases use -- immutable,
+    hash-verified, refuses a differing overwrite (R-13)."""
+    _assert_phase1_field_contract(args.phase)
+    from src.external import gim  # allowlisted importer; deferred by design
+
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    bundle_dir = workspace / args.ionex_bundle_dir
+    stations_cfg = snapshot.data.get("stations", {})
+    requested_stations = [s.strip() for s in args.stations.split(",") if s.strip()]
+    for name in requested_stations:
+        if name not in stations_cfg:
+            raise IntegrityError(
+                "build-gim-comparator-release",
+                f"station {name!r} is not a key under configs/data.yaml: stations",
+            )
+
+    hand_check = json.loads(
+        (workspace / args.hand_check_file).read_text(encoding="utf-8-sig")
+    )
+    overlap_audit_full = json.loads(
+        (workspace / args.overlap_audit_file).read_text(encoding="utf-8-sig")
+    )
+    per_station_overlap = overlap_audit_full.get("per_station", {})
+
+    start_date = dt.date.fromisoformat(args.start_date)
+    end_date = dt.date.fromisoformat(args.end_date)
+    rule = gim.interpolation_rule_from(snapshot.experiment)
+
+    rows: list[dict[str, Any]] = []
+    excluded: list[dict[str, Any]] = []
+    cursor = start_date
+    while cursor <= end_date:
+        doy = cursor.timetuple().tm_yday
+        # Real acquired filename pattern: short form for days<=330, long form after
+        # (the actual provider switch observed in the 2026-09-26 acquisition).
+        short = f"codg{doy:03d}0.22i.Z"
+        long = f"COD0OPSFIN_2022{doy:03d}0000_01D_01H_GIM.INX.gz"
+        ionex_path = bundle_dir / short
+        if not ionex_path.is_file():
+            ionex_path = bundle_dir / long
+        if not ionex_path.is_file():
+            excluded.append(
+                {"date": cursor.isoformat(), "reason": f"neither {short} nor {long} found"}
+            )
+            cursor += dt.timedelta(days=1)
+            continue
+        ionex_sha256 = sha256_of_file(ionex_path)
+        for station in requested_stations:
+            lat = float(stations_cfg[station]["lat"])
+            lon = float(stations_cfg[station]["lon"])
+            per_station = per_station_overlap.get(station)
+            overlap_audit = dict(overlap_audit_full)
+            if per_station is not None:
+                overlap_audit["gim_network_overlap_flag"] = bool(
+                    per_station["present_in_network"]
+                )
+            for hour in range(24):
+                target_epoch = dt.datetime(
+                    cursor.year, cursor.month, cursor.day, hour, 0, 0, tzinfo=dt.timezone.utc
+                )
+                try:
+                    result = gim.generate_comparator(
+                        interpolation_rule=rule,
+                        hand_check=hand_check,
+                        overlap_audit=overlap_audit,
+                        injection_mode=False,
+                        comparator_inputs={
+                            "ionex_path": str(ionex_path),
+                            "station_lat": lat,
+                            "station_lon": lon,
+                            "target_epoch_utc": target_epoch.isoformat(),
+                        },
+                    )
+                except IntegrityError as exc:  # ComparatorError is a subclass
+                    excluded.append(
+                        {
+                            "station": station,
+                            "target_epoch_utc": target_epoch.isoformat(),
+                            "reason": str(exc),
+                        }
+                    )
+                    continue
+                rows.append(
+                    {
+                        "station": station,
+                        "target_epoch_utc": target_epoch.isoformat(),
+                        "value_tecu": result["value_tecu"],
+                        "rule": result["rule"],
+                        "ionex_file": ionex_path.name,
+                        "ionex_sha256": ionex_sha256,
+                        "f_t": result["f_t"],
+                        "exact_epoch_match": result["exact_epoch_match"],
+                        "gim_network_overlap_flag": overlap_audit["gim_network_overlap_flag"],
+                        "overlap_audit_id": result["overlap_audit_id"],
+                        "overlap_audit_sha256": result["overlap_audit_sha256"],
+                        "phase_id": "P1",
+                    }
+                )
+        cursor += dt.timedelta(days=1)
+
+    if not rows:
+        raise IntegrityError(
+            "build-gim-comparator-release",
+            f"every requested station-epoch failed generation ({len(excluded)} "
+            f"exclusions); a release with zero rows has no content to publish",
+        )
+
+    import pandas as pd  # deferred: only this bounded path needs it
+
+    frame = pd.DataFrame(rows)
+    snapshot_roots = snapshot.resolved_roots
+    release_root = release_root_for(
+        workspace,
+        artifacts_root=Path(snapshot_roots["artifacts"]),
+        fixture_id=entry.get("fixture_scope_id"),
+    )
+    directory = release_root / _GIM_COMPARATOR_ARTIFACT
+    directory.mkdir(parents=True, exist_ok=True)
+    parquet_path = directory / "gim_comparator.parquet"
+    if parquet_path.exists():
+        raise IntegrityError(
+            str(parquet_path),
+            "gim_comparator.parquet already exists at this release path; TE 13.3 "
+            "requires write-once, never an overwrite (R-13)",
+        )
+    frame.to_parquet(parquet_path, engine="pyarrow", index=False)
+
+    manifest = _gim_comparator_release_manifest(
+        snapshot=snapshot,
+        rows=rows,
+        excluded=excluded,
+        output_files={"gim_comparator.parquet": sha256_of_file(parquet_path)},
+        fixture_scope_id=entry.get("fixture_scope_id"),
+    )
+    try:
+        written = write_release(directory, manifest, release_root=release_root)
+    except ReleaseError as exc:
+        parquet_path.unlink(missing_ok=True)
+        raise IntegrityError(directory, f"the gim_comparator release was refused: {exc}") from exc
+
+    excluded_path = directory / "excluded_rows.json"
+    excluded_path.write_text(json.dumps(excluded, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    return {
+        "release_dir": str(directory.relative_to(workspace)),
+        "dataset_version": written["dataset_version"],
+        "rows_written": len(rows),
+        "rows_excluded": len(excluded),
+        "stations_covered": sorted({r["station"] for r in rows}),
+        "window": {"start": args.start_date, "end": args.end_date},
+        "parquet_sha256": sha256_of_file(parquet_path),
+    }
+
+
 def _write_prediction_once(path: Path, payload: Mapping[str, Any]) -> Path:
     """Write-once: an existing prediction file is never overwritten (TE 13.3; R-102a
     step 1) -- the same idiom `06_train_and_predict.py`'s `_write_prediction_once`
@@ -2115,6 +2420,7 @@ def main() -> int:
                 or args.verify_gim_bundle is not None
                 or args.overlap_audit_network is not None
                 or args.generate_comparison
+                or args.build_gim_comparator_release
             ),
         )
     except IntegrityError as exc:
@@ -2159,6 +2465,8 @@ def main() -> int:
             summary = _run_overlap_audit(entry, args)
         elif args.generate_comparison:
             summary = _generate_comparison(entry, args)
+        elif args.build_gim_comparator_release:
+            summary = _build_gim_comparator_release(entry, args)
         elif args.emit_prediction_payload is not None:
             summary = _emit_prediction_payload(entry, args)
         else:

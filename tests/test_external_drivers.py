@@ -1003,6 +1003,98 @@ def test_tuning_call_injection_is_caught() -> None:
     assert _tuning_call_sites("scipy.optimize.minimize(f, x0)\n", name="inject3.py")
 
 
+#: A second, narrower partial control for the SAME named residual (obligation 4:
+#: "tuning performed OUTSIDE gim.py and pasted in as a constant is reached by no
+#: check"). `_tuning_call_sites` catches a fitting CALL left in the module; this
+#: catches the realistic disguise the residual actually describes -- no call at
+#: all, just a bare numeric literal assigned to (or passed as) a name that reads
+#: like an ML hyperparameter, which a tuning run outside gim.py could paste in
+#: without ever calling anything gim.py's own AST scan would flag.
+_HYPERPARAMETER_NAME_TOKENS = (
+    "alpha",
+    "learning_rate",
+    "n_estimators",
+    "max_depth",
+    "min_samples",
+    "gamma",
+    "batch_size",
+    "epochs",
+    "hidden_units",
+    "dropout",
+    "regularization",
+    "reg_lambda",
+    "reg_alpha",
+    "c_param",
+)
+
+
+def _pasted_hyperparameter_literals(source: str, *, name: str) -> list[str]:
+    """AST-level scan for a bare numeric literal assigned to, or passed as a
+    keyword argument named like, a common ML hyperparameter -- the shape a
+    tuning result pasted in as a constant would realistically take."""
+    tree = ast.parse(source, filename=name)
+    sites: list[str] = []
+
+    def _is_hyperparam_name(identifier: str) -> bool:
+        lowered = identifier.lower()
+        return any(token in lowered for token in _HYPERPARAMETER_NAME_TOKENS)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            if isinstance(node.value, ast.Constant) and isinstance(
+                node.value.value, (int, float)
+            ):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and _is_hyperparam_name(target.id):
+                        sites.append(f"{name}:{node.lineno} {target.id} = {node.value.value!r}")
+        elif isinstance(node, ast.Call):
+            for kw in node.keywords:
+                if (
+                    kw.arg
+                    and _is_hyperparam_name(kw.arg)
+                    and isinstance(kw.value, ast.Constant)
+                    and isinstance(kw.value.value, (int, float))
+                ):
+                    sites.append(f"{name}:{node.lineno} {kw.arg}={kw.value.value!r}")
+    return sites
+
+
+def test_gim_module_carries_no_pasted_hyperparameter_literal() -> None:
+    """Obligation 4's residual, narrowed (not eliminated -- see docstring below):
+    no bare numeric literal in `gim.py` is assigned to, or passed as a keyword
+    argument named like, a common ML hyperparameter. Real, named numeric
+    literals DO exist in this module -- the Earth-rotation rate (15.0
+    deg/hour), the IONEX missing-data sentinel (9999), the grid geometry
+    constants (2.5/5.0/87.5/-87.5/-180.0/180.0) -- and this check does not
+    flag any of them, because none is named like a hyperparameter; they are
+    physical/format constants, not tuned values, and this test proves that
+    distinction by NAME rather than merely asserting it in prose.
+
+    HONEST LIMIT, stated explicitly rather than papered over: this closes the
+    realistic disguise (a tuned constant kept its telltale name), not every
+    disguise -- a constant renamed to something innocuous (`k = 0.037`) would
+    still evade this check, exactly as `gim.py`'s own docstring already says
+    of obligation 4's residual. This test NARROWS the residual; it does not
+    and cannot CLOSE it.
+    """
+    source = (REPO_ROOT / "src" / "external" / "gim.py").read_text(encoding="utf-8")
+    assert _pasted_hyperparameter_literals(source, name="gim.py") == []
+
+
+def test_pasted_hyperparameter_literal_injection_is_caught() -> None:
+    """Negative control: an injected hyperparameter-shaped constant is caught,
+    both as a bare assignment and as a call keyword argument."""
+    assert _pasted_hyperparameter_literals("alpha = 0.037\n", name="inject4.py")
+    assert _pasted_hyperparameter_literals(
+        "build_model(learning_rate=0.001, n_estimators=300)\n", name="inject5.py"
+    )
+    # Physical/format constants with similarly-shaped bare literals must NOT
+    # be flagged -- the check keys on NAME, not on "any bare numeric literal".
+    assert not _pasted_hyperparameter_literals(
+        "rotation_rate_deg_per_hour = 15.0\nmissing_sentinel = 9999\n", name="clean.py"
+    )
+
+
 # =========================================================================================
 # The migrated exit-code pair and the two refusals, THROUGH the allowlisted script
 # =========================================================================================

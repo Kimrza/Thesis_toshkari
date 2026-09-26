@@ -1,0 +1,134 @@
+{
+  "change_record_id": "D-72,D-73 (evidence/DECISIONS.md)",
+  "content_hash": "9acff1b070eb9855f0ad23e1434430859f177bfab9d8590276d426bcc6d91136",
+  "covered_window": {
+    "end": "2022-04-16T23:00:00+00:00",
+    "start": "2022-04-10T00:00:00+00:00"
+  },
+  "created_at_utc": "2026-09-26T15:02:13.579555+00:00",
+  "dataset_version": "9acff1b070eb",
+  "evidence_class": "governed_run",
+  "exclusions_qc_summary": [
+    {
+      "count": 0,
+      "reason": "generation refused for this station-epoch (gate violation, missing grid data, or out-of-range coordinate); excluded rather than silently substituted or defaulted (R-60)"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "map_to_map_statement": "The Phase 1 GIM comparison is explicitly a map-product-to-map-product comparison; it cannot validate receiver-level station VTEC or serve as an independent target check.",
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "gim_comparator.parquet": "77c93cfb59e63248c1337f847a089044488637dfea93210c948e90b4b71bf784"
+  },
+  "processing": {
+    "hourly_aggregation": "none: one interpolated value per requested station-epoch, generated on demand, not aggregated from finer-grained readings",
+    "parameters": [
+      "value_tecu"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "not applicable: CODE final GIM IONEX product, not a Madrigal experiment",
+    "selected_cell_bounds": {
+      "not_applicable": "see station_coordinate_to_cell_rule"
+    },
+    "station_coordinate_to_cell_rule": "not applicable: GIM comparator reads the grid at the station's own D-1 coordinate via bilinear interpolation (rule C, D-72), never a cell assignment",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "producing_artifact": "gim_comparator_C-01_2022",
+  "release_status": "generated_not_trained",
+  "row_counts": {
+    "by_month": {
+      "2022-04": 504
+    },
+    "by_qc_stage": {
+      "generated_rule_c_gated": 504
+    },
+    "by_split": {
+      "unsplit_stage_04": 504
+    },
+    "by_station": {
+      "ARUC": 168,
+      "BSHM": 168,
+      "NICO": 168
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg1000.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "afe2dcaddf174aa73496019a4bb46fc55ca272396df859afdb3c75d7b8543bce"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg1010.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "a97766b966f53f20eb346ce8a85a45b8e391a4a968c92bbfa5d4acdb2cb69abd"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg1020.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "f545f60ced436e3bd07dcecb34567e8dce896fb8a317b6abe2f777e805b8ae56"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg1030.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "cd2a042e99cbc4ec68101eae14c8bbfc524082bcfb4f869d64cd6f443423d843"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg1040.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "c63aae00954d39178cb3e4feaeaa8fff0cb4723b273b2d20700793954fa6c4b1"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg1050.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "f06888128f3a52c9a9cfca1dfb954afa5d7158b337e1f4e92a118b79790595ca"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg1060.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "995b491a07407182d9fa2d5d800f91c311895935ed1bdca4e9e6b0b56d0b4abf"
+    }
+  ],
+  "source_manifest_id": "gim_comparator_C-01_2022:D-72,D-73",
+  "stations_covered": [
+    "ARUC",
+    "BSHM",
+    "NICO"
+  ],
+  "units": {
+    "value_tecu": "TECU"
+  },
+  "window": {
+    "end": "2022-04-16T23:00:00+00:00",
+    "start": "2022-04-10T00:00:00+00:00"
+  }
+}
