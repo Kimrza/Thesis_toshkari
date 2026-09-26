@@ -65,6 +65,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import sys
 import uuid
 from collections.abc import Mapping
@@ -630,8 +631,18 @@ def _publish_target_release(
     consumed = _consumed_release_manifests(release_root)
 
     directory.mkdir(parents=True, exist_ok=True)
-    released_rows = write_target_rows_csv(directory / target_path.name, result.rows)
-    output_files = {released_rows.name: sha256_of_file(released_rows)}
+    # R-13 must protect the DATA FILE, not only the manifest: writing straight to the
+    # published path first and checking afterward left a real gap (found by executing
+    # --emit-candidate against a stale pre-existing release, 2026-09-26) -- a refused
+    # write still silently overwrote hourly_target_phase1.csv on disk before the
+    # manifest-hash check ever ran, so the "refusal" was cosmetic against a citation
+    # other artifacts may depend on. Write to a TEMP path, hash THAT, decide, and only
+    # place the real file if this run's content is new or identical -- never touch the
+    # published path on a genuine version conflict.
+    target_final_path = directory / target_path.name
+    target_temp_path = directory / f".{target_path.name}.tmp-{os.getpid()}"
+    released_rows = write_target_rows_csv(target_temp_path, result.rows)
+    output_files = {target_final_path.name: sha256_of_file(released_rows)}
     manifest = _target_release_manifest(
         snapshot=snapshot,
         result=result,
@@ -645,6 +656,7 @@ def _publish_target_release(
         would_be = content_hash_of(manifest)
         existing = str(published.get("content_hash", ""))
         if would_be == existing:
+            target_temp_path.unlink(missing_ok=True)
             return {
                 "release_dir": str(directory),
                 "dataset_version": str(published.get("dataset_version", "")),
@@ -656,15 +668,18 @@ def _publish_target_release(
                     "created_at_utc, so an identical run is identical by construction)"
                 ),
             }
+        target_temp_path.unlink(missing_ok=True)
         raise IntegrityError(
             manifest_path,
             f"a DIFFERENT Phase 1 hourly target is already published under this citation "
             f"(published content_hash {existing}, this run's {would_be}). TE 13.3 requires a "
             f"new version rather than an overwrite, and the consumers read this directory by "
             f"name, so choosing how to version it is an owner act -- refusing rather than "
-            f"republishing over a citation other artifacts may already cite (R-13)",
+            f"republishing over a citation other artifacts may already cite (R-13). The "
+            f"published file on disk was NOT touched by this run",
         )
 
+    target_temp_path.replace(target_final_path)
     try:
         written = write_release(directory, manifest, release_root=release_root)
     except ReleaseError as exc:

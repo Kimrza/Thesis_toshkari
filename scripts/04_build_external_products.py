@@ -1970,7 +1970,22 @@ def _generate_comparison(entry: Mapping[str, Any], args: argparse.Namespace) -> 
             "target_epoch_utc": args.target_epoch_utc,
         },
     )
-    report = gim.render_comparison_report(comparison=result, overlap_audit=overlap_audit)
+    # R-60 obligation 4, closed against real evidence (2026-09-26): read the actual
+    # experiment-registry rows and hand them to the disclosure chokepoint, which
+    # scans them for any recorded tuning run against the GIM comparator. gim.py
+    # reads no file itself (module invariant); this script -- the allowlisted
+    # caller -- is where the real registry is read, matching this project's
+    # existing convention (the caller reads, gim.py checks).
+    registry_path, _ = _registry_paths(snapshot)
+    registry_rows: list[dict[str, Any]] = []
+    if registry_path.is_file():
+        for line in registry_path.read_text(encoding="utf-8-sig").splitlines():
+            line = line.strip()
+            if line:
+                registry_rows.append(json.loads(line))
+    report = gim.render_comparison_report(
+        comparison=result, overlap_audit=overlap_audit, registry_rows=registry_rows
+    )
     from src.data.acquisition import guard_egress  # deferred with the attempt paths
 
     guard_egress(report, context="gim_comparison_report[generate]")

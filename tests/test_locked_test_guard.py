@@ -964,6 +964,11 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         # directory, same reason as its five siblings above. Derived and printed before
         # assertion: matches `vtec|tecu` 1 time, ZERO `2022-12-DD` dates.
         "r60_gim_gate_inputs/Fixture_TBD_inventory_2026-09-26.md",
+        # 2026-09-26 (later same day): the fixture TBD resolution table (part 3 of the
+        # owner's second follow-up). Same directory, same reason as its six siblings
+        # above. Derived and printed before assertion: matches `vtec|tecu` 4 times,
+        # ZERO `2022-12-DD` dates.
+        "r60_gim_gate_inputs/Fixture_TBD_resolution_2026-09-26.md",
     }
     assert not [e for e in inventory if e.disposition == "flagged"]
 

@@ -332,6 +332,26 @@ PROVIDER_COLUMNS: Final[tuple[str, ...]] = (
 TARGET_RELEASE_DIR: Final[str] = "phase1_hourly_target"
 
 
+def _non_provider_release_dirs() -> frozenset[str]:
+    """Every release directory name under a shared release root that is NOT a
+    provider-VTEC input: this stage's own output (`TARGET_RELEASE_DIR`), plus
+    the four D-63 driver-producer identities (`src.external.spaceweather.
+    DRIVER_PRODUCERS`'s values -- one import, never a second hardcoded copy).
+
+    Found missing by executing `--emit-candidate` against `plumbing_7day`
+    2026-09-26: the release root is SHARED across stages 02 and 04 (D-61's
+    option A), and once stage 04 had published its four driver releases into
+    it, `load_released_provider_rows` tried to read `hp60_ap60_1h.csv` as
+    provider VTEC input and refused on its column shape -- correctly refusing
+    a wrong file, but the file should never have been offered to this loader
+    at all. This was a real gap in the exclusion set, not a bug in the D-17
+    column check that caught it.
+    """
+    from src.external.spaceweather import DRIVER_PRODUCERS
+
+    return frozenset({TARGET_RELEASE_DIR, *DRIVER_PRODUCERS.values()})
+
+
 def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
     """Consume released provider input by release manifest and hash — never bare path.
 
@@ -348,6 +368,7 @@ def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
         and violated expectation on any verification failure.
     """
     release_root = Path(release_root)
+    excluded_dirs = _non_provider_release_dirs()
     manifests = [
         path
         for path in (sorted(release_root.rglob(MANIFEST_NAME)) if release_root.is_dir() else [])
@@ -356,8 +377,10 @@ def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
         # OUTPUT, never its input. Without this exclusion the second run of stage 02 reads
         # its own previous release, finds the D-17 target columns where the five provider
         # columns belong, and refuses -- which is the loader being right about the wrong
-        # file. Found by executing the stage twice.
-        if path.parent.name != TARGET_RELEASE_DIR
+        # file. Found by executing the stage twice. The four driver releases share the
+        # same root too (D-61 option A) and are excluded the same way -- found by
+        # executing --emit-candidate for real, 2026-09-26 (see _non_provider_release_dirs).
+        if path.parent.name not in excluded_dirs
     ]
     if not manifests:
         raise IntegrityError(

@@ -3661,6 +3661,67 @@ recorded in that file). `src/external/gim.py: compute_overlap_audit` (implementa
 
 ---
 
+## D-74 — `plumbing_7day` fixture: 15 of 19 `comparison_class` entries + `numerical_variation.exact_fields`, mechanically classified under TE §13.7 (transcription/application, not a new choice)
+
+**Decision date:** 2026-09-26. **Frozen by:** mechanical application of TE §13.7's
+already-adopted rule, on the coding agent's derivation, transcribed into this register
+per the Student's explicit instruction ("Apply decisions that are already determined by
+adopted rules or directly measurable contracts"). **This is not a TE §18.2 forbidden-
+choice item** — TE §13.7 itself states the classification rule in full; applying it to 15
+of the fixture's 19 named outputs (each output's nature — schema/hash/ID/deterministic
+transform vs. model-fit float — is a fact about the producing code, not a judgment call)
+is the same class of act as D-70's positional apparatus rule or D-63's producer-identity
+transcription: derived, not chosen. **The remaining 4 outputs (the `plots/*` group) and
+their `comparison_class`/`units` are explicitly NOT decided here** — see the open
+decision question routed to the Student separately, since how a rendered image is
+compared (or whether it is compared at all) is not answered by TE §13.7's own wording.
+
+**Authority.** `PreFlight/Technical_Environment_and_Research_Implementation(1)(2).md`
+§13.7, quoted in full: "Exact equality is required for hashes, schemas, partition
+membership, IDs, and deterministic CPU transformations. Floating-point predictions and
+metrics use fixture-derived tolerances that distinguish expected platform variation from
+material divergence."
+
+**Decision — `comparison_class`, 15 of 19 `required_outputs` entries in
+`tests/fixtures/plumbing_7day/fixture_manifest.yaml`:**
+
+| Output | Class | Basis |
+|---|---|---|
+| `input_manifest.yaml` | exact | schema + hash, no floats |
+| `processing_config_snapshot.yaml` | exact | schema + hash |
+| `hourly_vtec.parquet` | exact | deterministic CPU transform (D-16 median aggregation) |
+| `feature_table.parquet` | exact | deterministic CPU transform |
+| `iri_benchmark.parquet` | exact | B-01 is GENERATED, NOT TRAINED (`src/external/iri.py`, line 12-13) — a fixed physics model evaluation, not a fit |
+| `gim_comparator.parquet` | exact | C-01 is GENERATED, NOT TRAINED (D-72); verified in this session (2026-09-26) that repeated `compute_comparison` calls against identical inputs reproduce identical output to at least 15 significant figures |
+| `split_manifest.json` | exact | partition membership |
+| `mask_manifest.json` | exact | partition membership |
+| `predictions.parquet` | **toleranced** | model-fit output (ridge/RF/LSTM) — TE §13.7's own named case |
+| `metrics.json` | **toleranced** | derived from predictions — TE §13.7's own named case |
+| `bootstrap_summary.json` | **toleranced** | resampling-derived statistic, not itself a hash/schema/ID |
+| `checkpoint_manifest.json` | exact | hash/ID |
+| `registry_entry.json` | exact | schema/ID (TE §13.4's twenty-column contract) |
+| `test_report.*` | exact | pass/fail schema |
+| `clean_run_log.*` | exact | log schema/hash |
+| `plots/target_support.*`, `plots/predictions.*`, `plots/residuals.*`, `plots/quality_diagnostics.*` | **NOT DECIDED** | routed to the Student — see the open decision question |
+
+**Decision — `numerical_variation.exact_fields`:** the 12 outputs classified `exact`
+above (`input_manifest.yaml`, `processing_config_snapshot.yaml`, `hourly_vtec.parquet`,
+`feature_table.parquet`, `iri_benchmark.parquet`, `gim_comparator.parquet`,
+`split_manifest.json`, `mask_manifest.json`, `checkpoint_manifest.json`,
+`registry_entry.json`, `test_report.*`, `clean_run_log.*`). Not yet final: the plots
+question may add up to 4 more if the Student rules any of them exact-comparable, so this
+list is written as "at least these twelve," not "exactly these twelve."
+
+**What this does NOT do.** It does not freeze `comparison_ledger.*.units` (Category 3,
+execution-blocked — a real fixture run must still measure and state each output's unit)
+or any numeric tolerance value (also Category 3). It does not touch the plots group.
+
+**Evidence.** `tests/fixtures/plumbing_7day/fixture_manifest.yaml` (the manifest edited
+under this decision); `evidence/r60_gim_gate_inputs/Fixture_TBD_inventory_2026-09-26.md`
+(the inventory this decision resolves items from).
+
+---
+
 ## Supervisor review
 
 D-3/D-144 is countersigned as of 2026-08-15 and **expressly approved 2026-08-21**
@@ -3745,3 +3806,4 @@ exposed to challenge and should be read first.
 | D-71 ml_dtypes pinned to 0.5.3 (engineering pin, TF 2.21.0 dependency) | **Not required under TE §18.2 — engineering pin on the scikit-learn precedent (team.md § Testing Posture, Q3=A class); Student approval by instruction, 2026-09-26. Numbering note: the Student first named this D-16; the coding agent's pre-write collision check found D-16 already owns target.aggregation (cited by D-55 and D-61), and the number was re-ruled to D-71, the register's next free number, per the D-70 precedent. Transcribed into this register by the coding agent on the Student's explicit instruction of 2026-09-26; the decision and its number are the Student's.** | 2026-09-26 | TensorFlow 2.21.0 (D-36) permits ml_dtypes>=0.5.1,<1.0.0. The version pip's resolver selects by default (0.6.0) requires numpy>=2.0.0, conflicting with the governed numpy==1.26.4; an unconstrained install would have upgraded numpy to the also-downloaded 2.4.6 wheel. Pinned ml_dtypes==0.5.3 (requires numpy>=1.23.3 on Python 3.11; wheel sha256 58e39349d820b5702bb6f94ea0cb2dc8ec62ee81c0267d9622067d8333596a46). Enforced by requirements.txt (committed 12843b5) and environment/install_wheels.ps1, which asserts numpy remains 1.26.4 after every wheel-layer install. Verified 2026-09-26: offline from-scratch rebuild green; suite 1589 passed / 4 designed skips / 0 failed. |
 | D-72 GIM interpolation rule (Q-15): Option C, bilinear on rotated maps | **n/a — Q-15 is TE §18.2 Student-owned per `gim.py`'s own docstring; no supervisor countersignature required (same basis as D-11/D-14/Q-31)** | 2026-09-26 | Frozen by explicit Student instruction. Full text: the dated entry above (search `## D-72`). One worked hand-check point (BSHM, 2022-04-10 00:20 UTC): B=18.333, C=18.262 TECU, difference 0.071 TECU (~0.4%) — supporting context, not a selection criterion; n=1, not a full sweep. Option B retained as a labeled Jan–Nov sensitivity, not adopted. No December value read or used. `configs/experiment.yaml: gim_interpolation_rule = "C"`. |
 | D-73 `gim_network_overlap_flag` definition: direct receiver-presence | **n/a — audit-definition confirmation, not a Student+Supervisor forbidden-choice item; Student instruction 2026-09-26** | 2026-09-26 | Full text: the dated entry above (search `## D-73`). Defines the flag as presence-only (target station's 4-char code in CODE's per-day contributing list), explicitly NOT independence. Jan–Nov 2022 result: ARUC False, BSHM True, NICO True. December status NOT determined or extrapolated by this decision — any December extension is separate, later, access-gated work. |
+| D-74 `plumbing_7day` fixture: 15/19 `comparison_class` entries + partial `exact_fields`, mechanical TE §13.7 application | **n/a — TE §13.7 states the rule in full; applying it to each output's known nature is derivation, not a Student/Supervisor forbidden choice** | 2026-09-26 | Full text: the dated entry above (search `## D-74`). 12 outputs exact (schemas/hashes/IDs/deterministic transforms, including both `iri_benchmark.parquet` and `gim_comparator.parquet` — both GENERATED, NOT TRAINED); 3 toleranced (`predictions.parquet`, `metrics.json`, `bootstrap_summary.json` — TE §13.7's own named case). The 4 `plots/*` outputs are explicitly NOT decided here — routed to the Student as an open question. |

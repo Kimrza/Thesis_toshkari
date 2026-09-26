@@ -607,3 +607,79 @@ def test_generation_rotation_pushes_past_dateline_wraps_correctly(tmp_path: Path
     # rotation figure above, proving the +180-crossing shift was computed and
     # consumed without error.
     assert report["comparison"]["value_tecu"] == pytest.approx(10.0, abs=1e-9)
+
+
+# =========================================================================================
+# R-60 obligation 4, real evidence-based closure (2026-09-26)
+# =========================================================================================
+
+
+def test_generation_closes_obligation_4_against_real_empty_registry(tmp_path: Path) -> None:
+    """With a real (empty) registry passed, the report states CLOSED, not the
+    AST-only fallback -- proving the stronger check actually ran, not just
+    that generation succeeded."""
+    workspace = _workspace(tmp_path)
+    _mirror_gate_inputs(workspace)
+    ionex_dest = workspace / "evidence" / "gim_code_final_2022" / "codg1000.22i.Z"
+    ionex_dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(REAL_BUNDLE / "codg1000.22i.Z", ionex_dest)
+    registry_dir = workspace / "artifacts" / "registry"
+    registry_dir.mkdir(parents=True, exist_ok=True)
+    (registry_dir / "experiment_registry.jsonl").write_text("", encoding="utf-8")
+
+    result = _run_script(
+        [
+            "--generate-comparison",
+            "--ionex-file",
+            "evidence/gim_code_final_2022/codg1000.22i.Z",
+            "--station",
+            "BSHM",
+            "--target-epoch-utc",
+            "2022-04-10T00:20:00+00:00",
+            "--comparison-out",
+            "closed.json",
+        ],
+        workspace,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads((workspace / "closed.json").read_text(encoding="utf-8"))
+    assert "CLOSED against real evidence" in report["no_tuning_statement"]
+
+
+def test_generation_refuses_on_real_registered_tuning_against_gim(tmp_path: Path) -> None:
+    """A real registry row recording hyperparameters against a GIM/C-01
+    model_id must refuse generation outright -- the strongest possible
+    evidence that tuning happened is caught, not just narrated around."""
+    workspace = _workspace(tmp_path)
+    _mirror_gate_inputs(workspace)
+    ionex_dest = workspace / "evidence" / "gim_code_final_2022" / "codg1000.22i.Z"
+    ionex_dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(REAL_BUNDLE / "codg1000.22i.Z", ionex_dest)
+    registry_dir = workspace / "artifacts" / "registry"
+    registry_dir.mkdir(parents=True, exist_ok=True)
+    tainted_row = json.dumps(
+        {
+            "run_id": "fake-tuning-run-C-01",
+            "model_id": "C-01",
+            "hyperparameters_json": '{"alpha": 0.037}',
+        }
+    )
+    (registry_dir / "experiment_registry.jsonl").write_text(tainted_row + "\n", encoding="utf-8")
+
+    result = _run_script(
+        [
+            "--generate-comparison",
+            "--ionex-file",
+            "evidence/gim_code_final_2022/codg1000.22i.Z",
+            "--station",
+            "BSHM",
+            "--target-epoch-utc",
+            "2022-04-10T00:20:00+00:00",
+            "--comparison-out",
+            "tainted.json",
+        ],
+        workspace,
+    )
+    assert result.returncode != 0
+    assert "records hyperparameters" in result.stderr
+    assert not (workspace / "tainted.json").exists()

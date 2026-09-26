@@ -245,12 +245,17 @@ units:
       (D-17's row contract)
     source: D-17; src/data/prepared.py
   coordinates:
-    value: "TBD — freeze gate"
+    value: >-
+      geodetic: D-1 (BSHM 32.778987 N, 35.022987 E); geomagnetic (centered-dipole,
+      IGRF-13, epoch 2022.5, Hapgood-1992 MAG frame): D-65; coordinate-to-cell rule
+      (floor convention, half-open [floor, floor+1)): D-1, governance condition closed
+      2026-08-21 (D-1 addendum)
     source: >-
-      the station registry's geodetic AND IGRF geomagnetic coordinates, and the
-      coordinate-to-cell rule. Both are §18.2 forbidden-choice items (station coordinates:
-      Student; cell-selection rule: Student + Supervisor) and are owed a D-number freeze
-      before migration out of the notebook (team.md § Code Style).
+      configs/data.yaml: stations.BSHM.{lat,lon,geomagnetic_lat,geomagnetic_lon};
+      evidence/DECISIONS.md D-1, D-1 addendum, D-65. Resolved 2026-09-26: this field was
+      stale, not open -- both halves TE §15.2 area 5 names (coordinates, coordinate-to-cell
+      rule) were already frozen and countersigned before this fixture manifest skeleton was
+      written; only the citation was missing here.
   tecu:
     value: TECU
     source: TE § Domain Glossary — the unit of every VTEC quantity in this project.
@@ -395,67 +400,75 @@ required_outputs:
   #     `inverse_route` is NOT freezable (BLK-08 down-arrow; R-139 control 25).
   comparison_ledger:
     input_manifest.yaml:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/00_acquire_prepared_vtec.py
     processing_config_snapshot.yaml:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/01_inventory_and_registry.py
     hourly_vtec.parquet:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/02_standardize_prepared_target.py
     feature_table.parquet:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/05_build_features_and_splits.py
     iri_benchmark.parquet:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/04_build_external_products.py
     gim_comparator.parquet:
-      comparison_class: "TBD — freeze gate"
-      units: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
+      units: >-
+        value_tecu: TECU; f_t: dimensionless [0,1]; exact_epoch_match,
+        gim_network_overlap_flag: boolean; station, rule, ionex_file,
+        ionex_sha256, overlap_audit_id, overlap_audit_sha256, phase_id:
+        identifiers/strings, no unit -- measured from the real schema of
+        artifacts/releases/gim_comparator_C-01_2022/gim_comparator.parquet
+        (504 rows, ARUC/BSHM/NICO x 2022-04-10..16, D-72/D-73), 2026-09-26.
+        Schema/units are window-independent; this fixture's own Nov 1-7
+        window measurement is still owed (Category 3, execution-blocked).
       producing_path:
         script: scripts/04_build_external_products.py
     split_manifest.json:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/05_build_features_and_splits.py
     mask_manifest.json:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/07_evaluate_and_report.py
     predictions.parquet:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: toleranced  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/06_train_and_predict.py
     metrics.json:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: toleranced  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/07_evaluate_and_report.py
     bootstrap_summary.json:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: toleranced  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/07_evaluate_and_report.py
     checkpoint_manifest.json:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/06_train_and_predict.py
     registry_entry.json:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/run_walking_skeleton.py
@@ -480,12 +493,12 @@ required_outputs:
       producing_path:
         script: scripts/07_evaluate_and_report.py
     test_report.*:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/run_walking_skeleton.py
     clean_run_log.*:
-      comparison_class: "TBD — freeze gate"
+      comparison_class: exact  # D-74 (evidence/DECISIONS.md), TE 13.7
       units: "TBD — freeze gate"
       producing_path:
         script: scripts/run_walking_skeleton.py
@@ -509,12 +522,18 @@ runtime:
 # `planted_correlation_recovery_tolerance` is scientific_1month-only and absent here.
 numerical_variation:
   exact_fields:
-    value: "TBD — freeze gate"
+    value: >-
+      at least: input_manifest.yaml, processing_config_snapshot.yaml, hourly_vtec.parquet,
+      feature_table.parquet, iri_benchmark.parquet, gim_comparator.parquet,
+      split_manifest.json, mask_manifest.json, checkpoint_manifest.json,
+      registry_entry.json, test_report.*, clean_run_log.* (12 of 19; D-74)
     source: >-
       TE §13.7 fixes the five classes requiring exact equality — hashes, schemas,
-      partition membership, IDs, deterministic CPU transformations. WHICH of this
-      fixture's fields fall in each class is the same frozen decision as
-      `comparison_ledger.comparison_class` above and is deliberately not chosen here.
+      partition membership, IDs, deterministic CPU transformations. D-74
+      (evidence/DECISIONS.md) mechanically applies this to 15 of the 19
+      comparison_ledger outputs (12 exact, 3 toleranced) as a derivation, not a new
+      choice. The plots/* group (4 outputs) remains open, routed to the Student —
+      this list is written as "at least" these twelve pending that answer.
   floating_point_tolerances:
     value: "TBD — freeze gate"
     note: >-
