@@ -3722,6 +3722,72 @@ under this decision); `evidence/r60_gim_gate_inputs/Fixture_TBD_inventory_2026-0
 
 ---
 
+## D-75 — `plumbing_7day` fixture: `plots/*` comparison class (owner ruling, Option C conditional)
+
+**Decision date:** 2026-09-26. **Frozen by:** the project decision owner, by explicit
+instruction ("Plot comparison — choose Option C, with this exact boundary"). Resolves the
+decision question D-74 routed ("the `plots/*` group's `comparison_class`... TE §13.7's own
+wording does not answer how a rendered image is compared").
+
+**Decision.** A new comparison class, `recorded_presence`, for the four `plots/*` outputs
+(`target_support`, `predictions`, `residuals`, `quality_diagnostics`). Each expected file
+must: (1) exist, (2) be readable as its declared image format (checked by magic bytes —
+PNG `\x89PNG\r\n\x1a\n`, PDF `%PDF-`, SVG's XML prolog or a bare `<svg` start), (3) have its
+filename and SHA-256 recorded in the fixture evidence (`artifact_manifest.json`, TE §15.4's
+existing hash listing — unchanged, every output including these four is still hash-listed).
+**Never** a pixel-equality or image-hash comparison against an earlier rendering — two
+genuinely different renderings of the same plot both pass, by design. A missing, empty, or
+wrong-format file is still a hard failure (`compare_required_outputs` raises, naming the
+file). Plots are **not** optional: they remain in `required_outputs.outputs` and are
+hash-listed exactly like every other output; only their *comparison method* differs.
+
+**Implementation.** `src/data/fixture_manifest.py`: `COMPARISON_CLASSES` gains
+`"recorded_presence"`; `_validate_ledger_entry` requires a declared `image_format` (one of
+`RECORDED_PRESENCE_FORMATS`) and forbids both `fp_tolerance` and `exact_kind` on this class;
+`compare_required_outputs` checks magic bytes + non-empty, records the SHA-256 into the
+matched-artifact report, and never reads `expected_hashes()` for this class. Verified:
+`tests/test_recorded_presence.py` (7 tests) — including the specific case D-75 exists for
+(two different PNG byte sequences both pass; a wrong-format or empty file both fail).
+
+**Configuration.** `tests/fixtures/plumbing_7day/fixture_manifest.yaml`'s four `plots/*`
+entries: `comparison_class: recorded_presence`, `image_format` declared per output, `units`
+stated as not applicable (images carry no physical unit).
+
+**Evidence.** `src/data/fixture_manifest.py`, `tests/test_recorded_presence.py`,
+`tests/fixtures/plumbing_7day/fixture_manifest.yaml`.
+
+---
+
+## D-76 — R-13 target-release conflict: conditional re-versioning policy (owner ruling, Option A conditional)
+
+**Decision date:** 2026-09-26. **Frozen by:** the project decision owner, by explicit
+instruction ("R-13 release conflict — choose Option A conditionally"). Resolves the second
+decision question D-74's resolution table routed (the stale `phase1_hourly_target`
+candidate release, committed under `e535521`, conflicting with a fresh run's content).
+
+**Decision — the policy, not yet an applied resolution of the specific conflict** (that
+investigation is reported separately, in this session's continued work, since it requires
+comparing actual bytes, not a rule that can be stated in the abstract): the existing release
+is **preserved in an immutable, identified archive** with its original hashes and
+provenance — never deleted, never silently overwritten. Before any new version is accepted:
+the old and fresh releases are diffed; if the difference traces to a documented, authorized
+input/code/config change since the old release was produced, the lineage is recorded and
+the new release is versioned under R-13 with that citation. If the cause is unexplained or
+indicates nondeterminism, R-13 stays closed (the write stays refused) and the blocker is
+reported, not silently resolved either way.
+
+**Verification requirement, mandatory going forward.** A refused write must leave every
+committed artifact byte-for-byte unchanged — the exact invariant the write-order bug found
+and fixed earlier this session (`scripts/02_standardize_prepared_target.py`'s temp-write-
+then-replace pattern) exists to guarantee, and every future refusal on this path is checked
+against it, not assumed.
+
+**Evidence.** See this session's continued work for the specific investigation outcome and
+citation (recorded here once the diff is complete, per this decision's own conditional
+structure).
+
+---
+
 ## Supervisor review
 
 D-3/D-144 is countersigned as of 2026-08-15 and **expressly approved 2026-08-21**
@@ -3807,3 +3873,5 @@ exposed to challenge and should be read first.
 | D-72 GIM interpolation rule (Q-15): Option C, bilinear on rotated maps | **n/a — Q-15 is TE §18.2 Student-owned per `gim.py`'s own docstring; no supervisor countersignature required (same basis as D-11/D-14/Q-31)** | 2026-09-26 | Frozen by explicit Student instruction. Full text: the dated entry above (search `## D-72`). One worked hand-check point (BSHM, 2022-04-10 00:20 UTC): B=18.333, C=18.262 TECU, difference 0.071 TECU (~0.4%) — supporting context, not a selection criterion; n=1, not a full sweep. Option B retained as a labeled Jan–Nov sensitivity, not adopted. No December value read or used. `configs/experiment.yaml: gim_interpolation_rule = "C"`. |
 | D-73 `gim_network_overlap_flag` definition: direct receiver-presence | **n/a — audit-definition confirmation, not a Student+Supervisor forbidden-choice item; Student instruction 2026-09-26** | 2026-09-26 | Full text: the dated entry above (search `## D-73`). Defines the flag as presence-only (target station's 4-char code in CODE's per-day contributing list), explicitly NOT independence. Jan–Nov 2022 result: ARUC False, BSHM True, NICO True. December status NOT determined or extrapolated by this decision — any December extension is separate, later, access-gated work. |
 | D-74 `plumbing_7day` fixture: 15/19 `comparison_class` entries + partial `exact_fields`, mechanical TE §13.7 application | **n/a — TE §13.7 states the rule in full; applying it to each output's known nature is derivation, not a Student/Supervisor forbidden choice** | 2026-09-26 | Full text: the dated entry above (search `## D-74`). 12 outputs exact (schemas/hashes/IDs/deterministic transforms, including both `iri_benchmark.parquet` and `gim_comparator.parquet` — both GENERATED, NOT TRAINED); 3 toleranced (`predictions.parquet`, `metrics.json`, `bootstrap_summary.json` — TE §13.7's own named case). The 4 `plots/*` outputs are explicitly NOT decided here — routed to the Student as an open question. |
+| D-75 `plumbing_7day` fixture: `plots/*` comparison class = `recorded_presence` (Option C conditional) | **Owner ruling by instruction, 2026-09-26. No separate supervisor signature claimed.** | 2026-09-26 | Full text: the dated entry above (search `## D-75`). New comparison class: existence + format-readable (magic bytes) + SHA-256 recorded, NEVER pixel/hash comparison against a prior rendering. Plots stay hash-listed and required, not optional. Implemented in `src/data/fixture_manifest.py`; tested (`tests/test_recorded_presence.py`, 7/7). |
+| D-76 R-13 target-release conflict: conditional re-versioning policy (Option A conditional) | **Owner ruling by instruction, 2026-09-26. No separate supervisor signature claimed.** | 2026-09-26 | Full text: the dated entry above (search `## D-76`). Old release preserved in an immutable identified archive, never deleted/overwritten silently. New version accepted only with a traced, authorized lineage; otherwise R-13 stays closed and the blocker is reported. Specific-conflict investigation outcome recorded separately once complete. |

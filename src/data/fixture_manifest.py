@@ -421,7 +421,21 @@ REQUIRED_OUTPUTS: Final[tuple[str, ...]] = (
 SCIENTIFIC_ONLY_OUTPUTS: Final[tuple[str, ...]] = ("target_uncertainty_budget.json",)
 
 #: R-139's two comparison classes.
-COMPARISON_CLASSES: Final[tuple[str, ...]] = ("exact", "toleranced")
+#: D-75 (evidence/DECISIONS.md, 2026-09-26): a third class for outputs TE 13.7's own
+#: rule doesn't reach (rendered plots). Existence + readability-as-the-declared-format +
+#: filename/SHA-256 recorded, NEVER compared for pixel/hash equality against a prior
+#: rendering (owner ruling: rendering can vary benignly across library/font versions,
+#: and inventing a pixel-equality or perceptual-similarity threshold would be exactly
+#: the "implementer choosing by convenience" TE 1.1 forbids for the fields the rule
+#: DOES name). A missing, corrupt, or unrecorded plot is still a hard failure.
+COMPARISON_CLASSES: Final[tuple[str, ...]] = ("exact", "toleranced", "recorded_presence")
+#: D-75's declared image formats for `recorded_presence` entries -- readability is
+#: checked by magic bytes, not a full decode (no new imaging dependency).
+RECORDED_PRESENCE_FORMATS: Final[Mapping[str, bytes]] = {
+    "png": b"\x89PNG\r\n\x1a\n",
+    "pdf": b"%PDF-",
+    "svg": b"<?xml",  # SVG's XML prolog; a bare "<svg" start is also accepted below
+}
 #: TE 13.7's five exact-equality classes, by name.
 EXACT_KINDS: Final[tuple[str, ...]] = (
     "hash",
@@ -928,6 +942,21 @@ def _validate_ledger_entry(resource: str, entry: Mapping[str, Any]) -> None:
                 resource,
                 "an exact entry carries no fp_tolerance: exact classes compare by EQUALITY, "
                 "not tolerance (TE 13.7; NFR-REP-01)",
+            )
+        return
+    if klass == "recorded_presence":
+        if entry.get("image_format") not in RECORDED_PRESENCE_FORMATS:
+            raise _refuse(
+                resource,
+                f"a recorded_presence entry names one of D-75's declared image formats "
+                f"{list(RECORDED_PRESENCE_FORMATS)}",
+            )
+        if "fp_tolerance" in entry or "exact_kind" in entry:
+            raise _refuse(
+                resource,
+                "a recorded_presence entry carries neither fp_tolerance nor exact_kind: "
+                "it is compared by neither equality nor tolerance, only existence + "
+                "readability + recorded identity (D-75)",
             )
         return
     tolerance = entry.get("fp_tolerance")
@@ -1540,6 +1569,31 @@ def compare_required_outputs(manifest: FixtureManifest, produced_root: Path) -> 
                     f"R-139 control 21/23)",
                 )
             results[output] = {"comparison_class": "exact", "sha256": actual, "matched": True}
+            continue
+        if entry["comparison_class"] == "recorded_presence":
+            # D-75: existence + readable-as-declared-format + recorded identity. NEVER a
+            # pixel/hash comparison against `expected[output]` -- a benign rendering
+            # difference (library/font version) must not fail the fixture, but a missing,
+            # empty, or wrong-format file still does.
+            image_format = entry["image_format"]
+            magic = RECORDED_PRESENCE_FORMATS[image_format]
+            header = produced.open("rb").read(max(64, len(magic)))
+            is_svg_bare = image_format == "svg" and header.lstrip().startswith(b"<svg")
+            if not (header.startswith(magic) or is_svg_bare):
+                raise _refuse(
+                    produced,
+                    f"recorded_presence entry declares format {image_format!r} but the "
+                    f"file's own bytes do not start with that format's signature; a "
+                    f"corrupt or wrong-format plot is still a failure (D-75)",
+                )
+            if produced.stat().st_size == 0:
+                raise _refuse(produced, "recorded_presence entry is a zero-byte file (D-75)")
+            results[output] = {
+                "comparison_class": "recorded_presence",
+                "image_format": image_format,
+                "sha256": actual,
+                "matched": True,
+            }
             continue
         reference = manifest.artifact_manifest_path.parent / output
         tolerance = float(entry["fp_tolerance"]["value"])

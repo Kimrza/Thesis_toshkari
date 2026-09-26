@@ -473,23 +473,27 @@ required_outputs:
       producing_path:
         script: scripts/run_walking_skeleton.py
     plots/target_support.*:
-      comparison_class: "TBD — freeze gate"
-      units: "TBD — freeze gate"
+      comparison_class: recorded_presence  # D-75
+      image_format: png
+      units: "not applicable (image; existence + format + recorded SHA-256, D-75)"
       producing_path:
         script: scripts/07_evaluate_and_report.py
     plots/predictions.*:
-      comparison_class: "TBD — freeze gate"
-      units: "TBD — freeze gate"
+      comparison_class: recorded_presence  # D-75
+      image_format: png
+      units: "not applicable (image; existence + format + recorded SHA-256, D-75)"
       producing_path:
         script: scripts/07_evaluate_and_report.py
     plots/residuals.*:
-      comparison_class: "TBD — freeze gate"
-      units: "TBD — freeze gate"
+      comparison_class: recorded_presence  # D-75
+      image_format: png
+      units: "not applicable (image; existence + format + recorded SHA-256, D-75)"
       producing_path:
         script: scripts/07_evaluate_and_report.py
     plots/quality_diagnostics.*:
-      comparison_class: "TBD — freeze gate"
-      units: "TBD — freeze gate"
+      comparison_class: recorded_presence  # D-75
+      image_format: png
+      units: "not applicable (image; existence + format + recorded SHA-256, D-75)"
       producing_path:
         script: scripts/07_evaluate_and_report.py
     test_report.*:
@@ -532,8 +536,10 @@ numerical_variation:
       partition membership, IDs, deterministic CPU transformations. D-74
       (evidence/DECISIONS.md) mechanically applies this to 15 of the 19
       comparison_ledger outputs (12 exact, 3 toleranced) as a derivation, not a new
-      choice. The plots/* group (4 outputs) remains open, routed to the Student —
-      this list is written as "at least" these twelve pending that answer.
+      choice. D-75 resolves the plots/* group (4 outputs) as a THIRD class,
+      recorded_presence, never exact or toleranced -- so this "exact_fields" list is
+      now COMPLETE at twelve, not "at least twelve": all 19 comparison_ledger entries
+      are classified (12 exact + 3 toleranced + 4 recorded_presence = 19).
   floating_point_tolerances:
     value: "TBD — freeze gate"
     note: >-
