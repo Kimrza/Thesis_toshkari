@@ -596,3 +596,66 @@ except stage04.IntegrityError as exc:
         tmp_path,
     )
     _assert_ok(result)
+
+
+# --- apparatus-fold overlap: why the 04 wrapper calls the adapter once PER fold ------------
+
+
+def test_overlapping_apparatus_folds_bucket_correctly_only_via_per_fold_calls() -> None:
+    """Fixture-scale extension (CR-2026-09-25-APPARATUS-HYPERPARAMETERS §7a): apparatus
+    fold partitions carry DAY-valued validation months, so their
+    `[validation day, next month)` ranges OVERLAP — unlike the governed F1-F4, whose
+    disjointness is what licenses the adapter's single-bucket `break`. Two limbs:
+
+    1. Per-fold calls (what `04`'s wrapper does at fixture scale) give each fold its
+       full window: the overlapping row lands in BOTH folds' payloads.
+    2. A single shared call over both folds gives every overlapping row to the FIRST
+       fold and refuses the second as empty — pinned here so a future adapter change
+       (or a wrapper regression back to one shared call) is caught, not guessed at.
+    """
+    result = _run(
+        """
+ap1 = Partition(
+    partition_id="AP1",
+    kind=PartitionKind.fold,
+    train_start=dt.date(2022, 11, 1),
+    train_end=dt.date(2022, 11, 3),
+    validation_month=dt.date(2022, 11, 4),
+    embargo_hours=24,
+)
+ap2 = Partition(
+    partition_id="AP2",
+    kind=PartitionKind.fold,
+    train_start=dt.date(2022, 11, 1),
+    train_end=dt.date(2022, 11, 4),
+    validation_month=dt.date(2022, 11, 5),
+    embargo_hours=24,
+)
+contract = _contract()
+rows = [
+    _row("BSHM", dt.datetime(2022, 11, 4, 12, tzinfo=_UTC), 10.0),  # AP1 only
+    _row("BSHM", dt.datetime(2022, 11, 5, 12, tzinfo=_UTC), 11.0),  # both windows
+]
+# Limb 1: per-fold calls (the wrapper's fixture-scale shape) — exact per-fold windows.
+per_fold = {
+    p.partition_id: predictions_from_benchmark_rows(
+        rows, contract=contract, stations=STATIONS, partitions=[p]
+    )[p.partition_id]
+    for p in (ap1, ap2)
+}
+ap1_times = [r["interval_start_utc"] for r in per_fold["AP1"]["rows"]]
+ap2_times = [r["interval_start_utc"] for r in per_fold["AP2"]["rows"]]
+assert len(ap1_times) == 2, ap1_times  # Nov 4 and Nov 5 both inside [Nov 4, Dec 1)
+assert len(ap2_times) == 1 and "2022-11-05" in ap2_times[0], ap2_times
+# Limb 2: one shared call mis-buckets on overlap — first fold takes the shared row,
+# the second refuses as empty. This is the documented reason for limb 1's shape.
+try:
+    predictions_from_benchmark_rows(
+        rows, contract=contract, stations=STATIONS, partitions=[ap1, ap2]
+    )
+    raise SystemExit("expected BenchmarkError: AP2 empty under a shared call")
+except BenchmarkError as exc:
+    assert "AP2" in str(exc) and "empty" in str(exc)
+"""
+    )
+    _assert_ok(result)

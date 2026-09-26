@@ -111,7 +111,9 @@ from src.data.experiment_registry import (  # noqa: E402
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
     WALKING_SKELETON_ROOT,
+    build_apparatus_partitions,
     load_fixture_scope,
+    read_embargo_hours,
     release_root_for,
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
@@ -1796,16 +1798,51 @@ def _emit_prediction_payload(entry: Mapping[str, Any], args: argparse.Namespace)
     rows = _read_jsonl(rows_path)
     contract = iri.read_benchmark_contract(entry["snapshot"])
     stations = load_registry(entry["snapshot"])
-    all_partitions = build_partitions(entry["snapshot"])
-    fold_partitions = [p for p in all_partitions if p.kind is PartitionKind.fold]
+    # FIXTURE-SCALE EXTENSION (CR-2026-09-25-APPARATUS-HYPERPARAMETERS §7a item 6, the
+    # Kaggle-leg ruling of 2026-09-26): with `--fixture-manifest`, the bridge targets the
+    # SCOPE's apparatus fold partitions (day-scale validation windows, R-122 apparatus
+    # constants) instead of the governed F1-F4 — the pure adapter is already general over
+    # fold-kind partitions and Q1 = B's window filtering applies unchanged through
+    # `validation_month_range`. The payloads are additionally wrapped in the fixture
+    # stamp, exactly as 06 stamps its own fixture predictions, so 07's fixture path
+    # reads one consistent shape. The governed path below is byte-identical.
+    fixture_scope = None
+    if args.fixture_manifest is not None:
+        from src.data.fixture_evidence import stamp_fixture_artifact, stamp_for_manifest
 
-    payloads = iri.predictions_from_benchmark_rows(
-        rows, contract=contract, stations=stations, partitions=fold_partitions
-    )
+        fixture_scope = load_fixture_scope(Path(args.fixture_manifest))
+        apparatus = build_apparatus_partitions(
+            fixture_scope, embargo_hours=read_embargo_hours(entry["snapshot"])
+        )
+        fold_partitions = [p for p in apparatus if p.kind is PartitionKind.fold]
+        # ONE adapter call PER apparatus fold, never one call over all of them: the
+        # adapter's single-bucket `break` is correct for the governed folds (disjoint
+        # validation months by construction, splits.py) and WRONG for apparatus folds,
+        # whose `[validation day, next month)` ranges overlap — a shared call would
+        # give every overlapping row to the first fold and refuse the second as empty.
+        # Per-fold calls keep the adapter untouched and make each payload's window
+        # filtering exact by construction (Q1 = B applied per partition).
+        payloads = {
+            p.partition_id: iri.predictions_from_benchmark_rows(
+                rows, contract=contract, stations=stations, partitions=[p]
+            )[p.partition_id]
+            for p in fold_partitions
+        }
+    else:
+        all_partitions = build_partitions(entry["snapshot"])
+        fold_partitions = [p for p in all_partitions if p.kind is PartitionKind.fold]
+        payloads = iri.predictions_from_benchmark_rows(
+            rows, contract=contract, stations=stations, partitions=fold_partitions
+        )
 
     written: list[str] = []
     run_dir = Path(args.emit_prediction_payload)
     for partition_id, payload in payloads.items():
+        if fixture_scope is not None:
+            payload = stamp_fixture_artifact(
+                dict(payload),
+                stamp_for_manifest(fixture_scope, apparatus_partition_id=partition_id),
+            )
         path = _write_prediction_once(run_dir / partition_id / "B-01.json", payload)
         written.append(str(path))
         print(f"04_build_external_products: B-01 payload -> {path}")
