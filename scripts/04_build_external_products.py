@@ -348,7 +348,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help=(
             "real end-to-end generation: Q-15 rule from configs/experiment.yaml "
-            "(D-70, 'C'), a real hand-check record (--hand-check-file) and a "
+            "(D-72, 'C'), a real hand-check record (--hand-check-file) and a "
             "real overlap-audit record (--overlap-audit-file) both with "
             "timestamps preceding this attempt, against a real IONEX file "
             "(--ionex-file) for --station at --target-epoch-utc. Refuses on "
@@ -1864,7 +1864,7 @@ def _run_overlap_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> di
 
 def _generate_comparison(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     """Real end-to-end GIM comparator generation (R-60, all four obligations,
-    D-70/D-71): Q-15's rule from the governed config, a real hand-check
+    D-72/D-73): Q-15's rule from the governed config, a real hand-check
     record, a real overlap-audit record, and the real hash-verified IONEX
     bundle -- refuses on any gate violation or missing input, exactly as
     `_attempt_comparator`'s injection-mode gates do, but against REAL
@@ -1907,7 +1907,7 @@ def _generate_comparison(entry: Mapping[str, Any], args: argparse.Namespace) -> 
     hand_check = json.loads(hand_check_path.read_text(encoding="utf-8-sig"))
     overlap_audit_full = json.loads(overlap_audit_path.read_text(encoding="utf-8-sig"))
     # The registered overlap-audit record may carry a per_station breakdown across
-    # several target stations (e.g. the Jan-Nov union audit, D-71); this comparison
+    # several target stations (e.g. the Jan-Nov union audit, D-73); this comparison
     # is for ONE station, so its own flag is that station's own result, never the
     # OR across every station this repo happens to track. Falls back to the top-
     # level flag when no per-station breakdown exists (a single-station record).

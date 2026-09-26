@@ -1,4 +1,4 @@
-"""Tests for real GIM comparator generation (D-70 frozen Q-15 rule "C",
+"""Tests for real GIM comparator generation (D-72 frozen Q-15 rule "C",
 `gim.compute_comparison` / `generate_comparator` / `render_comparison_report`),
 all exercised through `scripts/04_build_external_products.py --generate-comparison`
 in a subprocess (TE 12's import-boundary; `tests/*` cannot import `gim` directly,
@@ -10,7 +10,7 @@ hasn't run the acquisition), epoch boundary behaviour (exact map-epoch match,
 target outside the file's range), longitude wrapping near +/-180, a missing
 IONEX file, an altered (corrupted) IONEX file, an unfrozen/unimplemented rule,
 and the overlap-flag disclosure propagating correctly per station (BSHM/NICO
-True, ARUC False -- D-71).
+True, ARUC False -- D-73).
 """
 
 from __future__ import annotations
@@ -208,7 +208,7 @@ def test_real_generation_reproduces_the_documented_hand_check(tmp_path: Path) ->
     report = json.loads((workspace / "comparison.json").read_text(encoding="utf-8"))
     assert report["comparison"]["value_tecu"] == pytest.approx(18.262, abs=0.001)
     assert report["comparison"]["rule"] == "C"
-    assert report["gim_network_overlap_flag"] is True  # BSHM, D-71
+    assert report["gim_network_overlap_flag"] is True  # BSHM, D-73
     assert "map-product-to-map-product" in report["map_to_map_statement"]
     assert "Spatial-representativeness" in report["spatial_representativeness_statement"]
 
@@ -217,7 +217,7 @@ def test_real_generation_reproduces_the_documented_hand_check(tmp_path: Path) ->
     not (REAL_BUNDLE / "codg1000.22i.Z").is_file(), reason="real acquired GIM bundle not present"
 )
 def test_real_generation_aruc_discloses_no_overlap(tmp_path: Path) -> None:
-    """ARUC's own D-71 result is False -- the disclosed flag for a real ARUC
+    """ARUC's own D-73 result is False -- the disclosed flag for a real ARUC
     comparison must be False, never silently defaulted or copied from
     another station."""
     workspace = _workspace(tmp_path)

@@ -298,13 +298,13 @@ comparison_sets:
     benchmark_ids: ["M-04", "M-05"] # ridge and direct RF, matched causal window (§8.9)
 
 # --- GIM interpolation rule (Q-15, TE §18.2 Student-owned forbidden choice) ---------------
-# Frozen 2026-09-26 by explicit Student instruction, D-70 (evidence/DECISIONS.md). Read by
+# Frozen 2026-09-26 by explicit Student instruction, D-72 (evidence/DECISIONS.md). Read by
 # src/external/gim.py: interpolation_rule_from -- the exact top-level key that function
 # reads. "C" = bilinear spatial interpolation on consecutive rotated maps (IONEX 1.0 spec,
 # Schaer et al. 1998), per governance/Q15_DECISION_OPTIONS_2026-09-26_gim_interpolation.md
 # [Answer]. This was UNSET (absent) until this freeze -- no default was ever supplied
 # (TE §18.2, "No implementer or coding agent may fill such a value by convenience").
-gim_interpolation_rule: "C" # D-70; was TBD -- freeze gate until 2026-09-26
+gim_interpolation_rule: "C" # D-72; was TBD -- freeze gate until 2026-09-26
 
 # --- ablation registry (TE §7.2 "Ablation registry (Q-18, Q-17, Q-11)") -------------------
 # TE §7.2: "Ablations are named, predeclared runs, not exploratory experiments invented after

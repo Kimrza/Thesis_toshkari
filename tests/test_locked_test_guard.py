@@ -945,7 +945,7 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         # unmodified (5,964 rows, sha256 985f0671..., verified before and after this run).
         "test_run_access_log.SUPERSEDED_2026-09-20.md",
         # 2026-09-26: the R-60/Q-15 GIM acquisition hand-back and gate-input evidence
-        # (D-70/D-71). Five Markdown files under evidence/r60_gim_gate_inputs/, all prose
+        # (D-72/D-73). Five Markdown files under evidence/r60_gim_gate_inputs/, all prose
         # -- lands here for the same reason every `.md` above does. Derived and printed
         # before assertion: `HANDBACK_2026-09-26.md` matches `vtec|tecu` 0 times;
         # `R60_handcheck_2026-09-26.md` 12, `R60_overlap_audit_input_2026-09-26.md` 1,
