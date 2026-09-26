@@ -13,9 +13,9 @@
     "window_start": "2022-11-01"
   },
   "declared_inputs": {
-    "evidence_dir": "C:\\Users\\s_sch\\Desktop\\test\\Thesis_toshkari-main\\Thesis_toshkari-main\\evidence\\audit_evidence_2022-11",
+    "evidence_dir": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\evidence\\audit_evidence_2022-11",
     "records_file": "madrigal_coverage_raw_records.csv",
-    "sha256_manifest": "C:\\Users\\s_sch\\Desktop\\test\\Thesis_toshkari-main\\Thesis_toshkari-main\\evidence\\audit_evidence_2022-11\\sha256_manifest.json",
+    "sha256_manifest": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\evidence\\audit_evidence_2022-11\\sha256_manifest.json",
     "verified": {
       "madrigal_coverage_monthly.csv": "ab14a2c23868dd6d1402e3903d8d665a7250d525d27efb4952aed54be46af2a8",
       "madrigal_coverage_raw_records.csv": "570d1be5e22191bc3248873e711610b580a77ffb5dcbf7988eca92011e7baff9",

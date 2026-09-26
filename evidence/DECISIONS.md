@@ -3786,6 +3786,65 @@ against it, not assumed.
 citation (recorded here once the diff is complete, per this decision's own conditional
 structure).
 
+**Investigation outcome, recorded 2026-09-26 (same day, continued work).** The old
+(`e535521`) and fresh releases were diffed row-by-row (168 rows, all 17 D-17 columns), via
+Python's `csv.DictReader`, three times independently reproduced. Result: **every scientific
+value is byte-identical** (`vtec_tecu`, `valid_observation_count`, `within_hour_spread_tecu`,
+`largest_internal_gap_s`, `provider_dtec_summary`, `target_valid`, all three TEC-05 stamps,
+the lineage caveat) across all 168 rows. The **only** field that differs is
+`aggregation_config_id` (`6f8330c7396a` -> `2b95a77bd9e2`), which
+`scripts/02_standardize_prepared_target.py` derives as
+`snapshot.hashes["data.yaml"][:12]` — a hash of `configs/data.yaml`'s own bytes, which
+legitimately changed between the two runs (this session's D-72 through D-76 edits touched
+`evidence/DECISIONS.md`, `configs/experiment.yaml`, and `tests/fixtures/plumbing_7day/
+fixture_manifest.yaml`, none of which is `data.yaml` itself — the actual `data.yaml`
+change traces further back, to work already committed before this session's D-72). **This
+is a documented, authorized, traced code/config lineage, not nondeterminism** — D-76's
+first branch applies: the new release is accepted and versioned under R-13, citing this
+entry.
+
+**Two further real bugs found and fixed while investigating, same class as obligation 3's
+driver-exclusion gap:** (1) `load_released_provider_rows` had no dedup for repeated
+stage-00 runs producing byte-identical content under new timestamped directories — three
+duplicate directories from this session's own repeated testing silently TRIPLED
+`valid_observation_count` (9 -> 27) while leaving `vtec_tecu` correct (the median of
+triplicated identical values), a correctness bug invisible from the output alone. Fixed:
+dedupe by `dataset_version`, refuse on genuinely differing versions (real ambiguity).
+(2) The SEPARATE `_consumed_release_manifests` provenance-citation function (which builds
+the target release's own `source_files` list) had neither this dedup nor the archived-
+release exclusion, so the CITATION varied run to run even after the actual row-loading was
+fixed — and since `content_hash_of` hashes `source_files`, this alone made identical-science
+runs look "different." Fixed with the same dedup/exclusion shape. Also found: an
+ALREADY-committed archive directory (`phase1_hourly_target.archived-e535521/`, commit
+`0ce2a68`, predating this session) used the same `.archived-<ref>` naming convention this
+session's own archival work independently adopted — confirming it as this project's
+existing convention, not an invention. Both fixes tested
+(`tests/test_fixture_run_fixes.py`, 4 new tests).
+
+**Result of accepting the new version:** the fixture run advanced through stages 00, 02,
+05, and 06 for the first time in this project's history, producing real M-01 through M-06
+predictions for both FIX-NOV-FOLD-01 and FIX-NOV-FOLD-02. It stopped at stage 07 on a
+genuine, correctly-firing refusal: B-01 (IRI benchmark) predictions are absent —
+`governance/RUNBOOK_2026-09-26_kaggle_b01_fixture_leg.md` (prepared before this session)
+already names the exact missing artifacts (`artifacts/external/b01/
+b01_iri2016_rows.jsonl` + `b01_provenance.json`) and the Kaggle-operator runbook to produce
+them (D-49: CPython 3.10.12, pinned `iricore==1.8.0`; "no agent runs these" -- Student-
+operated by design).
+
+**Verification per D-76's mandatory requirement.** Every refusal encountered in this
+investigation was checked, not assumed, to leave committed artifacts untouched: `git
+status`/`git diff --stat` confirmed zero unintended modifications to any committed file at
+each step; the one case where a refusal DID silently touch a committed file (found before
+this decision's own writing, `scripts/02_standardize_prepared_target.py`'s original write-
+order bug) was restored via `git checkout` immediately and is the bug this decision's
+mandatory-verification clause exists to catch on every future refusal.
+
+**Evidence.** `tests/test_fixture_run_fixes.py` (9 tests total across both investigations),
+`artifacts/walking_skeleton/plumbing_7day/archived_releases/` (the immutable archive of
+every superseded artifact this investigation touched: `phase1_hourly_target.archived-
+e535521/`, three `features/*.archived-e535521/` bundles, `predictions.archived-
+e535521/`), `governance/RUNBOOK_2026-09-26_kaggle_b01_fixture_leg.md`.
+
 ---
 
 ## Supervisor review

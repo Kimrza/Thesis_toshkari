@@ -17,6 +17,7 @@ against `plumbing_7day` for the first time in this state, 2026-09-26:
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -91,3 +92,119 @@ def test_write_order_never_touches_published_path_on_version_conflict() -> None:
     assert source.count("write_target_rows_csv(target_temp_path") == 1
     assert "write_target_rows_csv(target_final_path" not in source
     assert "write_target_rows_csv(directory / target_path.name" not in source
+
+
+def _write_valid_provider_release(directory: Path, *, row_marker: str) -> str:
+    """A fully TE 13.3-valid, write_release-compatible release manifest (all
+    fourteen required fields, correct content_hash/dataset_version
+    derivation). `row_marker` varies the CSV content (and therefore the
+    derived dataset_version) between calls; two calls with the SAME marker
+    produce the SAME dataset_version, exactly like two identical stage-00
+    re-runs. Returns the derived dataset_version."""
+    from src.data.release import content_hash_of, dataset_version_for
+    import hashlib
+
+    directory.mkdir(parents=True, exist_ok=True)
+    csv_body = f"station,ut1_unix,gdlat,glon,tec,dtec\nBSHM,1667260800,32,35,{row_marker},0.5\n"
+    csv_path = directory / "rows.csv"
+    csv_path.write_text(csv_body, encoding="utf-8")
+    digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
+    payload = {
+        "created_at_utc": "2026-09-26T00:00:00+00:00",
+        "source_manifest_id": "test:source",
+        "source_files": [
+            {
+                "provider": "test",
+                "citation": "test",
+                "location_date": "test",
+                "filename": "rows.csv",
+                "retrieval_date": "2026-09-26",
+                "sha256": digest,
+            }
+        ],
+        "processing": {
+            "phase_id": "P1A",
+            "target_definition_id": "test",
+            "provider_experiment_kindat": "test",
+            "parameters": ["tec"],
+            "station_coordinate_to_cell_rule": "test",
+            "selected_cell_bounds": {"test": "test"},
+            "hourly_aggregation": "test",
+        },
+        "schema_version": "1",
+        "units": {"tec": "TECU"},
+        "row_counts": {
+            "by_station": {"BSHM": 1},
+            "by_month": {"2022-11": 1},
+            "by_split": {"unsplit": 1},
+            "by_qc_stage": {"raw": 1},
+        },
+        "exclusions_qc_summary": [{"reason": "test", "count": 0}],
+        "fold_ids": ["NOT_YET_ASSIGNED"],
+        "mask_ids": ["NOT_YET_ASSIGNED"],
+        "feature_set_ids": ["NOT_YET_ASSIGNED"],
+        "output_files": {"rows.csv": digest},
+        "change_record_id": "test",
+    }
+    content_hash = content_hash_of(payload)
+    dataset_version = dataset_version_for(content_hash)
+    manifest = {**payload, "content_hash": content_hash, "dataset_version": dataset_version}
+    (directory / "release_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    return dataset_version
+
+
+def test_load_released_provider_rows_dedupes_identical_dataset_version_duplicates(
+    tmp_path: Path,
+) -> None:
+    """Real bug found 2026-09-26: repeated stage-00 runs create a new timestamped
+    release directory per run even for byte-identical content; without dedup, N
+    identical-content releases made every row get counted N times. Three release
+    directories with IDENTICAL content (and therefore identical derived
+    dataset_version, exactly like three re-runs of the same acquisition) must
+    collapse to one."""
+    release_root = tmp_path / "releases"
+    versions = {
+        _write_valid_provider_release(release_root / name, row_marker="7.0")
+        for name in ("run_a", "run_b", "run_c")
+    }
+    assert len(versions) == 1, "test setup: all three must derive the same dataset_version"
+
+    rows = load_released_provider_rows(release_root)
+    assert len(rows) == 1, "three identical-content releases must collapse to one row set"
+
+
+def test_load_released_provider_rows_refuses_genuinely_different_dataset_versions(
+    tmp_path: Path,
+) -> None:
+    """Two releases with DIFFERENT content (and therefore different derived
+    dataset_version) is real ambiguity -- must refuse by name, never guess or
+    sum rows from two different releases."""
+    release_root = tmp_path / "releases"
+    v1 = _write_valid_provider_release(release_root / "run_a", row_marker="7.0")
+    v2 = _write_valid_provider_release(release_root / "run_b", row_marker="9.0")
+    assert v1 != v2, "test setup: different content must derive different dataset_version"
+
+    with pytest.raises(Exception) as exc_info:
+        load_released_provider_rows(release_root)
+    assert "DIFFERENT dataset_version" in str(exc_info.value)
+
+
+def test_load_released_provider_rows_skips_archived_release_dirs(tmp_path: Path) -> None:
+    """A second real gap found alongside the first: an already-committed
+    `<name>.archived-<commit>` directory (pre-dating this session,
+    `phase1_hourly_target.archived-e535521/`) carries TARGET-shaped columns
+    and must never be offered to the provider-column check either."""
+    from src.data.prepared import _is_archived_release_dirname
+
+    assert _is_archived_release_dirname("phase1_hourly_target.archived-e535521")
+    assert not _is_archived_release_dirname("gfz_hp60ap60_v2_2022")
+    assert not _is_archived_release_dirname("phase1_hourly_target")
+
+    release_root = tmp_path / "releases"
+    archived_dir = release_root / "phase1_hourly_target.archived-e535521"
+    archived_dir.mkdir(parents=True)
+    (archived_dir / "release_manifest.json").write_text("{}", encoding="utf-8")
+
+    with pytest.raises(Exception) as exc_info:
+        load_released_provider_rows(release_root)
+    assert "no released provider input exists" in str(exc_info.value)

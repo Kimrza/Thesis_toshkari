@@ -447,11 +447,28 @@ def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str
     assumed: the rows were verified when they were read, and the manifest is being cited
     now, so it is checked now.
     """
+    # Real bug found alongside load_released_provider_rows's own (2026-09-26): this
+    # SEPARATE enumeration builds the target release's own `source_files` provenance
+    # citation, and had neither the driver-directory... no, it correctly cites driver
+    # releases (that IS wanted provenance) -- but it had NEITHER the archived-release
+    # exclusion NOR any dataset_version dedup, so repeated stage-00 re-runs (or an
+    # archived historical release) made the CITED source_files list vary run to run
+    # even when the actual consumed ROWS (load_released_provider_rows, deduped) did
+    # not -- and since content_hash_of hashes source_files, this alone made every run
+    # look like a "different" release even on identical science. Same fix shape:
+    # exclude archived dirs; for the actual provider-VTEC releases specifically,
+    # dedupe multiple identical-dataset_version citations down to the earliest one
+    # (deterministic, not "whichever re-run happened to exist last").
+    from src.data.prepared import _is_archived_release_dirname
+
+    seen_provider_versions: set[str] = set()
     out: list[tuple[Path, dict[str, Any]]] = []
     manifests = sorted(release_root.rglob(MANIFEST_NAME)) if release_root.is_dir() else []
     for manifest_path in manifests:
         if manifest_path.parent.name == TARGET_RELEASE_DIR:
             continue  # this stage's own output is never its own input
+        if _is_archived_release_dirname(manifest_path.parent.name):
+            continue  # provenance history, never a live input (same reasoning as target)
         problems = verify_release(manifest_path)
         if problems:
             raise IntegrityError(
@@ -459,7 +476,19 @@ def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str
                 "a consumed release does not verify, so it cannot be cited as a source of "
                 f"the target release: {'; '.join(problems)}",
             )
-        out.append((manifest_path, json.loads(manifest_path.read_text(encoding="utf-8"))))
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        version = str(manifest.get("dataset_version", ""))
+        # Only dedupe the PROVIDER release citations (this stage's actual scientific
+        # input, always published as exactly this filename by stage 00); driver
+        # releases are singular by construction (one per D-63 identity) and always
+        # worth citing individually.
+        output_files = manifest.get("output_files")
+        is_provider_shaped = isinstance(output_files, Mapping) and "prepared_vtec_records.csv" in output_files
+        if is_provider_shaped:
+            if version in seen_provider_versions:
+                continue  # identical-content duplicate from a repeated stage-00 run
+            seen_provider_versions.add(version)
+        out.append((manifest_path, manifest))
     return out
 
 

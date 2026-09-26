@@ -352,6 +352,18 @@ def _non_provider_release_dirs() -> frozenset[str]:
     return frozenset({TARGET_RELEASE_DIR, *DRIVER_PRODUCERS.values()})
 
 
+def _is_archived_release_dirname(name: str) -> bool:
+    """A second real gap, found alongside the first (2026-09-26): an ALREADY
+    committed archived-release directory (`phase1_hourly_target.archived-
+    e535521/`, commit `0ce2a68`, predating this session) uses a
+    `<name>.archived-<commit>` naming convention this loader also had no
+    exclusion for -- it carries TARGET-shaped columns and would hit the same
+    wrong-column refusal the driver releases did. Archived releases are
+    provenance history, never live provider input, by the same reasoning as
+    `TARGET_RELEASE_DIR`."""
+    return ".archived-" in name
+
+
 def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
     """Consume released provider input by release manifest and hash — never bare path.
 
@@ -381,6 +393,7 @@ def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
         # same root too (D-61 option A) and are excluded the same way -- found by
         # executing --emit-candidate for real, 2026-09-26 (see _non_provider_release_dirs).
         if path.parent.name not in excluded_dirs
+        and not _is_archived_release_dirname(path.parent.name)
     ]
     if not manifests:
         raise IntegrityError(
@@ -390,6 +403,32 @@ def load_released_provider_rows(release_root: Path) -> list[dict[str, str]]:
             "bare paths, and none has been produced — refusing rather than "
             "fabricating input",
         )
+    # Real bug found by executing --emit-candidate twice against the same evidence,
+    # 2026-09-26: repeated stage-00 runs create a NEW timestamped release directory
+    # each time (even for byte-identical content), and this loader had no dedup --
+    # three identical-content releases from three re-runs made every provider row get
+    # read three times, silently tripling valid_observation_count (9 -> 27) while the
+    # actual vtec_tecu statistic stayed correct (median of triplicated identical values
+    # equals the median of the originals) -- a correctness bug that a naive row-count
+    # or hash check on the OUTPUT would not have caught, only tracing the INPUT did.
+    # Fix: dedupe by dataset_version -- identical content across directories is safe to
+    # collapse to one; GENUINELY DIFFERING dataset_versions among candidate provider
+    # releases is real ambiguity and refuses, naming both, rather than picking one or
+    # summing rows from two different releases.
+    by_dataset_version: dict[str, list[Path]] = {}
+    for manifest_path in manifests:
+        manifest_preview = json.loads(manifest_path.read_text(encoding="utf-8"))
+        version = str(manifest_preview.get("dataset_version", ""))
+        by_dataset_version.setdefault(version, []).append(manifest_path)
+    if len(by_dataset_version) > 1:
+        raise IntegrityError(
+            release_root,
+            f"multiple provider releases with DIFFERENT dataset_version exist under "
+            f"the release root ({sorted(by_dataset_version)}); this is genuine "
+            f"ambiguity about which is the input, not a duplicate to collapse -- "
+            f"refusing rather than guessing or summing rows from different releases",
+        )
+    manifests = [sorted(paths)[0] for paths in by_dataset_version.values()]
     rows: list[dict[str, str]] = []
     for manifest_path in manifests:
         problems = verify_release(manifest_path)
