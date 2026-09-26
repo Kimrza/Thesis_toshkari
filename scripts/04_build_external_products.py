@@ -306,6 +306,112 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help="attempt GIM comparator generation; REFUSES today (Q-15 unset; R-60)",
     )
     parser.add_argument(
+        "--verify-gim-bundle",
+        type=Path,
+        default=None,
+        help=(
+            "workspace-relative directory of acquired CODE final GIM IONEX files "
+            "plus their sha256_manifest.json; re-hashes every manifested file and "
+            "structurally validates each file's day/year and grid geometry "
+            "(gim.verify_ionex_bundle) -- reads no TEC map value, refuses on the "
+            "first mismatch. A bounded provenance check, independent of Q-15"
+        ),
+    )
+    parser.add_argument(
+        "--gim-bundle-out",
+        type=Path,
+        default=Path("artifacts/external/gim_bundle_verification.json"),
+        help="output path for --verify-gim-bundle's report",
+    )
+    parser.add_argument(
+        "--overlap-audit-network",
+        type=Path,
+        default=None,
+        help=(
+            "workspace-relative text file of CODE contributing-station 4-char "
+            "codes, one per line (e.g. the union across acquired IONEX headers); "
+            "computes the gim_network_overlap_flag candidate audit "
+            "(gim.compute_overlap_audit) against this run's ARUC/BSHM/NICO "
+            "station codes from configs/data.yaml. A bounded check, independent "
+            "of Q-15 -- the flag it computes is a candidate rule the "
+            "Student/owner must confirm before any independence claim cites it"
+        ),
+    )
+    parser.add_argument(
+        "--overlap-audit-out",
+        type=Path,
+        default=Path("artifacts/external/gim_overlap_audit.json"),
+        help="output path for --overlap-audit-network's result",
+    )
+    parser.add_argument(
+        "--generate-comparison",
+        action="store_true",
+        help=(
+            "real end-to-end generation: Q-15 rule from configs/experiment.yaml "
+            "(D-70, 'C'), a real hand-check record (--hand-check-file) and a "
+            "real overlap-audit record (--overlap-audit-file) both with "
+            "timestamps preceding this attempt, against a real IONEX file "
+            "(--ionex-file) for --station at --target-epoch-utc. Refuses on "
+            "any gate violation, an unimplemented rule, or a missing/altered "
+            "file (R-60, all four obligations)"
+        ),
+    )
+    parser.add_argument(
+        "--hand-check-file",
+        type=Path,
+        default=Path("evidence/r60_gim_gate_inputs/R60_handcheck_2026-09-26.json"),
+        help="JSON with worked_arithmetic + checked_at_utc, for --generate-comparison",
+    )
+    parser.add_argument(
+        "--overlap-audit-file",
+        type=Path,
+        default=Path("evidence/r60_gim_gate_inputs/R60_overlap_audit_result_2026-09-26.json"),
+        help="JSON with gim_network_overlap_flag + recorded_at_utc, for --generate-comparison",
+    )
+    parser.add_argument(
+        "--ionex-file",
+        type=Path,
+        default=None,
+        help="workspace-relative CODE final GIM file for --generate-comparison",
+    )
+    parser.add_argument(
+        "--station",
+        type=str,
+        default=None,
+        help=(
+            "station name (must be a key under configs/data.yaml: stations) for "
+            "--generate-comparison, unless --station-lat/--station-lon override it"
+        ),
+    )
+    parser.add_argument(
+        "--station-lat",
+        type=float,
+        default=None,
+        help=(
+            "diagnostic-only latitude override for --generate-comparison, bypassing "
+            "the configs/data.yaml station lookup (requires --station-lon too; "
+            "--station still names the run for the overlap-audit per-station lookup)"
+        ),
+    )
+    parser.add_argument(
+        "--station-lon",
+        type=float,
+        default=None,
+        help="diagnostic-only longitude override, paired with --station-lat",
+    )
+    parser.add_argument(
+        "--target-epoch-utc",
+        type=str,
+        default=None,
+        help="ISO-8601 UTC target epoch for --generate-comparison",
+    )
+    parser.add_argument(
+        "--comparison-out",
+        type=Path,
+        default=Path("artifacts/external/gim_comparison_report.json"),
+        help="output path for --generate-comparison's rendered report",
+    )
+    parser.add_argument(
         "--gate-state",
         type=Path,
         default=None,
@@ -1695,6 +1801,150 @@ def _render_comparison(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     return {"rendered": "stdout (contract check over injected state; no artifact written)"}
 
 
+def _verify_gim_bundle(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """Bounded provenance check (independent of Q-15): re-hash and structurally
+    validate an acquired CODE final GIM bundle. Writes a report; refuses (does
+    not write) if any file fails hash or structural validation."""
+    _assert_phase1_field_contract(args.phase)
+    from src.external import gim  # allowlisted importer; deferred by design
+
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    bundle_dir = workspace / args.verify_gim_bundle
+    result = gim.verify_ionex_bundle(bundle_dir)
+    out_path = workspace / args.gim_bundle_out
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    report = {
+        **result,
+        "bundle_dir": str(bundle_dir),
+        "verified_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+    }
+    out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"gim_bundle_report": str(out_path), **result}
+
+
+def _run_overlap_audit(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """Bounded candidate overlap-audit computation (independent of Q-15): real
+    station-list input in, `gim_network_overlap_flag` candidate result out. The
+    rule implemented is named as a candidate in the result itself
+    (gim.compute_overlap_audit's docstring) -- this write is NOT itself the
+    Vision 6.10 disclosure (that happens at report-render time, per
+    `render_comparison_report`'s chokepoint) and is NOT an independence claim."""
+    _assert_phase1_field_contract(args.phase)
+    from src.external import gim  # allowlisted importer; deferred by design
+
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    network_path = workspace / args.overlap_audit_network
+    if not network_path.is_file():
+        raise IntegrityError(str(network_path), "overlap-audit network file does not exist")
+    codes = [
+        line.strip()
+        for line in network_path.read_text(encoding="utf-8-sig").splitlines()
+        if line.strip()
+    ]
+    stations = snapshot.data.get("stations", {})
+    target_stations = {name: name.lower() for name in stations}
+    if not target_stations:
+        raise IntegrityError(
+            str(network_path),
+            "configs/data.yaml carries no 'stations' block; the overlap audit's "
+            "target set cannot be resolved",
+        )
+    result = gim.compute_overlap_audit(
+        network_station_codes=codes,
+        target_stations=target_stations,
+        source_description=str(args.overlap_audit_network),
+    )
+    out_path = workspace / args.overlap_audit_out
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"overlap_audit_report": str(out_path), **result}
+
+
+def _generate_comparison(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """Real end-to-end GIM comparator generation (R-60, all four obligations,
+    D-70/D-71): Q-15's rule from the governed config, a real hand-check
+    record, a real overlap-audit record, and the real hash-verified IONEX
+    bundle -- refuses on any gate violation or missing input, exactly as
+    `_attempt_comparator`'s injection-mode gates do, but against REAL
+    evidence rather than injected state, and producing a real value when
+    every gate passes."""
+    _assert_phase1_field_contract(args.phase)
+    from src.external import gim  # allowlisted importer; deferred by design
+
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+
+    if args.ionex_file is None or args.station is None or args.target_epoch_utc is None:
+        raise IntegrityError(
+            "generate-comparison",
+            "--ionex-file, --station and --target-epoch-utc are all required "
+            "with --generate-comparison",
+        )
+    if args.station_lat is not None and args.station_lon is not None:
+        lat, lon = float(args.station_lat), float(args.station_lon)
+    else:
+        stations = snapshot.data.get("stations", {})
+        if args.station not in stations:
+            raise IntegrityError(
+                "generate-comparison",
+                f"station {args.station!r} is not a key under configs/data.yaml: "
+                f"stations ({sorted(stations)})",
+            )
+        station_entry = stations[args.station]
+        lat = float(station_entry["lat"])
+        lon = float(station_entry["lon"])
+
+    hand_check_path = workspace / args.hand_check_file
+    overlap_audit_path = workspace / args.overlap_audit_file
+    if not hand_check_path.is_file():
+        raise IntegrityError(str(hand_check_path), "hand-check record file does not exist")
+    if not overlap_audit_path.is_file():
+        raise IntegrityError(
+            str(overlap_audit_path), "overlap-audit record file does not exist"
+        )
+    hand_check = json.loads(hand_check_path.read_text(encoding="utf-8-sig"))
+    overlap_audit_full = json.loads(overlap_audit_path.read_text(encoding="utf-8-sig"))
+    # The registered overlap-audit record may carry a per_station breakdown across
+    # several target stations (e.g. the Jan-Nov union audit, D-71); this comparison
+    # is for ONE station, so its own flag is that station's own result, never the
+    # OR across every station this repo happens to track. Falls back to the top-
+    # level flag when no per-station breakdown exists (a single-station record).
+    per_station = overlap_audit_full.get("per_station")
+    if isinstance(per_station, dict) and args.station in per_station:
+        overlap_audit: dict[str, Any] = dict(overlap_audit_full)
+        overlap_audit["gim_network_overlap_flag"] = bool(
+            per_station[args.station]["present_in_network"]
+        )
+    else:
+        overlap_audit = dict(overlap_audit_full)
+
+    ionex_path = workspace / args.ionex_file
+    rule = gim.interpolation_rule_from(snapshot.experiment)
+
+    result = gim.generate_comparator(
+        interpolation_rule=rule,
+        hand_check=hand_check,
+        overlap_audit=overlap_audit,
+        injection_mode=False,
+        comparator_inputs={
+            "ionex_path": str(ionex_path),
+            "station_lat": lat,
+            "station_lon": lon,
+            "target_epoch_utc": args.target_epoch_utc,
+        },
+    )
+    report = gim.render_comparison_report(comparison=result, overlap_audit=overlap_audit)
+    from src.data.acquisition import guard_egress  # deferred with the attempt paths
+
+    guard_egress(report, context="gim_comparison_report[generate]")
+    out_path = workspace / args.comparison_out
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"comparison_report": str(out_path), "value_tecu": result["value_tecu"]}
+
+
 def _write_prediction_once(path: Path, payload: Mapping[str, Any]) -> Path:
     """Write-once: an existing prediction file is never overwritten (TE 13.3; R-102a
     step 1) -- the same idiom `06_train_and_predict.py`'s `_write_prediction_once`
@@ -1859,7 +2109,13 @@ def main() -> int:
             phase=args.phase,
             code_commit=args.code_commit,
             fixture_manifest=args.fixture_manifest,
-            full_year_job=not (args.verify_runtime or args.build_validation_report is not None),
+            full_year_job=not (
+                args.verify_runtime
+                or args.build_validation_report is not None
+                or args.verify_gim_bundle is not None
+                or args.overlap_audit_network is not None
+                or args.generate_comparison
+            ),
         )
     except IntegrityError as exc:
         print(f"04_build_external_products: preflight refusal: {exc}", file=sys.stderr)
@@ -1897,6 +2153,12 @@ def main() -> int:
             summary = _attempt_comparator(entry, args)
         elif args.render_comparison is not None:
             summary = _render_comparison(entry, args)
+        elif args.verify_gim_bundle is not None:
+            summary = _verify_gim_bundle(entry, args)
+        elif args.overlap_audit_network is not None:
+            summary = _run_overlap_audit(entry, args)
+        elif args.generate_comparison:
+            summary = _generate_comparison(entry, args)
         elif args.emit_prediction_payload is not None:
             summary = _emit_prediction_payload(entry, args)
         else:

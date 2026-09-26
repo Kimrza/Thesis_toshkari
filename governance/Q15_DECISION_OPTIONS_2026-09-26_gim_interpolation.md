@@ -50,4 +50,15 @@ D) Other (please specify)
 > but the freeze should still name C, with B as the disclosed sensitivity, not the
 > reverse.
 
-[Answer]:
+[Answer]: C
+
+Frozen 2026-09-26 by explicit Student instruction. Rationale: IONEX specification's
+own recommended method (Schaer et al. 1998); literature-standard consumption of CODE
+final GIM, matching the sun-fixed generation frame CODE's own file header documents.
+One worked hand-check point (BSHM, 2022-04-10 00:20 UTC, file codg1000.22i.Z) measured
+B-vs-C difference of 0.071 TECU (~0.4%) at that single instant -- supporting context
+for this freeze, not a model-performance selection criterion; n=1, not a full sweep.
+Option B is retained as a labeled January-November sensitivity analysis, not adopted.
+No December value was read or used. Recorded as evidence/DECISIONS.md D-70; see
+evidence/r60_gim_gate_inputs/Q15_exploration_note_2026-09-26.md and
+R60_handcheck_2026-09-26.md for the full worked evidence.

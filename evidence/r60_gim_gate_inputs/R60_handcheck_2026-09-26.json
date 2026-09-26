@@ -1,0 +1,9 @@
+{
+  "worked_arithmetic": "See evidence/r60_gim_gate_inputs/R60_handcheck_2026-09-26.md for the full worked example. Station BSHM (32.778987N, 35.022987E), file codg1000.22i.Z (day-of-year 100, 2022-04-10), target epoch 2022-04-10T00:20:00Z. Rule B (bilinear spatial + linear temporal, no rotation): map1(00:00) bilinear = 184.78 (0.1 TECU) from corners lat32.5/lon35=186, lat32.5/lon40=187, lat35.0/lon35=175, lat35.0/lon40=176, weights f_lat=0.111595 f_lon=0.004597; map2(01:00) bilinear = 180.44 (0.1 TECU) from corners 182/182/168/169; temporal blend f_t=0.333333 gives 183.33 (0.1 TECU) = 18.333 TECU. Rule C (bilinear on rotated maps): map1 longitude shifted +5.0deg (15deg/h * 20min), map2 shifted -10.0deg (15deg/h * 40min); map1 rotated bilinear = 185.76 (0.1 TECU) from corners 187/184/176/174 (lon 40/45 bracket); map2 rotated bilinear = 176.34 (0.1 TECU) from corners 178/181/163/166 (lon 25/30 bracket); temporal blend gives 182.62 (0.1 TECU) = 18.262 TECU. Independently reproduced 2026-09-26 by src/external/gim.py: compute_comparison against the same file, matching to 4 decimal places (18.33307650153112 / 18.26194087639557 TECU).",
+  "checked_at_utc": "2026-09-26T12:00:00+00:00",
+  "ionex_file": "codg1000.22i.Z",
+  "station": "BSHM",
+  "target_epoch_utc": "2022-04-10T00:20:00+00:00",
+  "values_tecu": {"B": 18.333, "C": 18.262},
+  "evidence_document": "evidence/r60_gim_gate_inputs/R60_handcheck_2026-09-26.md"
+}

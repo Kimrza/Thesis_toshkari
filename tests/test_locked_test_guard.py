@@ -944,6 +944,21 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         # carries no `2022-12-DD` date at all. The closed log it describes is itself
         # unmodified (5,964 rows, sha256 985f0671..., verified before and after this run).
         "test_run_access_log.SUPERSEDED_2026-09-20.md",
+        # 2026-09-26: the R-60/Q-15 GIM acquisition hand-back and gate-input evidence
+        # (D-70/D-71). Five Markdown files under evidence/r60_gim_gate_inputs/, all prose
+        # -- lands here for the same reason every `.md` above does. Derived and printed
+        # before assertion: `HANDBACK_2026-09-26.md` matches `vtec|tecu` 0 times;
+        # `R60_handcheck_2026-09-26.md` 12, `R60_overlap_audit_input_2026-09-26.md` 1,
+        # `Q15_proposed_answer_2026-09-26.md` 7, `Q15_exploration_note_2026-09-26.md` 8
+        # (TECU appears throughout -- these documents discuss GIM interpolation values by
+        # design); every one of the five carries ZERO `2022-12-DD` dates. All measured
+        # content is January-November 2022 only (the acquisition's own December-sealed
+        # discipline), independent of this test's own scan.
+        "r60_gim_gate_inputs/HANDBACK_2026-09-26.md",
+        "r60_gim_gate_inputs/R60_handcheck_2026-09-26.md",
+        "r60_gim_gate_inputs/R60_overlap_audit_input_2026-09-26.md",
+        "r60_gim_gate_inputs/Q15_proposed_answer_2026-09-26.md",
+        "r60_gim_gate_inputs/Q15_exploration_note_2026-09-26.md",
     }
     assert not [e for e in inventory if e.disposition == "flagged"]
 

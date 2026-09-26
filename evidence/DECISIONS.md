@@ -3527,6 +3527,127 @@ validation remains outstanding (FR-P1-02-1, gate G-02).
 
 ---
 
+## D-70 — GIM interpolation rule (Q-15): bilinear spatial interpolation on rotated maps (freeze)
+
+**Decision date:** 2026-09-26. **Frozen by:** the project decision owner, the Student, by
+explicit instruction ("I choose option C: bilinear spatial interpolation on rotated maps
+with the documented temporal rule... Adopt it through the project's required freeze
+process"). **TE §18.2** names the GIM interpolation rule a Student-owned forbidden choice
+(`gim.py`'s own docstring, "R-60 obligation 1"); no supervisor countersignature is required
+(same basis as D-11/D-14/Q-31). **Authority:**
+`governance/Q15_DECISION_OPTIONS_2026-09-26_gim_interpolation.md` (the three candidate
+options, drafted for this freeze); `governance/RUNBOOK_2026-09-26_gim_acquisition_internet_system.md`
+(the acquisition + exploration guardrails this decision was made under).
+
+**Decision.** Option **C**: bilinear spatial interpolation performed on each of the two
+bracketing CODE final GIM maps after each map's effective longitude is first shifted by
+Earth's rotation (15°/hour) toward the target epoch, followed by linear interpolation in
+time between the two resulting values — the IONEX 1.0 specification's own recommended
+method (Schaer et al., 1998), reflecting CODE's stated sun-fixed generation frame.
+
+**Basis.** IONEX-specification / literature-standard consumption of CODE final GIM, so the
+comparator inherits a citable, reviewer-defensible convention rather than a project-local
+choice, per the decision document's own stated recommendation
+(`governance/Q15_DECISION_OPTIONS_2026-09-26_gim_interpolation.md`, Question 1
+recommendation for Option C).
+
+**What the 0.071 TECU / 0.4% figure measures — verified before recording, exactly.**
+It is the absolute difference between Option B's result (18.333 TECU) and Option C's
+result (18.262 TECU) at **one single worked point**: station BSHM (32.778987°N,
+35.022987°E), target epoch 2022-04-10 00:20:00 UTC, computed from the real grid values in
+`evidence/gim_code_final_2022/codg1000.22i.Z` (day-of-year 100, 2022 — January–November,
+not December). The full arithmetic is in
+`evidence/r60_gim_gate_inputs/R60_handcheck_2026-09-26.md`. **Sample size: n=1** — one
+station, one epoch, one day out of the 334 eligible January–November days. **This
+measurement is supporting context for the freeze, not a model-performance selection
+criterion**: no model prediction and no model-vs-GIM skill score entered its computation
+or this decision, consistent with `governance/RUNBOOK_2026-09-26_gim_acquisition_internet_system.md`
+§3's guardrail. No December file's TEC values were read, opened, or used to inform or
+revise this decision.
+
+**Option B, disclosed as a labeled Jan–Nov sensitivity analysis, not adopted.** B (bilinear
+spatial + linear temporal, no rotation correction) is retained in
+`evidence/r60_gim_gate_inputs/Q15_exploration_note_2026-09-26.md` as an explicitly labeled
+sensitivity comparison against the frozen rule C — it measures how much the rotation
+correction changes the result at the one worked point (0.4%), not an alternative frozen
+choice. The freeze names C; B is disclosed rationale, per the decision document's own
+instruction ("the freeze should still name C, with B as the disclosed sensitivity, not the
+reverse").
+
+**Configuration.** `configs/experiment.yaml: gim_interpolation_rule: "C"`, citing this
+D-number. `[Answer]:` filled in
+`governance/Q15_DECISION_OPTIONS_2026-09-26_gim_interpolation.md` with `C`.
+
+**Evidence.** `evidence/r60_gim_gate_inputs/Q15_exploration_note_2026-09-26.md`,
+`R60_handcheck_2026-09-26.md`, `Q15_proposed_answer_2026-09-26.md` (superseded by this
+entry's adoption — the proposal became this decision, unedited retroactively). Acquisition
+provenance: `evidence/gim_code_final_2022/sha256_manifest.json`,
+`acquisition_log.json` (365/365 files, independently re-verified 2026-09-26).
+
+---
+
+## D-71 — `gim_network_overlap_flag` definition: direct receiver-presence in CODE's contributing-station list (freeze)
+
+**Decision date:** 2026-09-26. **Frozen by:** the project decision owner, the Student, by
+explicit instruction ("I approve the direct receiver-presence rule for
+`gim_network_overlap_flag`... Define the flag explicitly as direct presence in CODE's
+per-day contributing-station lists, not independence of the GIM estimate"). **Authority:**
+Vision §6.10 ("No independence claim may be made before that audit"); Technical Environment
+§5.2; `src/external/gim.py`'s `compute_overlap_audit` (implemented 2026-09-26, flagged in
+its own docstring as an implementer-authored candidate pending this confirmation — this
+entry is that confirmation).
+
+**Decision.** `gim_network_overlap_flag` is defined as: **True iff a target station's own
+4-character IGS code appears in CODE's per-day contributing-station list** (the `List of
+stations:` header comment CODE publishes inside each IONEX file), for the audited window;
+**False** otherwise. This is a **presence** test, evaluated per the evidence actually
+available from IONEX header metadata.
+
+**Result, audited window January–November 2022 (334 files, real union, method printed in
+`evidence/r60_gim_gate_inputs/R60_overlap_audit_input_2026-09-26.md`):**
+
+| Station | `gim_network_overlap_flag` |
+|---|---|
+| ARUC | **False** |
+| BSHM | **True** |
+| NICO | **True** |
+
+**What this flag IS NOT, stated explicitly per instruction.** It is **not** a claim of
+independence for the `False` case, and its `True` case is a lower bound on non-independence,
+not the whole of it. Two named, uncovered residuals: (1) CODE's GIM is a global
+spherical-harmonic fit, not a per-cell average — a station absent from the contributing
+list can still have its cell's value constrained by nearby contributing receivers, which
+this presence rule cannot detect from header metadata alone; (2) coverage is
+January–November only — a station's status could differ across months not in this window,
+or through upstream ties this rule does not trace. ARUC's `False` result means "ARUC's own
+receiver did not directly feed CODE's Jan–Nov 2022 solution," not "ARUC's GIM comparison is
+independent."
+
+**December scope — checked, not extended.** This flag's `True`/`False` values are computed
+and recorded for the January–November audited window only. December's station-contribution
+status is **not determined by this decision** and is **not to be inferred or extrapolated**
+from the table above. Opening December's IONEX headers to extend this audit is itself
+governed by the same December-sealed discipline as every other December read
+(`governance/RUNBOOK_2026-09-26_gim_acquisition_internet_system.md` §2: December files may
+be acquired and hashed for inventory, never opened for content — and this project's
+December-locked-test guard, `tests/test_locked_test_guard.py`, is the executable form of
+that rule for any December access, station-list metadata included). Any future December
+extension of this audit is separate, later work under its own access check, not silently
+assumed here.
+
+**Applicability at generation/reporting time.** Per `render_comparison_report`'s existing
+contract (unchanged by this decision — obligation 3, R-60): any GIM comparison at BSHM or
+NICO discloses `gim_network_overlap_flag = True` and makes no independence claim; a
+comparison at ARUC discloses `False` together with the two named residuals above, so a
+reader cannot mistake `False` for a stronger claim than the audit actually supports.
+
+**Evidence.** `evidence/r60_gim_gate_inputs/R60_overlap_audit_input_2026-09-26.md`,
+`code_network_stations_2022_jan-nov_union.txt` (334-file union, 275 codes, SHA-256
+recorded in that file). `src/external/gim.py: compute_overlap_audit` (implementation),
+`tests/test_gim_provenance.py` (overlap-audit tests).
+
+---
+
 ## Supervisor review
 
 D-3/D-144 is countersigned as of 2026-08-15 and **expressly approved 2026-08-21**
@@ -3607,5 +3728,7 @@ exposed to challenge and should be read first.
 | D-67 `budget_value`: `statistic = p95`, `combination = sum` (GOV-2026-09-20-CG-01 Recommendation 20 / dispositions §4.5) | **Countersignature: Student — Approved by instruction, 2026-09-24, verbatim text as drafted in `governance/CHANGE_RECORD_2026-09-24_budget_value_merged.md`. No separate supervisor signature is claimed.** | 2026-09-24 | Sets both content fields of `configs/data.yaml: target.uncertainty_budget`: `statistic = p95` (forecast-verification, decision-relevant tail statistic — [Bouttier et al. 2024](https://consensus.app/papers/details/571419dc7b7659b0900fef05315e3f8a/?utm_source=claude_desktop), [Brown et al. 2020, MET/METplus](https://consensus.app/papers/details/b5c9557092ce5684b901f760cb3fb182/?utm_source=claude_desktop) — avoids `max`'s single-point fragility and `median`'s permissiveness for a budget concept) and `combination = sum` (Phase 1/Phase 2 VTEC uncertainty content share a documented common systematic error source — GNSS differential-code-bias estimation — [Chen et al. 2026](https://consensus.app/papers/details/6dcc64144644599db0819d5b08e65c52/?utm_source=claude_desktop), [Zhang et al. 2018](https://consensus.app/papers/details/1cf7c2a93f8258aca2279d9174da756f/?utm_source=claude_desktop)/[2023](https://consensus.app/papers/details/806b64787d305afa94ae9059fb06e99c/?utm_source=claude_desktop), [Hernández-Pajares et al. 2017](https://consensus.app/papers/details/6c9fd1e894a65cfdb38649b8d071d4b6/?utm_source=claude_desktop) — corroborated by this project's own existing Mandated rules on the two phases' non-independence; general GUM practice reserves quadrature for established-independent components, [Fröhner 2003](https://consensus.app/papers/details/fab8b70c41ef56ccb17b990e1bcc47b1/?utm_source=claude_desktop), [Dixson et al. 2026](https://consensus.app/papers/details/6a49d4b0e1d05ef09026393197f5a980/?utm_source=claude_desktop)). **Closes Recommendation 20 / the §18.2 item in full**: `decision`, `statistic` and `combination` are now all set in `configs/data.yaml: target.uncertainty_budget`; `resolve_budget_rule` returns a usable rule for the first time and `practical_relevance_statement` stops refusing. Full literature review and both merged prior drafts: `governance/CHANGE_RECORD_2026-09-24_budget_value_merged.md` (superseding `..._budget_value_statistic.md` and `..._budget_value_combination.md`, both left standing as history). Verified 2026-09-24: 250 passed, 1 skipped across every consumer test module, governed `tec-thesis-311` (Python 3.11.16) environment. |
 | D-68 Bounded 1-December persistence-history lookup for M-01/M-02 (Option A, `RULING_REQUEST_2026-09-21_GOV-CG-01_OPEN_ITEMS.md` §2) | **Countersignature: Student — Approved by instruction, 2026-09-24, verbatim text as drafted in `governance/CHANGE_RECORD_2026-09-24_d28_option_a_mechanism_built.md`. No separate supervisor signature is claimed.** | 2026-09-24 | Authorizes `src.data.locked_test.read_persistence_history_lookup`, built and tested 2026-09-24 (`tests/test_locked_test_guard.py`, 6 tests, all 5 conditions independently verified; full §18.3 critical set 772/772 passing at build time). A narrowly-scoped, logged, performance-blind read of 2022-12-01 target values, strictly as backward-looking lookup history for M-01 (`y(t-1h)`) and M-02 (`y(t-24h)`), recovering the full D-28/D-59 30-day scored set (2–31 December) without amending either decision. **Does not touch, amend, or contradict D-28 or D-59** — both stand exactly as originally frozen; this is an additive lookup path for two specific, unfitted difficulty controls only. `configs/experiment.yaml: persistence_history_lookup.decision` updated to cite `D-68` and `authorized` flipped to `true` in the same act as this ruling — the mechanism activates for real DEC iterations from this point on, gated by the 5 conditions its own tests independently verify (only M-01/M-02; routed through `open_restricted`, logged; post-G-05 only via `verify_g05_signature`; never returns a row outside 2022-12-01). Caller-side wiring into `scripts/06_train_and_predict.py` / `src/models/persistence.py` (owned by `models-and-baselines`/`fixtures-and-reproducibility`) authorized in the same instruction and implemented same day — see `governance/CHANGE_RECORD_2026-09-24_d28_option_a_wiring.md` for the connected implementation and its own verification. |
 | D-69 §18.3 "critical set" selection reconciled: selection (b), the ten-module §18.3 selection, is authoritative; selections (a) and (c) superseded/not applicable for this gate (build-and-test Rec 5, item 7) | **Countersignature: Student — Approved by instruction, 2026-09-25, verbatim text as drafted in `governance/CHANGE_RECORD_2026-09-25_item7_selection_b_ruling.md`. No separate supervisor signature is claimed.** | 2026-09-25 | `build-and-test`'s `build-test-results.md` identified three coexisting "critical set" selections that must not be conflated: (a) the pre-commit hook's five-module commit-time subset (a subset by design, Rec 30 option 1, never a candidate); (b) the ten-module §18.3 selection whose module homes map 1:1 onto §18.3's ten named critical items (target contract and DCB sign; availability lags; IRI-free denial; split embargo; train-only transforms; comparison-wide masks and matched windows; checkpoint restore; vector bootstrap; release hashes; locked-test access guard) — `test_prepared_target_schema`, `test_feature_availability`, `test_iri_denial`, `test_split_embargo`, `test_train_only_transforms`, `test_common_masks`, `test_checkpoint_restore`, `test_bootstrap`, `test_release_hashes`, `test_locked_test_guard`; (c) the 766-test selection behind `governance/PENDING_FOLLOWUPS.md` §1a's "766/766 passed", which spans all 29 test modules, has no surviving green junit evidence (the only committed 766-test XML records 2 failures), and was run while the three site-log bytes were already absent from tracking. **Ruling: selection (b) is authoritative for §18.3's "zero unresolved P0 fields and no failing critical test" gate criterion.** (a) and (c) are superseded/not applicable for this gate but stand unedited as their own dated historical evidence (`project.md`'s never-edit-a-signed-record correction). **Verified 2026-09-25** with a fresh run, not reused from the prior day: **685 total, 685 passed, 0 failed, 0 errors, 0 skipped**, 54.870 s, governed `tec-thesis-311` (Python 3.11.16), `PYTHONHASHSEED=0`. Persisted `artifacts/exec_evidence/run_2026-09-25_item7_selection_b/crit.xml` (sha256 `005fdb00a282e9c57c8007a0a18b71d324c81e3143b3019c9ea5d2b5a85b16a3`), matching the prior day's 685/685 figure — no regression. §18.3's "no failing critical test" precondition is satisfied for selection (b) as of this commit. |
+| D-70 GIM interpolation rule (Q-15): Option C, bilinear on rotated maps | **n/a — Q-15 is TE §18.2 Student-owned per `gim.py`'s own docstring; no supervisor countersignature required (same basis as D-11/D-14/Q-31)** | 2026-09-26 | Frozen by explicit Student instruction. Full text: the dated entry above (search `## D-70`). One worked hand-check point (BSHM, 2022-04-10 00:20 UTC): B=18.333, C=18.262 TECU, difference 0.071 TECU (~0.4%) — supporting context, not a selection criterion; n=1, not a full sweep. Option B retained as a labeled Jan–Nov sensitivity, not adopted. No December value read or used. `configs/experiment.yaml: gim_interpolation_rule = "C"`. |
+| D-71 `gim_network_overlap_flag` definition: direct receiver-presence | **n/a — audit-definition confirmation, not a Student+Supervisor forbidden-choice item; Student instruction 2026-09-26** | 2026-09-26 | Full text: the dated entry above (search `## D-71`). Defines the flag as presence-only (target station's 4-char code in CODE's per-day contributing list), explicitly NOT independence. Jan–Nov 2022 result: ARUC False, BSHM True, NICO True. December status NOT determined or extrapolated by this decision — any December extension is separate, later, access-gated work. |
 | D-70 Apparatus hyperparameter points for the walking-skeleton fixtures (positional rule) | **Not required under TE §18.2 — Q-31 class: fixture apparatus is Student-owned, no supervisor countersignature required (team.md § Walking Skeleton; D-20 precedent). Student adoption by instruction, 2026-09-25, verbatim from `governance/CHANGE_RECORD_2026-09-25_apparatus_hyperparameters.md` §6. Numbering note: the Student first named this D-125; the coding agent's pre-write collision check found Vision §14.2 already owns D-125 (comparison-wide masks row, Approved, cited by REQ-FAIR-01 and N-06), and the Student re-ruled the number to D-70, the register's next free number. Transcribed into this register by the coding agent on the Student's explicit instruction of 2026-09-25; the decision, its values, and its number are the Student's.** | 2026-09-25 | Breaks the circular refusal disclosed in `CHANGE_RECORD_2026-09-25_apparatus_hyperparameters.md` §1 (fixture pass needs `models.selected`; `models.selected` is the governed tuning run's output; the tuning run is gated on frozen fixtures — TE §9.2 vs R-101/TE §7.0B). For fixture-scale walking-skeleton runs ONLY, the fixture scope carries one apparatus grid point per fitted track, selected by POSITION — the first transcribed element of each grid axis in `configs/experiment.yaml` (D-121's transcription order) — with zero discretion, before any result of any kind has been observed: **ridge (M-04) `alpha: 0.01`; random_forest (M-05) `n_estimators: 300`, `max_depth: 8`, `min_samples_leaf: 1`; lstm (M-06) `layers: 1`, `units: 32`, `learning_rate: 1.0e-3`, `batch_size: 64`.** Every point must be a member of D-121's frozen grid (`assert_in_grid` at use). **Restrictions, mandatory:** these points exercise the plumbing apparatus (TC-03f: smoke evidence, never scientific evidence) and are NOT a prior, a default, a ranking signal, or a candidate shortlist for the governed selection; `models.selected` remains `TBD — freeze gate` until the governed January–November F1–F4 tuning run produces it under D-124's rule; no comparison between these apparatus points and any tuning result may be drawn. The positional rule exists so the choice cannot be performance-informed even in principle. Alternative offered and declined: minimum-CPU-cost member per track ("cheapest" requires a runtime judgment; the positional rule leaves none). Mechanism, schema, negative controls and verification (1593 collected, 0 failed, 3 skipped, governed Python 3.11.16): the change record above. |
 | D-71 ml_dtypes pinned to 0.5.3 (engineering pin, TF 2.21.0 dependency) | **Not required under TE §18.2 — engineering pin on the scikit-learn precedent (team.md § Testing Posture, Q3=A class); Student approval by instruction, 2026-09-26. Numbering note: the Student first named this D-16; the coding agent's pre-write collision check found D-16 already owns target.aggregation (cited by D-55 and D-61), and the number was re-ruled to D-71, the register's next free number, per the D-70 precedent. Transcribed into this register by the coding agent on the Student's explicit instruction of 2026-09-26; the decision and its number are the Student's.** | 2026-09-26 | TensorFlow 2.21.0 (D-36) permits ml_dtypes>=0.5.1,<1.0.0. The version pip's resolver selects by default (0.6.0) requires numpy>=2.0.0, conflicting with the governed numpy==1.26.4; an unconstrained install would have upgraded numpy to the also-downloaded 2.4.6 wheel. Pinned ml_dtypes==0.5.3 (requires numpy>=1.23.3 on Python 3.11; wheel sha256 58e39349d820b5702bb6f94ea0cb2dc8ec62ee81c0267d9622067d8333596a46). Enforced by requirements.txt (committed 12843b5) and environment/install_wheels.ps1, which asserts numpy remains 1.26.4 after every wheel-layer install. Verified 2026-09-26: offline from-scratch rebuild green; suite 1589 passed / 4 designed skips / 0 failed. |
