@@ -82,12 +82,16 @@
       "artifact_id": "uncertainty_budget",
       "asymmetry_statement": "A slowly varying per-station-day bias partially cancels in the paired difference but does not cancel in the derived percentage summary, because it inflates the reference denominator.",
       "bounds_statement": "This budget covers the Phase 1-applicable set only (two of Vision 6.9's six contents plus the asymmetry statement); Vision 6.9 states its list without a phase qualifier, and the phase qualifier runs through Vision 15.2 — recorded so the gap reads as governed rather than as non-compliance. Values are stated as computed; nothing is truncated.",
-      "budget_value": null,
+      "budget_value": 9.540755750000002,
       "budget_value_rule": {
-        "owner": "Student + Supervisor countersignature (TE 18.2 forbidden choice)",
-        "reference": "GOV-2026-09-20-CG-01 Recommendation 20; CR-2026-09-20-GOV-CG-01-DISPOSITIONS §4.5",
-        "status": "owed",
-        "where": "configs/data.yaml: target.uncertainty_budget {decision, statistic, combination}"
+        "combination": "sum",
+        "decision": "D-67",
+        "per_content_scalars_tecu": {
+          "provider_reported_uncertainty": 0.92366075,
+          "within_hour_aggregation_spread": 8.617095000000003
+        },
+        "statistic": "p95",
+        "status": "frozen"
       },
       "completeness": {
         "asserted": true,

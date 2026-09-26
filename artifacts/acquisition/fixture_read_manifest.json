@@ -46,7 +46,7 @@
   "kind": "fixture_read_manifest",
   "month_recorded_madrigalWeb_version": "unknown",
   "phase_id": "P1A",
-  "producing_interpreter": "3.11.16 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:36:16) [MSC v.1942 64 bit (AMD64)]",
+  "producing_interpreter": "3.11.16 | packaged by conda-forge | (main, Sep  2 2026, 23:31:17) [MSC v.1944 64 bit (AMD64)]",
   "provenance_class": "derived_only",
   "retrieval_performed": false,
   "source_id": "GNSS_VTEC",

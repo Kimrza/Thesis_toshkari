@@ -3,7 +3,7 @@
   "hash_count": 4,
   "manifest": "sha256_manifest.json",
   "phase_id": "P1A",
-  "producing_interpreter": "3.11.16 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:36:16) [MSC v.1942 64 bit (AMD64)]",
+  "producing_interpreter": "3.11.16 | packaged by conda-forge | (main, Sep  2 2026, 23:31:17) [MSC v.1944 64 bit (AMD64)]",
   "provenance_class": "derived_only",
   "provider_file_count": 0,
   "provider_files": {},
