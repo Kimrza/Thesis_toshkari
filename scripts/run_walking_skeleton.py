@@ -374,6 +374,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--table-caption",
+        type=str,
+        default=None,
+        help=(
+            "the primary table's caption, forwarded VERBATIM to 07's --table-caption. "
+            "Authored prose owned by the Student (FR-P1-05-19's plasmaspheric-offset "
+            "sentence and D-28's scored-set statement); this orchestrator authors none "
+            "and forwards exactly what it was given — 07 refuses when absent"
+        ),
+    )
+    parser.add_argument(
         "--python",
         type=str,
         default=sys.executable,
@@ -549,6 +560,16 @@ def lifecycle_arguments(script: str, fixture_id: str) -> list[str]:
             (base / "predictions").as_posix(),
             "--evaluation-out",
             (base / "evaluation").as_posix(),
+            # Rec 18 reporting-layer inputs, threaded like the Rec 4 roots (found by the
+            # first fixture run to reach 07, 2026-09-26): the released fixture target's
+            # manifest under THIS fixture's release root, and stage 02's uncertainty
+            # budget artifact at its fixed emission path (02:728 writes it under the
+            # governed artifacts root on every run, fixture included — a disclosed
+            # fixture-taint of that path, see CR-2026-09-25-APPARATUS-HYPERPARAMETERS §5).
+            "--target-release-manifest",
+            (base / "releases" / "phase1_hourly_target" / "release_manifest.json").as_posix(),
+            "--budget-artifact",
+            "artifacts/prepared_target/uncertainty_budget.json",
         ]
     return []
 
@@ -561,6 +582,7 @@ def build_phase1_commands(
     scope_path: Path,
     fixture_id: str | None = None,
     code_commit: str | None = None,
+    table_caption: str | None = None,
 ) -> list[list[str]]:
     """TE 13.2's seven Phase 1 invocations, in order, plus the ruled scope argument (Q4/Q5),
     — when `fixture_id` is given — the Rec 4 lifecycle roots under the fixture root, and —
@@ -579,6 +601,10 @@ def build_phase1_commands(
             argv += ["--code-commit", str(code_commit)]
         if fixture_id is not None:
             argv += lifecycle_arguments(script, fixture_id)
+        if table_caption is not None and script.startswith("07_"):
+            # forwarded VERBATIM: the caption is the Student's authored prose and this
+            # orchestrator supplies no caption of its own (07's own refusal states why)
+            argv += ["--table-caption", table_caption]
         commands.append(argv)
     return commands
 
@@ -884,6 +910,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     commands = build_phase1_commands(
         python=args.python, scripts_dir=REPO_ROOT / "scripts", config_dir=Path(args.config),
         scope_path=scope_path, fixture_id=args.fixture, code_commit=args.code_commit,
+        table_caption=args.table_caption,
     )
     sequence = run_sequence(commands, env=env, cwd=workspace)
     m10: dict[str, Any] | None = None

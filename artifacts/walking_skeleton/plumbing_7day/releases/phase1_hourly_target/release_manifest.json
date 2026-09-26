@@ -1,8 +1,8 @@
 {
   "change_record_id": "CR-2026-09-23-TARGET-RELEASE-OPTION-A",
-  "content_hash": "0100f7b48eea30acd0bcf9e07713aa2e0962c1bc998355d6745bee4eb13e0843",
-  "created_at_utc": "2026-09-23T16:03:10.865343+00:00",
-  "dataset_version": "0100f7b48eea",
+  "content_hash": "a9e03d4d1599b7a09a57849975f83bc9d54485b791d471839190beef8965ee6d",
+  "created_at_utc": "2026-09-26T06:48:55.197204+00:00",
+  "dataset_version": "a9e03d4d1599",
   "evidence_class": "fixture_plumbing",
   "exclusions_qc_summary": [
     {
@@ -25,7 +25,7 @@
     "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
   ],
   "output_files": {
-    "hourly_target_phase1.csv": "ee5b360c29dd390cece96923f593f52b2367caa920d75dbe8e1d94a72137ce7f"
+    "hourly_target_phase1.csv": "44eec7a404468c222271fc202e5de8dfba7fcea5c1feebd17ba5bb1801b329d1"
   },
   "processing": {
     "hourly_aggregation": "median",
@@ -71,9 +71,9 @@
     {
       "citation": "consumed release dataset_version ed246781688c, content_hash ed246781688ca77e4a2b4fe2804d96f4f873693fd68eeee66e92cabac148d135",
       "filename": "prepared_vtec_records.csv",
-      "location_date": "plumbing_7day_20260923T160244Z (created 2026-09-23T16:02:44.207818+00:00)",
+      "location_date": "plumbing_7day_20260926T064829Z (created 2026-09-26T06:48:29.448960+00:00)",
       "provider": "project release (stage 00 acquisition)",
-      "retrieval_date": "2026-09-23T16:02:44.207818+00:00",
+      "retrieval_date": "2026-09-26T06:48:29.448960+00:00",
       "sha256": "fac835fca6b4d928cee468eecca452c0cfdfa4640342d0aafb321788a9f7899a"
     }
   ],

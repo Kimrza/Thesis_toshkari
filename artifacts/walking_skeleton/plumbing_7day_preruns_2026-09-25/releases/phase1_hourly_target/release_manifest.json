@@ -1,0 +1,86 @@
+{
+  "change_record_id": "CR-2026-09-23-TARGET-RELEASE-OPTION-A",
+  "content_hash": "0100f7b48eea30acd0bcf9e07713aa2e0962c1bc998355d6745bee4eb13e0843",
+  "created_at_utc": "2026-09-23T16:03:10.865343+00:00",
+  "dataset_version": "0100f7b48eea",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 5,
+      "reason": "largest_internal_gap_s above D-19 maximum 1800.0"
+    },
+    {
+      "count": 5,
+      "reason": "within_hour_spread_tecu above D-19 range bound 10.0"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "plumbing_7day",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "hourly_target_phase1.csv": "ee5b360c29dd390cece96923f593f52b2367caa920d75dbe8e1d94a72137ce7f"
+  },
+  "processing": {
+    "hourly_aggregation": "median",
+    "parameters": [
+      "ut1_unix",
+      "gdlat",
+      "glon",
+      "tec",
+      "dtec"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "8000/3500",
+    "selected_cell_bounds": {
+      "BSHM": {
+        "cell_gdlat": 32,
+        "cell_glon": 35,
+        "cell_lat_bounds": "[32, 33)",
+        "cell_lon_bounds": "[35, 36)",
+        "resolved": true,
+        "rule": "floor-half-open-d1"
+      }
+    },
+    "station_coordinate_to_cell_rule": "floor-half-open-d1",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "row_counts": {
+    "by_month": {
+      "2022-11": 168
+    },
+    "by_qc_stage": {
+      "post_documented_qc_invalid": 10,
+      "post_documented_qc_valid": 158
+    },
+    "by_split": {
+      "unsplit_stage_02": 168
+    },
+    "by_station": {
+      "BSHM": 168
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "consumed release dataset_version ed246781688c, content_hash ed246781688ca77e4a2b4fe2804d96f4f873693fd68eeee66e92cabac148d135",
+      "filename": "prepared_vtec_records.csv",
+      "location_date": "plumbing_7day_20260923T160244Z (created 2026-09-23T16:02:44.207818+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-09-23T16:02:44.207818+00:00",
+      "sha256": "fac835fca6b4d928cee468eecca452c0cfdfa4640342d0aafb321788a9f7899a"
+    }
+  ],
+  "source_manifest_id": "ed246781688c",
+  "units": {
+    "largest_internal_gap_s": "s",
+    "vtec_tecu": "TECU",
+    "within_hour_spread_tecu": "TECU"
+  }
+}

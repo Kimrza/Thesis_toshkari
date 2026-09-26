@@ -175,6 +175,49 @@ is itself a choice, where the positional rule leaves no judgment at all.
 then written into `tests/fixtures/plumbing_7day/identity_declaration.yaml` citing D-70. The
 paragraph below is kept as the gate's original statement.
 
+### §7a. Execution log of the first end-to-end attempts (2026-09-26, appended)
+
+Six orchestrated attempts, each preserved (never deleted) under
+`artifacts/walking_skeleton/plumbing_7day_preruns_2026-09-25/`, each with honest
+started/aborted registry rows. What each found, in order:
+
+1. **Stale interpreter** (runs 1–2): the Temp-dir `tec311` conda env is a leftover — no
+   TensorFlow, and its sklearn dies natively (0xC06D007F, delay-load) on Ridge's first BLAS
+   call once TF is in-process. The governed env is the 12843b5 rebuild at
+   `%LOCALAPPDATA%\tec-envs\tec311` (TF 2.21.0, ml_dtypes 0.5.3 per D-71, sklearn 1.4.2).
+2. **Unactivated launch** (run 2→3): even the governed env crashes the same way when its
+   `python.exe` is invoked by bare path — `Library\bin` absent from PATH breaks DLL
+   resolution after TF loads (`seed_everything` imports TF in EVERY stage entry,
+   `src/data/config.py:1154`, by design). Minimal repro confirmed both directions.
+   **Operational rule recorded: always launch stage scripts with the env activated.**
+3. **M-06 backend gap** (run 3→4): `_run_fixture_scale` reached M-06 and refused —
+   `fit_predict` carries no `CheckpointBackend` (the disclosed dispatcher gap). Fixed by
+   the `_fit_candidate` precedent: direct `lstm.fit_predict_rows` with the in-memory
+   backend (apparatus fold fits only; `assert_not_locked_fit` runs inside the family
+   module; the generic-dispatcher fix stays owed).
+4. **07's target loader was a stub** (run 4→5): `scripts/07_evaluate_and_report.py`
+   refused unconditionally at the released target, exactly as 06's did before 2026-09-25.
+   Implemented mirroring 06's loader verbatim (stage-local copy by the scripts' designed
+   pattern; consolidation of the two copies into one `src/` home is OWED).
+5. **Rec 18 inputs unwired** (run 5→6): the orchestrator never passed
+   `--target-release-manifest`, `--budget-artifact`, `--table-caption` to 07.
+   `lifecycle_arguments` now threads the first two; `--table-caption` became a
+   run_walking_skeleton pass-through forwarded VERBATIM (Student-approved caption text,
+   2026-09-26). Side-finding disclosed: stage 02 writes `uncertainty_budget.json` under
+   the governed `artifacts/prepared_target/` root even on fixture runs (02:728) — the
+   same fixture-taint class as the Phase 3 `artifacts/releases/` problem.
+6. **Run 6 stopped at R-106, and this one is STRUCTURAL, not a bug**: comparison set
+   `primary` declares member `B-01` (IRI-2016, generated-not-trained, R-59/D-45); no
+   B-01 payload can exist locally — B-01 generation is 04's opt-in `--attempt-benchmark`
+   path, requires `iricore` (Linux cp310 wheel only → the D-49 Kaggle session), and the
+   orchestrator passes no attempt flag. TE 15.4 additionally lists `iri_benchmark.parquet`
+   and `gim_comparator.parquet` as required PLUMBING outputs, so even a 07 workaround
+   could not produce a fixture pass. No local-only path to a plumbing receipt exists
+   under the frozen texts. Ruling routed to the Student (see the session record); nothing
+   was changed to circumvent it. Deepest verified point: stages 00–06 complete end-to-end
+   (all six families fit under D-70's apparatus points, LSTM three seeds + confirmatory),
+   07 runs to the R-106 exact-set refusal.
+
 The `apparatus_hyperparameters` block is NOT yet written into
 `tests/fixtures/plumbing_7day/identity_declaration.yaml`. The executor of the next step
 checks, on reaching it, that `evidence/DECISIONS.md` carries the adopted decision with a

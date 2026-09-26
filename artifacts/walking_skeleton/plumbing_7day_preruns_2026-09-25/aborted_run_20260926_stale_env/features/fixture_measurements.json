@@ -1,0 +1,20 @@
+{
+  "measurements": {
+    "permitted_floating_point_tolerances": {
+      "value_level_diff_tecu": {
+        "measured_over_bundles": 8,
+        "observed_max": 0.0,
+        "status": "measured, not frozen; WS-13 Pending",
+        "units": "TECU"
+      }
+    },
+    "row_count_ranges": {
+      "feature_window": {
+        "max": 48,
+        "min": 24,
+        "units": "rows"
+      }
+    }
+  },
+  "stage": "05_build_features_and_splits"
+}

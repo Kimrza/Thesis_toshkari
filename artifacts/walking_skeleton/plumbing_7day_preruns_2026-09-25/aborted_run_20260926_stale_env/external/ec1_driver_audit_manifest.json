@@ -1,0 +1,90 @@
+{
+  "artifact_class": "driver_manifest",
+  "derived": true,
+  "partial": true,
+  "missing_months": [
+    "2022-11..2022-11 (hp60_ap60: retrieved 2026-09-18 into evidence/audit_gfz_2026-09-18/ but not yet consumed by this stage; no driver product built from it here -- integration owed under D-39/D-40/D-41)",
+    "2022-11..2022-11 (kp_ap3: retrieved 2026-09-18 into evidence/audit_gfz_2026-09-18/ but not yet consumed by this stage; no driver product built from it here -- integration owed under D-39/D-40/D-41)"
+  ],
+  "series": [
+    {
+      "series_id": "dst",
+      "release_status": "provisional",
+      "retrieval_date": "2026-08-15",
+      "provider_product_identity": "kyoto_dst/dst_provisional_2022MM.html (1 monthly files present)",
+      "sha256": "11ec75d3b20b9da0c8305fba9b35e5de1d1a65ea77c56e99f953bcf261d3bc0a",
+      "per_file_sha256": {
+        "dst_provisional_202211.html": "56562cf040e1b12b7fae5156d2bd1e4f5d2489fb215071fdd5883143864fb592"
+      },
+      "provenance_verifiability": {
+        "status": "declared-status-only",
+        "documented_absence": "the Kyoto monthly tables carry no provenance column; the grade is inferable from the filename alone",
+        "unverified_status_statement": "the declared 'provisional' grade is recorded, not verified: D-10.1's open item on the 2022 Kyoto grade remains unchecked per D-11, and no detection is possible from the bytes -- bounded, not closed (R-63's Constraint, carried to G-04)",
+        "grade_basis": "filename token 'provisional' (declared)"
+      },
+      "carried_forward_epochs": [],
+      "coverage": [
+        {
+          "month": "2022-11",
+          "file": "dst_provisional_202211.html",
+          "sha256": "56562cf040e1b12b7fae5156d2bd1e4f5d2489fb215071fdd5883143864fb592",
+          "expected_days": 7,
+          "day_rows_parsed": 7,
+          "missing_days": []
+        }
+      ],
+      "evidence_class": "fixture_plumbing",
+      "fixture_scope_id": "plumbing_7day",
+      "audit_window": {
+        "start": "2022-11-01",
+        "end": "2022-11-07"
+      },
+      "provenance_stamp": {
+        "source": "kyoto_dst/dst_provisional_2022MM.html (1 monthly files present)",
+        "produced_by": "scripts/04_build_external_products.py",
+        "stamp_class": "evidentiary",
+        "stamped_at_utc": "2026-09-26T00:03:59.661185+00:00"
+      }
+    },
+    {
+      "series_id": "f107",
+      "release_status": "observed (grade undeclared by provider)",
+      "retrieval_date": "2026-08-15",
+      "provider_product_identity": "nrcan_f107/fluxtable.txt",
+      "sha256": "4b7fbfde3b9d0140ef43e7487f5986fe18f93182dac5e1ee37a93fb6ebd690b9",
+      "per_file_sha256": {
+        "fluxtable.txt": "4b7fbfde3b9d0140ef43e7487f5986fe18f93182dac5e1ee37a93fb6ebd690b9"
+      },
+      "provenance_verifiability": {
+        "status": "declared-status-only",
+        "documented_absence": "fluxtable.txt has exactly seven columns and no correction, revision, version or provenance column (D-22)",
+        "unverified_status_statement": "the provider's publication latency is not derivable from the held file (D-21) and no reanalysed-value detection is possible from the bytes -- bounded, not closed (R-63's Constraint, carried to G-04)",
+        "grade_basis": "no provenance column exists; absence documented"
+      },
+      "carried_forward_epochs": [],
+      "coverage": {
+        "file": "fluxtable.txt",
+        "sha256": "4b7fbfde3b9d0140ef43e7487f5986fe18f93182dac5e1ee37a93fb6ebd690b9",
+        "records_2022": 21,
+        "days_present_2022": 7,
+        "days_missing_2022": [],
+        "days_missing_from_outage_start": [],
+        "unparsed_lines": 0
+      },
+      "evidence_class": "fixture_plumbing",
+      "fixture_scope_id": "plumbing_7day",
+      "audit_window": {
+        "start": "2022-11-01",
+        "end": "2022-11-07"
+      },
+      "provenance_stamp": {
+        "source": "nrcan_f107/fluxtable.txt",
+        "produced_by": "scripts/04_build_external_products.py",
+        "stamp_class": "evidentiary",
+        "stamped_at_utc": "2026-09-26T00:03:59.661185+00:00"
+      }
+    }
+  ],
+  "produced_by": "scripts/04_build_external_products.py",
+  "provenance_stamp_note": "stamps are evidentiary, not cryptographic (SD-E-03): nothing validates a stamp's truthfulness, and no reader may treat one as a signature"
+}

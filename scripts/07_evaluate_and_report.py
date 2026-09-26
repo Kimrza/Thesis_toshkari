@@ -100,12 +100,13 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import csv
 import json
 import sys
 import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -139,6 +140,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     release_root_for,
 )
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
+from src.data.release import verify_release  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.splits import (  # noqa: E402
     LOCKED_ID,
@@ -574,11 +576,35 @@ def _registry_row(
 # =======================================================================================
 
 
+#: The released target CSV's columns this loader reads — the SAME contract as
+#: `06_train_and_predict.py`'s `_TARGET_COLUMNS` (three TARGET_* identities plus the three
+#: NFR-TDEF-01 identity stamps). Two stage-local copies by the scripts' designed pattern;
+#: consolidation into one `src/` home is flagged as owed in
+#: `CR-2026-09-25-APPARATUS-HYPERPARAMETERS` §5 follow-ups.
+_TARGET_COLUMNS: Final[tuple[str, ...]] = (
+    "interval_start_utc",
+    "station_id",
+    "vtec_tecu",
+    "target_valid",
+    "phase_id",
+    "source_id",
+    "target_definition_id",
+)
+
+
 def _load_target_by_manifest(snapshot: Any, *, fixture_scope_id: str | None) -> Any:
     """The released Phase 1 hourly target, read BY MANIFEST from the release root.
 
     An upstream unit's artifact (`target-standardization`). A missing release refuses
     honestly (TE 13.3; TE 18.3) — exactly as `06` does; no loader is defaulted.
+    `verify_release` re-derives the manifest's own claims before a single byte is
+    trusted; only rows with `target_valid == "True"` are kept — a QC-invalid row is
+    dropped, never imputed (D-5).
+
+    Implemented 2026-09-26, mirroring `06`'s 2026-09-25 implementation verbatim (same
+    stub, same reason, found by the first fixture run to reach stage 07 — see
+    `CR-2026-09-25-APPARATUS-HYPERPARAMETERS`). Before this the function refused
+    unconditionally even once the release existed on disk.
     """
     # Owner ruling 2026-09-23: ONE resolver for the release root. On a fixture run the
     # releases live under the walking-skeleton root, so this stage reads the fixture's
@@ -589,7 +615,8 @@ def _load_target_by_manifest(snapshot: Any, *, fixture_scope_id: str | None) -> 
         artifacts_root=Path(snapshot.resolved_roots["artifacts"]),
         fixture_id=fixture_scope_id,
     )
-    manifest = release_root / "phase1_hourly_target" / "release_manifest.json"
+    release_dir = release_root / "phase1_hourly_target"
+    manifest = release_dir / "release_manifest.json"
     if not manifest.is_file():
         raise IntegrityError(
             manifest,
@@ -597,12 +624,33 @@ def _load_target_by_manifest(snapshot: Any, *, fixture_scope_id: str | None) -> 
             "against is read from a released target by manifest and hash, never from a "
             "bare path (TE 13.3)",
         )
-    raise IntegrityError(
-        manifest,
-        "reading the released target into a frame is reached only after the upstream "
-        "freezes land; none has today, so this path stops here rather than defaulting a "
-        "loader (TE 18.3)",
-    )
+    problems = verify_release(manifest)
+    if problems:
+        raise IntegrityError(
+            manifest,
+            "the released target manifest does not verify (TE 13.3; R-11): " + "; ".join(problems),
+        )
+    parsed = json.loads(manifest.read_text(encoding="utf-8"))
+    output_files = parsed.get("output_files")
+    if not isinstance(output_files, Mapping) or not output_files:
+        raise IntegrityError(manifest, "output_files is absent or empty after verification")
+    records: list[dict[str, Any]] = []
+    for rel_path in sorted(output_files):
+        csv_path = release_dir / rel_path
+        with csv_path.open("r", encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                if str(row.get("target_valid", "")).strip() != "True":
+                    continue  # D-5: a QC-invalid row is dropped, never imputed
+                records.append({name: row.get(name) for name in _TARGET_COLUMNS})
+    if not records:
+        raise IntegrityError(
+            manifest, "the released target carries zero rows with target_valid == 'True'"
+        )
+    # A plain record sequence, NOT a `src/features` frame: this script is boundaried to
+    # `src/data` + `src/evaluation` (the import-boundary control in test_common_masks.py),
+    # and `src/evaluation` consumes VALUES through its own `_rows_of` — which accepts a
+    # record sequence by design (masks.py, D-27's transitive bar on `src/features`).
+    return records
 
 
 def _load_predictions_run(run_dir: Path | None, partition_id: str) -> dict[str, Any]:

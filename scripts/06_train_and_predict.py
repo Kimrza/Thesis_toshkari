@@ -1230,20 +1230,47 @@ def _run_fixture_scale(
             params = _apparatus_params(scope, snapshot, model_id)
             for seed in seeds:
                 assert_stamp_match(score_bundle, partition)
-                prediction = fit_predict(
-                    model_id,
-                    bundle=train_bundle,
-                    partition=partition,
-                    snapshot=snapshot,
-                    target=fixture_target,  # the fixture-scale target; no locked path exists
-                    score_bundle=score_bundle,
-                    # apparatus folds mirror the frozen folds: the scored bundle IS the
-                    # validation bundle here, named rather than implied
-                    validation_bundle=score_bundle,
-                    seed=seed,
-                    params=params,
-                    horizon_hours=horizon,
-                )
+                if model_id == "M-06":
+                    # The SAME dispatcher gap `_fit_candidate` discloses: `fit_predict`'s
+                    # approved signature carries no CheckpointBackend, so it can never
+                    # reach a fold fit's best-checkpoint restoration (R-94). M-06 is fit
+                    # by calling its family module directly with the in-memory backend —
+                    # an apparatus fold fit, never a refit, so TS-M-01's frozen persist
+                    # format is not in play. `lstm.fit_predict_rows` runs its own
+                    # `assert_not_locked_fit`, and no apparatus partition is ever locked
+                    # (R-137). The generic-dispatcher fix stays owed and disclosed
+                    # (CR-2026-09-25 target-loader record, "A second gap found, not
+                    # fixed"; extended by CR-2026-09-25-APPARATUS-HYPERPARAMETERS).
+                    from src.models import lstm as _lstm  # lazy import (R-05)
+
+                    prediction = _lstm.fit_predict_rows(
+                        model_id,
+                        bundle=train_bundle,
+                        score_bundle=score_bundle,
+                        partition=partition,
+                        snapshot=snapshot,
+                        target=fixture_target,
+                        seed=seed,
+                        params=params,
+                        horizon_hours=horizon,
+                        validation_bundle=score_bundle,
+                        backend=_InMemoryCheckpointBackend(),
+                    )
+                else:
+                    prediction = fit_predict(
+                        model_id,
+                        bundle=train_bundle,
+                        partition=partition,
+                        snapshot=snapshot,
+                        target=fixture_target,  # the fixture-scale target; no locked path exists
+                        score_bundle=score_bundle,
+                        # apparatus folds mirror the frozen folds: the scored bundle IS the
+                        # validation bundle here, named rather than implied
+                        validation_bundle=score_bundle,
+                        seed=seed,
+                        params=params,
+                        horizon_hours=horizon,
+                    )
                 if model_id == "M-06":
                     seeded.append(prediction)
                 name = f"{model_id}" + (f"_seed{seed}" if seed is not None else "") + ".json"

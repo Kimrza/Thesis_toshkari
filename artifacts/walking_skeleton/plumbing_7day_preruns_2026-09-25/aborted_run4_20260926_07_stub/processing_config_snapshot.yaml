@@ -1,0 +1,21 @@
+{
+  "config_hashes": {
+    "data.yaml": "6f8330c7396a38f079b054b7f1d7b8950f32beb0496027f8827355a5665ef546",
+    "experiment.yaml": "733f59b7b358e4d8ebdd7cd9eade1dbe24e1cdf184044262fa6d89b3630f6f85",
+    "features.yaml": "1b1ebdfd009010742bf22bf1f608dc5df5e6b1fbb36981d1b2936f3b6c92d28c",
+    "seeds.yaml": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166"
+  },
+  "fixture_stamp": {
+    "apparatus_partition_id": null,
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified \u2014 no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md \u00a7 Walking Skeleton).",
+    "december_representativeness": "not_representative",
+    "evidence_class": "smoke_only",
+    "fixture_id": "plumbing_7day",
+    "frozen_manifest_hash": null,
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "kind": "processing_config_snapshot",
+  "snapshot_dir": "C:\\Users\\s_sch\\Desktop\\test\\Thesis_toshkari-main\\Thesis_toshkari-main\\artifacts\\run_snapshots\\20260926T001614Z-290c4e1f"
+}

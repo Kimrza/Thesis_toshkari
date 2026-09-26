@@ -1,0 +1,151 @@
+{
+  "confirmatory": false,
+  "fixture_stamp": {
+    "apparatus_partition_id": "FIX-NOV-FOLD-02",
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified \u2014 no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md \u00a7 Walking Skeleton).",
+    "december_representativeness": "not_representative",
+    "evidence_class": "smoke_only",
+    "fixture_id": "plumbing_7day",
+    "frozen_manifest_hash": null,
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "horizon_hours": 1,
+  "hyperparameters": {
+    "batch_size": 64,
+    "layers": 1,
+    "learning_rate": 0.001,
+    "units": 32
+  },
+  "model_id": "M-06",
+  "partition_id": "FIX-NOV-FOLD-02",
+  "phase_id": "P1A",
+  "rows": [
+    {
+      "interval_start_utc": "2022-11-07T00:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.292478561401367
+    },
+    {
+      "interval_start_utc": "2022-11-07T01:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.29425048828125
+    },
+    {
+      "interval_start_utc": "2022-11-07T02:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.296545028686523
+    },
+    {
+      "interval_start_utc": "2022-11-07T03:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.2931489944458
+    },
+    {
+      "interval_start_utc": "2022-11-07T04:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.29425048828125
+    },
+    {
+      "interval_start_utc": "2022-11-07T05:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.306070327758789
+    },
+    {
+      "interval_start_utc": "2022-11-07T06:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.318832397460938
+    },
+    {
+      "interval_start_utc": "2022-11-07T07:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.327866554260254
+    },
+    {
+      "interval_start_utc": "2022-11-07T08:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.339825630187988
+    },
+    {
+      "interval_start_utc": "2022-11-07T09:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.345722198486328
+    },
+    {
+      "interval_start_utc": "2022-11-07T10:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.337766647338867
+    },
+    {
+      "interval_start_utc": "2022-11-07T11:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.343550682067871
+    },
+    {
+      "interval_start_utc": "2022-11-07T12:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.349048614501953
+    },
+    {
+      "interval_start_utc": "2022-11-07T13:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.349372863769531
+    },
+    {
+      "interval_start_utc": "2022-11-07T14:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.344995498657227
+    },
+    {
+      "interval_start_utc": "2022-11-07T15:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.335357666015625
+    },
+    {
+      "interval_start_utc": "2022-11-07T16:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.318746566772461
+    },
+    {
+      "interval_start_utc": "2022-11-07T17:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.313701629638672
+    },
+    {
+      "interval_start_utc": "2022-11-07T18:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.304826736450195
+    },
+    {
+      "interval_start_utc": "2022-11-07T19:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.305645942687988
+    },
+    {
+      "interval_start_utc": "2022-11-07T20:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.307051658630371
+    },
+    {
+      "interval_start_utc": "2022-11-07T21:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.30744457244873
+    },
+    {
+      "interval_start_utc": "2022-11-07T22:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.309792518615723
+    },
+    {
+      "interval_start_utc": "2022-11-07T23:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 12.303873062133789
+    }
+  ],
+  "seed": 1337,
+  "seeds_averaged": null,
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "transform_id": "T-FIX-NOV-FOLD-02"
+}
