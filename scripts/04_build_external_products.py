@@ -336,6 +336,38 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "`external-products`' record (fixtures-and-reproducibility CR-2026-09-07)"
         ),
     )
+    parser.add_argument(
+        "--emit-prediction-payload",
+        type=Path,
+        default=None,
+        help=(
+            "the B-01-to-Prediction bridge (partition-scoping Q1 = B, decided by the "
+            "Student/Owner 2026-09-26): reads the already-generated "
+            "b01_iri2016_rows*.jsonl + b01_provenance.json, re-verifies the R-59 gate they "
+            "carry, filters rows into each F1-F4 fold partition's own validation-month "
+            "window, and writes one `06`-shaped B-01.json per partition under this "
+            "workspace-relative 06 predictions-run directory (write-once; REFIT and DEC "
+            "are refused -- REFIT is scored nowhere, DEC needs the separate one-door gate)"
+        ),
+    )
+    parser.add_argument(
+        "--benchmark-rows",
+        type=Path,
+        default=None,
+        help=(
+            "the B-01 raw rows file for --emit-prediction-payload; default is the b01 out "
+            "dir's b01_iri2016_rows.jsonl (or _partial variant)"
+        ),
+    )
+    parser.add_argument(
+        "--benchmark-provenance",
+        type=Path,
+        default=None,
+        help=(
+            "the b01_provenance.json for --emit-prediction-payload; default is the b01 "
+            "out dir's b01_provenance.json"
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -1661,6 +1693,125 @@ def _render_comparison(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     return {"rendered": "stdout (contract check over injected state; no artifact written)"}
 
 
+def _write_prediction_once(path: Path, payload: Mapping[str, Any]) -> Path:
+    """Write-once: an existing prediction file is never overwritten (TE 13.3; R-102a
+    step 1) -- the same idiom `06_train_and_predict.py`'s `_write_prediction_once`
+    applies to every `06` prediction file, extended here to B-01's bridged payload so
+    both producers keep one discipline."""
+    if path.exists():
+        raise IntegrityError(
+            str(path),
+            "prediction file already exists; predictions are written exactly once and "
+            "never regenerated after a score is seen (FR-P1-05-12; R-102a)",
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    return path
+
+
+def _read_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    with Path(path).open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    return rows
+
+
+def _emit_prediction_payload(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """The B-01-to-`Prediction` bridge (Phase 3/4 design; partition-scoping Q1 = B,
+    decided by the Student/Owner 2026-09-26). Re-verifies the R-59 gate at consumption
+    time (never trusts generation-time gating alone), then delegates the pure
+    row-to-payload conversion to `iri.predictions_from_benchmark_rows` and writes one
+    `06`-shaped `B-01.json` per F1-F4 fold partition into the named 06 predictions-run
+    directory. REFIT and DEC are never targeted: REFIT is scored nowhere
+    (FR-P1-04-14) and DEC needs the separate one-door `open_restricted` gate (R-109),
+    which is out of scope for this bridge.
+    """
+    _assert_phase1_field_contract(args.phase)
+    from src.data.registry import load_registry  # station coordinates (D-1)
+    from src.data.splits import PartitionKind, build_partitions
+    from src.external import iri  # allowlisted importer; deferred by design
+
+    if args.emit_prediction_payload is None:  # pragma: no cover - argparse routing guarantees this
+        raise IntegrityError(
+            "--emit-prediction-payload", "no 06 predictions-run directory was named"
+        )
+    out = _b01_out_dir(entry, args)
+    rows_path = args.benchmark_rows
+    if rows_path is None:
+        candidate = out / "b01_iri2016_rows.jsonl"
+        rows_path = candidate if candidate.is_file() else out / "b01_iri2016_rows_partial.jsonl"
+    prov_path = args.benchmark_provenance or (out / "b01_provenance.json")
+    if not Path(rows_path).is_file():
+        raise IntegrityError(str(rows_path), "no B-01 raw rows file; run --generate-benchmark first")
+    if not Path(prov_path).is_file():
+        raise IntegrityError(str(prov_path), "no b01_provenance.json; run --generate-benchmark first")
+
+    provenance = _load_json_object(prov_path, what="B-01 provenance")
+    if not isinstance(provenance, Mapping):
+        raise IntegrityError(str(prov_path), "B-01 provenance must be a JSON object")
+    artifact_class = str(provenance.get("artifact_class", ""))
+    if not artifact_class.startswith("B-01 benchmark rows (generated, not trained)"):
+        raise IntegrityError(
+            str(prov_path),
+            f"artifact_class {artifact_class!r} is not a B-01 generated-benchmark "
+            f"provenance record; refusing to bridge a differently-labelled artifact",
+        )
+    actual_rows_hash = sha256_of_file(Path(rows_path))
+    if actual_rows_hash != provenance.get("rows_sha256"):
+        raise IntegrityError(
+            str(rows_path),
+            f"rows file hash {actual_rows_hash} does not match provenance's recorded "
+            f"rows_sha256 {provenance.get('rows_sha256')!r}; the rows file has changed "
+            f"since generation or the provenance does not describe it",
+        )
+    validation_report_file = provenance.get("validation_report_file")
+    if not validation_report_file:
+        raise IntegrityError(str(prov_path), "provenance carries no validation_report_file")
+    actual_report_hash = sha256_of_file(Path(validation_report_file))
+    if actual_report_hash != provenance.get("validation_report_sha256"):
+        raise IntegrityError(
+            str(validation_report_file),
+            f"validation report hash {actual_report_hash} does not match provenance's "
+            f"recorded validation_report_sha256 {provenance.get('validation_report_sha256')!r}",
+        )
+    report = _load_json_object(validation_report_file, what="validation report")
+    report_status = report.get("status") if isinstance(report, Mapping) else None
+    if not isinstance(report, Mapping) or str(report_status).lower() != "passed":
+        raise IntegrityError(
+            str(validation_report_file),
+            f"validation report status is {report_status!r}, not 'passed'; R-59 limb 1 "
+            f"is re-asserted at consumption, not only at generation, and refuses a "
+            f"benchmark whose gate did not pass",
+        )
+    if provenance.get("partial"):
+        print(
+            "04_build_external_products: WARNING -- bridging a PARTIAL B-01 artifact "
+            f"(months {provenance.get('months')}); some months will have no B-01 rows",
+            file=sys.stderr,
+        )
+
+    rows = _read_jsonl(rows_path)
+    contract = iri.read_benchmark_contract(entry["snapshot"])
+    stations = load_registry(entry["snapshot"])
+    all_partitions = build_partitions(entry["snapshot"])
+    fold_partitions = [p for p in all_partitions if p.kind is PartitionKind.fold]
+
+    payloads = iri.predictions_from_benchmark_rows(
+        rows, contract=contract, stations=stations, partitions=fold_partitions
+    )
+
+    written: list[str] = []
+    run_dir = Path(args.emit_prediction_payload)
+    for partition_id, payload in payloads.items():
+        path = _write_prediction_once(run_dir / partition_id / "B-01.json", payload)
+        written.append(str(path))
+        print(f"04_build_external_products: B-01 payload -> {path}")
+    return {"written": written}
+
+
 def main() -> int:
     ensure_process_determinism(sys.argv)  # FIRST statement, before any framework import
     args = _parse_args(sys.argv[1:])
@@ -1709,6 +1860,8 @@ def main() -> int:
             summary = _attempt_comparator(entry, args)
         elif args.render_comparison is not None:
             summary = _render_comparison(entry, args)
+        elif args.emit_prediction_payload is not None:
+            summary = _emit_prediction_payload(entry, args)
         else:
             summary = _run_driver_audit(entry, args)
     except IntegrityError as exc:

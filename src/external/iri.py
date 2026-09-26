@@ -71,6 +71,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.data.config import BenchmarkError
+from src.data.splits import Partition, PartitionKind, validation_month_range
 
 __all__ = [
     "REPORT_CONTENT_AREAS",
@@ -88,6 +89,7 @@ __all__ = [
     "benchmark_driver_rows",
     "build_validation_report",
     "run_gated_generation",
+    "predictions_from_benchmark_rows",
 ]
 
 #: FR-P1-04-15's seven content areas, asserted field by field (R-59 limb 3). The keys
@@ -1017,3 +1019,181 @@ def run_gated_generation(
         "spatial_representativeness_statement": "Phase 1 compares a gridded-cell target against IRI evaluated at the station coordinate; part of any measured difference is geometry and sampling, not skill (Vision 6.6)",
     }
     return {"rows": rows, "provenance": provenance, "partial": months is not None}
+
+
+#: The reserved transform-identity literal `06` stamps on every generated (never
+#: fitted) comparison member -- B-01 and C-01 (`evaluation-and-comparison`
+#: business-rules.md: "B-01 and C-01 ... stamped with ... the reserved literal
+#: `untransformed`"). Duplicated here, rather than imported from
+#: `src.evaluation.guards.UNTRANSFORMED`, to avoid a `src/external` -> `src/evaluation`
+#: import edge this unit's boundary note does not grant (TE 12; TA-07); a dedicated
+#: equality test (`tests/test_b01_prediction_adapter.py`) asserts the two literals
+#: agree so they cannot drift unnoticed.
+_UNTRANSFORMED: str = "untransformed"
+
+
+def predictions_from_benchmark_rows(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    contract: BenchmarkContract,
+    stations: Mapping[str, Any],
+    partitions: Sequence[Partition],
+) -> dict[str, dict[str, Any]]:
+    """Bridge B-01's raw generated rows (`evaluate_points`'s shape) into the eight-field
+    `Prediction` payload convention `06` already writes and `07` already reads
+    (`src.evaluation.masks.prediction_from_payload`) -- one payload per fold partition.
+
+    Partition-scoping decision (Student/Owner, 2026-09-26): **Option B** -- rows are
+    filtered to each partition's own `[validation_month, next_month)` window
+    (`src.data.splits.validation_month_range`) before being written into that
+    partition's payload; a partition's payload never carries another partition's rows.
+
+    Only `PartitionKind.fold` partitions (F1-F4) are accepted -- `REFIT` has no
+    `validation_month` (scored nowhere, FR-P1-04-14) and `DEC` is refused outright: the
+    locked partition is reachable only through `governance-guards`' one-door
+    `open_restricted` (R-109), which this pure function does not implement and must not
+    be assumed by writing into a `DEC` directory ahead of that gate.
+
+    Every envelope field below traces to an already-frozen source -- none is invented
+    here (TE 18.2):
+
+    * `model_id` = `contract.benchmark_id` (`configs/experiment.yaml:
+      benchmark_b01.benchmark_id`, `"B-01"`);
+    * `seed` = `None` (`evaluation-and-comparison/domain-entities.md`: "B-01 and C-01
+      are producible as `Prediction`s with `seed = None`");
+    * `phase_id`, `source_id`, `target_definition_id` = `contract.stamps` (`configs/
+      experiment.yaml: benchmark_b01.stamps`);
+    * `transform_id` = the reserved literal `"untransformed"` (same source, "the
+      reserved literal `untransformed`");
+    * `partition_id` = the fold partition's own `partition_id`.
+
+    Row rename only (`station_id` -> `station`, `target_time_utc` ->
+    `interval_start_utc`, `contract.output_field` value -> `y_hat`) -- no new schema.
+
+    Accounting (never a silent drop). Every payload's `b01_generation_provenance`
+    carries `total_row_count` (all raw rows supplied), `error_row_count` (rows whose own
+    `status != "ok"`), and `unmatched_partition_row_count` (rows that ARE valid B-01
+    points but fall in none of the SUPPLIED `partitions`' windows -- e.g. a training-only
+    month between F1-F4, per `configs/data.yaml`'s real fold months). The three counts
+    are disjoint and sum to `total_row_count`. An unmatched row is NOT an error: it is a
+    legitimate completeness fact about the partition set the caller supplied, exactly
+    the two-tier posture (integrity violation vs. non-fatal completeness shortfall)
+    `evaluate_points`' own `status` field already applies to its rows.
+
+    Raises
+    ------
+    BenchmarkError
+        a `partitions` entry that is not `PartitionKind.fold` (REFIT/DEC refused
+        outright); `contract.stamps` missing `phase_id`/`source_id`/
+        `target_definition_id`; a row with an unparseable/naive `target_time_utc`; a
+        row whose `station_id` is not in `stations` (the registry, D-1); a duplicate
+        `(station_id, target_time_utc)` pair across the raw rows; or a fold partition
+        whose filtered row set is empty (an empty comparison member masks nothing --
+        the same posture `build_comparison_mask` takes on an empty intersection).
+    """
+    for partition in partitions:
+        if partition.kind is not PartitionKind.fold:
+            raise BenchmarkError(
+                f"partition {partition.partition_id}",
+                "is not a fold partition (F1-F4); REFIT has no validation_month (scored "
+                "nowhere, FR-P1-04-14) and DEC is reachable only through "
+                "governance-guards' one-door open_restricted (R-109) -- this function "
+                "accepts fold partitions only",
+            )
+    required_stamps = ("phase_id", "source_id", "target_definition_id")
+    missing_stamps = [k for k in required_stamps if not contract.stamps.get(k)]
+    if missing_stamps:
+        raise BenchmarkError(
+            "experiment.benchmark_b01.stamps",
+            f"missing required stamp(s) {missing_stamps}; phase_id/source_id/"
+            f"target_definition_id are the comparison's identity stamps and are never "
+            f"defaulted (R-105/TE 13)",
+        )
+
+    windows: dict[str, tuple[dt.datetime, dt.datetime]] = {
+        p.partition_id: validation_month_range(p) for p in partitions
+    }
+    buckets: dict[str, list[dict[str, Any]]] = {p.partition_id: [] for p in partitions}
+    seen_keys: set[tuple[str, str]] = set()
+    error_row_count = 0
+    unmatched_partition_row_count = 0
+
+    for row in rows:
+        status = row.get("status")
+        if status != "ok":
+            error_row_count += 1
+            continue
+        station_id = row.get("station_id")
+        if station_id not in stations:
+            raise BenchmarkError(
+                "b01 rows",
+                f"row station_id {station_id!r} is not in the station registry "
+                f"(configs/data.yaml: stations, D-1); a benchmark row for an "
+                f"unregistered station cannot be scored",
+            )
+        target_time = _parse_utc(row.get("target_time_utc"), resource="b01 rows", field="target_time_utc")
+        key = (str(station_id), target_time.isoformat())
+        if key in seen_keys:
+            raise BenchmarkError(
+                "b01 rows",
+                f"duplicate row for (station_id, target_time_utc) = {key}; the raw "
+                f"benchmark output must not carry the same point twice",
+            )
+        seen_keys.add(key)
+        value = row.get(contract.output_field)
+        if not isinstance(value, int | float) or isinstance(value, bool):
+            raise BenchmarkError(
+                "b01 rows",
+                f"row for {key} has status 'ok' but {contract.output_field!r} is "
+                f"{value!r}, not a number (a bool is never accepted as a TEC value, "
+                f"even though `isinstance(True, int)` is True in Python)",
+            )
+        for partition_id, (start, end) in windows.items():
+            if start <= target_time < end:
+                buckets[partition_id].append(
+                    {
+                        "station": str(station_id),
+                        "interval_start_utc": target_time.isoformat(),
+                        "y_hat": float(value),
+                    }
+                )
+                break  # windows are disjoint by construction (splits.py); one match only
+        else:
+            # No supported partition's window claimed this row. This is NOT an error
+            # (team.md's two-tier posture): a valid, well-formed B-01 row for a month no
+            # declared partition scores (e.g. a training-only month between F1-F4) is a
+            # legitimate, non-fatal completeness fact about the SUPPLIED partition set,
+            # never an integrity violation. It must still be counted, never silently
+            # dropped -- the same posture `evaluate_points`' own error-row accounting
+            # already takes for its own rows.
+            unmatched_partition_row_count += 1
+
+    payloads: dict[str, dict[str, Any]] = {}
+    for partition in partitions:
+        member_rows = buckets[partition.partition_id]
+        if not member_rows:
+            raise BenchmarkError(
+                f"partition {partition.partition_id}",
+                "the B-01 rows filtered to this partition's validation-month window are "
+                "empty; an empty comparison member masks nothing and is refused rather "
+                "than written (matches build_comparison_mask's empty-intersection "
+                "refusal)",
+            )
+        payloads[partition.partition_id] = {
+            "model_id": contract.benchmark_id,
+            "seed": None,
+            "partition_id": partition.partition_id,
+            "transform_id": _UNTRANSFORMED,
+            "phase_id": str(contract.stamps["phase_id"]),
+            "source_id": str(contract.stamps["source_id"]),
+            "target_definition_id": str(contract.stamps["target_definition_id"]),
+            "confirmatory": False,
+            "rows": member_rows,
+            "b01_generation_provenance": {
+                "label": "generated, not trained",
+                "error_row_count": error_row_count,
+                "unmatched_partition_row_count": unmatched_partition_row_count,
+                "total_row_count": len(rows),
+            },
+        }
+    return payloads
