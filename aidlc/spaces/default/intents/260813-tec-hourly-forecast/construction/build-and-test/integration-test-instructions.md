@@ -17,8 +17,14 @@ Two fixtures, run in order, both required before any full-year job
 
 1. **`plumbing_7day`** — one station (BSHM, D-20), 2022-11-01 to 2022-11-07
    (D-11). Smoke test only, never scientific evidence.
-2. **`scientific_1month`** — all three stations, one month. Window still
-   open under Q-31 (a student freeze act, not an implementation choice).
+2. **`scientific_1month`** — all three stations, one month: 2022-03-01 to
+   2022-03-31, the window frozen 2026-08-21 as **D-14**. What remains open
+   under Q-31 is the fixture **manifest freeze** — the measured counts,
+   tolerances and runtimes whose `TBD — freeze gate` sentinels stand in
+   `tests/fixtures/scientific_1month/fixture_manifest.yaml` (a student freeze
+   act, not an implementation choice). *(Corrected 2026-09-27,
+   `GOV-2026-09-27-BT-02` R15: the earlier "window still open under Q-31"
+   misnamed the open act.)*
 
 ```bash
 export PYTHONHASHSEED=0
@@ -36,6 +42,13 @@ Stages **06 and 07 have not yet run** on the fixture (no
 `models/`/`predictions/`/`evaluation/` outputs exist under the fixture root).
 The scientific fixture has never run. WS-20 / TA-17 therefore remain
 `Pending`.
+
+*(Superseded in part, 2026-09-27 — `GOV-2026-09-27-BT-02` R1: **stage 06 has
+since run** on the plumbing fixture, 2026-09-26, commit `7b4109b` —
+`predictions/FIX-NOV-FOLD-01|02` exist under the fixture root, registry-stamped
+`evidence_class: smoke_only`, under owner rulings D-75/D-76. Stage 07 has still
+not run; the scientific fixture has still never run; WS-20/TA-17 remain
+Pending. See `build-test-results.md` § "2026-09-27 re-baseline addendum".)*
 
 Fixture runs write under `artifacts/walking_skeleton/<fixture_id>/releases/`,
 never the governed `artifacts/releases/` root (release-root split, ruled
@@ -88,5 +101,7 @@ Carried to the approval gate rather than worked around:
    `models.refit` and `reporting:` blocks in `configs/experiment.yaml` —
    owner transcription acts (some now landed via D-67/D-68; verify at run
    time with the §18.3 preflight, which refuses on any `TBD`).
-2. The scientific fixture window is an open Q-31 student freeze.
+2. The scientific fixture **manifest freeze** (measured counts, tolerances,
+   runtimes) is an open Q-31 student act; the window itself is frozen as D-14
+   (March 2022). *(Corrected 2026-09-27, `GOV-2026-09-27-BT-02` R15.)*
 3. TC-03g's Kaggle-session run has never been executed from this clone.

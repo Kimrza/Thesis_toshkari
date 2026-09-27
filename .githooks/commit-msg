@@ -1,0 +1,41 @@
+#!/bin/sh
+# .githooks/commit-msg — refuse empty and editor-boilerplate commit messages.
+#
+# Added 2026-09-27 under GOV-2026-09-27-BT-02 R7 (Student-approved 2026-09-27), after
+# four governed-artifact commits (db15880, 576046c, 0ce2a68, 69b00c4) landed carrying
+# the literal editor template "Please enter the commit message for your changes...".
+# team.md § Way of Working (affirmed Q1/Q2): any commit that changes a scientific
+# constant, a config value, or another governed artifact must cite its D-number in the
+# commit message — a message that says nothing severs that link at the exact commits
+# where it matters most.
+#
+# Mechanism note: R7's text says "pre-commit hook check", but a message check
+# mechanically belongs HERE — the pre-commit hook runs before the message exists.
+# Recorded as a mechanism correction, not a scope change.
+#
+# Re-run behaviour: pure check — reads $1 (the message file), writes nothing.
+# A refusal blocks the commit; write a real message and re-commit.
+
+MSG_FILE="$1"
+
+if [ ! -f "$MSG_FILE" ]; then
+    echo "commit-msg: message file '$MSG_FILE' not found; refusing (GOV-2026-09-27-BT-02 R7)" >&2
+    exit 1
+fi
+
+# Strip comment lines and all whitespace; what remains is the effective message.
+CONTENT=$(grep -v '^[[:space:]]*#' "$MSG_FILE" | tr -d '[:space:]')
+
+if [ -z "$CONTENT" ]; then
+    echo "commit-msg: EMPTY commit message refused (GOV-2026-09-27-BT-02 R7)." >&2
+    echo "commit-msg: describe the change; a governed-artifact commit cites its D-number/CR (team.md § Way of Working)." >&2
+    exit 1
+fi
+
+if grep -qi 'Please enter the commit message for your changes' "$MSG_FILE"; then
+    echo "commit-msg: editor-BOILERPLATE message refused (GOV-2026-09-27-BT-02 R7)." >&2
+    echo "commit-msg: describe the change; a governed-artifact commit cites its D-number/CR (team.md § Way of Working)." >&2
+    exit 1
+fi
+
+exit 0

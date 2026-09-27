@@ -968,3 +968,17 @@ touch this unit's evidence disclosure:
 
 This addendum discloses per `project.md` `gf-3`; the READY receipt stands as history
 and is not reopened.
+
+## 2026-09-27 addendum — comment-only edit under GOV-2026-09-27-BT-02 R19 (gf-3 disclosure)
+
+The 2026-09-27 governance remediation (Student approved all 29 recommendations;
+execution record `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`)
+corrected the §8 header comment of `tests/test_locked_test_guard.py`: "the five
+retrospective December accesses, rows 3, 4, 5, 8 and 9" was written before
+registry row 10 existed and under-counted the retrospective class — six rows
+(3, 4, 5, 8, 9, 10) are retrospective; row 10 is a distinct event the synthetic
+orphan set never represented. **Comment only — no test logic, fixture,
+constant, or assertion changed** (`_KNOWN_PRE_GUARD_ORPHANS` unchanged). The
+registry's own roll-up and `foundation`'s Rec-43 docstring correction carry the
+matching six-row derivation. This addendum discloses per `project.md` `gf-3`;
+the receipt stands.

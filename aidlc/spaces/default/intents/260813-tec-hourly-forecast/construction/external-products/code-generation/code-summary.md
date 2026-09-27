@@ -1096,3 +1096,35 @@ owned by the Student, in another unit's scope. This unit's step is not the block
 
 Still unchanged: no WS or TA row is claimed discharged, B-01's R-59 limb 1 is open, and G-04
 is not passed.
+
+## 2026-09-27 addendum — cross-unit edits under GOV-2026-09-27-BT-02 (gf-3 disclosure)
+
+The 2026-09-27 governance remediation (Student approved all 29 recommendations;
+execution record `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`)
+edited five modules this unit owns, under its frozen receipt:
+
+- `src/external/gim.py` (R23): `generate_comparator` gains a fail-closed
+  December-2022 epoch refusal BEFORE any IONEX byte is read, with an optional
+  `g05_signature_verified: bool = False` override documented against
+  `src.data.splits.verify_g05_signature` (D-73; Vision §8.3). The signature
+  gains one keyword-only defaulted parameter; no existing caller changes
+  behaviour; the docstring's Raises section names the new refusal.
+- `tests/test_gim_generation.py` (R23, R3): new negative control
+  `test_generation_december_2022_epoch_refuses_pre_g05` through the sanctioned
+  `scripts/04` subprocess path; `_run_script` additionally strips
+  `GITHUB_ACTIONS`/`CI` (marker-free default resolution is the tested
+  behaviour, and those markers now refuse at `resolve_platform_roots`).
+- `tests/test_iri_denial.py` (R11): `iri_column_violations`' name limb widened
+  to production's token rule (any token beginning `iri`), with the new control
+  `test_canonical_iri2016_name_fails_whatever_its_provenance_says`; the
+  predicate docstring updated. Production enforcement was never weaker — this
+  closes a test-layer statement drift (`nfr-design:c58` class).
+- `tests/test_gim_provenance.py` and `tests/test_external_drivers.py` (R3):
+  subprocess helpers strip the CI markers, same rationale (two helpers in
+  `test_external_drivers.py`).
+
+⚠ Static only on the authoring clone — **no interpreter exists there, no test
+was executed**; first verification is the governed-host suite run recorded in
+the execution record § 7, plus CI once pushed (none of these five modules is
+among the CI deselections). This addendum discloses per `project.md` `gf-3`;
+the READY receipt stands as history and is not reopened.

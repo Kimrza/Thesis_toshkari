@@ -69,6 +69,20 @@ name: verify
 # and all three are owner acts. This is recorded as an OPEN RULING owed alongside
 # Recommendation 47's change record, and as an input to the G-09 disposition that already
 # holds the related history-immutability question.
+#
+# ── 2026-09-27 UPDATE (GOV-2026-09-27-BT-02 R2, Student-approved 2026-09-27) ──────────
+# The suite-narrowing option above is now EXECUTED as the approved immediate step: the
+# restricted-root reader modules are deselected below (see the "Full tests/ directory"
+# step and the two removed dedicated steps), so this workflow no longer READS the locked
+# December root on any push — limb (a)'s reads and limb (b)'s ephemeral access records
+# are closed for reads. STILL OPEN: `actions/checkout` still MATERIALISES the 29 tracked
+# restricted files on the runner (untracking is an owner act this remediation may not
+# take), and the Rec 47 Student + Supervisor authorization change record is still owed —
+# both consolidated in governance/CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md.
+# Additionally, `resolve_platform_roots` now REFUSES GITHUB_ACTIONS/CI-marked
+# environments instead of silently defaulting them to `local` (R3); this workflow
+# therefore declares TEC_PLATFORM=local EXPLICITLY at job level, an auditable
+# declaration under this bound, replacing the silent default the guard used to grant.
 # ══════════════════════════════════════════════════════════════════════════════════════
 
 on:
@@ -81,6 +95,12 @@ jobs:
   governed-evidence:
     name: governed evidence (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    env:
+      # R3 (GOV-2026-09-27-BT-02): the platform guard refuses CI-marked environments
+      # rather than defaulting them to `local`. This is the explicit, auditable
+      # declaration that replaces the silent default — valid ONLY under the Rec 47
+      # non-scientific bound above; it makes nothing here governed evidence.
+      TEC_PLATFORM: local
     strategy:
       fail-fast: false
       matrix:
@@ -114,17 +134,30 @@ jobs:
       - name: Install governed dependencies
         run: python -m pip install --upgrade pip pytest -r requirements.txt
 
-      - name: Release-hash verification (all manifests + EC-1 recorded hashes)
-        run: python -m pytest tests/test_release_hashes.py -v -rs
-
-      - name: Acquisition-window and locked-month custody
-        run: python -m pytest tests/test_acquisition_window.py -v -rs
-
+      # The dedicated "Release-hash verification" and "Acquisition-window and
+      # locked-month custody" steps were REMOVED 2026-09-27 (GOV-2026-09-27-BT-02 R2,
+      # Student-approved): both modules read the restricted December root, and running
+      # them here was the recurring third-party December read the open ruling records.
+      # They remain in the local gate suite and the §18.3 selection (b) — CI narrowing
+      # never narrows the critical-test obligation (GOV-F-06's logic; the deselection
+      # is a platform-custody act, not a test-set redefinition).
       - name: Phase-boundary enforcement
         run: python -m pytest tests/test_phase_boundary.py -v -rs
 
-      - name: Full tests/ directory
-        run: python -m pytest tests/ -v -rs
+      - name: Full tests/ directory (restricted-root readers deselected — R2)
+        # --ignore is collection-time deselection: test_release_hashes previously
+        # failed at COLLECTION on a refused restricted read, so ignore (not -k) is
+        # the correct mechanism. The five ignored modules are the restricted-root
+        # readers (the three named by item 9 plus the acquisition-window reader and
+        # the merge-script restricted-reads module); over-breadth is deliberate
+        # fail-safe pending the owner's consolidated platform ruling.
+        run: >
+          python -m pytest tests/ -v -rs
+          --ignore=tests/test_release_hashes.py
+          --ignore=tests/test_acquisition_window.py
+          --ignore=tests/test_common_masks.py
+          --ignore=tests/test_locked_test_guard.py
+          --ignore=tests/test_merge_script_restricted_reads.py
 
       - name: Restricted-path invariant, independent of pytest
         # A second, deliberately redundant check: no December 2022 record outside the

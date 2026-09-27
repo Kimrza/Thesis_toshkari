@@ -75,6 +75,10 @@ def _run_script(args: list[str], workspace: Path) -> subprocess.CompletedProcess
     env["PYTHONHASHSEED"] = "0"
     env["TEC_WORKSPACE_ROOT"] = str(workspace)
     env.pop("TEC_PLATFORM", None)
+    # R3 (GOV-2026-09-27-BT-02): CI markers now refuse; these subprocess tests
+    # exercise marker-free default resolution deliberately.
+    env.pop("GITHUB_ACTIONS", None)
+    env.pop("CI", None)
     return subprocess.run(
         [
             sys.executable,

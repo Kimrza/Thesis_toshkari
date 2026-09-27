@@ -117,7 +117,14 @@ The build is verified when all four hold:
 
 1. `python -V` reports 3.11.x.
 2. `pip install -r requirements.txt` completed and every pinned package imports.
-3. `ruff check .` and `ruff format --check .` exit 0.
+3. `ruff check .` and `ruff format --check .` are **run and their findings
+   recorded**; findings are advisory — no lint exit code gates the build —
+   pending the owner's tree-wide-ruff ruling. *(Amended 2026-09-27 under
+   `GOV-2026-09-27-BT-02` R17: the previous "exit 0" condition was never an
+   affirmed practice, contradicted the recorded advisory posture — team.md
+   § Testing Posture fixes the real bar as §18.3 plus the WS/TA rows, with no
+   enforced lint floor (Q5=A) — and by its own wording no recorded run had ever
+   "passed" the build: 63 pre-existing findings stand tree-wide.)*
 4. The full test suite runs (see `unit-test-instructions.md`) with zero failures
    and zero collection errors.
 
@@ -178,6 +185,11 @@ through `--fixture-manifest`, and executes TE §13.2's Phase 1 fence verbatim:
 `05_build_features_and_splits.py`, `06_train_and_predict.py`,
 `07_evaluate_and_report.py`. `02_build_vtec_target.py` and
 `03_verify_processing.py` are Phase 2 only and run only after G-P2.
+`02_build_vtec_target.py` **does not exist yet by design** — it is created at
+Phase 2 entry, mirroring the three Phase-2 test modules' treatment in
+`unit-test-instructions.md`; `03_verify_processing.py` is present. A TA-01
+tree check before G-P2 should expect eight of the nine stage scripts. *(Added
+2026-09-27, `GOV-2026-09-27-BT-02` R26.)*
 
 **Outstanding prerequisites for the ladder, as of this commit.** The ladder has
 never completed on any host available to this initiative. Blocking it are: a host
@@ -357,3 +369,22 @@ Three further corrections under the Student's 2026-09-24 rulings on
   stub, so prefix the governed environment for any commit, e.g. (Git Bash)
   `PATH="/c/<env-root>/tec311:$PATH" git commit ...`. A commit from a bare shell is
   blocked by the hook's own no-python message — by design (Q7=D), not a defect.
+
+## 2026-09-27 amendments (GOV-2026-09-27-BT-02)
+
+- **Persist before re-running** (R25): never overwrite a junit XML by
+  re-running into the same path — copy or write each run's XML under a dated
+  `artifacts/exec_evidence/run_<date>_<tag>/` directory BEFORE any re-run. The
+  first-pass 1582/1572 XML of 2026-09-24 was lost exactly this way and its row
+  is prose-only evidence forever.
+- **Commit-message hook** (R7): `.githooks/commit-msg` now refuses empty and
+  editor-boilerplate messages ("Please enter the commit message…"). Governed
+  commits cite their D-number/CR in the message (team.md § Way of Working);
+  four boilerplate commits of 2026-09-24..26 are mapped to their authorizing
+  records in `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`.
+- **Explicit platform declaration on CI** (R3): `resolve_platform_roots` now
+  REFUSES environments carrying `GITHUB_ACTIONS`/`CI` markers instead of
+  defaulting them to `local`. Any surface that legitimately needs platform
+  resolution on a runner must declare `TEC_PLATFORM` explicitly (as
+  `verify.yml` now does at job level, visibly, under the Rec 47 non-scientific
+  bound) — a silent default no longer exists for CI-marked environments.

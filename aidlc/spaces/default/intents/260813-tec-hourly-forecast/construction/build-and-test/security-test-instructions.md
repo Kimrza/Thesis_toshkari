@@ -48,11 +48,18 @@ python -m pytest tests/test_locked_test_guard.py tests/test_phase_boundary.py \
   (Rec 30, **option 1** — deselect restricted readers from the commit set,
   retain them in the gate suite; citation corrected 2026-09-24 under Rec 12
   of `GOV-2026-09-24-BT-01`), so a commit does not silently touch December.
-- **Open owner ruling (carried, not resolved):**
-  `evidence/locked_test_restricted/` is tracked in git with a GitHub remote;
-  `.github/workflows/verify.yml` exists locally and, if pushed and executing,
-  would materialise the locked month on third-party runners (Rec 47 —
-  needs a GitHub check when network access allows).
+- **Owner-ruling status (corrected 2026-09-27, `GOV-2026-09-27-BT-02` R9/R2):**
+  the locked-root **git-exposure** question was RULED 2026-09-24 — ACCEPTABLE,
+  conditioned (`governance/CHANGE_RECORD_2026-09-24_locked_root_git_exposure_ruling.md`)
+  — and the workflow is not hypothetical: it IS pushed and executing (49+ runs;
+  the "if pushed" wording above is the `41fd109` state). Until 2026-09-27 every
+  push materialised the locked month on GitHub runners AND ran the
+  restricted-reader modules there, with access rows destroyed with the runner.
+  As of 2026-09-27 those modules are deselected from `verify.yml`; checkout
+  still materialises the tracked root. **What survives open:** Rec 47's
+  Student + Supervisor authorization change record, the materialisation
+  disposition, and the CI-runner access-record persistence residual — all
+  consolidated in `governance/CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md`.
 
 ### Addendum 2026-09-24 — the SIXTH access purpose: `persistence_history` (D-68)
 
@@ -97,9 +104,19 @@ python -m pytest tests/test_iri_denial.py tests/test_import_boundary.py \
   `iri_*` field must be **rejected**. Note the widened control set after the
   `iri2016_t_plus_1_tecu` near-miss (a canonical name the old `iri_`-prefix
   filter missed — stage diary, 2026-09-20).
-- `test_import_boundary.py` — `src/external/iri.py` / `gim.py` never
-  imported, directly or transitively, from `src/features/` or `src/models/`
-  (TA-07).
+- `test_iri_denial.py` is ALSO the home of the **TA-07 containment scan**
+  (`iri_gim_containment`): `src/external/iri.py` / `gim.py` never imported,
+  directly or transitively, from `src/features/` or `src/models/` — the only
+  permitted importers are TE §12's two paths — with injected direct/transitive/
+  notebook-import negative controls.
+- `test_import_boundary.py` — a DIFFERENT boundary, in the opposite direction:
+  the December-audit surface (`src/data/*` + `scripts/01`) must not import
+  `src.models` / `src.evaluation` (SEC-I-01 limb 2 / SD-I-01). *(Corrected
+  2026-09-27, `GOV-2026-09-27-BT-02` R16: this document previously attributed
+  the TA-07 iri/gim boundary to `test_import_boundary.py`, which does not test
+  it — the module's own docstring names the December-audit boundary and claims
+  no NFR-PHASE-01/TA-07 coverage. Two guard homes, two boundaries, stated per
+  `nfr-design:c58`.)*
 - `test_feature_leakage_guards.py` — availability lags, trailing-only F10.7,
   carry-forward ≤ 3 h, no backfill from future finals.
 - `test_acquisition_window.py` — fold membership from record timestamps,
@@ -122,7 +139,12 @@ python -m pytest tests/test_release_hashes.py tests/test_release_contract.py \
 
 - No SAST/DAST service and no CI-hosted scanning — no CI service is
   authorised (team.md, Q7=D); the hook and the local gates are the
-  mechanism.
+  mechanism. *(2026-09-27 note, `GOV-2026-09-27-BT-02` R2:
+  `.github/workflows/verify.yml` exists and runs on GitHub as a NON-scientific
+  verification surface under the Rec 47 bound — never gate evidence, never a
+  governed platform. The team.md correction reconciling "No CI service is
+  used" with this reality is drafted for the §13 learnings ritual at this
+  stage's gate; the ritual is its only sanctioned write path.)*
 - No auth/injection web testing — nothing serves requests.
 - Supply-chain caution is live practice here: the 2026-09-13 vendored-pytest
   integrity finding (a planted one-line marker and an undeclared `import py`

@@ -151,6 +151,11 @@ def _run_script(args: list[str], workspace: Path) -> subprocess.CompletedProcess
     env["PYTHONHASHSEED"] = "0"
     env["TEC_WORKSPACE_ROOT"] = str(workspace)
     env.pop("TEC_PLATFORM", None)
+    # R3 (GOV-2026-09-27-BT-02): CI markers now REFUSE at resolve_platform_roots.
+    # These subprocess tests deliberately exercise marker-free default resolution
+    # (-> local), so the CI markers are stripped alongside TEC_PLATFORM.
+    env.pop("GITHUB_ACTIONS", None)
+    env.pop("CI", None)
     return subprocess.run(
         [
             sys.executable,
@@ -285,6 +290,33 @@ def _generate_against_synthetic(
         ],
         workspace,
     )
+
+
+def test_generation_december_2022_epoch_refuses_pre_g05(tmp_path: Path) -> None:
+    """GOV-2026-09-27-BT-02 R23 (Student-approved 2026-09-27): every other December
+    channel is guarded executably; the comparator generation path now refuses a
+    2022-12 target epoch BEFORE any IONEX byte is read, until a verified G-05
+    signature authorizes the separate December-extension work (D-73; Vision 8.3).
+    The gate inputs here are the REAL mirrored records, so every earlier gate
+    passes and the refusal isolates the December clause."""
+    text = _build_synthetic_ionex(
+        day=335,
+        year=2022,
+        lat1=10.0,
+        lat2=-10.0,
+        dlat=-10.0,
+        lon1=-10.0,
+        lon2=10.0,
+        dlon=10.0,
+        map_epochs=[(2022, 12, 1, 0, 0, 0), (2022, 12, 1, 1, 0, 0)],
+        fill_value=100,
+    )
+    result = _generate_against_synthetic(
+        tmp_path, text=text, station="BSHM", target_epoch="2022-12-01T01:00:00+00:00"
+    )
+    assert result.returncode != 0
+    combined = result.stderr + result.stdout
+    assert "December 2022" in combined, combined
 
 
 def test_generation_missing_ionex_file_refuses(tmp_path: Path) -> None:

@@ -285,6 +285,7 @@ def generate_comparator(
     injection_mode: bool = False,
     now: dt.datetime | None = None,
     comparator_inputs: Mapping[str, Any] | None = None,
+    g05_signature_verified: bool = False,
 ) -> dict[str, Any] | None:
     """Attempt GIM comparator generation.
 
@@ -321,8 +322,10 @@ def generate_comparator(
     ComparatorError
         from the violated gate; from the injection-mode terminal refusal;
         from an unset rule other than "C" when comparator_inputs is supplied
-        (rule "B" is never used to generate the real comparator); or from a
-        real, fully-passing attempt with no comparator_inputs supplied.
+        (rule "B" is never used to generate the real comparator); from a
+        real, fully-passing attempt with no comparator_inputs supplied; or
+        from a December 2022 target epoch without `g05_signature_verified=True`
+        (GOV-2026-09-27-BT-02 R23 -- D-73; Vision 8.3; fail-closed default).
     """
     attempt_utc = now if now is not None else dt.datetime.now(dt.timezone.utc)
     evaluate_generation_gates(
@@ -355,15 +358,36 @@ def generate_comparator(
             f"is a sensitivity analysis only, reachable through "
             f"compute_comparison directly, never through this gated path",
         )
+    target_epoch = _parse_utc(
+        comparator_inputs["target_epoch_utc"],
+        resource="GIM comparator generation",
+        field="comparator_inputs.target_epoch_utc",
+    )
+    # December 2022 refusal (GOV-2026-09-27-BT-02 R23, Student-approved 2026-09-27):
+    # every other December channel here is guarded executably; until this clause the
+    # comparator path's December discipline was procedural only (the acquisition
+    # runbook's checklist and D-72/D-73's text). D-73 fixes December's comparator
+    # status as separate, later, access-gated work, and Vision 8.3 bars any
+    # December-informed artifact before G-05 -- so a 2022-12 target epoch refuses
+    # BEFORE any IONEX byte is read. A future authorized caller passes
+    # `g05_signature_verified=True` only after `src.data.splits.verify_g05_signature`
+    # returns True for a signed G-05 (the same pattern as
+    # `read_persistence_history_lookup`); the default fails closed.
+    if (target_epoch.year, target_epoch.month) == (2022, 12) and not g05_signature_verified:
+        raise ComparatorError(
+            "GIM comparator generation",
+            f"REFUSED: target epoch {target_epoch.isoformat()} falls in December 2022, "
+            f"the locked test month. D-73 fixes any December comparator extension as "
+            f"separate, later, access-gated work, and Vision 8.3 bars December-informed "
+            f"artifacts before G-05; pass g05_signature_verified=True only after "
+            f"src.data.splits.verify_g05_signature confirms a signed G-05 "
+            f"(GOV-2026-09-27-BT-02 R23)",
+        )
     result = compute_comparison(
         ionex_path=Path(comparator_inputs["ionex_path"]),
         station_lat=float(comparator_inputs["station_lat"]),
         station_lon=float(comparator_inputs["station_lon"]),
-        target_epoch_utc=_parse_utc(
-            comparator_inputs["target_epoch_utc"],
-            resource="GIM comparator generation",
-            field="comparator_inputs.target_epoch_utc",
-        ),
+        target_epoch_utc=target_epoch,
         rule=interpolation_rule,
     )
     result["map_to_map_statement"] = MAP_TO_MAP_STATEMENT

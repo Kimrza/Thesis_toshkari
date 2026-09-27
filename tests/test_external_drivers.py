@@ -1142,6 +1142,10 @@ def _run_script(args: list[str], workspace: Path) -> subprocess.CompletedProcess
     env["PYTHONHASHSEED"] = "0"  # the determinism step reads it; no re-exec in the child
     env["TEC_WORKSPACE_ROOT"] = str(workspace)
     env.pop("TEC_PLATFORM", None)
+    # R3 (GOV-2026-09-27-BT-02): CI markers now refuse; these subprocess tests
+    # exercise marker-free default resolution deliberately.
+    env.pop("GITHUB_ACTIONS", None)
+    env.pop("CI", None)
     return subprocess.run(
         [
             sys.executable,
@@ -2261,6 +2265,9 @@ def test_b01_verify_runtime_completes_at_subprocess_level(tmp_path: Path) -> Non
         os.environ, PYTHONHASHSEED="0", TEC_WORKSPACE_ROOT=str(workspace), PYTHONPATH=str(site)
     )
     env.pop("TEC_PLATFORM", None)
+    # R3 (GOV-2026-09-27-BT-02): CI markers now refuse; marker-free default exercised.
+    env.pop("GITHUB_ACTIONS", None)
+    env.pop("CI", None)
     result = subprocess.run(
         [
             sys.executable,

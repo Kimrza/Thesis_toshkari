@@ -52,8 +52,13 @@ Notes that matter on this repository specifically:
 - Some determinism tests spawn fresh processes (`tests/_fresh_process.py`);
   they are one-process-per-stage by design and slower than the rest.
 - The locked-test guard tests exercise refusal paths against
-  `evidence/locked_test_restricted/`; they never open December content and
-  every access attempt is recorded.
+  `evidence/locked_test_restricted/`, and additionally perform **byte-level
+  reads of one real restricted artifact**, routed through `open_restricted` and
+  logged to the test-mode sidecar before each read; **no December value is
+  parsed or inspected**. *(Reworded 2026-09-27, `GOV-2026-09-27-BT-02` R20: the
+  earlier "they never open December content" collapsed the access taxonomy the
+  custody log is built on — the registry logs byte reads AS accesses, rows 6
+  and 11 setting that standard.)*
 
 ## The mandated module set (21 modules) and what exists
 
@@ -154,3 +159,24 @@ Hook activation state, measured on this clone 2026-09-24 (Rec 3 of
 false when written; the hook file existed but `core.hooksPath` was unset, so
 prior commits on this clone ran ungated). The hook needs `python`+`pytest`
 on `PATH` — see `build-instructions.md` addendum for the commit procedure.
+
+## 2026-09-27 addendum (GOV-2026-09-27-BT-02)
+
+- **Module inventory is 34 at HEAD `69b00c4`** (R1; derived
+  `Get-ChildItem tests -Filter "test_*.py"` → 34). The 29-module inventory and
+  per-module function-count table above are the `41fd109` state. The five
+  modules added since: `test_b01_prediction_adapter.py`,
+  `test_fixture_run_fixes.py`, `test_gim_generation.py`,
+  `test_gim_provenance.py`, `test_recorded_presence.py`. Function counts for
+  the new modules are owed to the next measured pass on a governed host.
+- **A `commit-msg` hook now exists beside the pre-commit hook**
+  (`.githooks/commit-msg`, added under R7): it refuses empty and
+  editor-boilerplate commit messages, after four governed-artifact commits
+  landed with the literal "Please enter the commit message…" template. Message
+  checks mechanically belong to `commit-msg`, not `pre-commit` — a pre-commit
+  hook runs before the message exists.
+- **"No CI service is used" (team.md, quoted above) is currently inaccurate on
+  the tree** — `.github/workflows/verify.yml` runs on GitHub as a
+  NON-scientific verification surface under the Rec 47 bound, never gate
+  evidence. The reconciling team.md correction is drafted for the §13 ritual
+  at this stage's gate (R2).

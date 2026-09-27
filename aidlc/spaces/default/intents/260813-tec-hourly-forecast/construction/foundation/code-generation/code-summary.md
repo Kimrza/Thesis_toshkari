@@ -558,3 +558,28 @@ staleness is now closed:
 
 This addendum discloses per `project.md` `gf-3`; the receipt stands as history and is
 not reopened.
+
+## 2026-09-27 addendum — cross-unit edits under GOV-2026-09-27-BT-02 R3 (gf-3 disclosure)
+
+The 2026-09-27 governance remediation (Student approved all 29 recommendations;
+execution record `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`)
+edited two modules this unit owns, under its frozen receipt:
+
+- `src/data/config.py` (R3): new `_CI_MARKERS = ("GITHUB_ACTIONS", "CI")`
+  constant and a refusal branch in `resolve_platform_roots` — a CI-marked
+  environment now raises `PlatformError` instead of inheriting `local` by
+  elimination. The guard previously failed OPEN on exactly the unknown
+  platforms SD-G-01 Q1=A exists to refuse: green full-suite runs on GitHub
+  runners proved restricted reads were being permitted there while Kaggle, an
+  authorised platform, was refused. An explicit `TEC_PLATFORM` declaration,
+  checked first, still wins; the W-8 docstring's Raises section is updated.
+- `tests/test_determinism.py` (R3): new negative control
+  `test_ci_runner_markers_are_refused_not_defaulted`, beside the existing
+  Colab-marker control — both markers refuse, and an explicit declaration
+  still resolves (asserted so the refusal is a default change, not a CI ban).
+
+⚠ Static only on the authoring clone — **no interpreter exists there, no test
+was executed**; first verification is the governed-host suite run recorded in
+the execution record § 7, plus CI once pushed (`test_determinism.py` is not
+among the CI deselections). This addendum discloses per `project.md` `gf-3`;
+the receipt stands as history and is not reopened.

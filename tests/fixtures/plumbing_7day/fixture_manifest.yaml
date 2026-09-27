@@ -252,10 +252,16 @@ units:
       2026-08-21 (D-1 addendum)
     source: >-
       configs/data.yaml: stations.BSHM.{lat,lon,geomagnetic_lat,geomagnetic_lon};
-      evidence/DECISIONS.md D-1, D-1 addendum, D-65. Resolved 2026-09-26: this field was
-      stale, not open -- both halves TE §15.2 area 5 names (coordinates, coordinate-to-cell
-      rule) were already frozen and countersigned before this fixture manifest skeleton was
-      written; only the citation was missing here.
+      evidence/DECISIONS.md D-1, D-1 addendum, D-33, D-65. Corrected 2026-09-27 under
+      GOV-2026-09-27-BT-02 R4 (Student-approved; execution record
+      governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md section 2): the
+      2026-09-26 note here claimed both halves were "already frozen and countersigned",
+      which overstated the register -- coordinates are frozen (D-1, closed 2026-08-21
+      under the recorded student/supervisor authority equivalence, with NO signature
+      artifact existing or claimed; D-65 Student-owned), and the coordinate-to-cell rule
+      is frozen (D-1 addendum / D-33) with D-33's TE 18.2 supervisor countersignature
+      still OUTSTANDING (evidence/DECISIONS.md D-33; configs/data.yaml line 176 agrees).
+      The rule VALUE is unchanged; only the signature-status claim is corrected.
   tecu:
     value: TECU
     source: TE § Domain Glossary — the unit of every VTEC quantity in this project.

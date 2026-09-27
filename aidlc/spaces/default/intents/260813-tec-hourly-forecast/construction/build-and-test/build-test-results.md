@@ -41,7 +41,7 @@ Counts read programmatically from the run's junit XML, never from prose
 | Full suite, first pass | 1582 | 1572 | **4** | 0 | 6 | — |
 | Full suite, clean re-run (after the fix below; re-run because a `git stash` cycle briefly raced the first pass — stage diary, Deviations) | **1582** | **1573** | **3** | 0 | 6 | 145.5 s |
 | §18.3 critical-set modules (ten-module selection listed below) | 683 | 677 | **3** | 0 | 3 | 38.1 s |
-| Full suite, POST-remediation (after the `GOV-2026-09-24-BT-01` ruling execution — two new controls collected; persisted as `full_post.xml`) | **1584** | **1581** | **3** | 0 | 6 | 138.5 s |
+| Full suite, POST-remediation (after the `GOV-2026-09-24-BT-01` ruling execution — two new controls collected; persisted as `full_post.xml`) | **1584** | **1575** *(corrected 2026-09-27: 1584 − 3 − 6 = 1575; the earlier "1581" counted skips as passes — `GOV-2026-09-27-BT-02` R14)* | **3** | 0 | 6 | 138.5 s |
 
 Critical-set selection run: `test_prepared_target_schema`,
 `test_feature_availability`, `test_iri_denial`, `test_split_embargo`,
@@ -170,7 +170,9 @@ corrections visible throughout this document:
 
 Post-remediation module run (persisted as `rem1.xml`): `test_release_hashes`
 + `test_locked_test_guard` + `test_models_smoke` + `test_acquisition` —
-**448 tests, 445 passed, 3 failed** (the site-log rows only), 4 skipped.
+**448 tests, 441 passed, 3 failed** (the site-log rows only), 4 skipped
+*(corrected 2026-09-27: 448 − 3 − 4 = 441; the earlier "445" counted skips as
+passes — `GOV-2026-09-27-BT-02` R14)*.
 
 Cross-unit disclosure per `gf-3`: these edits touch modules owned by
 `governance-guards` (`locked_test.py`, `test_locked_test_guard.py`),
@@ -229,7 +231,13 @@ persisted this session, never carried from prose.
 are present on disk under `evidence/station_registry_sources_2026-09-19/`,
 already committed (`db15880`, prior to this session), and their SHA-256
 hashes were independently recomputed this session and match
-`sitelog_index.json` exactly (all three, byte-for-byte). The `.gitignore:10`
+`sitelog_index.json` exactly (all three, byte-for-byte). *(Custody-channel
+disclosure added 2026-09-27, `GOV-2026-09-27-BT-02` R6: the recovery channel of
+the `db15880` bytes — who retrieved or copied them, from where, and when — is
+UNRECORDED; `db15880`'s commit message is editor boilerplate and no artifact
+narrates the act. Their identity therefore rests on hash equality with the
+2026-09-20 recorded manifests alone, which four independent 2026-09-27 board
+seats re-verified. This is a stated limitation, not a defect in the hashes.)* The `.gitignore:10`
 negation (`!evidence/**/*.log`) is in place and verified live —
 `git check-ignore` reports no match for any of the three files.
 `tests/test_release_hashes.py` (option 1's closing control):
@@ -328,7 +336,18 @@ Evidence for this addendum:
 for run `36139946731`) read live, not persisted as files (no local
 credential or token was used — the repository is public).
 
-## 2026-09-25 item 6 (Rec 47 GitHub check) — CLOSED
+## 2026-09-25 item 6 (Rec 47 GitHub check) — CLOSED (CI-verification limb ONLY; scoped 2026-09-27)
+
+*(Scope correction 2026-09-27, `GOV-2026-09-27-BT-02` R2: this heading's
+unqualified "CLOSED" overstated a two-limb status. What closed is the
+CI-verification limb — local pass equals remote pass at the fixed commit. The
+CUSTODY limb remains OPEN: the workflow's authorizing Student + Supervisor
+change record is still owed (the workflow's own bound annotation records it),
+and every push until 2026-09-27 ran the restricted-reader modules on GitHub
+runners with access rows destroyed with the runner. The restricted-reader
+modules are deselected from `verify.yml` as of 2026-09-27; the consolidated
+platform ruling is drafted at
+`governance/CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md`.)*
 
 Root cause found from Student-supplied full job logs (`.github/workflows/verify.yml` run
 `36145238473`, commit `53f1c32`): two workflow-definition bugs, neither a code defect.
@@ -348,8 +367,10 @@ Root cause found from Student-supplied full job logs (`.github/workflows/verify.
 **Pushed and verified.** Student pushed `7357f3504466dd883249eefd9a7064267997e7a3`. Runs
 `36160927386` (ubuntu) and `36160926808` (windows) — both **`completed` / `success`**, every
 step green including "Full tests/ directory" on both OSes, confirmed via the public Actions
-API against this exact commit (not a stale one). Local pass now equals remote pass. Rec 47
-is closed.
+API against this exact commit (not a stale one). Local pass now equals remote pass. Rec 47's
+**CI-verification limb** is closed; its **custody limb** (the authorizing change record and
+the locked-root materialisation/access-record question) remains open — see the 2026-09-27
+scope correction at this section's heading.
 
 ## 2026-09-25 item 9 (new) — W-6 step 8: Kaggle durability measurement blocks all restricted-root reads on Kaggle
 
@@ -390,3 +411,60 @@ design"); `aidlc/.../construction/foundation/code-generation/code-summary.md:123
 `kaggle/HOW_TO_RUN_IN_SESSION_GATE.md` (the prepared, not-yet-run discharge runbook);
 this session's `crit_kaggle_nine_of_ten.xml` and `test_release_hashes_kaggle.xml`
 (2026-09-25).
+
+**Correction 2026-09-27 (`GOV-2026-09-27-BT-02` R8): the two Kaggle junit files
+named above were never persisted to the repository** — no such file exists in the
+working tree, under `artifacts/exec_evidence/`, or in any commit
+(`git log --all --diff-filter=A` on both names is empty, derived 2026-09-27).
+Item 9's quantitative claims — "16 test failures/errors total, all one root
+cause" and the three-module scope — are therefore **prose-only evidence**,
+exactly the class the first-pass 1582/1572 row above is marked as, until the
+counts are re-derived and persisted on the next Kaggle session. The finding's
+qualitative substance (the empty `CHARACTERISED_DURABILITY_PLATFORMS` set
+refusing every restricted-root read on Kaggle) is independently verifiable from
+`src/data/config.py:482` and is not affected.
+
+## 2026-09-27 re-baseline addendum (GOV-2026-09-27-BT-02 R1)
+
+Executed under the Student's 2026-09-27 approval of all 29 board
+recommendations (`governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`
+is the execution record). Every count below is derived programmatically at
+HEAD `69b00c4` (2026-09-26) and printed with its derivation; nothing is carried
+from prose.
+
+**What changed between the artifact baseline `41fd109` and HEAD `69b00c4`:**
+25 commits (`git log --oneline 41fd109..69b00c4 | wc -l` → 25). Materially:
+
+- **Test modules: 34** (`Get-ChildItem tests -Filter "test_*.py"` → 34; the
+  unit-test-instructions' 29-module inventory is the `41fd109` state). The five
+  additions: `test_b01_prediction_adapter.py`, `test_fixture_run_fixes.py`,
+  `test_gim_generation.py`, `test_gim_provenance.py`, `test_recorded_presence.py`.
+- **Pin surface: 10 pins** (`requirements.txt` `==` lines → 10). The tenth,
+  `ml_dtypes==0.5.3`, was owner-approved 2026-09-26 (commit `12843b5`); the
+  addendum's "9 of 9 exact" above is the pre-`12843b5` state.
+- **Fixture ladder: through stage 06 on `plumbing_7day`** (commit `7b4109b`;
+  `artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01|02`
+  exist with `registry_entry.json` stamped `evidence_class: smoke_only`). The
+  "Fixture stages 06/07 — still blocked" inspection above was true at its
+  2026-09-25 baseline and is superseded. Stage 07 has not run. WS-20/TA-17
+  remain Pending (the Q-31 scientific-fixture MANIFEST freeze is still owed;
+  the window is frozen as D-14).
+- **Owner decisions D-72 through D-76 landed** (D-72 froze Q-15 = rule "C";
+  D-73 fixed the overlap-audit result and December's separate access-gated
+  status; D-74/D-75/D-76 are the 2026-09-26 fixture/pipeline rulings), and the
+  governed release `artifacts/releases/gim_comparator_C-01_2022/` exists —
+  produced inside this still-open stage and reviewed by the 2026-09-27 board
+  (manifest complete per TE §13.3; parquet + sampled source hashes re-verified).
+
+**What could NOT be re-derived on this clone: any suite count at HEAD.** This
+remediation clone carries no Python interpreter or conda (`Get-Command
+conda|python` → not found), so the fresh full-suite and critical-set runs at
+HEAD are **BLOCKED here** — the same environment-absence class the 2026-09-24
+session hit, disclosed rather than worked around. Consequence, stated plainly:
+**the operative suite figures (1584-total full suite; 685/685 selection (b))
+are evidence for `db15880`-era commits, not for HEAD**, and whether the suite
+is green at HEAD — including the five new modules and this remediation's own
+new negative controls — is an inference until a governed-environment host runs
+and persists a junit at `69b00c4` or later under
+`artifacts/exec_evidence/run_2026-09-27_bt02/`. That run is the FIRST
+verification step owed by this remediation (execution record § Verification).

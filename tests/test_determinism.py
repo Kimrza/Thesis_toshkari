@@ -400,6 +400,21 @@ def test_colab_markers_are_refused_not_defaulted() -> None:
         resolve_platform_roots({"COLAB_RELEASE_TAG": "release"})
 
 
+def test_ci_runner_markers_are_refused_not_defaulted() -> None:
+    """Negative control (GOV-2026-09-27-BT-02 R3, Student-approved 2026-09-27): an
+    unrecognised environment must fail CLOSED. A GitHub-Actions-marked environment
+    carries neither authorised platform's markers and previously inherited `local` by
+    elimination -- the exact fail-open the Q1=A rationale exists to prevent (TC-03c).
+    An explicit TEC_PLATFORM declaration still wins, asserted here so the refusal is
+    a default change, not a blanket CI ban."""
+    with pytest.raises(PlatformError):
+        resolve_platform_roots({"GITHUB_ACTIONS": "true"})
+    with pytest.raises(PlatformError):
+        resolve_platform_roots({"CI": "true"})
+    label, _roots = resolve_platform_roots({"TEC_PLATFORM": "local", "GITHUB_ACTIONS": "true"})
+    assert label == "local"
+
+
 def test_kaggle_and_local_resolve(tmp_path) -> None:
     label, roots = resolve_platform_roots({"KAGGLE_KERNEL_RUN_TYPE": "Interactive"})
     assert label == "kaggle" and roots["workspace"] == Path("/kaggle/working")

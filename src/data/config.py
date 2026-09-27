@@ -489,6 +489,15 @@ _COLAB_MARKERS: Final[tuple[str, ...]] = ("COLAB_RELEASE_TAG", "COLAB_GPU", "COL
 #: platform label check — never a credential (R-14).
 _KAGGLE_MARKERS: Final[tuple[str, ...]] = ("KAGGLE_KERNEL_RUN_TYPE", "KAGGLE_URL_BASE")
 
+#: CI-runner detection markers (GitHub Actions sets both). A CI runner is neither of the
+#: two authorised platforms (TC-03c) and its write-durability is uncharacterised; before
+#: 2026-09-27 such an environment inherited `local` by elimination — the guard failed
+#: OPEN on exactly the unknown platforms it exists to refuse (GOV-2026-09-27-BT-02 R3,
+#: Student-approved 2026-09-27; SD-G-01 Q1=A). An explicit `TEC_PLATFORM` declaration
+#: still wins (checked first): a surface that legitimately runs here must declare
+#: itself visibly rather than being defaulted. Only NAMES are consulted (R-14).
+_CI_MARKERS: Final[tuple[str, ...]] = ("GITHUB_ACTIONS", "CI")
+
 
 @dataclass(frozen=True)
 class ConfigSnapshot:
@@ -746,7 +755,9 @@ def resolve_platform_roots(env: Mapping[str, str]) -> tuple[str, Mapping[str, Pa
     PlatformError
         when the platform is not exactly one of the two TC-03c authorises. A Colab
         marker is an explicit refusal, not an unknown: Colab was removed as a governed
-        platform (TE 9.1, Vision 8.3).
+        platform (TE 9.1, Vision 8.3). A CI-runner marker (GITHUB_ACTIONS/CI) is
+        likewise refused rather than defaulted to `local` (GOV-2026-09-27-BT-02 R3);
+        an explicit `TEC_PLATFORM` declaration, checked first, still wins.
     """
     explicit = env.get("TEC_PLATFORM")
     if explicit is not None:
@@ -764,6 +775,15 @@ def resolve_platform_roots(env: Mapping[str, str]) -> tuple[str, Mapping[str, Pa
             "platform",
             "a Google Colab environment marker is present; Colab is explicitly removed "
             "as a governed platform (TE 9.1; Vision 8.3; TC-03c)",
+        )
+    elif any(marker in env for marker in _CI_MARKERS):
+        raise PlatformError(
+            "platform",
+            "a CI-runner environment marker (GITHUB_ACTIONS/CI) is present; a CI runner "
+            "is not one of the exactly two authorised platforms (TC-03c), and defaulting "
+            "it to 'local' would fail OPEN on an uncharacterised platform — declare "
+            "TEC_PLATFORM explicitly if this surface is authorised to resolve one "
+            "(GOV-2026-09-27-BT-02 R3)",
         )
     else:
         label = "local"

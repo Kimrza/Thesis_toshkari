@@ -11,10 +11,10 @@
 |---|---|
 | Governed interpreter (CPython 3.11 exact) | ✅ Rebuilt this session (3.11.16, conda-forge) |
 | Pin surface | ⚠ Partial: 7 of 9 pinned packages exact; `matplotlib==3.9.0` and `tensorflow==2.21.0` unobtainable from reachable channels (PyPI blocked) — disclosed, not substituted |
-| Full test suite (post-remediation, `full_post.xml`) | ⚠ **1581 / 1584 passed, 3 failed, 6 skipped** (junit-derived; the 3 are the site-log custody rows) |
+| Full test suite (post-remediation, `full_post.xml`) | ⚠ **1575 / 1584 passed, 3 failed, 6 skipped** *(corrected 2026-09-27 under `GOV-2026-09-27-BT-02` R14: re-derived from `full_post.xml`'s attributes, 1584 − 3 failed − 6 skipped = 1575; the earlier "1581" counted skips as passes. The 3 failures were the site-log custody rows, since closed — see the 2026-09-25 addendum)* |
 | §18.3 critical set (ten-module selection) | ⚠ 677 / 683 passed — the same 3 failures, all in `test_release_hashes.py` |
 | Remaining failures | All three are ONE finding: IGS site logs declared in a committed manifest but never committed (swallowed by the generic `*.log` ignore) — ruled option 1 (re-retrieve + verify + commit); retrieval blocked from this network, never-again mechanism already in place |
-| Fixture ladder | Stages 00, 01, 02, 04, 05 complete on `plumbing_7day`; 06/07 not yet run; `scientific_1month` window still an open Q-31 freeze |
+| Fixture ladder | Stages 00, 01, 02, 04, 05 complete on `plumbing_7day`; 06/07 not yet run *(superseded — stage 06 has since run on the fixture, 2026-09-26; see the 2026-09-27 addendum below)*; `scientific_1month` **manifest freeze** (measured counts, tolerances, runtimes) still open under Q-31 — the window itself was frozen 2026-08-21 as **D-14** (March 2022). *(Corrected 2026-09-27 under `GOV-2026-09-27-BT-02` R15: the earlier "window still an open Q-31 freeze" misnamed the open act.)* |
 | Lint (`ruff check .`) | 63 pre-existing findings tree-wide (advisory; no enforced floor) |
 
 ## Test type inventory (what this stage generated)
@@ -74,9 +74,21 @@ record.)*
    recurrence; diary Open questions).
 6. **Rec 47 (GitHub Actions on a third platform)** unresolved pending a
    GitHub check; interacts with the tracked `evidence/locked_test_restricted/`
-   root (owner ruling open).
+   root (owner ruling open). *(Corrected 2026-09-27 under `GOV-2026-09-27-BT-02`
+   R9: the locked-root git-exposure ruling was MADE on 2026-09-24 —
+   `governance/CHANGE_RECORD_2026-09-24_locked_root_git_exposure_ruling.md`,
+   ACCEPTABLE, conditioned — and the GitHub-check limb closed 2026-09-25. What
+   survives open: Rec 47's Student + Supervisor authorization change record,
+   and the residual that ruling did not reach — CI-runner accesses whose
+   sidecar access records are destroyed with the runner. See the 2026-09-27
+   addendum.)*
 7. **The operative §18.3 critical-set selection** (Rec 5) — routed to the
    Student; see `build-test-results.md` § "§18.3 selection reconciliation".
+   *(Corrected 2026-09-27 under `GOV-2026-09-27-BT-02` R9: RULED on
+   2026-09-25 — selection (b), the ten-module §18.3 homes, is THE
+   authoritative critical set;
+   `governance/CHANGE_RECORD_2026-09-25_item7_selection_b_ruling.md`, D-69.
+   Selections (a) and (c) are superseded for §18.3 purposes.)*
 8. **Pre-commit hook now ACTIVE on this clone** (Rec 3, ruled option 2;
    `core.hooksPath=.githooks` set and verified 2026-09-24 this session) —
    commits need the governed environment on `PATH`; procedure in
@@ -137,3 +149,39 @@ modules (`test_release_hashes.py`, `test_common_masks.py`, `test_locked_test_gua
 Recommendation 57, dispositions §5 item 10, "Student — before G-05") but not yet
 actioned; blocked itself on two further preconditions (in-session-gate wiring;
 item 3's Q-31 freeze). Item 2 stays blocked on this dependency, not reclassified.
+
+## 2026-09-27 remediation addendum (GOV-2026-09-27-BT-02)
+
+*(Execution record: `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`.
+All 29 recommendations of the 2026-09-27 full-board review were approved by the
+Student; this addendum records what that remediation changed in THIS artifact's
+lane. The "Overall build status" table above is the 2026-09-24 state with dated
+in-place corrections; this addendum and the results file's 2026-09-27 re-baseline
+addendum are the current state.)*
+
+- **Re-baseline at HEAD `69b00c4` (R1), derived programmatically 2026-09-27:**
+  the tree is 25 commits past the artifacts' `41fd109` baseline. Test modules
+  **34** (was 29; +`test_b01_prediction_adapter.py`, `test_fixture_run_fixes.py`,
+  `test_gim_generation.py`, `test_gim_provenance.py`, `test_recorded_presence.py`);
+  pinned packages **10** (was 9; +`ml_dtypes==0.5.3`, owner-approved 2026-09-26);
+  fixture ladder advanced **through stage 06** on `plumbing_7day` (commit
+  `7b4109b`, predictions `FIX-NOV-FOLD-01/02`, registry-stamped
+  `evidence_class: smoke_only`); owner decisions D-72–D-76 landed; the governed
+  release `artifacts/releases/gim_comparator_C-01_2022/` exists (manifest and
+  parquet hash independently re-verified by the 2026-09-27 board). **No suite
+  junit exists at HEAD**: this remediation clone carries no Python interpreter,
+  so the fresh full-suite + critical-set run at HEAD is BLOCKED here and owed
+  from a governed-environment host before the gate relies on suite counts for
+  HEAD (`build-test-results.md` § 2026-09-27 re-baseline addendum).
+- **Rec 47 status is two-limbed (R2):** the CI-verification limb is closed
+  (workflow green at `7357f35`); the custody limb is OPEN — the workflow's
+  authorizing Student + Supervisor change record is still owed, and until this
+  remediation the workflow's `pytest tests/` step read the restricted December
+  root on every push with access rows destroyed with the runner. As of
+  2026-09-27 the restricted-reader modules are deselected from
+  `.github/workflows/verify.yml` (R2's approved immediate step); checkout still
+  materialises the tracked restricted root, which remains part of the owed
+  consolidated ruling (`governance/CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md`).
+- **Item 5 (`aidlc-state.md` Project Root)** — third stale recurrence recorded
+  (R28); dropping/relativizing the field is the routed owner question, no
+  hand-edit made this pass.

@@ -49,6 +49,19 @@ the rows did not exist before the reads, and no row can be made to have preceded
 registry itself was created 2026-08-16, after events 1 to 4. What these rows close is the
 discrepancy; what they cannot close is the ordering.
 
+> **Correction, appended 2026-09-27 (GOV-2026-09-27-BT-02 R19, Student-approved;
+> execution record `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`).**
+> The roll-up above was written 2026-08-22 and never swept after **row 10** was
+> added on 2026-08-28: row 10 is itself marked "Retrospective row, created
+> 2026-08-28. Logged AFTER the read" — so the retrospective class is **six rows
+> (3, 4, 5, 8, 9 and 10)**, not five. "All five" was true when written and is
+> superseded, not overwritten, per this registry's own append-correction pattern
+> (rows 3–5 were themselves appended corrections). Rows 6, 7, 11 and 12 remain
+> written-before-the-read. The companion stale comment in
+> `tests/test_locked_test_guard.py` (§8 header) carries the same dated
+> correction; its synthetic orphan set is unchanged — row 10 is a distinct
+> event it never represented.
+
 **Row 8 records a metadata-and-manifest read, not a data read**, and the distinction is
 kept because collapsing it would make the log less useful rather than more cautious. What
 a G-06 reviewer needs to establish is when December *target values* were seen. Row 8 saw

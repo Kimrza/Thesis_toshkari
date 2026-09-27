@@ -392,10 +392,14 @@ def run_containment_scan(
 
 def iri_column_violations(columns: Sequence[Mapping[str, Any]]) -> list[str]:
     """The content-assertion predicate: a column is admitted only when its provenance
-    is PRESENT AND DOES NOT SAY IRI. An `iri_*` NAME fails outright (WS-10's injected
-    field); an ABSENT provenance fails (the flipped default -- SD-E-03: admitting a
-    column because its provenance is silent is inferring a grade from silence); a
-    provenance that says IRI fails. Present-and-not-IRI is admitted.
+    is PRESENT AND DOES NOT SAY IRI. A NAME carrying any token that BEGINS `iri` fails
+    outright (WS-10's injected field; the name limb matches production's widened rule in
+    `src/features/build.py::_assert_field_name_clean` -- the narrower `iri_`-prefix limb
+    this predicate previously implemented missed the project's own canonical
+    `iri2016_t_plus_1_tecu`; widened 2026-09-27 under GOV-2026-09-27-BT-02 R11,
+    Student-approved); an ABSENT provenance fails (the flipped default -- SD-E-03:
+    admitting a column because its provenance is silent is inferring a grade from
+    silence); a provenance that says IRI fails. Present-and-not-IRI is admitted.
 
     The barrier is evidentiary, not cryptographic; the renamed-and-recomputed value
     with a fabricated provenance is the named residual no artifact may describe as
@@ -405,8 +409,12 @@ def iri_column_violations(columns: Sequence[Mapping[str, Any]]) -> list[str]:
     for column in columns:
         name = str(column.get("name", ""))
         provenance = column.get("provenance")
-        if name.lower().startswith("iri_"):
-            problems.append(f"{name}: iri_* field on a training/inference surface (WS-10)")
+        name_tokens = {t for t in name.lower().replace("-", "_").split("_") if t}
+        if name.lower().startswith("iri_") or any(t.startswith("iri") for t in name_tokens):
+            problems.append(
+                f"{name}: iri_* / IRI-derived field name on a training/inference "
+                f"surface (WS-10; token rule per src/features/build.py, R11)"
+            )
             continue
         if provenance is None or not str(provenance).strip():
             problems.append(
@@ -768,3 +776,16 @@ def test_iri_named_column_fails_even_with_innocent_provenance() -> None:
     columns = [{"name": "iri_residual", "provenance": "definitely not what it says"}]
     problems = iri_column_violations(columns)
     assert problems and "iri_residual" in problems[0]
+
+
+def test_canonical_iri2016_name_fails_whatever_its_provenance_says() -> None:
+    """GOV-2026-09-27-BT-02 R11 (Student-approved 2026-09-27): this module's statement
+    of the name limb must match production's widened rule. The project's canonical IRI
+    field name, `iri2016_t_plus_1_tecu` (TE 6.2 row identity), neither starts `iri_`
+    nor tokenises to a bare `iri` token, and escaped the narrower limb this predicate
+    previously implemented -- the exact near-miss `_assert_field_name_clean` was
+    widened for. A fabricated non-IRI provenance must not rescue it: the name limb
+    refuses on any token beginning `iri`."""
+    columns = [{"name": "iri2016_t_plus_1_tecu", "provenance": "fabricated non-IRI stamp"}]
+    problems = iri_column_violations(columns)
+    assert problems and "iri2016_t_plus_1_tecu" in problems[0], problems

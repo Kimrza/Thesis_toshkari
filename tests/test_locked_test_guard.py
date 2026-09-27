@@ -1203,11 +1203,15 @@ def test_local_platform_keeps_its_designed_behaviour(
 # Foundation's `reconcile_access_records` owns the both-way reconciliation as a PURE
 # READ with a `known_orphans` parameter; these tests wire this unit's AccessRecord
 # against it and do not redesign it. The six known pre-guard orphans of the real log
-# (the five retrospective December accesses, rows 3, 4, 5, 8 and 9 of
-# `evidence/experiment_registry.md`, plus GOV-2026-08-28-FD-01 Recommendation 31's
-# expressly unresolved access) are represented here by synthetic run_ids of the same
-# SHAPE: these tests exercise the mechanism against synthetic logs only and read no
-# December content.
+# (five of the SIX retrospective December accesses -- rows 3, 4, 5, 8 and 9 of
+# `evidence/experiment_registry.md`; row 10, the sixth retrospective row, added
+# 2026-08-28, is a distinct later event not represented in this synthetic set -- plus
+# GOV-2026-08-28-FD-01 Recommendation 31's expressly unresolved access) are represented
+# here by synthetic run_ids of the same SHAPE: these tests exercise the mechanism
+# against synthetic logs only and read no December content. (Comment corrected
+# 2026-09-27, GOV-2026-09-27-BT-02 R19: "the five retrospective December accesses" was
+# written before row 10 existed and under-counted the retrospective class; the
+# registry's own roll-up carries the same dated correction. Mechanics unchanged.)
 
 _KNOWN_PRE_GUARD_ORPHANS = {
     "retro-row-3": "retrospective pre-guard access (experiment_registry.md row 3)",
