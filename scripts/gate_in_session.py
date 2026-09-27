@@ -140,6 +140,19 @@ def critical_test_command(python: str, targets: list[str], junit: Path) -> list[
 
 
 def fixture_command(python: str, config_dir: Path, fixture_id: str, code_commit: str) -> list[str]:
+    """The measuring-run invocation for one fixture.
+
+    `--emit-candidate` + `--identity` is required here rather than a plain comparison
+    run: at HEAD, both fixtures' `fixture_manifest.yaml` are `status: candidate`
+    structural skeletons carrying `TBD -- freeze gate` sentinels (TE 15.1's own rule
+    forbids comparing against an unmeasured placeholder), so the plain-mode loader
+    refuses before a single stage runs (`GOV-2026-09-27-BT-02` continuation, verified
+    by direct local reproduction 2026-09-27). Each fixture's own frozen identity
+    declaration is at the fixed, per-fixture path `tests/fixtures/<fixture_id>/
+    identity_declaration.yaml` (TE 15.1/15.2; both exist and validate as of this
+    writing) -- never a placeholder path, and never the *other* fixture's file.
+    """
+    identity = Path("tests") / "fixtures" / fixture_id / "identity_declaration.yaml"
     return [
         python,
         str(REPO_ROOT / "scripts" / "run_walking_skeleton.py"),
@@ -147,6 +160,9 @@ def fixture_command(python: str, config_dir: Path, fixture_id: str, code_commit:
         str(config_dir),
         "--fixture",
         fixture_id,
+        "--emit-candidate",
+        "--identity",
+        str(identity),
         "--code-commit",
         code_commit,
     ]

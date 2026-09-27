@@ -196,6 +196,33 @@ def test_the_wrapper_offers_no_way_to_skip_a_fixture() -> None:
     assert "for fixture_id in FIXTURE_IDS:" in source
 
 
+def test_the_wrapper_s_fixture_invocation_is_a_measuring_run_with_the_right_identity() -> None:
+    """`GOV-2026-09-27-BT-02` continuation, 2026-09-27: `fixture_command()` used to build a
+    PLAIN comparison-run argv, which refuses at HEAD because both fixtures' own
+    `fixture_manifest.yaml` are still `status: candidate` sentinel-laden skeletons (TE 15.1) --
+    verified by direct local reproduction before this fix. The wrapper must instead run a
+    MEASURING run (`--emit-candidate`) against each fixture's OWN identity declaration, never
+    a placeholder path and never the other fixture's file."""
+    for fixture_id in FIXTURE_IDS:
+        argv = GATE.fixture_command("py", Path("configs"), fixture_id, "c" * 40)
+        assert "--emit-candidate" in argv
+        identity_index = argv.index("--identity") + 1
+        identity_path = Path(argv[identity_index])
+        assert identity_path == Path("tests") / "fixtures" / fixture_id / "identity_declaration.yaml"
+        # never the sibling fixture's declaration
+        other = [f for f in FIXTURE_IDS if f != fixture_id][0]
+        assert other not in str(identity_path)
+        # the real file exists and actually validates as an identity declaration -- this
+        # control would not have caught the original bug (a missing flag), but it does catch
+        # a wrong or swapped path, which is the failure mode a hand-edit could introduce
+        real_path = REPO_ROOT / identity_path
+        assert real_path.is_file(), f"{real_path} must exist for the gate to have anything to read"
+        from src.data.fixture_manifest import load_identity_declaration
+
+        declaration = load_identity_declaration(real_path)
+        assert declaration.fixture_id == fixture_id
+
+
 def test_the_wrapper_refuses_a_non_kaggle_platform_before_running_anything(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

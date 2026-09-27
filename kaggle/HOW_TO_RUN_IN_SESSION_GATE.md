@@ -1,18 +1,70 @@
 # How to run the TC-03g in-session gate on Kaggle
 
-**Updated 2026-09-27 (GOV-2026-09-27-BT-02 continuation session).** The two
-preconditions this file originally named (below) are **partly stale** — verified
-against the current repository rather than assumed. Read the corrected status
-before booking anything.
+**Updated 2026-09-27 (GOV-2026-09-27-BT-02 continuation session, second pass).**
+Every command below has now been verified locally against commit `b63a7e0` plus
+this session's fixes — **not inside Kaggle itself, which remains untested by this
+session.** Read "What is verified vs. what is not" before booking anything.
 
-**Nothing in this file has been executed by an agent against a real Kaggle
-session.** No Kaggle account, API key or network session exists in this local
-environment. Local, non-December, bounded dry-runs WERE executed this session
-to verify the commands below are accurate — never a governed run, never
-December content. This is the runbook for the act
-`CR-2026-09-20-GOV-CG-01-DISPOSITIONS` §5 item 10 assigns to the Student
-(`GOV-2026-09-20-CG-01` Recommendations 28 and 57): the in-Kaggle session that discharges
-**TC-03g** (`binding: hard`) and W-6 step 8's durability measurement.
+## What is verified vs. what is not
+
+**Verified locally, this session, with reproducible commands and logs (never a
+governed run, never a December byte):**
+
+1. `scripts/gate_in_session.py`'s fixture invocation was missing
+   `--emit-candidate --identity <path>` and would have failed inside Kaggle on
+   both fixtures. **Fixed** (commit pending as of this writing) and covered by a
+   new bite-proofed test, `tests/test_in_session_gate.py::test_the_wrapper_s_fixture_invocation_is_a_measuring_run_with_the_right_identity`.
+2. A real R-13 release conflict existed in the local artifact tree (a previous
+   session's D-33 governance-comment edit to `configs/data.yaml` shifted that
+   file's hash, which is stamped into the target release's
+   `aggregation_config_id`). **Diagnosed and resolved** by archiving the
+   affected releases/feature-bundles/predictions under the project's existing
+   `.archived-<commit>` convention and re-running — see
+   `evidence/DECISIONS.md` "D-76 addendum" for the full diagnosis. Every
+   scientific value was confirmed byte-identical before archiving; nothing was
+   guessed.
+3. With both of the above fixed, `python scripts/run_walking_skeleton.py
+   --config configs/ --fixture plumbing_7day --emit-candidate --identity
+   tests/fixtures/plumbing_7day/identity_declaration.yaml --code-commit
+   b63a7e0` now runs stages 00 through 06 **successfully** and stops at stage
+   07 on exactly one refusal:
+   ```
+   07_evaluate_and_report: aborted: comparison set primary on partition
+   FIX-NOV-FOLD-01: prediction(s) missing for declared member(s) ['B-01'];
+   the mask is built over the declared set exactly, never over whatever
+   arrived (R-106)
+   ```
+   This is the **same structural refusal** `CHANGE_RECORD_2026-09-25_apparatus_hyperparameters.md`
+   §7a item 6 already documented on 2026-09-26: the comparison set `primary`
+   declares member `B-01` (the IRI-2016 benchmark), and no B-01 payload exists
+   locally — it requires `iricore`, a Linux-only wheel, which only Kaggle can
+   provide (D-49). **This is the one concrete remaining local blocker**, named
+   precisely, not fabricated around.
+4. Full log: `artifacts/exec_evidence/run_2026-09-27_kaggle_readiness/plumbing_7day_emit_candidate_b63a7e0.log`.
+   Focused test suite green: `tests/test_in_session_gate.py` (11/11),
+   `tests/test_fixture_run_fixes.py`, `tests/test_prepared_target_schema.py`,
+   `tests/test_recorded_presence.py`, `tests/test_release_hashes.py`,
+   `tests/test_locked_test_guard.py`, `tests/test_clean_run.py` — all pass, no
+   new failures, no guard weakened.
+
+**NOT verified — can only be confirmed inside an actual Kaggle session:**
+
+- That `iricore==1.8.0` actually installs and runs on Kaggle's current base
+  image (glibc compatibility for the `manylinux_2_35` wheel).
+- That `scripts/gate_in_session.py` end-to-end, including the critical test
+  set and the `emit_in_session_gate_result` write, behaves the same way under
+  Kaggle's actual filesystem/platform stamp as it does against synthetic
+  inputs locally (`test_in_session_gate.py` tests the wrapper's logic with
+  synthetic locks/manifests, not a real Kaggle run).
+- Real network/session behaviour (Kaggle account phone verification,
+  dataset upload size/time, session timeout limits).
+- Whether stage 07 clears once a real B-01 payload exists — the local
+  dry-run above proves everything **up to** that point works; it does not
+  prove what happens after, since no B-01 payload exists here to test with.
+
+**Do not treat this file's local verification as proof Kaggle will succeed.**
+It proves the commands are syntactically and logically correct against this
+repository as it stands, and identifies the one real remaining gap.
 
 ## What TC-03g actually requires, quoted from its own rule
 
@@ -23,169 +75,166 @@ a commit hook cannot fire there and a local suite run proves nothing about the e
 the governed run actually executes in."* (TE §9.1, §9.2; `constraint-register.md` TC-03g;
 TA-03, TA-26.)
 
-So three things must happen **in one Kaggle session, in this order**: the critical test
-set runs; both fixtures run; the result is recorded as
-`in_session_gate_result.json` with the session's own environment lock.
+## The two Kaggle sessions you need, in order
 
-## Precondition status, corrected 2026-09-27
+There are **two separate Kaggle sessions**. Do the first one first; only book
+the second after the first's output has been brought back and the fixture
+ladder clears locally.
 
-**Precondition 1 (gate-emitter wiring) — RESOLVED**, but by a different mechanism
-than this file originally planned. `scripts/gate_in_session.py` now exists (added
-after this file was written): a dedicated orchestrator that runs the critical set,
-runs both fixtures, and calls `emit_in_session_gate_result` itself — no wiring into
-`run_walking_skeleton.py` was needed or done. Use `scripts/gate_in_session.py`
-directly; do not use `run_walking_skeleton.py` alone for this gate.
+- **Session A — the B-01 leg.** Produces the IRI-2016 benchmark payload. This
+  is the one concrete blocker named above. Do this first.
+- **Session B — the TC-03g in-session gate.** Runs the critical test set and
+  both fixtures inside Kaggle, for the durability/environment-attestation
+  requirement. Only book this after Session A's output is bridged back locally
+  and the fixture ladder passes stage 07 locally (confirms the payload is
+  correctly formed before spending a second Kaggle session).
 
-**Precondition 2 (fixture ladder) — PARTIALLY ADVANCED, and a NEW blocker was found
-in `gate_in_session.py` itself, verified locally 2026-09-27 (bounded dry-runs, no
-December, no Kaggle):**
+---
 
-1. The fixture ladder now reaches stage 07 (not stage 05) when invoked with
-   `--emit-candidate --identity <fixture>/identity_declaration.yaml`
-   (`CHANGE_RECORD_2026-09-25_apparatus_hyperparameters.md` §7a item 6, 2026-09-26:
-   "stages 00–06 complete end-to-end... 07 runs to the R-106 exact-set refusal").
-   That refusal is **structural**: comparison set `primary` declares member `B-01`
-   (the IRI-2016 benchmark), and no B-01 payload can be generated locally — it
-   requires `iricore`, Linux-only, which is exactly the Kaggle B-01 leg below.
-2. **`gate_in_session.py`'s own fixture invocation does NOT pass `--emit-candidate`**
-   (`fixture_command()`, line ~142): it calls plain
-   `run_walking_skeleton.py --config … --fixture <id> --code-commit <sha>` with no
-   `--emit-candidate` or `--identity` flag. Verified locally 2026-09-27: plain mode
-   refuses immediately — `tests/fixtures/plumbing_7day/fixture_manifest.yaml` still
-   carries the `TBD — freeze gate` sentinel on 46 fields and is "measured from a
-   fixture run and frozen, never compared against an unmeasured placeholder" (TE
-   15.1). **As shipped today, `gate_in_session.py` cannot pass either fixture** —
-   it will hit this same refusal for both `plumbing_7day` and `scientific_1month`
-   (the latter's `fixture_manifest.yaml` is also `status: candidate` with its own
-   `TBD` fields). This is a real gap in the script, not a Kaggle-environment
-   problem, and it is not yet fixed on this clone.
-3. The B-01 Kaggle leg's runbook (below) states a "known remaining blocker":
-   `gim_comparator.parquet` generation refusing on Q-15 (`TBD`). **That line is now
-   stale** — Q-15 was frozen as D-72 (2026-09-26, bilinear spatial interpolation)
-   and a governed release, `artifacts/releases/gim_comparator_C-01_2022/`, already
-   exists and was independently re-verified by the 2026-09-27 board. Do not expect
-   this blocker; if it recurs, that is a regression worth reporting, not the
-   expected state.
-4. **A stale/conflicting local artifact state was found and restored, not fixed
-   forward**: an `--emit-candidate` dry run this session hit a DIFFERENT, later
-   refusal at stage 02 — a published `phase1_hourly_target` release whose committed
-   content hash disagrees with this run's freshly computed one (R-13's
-   conflict-refusal, working as designed — TE §13.3 "a new version rather than an
-   overwrite"). This is evidence that **the repository's fixture-run artifacts are
-   not currently in a clean, freshly-reproducible state** — some prior local run
-   left a release version the Student has not yet resolved via D-76's Option A
-   procedure. Resolve this (or start from a clean `artifacts/walking_skeleton/` and
-   `artifacts/releases/` state) before trusting any fixture run, local or Kaggle.
+## Session A — the B-01 Kaggle leg (numbered, beginner-friendly)
 
-**Therefore: do not book the Kaggle session for the in-session gate yet.** The
-corrected order is: (1) the B-01 Kaggle leg (below) — this one IS ready to book;
-(2) the local bridge step; (3) fix `gate_in_session.py` to pass
-`--emit-candidate --identity <path>` per fixture (a small, verifiable code change —
-not done on this clone this session, since it was outside this task's scope); (4)
-resolve the R-13 stale-release conflict; (5) confirm both fixtures pass **locally**
-first (never assume Kaggle will succeed where local has not been tried); (6) only
-then book the in-session-gate Kaggle session.
+**Full technical runbook:** `governance/RUNBOOK_2026-09-26_kaggle_b01_fixture_leg.md`
+(verified current 2026-09-27 except its own "known remaining blocker" note on
+Q-15/`gim_comparator.parquet`, which is now stale and safe to ignore — Q-15 was
+frozen as D-72 on 2026-09-26 and a governed release already exists).
 
-## Step 0 — the B-01 Kaggle leg (THIS one is ready to book now)
+### 1. What to upload
 
-This is a **separate, smaller Kaggle session** from the TC-03g in-session gate
-below, and does not depend on any of the four items above. It produces the B-01
-(IRI-2016) benchmark payload the fixture ladder needs to clear the R-106
-refusal. Full runbook: `governance/RUNBOOK_2026-09-26_kaggle_b01_fixture_leg.md`
-(verified current 2026-09-27, except its own "known remaining blocker" note on
-Q-15/`gim_comparator.parquet`, which is stale — see item 3 above). Summary,
-commands verified against the repository as it stands today:
+Create a **private Kaggle dataset** (Kaggle → Create → New Dataset), not a
+notebook file attachment, containing the whole repository working tree:
+`configs/`, `src/`, `scripts/`, `tests/` (including `tests/fixtures/`),
+`requirements.txt`, `pyproject.toml`, and the `evidence/` months the fixture
+manifest cites. **Do NOT upload `evidence/locked_test_restricted/`** — the
+locked December root must never leave this machine (Vision §8.3; D-15).
 
-- Environment: CPython **3.10.12** (D-49's exception, this benchmark only —
-  NOT the 3.11 governed pin), `iricore==1.8.0` (Linux-only wheel, this is why
-  Kaggle and not local), pinned index files `apf107.dat` / `ig_rz.dat` by the
-  SHA-256s D-49/D-45 already record. **Never run `iricore.update()`.**
-- Pin check before and after (D-45 annotation item 2):
-  ```bash
-  python scripts/04_build_external_products.py --config configs/ --phase 1 \
-    --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
-    --code-commit <HASH> --verify-runtime
-  ```
-- R-59 validation report (needs the Student's own samples file, R-59's seven
-  areas; tolerance predeclared in `configs/experiment.yaml: benchmark_b01.validation_report`):
-  ```bash
-  python scripts/04_build_external_products.py --config configs/ --phase 1 \
-    --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
-    --code-commit <HASH> --build-validation-report <your_samples.json>
-  ```
-  A `failed` report is written as-is and generation stays blocked — never switch
-  implementations to make it pass.
-- Generation (November only — the fixture month):
-  ```bash
-  python scripts/04_build_external_products.py --config configs/ --phase 1 \
-    --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
-    --code-commit <HASH> --generate-benchmark \
-    --validation-report artifacts/external/b01/iri_implementation_validation_report.json \
-    --months 11
-  ```
-  Then repeat the pin check (pins AFTER — a drifted pin invalidates the session, D-49).
-- **Bring back** from `artifacts/external/b01/`: `b01_runtime_identity.json`,
-  `iri_implementation_validation_report.json`, `b01_iri2016_rows.jsonl`,
-  `b01_provenance.json`, `sha256_manifest.json`.
-- **Local bridge step, back on this machine, after verifying the returned files
-  against their `sha256_manifest.json`** (agent-runnable, not a Kaggle act):
-  ```bash
-  python scripts/04_build_external_products.py --config configs/ --phase 1 \
-    --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
-    --emit-prediction-payload artifacts/walking_skeleton/plumbing_7day/predictions \
-    --benchmark-rows <returned b01_iri2016_rows.jsonl> \
-    --benchmark-provenance <returned b01_provenance.json>
-  ```
-  This re-verifies R-59 at consumption and writes one stamped `B-01.json` per
-  apparatus fold (one adapter call per fold — the fold windows overlap, per
-  `test_overlapping_apparatus_folds_bucket_correctly_only_via_per_fold_calls`).
-
-After this leg, re-attempt the local `--emit-candidate` dry run for
-`plumbing_7day` (after resolving item 4's R-13 conflict) to confirm stage 07
-now clears — **do this locally before spending a second Kaggle session on the
-in-session gate below.**
-
-## The session, once items 1–5 above are resolved (the in-session gate itself)
-
-### Upload
-
-The whole repository working tree, as a **private Kaggle dataset** (not a notebook
-attachment of loose files): `configs/`, `src/`, `scripts/`, `tests/`,
-`requirements.txt`, `pyproject.toml`, `tests/fixtures/`, and the `evidence/` months the
-fixture manifests cite. **Do not upload `evidence/locked_test_restricted/`** — the locked
-December root must not leave the governed machine, and no Kaggle path may reach it
-(Vision §8.3; D-15).
-
-### Kaggle settings
+### 2. Notebook/session settings
 
 | Setting | Value | Why |
 |---|---|---|
-| Accelerator | **None / CPU** | TC-01: CPU is a complete execution path; a GPU result is not the governed one |
-| Internet | **ON** | needed to `pip install -r requirements.txt`; needs a phone-verified account |
-| Environment | default "Latest environment" | the notebook detects its own interpreter; see the 3.10/3.11 note below |
-| Dataset | the private dataset above | no other attachment |
+| Accelerator | **None / CPU** | TC-01: CPU is a complete execution path |
+| Internet | **ON** | needed to install `iricore` and its index files |
+| Environment | build a **Python 3.10** virtual environment inside the session | D-49's exception is 3.10 for this benchmark only — do not use the kernel's default interpreter without checking its version first |
+| Dataset | attach the private dataset from step 1 | no other attachment needed |
 
-### Environment
+### 3. Cells/commands, in order
 
-`requirements.txt` pins the governed set exactly (`numpy==1.26.4`, `pandas==2.1.4`,
-`pyyaml==6.0.1`, `scikit-learn==1.4.2`, `tensorflow==2.21.0`, `matplotlib==3.9.0`,
-`pyarrow==16.1.0`, `pytest==8.2.2`, `ruff==0.4.8`). TC-03d pins **Python 3.11**; D-49's
-extension covers a 3.10 environment for the B-01 benchmark only. If the Kaggle image is
-not 3.11, build a 3.11 environment and run everything inside it — do not silently run the
-governed suite on another interpreter, and record the interpreter version in the evidence
-either way.
+```bash
+# cell 1 — confirm the interpreter, then install iricore==1.8.0 and its pinned index files
+python --version   # must print 3.10.x
+pip install iricore==1.8.0
+# apf107.dat / ig_rz.dat SHA-256s must match D-49/D-45's recorded values — verify before use
 
-### The commands, in order
+# cell 2 — pin check BEFORE (D-45 annotation item 2)
+python scripts/04_build_external_products.py --config configs/ --phase 1 \
+  --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
+  --code-commit <HASH> --verify-runtime
+```
+Expected output: a runtime-identity report confirming CPython 3.10.12,
+`iricore==1.8.0`, and both index-file hashes. **If any hash disagrees, stop —
+do not proceed with a drifted pin.**
 
-**Use `scripts/gate_in_session.py`, not manual pytest/`run_walking_skeleton.py`
-calls.** It exists now (it did not when this file was first written) and does
-steps 1, 2 and the gate-emission in one orchestrated, write-once, audit-logged
-run — it already deselects the three restricted readers by name and already
-refuses a non-`kaggle` platform stamp before running anything. **Precondition:
-its `fixture_command()` must first be patched to pass
-`--emit-candidate --identity <fixture>/identity_declaration.yaml`** (item 2
-above) — without that fix it will abort at the same fixture-manifest refusal
-verified locally this session, inside the Kaggle session, wasting the booking.
+```bash
+# cell 3 — R-59 validation report (needs YOUR OWN samples file — see below)
+python scripts/04_build_external_products.py --config configs/ --phase 1 \
+  --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
+  --code-commit <HASH> --build-validation-report <your_samples.json>
+```
+`<your_samples.json>` is a file **you** (the Student) prepare, covering R-59's
+seven required areas — this is not something an agent may fabricate. Expected
+output: a JSON report ending in `"status": "passed"`. **If it says `"failed"`,
+stop — do not switch implementations to force a pass; that is a governance
+violation (project.md § Forbidden).**
+
+```bash
+# cell 4 — generation (November only, the fixture month — never run over December)
+python scripts/04_build_external_products.py --config configs/ --phase 1 \
+  --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
+  --code-commit <HASH> --generate-benchmark \
+  --validation-report artifacts/external/b01/iri_implementation_validation_report.json \
+  --months 11
+
+# cell 5 — pin check AFTER (a drifted pin invalidates the whole session, D-49)
+python scripts/04_build_external_products.py --config configs/ --phase 1 \
+  --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
+  --code-commit <HASH> --verify-runtime
+```
+
+### 4. What successful output looks like
+
+`artifacts/external/b01/` in the Kaggle session's working directory contains:
+`b01_runtime_identity.json`, `iri_implementation_validation_report.json`
+(status `passed`), `b01_iri2016_rows.jsonl`, `b01_provenance.json`,
+`sha256_manifest.json`. No error text in the cell outputs; the last cell's pin
+check matches cell 2's.
+
+### 5. Download and send back to me (or bring to your own local bridge step)
+
+From Kaggle's Output pane, download the whole `artifacts/external/b01/`
+folder. **What you should return**: all five files listed in step 4, plus the
+full cell outputs/console log of cells 1–5 (as text, not a screenshot — hashes
+need to be copy-checkable).
+
+### 6. The local bridge step (run on YOUR governed machine, not Kaggle)
+
+After verifying the returned files against their own `sha256_manifest.json`:
+```bash
+python scripts/04_build_external_products.py --config configs/ --phase 1 \
+  --fixture-manifest tests/fixtures/plumbing_7day/identity_declaration.yaml \
+  --emit-prediction-payload artifacts/walking_skeleton/plumbing_7day/predictions \
+  --benchmark-rows <returned b01_iri2016_rows.jsonl> \
+  --benchmark-provenance <returned b01_provenance.json>
+```
+This re-verifies R-59 at consumption and writes one stamped `B-01.json` per
+apparatus fold.
+
+### 7. Confirm locally before booking Session B
+
+```bash
+export TEC_PLATFORM=local
+export PYTHONHASHSEED=0
+python scripts/run_walking_skeleton.py --config configs/ --fixture plumbing_7day \
+  --emit-candidate --identity tests/fixtures/plumbing_7day/identity_declaration.yaml \
+  --code-commit <your current commit>
+```
+Expected: this now passes stage 07 (the exact refusal quoted at the top of
+this file should no longer occur). If it still refuses at 07 with the same
+`B-01` message, the bridge step (6) did not complete correctly — check the
+returned files' hashes again before re-attempting.
+
+### Troubleshooting (Session A)
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `pip install iricore==1.8.0` fails / no matching wheel | Kaggle's glibc doesn't match the `manylinux_2_35` wheel | This is a real, reportable blocker — do not substitute a different `iricore` version (violates D-49's exact pin) |
+| pin-check hash disagrees | Kaggle's environment installed a different `apf107.dat`/`ig_rz.dat` | Re-download the exact pinned files; never proceed on a hash mismatch |
+| R-59 report says `"failed"` | Your samples don't match the implementation to the declared tolerance | Investigate the implementation or the samples — never force a pass |
+| `--generate-benchmark` refuses citing December | You passed the wrong `--months` value | Use `--months 11` only, never touch December from this leg |
+
+---
+
+## Session B — the TC-03g in-session gate (after Session A + step 7 above succeed)
+
+### 1. What to upload
+
+Same private Kaggle dataset as Session A, refreshed to the commit where stage
+07 now passes locally (confirmed in Session A step 7).
+
+### 2. Notebook/session settings
+
+| Setting | Value | Why |
+|---|---|---|
+| Accelerator | **None / CPU** | TC-01 |
+| Internet | **ON** | to install `requirements.txt` |
+| Environment | **Python 3.11** (the governed pin, TC-03d) — this is a DIFFERENT environment from Session A's 3.10 | do not run this gate under the B-01 leg's 3.10 env |
+| Dataset | the refreshed dataset | no other attachment |
+
+`requirements.txt` pins the governed set exactly (`numpy==1.26.4`,
+`pandas==2.1.4`, `pyyaml==6.0.1`, `scikit-learn==1.4.2`, `tensorflow==2.21.0`,
+`matplotlib==3.9.0`, `pyarrow==16.1.0`, `pytest==8.2.2`, `ruff==0.4.8`). If the
+Kaggle image is not 3.11, build one and run everything inside it — record the
+actual interpreter version either way.
+
+### 3. The command
 
 ```bash
 export TEC_PLATFORM=kaggle
@@ -196,19 +245,42 @@ COMMIT=<the exact commit sha the uploaded tree was taken from>
 python scripts/gate_in_session.py --config configs/ --phase 1 --code-commit "$COMMIT"
 ```
 
-That single command runs the critical set (junit at
-`artifacts/exec_evidence/in-session-gate-<UTC>/junit_in_session.xml`), then both
-fixtures in order (plumbing first, TE §9.2), then emits
-`artifacts/walking_skeleton/in_session_gate_result.json` and immediately
-self-checks it through `require_in_session_gate`. Exit 0 only if the result was
-both emitted and accepted. If it aborts, the registry row it appends (status
-`aborted`, with a `reason`) says why — read that before re-running; the gate
-result is write-once, so a second run in the same workspace needs a moved or
-versioned prior result, never an overwrite.
+### 4. What successful output looks like
 
-**Separately, for the G-09 preflight report** (not part of `gate_in_session.py`,
-a distinct artifact per `src/data/fixture_evidence.py: build_environment_and_cpu_preflight_report`,
-which reads the gate result above as its input):
+The last printed line reads:
+```
+gate_in_session: accepted on kaggle; N critical module(s), fixtures
+{'plumbing_7day': 'passed', 'scientific_1month': 'passed'}; measured total
+<seconds> s -> artifacts/walking_skeleton/in_session_gate_result.json
+```
+Exit code 0. If it prints `gate_in_session: aborted: <reason>` instead, the
+reason is stated explicitly — read it before re-running (see troubleshooting
+below).
+
+**Note on `scientific_1month`:** as of this writing its own
+`fixture_manifest.yaml` is also `status: candidate` (Q-31's scientific-fixture
+manifest freeze is a separate, still-owed Student act, distinct from
+everything fixed this session). If this session still shows that fixture
+failing for that reason, it is a **separate, pre-existing blocker**, not
+something Session A or this gate's own fix touches — do not attempt to freeze
+that manifest yourself; it is a Student-owned act (TE §18.2, Q-31).
+
+### 5. Where the evidence lands, and how to bring it back
+
+| File | Written to (inside the Kaggle session) | What it evidences |
+|---|---|---|
+| Critical-set junit | `artifacts/exec_evidence/in-session-gate-<UTC>/junit_in_session.xml` | the critical set ran **in session** (TA-03, TA-26) |
+| Both fixture roots | `artifacts/walking_skeleton/plumbing_7day/` and `.../scientific_1month/` | both fixtures ran in session (TE §9.2) |
+| The gate result itself | `artifacts/walking_skeleton/in_session_gate_result.json` | **the TC-03g artifact** — platform, environment lock/hash, frozen manifest hashes, per-test and per-fixture results, measured runtime |
+| Registry rows | appended to `artifacts/registry/experiment_registry.jsonl` | NFR-AUD-01: every run visible with status and reason, success or failure |
+| Environment record | `pip freeze` and `python -V` output, saved as text | the session's actual environment, beside the declared pins |
+
+From Kaggle's Output pane, download `artifacts/exec_evidence/in-session-gate-<UTC>/`,
+the two fixture root directories under `artifacts/walking_skeleton/`,
+`in_session_gate_result.json`, and the appended registry rows.
+
+### 6. Then, separately, the G-09 preflight report (not part of `gate_in_session.py`)
+
 ```bash
 python scripts/gate_preflight_report.py --config configs/ --phase 1 \
   --junit artifacts/exec_evidence/in-session-gate-<UTC>/junit_in_session.xml \
@@ -216,34 +288,32 @@ python scripts/gate_preflight_report.py --config configs/ --phase 1 \
   --code-commit "$COMMIT" \
   --output /kaggle/working/aws_ai_dlc_preflight_report_kaggle.json
 ```
+Download `aws_ai_dlc_preflight_report_kaggle.json` too.
 
-The three December-reading modules are deselected by `gate_in_session.py` for
-the same reason the pre-commit hook deselects them (`.githooks/pre-commit` §2,
-Recommendation 30): they read bytes under the restricted root, which is not
-uploaded and must not be. Their evidence belongs to an authorised local gate
-occasion, not to a Kaggle session.
+### 7. What to send back to me (or commit yourself)
 
-### What to bring back, and where it goes
+All of: the gate's final printed line (success or the exact abort reason),
+`in_session_gate_result.json`, the junit XML, the appended registry rows,
+`pip freeze` + `python -V` output, and `aws_ai_dlc_preflight_report_kaggle.json`.
+Commit them under the paths in the table above with a message citing this
+runbook and TC-03g; never delete a row from the registry even if the run
+aborted.
 
-Download from the Output pane and commit into the repository:
+### Troubleshooting (Session B)
 
-| File | Goes to | What it evidences |
+| Symptom | Likely cause | Fix |
 |---|---|---|
-| `junit_in_session.xml`, the pytest console log | `artifacts/exec_evidence/run_<UTC>/` | the critical set ran **in session** (TA-03, TA-26) |
-| `artifacts/walking_skeleton/*/` (both fixture roots, `clean_run_log.json`, `artifact_manifest.json`, `test_report.json`) | same paths in the repo | both fixtures ran in session (TE §9.2) |
-| `artifacts/walking_skeleton/in_session_gate_result.json` | same path | **the TC-03g artifact itself** — platform, environment lock and hash, frozen manifest hashes, per-test and per-fixture results, measured total runtime |
-| the appended `artifacts/registry/experiment_registry.jsonl` rows | merge, append-only | NFR-AUD-01: every run visible with status and reason |
-| `pip freeze`, `python -V` | `artifacts/exec_evidence/run_<UTC>/` | the session's actual environment, beside the declared pins |
-| `aws_ai_dlc_preflight_report_kaggle.json` | `artifacts/preflight/` | G-09 / TA-23 evidence produced in the governed execution environment |
-
-Record the session in the run's evidence record and in the experiment registry. A failed
-or aborted session stays visible with its status and reason — never delete a row and never
-silently re-run (NFR-AUD-01; `project.md` § Forbidden).
+| `refusing: resolved platform is 'local'` | `TEC_PLATFORM=kaggle` not set, or set after `load_configs` already ran | Set the env var before invoking the script, in the same shell |
+| Aborts at the critical set with named failing module(s) | A real test failure inside the Kaggle environment (different from local — e.g. a pin drift) | Read the failing module list the abort message prints; do not weaken or skip the test to force a pass |
+| Aborts on `plumbing_7day` | Session A's B-01 payload was not correctly bridged, or the uploaded dataset is stale | Re-check Session A step 7 passed locally before re-uploading |
+| Aborts on `scientific_1month` citing `TBD` fields | Q-31's manifest freeze is not yet done — a separate, pre-existing, Student-owned gap | Report to the Student; do not attempt to fill the sentinel yourself |
+| `gate result refused: ...` at the end (critical set and fixtures both passed) | `require_in_session_gate`'s own self-check caught a platform/hash/manifest disagreement (R-141) | Read the exact IntegrityError message — it names which of the three checks failed |
+| Second run in the same workspace refuses | The gate result is write-once by design | Move or version the prior `in_session_gate_result.json` before re-running; never overwrite |
 
 ### What the session does NOT do
 
-It does not open the locked December set, does not pass G-05 or G-06, and does not by
-itself sign G-09 — the preflight report is evidence for that gate, and the gate is the
-supervisor's (Vision §13.1). No credential may appear in the notebook, in any output, or
-in any registry note (TE §10; NFR-SEC-01): Kaggle credentials come from Kaggle's own
-secrets, never from a cell.
+It does not open the locked December set, does not pass G-05 or G-06, and does
+not by itself sign G-09 — the preflight report is evidence for that gate, and
+the gate is the supervisor's (Vision §13.1). No credential may appear in the
+notebook, in any output, or in any registry note (TE §10; NFR-SEC-01): Kaggle
+credentials come from Kaggle's own secrets, never from a cell.

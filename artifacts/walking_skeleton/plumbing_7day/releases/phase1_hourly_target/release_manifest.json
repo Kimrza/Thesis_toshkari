@@ -1,8 +1,8 @@
 {
   "change_record_id": "CR-2026-09-23-TARGET-RELEASE-OPTION-A",
-  "content_hash": "330a8c9e9b5360164a0aa53c6e78186d6281b737d77a4815afe1331922cd67e1",
-  "created_at_utc": "2026-09-26T18:34:34.122110+00:00",
-  "dataset_version": "330a8c9e9b53",
+  "content_hash": "c9405c58e3452b104f2c208b781c037573312d31a0ecc171d26ab9b2e17bd0ca",
+  "created_at_utc": "2026-09-27T19:36:04.582918+00:00",
+  "dataset_version": "c9405c58e345",
   "evidence_class": "fixture_plumbing",
   "exclusions_qc_summary": [
     {
@@ -25,7 +25,7 @@
     "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
   ],
   "output_files": {
-    "hourly_target_phase1.csv": "005057e7ea31abbaf6d846e376dca1c99237651f24699f116e2f2e68ba6899d7"
+    "hourly_target_phase1.csv": "b9078695dc329a7655bc782cc1f09f822cf53a259fb60a6dd428ac56ff98e667"
   },
   "processing": {
     "hourly_aggregation": "none: values are released at the provider's own cadence, unaggregated",

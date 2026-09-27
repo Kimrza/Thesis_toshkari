@@ -3277,3 +3277,56 @@
 **Duration ms**: 214
 
 ---
+
+## Human Turn
+**Timestamp**: 2026-09-27T19:21:00Z
+**Event**: HUMAN_TURN
+
+---
+
+## Subagent Completed
+**Timestamp**: 2026-09-27T19:26:23Z
+**Event**: SUBAGENT_COMPLETED
+**Agent Type**: general-purpose
+**Agent ID**: a04ab7acfbcdd5160
+**Message**: Report delivered to the caller via handback.
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-27T19:26:35Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-27T19:26:36Z
+**Event**: HUMAN_TURN
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-27T19:39:04Z
+**Event**: HUMAN_TURN
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-27T19:43:04Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---
+
+## Human Turn
+**Timestamp**: 2026-09-27T19:48:19Z
+**Event**: HUMAN_TURN
+
+---
+
+## Session Start
+**Timestamp**: 2026-09-27T19:52:45Z
+**Event**: SESSION_STARTED
+**Source**: startup
+
+---

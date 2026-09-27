@@ -3893,7 +3893,49 @@ e535521/`), `governance/RUNBOOK_2026-09-26_kaggle_b01_fixture_leg.md`.
 
 ---
 
-## D-77 — NFR-IRI-01 denial-mechanism widening after the `iri2016_t_plus_1_tecu` near-miss (TA-07/WS-10 record)
+## D-76 addendum — second recurrence of the R-13 conflict, resolved under the SAME standing policy (2026-09-27)
+
+**2026-09-27 (GOV-2026-09-27-BT-02 continuation session).** D-76's policy above is a
+**standing rule**, not a one-time act — its own text says every future refusal on this
+path is checked against the mandatory verification requirement, and its decision
+structure ("if the difference traces to a documented, authorized input/code/config change
+... the new release is versioned under R-13 with that citation") applies to any later
+recurrence with the same shape. This entry applies it to a second recurrence; it is not a
+new decision and required no fresh owner ruling, per D-76's own words.
+
+**Trigger.** A local, bounded dry-run of `run_walking_skeleton.py --fixture plumbing_7day
+--emit-candidate` (verifying the Kaggle guide's commands, no December content) hit the
+identical class of refusal: `scripts/02_standardize_prepared_target.py` refused to
+publish because the freshly computed `content_hash` differed from the published one.
+
+**Diagnosis, performed the same way D-76 prescribes** (isolated reproduction, never
+trusting the refusal message alone): `standardize_hourly_target` was called directly in a
+scratch script against a scratch output path (never the governed release path), and its
+168 rows were diffed field-by-field against the published `hourly_target_phase1.csv`.
+**Every scientific value was byte-identical** — `vtec_tecu`, `valid_observation_count`,
+`within_hour_spread_tecu`, `largest_internal_gap_s`, timestamps, station, cell bounds, all
+three TEC-05 stamps, the lineage caveat text. The **only** differing field was
+`aggregation_config_id` (published `2b95a77bd9e2` -> fresh `9c1fe28da736`), which is
+`snapshot.hashes["data.yaml"][:12]` by construction (script 02's own derivation, unchanged
+since D-76). The cause traces exactly: this session's `D-33 addendum` (above) edited
+`configs/data.yaml`'s `cell_rule` inline comment to record D-33's governance-condition
+closure — a real, authorized, documented, non-scientific-value edit to that file's bytes,
+committed at `b63a7e0`. **This is a documented, authorized lineage, not nondeterminism —
+D-76's first branch applies again.**
+
+**Action taken, mirroring D-76's own mechanism exactly:** the existing
+`releases/phase1_hourly_target/` was archived immutably to
+`releases/phase1_hourly_target.archived-b63a7e0` (git-tracked rename, never deleted,
+matching the project's existing `.archived-<short-commit>` convention — confirmed against
+`phase1_hourly_target.archived-e535521`, whose suffix is git commit `e535521`'s short
+hash, not a content hash). The fixture run was then re-executed and accepted the new
+version under this citation (verification below).
+
+**Verification per D-76's mandatory requirement.** `git status`/`git diff --stat` checked
+before and after; the archived copy is byte-identical to the pre-archive published file
+(a rename, not a copy-then-edit). No December byte was read. No scientific value in the
+target changed — only the release citation and its `aggregation_config_id` stamp, exactly
+as D-76 itself found the first time.
 
 **Decision date:** 2026-09-27. **Adopted by:** the project owner, Kimia Rezaei, on
 explicit instruction this session to adopt the outstanding R10 draft from
