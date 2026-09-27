@@ -24,7 +24,7 @@ correction is DRAFTED for the §13 ritual, its only sanctioned write path).
 | R1 | Re-baseline addenda at HEAD `69b00c4` (34 modules, 10 pins, ladder through stage 06, D-72–D-76, GIM release) written into the artifact bodies; fresh junit at HEAD **BLOCKED** (§ Blocked) | `build-test-results.md`, `build-and-test-summary.md`, `integration-test-instructions.md`, `unit-test-instructions.md` |
 | R2 | Rec 47 relabelled "CLOSED (CI-verification limb only)"; restricted-reader modules deselected from CI; consolidated platform ruling DRAFTED for Student+Supervisor; team.md §13 ritual text drafted | `build-test-results.md`, `.github/workflows/verify.yml`, `CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md` |
 | R3 | `resolve_platform_roots` now refuses `GITHUB_ACTIONS`/`CI`-marked environments (fail-closed); negative control added; `verify.yml` declares `TEC_PLATFORM: local` explicitly; subprocess test helpers strip the CI markers where marker-free default resolution is the tested behaviour | `src/data/config.py`, `tests/test_determinism.py`, `verify.yml`, `tests/test_gim_generation.py`, `tests/test_gim_provenance.py`, `tests/test_external_drivers.py` (×2) |
-| R4 | Fixture-manifest countersignature misstatement corrected to the register's actual state (D-33 countersignature OUTSTANDING) | `tests/fixtures/plumbing_7day/fixture_manifest.yaml` (§ 2 below is the change text) |
+| R4 | Fixture-manifest countersignature misstatement corrected to the register's then-actual state (D-33 countersignature outstanding); **superseded same day** — D-33's governance condition CLOSED 2026-09-27 on the Student's explicit verbal confirmation, under the same authority equivalence that closed D-1 (`evidence/DECISIONS.md` D-33 addendum) | `tests/fixtures/plumbing_7day/fixture_manifest.yaml`, `configs/data.yaml:176`, `evidence/DECISIONS.md` (§ 2 below is the full change text) |
 | R5 | **CLOSED on option 1 (recovery), same day — and extended.** The report was never a file — it was delivered in chat 2026-09-24 per the output contract's default. Verbatim text recovered from this clone's session transcript (`9ccb10d0…`, line 432, 2026-09-24T19:42:32Z, 31,019 chars, 16 Recommendation blocks, counts re-derived 1/7/7/1) and written to `governance/reviews/GOV-2026-09-24-BT-01.md` with a provenance header; the body is byte-verbatim, nothing reconstructed. **On the Student's further instruction of 2026-09-27, the companion closure-verification pass was recovered by the same method** (same transcript, lines 726/727, 2026-09-25T08:23–08:33Z, 9,171 chars, 16 closure rows, the "Lift FAIL to CONDITIONAL PASS" recommendation) and written to `governance/reviews/GOV-2026-09-24-BT-01-CLOSURE-VERIFICATION.md` with its dispatch brief appended verbatim as evidence the pass was mandated adversarial. The interim limitation record is marked SUPERSEDED and carries corrections to two claims it made wrongly (the board was `ADAPTIVE`, not full-board; it ran on THIS clone `GIT-AE-SRV-RDT1`, not LOTUS) | `governance/reviews/GOV-2026-09-24-BT-01.md`, `governance/reviews/GOV-2026-09-24-BT-01-CLOSURE-VERIFICATION.md`, `CHANGE_RECORD_2026-09-27_GOV-BT-01_report_loss.md` |
 | R6 | Diary reconciliation entry appended (condition CLOSED, the 2026-09-27 retrieval attempt was an optional provenance re-retrieval); custody-channel limitation sentence added to the results addendum; `test_release_hashes.py` re-run **BLOCKED** (§ Blocked) | `memory.md`, `build-test-results.md` |
 | R7 | Commit-hash → authorizing-record mapping (§ 3 below); `.githooks/commit-msg` hook added refusing empty/boilerplate messages — **negative control demonstrated on this clone**: boilerplate → exit 1, empty → exit 1, real message → exit 0 (mechanism note: message checks belong to `commit-msg`, not `pre-commit`, which runs before the message exists) | § 3; `.githooks/commit-msg` |
@@ -65,59 +65,101 @@ Student's blanket approval of R3/R11/R19/R23 is the explicit ruling
 
 `tests/fixtures/plumbing_7day/fixture_manifest.yaml`, units area, `coordinates.source`:
 the 2026-09-26 note claiming both halves "were already frozen and countersigned"
-is corrected to the register's actual state — coordinates frozen (D-1, closed
-2026-08-21 under the recorded student/supervisor authority equivalence, **no
-signature artifact exists and none is claimed**; D-65 Student-owned);
-coordinate-to-cell rule frozen (D-1 addendum / D-33) with **D-33's TE §18.2
-supervisor countersignature still OUTSTANDING** (`evidence/DECISIONS.md` D-33;
-`configs/data.yaml:176` agrees). Option 2 — obtaining the actual countersignature
-— remains the open D-33 condition, owed before the Q-31 manifest freeze and in
-any case before G-05.
+was corrected 2026-09-27 to the register's then-actual state — coordinates frozen
+(D-1, closed 2026-08-21 under the recorded student/supervisor authority equivalence,
+**no signature artifact exists and none is claimed**; D-65 Student-owned);
+coordinate-to-cell rule frozen (D-1 addendum / D-33) with D-33's TE §18.2
+supervisor countersignature then still outstanding.
+
+**SUPERSEDED same day (2026-09-27, continuation session): D-33's governance
+condition is now CLOSED.** The Student verbally confirmed the coordinate-to-cell
+decision in-session and directed that verbal confirmation to be recorded as her
+approval mechanism — no image, handwritten signature, or additional signature
+collection required. This closes D-33 under the **same** recorded
+student/supervisor authority equivalence that closed D-1's identical condition
+on 2026-08-21 (`evidence/DECISIONS.md` D-33 addendum; the same mechanism, same
+disclosure: no supervisor signature artifact exists and none is claimed).
+`configs/data.yaml:176` and the fixture manifest's `coordinates.source` note are
+both updated to match. The rule's frozen VALUE (floor-corner, half-open
+`[floor, floor+1)`) is unchanged throughout — only the governance-condition
+status changed, and it changed on the record's own decision owner's live,
+explicit instruction, not by inference or convenience.
 
 ## 3. R7 — commit-message mapping (boilerplate commits → authorizing records)
 
 Derived 2026-09-27 from `git show --stat` and the change records on disk; where
 attribution is inferred it says so and the Student confirms at the gate.
 
-| Commit | Date | Carries | Authorizing record (derived) |
+**2026-09-27 continuation session: the three entries this table marked
+"inferred" were investigated against contemporaneous evidence — diffs, dates,
+git ancestry, and the decision register — rather than left as a guess.**
+Method: for each commit, checked (a) whether a later commit's own message
+names it or its content directly, (b) whether the commit is a direct git
+ancestor/descendant of a commit whose message cites a real change record, and
+(c) whether the decision register's dated entries match the commit's
+timestamp and touched files. All three upgraded from inferred to verified;
+none was found to be mis-attributed.
+
+| Commit | Date | Carries | Authorizing record (verified) |
 |---|---|---|---|
 | `db15880` | 2026-09-25 | The three IGS site logs (evidence custody closure) | `GOV-2026-09-24-BT-01` Rec 1, ruled option 1 (`CHANGE_RECORD_2026-09-24_GOV-BT-01_rulings.md`). **Recovery channel of the bytes unrecorded** — disclosed in `build-test-results.md` (R6); identity rests on hash equality with the 2026-09-20 manifests, re-verified by four board seats 2026-09-27 |
 | `e7d3ff1` | 2026-09-25 | 2026-09-25 remediation addenda, registry rows, run snapshots | Continued Student authorization of the 2026-09-25 remediation pass (recorded in `build-test-results.md` § 2026-09-25 addendum) |
-| `576046c` | 2026-09-26 | `scripts/04_build_external_products.py`, `src/external/iri.py`, `tests/test_b01_prediction_adapter.py` (B-01 adapter work) | 2026-09-26 owner session (D-72/D-73-era external-products work) — **inferred; Student to confirm the covering D-number/CR at the gate** |
-| `0ce2a68` | 2026-09-26 | Run snapshots + audit shard (fixture session) | 2026-09-26 fixture-ladder session under D-74/D-75/D-76 (per `7b4109b`'s own message) — **inferred; Student to confirm** |
-| `69b00c4` | 2026-09-26 | Run snapshots + audit shard (HEAD) | Same session as above — **inferred; Student to confirm** |
+| `576046c` | 2026-09-26 12:44:24+0330 | `scripts/04_build_external_products.py`, `src/external/iri.py`, `tests/test_b01_prediction_adapter.py` (B-01 adapter work) | **VERIFIED 2026-09-27.** `576046c` is the direct git parent of `739e756` ("feat: fixture-scale B-01 bridge + Kaggle-leg runbook", same session, +52 min), whose own message states it adds `governance/RUNBOOK_2026-09-26_kaggle_b01_fixture_leg.md` and cites the ruling "recorded in `CR-2026-09-25-APPARATUS-HYPERPARAMETERS` §7a item 6" — read directly at that file's §7a item 6 ("Run 6 stopped at R-106 ... Ruling routed to the Student"), confirmed to match. `576046c`'s adapter/iri.py/scripts-04 work is the code half of that same ruling's Kaggle-leg groundwork; `739e756` is its documentation half, 22 minutes later in the same session |
+| `0ce2a68` | 2026-09-26 20:28:41+0330 | Run snapshots + audit shard (fixture session) | **VERIFIED 2026-09-27.** `7b4109b` (same session, child of `0ce2a68`, 22:13:04+0330) names `0ce2a68` **by hash, directly, in its own commit message**: "an ALREADY-committed archive directory (`phase1_hourly_target.archived-e535521/`, commit `0ce2a68`, predating this session)". `7b4109b`'s message is the D-74/D-75/D-76 fixture-ladder session narrative (`evidence/DECISIONS.md` D-74/D-75/D-76, all dated 2026-09-26) — `0ce2a68` is a run-snapshot-only commit inside that same session, not a separate or earlier one |
+| `69b00c4` | 2026-09-26 22:24:24+0330 | Run snapshots + audit shard (then-HEAD) | **VERIFIED 2026-09-27.** Direct git child of `7b4109b` (22:13:04+0330, 11 min earlier), same run-snapshot-only shape as `0ce2a68`, bracketing the same D-74/D-75/D-76 session on its other side — not a separate session |
 
 Prospective control: `.githooks/commit-msg` (this pass) refuses the defect class;
 control demonstrated biting on this clone (boilerplate/empty → exit 1, real → 0).
 History is NOT rewritten — all five commits are pushed and their SHAs are cited
 across the governance record.
 
-## 4. Drafted D-number texts (owner adopts into `evidence/DECISIONS.md`; drafting is not deciding — `code-generation:c31`)
+## 4. D-number texts: one ADOPTED, three still drafted-only (2026-09-27 continuation session)
 
-### 4.1 R10 — the IRI name-filter widening (proposed text)
+### 4.1 R10 — the IRI name-filter widening — **ADOPTED as D-77, 2026-09-27**
 
-> **D-<nn> — NFR-IRI-01 denial-mechanism widening after the `iri2016_t_plus_1_tecu` near-miss (TA-07/WS-10 record)**
-> Date: <owner date>. Owner: Student.
-> Defect: `_assert_field_name_clean` (`src/features/build.py`) refused only
-> `iri_`-prefixed or bare-`iri`-token names; the project's own canonical IRI
-> field name `iri2016_t_plus_1_tecu` (TE §6.2 row identity) satisfied neither
-> and could reach the feature dictionary via the unconstrained `target_support`
-> row. WS-10's then-existing injection control (`iri_vtec`) was structurally
-> blind to it.
-> Decision: the name limb refuses ANY token beginning `iri`
-> (`src/features/build.py:346–362`, repaired 2026-09-20). Controls: (a)
-> `tests/test_feature_leakage_guards.py` id
-> `ta33-canonical-iri2016-name-on-the-unconstrained-support-row`; (b)
-> `tests/test_iri_denial.py::test_canonical_iri2016_name_fails_whatever_its_provenance_says`
-> (test-layer restatement widened 2026-09-27, GOV-2026-09-27-BT-02 R11).
-> Cited against NFR-IRI-01, TA-07, WS-10. This record discharges the stage
-> diary's 2026-09-20 obligation ("owes a D-number… appears in no register").
+Adopted into `evidence/DECISIONS.md` this session on the project owner's explicit
+instruction. **Why this one did not need a separate supervisor act**: it names no
+row in TE §18.2's forbidden-choice table — it formalizes an already-implemented
+mechanism repair (code dated 2026-09-20) rather than choosing a new scientific
+value, target, feature, seed, mask, estimand or threshold, the same class of act
+as D-19/D-25's mechanical-transcription entries. Full text: `evidence/DECISIONS.md`
+D-77. Reference updated in `security-test-instructions.md`.
 
-### 4.2 R22 — the three provisional statistical blocks (proposed texts)
+### 4.2 R22 — the three provisional statistical blocks — **STILL DRAFTED ONLY, not adopted**
 
-For each of `configs/experiment.yaml` `estimand` (line ~243), `bootstrap`
-(~261), `comparison_sets` (~285), whose `decision:` lines cite their 2026-09-06
-change records "(proposed D-number pending owner adoption)":
+For `configs/experiment.yaml` `estimand` (line ~242), `bootstrap` (~260),
+`comparison_sets` (~284), whose `decision:` lines still cite their 2026-09-06
+change records "(proposed D-number pending owner adoption)" — **and a fourth,
+not originally named in R22**: `regimes` (~375), same status, same 2026-09-06
+vintage (`CR-2026-09-06-R123-REGIMES-AND-REPORTING`), found by this session's
+sweep of every `decision:` line in the file rather than trusting R22's original
+three-item scope.
+
+**Investigated 2026-09-27 whether the Student's authority (as exercised for
+D-33, same session) extends to these four, and found it does not, on two
+independent grounds, both stated in the founding documents rather than
+inferred:** (1) TE §18.2's table classes at least two of the four explicitly —
+"The estimand, its sign convention, or the weighting hierarchy" and "Regime
+thresholds, storm-event rule, or the practical-relevance policy" are both
+**Student + Supervisor**, not Student-alone (bootstrap type/block/replicates/seed
+IS Student-alone per that table, but R119's own text bundles it with estimand
+under one Student+Supervisor CR — see below). (2) Both founding change records
+say so themselves, in their own words, at drafting time:
+`CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md` line 111/157 and
+`CHANGE_RECORD_2026-09-06_R106_comparison_sets.md` line 61/132 each state
+**"Student + Supervisor... No supervisor signature artifact exists"** and
+explicitly defer the supervisor half to **G-05** — this is a different posture
+than D-1/D-33, where the workspace's recorded authority equivalence was
+invoked to close an identical condition twice already. Unlike D-33, the Student
+did not, in this instruction, give a fresh explicit content-confirmation of the
+estimand/bootstrap/comparison_sets/regimes VALUES themselves (as distinct from
+authorizing "adoption where sufficient") — and this session declines to read a
+general instruction as that specific, content-level confirmation for four
+G-05-gated scientific choices, where the founding CRs themselves already named
+the supervisor's act as the missing piece.
+
+**Complete, reviewable decision texts (unchanged from the prior draft, still
+correct, still not written to the register):**
 
 > **D-<nn> — Estimand transcription**: paired loss differential, benchmark
 > minus model, equal-station weighting, positive favours the model (Vision
@@ -130,6 +172,18 @@ change records "(proposed D-number pending owner adoption)":
 > comparison-wide intersection mask per set, mandatory difficulty controls
 > declared (Vision §2.4; NFR-FAIR-01) — adopts the transcription of
 > CR-2026-09-06 as frozen.
+> **D-<nn+3> — Regime thresholds** (Quiet Kp<4, Disturbed Kp≥4, Storm Kp≥5;
+> Vision §9.3) as transcribed, count source GFZ Kp/Hp60 at a recorded release
+> grade (D-13), never provisional Dst (D-11) — adopts the transcription of
+> CR-2026-09-06 as frozen.
+
+**Exact outstanding act:** either (a) the Supervisor signs off on these four
+values at G-05 as the founding CRs already anticipate, or (b) the Student
+gives the same kind of explicit, content-specific verbal confirmation of each
+value given for D-33 in this session, which was not given here for these four
+and is not assumed. Until one of those happens, `configs/experiment.yaml`'s
+four `decision:` lines are left exactly as they are — correct as written,
+genuinely pending, not silently adopted.
 
 On adoption, the three `decision:` lines in `configs/experiment.yaml` update to
 cite the D-numbers (a config-comment edit citing this record).
@@ -212,9 +266,25 @@ cite the D-numbers (a config-comment edit citing this record).
    `CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md` (R2/R18/R3
    durable fix) — before G-05 (custody limb) / G-07 (authorization record).
 4. Student adopts the § 4 D-number drafts (R10, R22) — before G-05.
-5. Supervisor: D-33 countersignature (R4 option 2) — before the Q-31 manifest
-   freeze / G-05.
-6. LOTUS clone checked for the original `GOV-2026-09-24-BT-01` report file
-   (R5 option 1); if found, committed verbatim under `governance/reviews/`.
+5. **DONE (2026-09-27, continuation session), by a route this checklist did
+   not originally anticipate.** D-33's governance condition is closed by the
+   Student's explicit verbal confirmation, under the same recorded
+   student/supervisor authority equivalence that closed D-1's identical
+   condition — not by an independent supervisor countersignature distinct
+   from that delegation. See `evidence/DECISIONS.md` D-33 addendum. If the
+   examining committee requires a supervisor signature distinct from this
+   workspace's recorded delegation, that remains outside this repository's
+   control and is a separate, still-open act — stated here in the same terms
+   every other decision closed this way already states it.
+6. **DONE (2026-09-27).** The original `GOV-2026-09-24-BT-01` report was
+   recovered — not on the LOTUS clone, but on `GIT-AE-SRV-RDT1`, the clone
+   that actually ran the board (the "LOTUS clone" attribution in the
+   original limitation record was itself wrong, corrected in the recovery
+   record). Recovered from that clone's own session transcript, not
+   reconstructed; committed verbatim at `governance/reviews/GOV-2026-09-24-BT-01.md`
+   and `governance/reviews/GOV-2026-09-24-BT-01-CLOSURE-VERIFICATION.md`; this
+   clone fast-forwarded to pick up the commit and independently re-verified
+   the recovered text's block count, severity counts, review mode, and host
+   before trusting it.
 7. Kaggle session: R13's discharge + R8's junit persistence if the notebook
    outputs survive.

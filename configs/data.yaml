@@ -164,16 +164,20 @@ igrf_version: "IGRF-13"
 # cell_rule — FROZEN as the EXISTING convention by the project decision owner's ruling of
 # 2026-09-10, ADOPTED as **D-33** (2026-09-10). Prepared at
 # governance/CHANGE_RECORD_2026-09-10_owner_rulings_implementation.md and recorded in
-# evidence/DECISIONS.md. TE §18.2 assigns this rule to Student + Supervisor, so a
-# SUPERVISOR COUNTERSIGNATURE IS REQUIRED AND NOT YET GIVEN. The value is the identifier
-# already declared in
+# evidence/DECISIONS.md. TE §18.2 assigns this rule to Student + Supervisor. The
+# governance condition is CLOSED as of 2026-09-27 (D-33 addendum, evidence/DECISIONS.md):
+# the Student verbally confirmed this decision in-session and directed that verbal
+# confirmation to be recorded as her approval mechanism, closing the condition under the
+# same recorded student/supervisor authority equivalence that closed D-1's identical
+# condition on 2026-08-21. No supervisor signature artifact exists and none is claimed.
+# The value is the identifier already declared in
 # src/data/registry.py (CELL_RULE_ID) for the convention already in use — a 1° × 1° cell
 # identified by its lower-left (floor) corner, half-open in both axes:
 #   cell = [floor(lat), floor(lat)+1) × [floor(lon), floor(lon)+1)
 # (notebooks/madrigal_phase1_coverage_audit.ipynb cell 4, verbatim). No grid was invented
 # and no station was moved. The notebook's own caveat is NOT discharged by this freeze:
 # confirm the convention against the real bin edges Madrigal returns before relying on it.
-cell_rule: "floor-half-open-d1" # D-33 (2026-09-10); TE §18.2 countersignature NOT YET GIVEN
+cell_rule: "floor-half-open-d1" # D-33 (2026-09-10); TE §18.2 condition CLOSED 2026-09-27 (D-33 addendum)
 
 # --- the six frozen partitions (ADR-11; R-80's closed six-value space) -------------------
 # TRANSCRIPTION into the live source of truth, approved by the project decision owner on

@@ -564,12 +564,31 @@ messages with `core.hooksPath=.githooks`:** boilerplate editor text → exit 1;
 empty message → exit 1; a real message → exit 0. Matches the execution
 record's claim.
 
-**R5 (lost `GOV-2026-09-24-BT-01` report):** searched this entire machine
-(`C:\Users\LOTUS\...`) beyond the repository tree — user profile, Desktop —
-2026-09-27; the file does not exist anywhere on this clone either. The
-report-loss condition stays open exactly as `CHANGE_RECORD_2026-09-27_GOV-BT-01_report_loss.md`
-records it; per `project.md` `delivery-planning:c12`, it is not reconstructed
-from the seventeen artifacts that cite it.
+**R5 (lost `GOV-2026-09-24-BT-01` report) — SUPERSEDED, correcting this
+addendum's own earlier statement.** At the time this section was first
+written (2026-09-27, commit `4501749`), a machine-wide search on this clone
+found nothing, and that was reported as the state. It is no longer the
+state: a **different** clone (`GIT-AE-SRV-RDT1`, the one the board actually
+ran on — the earlier "LOTUS clone" attribution in the superseded limitation
+record was itself wrong, corrected below) recovered the verbatim report text
+from its own session transcript and pushed it; this clone fast-forwarded
+`main` from `4501749` to `c7b174d` to pick it up (no local commits were
+ahead, so the fast-forward was lossless — `git merge --ff-only`, zero
+conflicts). Independently re-verified here, this session, before trusting
+it: `governance/reviews/GOV-2026-09-24-BT-01.md` carries exactly **16**
+`### Recommendation` blocks (`grep -c`), severity **Critical 1 / High 7 /
+Medium 7 / Low 1** stated in its own header and matching the stage diary's
+2026-09-24T22:10Z entry, review mode **ADAPTIVE** (not "full-board" as the
+now-superseded limitation record had assumed), and host
+**`GIT-AE-SRV-RDT1`** (not LOTUS). This is recovery of an authentic
+transcript artifact, not reconstruction from the citing artifacts — the
+`delivery-planning:c12` refusal this addendum invoked never applied to a
+genuine recovery and stays intact as project practice for the case it
+actually governs. R5 is **CLOSED**; `CHANGE_RECORD_2026-09-27_GOV-BT-01_report_loss.md`
+already carries its own supersession header and correction section, and the
+execution record's § 1 table already reflects CLOSED — this addendum's prior
+"still absent everywhere" sentence was the one artifact left uncorrected,
+fixed here rather than left standing as a second, contradicting claim.
 
 **R7 (commit attribution):** no session record or change record was found on
 this clone beyond what the execution record's § 3 table already cites; the

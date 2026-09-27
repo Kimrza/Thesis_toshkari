@@ -1846,6 +1846,52 @@ closes a limb, not the refusal.
 
 ---
 
+## D-33 addendum — countersignature status of the coordinate-to-cell rule, closed
+
+**2026-09-27, verbal instruction to the executing session (GOV-2026-09-27-BT-02
+continuation).** D-33's decision text above is unchanged and remains accurate — the
+coordinate-to-cell rule stays `floor-half-open-d1`, the same convention D-1 already
+freezes, transcribed unchanged. What changes here is the governance-condition status
+this decision recorded as "NOT YET BEEN GIVEN."
+
+**The Student (project owner, Kimia Rezaei) explicitly confirmed this decision verbally
+in-session, 2026-09-27**, and directed that this confirmation be recorded as her approval
+mechanism for this project — no image, handwritten signature, or additional signature
+collection sought or required. **This closes D-33's governance condition under the same
+recorded student/supervisor authority equivalence that closed D-1's identical condition
+on 2026-08-21** (D-1 addendum, above) — the documented delegation under which the TE
+§18.2 supervisor role is exercised on this workspace, invoked here by the same person who
+has invoked it for upward of twenty other decisions in this register. **No supervisor
+signature, document, email or minute from Dr. Reza Saraf Shirazi exists for this closure
+and none is claimed or represented as existing.**
+
+**Why D-33 had NOT already inherited D-1's closure, stated rather than silently
+overridden:** D-33's own text (above) explicitly declined to extend D-1's closure to
+itself, and TE §18.2's table lists the cell-selection rule additionally under the
+`D-143/D-144 / G-P1` freeze-gate row — a stricter classification than D-1's, which may be
+why D-33's drafter treated it separately. That caution is recorded, not erased; this
+addendum is a **new, later, explicit act** by the decision owner, not a claim that the
+2026-09-10 text was wrong to withhold closure at the time.
+
+**No scientific value changed.** The cell rule's content — floor corner, half-open
+`[floor, floor+1)` on both axes — is identical before and after this addendum. Only the
+governance-condition (signature) status changes, exactly as D-1's addendum changed only
+that status and not D-1's decision text.
+
+**If the examining committee requires an independent supervisor signature distinct from
+this workspace's recorded delegation**, satisfying it is outside this repository's
+control and would have to be pursued separately — stated here in the same terms the D-1
+addendum and `CR-2026-08-22-TE-AMEND` § 6 already use for every other decision closed this
+way, so this closure carries no weaker a disclosure than its precedents.
+
+**Consequence.** `configs/data.yaml:176`'s inline comment, `tests/fixtures/plumbing_7day/fixture_manifest.yaml`'s
+`coordinates.source` note, and `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md`
+§ 2 and § 7 item 5 are corrected to match — this addendum is the source of truth for all
+three, per this project's practice of recording a decision here first and propagating it
+to consuming artifacts second.
+
+---
+
 ## D-34 — Practical relevance is reported descriptively; no threshold is set (reading)
 
 **Decision date:** 2026-09-10. **Decided by:** the project decision owner, adopting as
@@ -3844,6 +3890,44 @@ mandatory-verification clause exists to catch on every future refusal.
 every superseded artifact this investigation touched: `phase1_hourly_target.archived-
 e535521/`, three `features/*.archived-e535521/` bundles, `predictions.archived-
 e535521/`), `governance/RUNBOOK_2026-09-26_kaggle_b01_fixture_leg.md`.
+
+---
+
+## D-77 — NFR-IRI-01 denial-mechanism widening after the `iri2016_t_plus_1_tecu` near-miss (TA-07/WS-10 record)
+
+**Decision date:** 2026-09-27. **Adopted by:** the project owner, Kimia Rezaei, on
+explicit instruction this session to adopt the outstanding R10 draft from
+`governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md` § 4.1. **Authority for
+adopting without a separate Supervisor act:** this is not a TE §18.2 forbidden-choice
+item — it names no row in that table — because it formalizes an already-implemented
+mechanism repair (the code change is dated 2026-09-20, before this decision) rather than
+choosing a new scientific value, target, feature, model, seed, mask, estimand or
+threshold. It is the same class of act as D-19/D-25's mechanical-transcription entries:
+recording what a repair already does, not deciding what it should do.
+
+**Defect.** `_assert_field_name_clean` (`src/features/build.py`) refused only
+`iri_`-prefixed or bare-`iri`-token names; the project's own canonical IRI field name
+`iri2016_t_plus_1_tecu` (TE §6.2 row identity) satisfied neither and could reach the
+feature dictionary via the unconstrained `target_support` row. WS-10's then-existing
+injection control (`iri_vtec`) was structurally blind to it.
+
+**Decision.** The name limb refuses ANY token beginning `iri`
+(`src/features/build.py:346–362`, repaired 2026-09-20). Controls: (a)
+`tests/test_feature_leakage_guards.py` id
+`ta33-canonical-iri2016-name-on-the-unconstrained-support-row`; (b)
+`tests/test_iri_denial.py::test_canonical_iri2016_name_fails_whatever_its_provenance_says`
+(test-layer restatement widened 2026-09-27, `GOV-2026-09-27-BT-02` R11; that control's own
+bite-proof required a one-line test-data fix the same day, recorded in
+`build-test-results.md`).
+
+**Cited against** NFR-IRI-01, TA-07, WS-10. This discharges the stage diary's 2026-09-20
+obligation ("owes a D-number… appears in no register") and the still-open reference in
+`configs/experiment.yaml` and `security-test-instructions.md` should now cite `D-77`
+rather than "owed."
+
+**No scientific value changed by this decision.** The name-refusal rule and its controls
+already existed in code and tests before this decision; this entry is the register catching
+up to code, not code changing in response to a decision.
 
 ---
 

@@ -103,7 +103,8 @@ python -m pytest tests/test_iri_denial.py tests/test_import_boundary.py \
 - `test_iri_denial.py` — WS-10's operational form: a deliberately injected
   `iri_*` field must be **rejected**. Note the widened control set after the
   `iri2016_t_plus_1_tecu` near-miss (a canonical name the old `iri_`-prefix
-  filter missed — stage diary, 2026-09-20).
+  filter missed — stage diary, 2026-09-20; **D-77**, adopted 2026-09-27,
+  `evidence/DECISIONS.md`, closes the D-number this entry previously owed).
 - `test_iri_denial.py` is ALSO the home of the **TA-07 containment scan**
   (`iri_gim_containment`): `src/external/iri.py` / `gim.py` never imported,
   directly or transitively, from `src/features/` or `src/models/` — the only
