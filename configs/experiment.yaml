@@ -240,7 +240,7 @@ models:
 # here. The sibling's code (src/evaluation/metrics.py EstimandResult) already refuses any
 # other orientation/weighting/sentence, so config-versus-code drift is caught by test.
 estimand:
-  decision: "CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS (proposed D-number pending owner adoption)"
+  decision: "D-78 (2026-09-27; transcription of CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS)"
   source: "Vision §2.3; TE §1.3"
   orientation: "benchmark_minus_model" # Vision §2.3: mean within-station difference of squared errors, benchmark minus model
   weighting: "equal_station" # Vision §2.3 / TE §1.3: unweighted mean of the per-station values
@@ -258,7 +258,7 @@ estimand:
 # (GOV-2026-08-28-FD-01 Recommendation 24). The 48-hour sensitivity's run_id is the owner's
 # TE §7.2 registration act and is not transcribed here.
 bootstrap:
-  decision: "CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS (proposed D-number pending owner adoption)"
+  decision: "D-79 (2026-09-27; transcription of CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS)"
   source: "TE §13.6; TC-19; D-122; D-28"
   block_hours: 24 # TE §13.6: 24-hour blocks carrying all three stations together; 30 blocks on DEC
   replicates: 10000 # TE §13.6 / TC-19: 10,000 replicates (the rejected variant's 2,000 never resurrected)
@@ -282,7 +282,7 @@ bootstrap:
 # against the declared set EXACTLY (missing/extra/duplicate/merged all refuse); tests
 # re-read the member counts 5 / 2 / 3 from this block, never from a source literal.
 comparison_sets:
-  decision: "CR-2026-09-06-R106-COMPARISON-SETS (proposed D-number pending owner adoption)"
+  decision: "D-80 (2026-09-27; transcription of CR-2026-09-06-R106-COMPARISON-SETS)"
   source: "Vision §2.4 tiers 1–3; Vision §8.4 model table; Vision §8.9 matched-window clause"
   primary:
     member_ids: ["M-01", "M-02", "M-03", "M-06", "B-01"] # 5 members, one mask
@@ -372,7 +372,7 @@ ablations:
 # construction). D-11 bars any provisional-Dst-derived figure from a G-05 regime count; the
 # count source is GFZ Kp/Hp60 at a recorded release grade (D-13 "Source of the count").
 regimes:
-  decision: "CR-2026-09-06-R123-REGIMES-AND-REPORTING (proposed D-number pending owner adoption)"
+  decision: "D-81 (2026-09-27; transcription of CR-2026-09-06-R123-REGIMES-AND-REPORTING)"
   source: "Vision §9.3; D-13; D-11"
   thresholds:
     quiet_kp_below: 4 # Vision §9.3: Quiet: Kp < 4

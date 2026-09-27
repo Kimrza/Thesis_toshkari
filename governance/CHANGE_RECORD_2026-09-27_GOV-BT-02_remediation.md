@@ -125,68 +125,56 @@ value, target, feature, seed, mask, estimand or threshold, the same class of act
 as D-19/D-25's mechanical-transcription entries. Full text: `evidence/DECISIONS.md`
 D-77. Reference updated in `security-test-instructions.md`.
 
-### 4.2 R22 — the three provisional statistical blocks — **STILL DRAFTED ONLY, not adopted**
+### 4.2 R22 — the four statistical blocks — **ADOPTED as D-78/D-79/D-80/D-81, 2026-09-27 (second continuation session)**
 
-For `configs/experiment.yaml` `estimand` (line ~242), `bootstrap` (~260),
-`comparison_sets` (~284), whose `decision:` lines still cite their 2026-09-06
-change records "(proposed D-number pending owner adoption)" — **and a fourth,
-not originally named in R22**: `regimes` (~375), same status, same 2026-09-06
-vintage (`CR-2026-09-06-R123-REGIMES-AND-REPORTING`), found by this session's
-sweep of every `decision:` line in the file rather than trusting R22's original
-three-item scope.
+The prior session (same day) found this could not be closed on the Student's
+general "adopt where sufficient" instruction alone, because TE §18.2 classes
+at least two of the four (estimand; regime thresholds) explicitly
+**Student + Supervisor**, and their own founding change records
+(`CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md`,
+`CHANGE_RECORD_2026-09-06_R106_comparison_sets.md`) state so in their own
+words, deferring the supervisor half to G-05. That gap is now closed: **the
+Student gave the same kind of explicit, content-specific confirmation for
+each of the four values individually** that D-33 received, in this session —
+quoted verbatim in each D-number entry below. This is exactly the "(b)" branch
+the prior session named as the exact outstanding act, now discharged.
 
-**Investigated 2026-09-27 whether the Student's authority (as exercised for
-D-33, same session) extends to these four, and found it does not, on two
-independent grounds, both stated in the founding documents rather than
-inferred:** (1) TE §18.2's table classes at least two of the four explicitly —
-"The estimand, its sign convention, or the weighting hierarchy" and "Regime
-thresholds, storm-event rule, or the practical-relevance policy" are both
-**Student + Supervisor**, not Student-alone (bootstrap type/block/replicates/seed
-IS Student-alone per that table, but R119's own text bundles it with estimand
-under one Student+Supervisor CR — see below). (2) Both founding change records
-say so themselves, in their own words, at drafting time:
-`CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md` line 111/157 and
-`CHANGE_RECORD_2026-09-06_R106_comparison_sets.md` line 61/132 each state
-**"Student + Supervisor... No supervisor signature artifact exists"** and
-explicitly defer the supervisor half to **G-05** — this is a different posture
-than D-1/D-33, where the workspace's recorded authority equivalence was
-invoked to close an identical condition twice already. Unlike D-33, the Student
-did not, in this instruction, give a fresh explicit content-confirmation of the
-estimand/bootstrap/comparison_sets/regimes VALUES themselves (as distinct from
-authorizing "adoption where sufficient") — and this session declines to read a
-general instruction as that specific, content-level confirmation for four
-G-05-gated scientific choices, where the founding CRs themselves already named
-the supervisor's act as the missing piece.
+**Adopted, each individually approved and cited verbatim in `evidence/DECISIONS.md`:**
 
-**Complete, reviewable decision texts (unchanged from the prior draft, still
-correct, still not written to the register):**
+- **D-78 — Estimand**: paired loss differential, benchmark-minus-model,
+  equal-station weighting (Vision §2.3; TE §1.3) — adopts the transcription of
+  `CR-2026-09-06-R119-BOOTSTRAP-CONFIRMATIONS` as frozen.
+- **D-79 — Bootstrap**: vector 24-hour time-block, 10,000 replicates, seed
+  20221201, 95% CI, 48-hour sensitivity, cross-station paired-error
+  correlation reported (TE §13.6; TC-19) — adopts the same transcription as
+  frozen.
+- **D-80 — Comparison sets**: the configured primary/gim/tier3 structure, one
+  comparison-wide intersection mask per set, mandatory difficulty controls
+  declared (Vision §2.4; NFR-FAIR-01) — adopts the transcription of
+  `CR-2026-09-06-R106-COMPARISON-SETS` as frozen.
+- **D-81 — Regime thresholds**: Quiet Kp<4, Disturbed Kp≥4, Storm Kp≥5,
+  contiguous-Kp≥5 storm events, 24-hour independence gap, −12/+24-hour window
+  (Vision §9.3), count source GFZ Kp/Hp60 at a recorded release grade, never
+  provisional Dst (D-11) — adopts the transcription of
+  `CR-2026-09-06-R123-REGIMES-AND-REPORTING` as frozen.
 
-> **D-<nn> — Estimand transcription**: paired loss differential, benchmark
-> minus model, equal-station weighting, positive favours the model (Vision
-> §2.3; TE §1.3) — adopts the transcription of CR-2026-09-06 as frozen.
-> **D-<nn+1> — Bootstrap transcription**: vector time-block bootstrap, 24-hour
-> blocks carrying all three stations, 10,000 replicates, seed 20221201, 95%
-> CI, 48-hour sensitivity, cross-station paired-error correlation reported
-> (TE §13.6; TC-19) — adopts the transcription of CR-2026-09-06 as frozen.
-> **D-<nn+2> — Comparison-set memberships** as transcribed, single
-> comparison-wide intersection mask per set, mandatory difficulty controls
-> declared (Vision §2.4; NFR-FAIR-01) — adopts the transcription of
-> CR-2026-09-06 as frozen.
-> **D-<nn+3> — Regime thresholds** (Quiet Kp<4, Disturbed Kp≥4, Storm Kp≥5;
-> Vision §9.3) as transcribed, count source GFZ Kp/Hp60 at a recorded release
-> grade (D-13), never provisional Dst (D-11) — adopts the transcription of
-> CR-2026-09-06 as frozen.
+**No scientific value changed by any of the four** — each is a mechanical
+transcription-confirmation of an already-drafted, already-implemented value;
+this closes the TE §18.2 governance condition (the approval record), not the
+content. **Literature support was gathered and verified for all four** (a
+dedicated research pass, 2026-09-27) and is recorded in full inside each
+D-number entry, including the caveats the Student explicitly required not be
+glossed over: no citation was found that mandates the exact bootstrap
+replicate count (10,000) or block lengths (24h/48h) as literature-fixed
+values rather than defensible engineering convention; no formal peer-reviewed
+citation was found for "one comparison-wide mask per set" as a named
+principle (only applied-methods guidance); one candidate citation
+("Rostoker 1972" for storm classification) could not be verified and was
+explicitly NOT cited rather than presented as real.
 
-**Exact outstanding act:** either (a) the Supervisor signs off on these four
-values at G-05 as the founding CRs already anticipate, or (b) the Student
-gives the same kind of explicit, content-specific verbal confirmation of each
-value given for D-33 in this session, which was not given here for these four
-and is not assumed. Until one of those happens, `configs/experiment.yaml`'s
-four `decision:` lines are left exactly as they are — correct as written,
-genuinely pending, not silently adopted.
-
-On adoption, the three `decision:` lines in `configs/experiment.yaml` update to
-cite the D-numbers (a config-comment edit citing this record).
+`configs/experiment.yaml`'s four `decision:` lines now cite `D-78`/`D-79`/
+`D-80`/`D-81` respectively, in place of "(proposed D-number pending owner
+adoption)".
 
 ## 5. Recorded dispositions (no code this pass)
 
@@ -265,7 +253,11 @@ cite the D-numbers (a config-comment edit citing this record).
 3. Student + Supervisor sign
    `CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md` (R2/R18/R3
    durable fix) — before G-05 (custody limb) / G-07 (authorization record).
-4. Student adopts the § 4 D-number drafts (R10, R22) — before G-05.
+4. **DONE (2026-09-27, second continuation session).** Student adopted all four
+   § 4 D-number drafts individually, with explicit content-specific confirmation
+   for each: R10 as D-77 (first continuation session); R22's four blocks as
+   D-78/D-79/D-80/D-81 (this session). See § 4.1/§ 4.2 above and
+   `evidence/DECISIONS.md`.
 5. **DONE (2026-09-27, continuation session), by a route this checklist did
    not originally anticipate.** D-33's governance condition is closed by the
    Student's explicit verbal confirmation, under the same recorded

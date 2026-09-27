@@ -3937,6 +3937,10 @@ before and after; the archived copy is byte-identical to the pre-archive publish
 target changed — only the release citation and its `aggregation_config_id` stamp, exactly
 as D-76 itself found the first time.
 
+---
+
+## D-77 — NFR-IRI-01 denial-mechanism widening after the `iri2016_t_plus_1_tecu` near-miss (TA-07/WS-10 record)
+
 **Decision date:** 2026-09-27. **Adopted by:** the project owner, Kimia Rezaei, on
 explicit instruction this session to adopt the outstanding R10 draft from
 `governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md` § 4.1. **Authority for
@@ -3970,6 +3974,227 @@ rather than "owed."
 **No scientific value changed by this decision.** The name-refusal rule and its controls
 already existed in code and tests before this decision; this entry is the register catching
 up to code, not code changing in response to a decision.
+
+---
+
+## D-78 — Primary estimand: paired loss differential, benchmark-minus-model, equal-station weighting (freeze)
+
+**Decision date:** 2026-09-27. **Approved by:** the project owner, Kimia Rezaei, in
+this session, verbatim: *"Estimand: benchmark-minus-model paired squared-error
+differential, with equal-station weighting."* Approved individually, separately from
+D-79/D-80/D-81. **Authority:** Vision §2.3 (`Δ_L = mean(L^IRI-2016 − L^LSTM)`, within-station
+mean then equal-station combination, sign convention positive-favours-LSTM); TE §1.3.
+Adopts as frozen the transcription already recorded in
+`governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md` (code-generation
+Q4=A, 2026-09-06) and already implemented, unchanged, in `configs/experiment.yaml:
+estimand` and `src/evaluation/metrics.py: EstimandResult`. **No value changed by this
+decision** — it closes the governance condition TE §18.2 requires (estimand, sign
+convention, weighting hierarchy: Student + Supervisor), which this project's `configs/
+experiment.yaml` had left citing "(proposed D-number pending owner adoption)".
+
+**Content, unchanged:** orientation `benchmark_minus_model` (IRI-2016 minus LSTM, squared
+error); weighting `equal_station` (unweighted mean of the three per-station values); sign
+convention "positive values favour the model."
+
+**Alternative considered and not taken:** inverse-variance (sample-size) weighting across
+stations, the standard practice in meta-analytic pooling when per-unit noise differs
+(NICO's markedly higher missingness, D-7, would otherwise argue for down-weighting it).
+Not taken because the thesis's confirmatory claim is bounded to these three NAMED stations
+as a fixed panel (D-8), not to an unbiased estimate over a larger population of stations —
+under that framing equal weighting is the correct target, not a compromise.
+
+**Literature support, verified 2026-09-27** (a dedicated research pass; every citation
+below was checked for real existence, correct authorship/year/venue, and that it actually
+supports the claim attributed to it — nothing below is presented as literature-mandating
+this project's specific parameter values unless stated as such):
+- Diebold, F.X. & Mariano, R.S. (1995), "Comparing Predictive Accuracy," *Journal of
+  Business & Economic Statistics*, 13(3), 253–263. Supports the general framework of
+  testing a *paired* loss differential between two competing forecasters under squared-
+  error loss, permitting serial and cross-sectional correlation in the errors — the
+  statistical family this project's estimand instantiates.
+- General inverse-variance/fixed-effect meta-analysis methodology (e.g., the Cochrane
+  Handbook's generic inverse-variance method) supports the *alternative* — equal-station
+  weighting is not itself literature-mandated; no domain-specific (ionospheric/multi-
+  station) paper weighting exactly this way was found. **This caveat is recorded
+  explicitly, per the Student's instruction not to overstate literature support**: the
+  choice is a scientifically defensible project-specific decision consistent with the
+  claim-boundary framing (D-8), not a value literature independently prescribes.
+
+**Effect on leakage/uncertainty/comparability/claim.** Loss is paired at the row level over
+one shared comparison-wide mask (D-80), so Δ_L is uncontaminated by sample-composition
+differences between IRI-2016 and the LSTM. Equal-station weighting means the reported
+effect is a claim about "the three named stations equally," not a variance-optimal pooled
+estimate — the CI width (D-79) reflects that choice as well as sampling noise, and readers
+should be told so.
+
+---
+
+## D-79 — Bootstrap procedure: 24 h vector time-block, 10,000 replicates, seed 20221201, 95% CI, 48 h sensitivity (freeze)
+
+**Decision date:** 2026-09-27. **Approved by:** the project owner, Kimia Rezaei, in this
+session, verbatim: *"Bootstrap: 24-hour vector blocks, 10,000 replicates, seed 20221201,
+95% CI, and 48-hour sensitivity analysis."* Approved individually. **Authority:** TE
+§13.6; TC-19 (`binding: hard`); D-122 (seed source); D-28 (720-hour scored-set
+arithmetic). Adopts as frozen the transcription already recorded in
+`governance/CHANGE_RECORD_2026-09-06_R119_bootstrap_confirmations.md` and already
+implemented in `configs/experiment.yaml: bootstrap`. **No value changed.**
+
+**Content, unchanged:** resample 24-hour blocks on the common timeline, carrying all
+three stations together as a vector; 10,000 replicates; fixed seed 20221201 (`seeds.yaml`,
+ADR-05 carve-out); combine station effects with equal-station weighting; report 95%
+confidence intervals (percentile method); repeat with 48-hour blocks as a predeclared
+sensitivity; report the cross-station paired-error correlation; fixed non-overlapping
+block scheme. A within-station or naive (i.i.d.) bootstrap is explicitly and permanently
+rejected (project.md § Forbidden; the Q-27 rejection).
+
+**Alternative considered and not taken:** the naive/within-station bootstrap. Rejected
+because it discards both the temporal autocorrelation of hourly VTEC/error series and
+the cross-station correlation induced by shared geomagnetic drivers affecting all three
+stations simultaneously (TC-12) — resampling under dependence as if independent
+systematically understates variance, producing artificially narrow, overconfident
+intervals.
+
+**Literature support, verified 2026-09-27:**
+- Künsch, H.R. (1989), "The Jackknife and the Bootstrap for General Stationary
+  Observations," *The Annals of Statistics*, 17(3), 1217–1241, DOI 10.1214/aos/1176347265.
+  Supports blocking (rather than i.i.d. resampling) as the correct mechanism to preserve
+  serial dependence when estimating a stationary time series statistic's sampling
+  variability — the direct methodological ancestor of the frozen fixed-block scheme.
+- Politis, D.N. & Romano, J.P. (1994), "The Stationary Bootstrap," *Journal of the
+  American Statistical Association*, 89(428), 1303–1313. Supports block-resampling as
+  standard machinery for approximating a dependent statistic's sampling distribution;
+  **noted honestly**, their proposal is for *random*-length blocks specifically, so this
+  citation supports the block-bootstrap family broadly, not the project's fixed-block
+  variant exactly (which is closer to Künsch's original fixed-block form).
+- **Explicit caveat, per the Student's instruction:** no citable methodological paper was
+  found that mandates "10,000 replicates" as a specific adequate count for a percentile
+  bootstrap CI, nor one that mandates 24 h/48 h as the exact block lengths for THIS
+  project's data — these are standard, defensible engineering conventions consistent with
+  the block-bootstrap literature above, not values the literature independently dictates.
+  The thesis should state this distinction rather than imply a citation fixes the exact
+  numbers.
+
+**Effect on leakage/uncertainty/comparability/claim.** Under-coverage from a naive
+bootstrap would be the single largest threat to the confirmatory claim's credibility — it
+would make the CI look artificially tighter than the true sampling variability warrants,
+particularly given the shared geomagnetic forcing across ARUC/BSHM/NICO. The 48 h
+sensitivity block and the mandatory cross-station correlation report are this project's
+own internal checks against exactly that failure mode.
+
+---
+
+## D-80 — Comparison-set structure: primary/gim/tier3, one comparison-wide mask per set (freeze)
+
+**Decision date:** 2026-09-27. **Approved by:** the project owner, Kimia Rezaei, in this
+session, verbatim: *"Comparison sets: the configured primary/gim/tier3 structure and one
+shared mask across all members of each comparison set."* Approved individually.
+**Authority:** Vision §2.4 tiers 1–3 (primary confirmatory + mandatory difficulty
+controls, binding honesty rule; secondary learned-model comparisons; contextual GIM);
+§8.4's model table; §8.9's matched-window clause; NFR-FAIR-01/TC-16. Adopts as frozen the
+transcription already recorded in
+`governance/CHANGE_RECORD_2026-09-06_R106_comparison_sets.md` (code-generation Q1=A,
+2026-09-06) and already implemented in `configs/experiment.yaml: comparison_sets`. **No
+value changed.**
+
+**Content, unchanged:** three named comparison sets, each with its own single
+comparison-wide intersection mask (never a pairwise or model-specific mask, never merged
+across sets) — `primary` (5 members: M-01, M-02, M-03, M-06, B-01; benchmarks B-01 plus
+the three difficulty controls), `gim` (2 members: M-06, C-01; evaluation-time-only
+comparator, never presumed independent), `tier3` (3 members: M-04, M-05, M-06; matched
+causal window per §8.9).
+
+**Alternative considered and not taken:** reporting only the Tier-1 IRI-2016 comparison
+(or relegating Tier-2 naive baselines to an appendix), and evaluating each model on its
+own maximal-availability subset via a model-specific mask. Both are exactly the pattern
+the cited literature below identifies as a known failure mode in ML-forecasting
+evaluation: model-specific masks let each model "pick its best rows," inflating apparent
+skill and breaking cross-model comparability; appendix-only naive baselines let an
+unfavourable persistence/climatology result go unseen at the abstract level.
+
+**Literature support, verified 2026-09-27:**
+- Makridakis, S., Spiliotis, E., & Assimakopoulos, V. (2018), "The M4 Competition:
+  Results, findings, conclusion and way forward," *International Journal of Forecasting*,
+  34(4), 802–808. Supports the empirical, competition-scale finding that sophisticated ML
+  methods frequently fail to beat simple statistical/naive benchmarks — direct support
+  for mandating naive-baseline co-reporting rather than a single flattering comparison.
+- Makridakis, S., Spiliotis, E., & Assimakopoulos, V. (2018), "Statistical and Machine
+  Learning forecasting methods: Concerns and ways forward," *PLOS ONE*, 13(3), e0194889.
+  Supports the critique that ML forecasting work often omits or under-reports trivial-
+  baseline comparisons, overstating apparent ML skill — direct support for the binding
+  honesty rule (Vision §2.4).
+- **Explicit caveat, per the Student's instruction:** no single named peer-reviewed paper
+  with a DOI was found stating "one comparison-wide mask per set" as a formal principle;
+  applied-verification-methods resources (e.g., CAWCR's forecast-verification guidance)
+  state the general good-practice principle but are not peer-reviewed journal sources.
+  This project's specific masking mechanism is presented as sound engineering practice
+  consistent with the cited literature's concerns, not as a value the literature itself
+  mandates.
+
+**Effect on leakage/uncertainty/comparability/claim.** The single comparison-wide mask
+per set is what makes D-78's Δ_L meaningful across models — without it, an LSTM "win"
+over IRI-2016 could be an artifact of more favourable evaluation rows than the naive
+baselines received. The binding honesty rule directly guards the thesis's confirmatory
+claim against a known ML-forecasting failure mode: reporting a flattering headline
+comparison while an unfavourable simple-baseline result goes unmentioned.
+
+---
+
+## D-81 — Geomagnetic regime thresholds and storm-event definition (freeze)
+
+**Decision date:** 2026-09-27. **Approved by:** the project owner, Kimia Rezaei, in this
+session, verbatim: *"Regimes: Kp < 4, Kp ≥ 4, Kp ≥ 5; contiguous Kp ≥ 5 storm events, a
+24-hour independence gap, and the −12/+24-hour window."* Approved individually.
+**Authority:** Vision §9.3 (thresholds and storm-event rule, frozen before any model
+result is inspected); D-13 (December demotion threshold, ≥3 independent events);
+D-11 (provisional Dst barred from any G-05 regime count). Adopts as frozen the
+transcription already recorded in
+`governance/CHANGE_RECORD_2026-09-06_R123_regimes_and_reporting.md` (code-generation
+Q1=A, 2026-09-06) and already implemented in `configs/experiment.yaml: regimes`. **No
+value changed.**
+
+**Content, unchanged:** Quiet Kp<4; Disturbed Kp≥4; Storm Kp≥5; a storm event is a
+contiguous interval of Kp≥5; two events are independent if separated by ≥24 hours of
+Kp<4; the reporting window for each event is −12 h to +24 h; count source is GFZ Kp/Hp60
+at a recorded release grade, never provisional Dst (D-11).
+
+**Alternative considered and not taken:** a regime split based on a different index
+(Dst, ap, or a continuous covariate) rather than discrete Kp bands. Not taken because Kp
+is the standard planetary-scale index with a long, homogeneous public record and an
+established threshold convention, and because this project's own Mandated rules already
+restrict Dst to diagnostic/hindcast-only use — a Dst-based regime definition would be
+inconsistent with that IRI/leakage-adjacent posture already frozen elsewhere. A continuous
+covariate would complicate the discrete "3 independent December events" demotion rule
+(D-13), which needs countable events.
+
+**Literature support, verified 2026-09-27:**
+- Menvielle, M. & Berthelier, A. (1991), "The K-derived planetary indices: Description
+  and availability," *Reviews of Geophysics*, 29(3), 415–432, DOI 10.1029/91RG00994.
+  Supports the authoritative provenance and definition of the K/Kp index family the
+  thresholds are built on.
+- NOAA Space Weather Prediction Center, "NOAA Space Weather Scales"
+  (swpc.noaa.gov/noaa-scales-explanation). Supports the conventional mapping of Kp≥5 onto
+  the accepted minimum "geomagnetic storm" threshold (G1/Minor). An operational agency
+  reference rather than a peer-reviewed journal article, but the standard citable source
+  space-weather researchers use for this exact convention.
+- Buonsanto, M.J. (1999), "Ionospheric Storms — A Review," *Space Science Reviews*, 88,
+  563–601, DOI 10.1023/A:1005107532631. Supports that TEC/F2-region electron density is
+  strongly regime-dependent, justifying stratified evaluation by geomagnetic regime as
+  scientifically meaningful rather than an arbitrary binning choice.
+- **Explicit caveat, per the Student's instruction:** a candidate citation ("Rostoker
+  1972") for storm classification could **not** be verified by search and is deliberately
+  **not cited** — presenting an unverified reference as real would be worse than citing
+  fewer sources. Mendillo (2006), *Reviews of Geophysics* 44(4), RG4001, is very likely a
+  real, relevant supporting source (TEC storm-response literature) but its exact DOI
+  could not be independently confirmed in the verification pass and should be spot-checked
+  against the published record before final thesis citation.
+
+**Effect on leakage/uncertainty/comparability/claim.** The stratification uses only Kp —
+a real-time-available geomagnetic index, distinct from any IRI- or GIM-derived quantity —
+so it introduces no IRI-related leakage. The 24-hour independence gap and the ≥3-event
+December threshold (D-13) are conservative safeguards against over-claiming: they prevent
+a single overlapping interval being double-counted as multiple "independent" events, and
+prevent a storm-time claim on the locked December month from resting on an underpowered,
+possibly-single-event sample.
 
 ---
 
