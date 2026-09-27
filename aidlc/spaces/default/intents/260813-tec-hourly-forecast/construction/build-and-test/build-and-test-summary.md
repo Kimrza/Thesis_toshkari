@@ -168,11 +168,16 @@ addendum are the current state.)*
   `7b4109b`, predictions `FIX-NOV-FOLD-01/02`, registry-stamped
   `evidence_class: smoke_only`); owner decisions D-72–D-76 landed; the governed
   release `artifacts/releases/gim_comparator_C-01_2022/` exists (manifest and
-  parquet hash independently re-verified by the 2026-09-27 board). **No suite
-  junit exists at HEAD**: this remediation clone carries no Python interpreter,
-  so the fresh full-suite + critical-set run at HEAD is BLOCKED here and owed
-  from a governed-environment host before the gate relies on suite counts for
-  HEAD (`build-test-results.md` § 2026-09-27 re-baseline addendum).
+  parquet hash independently re-verified by the 2026-09-27 board). **Suite
+  junit now exists**, measured 2026-09-27 on a governed host
+  (`tec-thesis-311`, CPython 3.11.16, `PYTHONHASHSEED=0`) at commit `70bb651`:
+  full suite **2384 total / 2380 passed / 0 failed / 0 errors / 4 skipped**
+  (`full.xml`); §18.3 selection (b) **1417/1417** (`crit.xml`);
+  `test_release_hashes.py` **965/965** (`release_hashes.xml`); all three new
+  negative controls (R3/R11/R23) pass individually and are proven to bite
+  (guard reverted → control fails; guard restored → control passes again).
+  Full detail, skip reasons, ruff delta, and the bite-proof log:
+  `build-test-results.md` § 2026-09-27 re-baseline addendum.
 - **Rec 47 status is two-limbed (R2):** the CI-verification limb is closed
   (workflow green at `7357f35`); the custody limb is OPEN — the workflow's
   authorizing Student + Supervisor change record is still owed, and until this

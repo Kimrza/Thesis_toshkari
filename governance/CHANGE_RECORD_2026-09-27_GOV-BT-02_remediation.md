@@ -185,12 +185,29 @@ cite the D-numbers (a config-comment edit citing this record).
 
 ## 7. Verification checklist (closure evidence per the board's blocks)
 
-1. Governed-host suite run at the remediation commit, junit persisted; the new
-   negative controls green: `test_ci_runner_markers_are_refused_not_defaulted`,
-   `test_canonical_iri2016_name_fails_whatever_its_provenance_says`,
-   `test_generation_december_2022_epoch_refuses_pre_g05`.
-2. Student commits with a real message citing this record; commit-msg hook
-   active on the committing clone (`core.hooksPath=.githooks` already set here).
+1. **DONE (2026-09-27, governed clone).** Suite run at commit `70bb651`
+   (the remediation patch, applied on the authoring clone), `tec-thesis-311`
+   / CPython 3.11.16 / `PYTHONHASHSEED=0`: full suite 2384 total / 2380
+   passed / 0 failed / 0 errors / 4 skipped (`full.xml`); §18.3 selection (b)
+   1417/1417 (`crit.xml`); `test_release_hashes.py` 965/965
+   (`release_hashes.xml`); all three new negative controls green individually
+   AND proven to bite (guard reverted → fails; restored → passes):
+   `test_ci_runner_markers_are_refused_not_defaulted`,
+   `test_canonical_iri2016_name_fails_whatever_its_provenance_says` (one
+   test-data fix applied to isolate this control from an accidental
+   provenance-substring match — see `build-test-results.md` § 2026-09-27
+   re-baseline addendum for the full bite-proof log),
+   `test_generation_december_2022_epoch_refuses_pre_g05`. All junit persisted
+   under `artifacts/exec_evidence/run_2026-09-27_bt02/`. Zero failures, zero
+   errors, no test weakened/skipped/xfailed to reach this; the four pre-existing
+   skips are read and stated individually in the results addendum.
+2. **DONE (2026-09-27, this governed clone).** Committed locally (not pushed)
+   with a real message citing this record, under `core.hooksPath=.githooks`
+   with the governed environment on PATH; `.githooks/commit-msg` verified
+   active and refusing boilerplate/empty messages before this commit was
+   made (Step 5 of this session). See `git log` for the commit hash — this
+   record is not edited again to insert it, per this project's rule against
+   editing a change record to chase a derived value after the fact.
 3. Student + Supervisor sign
    `CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md` (R2/R18/R3
    durable fix) — before G-05 (custody limb) / G-07 (authorization record).

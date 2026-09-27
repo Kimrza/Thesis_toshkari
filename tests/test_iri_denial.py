@@ -785,7 +785,13 @@ def test_canonical_iri2016_name_fails_whatever_its_provenance_says() -> None:
     nor tokenises to a bare `iri` token, and escaped the narrower limb this predicate
     previously implemented -- the exact near-miss `_assert_field_name_clean` was
     widened for. A fabricated non-IRI provenance must not rescue it: the name limb
-    refuses on any token beginning `iri`."""
-    columns = [{"name": "iri2016_t_plus_1_tecu", "provenance": "fabricated non-IRI stamp"}]
+    refuses on any token beginning `iri`.
+
+    The fabricated provenance is deliberately free of the substring "iri" itself
+    (GOV-2026-09-27-BT-02 bite-proof, R11): the original draft used "fabricated
+    non-IRI stamp", whose lowercased "non-iri" accidentally contains "iri" and so
+    was independently caught by the provenance check, masking whether the name
+    limb was doing anything at all. This string isolates the name-limb behaviour."""
+    columns = [{"name": "iri2016_t_plus_1_tecu", "provenance": "fabricated clean stamp"}]
     problems = iri_column_violations(columns)
     assert problems and "iri2016_t_plus_1_tecu" in problems[0], problems
