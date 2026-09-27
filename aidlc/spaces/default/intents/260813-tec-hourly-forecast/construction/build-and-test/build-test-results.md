@@ -456,15 +456,122 @@ from prose.
   produced inside this still-open stage and reviewed by the 2026-09-27 board
   (manifest complete per TE §13.3; parquet + sampled source hashes re-verified).
 
-**What could NOT be re-derived on this clone: any suite count at HEAD.** This
-remediation clone carries no Python interpreter or conda (`Get-Command
-conda|python` → not found), so the fresh full-suite and critical-set runs at
-HEAD are **BLOCKED here** — the same environment-absence class the 2026-09-24
-session hit, disclosed rather than worked around. Consequence, stated plainly:
-**the operative suite figures (1584-total full suite; 685/685 selection (b))
-are evidence for `db15880`-era commits, not for HEAD**, and whether the suite
-is green at HEAD — including the five new modules and this remediation's own
-new negative controls — is an inference until a governed-environment host runs
-and persists a junit at `69b00c4` or later under
-`artifacts/exec_evidence/run_2026-09-27_bt02/`. That run is the FIRST
-verification step owed by this remediation (execution record § Verification).
+**Governed-host verification, executed 2026-09-27 on this clone (item 1 of the
+execution record's § 7 checklist).** `tec-thesis-311` (CPython 3.11.16 exact),
+`PYTHONHASHSEED=0`, measured at commit `70bb651` (the remediation patch,
+applied and committed on the authoring clone, pulled here on top of `69b00c4`;
+this clone's working tree carries one additional fix on top of `70bb651` —
+see the bite-proof note below). Every count is read from the persisted junit's
+own `<testsuite>` attributes, never from pytest's terminal summary, and
+`passed` is derived as `total − failures − errors − skipped`:
+
+| Run | Total | Passed | Failed | Errors | Skipped | Wall time | XML |
+|---|---|---|---|---|---|---|---|
+| Three new negative controls (individually) | 3 | 3 | 0 | 0 | 0 | 0.33+0.20+17.19 s | `ctrl_r3.xml`, `ctrl_r11.xml`, `ctrl_r23.xml` |
+| `test_release_hashes.py` (R6 closing control) | 965 | 965 | 0 | 0 | 0 | 6.20 s | `release_hashes.xml` |
+| §18.3 critical set, selection (b), ten modules | 1417 | 1417 | 0 | 0 | 0 | 62.37 s | `crit.xml` |
+| Full suite (34 modules) | **2384** | **2380** | 0 | 0 | 4 | 728.75 s | `full.xml` |
+
+All persisted under `artifacts/exec_evidence/run_2026-09-27_bt02/`.
+
+**Every stale expectation this addendum's predecessor carried forward is
+superseded, and superseded upward, not down** — the suite grew between
+`db15880` and `70bb651`, it did not shrink: `test_release_hashes.py` was last
+measured 235/235 (2026-09-25) and is now **965/965**; the §18.3 selection (b)
+was last measured 685/685 (D-69, 2026-09-25) and is now **1417/1417**; the
+full suite's prior operative figure (1584 total) is now **2384 total,
+2380 passed, 0 failed, 0 errors, 4 skipped** — up from the "expect a higher
+total; derive it, don't predict it" note this addendum previously carried.
+Zero failures and zero errors across every run; no test was weakened, skipped,
+`xfail`-ed, or deleted to reach this. The four skips, read individually from
+the XML (never narrated):
+
+1. `test_clean_run.py::test_clean_run_completion_or_skip_with_named_reason` —
+   the scientific-fixture manifest still carries the `TBD — freeze gate`
+   sentinel on 45+ fields (Q-31 freeze not yet performed); correct refusal,
+   not a gap.
+2. `test_models_smoke.py::test_ridge_and_forest_refuse_by_name_when_sklearn_is_absent`
+   — scikit-learn IS installed in this governed env, so the absence-refusal
+   path is not reachable here (environment-conditional by design).
+3. `test_regimes_and_reporting.py::test_render_figure_refuses_naming_pin_surface_when_matplotlib_absent`
+   — matplotlib IS installed here for the same reason; absence path
+   untestable on this host.
+4. `test_release_contract.py::test_missing_required_field_is_refused[dataset_version]`
+   — `dataset_version` is derived by `write_release`, not a required input
+   field; see the D-29 tests.
+
+None of the four skips touch `evidence/locked_test_restricted/` or December
+2022 content — this remediation session read no locked-test byte.
+
+**R6 independently reconfirmed** (beyond the passing test): the three IGS
+site-log SHA-256 hashes were recomputed by this session directly from the
+committed bytes (`hashlib.sha256`, not the test harness) and matched
+`sitelog_index.json` exactly for all three files; `git check-ignore -v` on
+all three returned exit 1 (no match — none is gitignored).
+
+**`ruff check` on the eight edited files, baselined against `69b00c4`
+(pre-patch; all eight files existed there and were clean — `ruff check` on
+that copy returns "All checks passed!").** The current tree introduces **6
+new advisory findings across 2 of the 8 files** (no enforced floor, Q5=A;
+reported, not fixed, since none is a correctness or security-relevant miss
+introduced by this remediation's own logic — S603/S607/S105 pre-date this
+patch's actual new lines in `gim.py` and are pattern matches on
+already-existing `subprocess`/token-constant code the patch's diff did not
+touch the shape of):
+
+- `tests/test_determinism.py:71` — `I001` import block un-sorted (new).
+- `tests/test_external_drivers.py:1044,1056` — `UP038` `isinstance` tuple
+  style (new; 2 occurrences).
+- `src/external/gim.py:450,450,1075` — `S603`/`S607`/`S105` (new; the
+  subprocess-call and token-naming patterns the R23 edit's surrounding
+  function already contained).
+- The other 5 edited files (`src/data/config.py`,
+  `tests/test_iri_denial.py`, `tests/test_gim_generation.py`,
+  `tests/test_gim_provenance.py`, `tests/test_locked_test_guard.py`)
+  introduce **zero** new findings.
+
+**Bite-proof (execution record's "CONTROL BITES" idiom), each guard
+temporarily reverted then restored, working tree confirmed byte-identical
+afterward (`git diff --stat`):**
+
+- **R3**: removed the `_CI_MARKERS` refusal branch in
+  `resolve_platform_roots` → `test_ci_runner_markers_are_refused_not_defaulted`
+  failed (`DID NOT RAISE PlatformError`). Restored; passes again.
+- **R11**: narrowing the name limb to `startswith("iri_")` alone did **not**
+  fail the control on the first attempt — a genuine defect in the control,
+  not a false alarm: its fabricated provenance string was
+  `"fabricated non-IRI stamp"`, whose lowercased form contains the literal
+  substring `"non-iri"`, which itself contains `"iri"`, so the predicate's
+  separate provenance-content check caught the row regardless of what the
+  name limb did, masking whether the name limb was exercised at all. Fixed
+  by changing the test's fabricated provenance string to
+  `"fabricated clean stamp"` (no `"iri"` substring), which isolates the
+  name-limb behaviour; re-run with the limb narrowed then correctly failed
+  (`assert [] `, empty violations list). Restored the wide limb; passes
+  again with the corrected string. This is a test-data fix, not a guard or
+  assertion weakening — `git diff` against `70bb651` on
+  `tests/test_iri_denial.py` is exactly this one-string change plus its
+  docstring note.
+- **R23**: removed the December-2022 refusal clause in `generate_comparator`
+  → the control's assertion (`"December 2022" in combined`) correctly
+  failed — execution proceeded past the missing clause into a later,
+  unrelated grid-interpolation-range refusal with a different message,
+  confirming the assertion depends specifically on the December clause, not
+  on the subprocess merely exiting non-zero. Restored; passes again.
+
+**Commit-msg hook (R7, Step 5), exercised directly against three temp
+messages with `core.hooksPath=.githooks`:** boilerplate editor text → exit 1;
+empty message → exit 1; a real message → exit 0. Matches the execution
+record's claim.
+
+**R5 (lost `GOV-2026-09-24-BT-01` report):** searched this entire machine
+(`C:\Users\LOTUS\...`) beyond the repository tree — user profile, Desktop —
+2026-09-27; the file does not exist anywhere on this clone either. The
+report-loss condition stays open exactly as `CHANGE_RECORD_2026-09-27_GOV-BT-01_report_loss.md`
+records it; per `project.md` `delivery-planning:c12`, it is not reconstructed
+from the seventeen artifacts that cite it.
+
+**R7 (commit attribution):** no session record or change record was found on
+this clone beyond what the execution record's § 3 table already cites; the
+three attributions for `576046c`, `0ce2a68`, `69b00c4` remain marked
+**inferred**, unchanged, owed to the Student's confirmation at the gate.
