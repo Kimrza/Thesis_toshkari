@@ -228,6 +228,86 @@ def _registered(tmp_path: Path, set_id: str = "setA", **mask_kwargs: Any):
 
 
 # =======================================================================================
+# 0. source_id: provenance, not comparison-context identity (the Stage 07 fairness-guard
+#    fix — a model's own producer identity and an external benchmark's producer identity
+#    are EXPECTED to differ; only phase_id/target_definition_id define the comparison
+#    context and must still agree).
+# =======================================================================================
+
+
+def test_members_with_different_source_id_are_accepted_when_lineage_matches() -> None:
+    """The primary-comparison shape: a model stamped GNSS_VTEC scored against an external
+    benchmark stamped IRI2016_B01. Same phase_id/target_definition_id (comparison context),
+    different source_id (producer identity) — this must build, not raise."""
+    members = _members("setB")  # M-C (model) vs X-1 (benchmark)
+    members[1] = dataclasses.replace(members[1], source_id="IRI2016_B01")
+    mask = build_comparison_mask(
+        members,
+        set_id="setB",
+        declared_sets=SYNTH_SETS,
+        target=_target(KEYS),
+        feature_set_id="FS-synth",
+        month_start=MONTH_START,
+        month_end=MONTH_END,
+        embargo_hours=EMBARGO_HOURS,
+    )
+    # Provenance is disclosed, not collapsed to one member's stamp.
+    assert mask.source_id == f"IRI2016_B01+{IDENTITY['source_id']}"
+
+
+def test_members_disagreeing_on_phase_id_or_target_definition_id_still_refuse() -> None:
+    """The comparison-CONTEXT identity is still enforced-equal: a disagreement here is a
+    comparison across target lineages, not a producer-identity difference, and must still
+    raise FairnessError."""
+    members = _members("setB")
+    members[1] = dataclasses.replace(members[1], phase_id="OTHER-PHASE")
+    with pytest.raises(FairnessError):
+        build_comparison_mask(
+            members,
+            set_id="setB",
+            declared_sets=SYNTH_SETS,
+            target=_target(KEYS),
+            feature_set_id="FS-synth",
+            month_start=MONTH_START,
+            month_end=MONTH_END,
+            embargo_hours=EMBARGO_HOURS,
+        )
+
+    members = _members("setB")
+    members[1] = dataclasses.replace(members[1], target_definition_id="OTHER-TARGET-DEF")
+    with pytest.raises(FairnessError):
+        build_comparison_mask(
+            members,
+            set_id="setB",
+            declared_sets=SYNTH_SETS,
+            target=_target(KEYS),
+            feature_set_id="FS-synth",
+            month_start=MONTH_START,
+            month_end=MONTH_END,
+            embargo_hours=EMBARGO_HOURS,
+        )
+
+
+def test_a_member_with_missing_or_empty_source_id_still_refuses() -> None:
+    """source_id need not AGREE across members, but it must still be RECORDED and VALID on
+    every member — a missing/empty producer identity is an IntegrityError, not a silent
+    pass-through."""
+    members = _members("setB")
+    members[1] = dataclasses.replace(members[1], source_id="")
+    with pytest.raises(IntegrityError):
+        build_comparison_mask(
+            members,
+            set_id="setB",
+            declared_sets=SYNTH_SETS,
+            target=_target(KEYS),
+            feature_set_id="FS-synth",
+            month_start=MONTH_START,
+            month_end=MONTH_END,
+            embargo_hours=EMBARGO_HOURS,
+        )
+
+
+# =======================================================================================
 # 1. The declared sets: configuration, not source (R-106; Q1 = A)
 # =======================================================================================
 

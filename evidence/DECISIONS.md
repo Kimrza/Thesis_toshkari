@@ -3507,6 +3507,49 @@ recurrence stops the session with the junit counts rather than a stage traceback
 
 ---
 
+## D-49 addendum 2 — WSL2 on the Student's own laptop ruled IN as satisfying the B-01 environment exception (2026-09-28)
+
+**Decision date:** 2026-09-28. **Approved by:** the project owner, Kimia Rezaei, verbatim
+this session: *"I want to run the kaggle process locally on my own laptop. i have gpu and
+cpu running available choose whichever is best."* — after being shown the exact tension
+this addendum resolves and choosing explicitly to "rule it in as local" rather than use
+Kaggle's cloud infrastructure or leave it undecided.
+
+**The tension, stated precisely so this ruling is legible later.** D-49 item 1 scopes its
+exception to *"exactly one environment: the `virtualenv` created on the Kaggle image."*
+TC-03c authorizes exactly two platforms, `kaggle` and `local`, and R3
+(`GOV-2026-09-27-BT-02`) hardened `resolve_platform_roots` to refuse rather than default
+on any environment it cannot place in either. A prior session (D-49 addendum 1, above)
+already ran suite/compatibility checks under WSL2 CPython 3.10.21, but explicitly labelled
+that work **"diagnostic only"** — never as satisfying the governed B-01 occasion itself.
+Running the actual B-01 generation leg on WSL2 rather than Kaggle's cloud infrastructure is
+a genuine, new use beyond that precedent, not a mechanical extension of it.
+
+**Ruling.** WSL2 (Ubuntu) on the Student's own laptop (`LAPTOP-TV4UGFBC`) is **ruled IN**
+as satisfying D-49's B-01 execution-environment exception, in addition to (not replacing)
+the literal Kaggle image D-49 already names. This is the Student's own machine — real Linux
+via WSL2, not a third cloud platform — so it is recorded as the **`local`** platform
+(`TEC_PLATFORM=local`), never `kaggle`, since the infrastructure is not Kaggle's. Scope is
+identical to D-49 item 1 otherwise: exactly the isolated environment running
+`--verify-runtime`, `--build-validation-report` and `--generate-benchmark` against the
+pinned `iricore==1.8.0` wheel; it does not extend to model training, the fixture ladder, or
+any other stage script, all of which remain the governed Python 3.11 environment (TC-03d
+unchanged) on this same machine's Windows side.
+
+**Hardware.** CPU only. `iricore`'s IRI-2016 evaluation is a small, Fortran-derived
+empirical-model calculation (milliseconds per call, no matrix/tensor workload) — a GPU
+gives it no benefit and TC-01 bars a GPU dependency for any governed result in any case.
+The Student's GPU-enabled `tf_gpu` conda environment (TensorFlow 2.18.0 + CUDA, under
+construction in parallel) is **unrelated to this leg** and is not part of this ruling; it
+does not match the governed `tensorflow==2.21.0` pin (D-36) and was not evaluated or
+approved here.
+
+**What is NOT changed.** D-49's own text, scope statement, and recorded identity (item 3's
+hashes) stand unedited — this addendum adds a second satisfying environment, it does not
+relocate or reinterpret the first. No scientific value, config field, or index-file pin
+changes. The B-01 leg's own gates (R-59 validation report, pin checks before/after) apply
+identically regardless of which ruled-in environment runs them.
+
 ## D-50 addendum — the hmF2 diagnostic column is approved and implemented (no threshold)
 
 **2026-09-20.** The student approved the optional hmF2 diagnostic column ("The optional hmF2

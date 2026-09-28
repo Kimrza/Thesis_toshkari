@@ -1,0 +1,21 @@
+{
+  "package": "iricore",
+  "release": "1.8.0",
+  "installed_default_iri_version": 20,
+  "iri_version_requested": 16,
+  "index_dir": "/home/kimia_rezaee/miniconda3/envs/b01_iri/lib/python3.10/site-packages/iricore/data/index",
+  "index_files_sha256": {
+    "apf107.dat": "cdf4d5dffe6d05eaae9ed90532cddea4c3cf2fdad255d837e660018cae60e674",
+    "ig_rz.dat": "fbbed3049483ac445070cc63841b7d14aa2929894eb725bdf946889840a41486"
+  },
+  "python": "3.10.12",
+  "executable": "/home/kimia_rezaee/miniconda3/envs/b01_iri/bin/python",
+  "platform": "Linux-6.18.33.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "environment_lock_hash": "3d67c03707ead4056afdbbc6435dbed0ee4b07ef6ad9ad16f30744e1c2f99ec3",
+  "config_hashes": {
+    "data.yaml": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+    "features.yaml": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+    "experiment.yaml": "10028bf0b62a75aeaa042c734856dd1494dc358621b892693c5786c7e7160dd3",
+    "seeds.yaml": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166"
+  }
+}

@@ -118,8 +118,23 @@ _TARGET_STATION = "station_id"
 _TARGET_TIMESTAMP = "interval_start_utc"
 _TARGET_VALUE = "vtec_tecu"
 
-#: The three identity stamps every prediction carries (NFR-TDEF-01; TE §13).
-_IDENTITY_KEYS = ("phase_id", "source_id", "target_definition_id")
+#: The comparison-CONTEXT identity: same target lineage, same phase, same target
+#: definition. Required EQUAL across every member of a comparison set — a comparison whose
+#: members disagree here is scoring against different exams, not merely different producers
+#: (Vision §2.2/§6.6's no-target-equivalence rule). `source_id` is deliberately EXCLUDED:
+#: `configs/data.yaml`'s `target.identity.source_id` names the OBSERVED/target lineage
+#: (e.g. `GNSS_VTEC`) while `configs/experiment.yaml`'s `benchmark_b01.stamps.source_id`
+#: names the PREDICTION PRODUCER identity (`IRI2016_B01`) — two distinct semantics sharing
+#: one field name (`scripts/audit_gfz_drivers.py` :88-94's open comment). The primary
+#: comparison is EXACTLY LSTM (source_id=GNSS_VTEC) vs IRI-2016 (source_id=IRI2016_B01):
+#: requiring source_id equality here made the primary comparison itself unbuildable.
+_IDENTITY_KEYS = ("phase_id", "target_definition_id")
+
+#: `source_id` is comparison-set PROVENANCE, not comparison-context identity: every member
+#: must carry a present, non-empty value (recorded and valid), but members are NOT required
+#: to agree — a comparison legitimately spans multiple producers of the same target lineage
+#: (a model vs an external benchmark). See `_IDENTITY_KEYS` above for the distinction.
+_PROVENANCE_KEYS = ("source_id",)
 
 #: The declared set the membership floor below governs — the set whose table PC-03/PC-04
 #: and Vision §2.4's binding honesty rule speak about. An identity token.
@@ -354,6 +369,15 @@ class ComparisonMask:
     (R-107 limb 6): `mask_id`, `feature_set_id`, `row_counts` (surviving, per station),
     `exclusion_counts` (dropped by the intersection, per station), and
     `scored_window_statement`.
+
+    `source_id`: PROVENANCE, not comparison-context identity (see `_IDENTITY_KEYS` /
+    `_PROVENANCE_KEYS` in this module). Members of a comparison set are required to agree on
+    `phase_id` and `target_definition_id` but NOT on `source_id` — the primary comparison is
+    exactly a model (`source_id=GNSS_VTEC`) scored against IRI-2016
+    (`source_id=IRI2016_B01`). When every member shares one `source_id` this field holds
+    that single value, unchanged from before; when members differ it holds every distinct
+    value present, `+`-joined and sorted, so provenance stays disclosed rather than being
+    silently collapsed to one member's stamp.
     """
 
     mask_id: str
@@ -537,9 +561,10 @@ def build_comparison_mask(
     LeakageError, PartitionError, FairnessError
         per the guard order above.
     IntegrityError
-        identity-stamp disagreement between members (`phase_id`/`source_id`/
-        `target_definition_id` — a comparison across target lineages, Vision §2.2/§6.6), a
-        rowless intersection, or malformed rows.
+        comparison-context disagreement between members (`phase_id`/`target_definition_id`
+        — a comparison across target lineages, Vision §2.2/§6.6), a missing/empty
+        `source_id` (provenance must be recorded even though it need not agree), a rowless
+        intersection, or malformed rows.
     """
     members = list(predictions)
     require_stamps(members)  # W-1 step 1 first limb: None stamps (LeakageError)
@@ -557,6 +582,22 @@ def build_comparison_mask(
                 f"members disagree on {key} {sorted(values)}; a comparison across target "
                 f"lineages is not a comparison (Vision §2.2/§6.6 stamp rule; TE §13)",
             )
+
+    # `source_id` is PROVENANCE (producer identity), not comparison-context identity: it
+    # must be present and non-empty on every member, but members are explicitly PERMITTED
+    # to disagree — the primary comparison set is exactly a model (source_id=GNSS_VTEC)
+    # against IRI-2016 (source_id=IRI2016_B01). See `_IDENTITY_KEYS`/`_PROVENANCE_KEYS`
+    # above.
+    for key in _PROVENANCE_KEYS:
+        for p in members:
+            value = getattr(p, key, None)
+            if value is None or str(value).strip() == "":
+                raise IntegrityError(
+                    f"{getattr(p, 'model_id', '?')!r} in comparison set {set_id}",
+                    f"{key} is missing or empty; provenance must be recorded even though "
+                    f"it is not required to agree across members (Vision §2.2/§6.6)",
+                )
+    member_source_ids = sorted({str(getattr(p, "source_id")) for p in members})
 
     # Matched windows at the comparison boundary (R-111's limb; NFR-FAIR-01; control 28,
     # instantiated on the tier-3 set too — Vision §8.9's M-04/M-05 clause).
@@ -631,7 +672,12 @@ def build_comparison_mask(
             sorted({str(getattr(p, "transform_id")) for p in members})
         ),
         phase_id=str(getattr(template, "phase_id")),
-        source_id=str(getattr(template, "source_id")),
+        # `source_id`: members are no longer required to agree (see `_IDENTITY_KEYS` /
+        # `_PROVENANCE_KEYS` above), so the mask records EVERY distinct producer identity
+        # present in the set rather than silently picking one member's value. When every
+        # member shares one source_id (the common, non-cross-provenance case) this is
+        # unchanged from before: a single value. `+`-joined, sorted, deterministic.
+        source_id="+".join(member_source_ids),
         target_definition_id=str(getattr(template, "target_definition_id")),
         row_counts=dict(sorted(row_counts.items())),
         exclusion_counts=dict(sorted(exclusion_counts.items())),
