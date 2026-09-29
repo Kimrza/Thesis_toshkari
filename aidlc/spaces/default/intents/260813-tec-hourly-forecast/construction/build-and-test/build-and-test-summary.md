@@ -3,6 +3,9 @@
 **Stage:** build-and-test (3.6) · **Lead:** aidlc-quality-agent ·
 **Support:** aidlc-devsecops-agent
 **Date:** 2026-09-24 · **Repository commit:** `41fd109`
+*(Body baseline. The current state is in the dated addenda at the foot of this
+file, most recently "2026-09-29 re-baseline addendum" at HEAD `9710daf`, and the
+`GOV-2026-09-29-BT-03` corrections in `build-test-results.md`.)*
 **Test strategy:** Comprehensive
 
 ## Overall build status
@@ -22,7 +25,7 @@
 | Artifact | Contents |
 |---|---|
 | `build-instructions.md` | Environment reconstruction as the build; 2026-09-24 addendum with the measured conda-forge recipe and the two unobtainable pins |
-| `unit-test-instructions.md` | pytest under the governed env; 29 on-disk modules vs the 21-module §12 mandated set; per-module function counts; negative-control-per-rule methodology; no enforced coverage floor (Q5=A) |
+| `unit-test-instructions.md` | pytest under the governed env; 29 on-disk modules vs the 21-module §12 mandated set *(2026-09-24 baseline; **39** on disk at `9710daf`, of which 18 of the 21 mandated are present and the 3 absent are Phase 2-only; see `build-test-results.md` § 2026-09-29, Rec 16)*; per-module function counts; negative-control-per-rule methodology; no enforced coverage floor (Q5=A) |
 | `integration-test-instructions.md` | The fixture ladder as the real integration tier; cross-unit boundary module map; measured ladder state; known blockers |
 | `performance-test-instructions.md` | Measured-then-frozen runtime envelopes (TE §15.1/§15.2); CPU completeness (TC-01); determinism checks; explicit non-goals |
 | `security-test-instructions.md` | Secret scanning (gitleaks, deny-list, hook); locked-test custody; prohibited-flow negative controls; release integrity; §10.1 reuse governance |
@@ -42,7 +45,12 @@ in `unit-test-instructions.md`.
 
 - **Build-ready:** yes, with the disclosed partial pin surface. A fresh
   session can rebuild the environment from the recorded recipe without PyPI.
-- **Test-ready:** yes — the suite runs end-to-end in 145 s on CPU; every red
+- **Test-ready:** yes — the suite runs end-to-end in ~~145 s~~ on CPU
+  *(2026-09-29, `GOV-2026-09-29-BT-03` Rec 8: 145 s was the 29-module run of
+  2026-09-24. At `9710daf` the 39-module full suite takes **660.7 s** and §18.3
+  selection (b) takes **105.8 s** (`run_2026-09-29_bt_fix/{full,crit}.xml`). The
+  `plumbing_7day` fixture adds 365–366 s CPU per measuring run. Budget Kaggle
+  and TC-03g sessions from these figures.)*; every red
   row is root-caused and owner-routed.
 - **Deployment-ready** ("deployment" = dataset/model releases here): **no** —
   blocked on the site-log custody disposition, the open student freeze acts
@@ -119,6 +127,8 @@ addendum"; this section is the summary-level pointer, not a restatement.)*
 - Fresh full-suite counts: **1584 total, 1580 passed, 0 failed, 0 errors, 4
   skipped** (`full.xml`, 424.5 s). Fresh §18.3 ten-module selection (b):
   **685/685 passed, 0 failed, 0 skipped** (`crit.xml`, 55.8 s).
+- *(Superseded: the verdict below was later replaced by `GOV-2026-09-27-BT-02`
+  = FAIL and then by `GOV-2026-09-29-BT-03` = FAIL; see the 2026-09-29 addendum.)*
 - **Overall verdict: still CONDITIONAL PASS**, not upgraded to PASS — the
   remaining open conditions (items 3, 4, 5, 6, 7 above) are unresolved by
   this addendum and several are external to this stage (Student freeze
@@ -187,6 +197,41 @@ addendum are the current state.)*
   `.github/workflows/verify.yml` (R2's approved immediate step); checkout still
   materialises the tracked restricted root, which remains part of the owed
   consolidated ruling (`governance/CHANGE_RECORD_2026-09-27_platform_bound_RULING_REQUEST.md`).
+
+## 2026-09-29 re-baseline addendum (HEAD `9710daf`)
+
+*(The full derivation is in `build-test-results.md`, § "2026-09-29 re-baseline
+addendum". This section points there; it does not restate it.)*
+
+- **Suite at `9710daf` plus one test-only fix**, on `tec-thesis-311`: the full
+  suite ran **2456 total / 2452 passed / 0 failed / 0 errors / 4 skipped**, and
+  §18.3 selection (b) ran **1423/1423**
+  (`artifacts/exec_evidence/run_2026-09-29_bt_fix/`).
+- **Before the fix, 4 intermittent failures.** They came from a same-tick
+  timestamp race in `tests/test_common_masks.py`'s receipt helper. Seven limb 2
+  and limb 3 negative controls could pass without exercising their limb. The
+  owner ruled Option A; the fix is proven to bite; the guard is unchanged.
+- **Scope growth since `70bb651`:** 39 test modules (+5/−0); D-77…D-81 adopted;
+  the D-74 amendment; the fixture ladder through stage 07; the `plumbing_7day`
+  Q-31 candidate manifest is VALID but **not frozen**.
+- **Still open, and none of these is this stage's act:** WS-20/TA-17. *(Corrected
+  under `GOV-2026-09-29-BT-03` Rec 4: the first owed act is to promote the
+  `plumbing_7day` candidate into `fixture_manifest.yaml`, then the Student's Q-31
+  freeze of it, including its positive tolerance, then the `scientific_1month`
+  freeze.)* Also still open: the
+  TC-03g Kaggle-session run, the supervisor gates G-05/G-06/G-07, the custody
+  limb of Rec 47, R7's inferred attributions, and the `aidlc-state.md` Project
+  Root question.
+- **New `gf-3` carry:** `evaluation-and-comparison`'s code-summary is out of
+  date for the test edit.
+- **Verdict status:** the last governance verdict on this stage,
+  `GOV-2026-09-27-BT-02` (FAIL), stands until a fresh review runs. *(Update: the
+  fresh full-board review `GOV-2026-09-29-BT-03`
+  (`governance/reviews/GOV-2026-09-29-BT-03.md`) returned **FAIL** with 0 Critical,
+  6 High, 4 Medium and 7 Low findings. The single blocking ground is Rec 1, the
+  unrecorded `source_id` comparison-identity change in `208f138`. The Student's
+  rulings on all 17 findings are recorded in
+  `governance/CHANGE_RECORD_2026-09-29_GOV-BT-03_rulings.md`.)*
 - **Item 5 (`aidlc-state.md` Project Root)** — third stale recurrence recorded
   (R28); dropping/relativizing the field is the routed owner question, no
   hand-edit made this pass.

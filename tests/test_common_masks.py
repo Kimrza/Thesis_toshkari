@@ -984,7 +984,11 @@ def _receipted_prediction(tmp_path: Path) -> tuple[Path, Path]:
     receipt = {
         "prediction_path": str(prediction_path),
         "sha256": hashlib.sha256(prediction_path.read_bytes()).hexdigest(),
-        "recorded_at_utc": dt.datetime.now(UTC).isoformat(),
+        # Backdated one second: R-109 limb 1 requires the receipt to STRICTLY precede the
+        # metric call, and on Windows two `now()` reads can return the same microsecond,
+        # so an un-backdated stamp made limb 1 fire spuriously ahead of the limb a test
+        # targets (build-and-test, 2026-09-29). Test data only; the guard is unchanged.
+        "recorded_at_utc": (dt.datetime.now(UTC) - dt.timedelta(seconds=1)).isoformat(),
         "run_id": "synthetic-run",
         "partition_id": "DEC",
     }
@@ -1050,7 +1054,7 @@ def test_control_18_receipt_absent_raises(tmp_path: Path) -> None:
     prediction_path, receipt_path = _receipted_prediction(tmp_path)
     receipt_path.unlink()
     record = _access_record(mask, registry)
-    with pytest.raises(LockedTestError):
+    with pytest.raises(LockedTestError, match="no prediction-hash receipt exists"):
         require_locked_receipt(
             **_locked_kwargs(mask, registry, prediction_path, receipt_path, record)
         )
@@ -1062,7 +1066,7 @@ def test_controls_19_21_hash_mismatch_and_detected_second_write(tmp_path: Path) 
     record = _access_record(mask, registry)
     # (21) a second write of the prediction file AFTER the receipt — detected, not assumed
     prediction_path.write_text(json.dumps({"rows": [], "tampered": True}), encoding="utf-8")
-    with pytest.raises(LockedTestError):
+    with pytest.raises(LockedTestError, match="limb 1: sha256"):
         require_locked_receipt(
             **_locked_kwargs(mask, registry, prediction_path, receipt_path, record)
         )
@@ -1074,14 +1078,29 @@ def test_control_20_receipt_not_preceding_the_call_raises(tmp_path: Path) -> Non
     record = _access_record(mask, registry)
     kwargs = _locked_kwargs(mask, registry, prediction_path, receipt_path, record)
     kwargs["now"] = dt.datetime.now(UTC) - dt.timedelta(hours=1)  # call "before" the receipt
-    with pytest.raises(LockedTestError):
+    with pytest.raises(LockedTestError, match="does not precede"):
+        require_locked_receipt(**kwargs)
+
+
+def test_control_20b_receipt_at_the_same_instant_as_the_call_raises(tmp_path: Path) -> None:
+    """R-109 limb 1's boundary: hash-before-metrics is a strict ordering, so a receipt
+    stamped at exactly the metric call's instant refuses. Pins `<` against a silent
+    relaxation to `<=` (GOV-2026-09-29-BT-03 Recommendation 7; the same-tick case the
+    Windows clock produced)."""
+    mask, registry, _ = _dec_mask(tmp_path)
+    prediction_path, receipt_path = _receipted_prediction(tmp_path)
+    record = _access_record(mask, registry)
+    recorded = json.loads(receipt_path.read_text(encoding="utf-8"))["recorded_at_utc"]
+    kwargs = _locked_kwargs(mask, registry, prediction_path, receipt_path, record)
+    kwargs["now"] = dt.datetime.fromisoformat(recorded)
+    with pytest.raises(LockedTestError, match="does not precede"):
         require_locked_receipt(**kwargs)
 
 
 def test_control_23_no_access_record_refuses(tmp_path: Path) -> None:
     mask, registry, _ = _dec_mask(tmp_path)
     prediction_path, receipt_path = _receipted_prediction(tmp_path)
-    with pytest.raises(LockedTestError):
+    with pytest.raises(LockedTestError, match="limb 2: no access record"):
         require_locked_receipt(
             **_locked_kwargs(mask, registry, prediction_path, receipt_path, None)
         )
@@ -1115,7 +1134,7 @@ def test_containment_manifest_hash_mismatch_refuses(tmp_path: Path) -> None:
         mask_bundle_ids=(mask.mask_id,),
         mask_registry_hash="0" * 64,  # does not re-verify
     )
-    with pytest.raises(LockedTestError):
+    with pytest.raises(LockedTestError, match="limb 2: manifest re-hashes"):
         require_locked_receipt(
             **_locked_kwargs(mask, registry, prediction_path, receipt_path, record)
         )
@@ -1139,7 +1158,7 @@ def test_containment_mask_not_in_bundle_refuses(tmp_path: Path) -> None:
         mask_bundle_ids=("some-other-mask-id",),
         mask_registry_hash=hashlib.sha256(manifest_bytes).hexdigest(),
     )
-    with pytest.raises(LockedTestError):
+    with pytest.raises(LockedTestError, match="limb 2: not in the access record"):
         require_locked_receipt(
             **_locked_kwargs(mask, registry, prediction_path, receipt_path, record)
         )
@@ -1157,7 +1176,7 @@ def test_control_22_day1_row_in_the_locked_scored_set_raises(tmp_path: Path) -> 
         "y_hats": {m: 1.0 for m in SYNTH_SETS["setA"]["member_ids"]},
     }
     widened = dataclasses.replace(mask, masked_rows=(*mask.masked_rows, day1))
-    with pytest.raises(LockedTestError):
+    with pytest.raises(LockedTestError, match="limb 3"):
         require_locked_receipt(
             **_locked_kwargs(widened, registry, prediction_path, receipt_path, record)
         )

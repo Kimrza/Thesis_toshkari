@@ -50,6 +50,15 @@ since run** on the plumbing fixture, 2026-09-26, commit `7b4109b` —
 not run; the scientific fixture has still never run; WS-20/TA-17 remain
 Pending. See `build-test-results.md` § "2026-09-27 re-baseline addendum".)*
 
+*(Superseded again, 2026-09-29, `GOV-2026-09-29-BT-03` Rec 10: stages 00–07 have
+now run on `plumbing_7day`. The candidate manifest
+`fixture_manifest.candidate_walking-skeleton-plumbing_7day-20260929T133720Z-4a959333.yaml`
+is VALID over two measuring runs (`CR-2026-09-29-Q31-CLOSURE`), but it is **not
+promoted and not frozen**. The first owed act is to promote it into
+`fixture_manifest.yaml`, followed by the Student's Q-31 freeze. The scientific
+fixture has still never run, and WS-20/TA-17 remain Pending. See
+`build-test-results.md` § "2026-09-29 re-baseline addendum".)*
+
 Fixture runs write under `artifacts/walking_skeleton/<fixture_id>/releases/`,
 never the governed `artifacts/releases/` root (release-root split, ruled
 2026-09-23). A bundle is never overwritten (TE §13.3): re-running stage 05

@@ -4261,6 +4261,46 @@ possibly-single-event sample.
 
 ---
 
+## D-82 — Comparison-set identity vs provenance: `source_id` is provenance (owner ruling; ratifies `208f138`)
+
+**Decision date:** 2026-09-29. **Approved by:** the project owner, Kimia Rezaei, by
+explicit instruction in session on 2026-09-29, adopting the text proposed in
+`governance/CHANGE_RECORD_2026-09-29_GOV-BT-03_rulings.md` §3 (governance review
+`GOV-2026-09-29-BT-03`, Recommendation 1, ruling option 1). **Supervisor
+countersignature:** required under TE §18.2 if the comparison-set structure is classed as a
+G-05 input, as with D-80. It is **OPEN**; no supervisor signature is claimed.
+
+**Content.** Members of a declared comparison set must agree on `phase_id` and
+`target_definition_id`, which together form the comparison-context identity. `source_id` is
+**provenance**. Every member must carry a present, non-empty `source_id`, and the mask records
+every distinct producer, but members are not required to share it.
+
+**Reason.** The primary comparison is the LSTM (`source_id=GNSS_VTEC`) against IRI-2016
+(`source_id=IRI2016_B01`). Requiring equal `source_id` values made the primary comparison
+impossible to build. What makes a comparison fair under NFR-FAIR-01 is agreement on the
+target lineage, never agreement on the producer.
+
+**Unchanged.** Stamping all three ids on every dataset, prediction, mask and comparison
+(TEC-05; project.md Mandated) still applies. So do the comparison-wide mask (D-80) and the
+three mandatory difficulty controls.
+
+**Enforcement.** `src/evaluation/masks.py` (`_IDENTITY_KEYS`, `_PROVENANCE_KEYS`) and three
+tests in `tests/test_common_masks.py`, all added in `208f138`:
+`test_members_with_different_source_id_are_accepted_when_lineage_matches`,
+`test_members_disagreeing_on_phase_id_or_target_definition_id_still_refuse`,
+`test_a_member_with_missing_or_empty_source_id_still_refuses`.
+
+**Traceability note.** The code change landed in `208f138` on 2026-09-28. That commit's
+message ("Record fixture resolution decisions") cites no decision. This entry ratifies the
+change after the fact, and the gap is recorded rather than hidden (governance review
+`GOV-2026-09-29-BT-03`, Recommendations 1 and 2).
+
+**Effect on leakage / uncertainty / comparability / claim.** Leakage: none, because no
+feature or model input changes. Uncertainty: none. Comparability: members are still
+required to share the same target lineage. Claim: unchanged.
+
+---
+
 ## Supervisor review
 
 D-3/D-144 is countersigned as of 2026-08-15 and **expressly approved 2026-08-21**

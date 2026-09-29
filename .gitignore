@@ -106,6 +106,19 @@ secrets.yml
 # records are superseded, never deleted.
 artifacts/exec_evidence/test_access_log.jsonl
 
+# ── Derived run outputs: tracking policy B (CR-2026-09-29-GOV-BT-03-RULINGS §4) ──
+# Run snapshots (re-derivable; `load_configs` writes one per call) and `*.archived-*`
+# superseded outputs are NOT stored in git from 2026-09-29. Their bytes are made
+# verifiable instead by `artifacts/untracked_outputs_manifest_2026-09-29.json`
+# (SHA-256 per file). Releases under `*/releases/` are TE §13.3 objects and stay
+# COMMITTED. Paths already tracked before this rule stay tracked (ignore rules
+# never untrack a file).
+artifacts/run_snapshots/
+*.archived-*
+# An archived RELEASE is still a release: keep it committed.
+!**/releases/*.archived-*
+!**/releases/*.archived-*/**
+
 # ── Python derived artifacts ───────────────────────────────────────────
 __pycache__/
 *.py[cod]

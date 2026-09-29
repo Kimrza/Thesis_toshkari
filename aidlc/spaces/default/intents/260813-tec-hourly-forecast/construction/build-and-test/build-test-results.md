@@ -71,7 +71,7 @@ evidence**: the only committed 766-test XML
 (`artifacts/exec_evidence/run_2026-09-24/junit_final.xml`, host
 LAPTOP-TV4UGFBC, 01:12Z) records 766 tests with **2 failures** — the pre-fix
 chokepoint run. Set-differencing (b) against that XML's IDs shows the
-766-test selection spans all 29 modules while (b) is the ten §18.3 module
+766-test selection spans all 29 modules *(29 at 2026-09-24; 39 at `9710daf`)* while (b) is the ten §18.3 module
 homes; and the green report was made while the three site-log bytes were
 already absent from tracking, so it can only have run against untracked
 local bytes or a selection excluding those rows. **Which selection is THE
@@ -594,3 +594,164 @@ fixed here rather than left standing as a second, contradicting claim.
 this clone beyond what the execution record's § 3 table already cites; the
 three attributions for `576046c`, `0ce2a68`, `69b00c4` remain marked
 **inferred**, unchanged, owed to the Student's confirmation at the gate.
+
+## 2026-09-29 re-baseline addendum (HEAD `9710daf`)
+
+This addendum adds to the rows above; it does not overwrite them. It was written
+on the LOTUS clone on the owner's "Refresh, then review" instruction. Every count
+is read from the persisted junit `<testsuite>` attributes, and `passed` is
+derived as `total − failures − errors − skipped`.
+
+**What changed between `70bb651` and `9710daf`.** Ten commits
+(`git log --oneline 70bb651..HEAD` → 10). Materially:
+
+- **Test modules: 39.** `git ls-tree` set difference against `70bb651` gives
+  **+5 / −0**: `test_bootstrap_fixture_gate.py`,
+  `test_budget_artifact_envelope.py`, `test_fixture_outputs.py`,
+  `test_gim_comparison_set_fixture_gate.py`,
+  `test_reporting_surface_fixture_gate.py`.
+- **Pins: 10**, unchanged (`requirements.txt` `==` lines, excluding one comment
+  line).
+- **Decisions:** D-77 (IRI name-filter widening) and D-78…D-81 (estimand,
+  bootstrap, comparison sets, regimes) are adopted in `evidence/DECISIONS.md`,
+  and D-74 carries its 2026-09-29 amendment (`bootstrap_summary.json` on
+  `plumbing_7day` is exact/schema; candidate-versus-frozen tolerance rule).
+- **Fixture ladder:** stages 00–07 run on `plumbing_7day`. The candidate
+  manifest
+  `tests/fixtures/plumbing_7day/fixture_manifest.candidate_walking-skeleton-plumbing_7day-20260929T133720Z-4a959333.yaml`
+  is VALID over two real measuring runs (`CR-2026-09-29-Q31-CLOSURE`). It is a
+  **candidate, not frozen**: the positive acceptance tolerance is the Student's
+  Q-31 freeze act. The `scientific_1month` manifest freeze is still owed, so
+  WS-20 and TA-17 remain **Pending**.
+
+**First pass: 4 failures, all one timing defect in a test fixture.**
+Governed env `tec-thesis-311`, CPython 3.11.16, `PYTHONHASHSEED=0`, persisted
+under `artifacts/exec_evidence/run_2026-09-29_bt/`:
+
+| Run | Total | Passed | Failed | Errors | Skipped | XML |
+|---|---|---|---|---|---|---|
+| §18.3 selection (b), ten modules | 1423 | 1421 | 2 | 0 | 0 | `crit.xml` |
+| Full suite, 39 modules | 2456 | 2450 | 2 | 0 | 4 | `full.xml` |
+
+All four failures were in `tests/test_common_masks.py`, and all were R-109
+limb 1 refusals ("receipt timestamp … does not precede the metric call").
+Each run failed on a **different** pair of tests. Root cause: the helper
+`_receipted_prediction` stamped the receipt with `datetime.now()`, and
+`require_locked_receipt` read `now()` again. On Windows both reads returned the
+same microsecond, so the guard's strict `<` refused. The guard behaved
+correctly and failed closed. The defect was in the test data.
+
+**A related defect found while diagnosing.** Seven negative controls used a bare
+`pytest.raises(LockedTestError)`. When the clock collided, a limb 2 or limb 3
+control could pass because limb 1 raised first, without ever exercising the
+limb it exists to prove.
+
+**Repair (owner ruling Option A, 2026-09-29; test-only).** This is a cross-unit
+edit to `evaluation-and-comparison`'s READY module, made per
+`code-generation:c32`. The helper now backdates the receipt by 1 s, and each of
+the seven controls now matches its own limb's message. `src/evaluation/guards.py`
+is **unchanged**. `test_common_masks.py` changes by +12/−8 lines.
+
+- **Stability:** the module passed 82/82 on five consecutive runs.
+- **Bite-proof:** a temporary copy was run with the receipt forced two hours
+  into the future. Exactly the five limb 2 and limb 3 controls **FAILED**,
+  proving their message checks now bite. The three limb 1 controls (18, 19/21,
+  20) passed, as they must. The copy was deleted afterwards.
+
+**Post-repair runs** (`artifacts/exec_evidence/run_2026-09-29_bt_fix/`):
+
+| Run | Total | Passed | Failed | Errors | Skipped | Wall time | XML |
+|---|---|---|---|---|---|---|---|
+| §18.3 selection (b), ten modules | **1423** | **1423** | 0 | 0 | 0 | 105.8 s | `crit.xml` |
+| Full suite, 39 modules | **2456** | **2452** | 0 | 0 | 4 | 660.7 s | `full.xml` |
+
+The four skips are the same four named in the 2026-09-27 addendum, re-read
+from the XML: `test_clean_run_completion_or_skip_with_named_reason` (Q-31
+scientific-fixture freeze owed), the sklearn-absent and matplotlib-absent
+refusal paths (packages present), and `test_missing_required_field_is_refused[dataset_version]`.
+§18.3's "no failing critical test" condition holds for selection (b) at
+`9710daf` plus this test edit, which is not yet committed.
+
+**Tree state.** The runs mutated no tracked file apart from the AI-DLC audit
+shard. The stage's own edits are `tests/test_common_masks.py`, this addendum,
+the summary addendum and the stage diary, all uncommitted. There are 131
+untracked `artifacts/run_snapshots/*` directories and the
+`*.archived-*` fixture outputs, which predate this session; they are left for
+the owner.
+
+**Carried to the gate under `gf-3`:** `evaluation-and-comparison`'s
+`code-summary.md` is now out of date for this test edit, which is disclosed
+here rather than written into that unit's receipted record.
+
+### 2026-09-29 corrections under `GOV-2026-09-29-BT-03` (the Student's rulings)
+
+This block records what the board's findings changed. The paragraphs above
+stand as written, and this block supersedes them where the two conflict.
+
+- **Rec 4: the clean-run skip reason, corrected.** The paragraph above
+  attributed the `test_clean_run_completion_or_skip_with_named_reason` skip to
+  the "Q-31 scientific-fixture freeze owed". That was wrong. The skip message
+  in `run_2026-09-29_bt_fix/full.xml` names
+  `tests/fixtures/plumbing_7day/fixture_manifest.yaml` as the first unmet
+  precondition: that file is still the Recommendation 37 structural skeleton
+  and carries the `TBD — freeze gate` sentinel on 46 fields. The first owed
+  act is therefore **to promote the VALID `plumbing_7day` candidate into
+  `fixture_manifest.yaml`, then the Student's Q-31 freeze**. The
+  `scientific_1month` freeze comes after that. WS-20 and TA-17 stay Pending
+  until all three are done.
+- **Rec 5: the snapshot count, corrected.** The "Tree state" paragraph said
+  "131 untracked `artifacts/run_snapshots/*` directories … which predate this
+  session". Derived by `git status --porcelain | grep -c '^?? artifacts/run_snapshots/'`,
+  the count is **133**. Two of them were created by this stage's own suite
+  runs, because `load_configs` writes one snapshot per call:
+  `20260929T141802Z-69e1cbb7` (the first pass) and
+  `20260929T144927Z-f0912344` (the post-fix pass). The other 131 predate
+  this session.
+- **Rec 6: untracked release outputs, disclosed.** Seven untracked release
+  directories exist under `artifacts/walking_skeleton/plumbing_7day/releases/`:
+  six `plumbing_7day_20260929T{080230,080848,082445,085704,093502,101603}Z/`
+  and `gim_comparator_C-01_2022.archived-q31-closure-run1/`. There are also
+  97 untracked `*.archived-*` paths. None of them is recoverable from version
+  control, so TA-15 protects their bytes only while this disk survives. The
+  tracking policy for snapshots, archives and releases (`CR-2026-09-19` gate-prep-2,
+  item 6) is still **undecided**. It is routed to the Student as a separate
+  ruling in `governance/CHANGE_RECORD_2026-09-29_GOV-BT-03_rulings.md`.
+- **Rec 7: boundary control added.**
+  `test_control_20b_receipt_at_the_same_instant_as_the_call_raises` passes
+  `now` equal to the receipt's own timestamp and expects the "does not
+  precede" refusal. Bite-proof: with `guards.py:537` temporarily relaxed from
+  `<` to `<=`, 20b **FAILED** while control 20 still passed. The guard was
+  restored and `git diff -- src/` is empty.
+- **Rec 9: the `gf-3` disclosure, widened.** `evaluation-and-comparison`'s
+  `code-summary.md` (last committed in `7357f35`) is out of date for three
+  changes to modules that unit owns, not one:
+  - `208f138` changed `src/evaluation/masks.py`: `source_id` moved from
+    `_IDENTITY_KEYS` to `_PROVENANCE_KEYS`, with no decision record yet (Rec 1).
+  - `9710daf` changed `masks.py` and `src/evaluation/plots.py` (`render_series_figure`).
+  - This stage changed `tests/test_common_masks.py`.
+- **Rec 11:** the orphan bytecode
+  `tests/__pycache__/test_zz_bite_common_masks.cpython-311-pytest-8.2.2.pyc`
+  has been deleted. It was gitignored, and pytest never collected it.
+- **Rec 13: the sidecar is anchored.** The access sidecar
+  `artifacts/exec_evidence/test_access_log.jsonl` is gitignored by design, so
+  the closed log stays closed. Its SHA-256 at the time this block was
+  written is recorded in the commit-anchored re-run below (Rec 3).
+- **Rec 15: a target-lineage string guard was added.**
+  `tests/test_prepared_target_schema.py` gains
+  `test_target_definition_id_is_byte_identical_everywhere_it_is_declared`. It
+  reads the value from `configs/data.yaml` and never restates it, and it
+  compares every declaration in `configs/experiment.yaml` and the fixture
+  identity declarations and manifests against that value, case included. It
+  also gains a case-variant negative control. Bite-proof: `configs/experiment.yaml`
+  was temporarily retyped to `GRIDDED_VTEC_1H`, the test **FAILED** naming
+  the file, and the file was restored with `git checkout` (`git diff -- configs/`
+  is empty).
+- **Rec 16: the §12 mandated set, enumerated.** The mandated modules were
+  extracted from TE §12 (lines 610–745) by regular expression and give
+  **21**. Set-differenced against `git ls-files tests`: **18 present, 3
+  absent**. The absent three, `test_dcb_sign.py`, `test_hourly_target.py`
+  and `test_rinex_schema.py`, are all Phase 2-only (TE §7.0), so their
+  absence is correct. The phase-transition hash-diff limb is carried by
+  `tests/test_phase_contract.py:513`
+  (`test_identical_manifests_diff_empty_and_training_is_permitted`) and
+  `:522` (`test_a_differing_hash_is_named_and_training_is_refused`).

@@ -1018,3 +1018,48 @@ def test_practical_relevance_refuses_naming_the_owed_rule_on_the_real_budget() -
             g06_receipt_utc=_dt.datetime(2026, 12, 1, tzinfo=_dt.timezone.utc),
         )
     assert "budget_value" in str(excinfo.value) and "18.2" in str(excinfo.value)
+
+
+# --- target-lineage string integrity (GOV-2026-09-29-BT-03 Recommendation 15) ------------
+
+_TDI_SCALAR = __import__("re").compile(
+    r"""["']?target_definition_id["']?\s*:\s*["']?([A-Za-z0-9_\-]+)["']?"""
+)
+
+
+def _declared_target_definition_ids(path: Path) -> list[str]:
+    """Every scalar `target_definition_id` value in a YAML file, excluding schema dtype
+    entries (`"object"`), read as text so no loader normalises case or quoting."""
+    values = _TDI_SCALAR.findall(path.read_text(encoding="utf-8"))
+    return [value for value in values if value != "object"]
+
+
+def test_target_definition_id_is_byte_identical_everywhere_it_is_declared() -> None:
+    """A retyped id (e.g. a case change) would silently mint a new target lineage
+    (TEC-05; Vision §6.6). The one authoritative value is `configs/data.yaml`
+    `target.identity.target_definition_id`; every other declaration must equal it
+    exactly, case included. The value itself is read, never restated here."""
+    authoritative = _declared_target_definition_ids(REPO_ROOT / "configs" / "data.yaml")
+    assert len(set(authoritative)) == 1, f"configs/data.yaml declares {authoritative!r}"
+    expected = authoritative[0]
+    sites = [REPO_ROOT / "configs" / "experiment.yaml"]
+    sites += sorted((REPO_ROOT / "tests" / "fixtures").glob("*/identity_declaration.yaml"))
+    sites += sorted((REPO_ROOT / "tests" / "fixtures").glob("*/fixture_manifest*.yaml"))
+    checked = 0
+    for site in sites:
+        for value in _declared_target_definition_ids(site):
+            checked += 1
+            assert value == expected, (
+                f"{site.relative_to(REPO_ROOT)}: target_definition_id {value!r} is not "
+                f"byte-identical to configs/data.yaml's {expected!r}"
+            )
+    assert checked >= 5, f"only {checked} declarations found; the sweep is not reaching its sites"
+
+
+def test_target_definition_id_sweep_catches_a_case_variant(tmp_path: Path) -> None:
+    """Negative control: a case-changed copy is caught by the same predicate."""
+    authoritative = _declared_target_definition_ids(REPO_ROOT / "configs" / "data.yaml")[0]
+    variant = tmp_path / "variant.yaml"
+    variant.write_text(f'target_definition_id: "{authoritative.upper()}"\n', encoding="utf-8")
+    assert authoritative.upper() != authoritative
+    assert _declared_target_definition_ids(variant) != [authoritative]

@@ -119,7 +119,27 @@ jobs:
           git config --global core.eol lf
         shell: bash
 
+      # Platform ruling P2 (CR-2026-09-29-GOV-BT-03-RULINGS §5; Student 2026-09-29,
+      # Supervisor countersignature OPEN): the checkout EXCLUDES the locked December
+      # root, so the locked month is never materialised on a third-party runner.
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /*
+            !/evidence/locked_test_restricted/
+          sparse-checkout-cone-mode: false
+
+      - name: Custody check — the restricted root is absent on this runner (P2)
+        # Fails the job if the sparse checkout ever stops excluding the locked month.
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -e evidence/locked_test_restricted ]; then
+            echo "VIOLATION: evidence/locked_test_restricted/ was materialised on the runner"
+            exit 1
+          fi
+          test "$(git ls-files evidence/locked_test_restricted | wc -l)" -gt 0
+          echo "restricted root tracked in git but absent from the working tree: OK"
 
       - name: Report the line-ending state of governed paths
         run: |
