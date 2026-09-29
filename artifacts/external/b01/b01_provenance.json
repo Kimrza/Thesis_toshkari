@@ -76,8 +76,8 @@
   "months": [
     11
   ],
-  "workload_seconds": 527.609,
-  "calls_per_second": 4.09,
+  "workload_seconds": 535.353,
+  "calls_per_second": 4.03,
   "integration": {
     "hbot_km": 90.0,
     "htop_km": 2000.0,
@@ -90,8 +90,8 @@
   "rows_file": "b01_iri2016_rows_partial.jsonl",
   "rows_sha256": "0035a00fcc8d4c8bfd65d9af4ae26f47d4ad20c323edb0cc8fbc25ba41a09930",
   "validation_report_file": "artifacts/external/b01/iri_implementation_validation_report.json",
-  "validation_report_sha256": "b27f826c232fa3bc8086c18b77dfebc1c240010a79d5b676c6dcf1dd40ef89a2",
-  "environment_lock_hash": "3d67c03707ead4056afdbbc6435dbed0ee4b07ef6ad9ad16f30744e1c2f99ec3",
+  "validation_report_sha256": "23358ee831b8d0a2bd97e3194fe154a53e3a4d2d1fc0b4931738eb19412ed985",
+  "environment_lock_hash": "6bebb9108e581ecaf385bc24ece71e81056979d14b0471a37e2bab89b425df6a",
   "config_hashes": {
     "data.yaml": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
     "features.yaml": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",

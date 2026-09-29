@@ -308,6 +308,153 @@ def test_a_member_with_missing_or_empty_source_id_still_refuses() -> None:
 
 
 # =======================================================================================
+# 0b. Timestamp-spelling normalization at the intersection (Stage 07 fix): the target
+#     release CSV (stage 02 standardize-target) writes `...Z`; predictions (stage 06 model
+#     output, the B-01 bridge) write `...+00:00`. Both spell the SAME UTC instant. Before
+#     the fix, `(station, interval_start_utc)` keys were built from the raw string, so the
+#     three-way intersection was ALWAYS empty on a real run — same instant, two spellings,
+#     string equality always failing. The positive control proves the fix matches on the
+#     INSTANT; the negative control (team.md § Testing Posture: every hard rule gets a test
+#     that proves the violation is caught) proves it still does NOT match two genuinely
+#     different instants, however similar their spelling.
+# =======================================================================================
+
+
+def _target_raw(keys: list[tuple[str, int, int]], stamps: dict[tuple[int, int], str]) -> RecordFrame:
+    """Like `_target`, but with an explicit, literal `interval_start_utc` string per
+    (day, hour) — bypassing `_ts`'s single canonical spelling so the two producer spellings
+    can be exercised directly."""
+    return RecordFrame(
+        {
+            "station_id": station,
+            "interval_start_utc": stamps[(day, hour)],
+            "vtec_tecu": _truth(station, day, hour),
+        }
+        for station, day, hour in keys
+    )
+
+
+def _prediction_raw(
+    model_id: str,
+    keys: list[tuple[str, int, int]],
+    stamps: dict[tuple[int, int], str],
+    *,
+    partition_id: str = "F1",
+    transform_id: str | None = "T-F1",
+) -> LoadedPrediction:
+    frame = RecordFrame(
+        {
+            "station": station,
+            "interval_start_utc": stamps[(day, hour)],
+            "y_hat": _truth(station, day, hour),
+        }
+        for station, day, hour in keys
+    )
+    return LoadedPrediction(
+        model_id=model_id,
+        seed=None,
+        frame=frame,
+        target_definition_id=IDENTITY["target_definition_id"],
+        phase_id=IDENTITY["phase_id"],
+        source_id=IDENTITY["source_id"],
+        partition_id=partition_id,
+        transform_id=transform_id,  # type: ignore[arg-type]
+    )
+
+
+def test_same_instant_spelled_z_and_offset_still_intersects() -> None:
+    """POSITIVE CONTROL. The target frame spells its stamps `...Z` (stage 02's form); every
+    prediction spells the identical instants `...+00:00` (stage 06/B-01's form). Before the
+    fix this built an empty intersection (`IntegrityError`) on every real run; the fix must
+    match same-instant rows regardless of spelling."""
+    day_hour_keys = [(d, h) for d in (2, 3) for h in (0, 1, 2)]
+    z_stamps = {
+        (d, h): dt.datetime(SYNTH_YEAR, 4, d, h, tzinfo=UTC).isoformat().replace("+00:00", "Z")
+        for d, h in day_hour_keys
+    }
+    offset_stamps = {
+        (d, h): dt.datetime(SYNTH_YEAR, 4, d, h, tzinfo=UTC).isoformat() for d, h in day_hour_keys
+    }
+    # sanity: the two spellings really are textually different for the same instant
+    assert z_stamps[(2, 0)] != offset_stamps[(2, 0)]
+
+    target = _target_raw(KEYS, z_stamps)
+    members = [
+        _prediction_raw(m, KEYS, offset_stamps, transform_id="T-F1") for m in ("M-A", "M-B", "M-C")
+    ]
+    mask = build_comparison_mask(
+        members,
+        set_id="setA",
+        declared_sets=SYNTH_SETS,
+        target=target,
+        feature_set_id="FS-synth",
+        month_start=MONTH_START,
+        month_end=MONTH_END,
+        embargo_hours=EMBARGO_HOURS,
+    )
+    # every scorable (station, day, hour) row survives — the full KEYS universe, not empty
+    assert len(mask.masked_rows) == len(KEYS)
+    assert sum(mask.row_counts.values()) == len(KEYS)
+    assert sum(mask.exclusion_counts.values()) == 0
+
+
+def test_genuinely_different_instants_still_do_not_intersect() -> None:
+    """NEGATIVE CONTROL. Two stamps that look similar but name DIFFERENT instants — one hour
+    apart — must NOT be treated as matching just because normalization is now in play. The
+    fix must decide equality on the actual instant, never on textual similarity."""
+    target_stamps = {(2, 0): "2001-04-02T00:00:00Z", (2, 1): "2001-04-02T01:00:00Z"}
+    # the prediction is shifted by ten hours for every key: genuinely different instants,
+    # chosen with no overlap against ANY target key (not merely the same-index key), so a
+    # match on the wrong (day, hour) pairing cannot mask the intended negative control
+    prediction_stamps = {
+        (2, 0): "2001-04-02T10:00:00+00:00",
+        (2, 1): "2001-04-02T11:00:00+00:00",
+    }
+    keys = [("S1", 2, 0), ("S1", 2, 1)]
+    target = _target_raw(keys, target_stamps)
+    members = [
+        _prediction_raw("M-A", keys, prediction_stamps, transform_id="T-F1"),
+        _prediction_raw("M-B", keys, prediction_stamps, transform_id="T-F1"),
+        _prediction_raw("M-C", keys, prediction_stamps, transform_id="T-F1"),
+    ]
+    with pytest.raises(IntegrityError) as excinfo:
+        build_comparison_mask(
+            members,
+            set_id="setA",
+            declared_sets=SYNTH_SETS,
+            target=target,
+            feature_set_id="FS-synth",
+            month_start=MONTH_START,
+            month_end=MONTH_END,
+            embargo_hours=EMBARGO_HOURS,
+        )
+    assert "intersection" in str(excinfo.value)
+
+
+def test_empty_intersection_still_raises_for_truly_non_overlapping_rows() -> None:
+    """Existing empty-intersection behavior, unchanged: a target and predictions that share
+    no station/day/hour combination at all must still refuse, not be silently accepted."""
+    target = _target([("S1", 2, 0), ("S1", 2, 1)])
+    members = [
+        _prediction("M-A", [("S1", 9, 0), ("S1", 9, 1)], transform_id="T-F1"),
+        _prediction("M-B", [("S1", 9, 0), ("S1", 9, 1)], transform_id="T-F1"),
+        _prediction("M-C", [("S1", 9, 0), ("S1", 9, 1)], transform_id="T-F1"),
+    ]
+    with pytest.raises(IntegrityError) as excinfo:
+        build_comparison_mask(
+            members,
+            set_id="setA",
+            declared_sets=SYNTH_SETS,
+            target=target,
+            feature_set_id="FS-synth",
+            month_start=MONTH_START,
+            month_end=MONTH_END,
+            embargo_hours=EMBARGO_HOURS,
+        )
+    assert "intersection" in str(excinfo.value)
+
+
+# =======================================================================================
 # 1. The declared sets: configuration, not source (R-106; Q1 = A)
 # =======================================================================================
 

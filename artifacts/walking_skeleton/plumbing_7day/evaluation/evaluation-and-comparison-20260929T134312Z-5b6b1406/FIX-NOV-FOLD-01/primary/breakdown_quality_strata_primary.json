@@ -1,0 +1,54 @@
+{
+  "aggregation": "equal_station_macro",
+  "artifact_class": "breakdown",
+  "artifact_id": "breakdown-quality_strata_primary",
+  "breakdown_id": "quality_strata_primary",
+  "completeness_shortfalls": [
+    {
+      "reason": "the registered comparison mask carries the comparison surface (station, hour, y_true, y_hats) and not D-17's observation-quality columns, so this stratum has no rows in a 07 run; the shortfall is recorded machine-readably and the artifact is marked partial (R-127; the two-tier posture)",
+      "stratum_field": "valid_observation_count"
+    },
+    {
+      "reason": "the registered comparison mask carries the comparison surface (station, hour, y_true, y_hats) and not D-17's observation-quality columns, so this stratum has no rows in a 07 run; the shortfall is recorded machine-readably and the artifact is marked partial (R-127; the two-tier posture)",
+      "stratum_field": "within_hour_spread_tecu"
+    },
+    {
+      "reason": "the registered comparison mask carries the comparison surface (station, hour, y_true, y_hats) and not D-17's observation-quality columns, so this stratum has no rows in a 07 run; the shortfall is recorded machine-readably and the artifact is marked partial (R-127; the two-tier posture)",
+      "stratum_field": "provider_dtec_summary"
+    }
+  ],
+  "exclusion_counts": {
+    "BSHM": 121
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "kind": "breakdown",
+  "mask_id": "e2e1b6c37d808ded9e69b6e28ae6ad8d25e2efcbabfc90d02ba05fc132e7a913",
+  "partial": true,
+  "partition_id": "FIX-NOV-FOLD-01",
+  "payload": {
+    "strata": [
+      {
+        "rows": [],
+        "stratum_field": "valid_observation_count"
+      },
+      {
+        "rows": [],
+        "stratum_field": "within_hour_spread_tecu"
+      },
+      {
+        "rows": [],
+        "stratum_field": "provider_dtec_summary"
+      }
+    ]
+  },
+  "per_station": false,
+  "phase_id": "P1A",
+  "role_label": "supplementary",
+  "scored_window_statement": "5\u201330 November 2022, 26 days, first 24 h excluded and counted",
+  "source_id": "GNSS_VTEC+IRI2016_B01",
+  "surviving_row_counts": {
+    "BSHM": 37
+  },
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "units": "TECU"
+}

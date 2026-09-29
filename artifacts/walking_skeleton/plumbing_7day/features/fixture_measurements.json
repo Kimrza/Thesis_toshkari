@@ -1,10 +1,10 @@
 {
   "measurements": {
-    "permitted_floating_point_tolerances": {
-      "value_level_diff_tecu": {
+    "numerical_variation": {
+      "floating_point_tolerances": {
+        "max": 0.0,
         "measured_over_bundles": 8,
-        "observed_max": 0.0,
-        "status": "measured, not frozen; WS-13 Pending",
+        "min": 0.0,
         "units": "TECU"
       }
     },
@@ -13,6 +13,25 @@
         "max": 48,
         "min": 24,
         "units": "rows"
+      },
+      "split": {
+        "max": 144,
+        "min": 48,
+        "units": "rows"
+      }
+    },
+    "support_missingness": {
+      "external_feature": {
+        "max": 0,
+        "min": 0,
+        "units": "rows"
+      }
+    },
+    "timestamp_tolerances": {
+      "feature_alignment": {
+        "max": 0,
+        "min": 0,
+        "units": "s"
       }
     }
   },

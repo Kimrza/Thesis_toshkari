@@ -111,10 +111,12 @@ from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
     MEASUREMENTS_NAME,
     build_apparatus_partitions,
+    fixture_root_for,
     load_fixture_scope,
     read_embargo_hours,
     release_root_for,
 )
+from src.data.fixture_outputs import export_feature_table, export_split_manifest  # noqa: E402
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.registry import load_registry  # noqa: E402
@@ -151,6 +153,7 @@ from src.features.availability import (  # noqa: E402
 from src.features.build import (  # noqa: E402
     SECTION_6_2_ROWS,
     FrameSpec,
+    _assert_field_name_clean,
     build_features,
     load_feature_dictionary,
     load_permitted_producers,
@@ -164,6 +167,10 @@ PHASE_DEFAULT = 1
 #: The manifest/artifact field names this run can produce, screened through R-23's
 #: produced-field limb BEFORE the first write (R-24).
 PRODUCED_FIELDS: tuple[str, ...] = (
+    # TE §15.4 fixture-root outputs (CR-2026-09-29-Q31-CLOSURE)
+    "fixture_outputs",
+    "feature_table",
+    "split_manifest",
     "artifact_class",
     "partition_count",
     "partitions",
@@ -828,6 +835,11 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     excluded_embargo: dict[str, int] = {}
     scored_rows: list[int] = []
     parity_diffs: list[float] = []
+    # TE §15.2 measurements and the TE §15.4 feature table (CR-2026-09-29-Q31-CLOSURE):
+    split_rows: list[int] = []
+    external_missing: list[int] = []
+    alignment_offsets: list[int] = []
+    refit_raw: tuple[Path, Any] | None = None
     for partition in partitions:
         pid = partition.partition_id
         train_start, train_end = training_range(partition)
@@ -866,10 +878,18 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             for bundle in (raw, train)
             if bundle.measured_parity_diff is not None
         )
+        raw_dir: Path | None = None
         for bundle in (raw, train):
             bundle_dir = write_bundle(bundle, out_root)
             write_sibling_stamp(Path(bundle_dir), stamp)
             written.append(str(bundle_dir))
+            external_missing.append(_external_feature_exclusions(bundle))
+            if bundle is raw:
+                raw_dir = Path(bundle_dir)
+        split_rows.append(len(records_of(raw.matrix)))
+        alignment_offsets.extend(_seconds_past_hour_of(raw.matrix))
+        if partition.validation_month is None and raw_dir is not None:
+            refit_raw = (raw_dir, raw)
         if partition.validation_month is not None:
             score_start, score_end = validation_month_range(partition)
             scored_target, excluded = apply_embargo(target, partition)
@@ -879,47 +899,61 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
             bundle_dir = write_bundle(score, out_root)
             write_sibling_stamp(Path(bundle_dir), stamp)
             written.append(str(bundle_dir))
+            external_missing.append(_external_feature_exclusions(score))
             scored_rows.append(len(records_of(score.matrix)))
             if score.measured_parity_diff is not None:
                 parity_diffs.append(score.measured_parity_diff)
 
     if scored_rows:  # Rec 4: measurable here — scored feature-window rows per partition
+        measurements: dict[str, dict[str, Any]] = {
+            "row_count_ranges": {
+                "feature_window": {
+                    "min": min(scored_rows),
+                    "max": max(scored_rows),
+                    "units": "rows",
+                },
+                # rows per apparatus partition after the split (TE 15.2 area 6)
+                "split": {"min": min(split_rows), "max": max(split_rows), "units": "rows"},
+            },
+            # rows excluded for external-driver missingness beyond the <= 3 h carry-forward
+            # (TC-09), per bundle (TE 15.2 area 7)
+            "support_missingness": {
+                "external_feature": {
+                    "min": min(external_missing),
+                    "max": max(external_missing),
+                    "units": "rows",
+                }
+            },
+            # offset of every feature row from the hourly target grid (TE 15.2 area 8)
+            "timestamp_tolerances": {
+                "feature_alignment": {
+                    "min": min(alignment_offsets),
+                    "max": max(alignment_offsets),
+                    "units": "s",
+                }
+            },
+        }
+        if parity_diffs:
+            # TE 15.2 area 12 ("Numerical variation"): the fixture-derived floating-point
+            # difference for WS-13's value-level limb — the LARGEST difference this run
+            # observed between the flattened matrix and the sequence tensor. Freezing a
+            # tolerance from it is the owner's act; until then WS-13 stays Pending (TE 15.1:
+            # measured, never invented). Until 2026-09-29 this block was filed under a
+            # non-area key with no min/max, which `collect_stage_measurements` refuses
+            # (CR-2026-09-29-Q31-CLOSURE); the measured value is unchanged.
+            measurements["numerical_variation"] = {
+                "floating_point_tolerances": {
+                    "min": min(parity_diffs),
+                    "max": max(parity_diffs),
+                    "units": "TECU",
+                    "measured_over_bundles": len(parity_diffs),
+                }
+            }
         measurements_path = out_root / MEASUREMENTS_NAME
         measurements_path.parent.mkdir(parents=True, exist_ok=True)
         measurements_path.write_text(
             json.dumps(
-                {
-                    "stage": "05_build_features_and_splits",
-                    "measurements": {
-                        "row_count_ranges": {
-                            "feature_window": {
-                                "min": min(scored_rows),
-                                "max": max(scored_rows),
-                                "units": "rows",
-                            }
-                        },
-                        # TE 15.2 area: the fixture-derived floating-point tolerance for
-                        # WS-13's value-level limb. Reported as the LARGEST difference this
-                        # run observed between the flattened matrix and the sequence tensor;
-                        # freezing a tolerance from it is the owner's act, and until one is
-                        # frozen the limb is measured rather than asserted and WS-13 stays
-                        # Pending (TE 15.1: measured from the fixtures, never invented).
-                        **(
-                            {
-                                "permitted_floating_point_tolerances": {
-                                    "value_level_diff_tecu": {
-                                        "observed_max": max(parity_diffs),
-                                        "units": "TECU",
-                                        "measured_over_bundles": len(parity_diffs),
-                                        "status": "measured, not frozen; WS-13 Pending",
-                                    }
-                                }
-                            }
-                            if parity_diffs
-                            else {}
-                        ),
-                    },
-                },
+                {"stage": "05_build_features_and_splits", "measurements": measurements},
                 indent=2,
                 sort_keys=True,
             )
@@ -942,7 +976,74 @@ def _run_fixture_scale(entry: Mapping[str, Any], args: argparse.Namespace) -> di
     manifest_path = out_root / "apparatus_split_manifest.json"
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
-    return {"split_manifest": str(manifest_path), "bundles_written": written}
+
+    fixture_root = fixture_root_for(workspace, scope.fixture_id)
+    feature_table = _export_fixture_feature_table(scope, refit_raw, fixture_root)
+    split_export = export_split_manifest(manifest_path, fixture_root)
+    return {
+        "split_manifest": str(manifest_path),
+        "bundles_written": written,
+        "fixture_outputs": {"feature_table": str(feature_table), "split_manifest": str(split_export)},
+    }
+
+
+def _external_feature_exclusions(bundle: Any) -> int:
+    """Rows a bundle excluded for external-driver missingness: every carry-forward
+    exclusion (beyond the <= 3 h bound, TC-09) plus whole driver-row exclusions."""
+    counts = dict(getattr(bundle, "excluded_counts", {}) or {})
+    return int(
+        sum(v for k, v in counts.items() if str(k).startswith("carry_forward_excluded_"))
+        + counts.get("driver_rows_excluded", 0)
+    )
+
+
+def _seconds_past_hour_of(matrix: Any) -> list[int]:
+    offsets: list[int] = []
+    for row in records_of(matrix):
+        moment = dt.datetime.fromisoformat(str(row["interval_start_utc"]).replace("Z", "+00:00"))
+        offsets.append(moment.minute * 60 + moment.second)
+    return offsets
+
+
+def _export_fixture_feature_table(
+    scope: Any, refit_raw: tuple[Path, Any] | None, fixture_root: Path
+) -> Path:
+    """TE §15.4 `feature_table.parquet` (CR-2026-09-29-Q31-CLOSURE): the fixture's ONE
+    full-window, untransformed feature matrix — the refit partition's `untransformed`
+    bundle — asserted to cover the fixture's whole declared window rather than picked by
+    convenience, with the WS-10 IRI-denial check re-applied to every exported column and
+    its evidence attached (TE §15.4: "IRI-free; denial test evidence attached")."""
+    if refit_raw is None:
+        raise IntegrityError(
+            "feature_table.parquet",
+            "the fixture declares no refit apparatus partition, so no single full-window "
+            "untransformed feature matrix exists to export; none is assembled from folds",
+        )
+    bundle_dir, _bundle = refit_raw
+    window = scope.identity["window_citation"]
+    spec = json.loads((bundle_dir / "spec.json").read_text(encoding="utf-8"))
+    if spec.get("transform_id") is not None:
+        raise IntegrityError(bundle_dir, "the feature table is the UNTRANSFORMED bundle")
+    if str(spec["scored_start"])[:10] != str(window["start_utc"]) or dt.date.fromisoformat(
+        str(spec["scored_end"])[:10]
+    ) != dt.date.fromisoformat(str(window["end_utc"])) + dt.timedelta(days=1):
+        raise IntegrityError(
+            bundle_dir,
+            f"bundle range {spec['scored_start']}..{spec['scored_end']} is not the fixture's "
+            f"declared window {window['start_utc']}..{window['end_utc']}",
+        )
+    columns = [str(c) for c in spec["columns"]]
+    for column in columns:
+        _assert_field_name_clean(column)  # WS-10 / NFR-IRI-01: raises on any IRI field
+    return export_feature_table(
+        bundle_dir,
+        fixture_root,
+        denial_mechanism=(
+            "src.features.build._assert_field_name_clean (the WS-10 IRI-denial check: any "
+            "column whose name begins `iri_` or carries a token beginning `iri` is refused)"
+        ),
+        columns_checked=columns,
+    )
 
 
 def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:

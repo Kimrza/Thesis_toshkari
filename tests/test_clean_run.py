@@ -228,6 +228,9 @@ def _ledger(outputs: list[str]) -> dict[str, dict[str, Any]]:
                     "value": FP_TOLERANCE,
                     "units": "dimensionless",
                     "measuring_run_id": RUN_ID,
+                    # CR-2026-09-29-Q31-CLOSURE: a candidate's measured tolerance records
+                    # the number of measuring runs it was taken across (>= 2).
+                    "measured_over_runs": 2,
                 },
             }
         else:

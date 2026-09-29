@@ -1,0 +1,31 @@
+{
+  "artifact": "fixture_plot_manifest",
+  "figures": {
+    "plots/predictions.png": {
+      "points_drawn": 575,
+      "sources": {
+        "hourly_vtec.parquet": "c21c85c03a334de4d9fbcaa069b813e35531e0cac2592aa993804ad23010bc8e",
+        "predictions.parquet": "22a637e2797f9a0805e7788293335e3404c382fc7c48ce094ceddbe612aa6700"
+      }
+    },
+    "plots/quality_diagnostics.png": {
+      "points_drawn": 336,
+      "sources": {
+        "hourly_vtec.parquet": "c21c85c03a334de4d9fbcaa069b813e35531e0cac2592aa993804ad23010bc8e"
+      }
+    },
+    "plots/residuals.png": {
+      "points_drawn": 375,
+      "sources": {
+        "hourly_vtec.parquet": "c21c85c03a334de4d9fbcaa069b813e35531e0cac2592aa993804ad23010bc8e",
+        "predictions.parquet": "22a637e2797f9a0805e7788293335e3404c382fc7c48ce094ceddbe612aa6700"
+      }
+    },
+    "plots/target_support.png": {
+      "points_drawn": 168,
+      "sources": {
+        "hourly_vtec.parquet": "c21c85c03a334de4d9fbcaa069b813e35531e0cac2592aa993804ad23010bc8e"
+      }
+    }
+  }
+}

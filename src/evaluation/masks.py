@@ -87,6 +87,7 @@ from typing import Any
 from src.data.config import FairnessError, IntegrityError, TBD_SENTINEL
 from src.data.splits import RecordFrame
 from src.evaluation.guards import (
+    _as_utc,
     require_declared_membership,
     require_partition_agreement,
     require_stamps,
@@ -491,6 +492,23 @@ def _rows_of(frame: Any) -> list[Mapping[str, Any]]:
     return out
 
 
+def _canonical_stamp(stamp: Any, *, resource: str) -> str:
+    """Canonicalize a timestamp for use as an intersection-key component.
+
+    Two producers serialize the same UTC instant differently — predictions (stage 06 model
+    output, the B-01 bridge) write `...+00:00`, the target release CSV (stage 02
+    standardize-target) writes `...Z` — so building `(station, interval_start_utc)` keys
+    from the RAW string makes an always-empty three-way intersection: same instant, two
+    spellings, string equality always fails. Canonicalizing through `guards._as_utc` (the
+    project's one existing UTC-normalization idiom — `guards.py`, mirrored inline in
+    `bootstrap.py`, `diagnostics.py`, `regimes.py`) and re-serializing with `.isoformat()`
+    makes equality decide on the INSTANT, not the spelling, without weakening the check: two
+    genuinely different instants still canonicalize to different strings and still fail to
+    intersect.
+    """
+    return _as_utc(stamp, resource=resource).isoformat()
+
+
 def _prediction_keys(prediction: Any) -> dict[tuple[str, str], Any]:
     keyed: dict[tuple[str, str], Any] = {}
     for row in _rows_of(prediction.frame):
@@ -503,7 +521,10 @@ def _prediction_keys(prediction: Any) -> dict[tuple[str, str], Any]:
                 "ordered pair R-92 fixed",
             )
         if not _is_missing(row.get("y_hat")):
-            keyed[(str(station), str(stamp))] = row["y_hat"]
+            canonical_stamp = _canonical_stamp(
+                stamp, resource=f"prediction {getattr(prediction, 'model_id', '?')} row"
+            )
+            keyed[(str(station), canonical_stamp)] = row["y_hat"]
     return keyed
 
 
@@ -626,7 +647,8 @@ def build_comparison_mask(
                 "target frame row", "carries no (station_id, interval_start_utc) key"
             )
         if value is not None:
-            universe[(str(station), str(stamp))] = value
+            canonical_stamp = _canonical_stamp(stamp, resource="target frame row")
+            universe[(str(station), canonical_stamp)] = value
     member_keys = {m: _prediction_keys(p) for m, p in zip(member_ids, members, strict=True)}
     surviving = [
         key for key in sorted(universe) if all(key in keys for keys in member_keys.values())

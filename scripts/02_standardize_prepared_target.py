@@ -95,8 +95,14 @@ from src.data.experiment_registry import (  # noqa: E402
 )
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
+    fixture_root_for,
     load_fixture_scope,
     release_root_for,
+)
+from src.data.fixture_outputs import (  # noqa: E402
+    export_hourly_vtec,
+    target_measurements,
+    write_stage_measurements,
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.prepared import (  # noqa: E402
@@ -123,6 +129,10 @@ PHASE = 1
 #: BEFORE the first write (R-24). D-17's sixteen fields, the lineage-caveat column, and
 #: the coverage/quality/budget artifact keys. No excluded-class token appears here.
 PRODUCED_FIELDS: tuple[str, ...] = (
+    # TE §15.4 fixture-root outputs (CR-2026-09-29-Q31-CLOSURE)
+    "fixture_outputs",
+    "hourly_vtec",
+    "measurements",
     "interval_start_utc",
     "station_id",
     "cell_gdlat",
@@ -796,7 +806,27 @@ def _run_standardize(entry: Mapping[str, Any]) -> dict[str, Any]:
         target_path=target_path,
         fixture_scope_id=entry.get("fixture_scope_id"),
     )
+    fixture_outputs: dict[str, str] = {}
+    fixture_scope_id = entry.get("fixture_scope_id")
+    if fixture_scope_id:
+        # TE §15.4 (CR-2026-09-29-Q31-CLOSURE): the fixture-root `hourly_vtec.parquet` is
+        # the RELEASED target this run just published, re-encoded losslessly; and the
+        # target's row-count / support / invalid-hour / hourly-boundary measurements are
+        # taken from those same released rows (TE §15.2 areas 6-8).
+        fixture_root = fixture_root_for(
+            Path(snapshot.resolved_roots["workspace"]), fixture_scope_id
+        )
+        released_csv = Path(release["release_dir"]) / target_path.name
+        fixture_outputs["hourly_vtec"] = str(export_hourly_vtec(released_csv, fixture_root))
+        fixture_outputs["measurements"] = str(
+            write_stage_measurements(
+                fixture_root,
+                stage="02_standardize_prepared_target",
+                measurements=target_measurements(released_csv),
+            )
+        )
     return {
+        **({"fixture_outputs": fixture_outputs} if fixture_outputs else {}),
         "target": str(target_path),
         "coverage_report": str(coverage_path),
         "data_quality_block": str(quality_path),

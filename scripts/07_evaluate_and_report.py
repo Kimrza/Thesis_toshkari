@@ -130,9 +130,17 @@ from src.data.experiment_registry import (  # noqa: E402
     record_abort_honestly,
 )
 from src.data.fixture_evidence import stamp_for_manifest, write_sibling_stamp  # noqa: E402
+from src.data.fixture_outputs import (  # noqa: E402
+    export_bootstrap_not_executed,
+    export_mask_manifest,
+    export_metrics,
+    write_json_once,
+)
 from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
     MEASUREMENTS_NAME,
+    PLUMBING_FIXTURE_ID,
+    SCIENTIFIC_FIXTURE_ID,  # noqa: F401 -- re-exported: the fixture-gate tests read it here
     build_apparatus_partitions,
     fixture_root_for,
     load_fixture_scope,
@@ -140,7 +148,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     release_root_for,
 )
 from src.data.locked_test import AccessRecord, open_restricted  # noqa: E402
-from src.data.release import verify_release  # noqa: E402
+from src.data.release import sha256_of_file, verify_release  # noqa: E402
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.splits import (  # noqa: E402
     LOCKED_ID,
@@ -181,12 +189,18 @@ from src.evaluation.metrics import (  # noqa: E402
     paired_loss_differential,
     write_metrics_artifact,
 )
+from src.evaluation.plots import render_series_figure  # noqa: E402
 from src.evaluation.regimes import read_regime_config  # noqa: E402
 from src.evaluation.report_guards import ConclusionSurfaceRegistry  # noqa: E402
 
 STAGE = "evaluation-and-comparison"
 PHASE_DEFAULT = 1
 WRITER_ROLE = "evaluate"  # R-18: never `train`, never `bootstrap`
+
+#: The `configs/experiment.yaml: comparison_sets` key naming the GIM comparison set
+#: (`{member_ids: [M-06, C-01]}`, D-80). Named here, not a literal at the call site, so
+#: the Fixture 1 execution-scope gate below has exactly one place to read it from.
+GIM_COMPARISON_SET_ID: Final[str] = "gim"
 
 #: The artifact field names this run can produce, screened through R-23's produced-field
 #: limb BEFORE the first write (R-24).
@@ -789,6 +803,37 @@ def _read_json_input(path: Path | None, *, flag: str, what: str) -> Mapping[str,
     return payload
 
 
+def _unwrap_budget_artifact(raw: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Unwrap `write_json_artifact`'s (R-70/R-69) identity envelope around the budget's
+    domain payload -- a read-site step, never a contract change.
+
+    `src/data/prepared.build_uncertainty_budget` returns ONE flat shape project-wide
+    (Recommendation 20, producer half): `artifact_id`, `phase1_contents`,
+    `asymmetry_statement`, `phase2_quantities`, `budget_value` at the top level. That flat
+    shape is the AUTHORITATIVE contract this consumer checks against
+    (`_assert_budget`/`_REQUIRED_BUDGET_FIELDS` in `src/evaluation/diagnostics.py`, and
+    `tests/test_regimes_and_reporting.py::_budget()`, which feeds `build_primary_table`
+    that exact flat dict with no envelope).
+
+    But `02_standardize_prepared_target.py` writes `uncertainty_budget.json` to disk
+    through `write_json_artifact`, the SAME generic identity-stamping envelope used for
+    `coverage_report.json` and `data_quality_block.json` (R-70: every artifact describing
+    the Phase 1 target carries `phase_id`/`source_id`/`target_definition_id`/
+    `target_label`/the lineage caveat beside its domain payload, nested under `payload`).
+    Every other on-disk reader of that envelope already unwraps it before use --
+    `02_standardize_prepared_target.py:564` reads `report.get('payload')` for the
+    coverage report -- so this read site was the one that never followed the established
+    convention: it handed the raw, still-enveloped file straight to code written against
+    the flat producer shape, which is a wiring gap at THIS read site, not a defect in the
+    producer, not a defect in `_assert_budget`'s contract, and not a stale schema.
+    """
+    if "artifact_id" not in raw:
+        payload = raw.get("payload")
+        if isinstance(payload, Mapping):
+            return payload
+    return raw
+
+
 def _bootstrap_seed(snapshot: Any, *, seed_key: str) -> int:
     """The D-122 bootstrap seed, read from `seeds.yaml` by the DECLARED key (ADR-05).
 
@@ -805,6 +850,106 @@ def _bootstrap_seed(snapshot: Any, *, seed_key: str) -> int:
             "never defaulted (TE §18.3)",
         )
     return int(value)
+
+
+def _run_bootstrap_step(
+    *,
+    snapshot: Any,
+    model_id: str,
+    model: Any,
+    members_by_id: Mapping[str, Any],
+    declared: Mapping[str, Any],
+    declared_sets: Mapping[str, Mapping[str, Any]],
+    mask: Any,
+    registry: MaskRegistry,
+    report_dir: Path,
+    month_start: dt.datetime,
+    month_end: dt.datetime,
+    embargo_hours: int,
+    locked: LockedContext | None,
+    evaluation_mode: str,
+    fixture_id: str | None,
+) -> list[str]:
+    """W-1's vector time-block bootstrap, per (model, benchmark) pair -- GATED on fixture
+    identity (Q-31, student-owned execution-scoping decision; TE §15.3 "Minimal model
+    execution").
+
+    TE §15.3 names bootstrap ONLY for Fixture 2 (scientific_1month, "one bootstrap
+    execution at reduced replicate count for timing"); Fixture 1 (plumbing_7day) is
+    scoped to M-01..M-05 plus a minimal M-06 checkpoint save/restore and B-01/C-01 sample
+    generation. D-20 also froze plumbing_7day to a SINGLE station (BSHM), which is
+    structurally mismatched with the vector time-block bootstrap's three-station,
+    equal-station-weighted mechanism.
+
+    The gate is keyed on fixture IDENTITY (`fixture_id`, threaded from
+    ``load_fixture_scope(...).fixture_id`` at the `_run_fixture_scale` call site) --
+    NEVER on data availability, and NEVER by catching R-116's zero-masked-rows refusal.
+    R-116 is left completely untouched: for any run where bootstrap IS invoked (Fixture 2,
+    and the governed/full-year path where `fixture_id` is `None`), a genuine zero-support
+    condition still raises loudly. Skipping here only ever means the call is never made.
+    """
+    written: list[str] = []
+    if fixture_id == PLUMBING_FIXTURE_ID:
+        for benchmark_id in declared["benchmark_ids"]:
+            skip_path = report_dir / f"bootstrap_{model_id}_vs_{benchmark_id}.skipped.json"
+            skip_path.parent.mkdir(parents=True, exist_ok=True)
+            skip_record = {
+                "artifact": "bootstrap_skip_note",
+                "model_id": model_id,
+                "benchmark_id": benchmark_id,
+                "fixture_id": fixture_id,
+                "skipped": True,
+                "reason": (
+                    "bootstrap skipped: TE §15.3 does not require Fixture 1 "
+                    "(plumbing_7day) to execute the vector time-block bootstrap "
+                    "-- Fixture 1 is scoped to M-01..M-05 plus a minimal M-06 "
+                    "checkpoint save/restore and B-01/C-01 sample generation; "
+                    "bootstrap is named only for Fixture 2 (scientific_1month). "
+                    "D-20 also froze plumbing_7day to a single station (BSHM), "
+                    "which is structurally mismatched with the bootstrap's "
+                    "three-station, equal-station-weighted mechanism. This is a "
+                    "student-owned Q-31 execution-scoping decision, not a "
+                    "change to any scientific value."
+                ),
+            }
+            skip_path.write_text(
+                json.dumps(skip_record, indent=2, sort_keys=True), encoding="utf-8"
+            )
+            print(
+                f"[07_evaluate_and_report] bootstrap skipped for {model_id} vs "
+                f"{benchmark_id} on fixture {fixture_id}: TE §15.3 does not require "
+                f"Fixture 1 to execute bootstrap (see {skip_path})"
+            )
+            written.append(str(skip_path))
+        return written
+
+    declaration = read_bootstrap_declaration(snapshot.experiment)
+    seed = _bootstrap_seed(snapshot, seed_key=str(declaration["seed_key"]))
+    for benchmark_id in declared["benchmark_ids"]:
+        result = vector_block_bootstrap(
+            model,
+            members_by_id[benchmark_id],
+            mask=mask,
+            block_hours=int(declaration["block_hours"]),
+            replicates=int(declaration["replicates"]),
+            seed=seed,
+            declared_sets=declared_sets,
+            registry=registry,
+            experiment=snapshot.experiment,
+            evaluation_mode=evaluation_mode,
+            month_start=month_start,
+            month_end=month_end,
+            embargo_hours=embargo_hours,
+            locked=locked,
+        )
+        written.append(
+            str(
+                write_bootstrap_result(
+                    result, report_dir / f"bootstrap_{model_id}_vs_{benchmark_id}.json"
+                )
+            )
+        )
+    return written
 
 
 def _report_set(
@@ -826,6 +971,7 @@ def _report_set(
     embargo_hours: int,
     locked: LockedContext | None,
     evaluation_mode: str,
+    fixture_id: str | None = None,
 ) -> list[str]:
     """The inference and reporting layer for ONE comparison set (Recommendation 18).
 
@@ -858,53 +1004,106 @@ def _report_set(
     surfaces = ConclusionSurfaceRegistry(report_dir / "conclusion_surfaces")
 
     # --- W-1 (statistical-inference): the interval, per (model, benchmark) pair ---------
-    declaration = read_bootstrap_declaration(snapshot.experiment)
-    seed = _bootstrap_seed(snapshot, seed_key=str(declaration["seed_key"]))
-    for benchmark_id in declared["benchmark_ids"]:
-        result = vector_block_bootstrap(
-            model,
-            members_by_id[benchmark_id],
-            mask=mask,
-            block_hours=int(declaration["block_hours"]),
-            replicates=int(declaration["replicates"]),
-            seed=seed,
+    written.extend(
+        _run_bootstrap_step(
+            snapshot=snapshot,
+            model_id=model_id,
+            model=model,
+            members_by_id=members_by_id,
+            declared=declared,
             declared_sets=declared_sets,
+            mask=mask,
             registry=registry,
-            experiment=snapshot.experiment,
-            evaluation_mode=evaluation_mode,
+            report_dir=report_dir,
             month_start=month_start,
             month_end=month_end,
             embargo_hours=embargo_hours,
             locked=locked,
+            evaluation_mode=evaluation_mode,
+            fixture_id=fixture_id,
         )
-        written.append(
-            str(
-                write_bootstrap_result(
-                    result, report_dir / f"bootstrap_{model_id}_vs_{benchmark_id}.json"
-                )
-            )
-        )
-
-    # --- W-3: the ONE primary results table (PC-03/PC-04's co-reporting, by construction)
-    if not args.table_caption:
-        raise IntegrityError(
-            "--table-caption",
-            "no caption was supplied; FR-P1-05-19 requires the plasmaspheric-offset "
-            "sentence in the primary table's caption and D-28's scored-set statement "
-            "with it, both frozen wordings owned upstream — this orchestrator supplies "
-            "no caption of its own rather than authoring governed prose (TE §7)",
-        )
-    table = build_primary_table(
-        metrics_artifact=metrics_artifact,
-        mask=mask,
-        budget_artifact=budget_artifact,
-        declared_member_ids=declared["member_ids"],
-        caption=str(args.table_caption),
-        table_artifact_id=f"primary_table_{partition.partition_id}_{set_id}",
-        registry=surfaces,
-        emit_path=report_dir / f"primary_table_{set_id}.json",
     )
-    written.append(str(report_dir / f"primary_table_{set_id}.json"))
+
+    # --- W-3/W-4: the primary results table's budget adjacency, and the claims-and-
+    # limitations checklist -- GATED on fixture identity (TE §15.3/§15.4, mirroring the
+    # bootstrap gate in `_run_bootstrap_step` above).
+    #
+    # TE §15.3 exhaustively names Fixture 1's (plumbing_7day) required execution: M-01,
+    # M-02, M-03, M-04, M-05, and a minimal M-06 checkpoint save/restore, plus B-01 and C-01
+    # sample generation. TE §15.4 exhaustively names its required outputs (nineteen files;
+    # `target_uncertainty_budget.json` is explicitly marked `# fixture 2 only`) and lists NO
+    # `claims_checklist` or `ConclusionSurfaceArtifact` entry for EITHER fixture. Neither
+    # requires the primary table's budget adjacency (W-3) or the claims-and-limitations
+    # checklist (W-4; R-126 control (36)) from Fixture 1. `run_walking_skeleton.py`'s own
+    # docstring bounds its job to hash-listing TE §15.4's required outputs, and the
+    # `fixtures-and-reproducibility` unit that built it never wired `--conclusion-surface` --
+    # consistent with, not short of, that documented scope.
+    #
+    # This is an EXECUTION-SCOPE exemption for Fixture 1 only, never a change to R-126: for
+    # every `fixture_id != PLUMBING_FIXTURE_ID` run (Fixture 2, every governed/full-year
+    # run) the block below is BYTE-FOR-BYTE the pre-existing behaviour -- the primary table
+    # is built from the real budget artifact exactly as before, and the claims checklist
+    # keeps failing closed on an absent `ConclusionSurfaceArtifact` exactly as before
+    # (Rec 21 board option 1; control (36)). Nothing here fabricates or synthesizes a
+    # `ConclusionSurfaceArtifact`.
+    table: Mapping[str, Any] | None = None
+    if fixture_id == PLUMBING_FIXTURE_ID:
+        skip_path = report_dir / f"primary_table_and_claims_checklist_{set_id}.skipped.json"
+        skip_path.parent.mkdir(parents=True, exist_ok=True)
+        skip_record = {
+            "artifact": "reporting_surface_skip_note",
+            "set_id": set_id,
+            "partition_id": partition.partition_id,
+            "fixture_id": fixture_id,
+            "skipped": [
+                "primary_table_budget_adjacency",
+                "claims_checklist",
+                "ConclusionSurfaceArtifact_requirement",
+            ],
+            "reason": (
+                "skipped: TE §15.3 exhaustively names Fixture 1's (plumbing_7day) "
+                "required execution (M-01..M-05, a minimal M-06, B-01, C-01 sample "
+                "generation) and TE §15.4 exhaustively names its required outputs "
+                "(target_uncertainty_budget.json explicitly 'fixture 2 only'; no "
+                "claims_checklist or ConclusionSurfaceArtifact entry for either "
+                "fixture) -- neither requires the primary table's budget adjacency or "
+                "the claims-and-limitations checklist for Fixture 1. This is a "
+                "student-owned execution-scoping exemption (mirrors the TE §15.3 "
+                "bootstrap exemption applied above in this same function), not a "
+                "change to R-126 control (36), which stays fail-closed, unchanged, "
+                "for every fixture_id != 'plumbing_7day' run."
+            ),
+        }
+        skip_path.write_text(
+            json.dumps(skip_record, indent=2, sort_keys=True), encoding="utf-8"
+        )
+        print(
+            f"[07_evaluate_and_report] primary-table budget adjacency and claims "
+            f"checklist skipped for set {set_id!r} on fixture {fixture_id}: TE "
+            f"§15.3/§15.4 do not require either from Fixture 1 (see {skip_path})"
+        )
+        written.append(str(skip_path))
+    else:
+        # --- W-3: the ONE primary results table (PC-03/PC-04's co-reporting) ------------
+        if not args.table_caption:
+            raise IntegrityError(
+                "--table-caption",
+                "no caption was supplied; FR-P1-05-19 requires the plasmaspheric-offset "
+                "sentence in the primary table's caption and D-28's scored-set statement "
+                "with it, both frozen wordings owned upstream — this orchestrator supplies "
+                "no caption of its own rather than authoring governed prose (TE §7)",
+            )
+        table = build_primary_table(
+            metrics_artifact=metrics_artifact,
+            mask=mask,
+            budget_artifact=budget_artifact,
+            declared_member_ids=declared["member_ids"],
+            caption=str(args.table_caption),
+            table_artifact_id=f"primary_table_{partition.partition_id}_{set_id}",
+            registry=surfaces,
+            emit_path=report_dir / f"primary_table_{set_id}.json",
+        )
+        written.append(str(report_dir / f"primary_table_{set_id}.json"))
 
     # --- W-5: the breakdown family -----------------------------------------------------
     breakdowns: list[Mapping[str, Any]] = []
@@ -1062,6 +1261,20 @@ def _report_set(
             "partition_id": partition.partition_id,
         }
     else:
+        if table is None:
+            # Reachable only if a caller supplies --threshold-record on a Fixture 1 run --
+            # `run_walking_skeleton.py` never does (it forwards no --threshold-record for
+            # any fixture, so this never fires via the orchestrator). No primary table was
+            # built for `PLUMBING_FIXTURE_ID` (TE §15.3/§15.4 exemption above): refuse
+            # naming the reason, rather than crashing on an unbound `table`.
+            raise IntegrityError(
+                "--threshold-record",
+                f"a threshold record was supplied for fixture {fixture_id!r}, but no "
+                f"primary table was built for it (TE §15.3/§15.4 exempt Fixture 1 from "
+                f"the primary table's budget adjacency); practical relevance's measured "
+                f"improvement is read from the primary table's rows and has nothing to "
+                f"read here — supply no --threshold-record for a plumbing_7day run",
+            )
         threshold_record = _read_json_input(
             args.threshold_record,
             flag="--threshold-record",
@@ -1110,36 +1323,41 @@ def _report_set(
 
     # --- W-4: the claims-and-limitations checklist -------------------------------------
     # `conclusion_surface=None` is NOT a skip: the checklist fails closed on it by design
-    # (R-126 control (36)), which is why no pre-check guards this call.
-    checklist_path = report_dir / f"claims_checklist_{set_id}.json"
-    build_claims_checklist(
-        registry=surfaces,
-        conclusion_surface=(
-            _read_json_input(
-                args.conclusion_surface,
-                flag="--conclusion-surface",
-                what="the registered ConclusionSurfaceArtifact",
-            )
-            if args.conclusion_surface is not None
-            else None
-        ),
-        table=table,
-        breakdowns=breakdowns,
-        notebook_captions=(
-            dict(
+    # (R-126 control (36)), which is why no pre-check guards this call for a governed run.
+    # For Fixture 1 the skip record above already covers this surface (TE §15.3/§15.4
+    # exemption); `fixture_id != PLUMBING_FIXTURE_ID` is unchanged from before this fix —
+    # the checklist still fails closed on an absent ConclusionSurfaceArtifact exactly as
+    # designed, for Fixture 2 and every governed/full-year run.
+    if fixture_id != PLUMBING_FIXTURE_ID:
+        checklist_path = report_dir / f"claims_checklist_{set_id}.json"
+        build_claims_checklist(
+            registry=surfaces,
+            conclusion_surface=(
                 _read_json_input(
-                    args.notebook_captions,
-                    flag="--notebook-captions",
-                    what="the notebook caption map",
+                    args.conclusion_surface,
+                    flag="--conclusion-surface",
+                    what="the registered ConclusionSurfaceArtifact",
                 )
-            )
-            if args.notebook_captions is not None
-            else None
-        ),
-        checklist_artifact_id=f"claims_checklist_{partition.partition_id}_{set_id}",
-        emit_path=checklist_path,
-    )
-    written.append(str(checklist_path))
+                if args.conclusion_surface is not None
+                else None
+            ),
+            table=table,
+            breakdowns=breakdowns,
+            notebook_captions=(
+                dict(
+                    _read_json_input(
+                        args.notebook_captions,
+                        flag="--notebook-captions",
+                        what="the notebook caption map",
+                    )
+                )
+                if args.notebook_captions is not None
+                else None
+            ),
+            checklist_artifact_id=f"claims_checklist_{partition.partition_id}_{set_id}",
+            emit_path=checklist_path,
+        )
+        written.append(str(checklist_path))
     return written
 
 
@@ -1155,6 +1373,7 @@ def _evaluate_partition(
     out_root: Path,
     locked: LockedContext | None,
     evaluation_mode: str = "real_data",
+    fixture_id: str | None = None,
 ) -> list[str]:
     """Masks, estimands, the metrics artifact AND the reporting layer for one partition.
 
@@ -1172,14 +1391,86 @@ def _evaluate_partition(
         flag="--target-release-manifest",
         what="the released Phase 1 target's release manifest (the stamped units lineage)",
     )
-    budget_artifact = _read_json_input(
-        args.budget_artifact,
-        flag="--budget-artifact",
-        what="the target uncertainty budget artifact",
+    budget_artifact = _unwrap_budget_artifact(
+        _read_json_input(
+            args.budget_artifact,
+            flag="--budget-artifact",
+            what="the target uncertainty budget artifact",
+        )
     )
     written: list[str] = []
     for set_id in set_ids:
         declared = declared_sets[set_id]
+
+        # --- the `gim` comparison set -- GATED on fixture identity (TE §15.3/§15.4,
+        # mirroring the bootstrap and W-3/W-4 reporting-surface gates above). This is
+        # NARROWER than either of those: it exempts exactly ONE named comparison set
+        # (`GIM_COMPARISON_SET_ID`), never `primary` or `tier3`, and never touches R-106's
+        # member-completeness guard for any run where it does not apply.
+        #
+        # TE §15.3 requires "B-01 and C-01 **sample generation**" for Fixture 1 -- C-01
+        # itself is NOT exempted by this gate and remains a separately tracked Fixture 1
+        # obligation (TE §15.4's `gim_comparator.parquet`, distinct from this comparison
+        # set's `06`-shaped `predictions/<partition>/C-01.json` path; neither TE §15.2-15.4
+        # nor Recommendation 18 (whose gate/stage is G-06/G-07, not any fixture-pass gate)
+        # nor D-80 (which freezes the set's CONTENT, never its execution scope) links "C-01
+        # sample generation" to evaluating the full `gim` comparison set). TE §15.3's own
+        # wording draws the distinction: Fixture 2 alone is named for "the full benchmark
+        # join at evaluation time" -- Fixture 1's sentence carries no such phrase. This gate
+        # is that reading, applied narrowly: it skips the COMPARISON-SET EVALUATION (mask,
+        # estimand, metrics artifact, and the whole W-1..W-6 reporting layer FOR THIS SET
+        # ONLY), never C-01's own separate sample-generation/output obligation, which this
+        # gate neither claims nor marks satisfied.
+        #
+        # `fixture_id != PLUMBING_FIXTURE_ID` (Fixture 2, every governed/full-year run) is
+        # completely unchanged below: `gim` still builds its mask, still requires a real
+        # `C-01.json`, and still fails closed exactly as before (R-106 untouched).
+        if fixture_id == PLUMBING_FIXTURE_ID and set_id == GIM_COMPARISON_SET_ID:
+            skip_dir = out_root / partition.partition_id / set_id
+            skip_path = skip_dir / f"comparison_set_{set_id}.skipped.json"
+            skip_dir.mkdir(parents=True, exist_ok=True)
+            skip_record = {
+                "artifact": "comparison_set_skip_note",
+                "set_id": set_id,
+                "partition_id": partition.partition_id,
+                "fixture_id": fixture_id,
+                "member_ids": list(declared["member_ids"]),
+                "skipped": True,
+                "reason": (
+                    "skipped: full `gim` comparison-set evaluation (mask, estimand, "
+                    "metrics artifact, and the reporting layer) is not established as a "
+                    "Fixture 1 requirement by TE §15.3, TE §15.4, Recommendation 18 "
+                    "(gate/stage G-06/G-07, not a fixture-pass gate), or D-80 (freezes "
+                    "the set's content, never its execution scope). TE §15.3 requires "
+                    "'B-01 and C-01 sample generation' for Fixture 1 -- ONLY Fixture 2's "
+                    "sentence names 'the full benchmark join at evaluation time'. This "
+                    "skip covers the comparison-SET evaluation only, through its "
+                    "`predictions/<partition>/C-01.json` (06-shaped prediction) path. "
+                    "C-01 ITSELF IS NOT EXEMPTED: it remains a separately tracked "
+                    "Fixture 1 obligation (TE §15.4's `gim_comparator.parquet` output; "
+                    "TE §15.2's 'sample GIM value' independent-reference-check), neither "
+                    "of which this skip record produces, claims, or marks satisfied -- "
+                    "no C-01 prediction is generated, fabricated, or represented as "
+                    "passed by this run. A student-owned execution-scoping decision, "
+                    "mirroring the TE §15.3 bootstrap exemption and the W-3/W-4 "
+                    "reporting-surface exemption applied elsewhere in this same script; "
+                    "R-106 stays fully active, unweakened, for `primary`, `tier3`, and "
+                    "for `gim` on every fixture_id != 'plumbing_7day' run."
+                ),
+            }
+            skip_path.write_text(
+                json.dumps(skip_record, indent=2, sort_keys=True), encoding="utf-8"
+            )
+            print(
+                f"[07_evaluate_and_report] comparison set {set_id!r} skipped on "
+                f"partition {partition.partition_id!r} for fixture {fixture_id}: TE "
+                f"§15.3/§15.4 do not require the full gim comparison-set evaluation "
+                f"from Fixture 1 (C-01 itself remains a separate, unexempted "
+                f"obligation; see {skip_path})"
+            )
+            written.append(str(skip_path))
+            continue
+
         missing = [m for m in declared["member_ids"] if m not in members_by_id]
         if missing:
             raise IntegrityError(
@@ -1244,6 +1535,7 @@ def _evaluate_partition(
                 embargo_hours=embargo_hours,
                 locked=locked,
                 evaluation_mode=evaluation_mode,
+                fixture_id=fixture_id,
             )
         )
     return written
@@ -1316,6 +1608,9 @@ def _run_fixture_scale(
             # Rec 18: the reporting layer runs at fixture scale too, in `fixture` mode —
             # the mode the widening guard's failure semantics key on (R-120; Rec 23).
             evaluation_mode="fixture",
+            # fixture identity (never evaluation_mode, which is "fixture" for BOTH
+            # fixtures) is what gates the bootstrap skip for Fixture 1 (TE §15.3).
+            fixture_id=scope.fixture_id,
         )
         write_sibling_stamp(registry.registry_dir, stamp)  # the stamp beside the entries
         for artifact in artifacts:
@@ -1352,7 +1647,193 @@ def _run_fixture_scale(
             encoding="utf-8",
         )
         written.append(str(measurements_path))
-    return {"sets": list(set_ids), "artifacts_written": written}
+    fixture_outputs = _fixture_report_outputs(scope, fixture_root, written)
+    return {"sets": list(set_ids), "artifacts_written": written, "fixture_outputs": fixture_outputs}
+
+
+#: The smoke-test caveat every fixture diagnostic figure carries (TE §15.1 binding limitation;
+#: TC-03f), and the target label Phase 1 is bound to (project.md Forbidden: never
+#: "station-observed").
+_FIXTURE_FIGURE_CAVEATS: tuple[str, ...] = (
+    "walking-skeleton fixture: smoke evidence only, never scientific evidence (TE §15.1; TC-03f)",
+    "target: location-sampled gridded VTEC (Madrigal cell), not receiver-specific station VTEC",
+)
+
+
+def _fixture_report_outputs(
+    scope: Any, fixture_root: Path, written: Sequence[str]
+) -> dict[str, str]:
+    """TE §15.4's evaluation-side fixture outputs (CR-2026-09-29-Q31-CLOSURE).
+
+    `mask_manifest.json` and `metrics.json` aggregate what this run registered and emitted;
+    every comparison set the run skipped is carried as skipped, never as data. On the
+    plumbing fixture `bootstrap_summary.json` is the explicit `not_executed` status record
+    over the per-pair skips this run wrote (TE §15.3). The four plots draw the fixture's
+    released target and this run's predictions, read from the fixture-root tables `02` and
+    `06` wrote earlier in the same run.
+    """
+    paths = [Path(p) for p in written]
+    skipped_sets = []
+    skipped_pairs = []
+    for path in paths:
+        if path.name.startswith("comparison_set_") and path.name.endswith(".skipped.json"):
+            record = json.loads(path.read_text(encoding="utf-8"))
+            skipped_sets.append(
+                {
+                    "partition_id": record["partition_id"],
+                    "set_id": record["set_id"],
+                    "member_ids": record["member_ids"],
+                    "status": "skipped",
+                    "reason_record": path.name,
+                }
+            )
+        elif path.name.startswith("bootstrap_") and path.name.endswith(".skipped.json"):
+            record = json.loads(path.read_text(encoding="utf-8"))
+            skipped_pairs.append(
+                {
+                    "partition_id": path.parent.parent.name,
+                    "set_id": path.parent.name,
+                    "model_id": record["model_id"],
+                    "benchmark_id": record["benchmark_id"],
+                }
+            )
+    metrics_files = [
+        p for p in paths if p.name.startswith("metrics_") and p.name.endswith(".json")
+    ]
+    mask_files = sorted(
+        p
+        for p in (fixture_root / "mask_registry").glob("*/mask_*.json")
+        if p.is_file()
+    )
+    outputs = {
+        "mask_manifest": str(
+            export_mask_manifest(mask_files, skipped_sets, fixture_root, fixture_id=scope.fixture_id)
+        ),
+        "metrics": str(
+            export_metrics(metrics_files, skipped_sets, fixture_root, fixture_id=scope.fixture_id)
+        ),
+    }
+    if scope.fixture_id == PLUMBING_FIXTURE_ID:
+        outputs["bootstrap_summary"] = str(
+            export_bootstrap_not_executed(
+                skipped_pairs, fixture_root, fixture_id=scope.fixture_id
+            )
+        )
+    outputs.update(_render_fixture_plots(fixture_root))
+    return outputs
+
+
+def _render_fixture_plots(fixture_root: Path) -> dict[str, str]:
+    """The four TE §15.4 fixture figures, each drawing real rows (never a placeholder):
+    target support, target vs predictions, residuals (prediction minus target, per model),
+    and the D-17 quality fields. A plot manifest records each figure's source hashes and
+    drawn-point count."""
+    import pandas as pd  # deferred: only the fixture plot path needs it
+
+    target_path = fixture_root / "hourly_vtec.parquet"
+    predictions_path = fixture_root / "predictions.parquet"
+    target = pd.read_parquet(target_path).sort_values(["station_id", "interval_start_utc"])
+    predictions = pd.read_parquet(predictions_path)
+    predictions = predictions[~predictions["payload_file"].str.contains("_seed")]
+    valid = target[target["target_valid"].astype(str).str.lower() == "true"]
+
+    def _instant(stamp: Any) -> dt.datetime:
+        # the released target spells UTC `...Z`, predictions `...+00:00`: join on the
+        # INSTANT, never the spelling (the same rule the comparison mask applies)
+        return dt.datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+
+    truth = {
+        (str(r.station_id), _instant(r.interval_start_utc)): float(r.vtec_tecu)
+        for r in valid.itertuples(index=False)
+    }
+
+    def _model_series(residual: bool) -> list[dict[str, Any]]:
+        out = []
+        for (partition_id, model_id), group in predictions.groupby(
+            ["partition_id", "model_id"], sort=True
+        ):
+            group = group.sort_values(["station", "interval_start_utc"])
+            xs, ys = [], []
+            for row in group.itertuples(index=False):
+                key = (str(row.station), _instant(row.interval_start_utc))
+                y_hat = row.y_hat
+                if residual:
+                    if key not in truth or y_hat is None or pd.isna(y_hat):
+                        continue
+                    y_hat = float(y_hat) - truth[key]
+                xs.append(str(row.interval_start_utc)[5:16])
+                ys.append(None if y_hat is None or pd.isna(y_hat) else float(y_hat))
+            out.append({"label": f"{model_id} ({partition_id})", "x": xs, "y": ys})
+        return out
+
+    def _target_series(column: str, label: str) -> dict[str, Any]:
+        return {
+            "label": label,
+            "x": [str(v)[5:16] for v in target["interval_start_utc"]],
+            "y": [None if pd.isna(v) else float(v) for v in target[column]],
+        }
+
+    figures = {
+        "target_support": (
+            "Fixture target support: valid observations per hourly bin",
+            "valid_observation_count (samples per hour)",
+            [_target_series("valid_observation_count", "valid_observation_count")],
+            [target_path],
+        ),
+        "predictions": (
+            "Fixture predictions against the released target",
+            "VTEC (TECU)",
+            [
+                {
+                    "label": "target (location-sampled gridded VTEC)",
+                    "x": [k[1].isoformat()[5:16] for k in sorted(truth)],
+                    "y": [truth[k] for k in sorted(truth)],
+                },
+                *_model_series(residual=False),
+            ],
+            [target_path, predictions_path],
+        ),
+        "residuals": (
+            "Fixture residuals: prediction minus target, per model and partition",
+            "residual (TECU)",
+            _model_series(residual=True),
+            [target_path, predictions_path],
+        ),
+        "quality_diagnostics": (
+            "Fixture D-17 quality fields per hourly bin",
+            "TECU",
+            [
+                _target_series("within_hour_spread_tecu", "within_hour_spread_tecu"),
+                _target_series("provider_dtec_summary", "provider_dtec_summary"),
+            ],
+            [target_path],
+        ),
+    }
+    plots_dir = fixture_root / "plots"
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    manifest: dict[str, Any] = {"artifact": "fixture_plot_manifest", "figures": {}}
+    outputs: dict[str, str] = {}
+    for name, (title, units_label, series, sources) in figures.items():
+        out_path = plots_dir / f"{name}.png"
+        if out_path.exists():
+            raise IntegrityError(out_path, "a fixture figure is written once per run (TE 13.3)")
+        drawn = render_series_figure(
+            plot_id=name,
+            title=title,
+            units_label=units_label,
+            caveat_labels=_FIXTURE_FIGURE_CAVEATS,
+            series=series,
+            out_path=out_path,
+        )
+        manifest["figures"][f"plots/{name}.png"] = {
+            "points_drawn": drawn,
+            "sources": {p.name: sha256_of_file(p) for p in sources},
+        }
+        outputs[f"plot_{name}"] = str(out_path)
+    outputs["plot_manifest"] = str(
+        write_json_once(plots_dir / "plot_manifest.json", manifest)
+    )
+    return outputs
 
 
 def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:

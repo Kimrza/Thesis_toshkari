@@ -622,5 +622,10 @@ def fit_predict_rows(
             "role": score_bundle.spec.role,
             "horizon_hours": horizon_hours,
             **attrs,
+            # the restored checkpoint's in-run identity (the backend reference the weights
+            # were restored from), recorded so a fixture's checkpoint_manifest.json can cite
+            # it; additive only, nothing reads it to decide anything
+            # (CR-2026-09-29-Q31-CLOSURE)
+            "checkpoint_payload_ref": state.get("payload_ref"),
         },
     )

@@ -134,9 +134,14 @@ from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
     MEASUREMENTS_NAME,
     build_apparatus_partitions,
+    fixture_root_for,
     load_fixture_scope,
     read_embargo_hours,
     release_root_for,
+)
+from src.data.fixture_outputs import (  # noqa: E402
+    export_checkpoint_manifest,
+    export_predictions,
 )
 from src.data.locked_test import (  # noqa: E402
     PERSISTENCE_HISTORY_CALLERS,
@@ -198,6 +203,12 @@ PREDICTION_HASH_COLUMN_ORDINAL = 18  # TE 13.4's eighteenth column of twenty (R-
 #: The artifact field names this run can produce, screened through R-23's produced-field limb
 #: BEFORE the first write (R-24).
 PRODUCED_FIELDS: tuple[str, ...] = (
+    # TE §15.4 fixture-root outputs (CR-2026-09-29-Q31-CLOSURE)
+    "fixture_outputs",
+    "predictions",
+    "checkpoint_manifest",
+    "checkpoint_payload_ref",
+    "restored_validation_rmse",
     "station",
     "interval_start_utc",
     "y_hat",
@@ -1212,6 +1223,8 @@ def _run_fixture_scale(
 
     written: list[str] = []
     scored_rows: list[int] = []
+    checkpoint_entries: list[dict[str, Any]] = []
+    prediction_payloads: list[Path] = []
     for partition in partitions:
         pid = partition.partition_id
         stamp = stamp_for_manifest(scope, apparatus_partition_id=pid)
@@ -1273,6 +1286,7 @@ def _run_fixture_scale(
                     )
                 if model_id == "M-06":
                     seeded.append(prediction)
+                    checkpoint_entries.append(_checkpoint_entry(prediction, partition_id=pid))
                 name = f"{model_id}" + (f"_seed{seed}" if seed is not None else "") + ".json"
                 path = _write_prediction_once(
                     out_root / pid / name,
@@ -1287,6 +1301,7 @@ def _run_fixture_scale(
                     manifest_path=path,
                 )
                 written.append(str(path))
+                prediction_payloads.append(Path(path))
         confirmatory = three_seed_mean(seeded, expected_seeds=expected_seeds)
         path = _write_prediction_once(
             out_root / pid / "M-06_confirmatory.json",
@@ -1300,6 +1315,7 @@ def _run_fixture_scale(
             prediction=confirmatory, manifest_path=path,
         )
         written.append(str(path))
+        prediction_payloads.append(Path(path))
         scored_rows.append(len(records_of(confirmatory.frame)))
     if scored_rows:  # Rec 4: measurable here — scored prediction rows per partition
         measurements_path = out_root / MEASUREMENTS_NAME
@@ -1325,7 +1341,44 @@ def _run_fixture_scale(
             encoding="utf-8",
         )
         written.append(str(measurements_path))
-    return {"horizon_hours": horizon, "grid_counts": grid_counts, "predictions_written": written}
+
+    # TE §15.4 fixture-root outputs (CR-2026-09-29-Q31-CLOSURE): every model prediction
+    # this run wrote, aggregated verbatim; and the M-06 checkpoint facts the fits computed.
+    fixture_root = fixture_root_for(workspace, scope.fixture_id)
+    fixture_outputs = {
+        "predictions": str(export_predictions(prediction_payloads, fixture_root)),
+        "checkpoint_manifest": str(
+            export_checkpoint_manifest(
+                checkpoint_entries, fixture_root, fixture_id=scope.fixture_id
+            )
+        ),
+    }
+    return {
+        "horizon_hours": horizon,
+        "grid_counts": grid_counts,
+        "predictions_written": written,
+        "fixture_outputs": fixture_outputs,
+    }
+
+
+def _checkpoint_entry(prediction: Prediction, *, partition_id: str) -> dict[str, Any]:
+    """One M-06 fold fit's checkpoint save/restore facts, read from the attrs the fit
+    already recorded — never recomputed, and never a file hash (no checkpoint file is
+    persisted for a fold fit; see `_InMemoryCheckpointBackend`)."""
+    attrs = frame_attrs(prediction.frame)
+    rmse = attrs.get("restored_validation_rmse")
+    return {
+        "partition_id": partition_id,
+        "model_id": prediction.model_id,
+        "seed": prediction.seed,
+        "checkpoint_payload_ref": attrs.get("checkpoint_payload_ref"),
+        "checkpoint_selected": attrs.get("checkpoint_selected"),
+        "restored_epoch": attrs.get("restored_epoch"),
+        "epochs_run": attrs.get("epochs_run"),
+        "epoch_source": attrs.get("epoch_source"),
+        "validation_partition_id": attrs.get("validation_partition_id"),
+        "restored_validation_rmse": None if rmse is None else float(rmse),
+    }
 
 
 # =======================================================================================

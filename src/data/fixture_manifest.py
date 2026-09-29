@@ -904,7 +904,9 @@ def _validate_required_outputs(
                 "required output has no comparison-ledger entry; every output declares its "
                 "class at freeze time, never in a test body (R-133 control 3; R-139)",
             )
-        _validate_ledger_entry(f"{res}.comparison_ledger[{output}]", entry)
+        _validate_ledger_entry(
+            f"{res}.comparison_ledger[{output}]", entry, status=str(data.get("status"))
+        )
     extra = sorted(set(ledger) - set(listed))
     if extra:
         raise _refuse(f"{res}.comparison_ledger", f"ledger entries for undeclared outputs {extra}")
@@ -915,7 +917,9 @@ def _validate_required_outputs(
         )
 
 
-def _validate_ledger_entry(resource: str, entry: Mapping[str, Any]) -> None:
+def _validate_ledger_entry(
+    resource: str, entry: Mapping[str, Any], *, status: str = FROZEN
+) -> None:
     klass = entry.get("comparison_class")
     if klass not in COMPARISON_CLASSES:
         raise _refuse(
@@ -967,7 +971,24 @@ def _validate_ledger_entry(resource: str, entry: Mapping[str, Any]) -> None:
             "tolerance lives in the manifest and nowhere else (R-139 control 22)",
         )
     value = tolerance.get("value")
-    if isinstance(value, bool) or not isinstance(value, int | float) or value <= 0:
+    if isinstance(value, bool) or not isinstance(value, int | float) or value != value:
+        raise _refuse(f"{resource}.fp_tolerance.value", f"{value!r} is not a number")
+    if status == CANDIDATE:
+        # CR-2026-09-29-Q31-CLOSURE (owner decision 2026-09-29): a candidate records the
+        # MEASURED run-to-run variation, and a measured zero is admissible only when taken
+        # across >= 2 recorded measuring runs (deterministic execution, NFR-DET-01). The
+        # positive ACCEPTANCE tolerance is the Student's Q-31 freeze act (TE 18.2), so a
+        # frozen manifest still requires value > 0 below.
+        runs = tolerance.get("measured_over_runs")
+        if value < 0:
+            raise _refuse(f"{resource}.fp_tolerance.value", f"{value!r} is negative")
+        if isinstance(runs, bool) or not isinstance(runs, int) or runs < 2:
+            raise _refuse(
+                f"{resource}.fp_tolerance.measured_over_runs",
+                f"{runs!r}: a candidate's measured tolerance is taken across at least two "
+                f"recorded measuring runs (board Rec 5)",
+            )
+    elif value <= 0:
         raise _refuse(f"{resource}.fp_tolerance.value", f"{value!r} is not a positive number")
     if not _nonempty_str(tolerance.get("units")):
         raise _refuse(f"{resource}.fp_tolerance.units", "the tolerance's units are declared")
@@ -1715,9 +1736,17 @@ def collect_stage_measurements(fixture_root: Path) -> dict[str, dict[str, dict[s
 
 
 def write_measuring_result(
-    fixture_root: Path, *, run_id: str, measurements: Mapping[str, Mapping[str, Any]]
+    fixture_root: Path,
+    *,
+    run_id: str,
+    measurements: Mapping[str, Mapping[str, Any]],
+    fingerprints: Mapping[str, Mapping[str, float]] | None = None,
 ) -> Path:
-    """Persist ONE measuring run's raw measurement set (write-once; board Rec 5)."""
+    """Persist ONE measuring run's raw measurement set (write-once; board Rec 5).
+
+    `fingerprints` (CR-2026-09-29-Q31-CLOSURE): each `toleranced` output's numeric values
+    from this run, kept so a later composition can MEASURE cross-run variation from the
+    recorded runs themselves (TE 13.7 "fixture-derived tolerances")."""
     if not _nonempty_str(run_id):
         raise _refuse("measuring_run_id", "a measuring result carries its run's registry id")
     target = Path(fixture_root) / f"{MEASURING_RESULT_PREFIX}{run_id}.json"
@@ -1729,6 +1758,8 @@ def write_measuring_result(
         "measuring_run_id": run_id,
         "measurements": {a: dict(q) for a, q in measurements.items()},
     }
+    if fingerprints:
+        payload["fingerprints"] = {name: dict(values) for name, values in fingerprints.items()}
     target.write_text(
         json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
     )
@@ -1842,6 +1873,8 @@ def compose_candidate_manifest(
     outputs: Sequence[str],
     comparison_ledger: Mapping[str, Mapping[str, Any]],
     artifact_manifest_ref: str,
+    tolerances: Mapping[str, Mapping[str, Any]] | None = None,
+    recorded: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Assemble a `status: candidate` mapping from the owner's identity declaration and a
     measuring run's measurements — every measured field stamped with `measuring_run_id`.
@@ -1858,6 +1891,10 @@ def compose_candidate_manifest(
         declared = identity_declaration.get(area_key, {})
         measured = measurements.get(area_key, {})
         block: dict[str, Any] = dict(declared) if isinstance(declared, Mapping) else {}
+        # CR-2026-09-29-Q31-CLOSURE: the run's RECORD of the non-measured quantities
+        # (`fixture_outputs.recorded_quantities`). A declared value is never overridden.
+        for key, value in (recorded or {}).get(area_key, {}).items():
+            block.setdefault(key, value)
         for key, value in measured.items():
             block[key] = _stamp_measured(value, measuring_run_id)
         data[area_key] = block
@@ -1875,11 +1912,36 @@ def compose_candidate_manifest(
     ):
         if extra in identity_declaration:
             data[extra] = identity_declaration[extra]
+    # The template keeps TE 15.4's `.*` wildcard names; the producing run binds the concrete
+    # extension (skeleton manifest, required_outputs note). Each listed output takes the
+    # template entry its name matches; an output matching no entry is left unledgered so
+    # the schema below refuses it by name.
+    ledger: dict[str, dict[str, Any]] = {}
+    for output in outputs:
+        keys = [k for k in comparison_ledger if output_matches(str(output), str(k))]
+        if len(keys) == 1:
+            ledger[str(output)] = dict(comparison_ledger[keys[0]])
+    # CR-2026-09-29-Q31-CLOSURE: a `toleranced` entry's fp_tolerance is the cross-run
+    # variation MEASURED over the recorded measuring runs (`cross_run_variation`), stamped
+    # with those runs' ids — the template never carries one (a tolerance is measured, never
+    # declared, TE 15.1 / R-134). The schema below still decides whether it is admissible.
+    for name, measured in (tolerances or {}).items():
+        entry = ledger.get(name)
+        if entry is None or entry.get("comparison_class") != "toleranced":
+            continue
+        entry["fp_tolerance"] = {
+            "value": measured["value"],
+            "units": entry.get("units"),
+            "measuring_run_id": measuring_run_id,
+            "measured_over_runs": len(measured["measuring_run_ids"]),
+            "elements_compared": measured["elements_compared"],
+            "method": "max |element-wise difference| across the recorded measuring runs",
+        }
     data["required_outputs"] = {
         **data.get("required_outputs", {}),
         "artifact_manifest_ref": artifact_manifest_ref,
         "outputs": list(outputs),
-        "comparison_ledger": {k: dict(v) for k, v in comparison_ledger.items()},
+        "comparison_ledger": ledger,
     }
     return data
 

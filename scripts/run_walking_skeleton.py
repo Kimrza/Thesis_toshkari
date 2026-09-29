@@ -155,6 +155,7 @@ from src.data.fixture_manifest import (  # noqa: E402
     WALKING_SKELETON_ROOT,
     FixtureManifest,
     IdentityDeclaration,
+    _parse_yaml_text,
     assert_run_level_ranges,
     candidate_path_for,
     collect_stage_measurements,
@@ -171,6 +172,11 @@ from src.data.fixture_manifest import (  # noqa: E402
     window_days,
     write_candidate_manifest,
     write_measuring_result,
+)
+from src.data.fixture_outputs import (  # noqa: E402
+    cross_run_variation,
+    numeric_fingerprint,
+    recorded_quantities,
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
@@ -207,6 +213,21 @@ RUN_LOG_NAME: Final[str] = "clean_run_log.json"
 TEST_REPORT_NAME: Final[str] = "test_report.json"
 INPUT_MANIFEST_NAME: Final[str] = "input_manifest.yaml"
 CONFIG_SNAPSHOT_NAME: Final[str] = "processing_config_snapshot.yaml"
+#: CR-2026-09-29-Q31-CLOSURE: the consumed artifacts the measuring run records hashes,
+#: schemas and units from (identity enumerations of what stages 00-04 produce, not values).
+RECORDED_DRIVER_RELEASES: Final[tuple[str, ...]] = (
+    "gfz_kp_ap_nowcast_2022",
+    "gfz_hp60ap60_v2_2022",
+    "nrcan_f107_observed_daily_median_2022",
+    "kyoto_wdc_dst_2022",
+)
+RECORDED_GIM_RELEASE: Final[str] = "gim_comparator_C-01_2022"
+RECORDED_TARGET_RELEASE: Final[str] = "phase1_hourly_target"
+RECORDED_SITE_LOG: Final[str] = "evidence/station_registry_sources_2026-09-19/bshm00isr_20260422.log"
+RECORDED_SITE_LOG_MANIFEST: Final[str] = (
+    "evidence/station_registry_sources_2026-09-19/sha256_manifest.json"
+)
+RECORDED_B01_MANIFEST: Final[str] = "artifacts/external/b01/sha256_manifest.json"
 REGISTRY_ENTRY_NAME: Final[str] = "registry_entry.json"
 #: The default subprocess timeout (seconds) — operational, not scientific.
 SUBPROCESS_TIMEOUT_S: Final[int] = 3600
@@ -1026,7 +1047,23 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         block = run_measurements.setdefault(area, {})
         for key, value in quantities.items():
             block[key] = {"min": value["min"], "max": value["max"], "units": value["units"]}
-    write_measuring_result(fixture_root, run_id=run_id, measurements=run_measurements)
+    # CR-2026-09-29-Q31-CLOSURE: every `toleranced` output's numeric fingerprint is kept
+    # with this run's measuring result, so the variation a tolerance is MEASURED from
+    # (TE 13.7 "fixture-derived tolerances") is computed across the recorded runs, never
+    # declared.
+    template = scope.data.get("required_outputs", {}).get("comparison_ledger", {})
+    toleranced = sorted(
+        name for name, entry in template.items()
+        if isinstance(entry, Mapping) and entry.get("comparison_class") == "toleranced"
+    )
+    fingerprints = {
+        name: numeric_fingerprint(fixture_root / name)
+        for name in toleranced
+        if (fixture_root / name).is_file()
+    }
+    write_measuring_result(
+        fixture_root, run_id=run_id, measurements=run_measurements, fingerprints=fingerprints
+    )
     results = load_measuring_results(fixture_root)
     for extra in args.measuring_runs or []:
         extra_path = Path(extra) if Path(extra).is_absolute() else workspace / extra
@@ -1042,7 +1079,28 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             )
         seen_run_ids.add(rid)
     composed = compose_measurement_ranges(results)  # refuses a zero-width range (Rec 5)
-    template = scope.data.get("required_outputs", {}).get("comparison_ledger", {})
+    tolerances = {
+        name: cross_run_variation(
+            {str(r["measuring_run_id"]): r.get("fingerprints", {}).get(name, {}) for r in results}
+        )
+        for name in toleranced
+    }
+    # CR-2026-09-29-Q31-CLOSURE: the run's record of TE 15.2's non-measured quantities
+    # (inputs, processing, schemas, units, reference samples), read from the artifacts this
+    # run produced or consumed and from the owner's skeleton's frozen citations.
+    skeleton_path = manifest_path_for(workspace, args.fixture)
+    recorded = recorded_quantities(
+        workspace=workspace,
+        fixture_root=fixture_root,
+        skeleton=_parse_yaml_text(skeleton_path, skeleton_path.read_text(encoding="utf-8")),
+        ledger_template=template,
+        driver_releases=RECORDED_DRIVER_RELEASES,
+        gim_release=RECORDED_GIM_RELEASE,
+        target_release=RECORDED_TARGET_RELEASE,
+        site_log=workspace / RECORDED_SITE_LOG,
+        site_log_manifest=workspace / RECORDED_SITE_LOG_MANIFEST,
+        b01_manifest=workspace / RECORDED_B01_MANIFEST,
+    )
     candidate = compose_candidate_manifest(
         scope.data,
         fixture_id=args.fixture,
@@ -1050,6 +1108,8 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         measuring_run_id="+".join(sorted(seen_run_ids)),
         outputs=sorted(listing),
         comparison_ledger=template,
+        tolerances=tolerances,
+        recorded=recorded,
         artifact_manifest_ref=os.path.relpath(
             fixture_root / ARTIFACT_MANIFEST_NAME,
             manifest_path_for(workspace, args.fixture).parent,

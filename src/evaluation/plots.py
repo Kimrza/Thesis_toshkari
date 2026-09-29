@@ -71,6 +71,7 @@ __all__ = [
     "assert_manifest_entry",
     "assert_manifest_complete",
     "render_figure",
+    "render_series_figure",
 ]
 
 #: FR-P1-05-11's minimum required plots (identity tokens; the authoritative required-plot
@@ -269,3 +270,85 @@ def render_figure(entry: Mapping[str, Any], out_path: Any) -> Any:
     figure.savefig(out_path)
     plt.close(figure)
     return out_path
+
+
+def render_series_figure(
+    *,
+    plot_id: str,
+    title: str,
+    units_label: str,
+    caveat_labels: Sequence[str],
+    series: Sequence[Mapping[str, Any]],
+    out_path: Any,
+) -> int:
+    """Render one figure that DRAWS DATA: every series' (x, y) points, as passed.
+
+    The data-bearing sibling of ``render_figure`` for the walking-skeleton diagnostics
+    (TE §15.4's four fixture plots; CR-2026-09-29-Q31-CLOSURE): the caller passes values
+    read from serialized artifacts and nothing is computed here. A figure with no drawable
+    point REFUSES — an empty placeholder is not a diagnostic. `None`/NaN points are skipped
+    when drawing, never filled. Returns the number of points drawn.
+
+    Raises
+    ------
+    RegimeError
+        no series, a series whose x and y lengths differ, no finite point anywhere, or
+        matplotlib not importable (named against the pin surface, as ``render_figure``).
+    """
+    import math
+
+    if not series:
+        raise RegimeError(f"figure {plot_id}", "no data series; an empty figure is not drawn")
+    drawable: list[tuple[str, list[Any], list[float]]] = []
+    points = 0
+    for entry in series:
+        xs, ys = list(entry.get("x", ())), list(entry.get("y", ()))
+        if len(xs) != len(ys):
+            raise RegimeError(
+                f"figure {plot_id}: series {entry.get('label')!r}",
+                f"{len(xs)} x values against {len(ys)} y values",
+            )
+        kept = [
+            (x, float(y))
+            for x, y in zip(xs, ys, strict=True)
+            if y is not None and not (isinstance(y, float) and math.isnan(y))
+        ]
+        points += len(kept)
+        drawable.append((str(entry.get("label", "")), [k[0] for k in kept], [k[1] for k in kept]))
+    if points == 0:
+        raise RegimeError(
+            f"figure {plot_id}",
+            "every series is empty or non-finite; a figure with no drawn data is a "
+            "placeholder, not a diagnostic, and is refused",
+        )
+    try:
+        import matplotlib  # noqa: PLC0415 — lazy by design (R-05)
+        from matplotlib import pyplot as plt  # noqa: PLC0415
+    except ImportError as exc:
+        raise RegimeError(
+            "matplotlib",
+            f"not importable ({exc}); the plotting dependency is pinned in "
+            f"requirements.txt (TE §8.1) and its absence refuses rather than degrading",
+        ) from exc
+    matplotlib.use("Agg", force=False)
+    figure = plt.figure(figsize=(11, 5))
+    axes = figure.add_subplot(1, 1, 1)
+    for label, xs, ys in drawable:
+        if xs:
+            axes.plot(xs, ys, marker=".", linewidth=0.8, label=label)
+    axes.set_title(title)
+    axes.set_ylabel(units_label)
+    axes.tick_params(axis="x", labelrotation=45, labelsize=6)
+    if caveat_labels:
+        axes.annotate(
+            "\n".join(str(label) for label in caveat_labels),
+            xy=(0.01, 0.99),
+            xycoords="axes fraction",
+            va="top",
+            fontsize=7,
+        )
+    axes.legend(fontsize=6, loc="lower right")
+    figure.tight_layout()
+    figure.savefig(out_path, format="png")
+    plt.close(figure)
+    return points

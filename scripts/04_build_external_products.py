@@ -112,6 +112,7 @@ from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
     WALKING_SKELETON_ROOT,
     build_apparatus_partitions,
+    fixture_root_for,
     load_fixture_scope,
     read_embargo_hours,
     release_root_for,
@@ -192,6 +193,12 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "evidence_class",
     "audit_window",
     "fixture_scope_id",
+    # TE §15.4 fixture-root outputs (CR-2026-09-29-Q31-CLOSURE)
+    "fixture_b01_payloads",
+    "iri_benchmark",
+    "gim_comparator",
+    "gim_release",
+    "fixture_measurements",
     "plumbing_statement",
 )
 
@@ -2419,6 +2426,103 @@ def _emit_prediction_payload(entry: Mapping[str, Any], args: argparse.Namespace)
     return {"written": written}
 
 
+def _fixture_external_outputs(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """TE §15.4's external outputs of a FIXTURE run (CR-2026-09-29-Q31-CLOSURE).
+
+    Runs only with `--fixture-manifest`, after the fixture-scoped driver audit, and only
+    through paths this script already governs — nothing is regenerated that already
+    exists and nothing is substituted:
+
+    1. the B-01 bridge (`_emit_prediction_payload`, R-59 re-verified at consumption) writes
+       `B-01.json` into the fixture's `06` predictions run, so the orchestrated run carries
+       the benchmark the comparison sets declare instead of an out-of-band pre-staging step;
+    2. `iri_benchmark.parquet`: the SAME verified B-01 rows, filtered to the fixture's
+       stations and window, `status == "ok"` only (TE §15.3 "B-01 sample generation");
+    3. `gim_comparator.parquet`: `_build_gim_comparator_release` over the fixture's stations
+       and window against the already-acquired, hash-manifested IONEX bundle — the
+       procedure `evidence/r60_gim_gate_inputs/Fixture_TBD_resolution_2026-09-26.md` item
+       24 prescribes, gated by the same D-72 rule and D-73 hand-check / overlap evidence as
+       every real comparator (TE §15.3 "C-01 sample generation"). Never another window;
+    4. the IRI and GIM timestamp-tolerance measurements (TE §15.2 area 8).
+    """
+    from src.data.fixture_outputs import (
+        copy_once,
+        export_iri_benchmark,
+        gim_measurements,
+        iri_measurements,
+        iri_rows_in_scope,
+        write_stage_measurements,
+    )
+    from src.external import gim  # allowlisted importer; deferred by design
+
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    scope = load_fixture_scope(Path(args.fixture_manifest))
+    identity = scope.identity
+    stations = [str(s) for s in identity["stations"]]
+    start = dt.date.fromisoformat(str(identity["window_citation"]["start_utc"]))
+    end = dt.date.fromisoformat(str(identity["window_citation"]["end_utc"]))
+    fixture_root = fixture_root_for(workspace, scope.fixture_id)
+
+    bridge_args = argparse.Namespace(
+        **{**vars(args), "emit_prediction_payload": fixture_root / "predictions"}
+    )
+    bridged = _emit_prediction_payload(entry, bridge_args)
+
+    out = _b01_out_dir(entry, args)
+    rows_path = args.benchmark_rows
+    if rows_path is None:
+        candidate = out / "b01_iri2016_rows.jsonl"
+        rows_path = candidate if candidate.is_file() else out / "b01_iri2016_rows_partial.jsonl"
+    iri_rows = [
+        row
+        for station in stations
+        for row in iri_rows_in_scope(Path(rows_path), station=station, start=start, end=end)
+    ]
+    iri_path = export_iri_benchmark(iri_rows, fixture_root)
+
+    gim_args = argparse.Namespace(
+        **{
+            **vars(args),
+            "stations": ",".join(stations),
+            "start_date": start.isoformat(),
+            "end_date": end.isoformat(),
+        }
+    )
+    import pandas as pd  # deferred: only the fixture comparator path needs it
+
+    release = _build_gim_comparator_release(entry, gim_args)
+    release_parquet = workspace / release["release_dir"] / "gim_comparator.parquet"
+    gim_path = copy_once(release_parquet, fixture_root / "gim_comparator.parquet")
+    first_ionex = (
+        workspace
+        / args.ionex_bundle_dir
+        / str(pd.read_parquet(release_parquet)["ionex_file"].iloc[0])
+    )
+    interval_s = int(
+        gim.parse_ionex_header(gim._decompress_ionex_bytes(first_ionex).decode("ascii", "replace"))[
+            "interval_s"
+        ]
+    )
+    measurements = {
+        **iri_measurements(iri_rows),
+    }
+    measurements["timestamp_tolerances"] = {
+        **measurements["timestamp_tolerances"],
+        **gim_measurements(gim_path, map_interval_seconds=interval_s)["timestamp_tolerances"],
+    }
+    measured = write_stage_measurements(
+        fixture_root, stage="04_build_external_products", measurements=measurements
+    )
+    return {
+        "fixture_b01_payloads": bridged["written"],
+        "iri_benchmark": str(iri_path),
+        "gim_comparator": str(gim_path),
+        "gim_release": release,
+        "fixture_measurements": str(measured),
+    }
+
+
 def main() -> int:
     ensure_process_determinism(sys.argv)  # FIRST statement, before any framework import
     args = _parse_args(sys.argv[1:])
@@ -2486,6 +2590,8 @@ def main() -> int:
             summary = _emit_prediction_payload(entry, args)
         else:
             summary = _run_driver_audit(entry, args)
+            if entry.get("fixture_scope_id"):
+                summary = {**summary, **_fixture_external_outputs(entry, args)}
     except IntegrityError as exc:
         aborted = _registry_row(
             run_id, status="aborted", lock_hash=lock_hash, snapshot=snapshot, reason=str(exc)
