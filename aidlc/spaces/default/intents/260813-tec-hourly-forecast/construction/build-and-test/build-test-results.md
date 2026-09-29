@@ -755,3 +755,31 @@ stand as written, and this block supersedes them where the two conflict.
   `tests/test_phase_contract.py:513`
   (`test_identical_manifests_diff_empty_and_training_is_permitted`) and
   `:522` (`test_a_differing_hash_is_named_and_training_is_refused`).
+
+### 2026-09-29 post-commit re-run at `391a319` (GOV-2026-09-29-BT-03 Rec 3, step 2)
+
+The evidence is now tied to a commit. Every Recommendation 1–17 edit, plus D-82, is
+committed in `391a319`. The re-run executed on a clean tree at that HEAD: `git rev-parse HEAD`
+returned `391a3191dd2555bf76eb13ee74aa18250d110cda` before the run. Environment: `tec-thesis-311`,
+CPython 3.11.16, `PYTHONHASHSEED=0`. Counts are read from the junit `<testsuite>` attributes:
+
+| Run | Total | Passed | Failed | Errors | Skipped | Wall time | XML |
+|---|---|---|---|---|---|---|---|
+| §18.3 selection (b), ten modules | **1426** | **1426** | 0 | 0 | 0 | 62.5 s | `run_2026-09-29_bt_391a319/crit.xml` |
+| Full suite, 39 modules | **2459** | **2455** | 0 | 0 | 4 | 1007.7 s | `run_2026-09-29_bt_391a319/full.xml` |
+
+The previous run had 1423 critical-set tests and 2456 in the full suite. The **+3** is the
+three tests this pass added:
+
+- control 20b in `test_common_masks.py`;
+- the target-id sweep in `test_prepared_target_schema.py`;
+- the case-variant control, also in `test_prepared_target_schema.py`.
+
+The four skips are unchanged. The full-suite wall time of 1007.7 s is longer than the
+660.7 s measured before. This host was running other work at the same time, so this
+figure reflects machine load and is not a new runtime envelope.
+
+The test-mode access sidecar `artifacts/exec_evidence/test_access_log.jsonl` has SHA-256
+`fc03d6f393b82b40de344a583d072739926e4fd6027c4525fee1043d8d825849` after this run
+(Rec 13). The closed log `evidence/test_run_access_log.jsonl` is unchanged. The only
+file this run changed is the AI-DLC audit shard.
