@@ -1,6 +1,78 @@
 # CR-2026-09-29-PLATFORM-LOCAL-ONLY: local as the sole execution platform (proposed; not enacted)
 
-## Revision 7 (2026-09-30): the current draft
+## Revision 8 (2026-10-01): the current draft
+
+**Status: DRAFT, NOT ENACTED.** No D-number has been written. Adoption needs the following, per §A8 item 1:
+
+- the Student's adoption act;
+- the Supervisor's countersignature (§A8 item 2);
+- §R5-5 items 2 and 7, where item 2 is a full-board review of the revision-8 delta.
+
+**Form.** Revision 8 is a **delta revision** on revision 7, which is retained verbatim below.
+
+- §A8 amends revision 7.
+- Where §A8 and revision 7 disagree, §A8 governs.
+- Every other part of revision 7, including its D-text items not named here, §W7 and §R5-7, stands.
+
+**Basis.**
+
+- The seven-seat full board `GOV-2026-09-30-PV-09` (persisted at `governance/reviews/GOV-2026-09-30-PV-09.md`) returned **FAIL**.
+- The Student's rulings on that board, recorded in `governance/CHANGE_RECORD_2026-10-01_GOV-PV-09_rulings.md`, verbatim option labels:
+  - (1) "Amend preconditions";
+  - (2) "Record as countersigned";
+  - (3) "Kill-only admission";
+  - (4) "Diff allows only gates".
+
+### A8. Amendments (PV-09 Rec numbers in brackets)
+
+1. **Adoption preconditions [Rec 1; ruling 1].**
+   - In the §R4-7 D-text, "**Adoption preconditions:** §R5-5 items 2, 3, 4 and 7" is replaced by "**Adoption preconditions:** §R5-5 items 2 and 7".
+   - §R5-5 item 3 (peak-RSS and CPU-model capture) is due with W-7.
+   - §R5-5 item 4 (the local `scientific_1month` measuring run) is due before the characterising D-number (§R5-5 item 11), after W-4, W-7 and W-8.
+   - The Status block of revision 7 and this preconditions line now name the same set.
+2. **Supervisor approval [Rec 5; ruling 2].**
+   - The countersignature line in the D-text reads:
+
+     > **Supervisor countersignature:** recorded as given, by the Student's direction; the Supervisor's approval was given verbally and reported by the Student on 2026-09-30 ("i have it but verbally consider it equal to a signature"); no written artifact exists.
+
+   - Revision 7's "(the authority equivalence is not invoked)" is superseded to that extent: the Student has directed that the verbal approval be recorded as the countersignature.
+   - The form is stated wherever the countersignature is relied on.
+3. **Kill-only durability admission [Recs 4, 13; ruling 3].** In D-text item 11, the "Durability" bullet is replaced by:
+
+   > **Durability:** on NTFS, process-kill N = 100 per write type (access log, registry, receipt), one-sided 95 % zero-failure bound 2.95 % per write type. **Power-loss trials are not run, by the Student's direction of 2026-09-30.** Admission rests on detection plus the kill-fault evidence. **Limitation (stated wherever durability is relied on):** a process kill leaves the operating-system page cache intact, so it does not exercise `fsync` against power loss. The bound covers kills at the points the campaign reached, and nothing about power loss is claimed. The kill campaign must include torn (mid-write) faults, and the readers must detect every torn record they produce; a campaign with no torn record does not satisfy this bullet.
+
+   - §R5-6 row 32 and §R5-7 row 7R are amended to the kill-only protocol: 300 trials, with no power-loss limb and no backup prerequisite for power-loss.
+   - The §R4-7 preamble's reservation reads "until W-1 and §R5-6 rows 30, 31 and 32 pass" [VAL-01].
+   - D-text item 8's "after the durability measurement" means the kill-only measurement above.
+4. **B-01 assembly equality [Rec 3; ruling 4].** In D-text item 4, "the halves are joined only by a declared, manifested assembly step" is extended with:
+
+   > …which asserts equal index SHA-256, equal hashes for every config file other than `data.yaml`, and, for `data.yaml`, equality of its content with the `gates` node removed (`data_yaml_sans_gates_sha256`); the only permitted `data.yaml` difference is the G-05 signature under `gates`, and it is recorded in the assembly manifest's `config_diff`.
+
+5. **B-01 custody bindings [Recs 6–9].** Add to D-text item 4:
+
+   > December generation is refused when the phase's one-shot marker exists (generation-once, not only admission-once). Admission re-verifies G-05 in (a) with `--g05-signature`; a receipt's own `g05_verified` is never sufficient. Assembly binds to the admitted receipt: the marker's `receipt_sha256` and `rows_sha256` must equal the December half. `run_gated_generation` verifies G-05 itself from the snapshot and signature; no caller-supplied boolean is trusted.
+
+6. **Write-once receipts are complete-or-absent [Rec 12].** A receipt is written to a temporary sibling, fsynced, and hard-linked to its final name, so a kill never leaves a partial file at the final name.
+7. **Floor wording [Rec 32; ML-04, ML-06].**
+   - The floor in item 11 is stated once: "floor = 2⁻²³ × max|x| over that file's (a) elements", where 2⁻²³ is the coarsest compute precision in the pipeline (float32 machine epsilon).
+   - §A7 item 8 is read with that wording.
+   - [ML-07] Row 7R states that power-loss is not run, per item 3 above.
+8. **Guard home [Rec 32; IMPL-07].**
+   - `run_gated_generation` is the guard home for the December limb.
+   - Script 04 calls the same function earlier, as a pre-check. That call is defence in depth and is not a second home.
+
+### R5-8. Open items (added; §R5-5 to §R5-7 otherwise stand)
+
+| # | Item | Owner | Due |
+|---|---|---|---|
+| 38 | Full-board review of the revision-8 delta (replaces §R5-7 row 2) | per `/review-tec-governance` | before adoption |
+| 39 | PV-09 Recs 21–24: determinism precondition (ML-01); per-field floor (ML-05); `environment_id` literals and variable (DATA-09); D-number for item 29 (DATA-12) | Student | before §R5-5 item 4 |
+| 40 | PV-09 open mechanism findings (Recs 10, 11, 13–15, 19, 20, 27–29, 33): a governed code-generation pass as §W7 | Student | per W rows; Rec 15's clean-commit campaign before §R5-6 row 32 |
+| 41 | (b) receipt path on `/mnt/c` (Rec 14; DATA-11 scope) | Student | before §R5-7 row 35 |
+
+---
+
+## Revision 7 (superseded 2026-10-01 by Revision 8; retained verbatim as the base text that §A8 amends)
 
 **Status: DRAFT, NOT ENACTED.** No D-number has been written. Adoption needs:
 - the Student's adoption act;

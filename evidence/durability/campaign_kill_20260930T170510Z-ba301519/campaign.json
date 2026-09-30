@@ -1,0 +1,29 @@
+{
+  "campaign_id": "20260930T170510Z-ba301519",
+  "decision": "D-83 revision 7 section A7 item 6; section R4-7 item 11; W-6",
+  "fault": "kill",
+  "write_types": [
+    "access",
+    "registry",
+    "receipt"
+  ],
+  "trials_per_write_type": 100,
+  "required_per_write_type": 100,
+  "seed": 20260930,
+  "code_commit": "37ae2f7db6b21b752accfb236978067730eb9967",
+  "working_tree_note": "the harness and its production write paths as at code_commit plus the working tree",
+  "environment": {
+    "environment_id": "tec-thesis-311",
+    "python": "3.11.16 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:36:16) [MSC v.1942 64 bit (AMD64)]",
+    "executable": "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H"
+  },
+  "filesystem_under_test": {
+    "path": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\durability_scratch",
+    "drive": "C:\\",
+    "filesystem": "NTFS",
+    "volume_serial": "CE383450"
+  },
+  "started_at_utc": "2026-09-30T17:05:10.371982+00:00"
+}

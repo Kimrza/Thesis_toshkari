@@ -1,0 +1,56 @@
+{
+  "campaign_id": "20260930T164532Z-3820c087",
+  "decision": "D-83 revision 7 section A7 item 6; section R4-7 item 11; W-6",
+  "fault": "kill",
+  "write_types": [
+    "access",
+    "registry",
+    "receipt"
+  ],
+  "trials_per_write_type": 100,
+  "required_per_write_type": 100,
+  "seed": 20260930,
+  "code_commit": "37ae2f7db6b21b752accfb236978067730eb9967",
+  "working_tree_note": "the harness and its production write paths as at code_commit plus the working tree",
+  "environment": {
+    "environment_id": "tec-thesis-311",
+    "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Python314\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H"
+  },
+  "filesystem_under_test": {
+    "path": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\durability_scratch",
+    "drive": "C:\\",
+    "filesystem": "NTFS",
+    "volume_serial": "CE383450"
+  },
+  "started_at_utc": "2026-09-30T16:45:32.529413+00:00",
+  "finished_at_utc": "2026-09-30T16:48:37.298672+00:00",
+  "totals": {
+    "access": {
+      "run": 100,
+      "pass": 100,
+      "fail": 0
+    },
+    "registry": {
+      "run": 100,
+      "pass": 100,
+      "fail": 0
+    },
+    "receipt": {
+      "run": 100,
+      "pass": 100,
+      "fail": 0
+    }
+  },
+  "all_passed": true,
+  "meets_required_n": true,
+  "one_sided_95_zero_failure_upper_bound": {
+    "access": 0.0295,
+    "registry": 0.0295,
+    "receipt": 0.0295
+  },
+  "trials_sha256": "2087c7d7f331a9770797709e842bfc6b123e8263d040955c4b6398cdda95c6b4",
+  "campaign_sha256": "4c95493119406950658ffcd2d103528da382992eb78892f9edbf2127c69f5072"
+}
