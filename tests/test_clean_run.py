@@ -1394,6 +1394,7 @@ def _gate_payload(**overrides: Any) -> dict[str, Any]:
                 "input_versions",
                 "platform",
                 "nondeterministic_ops",
+                "environment_id",
             )
         },
         "environment_lock_hash": environment_lock_hash(lock),

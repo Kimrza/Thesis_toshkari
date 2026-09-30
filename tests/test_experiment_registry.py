@@ -551,3 +551,39 @@ def test_derived_csv_is_hashed_and_marked_derived(paths, tmp_path) -> None:
         (tmp_path / "experiment_registry.csv.manifest.json").read_text(encoding="utf-8")
     )
     assert sidecar["derived"] is True and sidecar["row_count"] == 2
+
+
+# --- D-83 revision 7 §R5-6 row 31 / §W7 W-10: the exposure clock keys on logged_at_utc ONLY
+
+
+def test_forged_later_retrieved_at_does_not_delay_the_exposure_clock(paths) -> None:
+    """Negative control (GOV-2026-09-30-PV-07 Rec 5): a caller-supplied `retrieved_at_utc`
+    forged AFTER the run start must not hide an exposure the guard stamped earlier."""
+    registry, access = paths
+    record = _access("audit-run", "2026-09-01T00:00:00Z")
+    record["retrieved_at_utc"] = "2026-12-31T00:00:00Z"  # forged, later than the run
+    access.write_text(json.dumps(record) + "\n", encoding="utf-8")
+    written = append_registry_event(
+        registry,
+        _row(started_at_utc="2026-09-05T10:00:00Z"),
+        phase=1,
+        writer_role="stage",
+        access_log_path=access,
+    )
+    assert written["exploratory"] is True
+
+
+def test_record_without_logged_at_sorts_earliest(paths) -> None:
+    """A row carrying only `retrieved_at_utc` is treated as earliest-possible exposure."""
+    registry, access = paths
+    record = _access("audit-run", "2026-09-08T00:00:00Z")
+    del record["logged_at_utc"]
+    access.write_text(json.dumps(record) + "\n", encoding="utf-8")
+    written = append_registry_event(
+        registry,
+        _row(started_at_utc="2026-09-05T10:00:00Z"),
+        phase=1,
+        writer_role="stage",
+        access_log_path=access,
+    )
+    assert written["exploratory"] is True

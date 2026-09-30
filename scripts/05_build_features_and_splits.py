@@ -393,6 +393,7 @@ def _registry_row(
         "code_commit": "",  # populated from the lock by the caller
         "environment_lock_hash": lock_hash,
         "platform": snapshot.platform,
+        "environment_id": snapshot.environment_id,  # D-83 revision 7 W-4
         "dataset_version": "",
         "fold_id": "",
         "mask_id": "",
@@ -717,7 +718,9 @@ def _read_target_artifact(path: Path) -> Any:
     return RecordFrame(rows)
 
 
-def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
+def _locked_loader(
+    args: argparse.Namespace, *, run_id: str, access_log: Path, phase_id: str
+):
     """The one door: every byte of December this script reads comes through here, logged."""
 
     def loader(locked: Partition) -> Any:
@@ -726,6 +729,8 @@ def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
             retrieved_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
             scope=f"{locked.partition_id} {locked.validation_month.isoformat()} feature build",
             purpose="locked_evaluation",
+            script_id="05_build_features_and_splits",  # D-83 revision 7 A6 item 20; A7 item 1
+            phase_id=phase_id,  # data.yaml target.identity.phase_id (A6 item 12)
             performance_inspected=False,
             locked_test_accessed=True,
             authorization=str(args.locked_authorization),
@@ -770,7 +775,14 @@ def _build_locked_score_bundle(
     scored_target = materialise_locked_partition(
         snapshot,
         g05_signature=args.g05_signature,
-        loader=_locked_loader(args, run_id=run_id, access_log=access_log),
+        loader=_locked_loader(
+            args,
+            run_id=run_id,
+            access_log=access_log,
+            # An absent phase_id is passed as "" and the locked_evaluation AccessRecord
+            # refuses it when the loader is used (D-83 revision 7 A6 item 20).
+            phase_id=str(((snapshot.data.get("target") or {}).get("identity") or {}).get("phase_id") or ""),
+        ),
         partitions=partitions,
     )
     if scored_target is None:

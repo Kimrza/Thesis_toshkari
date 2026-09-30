@@ -564,6 +564,7 @@ def _registry_row(
         "code_commit": code_commit,
         "environment_lock_hash": lock_hash,
         "platform": snapshot.platform,
+        "environment_id": snapshot.environment_id,  # D-83 revision 7 W-4
         "dataset_version": "",
         "fold_id": "",
         "mask_id": "",
@@ -718,7 +719,9 @@ def _read_target_artifact(path: Path) -> Any:
     return RecordFrame(rows)
 
 
-def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
+def _locked_loader(
+    args: argparse.Namespace, *, run_id: str, access_log: Path, phase_id: str
+):
     """The one-door loader: log-then-read with purpose `locked_evaluation` (R-109 limb 2).
 
     The AccessRecord carries the G-05 signature reference in `authorization`; the SD-C-02
@@ -738,6 +741,8 @@ def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
                 f"evaluation"
             ),
             purpose="locked_evaluation",
+            script_id="07_evaluate_and_report",  # D-83 revision 7 A6 item 20; A7 item 1
+            phase_id=phase_id,  # data.yaml target.identity.phase_id (A6 item 12)
             performance_inspected=False,
             locked_test_accessed=True,
             authorization=str(args.locked_authorization),
@@ -1872,7 +1877,14 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         if pid == LOCKED_ID:
             # The ONE door, twice guarded: the G-05 signature (R-82) then open_restricted
             # (R-25/R-28). Unreachable today: G-05 is Blocked and no signature verifies.
-            loader = _locked_loader(args, run_id=run_id, access_log=access_log)
+            loader = _locked_loader(
+            args,
+            run_id=run_id,
+            access_log=access_log,
+            # An absent phase_id is passed as "" and the locked_evaluation AccessRecord
+            # refuses it when the loader is used (D-83 revision 7 A6 item 20).
+            phase_id=str(((snapshot.data.get("target") or {}).get("identity") or {}).get("phase_id") or ""),
+        )
             materialise_locked_partition(
                 snapshot,
                 g05_signature=args.g05_signature,

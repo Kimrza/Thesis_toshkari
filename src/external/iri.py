@@ -955,6 +955,32 @@ def build_validation_report(
     }
 
 
+#: The locked-test month (Vision §8.3). B-01 December rows are generated only after
+#: G-05 is signed (D-83 revision 7 §R4-7 item 4).
+DECEMBER = 12
+
+
+def assert_december_gate(months: Sequence[int] | None, *, g05_verified: bool) -> None:
+    """Refuse a B-01 grid that reaches December without a verified G-05 signature, or
+    that mixes December with other months (D-83 revision 7 §A7 item 3; §W7 W-3)."""
+    wanted = set(range(1, 13)) if months is None else {int(m) for m in months}
+    if DECEMBER not in wanted:
+        return
+    if not g05_verified:
+        raise BenchmarkError(
+            "months",
+            "month 12 (the locked test month) is refused without a verifying G-05 signature "
+            "(--g05-signature); an omitted --months means 1-12. Before G-05 use "
+            "--months 1,2,3,4,5,6,7,8,9,10,11 (D-83 §R4-7 item 4)",
+        )
+    if wanted != {DECEMBER}:
+        raise BenchmarkError(
+            "months",
+            f"December B-01 generation is December-only; got months {sorted(wanted)} "
+            "(D-83 §A6 item 1: January-November and December are separate runs)",
+        )
+
+
 def run_gated_generation(
     *,
     contract: BenchmarkContract,
@@ -962,13 +988,29 @@ def run_gated_generation(
     stations: Mapping[str, Any],
     months: Sequence[int] | None = None,
     progress: Any = None,
+    snapshot: Any = None,
+    g05_signature: str | None = None,
 ) -> dict[str, Any]:
     """The production path: pins verified -> all four R-59 limbs -> target grid ->
     workload -> pins re-verified -> stamped rows + provenance. Never called by
     `generate_benchmark`'s injection mode. Returns a mapping with `rows`,
-    `provenance` and `partial` (True when `months` restricts the grid)."""
+    `provenance` and `partial` (True when `months` restricts the grid).
+
+    **December gate (D-83 revision 7 §A7 item 3, §R5-6 row 30; §W7 W-3).** This function
+    is the SINGLE guard home for the December limb of B-01 generation. It refuses:
+    - any grid containing month 12 unless `src.data.splits.verify_g05_signature`
+      passes HERE over the caller's `snapshot` and `g05_signature` (no caller-supplied
+      boolean is trusted: GOV-2026-09-30-PV-09 TEC-03); an omitted `months` means 1-12
+      and is therefore refused before G-05;
+    - a grid mixing month 12 with any other month: the December run is December-only
+      and the pre-G-05 run is January-November only (§A6 item 1).
+    """
     import time as _time
 
+    from src.data.splits import verify_g05_signature
+
+    g05_verified = snapshot is not None and verify_g05_signature(snapshot, g05_signature)
+    assert_december_gate(months, g05_verified=g05_verified)
     identity = verify_runtime(contract)
     driver_rows = benchmark_driver_rows(identity, contract)
     evaluate_generation_gates(

@@ -195,6 +195,7 @@ def _registry_row(
         "code_commit": "",
         "environment_lock_hash": lock_hash,
         "platform": snapshot.platform,
+        "environment_id": snapshot.environment_id,  # D-83 revision 7 W-4
         "dataset_version": "",
         "fold_id": "",
         "mask_id": "",

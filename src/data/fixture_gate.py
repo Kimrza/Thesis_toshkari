@@ -159,6 +159,16 @@ def lock_items(lock: RunRecord | Mapping[str, Any]) -> dict[str, Any]:
         source = {name: getattr(lock, name) for name in LOCK_ITEMS}
     else:
         source = lock
+        if "environment_id" not in source:
+            # A lock recorded before D-83 revision 7 W-4 carries no environment_id. It is
+            # refused by name, never upcast: D-83 section R5-5 item 29 makes pre-W-4
+            # identities non-comparable (GOV-2026-09-30-PV-09 DATA-03).
+            raise _refuse(
+                "environment lock",
+                "recorded before D-83 revision 7 W-4: it carries no environment_id and is "
+                "non-comparable with a post-W-4 lock (D-83 section R5-5 item 29); re-record "
+                "it under the current code rather than comparing it",
+            )
     missing = [name for name in LOCK_ITEMS if name not in source]
     if missing:
         raise _refuse(
@@ -188,6 +198,7 @@ def lock_from_items(items: Mapping[str, Any]) -> RunRecord:
         input_versions=list(normalised["input_versions"]),
         platform=str(normalised["platform"]),
         nondeterministic_ops=list(normalised["nondeterministic_ops"]),
+        environment_id=str(normalised["environment_id"]),
     )
 
 
@@ -838,7 +849,9 @@ def require_in_session_gate(
     if not isinstance(recorded, Mapping):
         raise _refuse("in-session gate result", "no recorded TE 13.1 lock")
     caller = lock_items(lock)
-    for item in ("code_commit", "config_hashes"):
+    # Widened by D-83 revision 6 §A6 item 7 / revision 7 §W7 W-4: the named environment
+    # and the environment identity must agree as well as the commit and configs.
+    for item in ("code_commit", "config_hashes", "environment_id"):
         if lock_items(recorded)[item] != caller[item]:
             raise _refuse(
                 "in-session gate result",

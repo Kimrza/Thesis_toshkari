@@ -79,6 +79,7 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
+import hashlib
 import json
 import math
 import re
@@ -305,6 +306,36 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help=(
             "comma-separated months restricting the grid (a PARTIAL product, labelled so); "
             "absent = the full year (the 26,000-call workload, TC-04)"
+        ),
+    )
+    parser.add_argument(
+        "--g05-signature",
+        type=str,
+        default=None,
+        help=(
+            "the G-05 signature artifact string, verified by "
+            "src.data.splits.verify_g05_signature; required for December (month 12) B-01 "
+            "generation, which is December-only and refused without it (D-83 revision 7 "
+            "section A7 item 3)"
+        ),
+    )
+    parser.add_argument(
+        "--admit-december-receipt",
+        type=Path,
+        default=None,
+        help=(
+            "run in environment (a): re-verify a December B-01 receipt (its provenance "
+            "JSON) after transfer and write the one-shot December-generation marker; a "
+            "second admission for the same phase_id is refused (D-83 revision 7 A7 item 1)"
+        ),
+    )
+    parser.add_argument(
+        "--assemble-benchmark",
+        action="store_true",
+        help=(
+            "join the January-November and December B-01 halves for this phase_id into "
+            "one manifested product; asserts equal index SHA-256 and config hashes and an "
+            "admitted December marker (D-83 revision 7 A7 item 2)"
         ),
     )
     parser.add_argument(
@@ -640,6 +671,7 @@ def _registry_row(
         "code_commit": "",  # populated from the lock by the caller
         "environment_lock_hash": lock_hash,
         "platform": snapshot.platform,
+        "environment_id": snapshot.environment_id,  # D-83 revision 7 W-4
         "dataset_version": "",
         "fold_id": "",
         "mask_id": "",
@@ -1717,10 +1749,68 @@ def _build_validation_report(entry: Mapping[str, Any], args: argparse.Namespace)
     return {"validation_report": path}
 
 
+def _data_phase_id(snapshot: Any) -> str:
+    """`phase_id` from `configs/data.yaml` `target.identity.phase_id` (D-83 revision 6
+    §A6 item 12): the governed source, never the B-01 stamp."""
+    try:
+        value = snapshot.data["target"]["identity"]["phase_id"]
+    except (KeyError, TypeError) as exc:
+        raise IntegrityError(
+            "configs/data.yaml", "target.identity.phase_id is absent (D-83 §A6 item 12)"
+        ) from exc
+    if not isinstance(value, str) or not value.strip() or value.strip().startswith("TBD"):
+        raise IntegrityError("configs/data.yaml", f"target.identity.phase_id is unset: {value!r}")
+    return value.strip()
+
+
+def _month_tag(months: list[int]) -> str:
+    """`m01-11` for a contiguous run, `m02` for one month, `m01_03` otherwise."""
+    ordered = sorted(set(months))
+    if len(ordered) == 1:
+        return f"m{ordered[0]:02d}"
+    if ordered == list(range(ordered[0], ordered[-1] + 1)):
+        return f"m{ordered[0]:02d}-{ordered[-1]:02d}"
+    return "m" + "_".join(f"{m:02d}" for m in ordered)
+
+
+def b01_output_names(phase_id: str, months: list[int]) -> dict[str, str]:
+    """Per-month-set, per-`phase_id` B-01 output names (D-83 revision 7 §A7 item 2; W-2).
+
+    The two halves (January-November before G-05; December after it) never share a file,
+    and neither touches the legacy November receipt (`b01_iri2016_rows_partial.jsonl`,
+    `b01_provenance.json`, `sha256_manifest.json`)."""
+    stem = f"{phase_id}_{_month_tag(months)}"
+    return {
+        "rows": f"b01_iri2016_rows_{stem}.jsonl",
+        "provenance": f"b01_provenance_{stem}.json",
+        "manifest": f"b01_sha256_manifest_{stem}.json",
+    }
+
+
+def _write_once_text(path: Path, text: str) -> Path:
+    """Exclusive create: an existing file is never overwritten (D-83 §A6 item 1)."""
+    try:
+        from src.data.release import write_once_durable
+
+        write_once_durable(path, text)  # exclusive create + fsync (W-6 measures this path)
+    except FileExistsError as exc:
+        raise IntegrityError(
+            str(path),
+            "already exists; B-01 outputs are write-once (D-83 revision 7 §A7 items 1-2)",
+        ) from exc
+    return path
+
+
 def _generate_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
-    """The production path (R-59 all limbs; D-45 pins before and after the session)."""
+    """The production path (R-59 all limbs; D-45 pins before and after the session).
+
+    D-83 revision 7: `--months` is required (an omitted value means 1-12, which reaches
+    December); month 12 needs a verifying `--g05-signature` and is December-only (the
+    guard lives in `iri.run_gated_generation`); outputs are named per month-set and
+    `phase_id` and written once."""
     _assert_phase1_field_contract(args.phase)
     from src.data.registry import load_registry  # station coordinates (D-1)
+    from src.data.splits import verify_g05_signature
     from src.external import iri  # allowlisted importer; deferred by design
 
     if args.validation_report is None:
@@ -1728,14 +1818,58 @@ def _generate_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> d
             "--validation-report",
             "required with --generate-benchmark: the governed R-59 report to gate on (limb 1)",
         )
+    if not args.months:
+        raise IntegrityError(
+            "--months",
+            "required with --generate-benchmark: an omitted --months means 1-12, which "
+            "reaches December; before G-05 use --months 1,2,3,4,5,6,7,8,9,10,11 "
+            "(D-83 revision 7 §A7 item 3)",
+        )
+    try:
+        months = [int(m) for m in args.months.split(",")]
+    except ValueError as exc:
+        raise IntegrityError(
+            "--months", f"{args.months!r} is not a comma-separated list of month numbers"
+        ) from exc
     report = _load_json_object(args.validation_report, what="validation report")
     if not isinstance(report, Mapping):
         raise IntegrityError(
             str(args.validation_report), "validation report must be a JSON object"
         )
-    months = [int(m) for m in args.months.split(",")] if args.months else None
-    contract = iri.read_benchmark_contract(entry["snapshot"])
-    stations = load_registry(entry["snapshot"])
+    snapshot = entry["snapshot"]
+    contract = iri.read_benchmark_contract(snapshot)
+    phase_id = _data_phase_id(snapshot)
+    stamped = dict(contract.stamps).get("phase_id")
+    if stamped != phase_id:
+        raise IntegrityError(
+            "experiment.yaml benchmark_b01.stamps.phase_id",
+            f"{stamped!r} differs from data.yaml target.identity.phase_id {phase_id!r} "
+            "(D-83 §A6 item 12)",
+        )
+    g05_verified = verify_g05_signature(snapshot, getattr(args, "g05_signature", None))
+    iri.assert_december_gate(months, g05_verified=g05_verified)
+    names = b01_output_names(phase_id, months)
+    if DECEMBER_MONTH in months:
+        # Generation-once, not only admission-once (GOV-2026-09-30-PV-09 VAL-02): a
+        # December draw is refused when the phase's one-shot marker already exists at the
+        # workspace path, whatever --out-dir is given.
+        marker = december_marker_path(Path(snapshot.resolved_roots["workspace"]), phase_id)
+        if marker.exists():
+            raise IntegrityError(
+                str(marker),
+                f"December B-01 rows for phase_id {phase_id!r} were already generated and "
+                "admitted; the December generation is one-shot per phase_id "
+                "(D-83 revision 7 §R4-7 item 4; §A7 item 1)",
+            )
+    out = _b01_out_dir(entry, args)
+    for key in ("rows", "provenance", "manifest"):
+        if (out / names[key]).exists():
+            raise IntegrityError(
+                str(out / names[key]),
+                f"already exists; B-01 generation for {names['rows']} is write-once "
+                "(D-83 revision 7 §A7 items 1-2)",
+            )
+    stations = load_registry(snapshot)
 
     def progress(done: int, total: int) -> None:
         print(f"04_build_external_products: B-01 {done}/{total} calls", flush=True)
@@ -1746,33 +1880,223 @@ def _generate_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> d
         stations=stations,
         months=months,
         progress=progress,
+        snapshot=snapshot,
+        g05_signature=getattr(args, "g05_signature", None),
     )
-    out = _b01_out_dir(entry, args)
-    rows_path = out / (
-        "b01_iri2016_rows_partial.jsonl" if result["partial"] else "b01_iri2016_rows.jsonl"
+    rows_path = _write_once_text(
+        out / names["rows"],
+        "".join(json.dumps(row, default=str) + "\n" for row in result["rows"]),
     )
-    with rows_path.open("w", encoding="utf-8") as handle:
-        for row in result["rows"]:
-            handle.write(json.dumps(row, default=str) + "\n")
     prov = dict(result["provenance"])
     prov["rows_file"] = rows_path.name
     prov["rows_sha256"] = sha256_of_file(rows_path)
+    prov["phase_id"] = phase_id
+    prov["script_id"] = "04_build_external_products"
     prov["validation_report_file"] = str(args.validation_report)
     prov["validation_report_sha256"] = sha256_of_file(Path(args.validation_report))
     prov["environment_lock_hash"] = environment_lock_hash(entry["lock"])
-    prov["config_hashes"] = dict(entry["snapshot"].hashes)
+    prov["config_hashes"] = dict(snapshot.hashes)
+    prov["data_yaml_sans_gates_sha256"] = data_sans_gates_sha256(snapshot)
+    prov["g05_verified"] = bool(g05_verified)
     prov["artifact_class"] = (
         "B-01 benchmark rows (generated, not trained); partial"
         if result["partial"]
         else "B-01 benchmark rows (generated, not trained)"
     )
-    prov_path = _write_json(out / "b01_provenance.json", prov)
-    _write_manifest(out, [rows_path, prov_path])
+    prov_path = _write_once_text(
+        out / names["provenance"], json.dumps(prov, indent=2, default=str) + "\n"
+    )
+    manifest_path = _write_once_text(
+        out / names["manifest"],
+        json.dumps({f.name: sha256_of_file(f) for f in (rows_path, prov_path)}, indent=2) + "\n",
+    )
     print(
         f"04_build_external_products: B-01 generated {prov['call_count']} rows "
         f"({prov['error_rows']} error rows) in {prov['workload_seconds']} s -> {rows_path}"
     )
-    return {"benchmark_rows": rows_path, "provenance": prov_path}
+    return {"benchmark_rows": rows_path, "provenance": prov_path, "manifest": manifest_path}
+
+
+DECEMBER_MONTH = 12
+DATA_YAML = "data.yaml"
+
+
+def data_sans_gates_sha256(snapshot: Any) -> str:
+    """SHA-256 of `data.yaml` with the `gates` node removed, canonical JSON.
+
+    Signing G-05 writes `gates.G-05` into `data.yaml`, so the two B-01 halves can never
+    carry equal `data.yaml` hashes. Under the Student's ruling on GOV-2026-09-30-PV-09
+    TEC-01 ("Diff allows only gates"), assembly allows `data.yaml` to differ ONLY there,
+    and this digest is the evidence that nothing else changed.
+    """
+    body = {k: v for k, v in dict(snapshot.data).items() if k != "gates"}
+    return hashlib.sha256(
+        json.dumps(body, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
+
+
+def december_marker_path(workspace: Path, phase_id: str) -> Path:
+    """The one-shot December-generation marker, admitted in (a) (D-83 §A7 item 1; W-1)."""
+    return workspace / "evidence" / "b01_december" / f"december_generation_marker_{phase_id}.json"
+
+
+def _verify_receipt(prov_path: Path) -> dict[str, Any]:
+    """Re-verify a B-01 receipt after transfer: provenance, rows and manifest hashes agree."""
+    prov = _load_json_object(prov_path, what="B-01 receipt")
+    if not isinstance(prov, Mapping):
+        raise IntegrityError(str(prov_path), "B-01 receipt must be a JSON object")
+    rows_name = str(prov.get("rows_file", ""))
+    rows_path = prov_path.parent / rows_name
+    if not rows_name or not rows_path.is_file():
+        raise IntegrityError(str(rows_path), "the receipt's rows file is missing")
+    if sha256_of_file(rows_path) != prov.get("rows_sha256"):
+        raise IntegrityError(str(rows_path), "rows SHA-256 differs from the receipt")
+    manifest_path = prov_path.parent / rows_name.replace(
+        "b01_iri2016_rows_", "b01_sha256_manifest_"
+    ).replace(".jsonl", ".json")
+    if not manifest_path.is_file():
+        raise IntegrityError(str(manifest_path), "the receipt's SHA-256 manifest is missing")
+    manifest = _load_json_object(manifest_path, what="B-01 manifest")
+    expected = {
+        rows_path.name: sha256_of_file(rows_path),
+        prov_path.name: sha256_of_file(prov_path),
+    }
+    if manifest != expected:
+        raise IntegrityError(str(manifest_path), "manifest disagrees with the transferred files")
+    return dict(prov)
+
+
+def _admit_december_receipt(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """Admit a December B-01 receipt in (a) and write the one-shot marker (W-1).
+
+    The marker is the one-shot key: exclusive create, so a second December generation for
+    the same `phase_id` can never be admitted, whichever (b) produced it (a rebuilt (b)
+    cannot evade it). The write-once receipt is the second limb (re-verified here after
+    transfer); (b)'s own write-once check is defence in depth only."""
+    snapshot = entry["snapshot"]
+    phase_id = _data_phase_id(snapshot)
+    prov_path = Path(args.admit_december_receipt)
+    prov = _verify_receipt(prov_path)
+    if prov.get("months") != [12]:
+        raise IntegrityError(
+            str(prov_path), f"not a December-only receipt: months {prov.get('months')!r}"
+        )
+    for key in ("phase_id", "script_id"):
+        if not prov.get(key):
+            raise IntegrityError(
+                str(prov_path), f"receipt lacks {key!r}; a missing field is refused"
+            )
+    if prov["phase_id"] != phase_id:
+        raise IntegrityError(
+            str(prov_path), f"receipt phase_id {prov['phase_id']!r} != {phase_id!r}"
+        )
+    if prov.get("g05_verified") is not True:
+        raise IntegrityError(str(prov_path), "receipt does not record a verified G-05 signature")
+    from src.data.splits import verify_g05_signature
+
+    if not verify_g05_signature(snapshot, getattr(args, "g05_signature", None)):
+        # The receipt's own `g05_verified` is self-attested; admission re-verifies G-05 in
+        # (a) (D-83 §R4-7 item 4; GOV-2026-09-30-PV-09 IMPL-02).
+        raise IntegrityError(
+            "--g05-signature",
+            "admission of a December receipt re-verifies G-05 in (a); no verifying "
+            "--g05-signature was given",
+        )
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    marker = december_marker_path(workspace, phase_id)
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "phase_id": phase_id,
+        "script_id": "04_build_external_products",
+        "receipt": prov_path.name,
+        "receipt_sha256": sha256_of_file(prov_path),
+        "rows_sha256": prov["rows_sha256"],
+        "admitted_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "admitting_environment_lock_hash": environment_lock_hash(entry["lock"]),
+        "decision": "D-83 revision 7 §A7 item 1",
+    }
+    try:
+        _write_once_text(marker, json.dumps(payload, indent=2) + "\n")
+    except IntegrityError as exc:
+        raise IntegrityError(
+            str(marker),
+            f"a December B-01 generation for {phase_id} is already admitted; the December "
+            "run is one-shot per phase_id (D-83 §R4-7 item 4)",
+        ) from exc
+    return {"december_marker": marker}
+
+
+def _assemble_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """Join the two B-01 halves for this phase_id into one manifested product (W-2)."""
+    snapshot = entry["snapshot"]
+    phase_id = _data_phase_id(snapshot)
+    out = _b01_out_dir(entry, args)
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    marker = december_marker_path(workspace, phase_id)
+    if not marker.is_file():
+        raise IntegrityError(
+            str(marker), "no admitted December marker; assembly needs an admitted December receipt"
+        )
+    halves = [
+        b01_output_names(phase_id, list(range(1, 12))),
+        b01_output_names(phase_id, [12]),
+    ]
+    provs = [_verify_receipt(out / h["provenance"]) for h in halves]
+    for prov, want in zip(provs, (list(range(1, 12)), [DECEMBER_MONTH])):
+        if prov.get("months") != want or prov.get("phase_id") != phase_id or not prov.get("script_id"):
+            raise IntegrityError(
+                "B-01 assembly",
+                f"half {prov.get('rows_file')!r} is not the {want} half for {phase_id} "
+                f"(months {prov.get('months')!r}, phase_id {prov.get('phase_id')!r})",
+            )
+    admitted = json.loads(marker.read_text(encoding="utf-8"))
+    dec_prov_path = out / halves[1]["provenance"]
+    if (
+        admitted.get("rows_sha256") != provs[1].get("rows_sha256")
+        or admitted.get("receipt_sha256") != sha256_of_file(dec_prov_path)
+    ):
+        # Assembly is bound to the ADMITTED December receipt, not whatever sits in the
+        # directory (GOV-2026-09-30-PV-09 TEC-02 / IMPL-03).
+        raise IntegrityError(
+            str(dec_prov_path),
+            "the December half is not the receipt admitted by the one-shot marker",
+        )
+    idx = [p.get("runtime_identity", {}).get("index_files_sha256") for p in provs]
+    if idx[0] is None or idx[0] != idx[1]:
+        raise IntegrityError("B-01 assembly", f"index SHA-256 differ between halves: {idx!r}")
+    hashes = [dict(p.get("config_hashes") or {}) for p in provs]
+    others = [{k: v for k, v in h.items() if k != DATA_YAML} for h in hashes]
+    if others[0] != others[1] or set(hashes[0]) != set(hashes[1]):
+        raise IntegrityError("B-01 assembly", "config hashes other than data.yaml differ between halves")
+    config_diff: dict[str, str] = {}
+    if hashes[0].get(DATA_YAML) != hashes[1].get(DATA_YAML):
+        sans = [p.get("data_yaml_sans_gates_sha256") for p in provs]
+        if sans[0] is None or sans[0] != sans[1]:
+            raise IntegrityError(
+                "B-01 assembly",
+                "data.yaml differs between halves outside the `gates` node; only the G-05 "
+                "signature may differ (Student ruling on GOV-2026-09-30-PV-09 TEC-01)",
+            )
+        config_diff[DATA_YAML] = "differs only under `gates`"
+    rows_text = "".join((out / h["rows"]).read_text(encoding="utf-8") for h in halves)
+    rows_path = _write_once_text(out / f"b01_iri2016_rows_{phase_id}_assembled.jsonl", rows_text)
+    manifest = {
+        "phase_id": phase_id,
+        "halves": {h["rows"]: p["rows_sha256"] for h, p in zip(halves, provs)},
+        "receipts": {h["provenance"]: sha256_of_file(out / h["provenance"]) for h in halves},
+        "assembled_rows": rows_path.name,
+        "assembled_rows_sha256": sha256_of_file(rows_path),
+        "index_files_sha256": idx[0],
+        "config_hashes": {h["rows"]: p.get("config_hashes") for h, p in zip(halves, provs)},
+        "config_diff": config_diff,
+        "data_yaml_sans_gates_sha256": provs[0].get("data_yaml_sans_gates_sha256"),
+        "december_marker": marker.name,
+        "decision": "D-83 revision 7 §A7 item 2; GOV-2026-09-30-PV-09 TEC-01/TEC-02",
+    }
+    manifest_path = _write_once_text(
+        out / f"b01_assembly_manifest_{phase_id}.json", json.dumps(manifest, indent=2) + "\n"
+    )
+    return {"assembled_rows": rows_path, "assembly_manifest": manifest_path}
 
 
 def _attempt_comparator(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
@@ -2574,6 +2898,10 @@ def main() -> int:
             summary = _build_validation_report(entry, args)
         elif args.generate_benchmark:
             summary = _generate_benchmark(entry, args)
+        elif args.admit_december_receipt is not None:
+            summary = _admit_december_receipt(entry, args)
+        elif args.assemble_benchmark:
+            summary = _assemble_benchmark(entry, args)
         elif args.attempt_comparator:
             summary = _attempt_comparator(entry, args)
         elif args.render_comparison is not None:

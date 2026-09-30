@@ -132,3 +132,6 @@ venv/
 .conda-env/
 # B-01 Kaggle package: a build output of the tree (kaggle/build_b01_package.py)
 kaggle/dist/
+
+# D-83 revision 7 W-6: durability-harness scratch (per-trial files; failed trials are copied into evidence/durability)
+artifacts/durability_scratch/

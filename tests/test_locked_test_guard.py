@@ -954,6 +954,11 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         # design); every one of the five carries ZERO `2022-12-DD` dates. All measured
         # content is January-November 2022 only (the acquisition's own December-sealed
         # discipline), independent of this test's own scan.
+        # 2026-10-01: the sidecar note marking the Python 3.14 kill campaign non-governed
+        # (GOV-2026-09-30-PV-09 ML-03 / DATA-05; inventoried per CHAIR-02 / IMPL-01). Prose,
+        # the same disposition as every `.md` above. Derived and printed before assertion:
+        # it matches `vtec|tecu` 0 times and carries no `2022-12-DD` date.
+        "durability/campaign_kill_20260930T164532Z-3820c087/NON_GOVERNED_NOTE.md",
         "r60_gim_gate_inputs/HANDBACK_2026-09-26.md",
         "r60_gim_gate_inputs/R60_handcheck_2026-09-26.md",
         "r60_gim_gate_inputs/R60_overlap_audit_input_2026-09-26.md",
@@ -1765,6 +1770,8 @@ def test_containment_fields_are_optional_on_the_record_itself() -> None:
         retrieved_at_utc="2026-08-28T00:00:00Z",
         scope="s",
         purpose="locked_evaluation",
+        script_id="06_train_and_predict",
+        phase_id="P1A",
         performance_inspected=False,
         locked_test_accessed=True,
         authorization="a",
@@ -1779,6 +1786,8 @@ def test_containment_fields_are_optional_on_the_record_itself() -> None:
             retrieved_at_utc="2026-08-28T00:00:00Z",
             scope="s",
             purpose="locked_evaluation",
+            script_id="06_train_and_predict",
+            phase_id="P1A",
             performance_inspected=False,
             locked_test_accessed=True,
             authorization="a",

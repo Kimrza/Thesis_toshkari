@@ -504,7 +504,8 @@ def run(out_dir: Path, *, offline: bool) -> int:
     )
     lock_hash, lock = _supplemental_lock(out_dir)
     registry_path = REPO_ROOT / "artifacts" / "registry" / "experiment_registry.jsonl"
-    access_log = REPO_ROOT / "evidence" / "test_run_access_log.jsonl"
+    # The governed log, never the CLOSED test_run_access_log.jsonl (D-83 revision 7 W-9).
+    access_log = REPO_ROOT / "evidence" / "merge_run_access_log.jsonl"
     notes = (
         "GFZ driver-pair audit (Kp nowcast vs definitive; Hp60 V2.0 vs V3.0). Driver data "
         "only: no December 2022 TARGET value read (R-26 driver exclusion). environment_lock_hash "

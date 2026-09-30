@@ -301,6 +301,14 @@ class AccessRecord:
     authorization: str
     mask_bundle_ids: tuple[str, ...] | None = None
     mask_registry_hash: str | None = None
+    #: D-83 revision 7 (§A6 item 20; §A7 item 1; §W7 W-1): the producing stage script and
+    #: the `phase_id` (from `data.yaml` `target.identity`). REQUIRED on
+    #: `purpose="locked_evaluation"` records, optional (and unused) on every other
+    #: purpose, so the audit builders (`inventory.py`, `merge_coverage_year.py`, the
+    #: acquisition reads) are unaffected. They key the once-per-`phase_id` refusal in
+    #: `assert_first_locked_evaluation`.
+    script_id: str | None = None
+    phase_id: str | None = None
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -327,7 +335,69 @@ class AccessRecord:
                 "locked_test_accessed must be True for any read under RESTRICTED_ROOT; "
                 "TE 13.4 makes the flag the fact a G-06 reviewer establishes",
             )
+        if self.purpose == "locked_evaluation":
+            for field_name in ("script_id", "phase_id"):
+                value = getattr(self, field_name)
+                if not isinstance(value, str) or not value.strip():
+                    raise LockedTestError(
+                        "AccessRecord",
+                        f"field {field_name!r} is required on a locked_evaluation record "
+                        "(D-83 revision 7 section A6 item 20; A7 item 1)",
+                    )
         _assert_parseable_retrieved_at(self.retrieved_at_utc)
+
+
+def assert_first_locked_evaluation(
+    access_log: Path,
+    *,
+    run_id: str,
+    script_id: str,
+    phase_id: str,
+    cutoff_utc: str | None = None,
+) -> None:
+    """Refuse a repeated locked evaluation by the same script for the same phase.
+
+    D-83 revision 7 (section R4-7 item 3; A7 item 1; W-1). A prior `locked_evaluation`
+    row MATCHES when it was logged by a different `run_id`, at or after `cutoff_utc`
+    (every row when no cutoff is given -- the conservative reading), and its `script_id`
+    and `phase_id` each either equal this run's or are MISSING: a record that does not
+    say which script or phase wrote it counts as a match and refuses. Rows of other
+    purposes never match, and a row stamped by a different script never matches, so a
+    05 feature-build row does not block the first 06 run.
+
+    An unreadable log line refuses too: it cannot prove it was not a prior evaluation.
+    """
+    if not access_log.is_file():
+        return
+    for number, line in enumerate(access_log.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise LockedTestError(
+                str(access_log),
+                f"line {number} is unreadable; it cannot be excluded as a prior locked "
+                "evaluation (D-83 revision 7 A7 item 1)",
+            ) from exc
+        if not isinstance(row, dict) or row.get("purpose") != "locked_evaluation":
+            continue
+        if row.get("run_id") == run_id:
+            continue
+        logged = row.get("logged_at_utc")
+        if cutoff_utc is not None and _logged_before(logged, cutoff_utc):
+            continue
+        if row.get("script_id") not in (None, "", script_id):
+            continue
+        if row.get("phase_id") not in (None, "", phase_id):
+            continue
+        raise LockedTestError(
+            str(access_log),
+            f"line {number}: a locked evaluation by {row.get('script_id')!r} for "
+            f"{row.get('phase_id')!r} (run {row.get('run_id')!r}) already exists; "
+            f"{script_id} runs once per phase_id, and a missing field counts as a match "
+            "(D-83 revision 7 section R4-7 item 3)",
+        )
 
 
 def _assert_parseable_retrieved_at(value: str) -> None:
@@ -385,6 +455,75 @@ def _restricted_root(repo_root: Path) -> Path:
     return (repo_root / RESTRICTED_ROOT).resolve()
 
 
+#: D-83 revision 7 (section A7 item 18; W-9): the governed access-log enumeration.
+#: GOVERNED: `evidence/merge_run_access_log.jsonl`, written by the stage scripts 01-07
+#: (`_registry_paths`), `scripts/gate_in_session.py` (l.247), `scripts/run_walking_skeleton.py`
+#: (`_registry_paths`) and `scripts/merge_coverage_year.py` (`ACCESS_LOG`).
+#: NOT GOVERNED: `artifacts/exec_evidence/test_access_log.jsonl` (the test suite's own,
+#: gitignored since 2026-09-20).
+#: CLOSED: `evidence/test_run_access_log.jsonl` (5,964 harness rows); no append is allowed
+#: and every row must carry a harness `run_id`.
+GOVERNED_ACCESS_LOG: Final[str] = "evidence/merge_run_access_log.jsonl"
+TEST_SUITE_ACCESS_LOG: Final[str] = "artifacts/exec_evidence/test_access_log.jsonl"
+CLOSED_ACCESS_LOG: Final[str] = "evidence/test_run_access_log.jsonl"
+#: The harness run ids the closed log may contain (the two restricted-reader test modules).
+CLOSED_LOG_HARNESS_RUN_IDS: Final[frozenset[str]] = frozenset(
+    {"test_release_hashes", "test_acquisition_window"}
+)
+
+
+def is_closed_access_log(path: Path) -> bool:
+    """True when `path` is the closed governed log (matched by its path tail)."""
+    parts = Path(path).resolve().parts
+    return len(parts) >= 2 and parts[-2:] == ("evidence", "test_run_access_log.jsonl")
+
+
+def _logged_before(logged: Any, cutoff_utc: str) -> bool:
+    """True only when both parse as aware datetimes and `logged` precedes the cutoff.
+
+    Anything unparseable stays IN scope (the conservative direction); comparison is on
+    parsed values, never strings (GOV-2026-09-30-PV-09 TEC-05 / VAL-04).
+    """
+    import datetime as _dt
+
+    def parse(value: Any) -> Any:
+        try:
+            out = _dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        return out if out.tzinfo is not None else None
+
+    a, b = parse(logged), parse(cutoff_utc)
+    return a is not None and b is not None and a < b
+
+
+def assert_closed_log_harness_only(path: Path) -> int:
+    """Every row of the closed log carries a harness `run_id` (W-9); returns the row count."""
+    count = 0
+    for number, line in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise LockedTestError(
+                str(path), f"line {number}: not valid JSON ({exc.msg}); the closed log is refused"
+            ) from exc
+        if not isinstance(row, dict):
+            raise LockedTestError(
+                str(path), f"line {number}: row is {type(row).__name__}, not an object"
+            )
+        run_id = row.get("run_id")
+        if run_id not in CLOSED_LOG_HARNESS_RUN_IDS:
+            raise LockedTestError(
+                str(path),
+                f"line {number}: run_id {run_id!r} is not a harness run id; the closed log "
+                "holds harness rows only (D-83 revision 7 A7 item 18)",
+            )
+        count += 1
+    return count
+
+
 def _append_and_flush(registry: Path, record: AccessRecord) -> str:
     """Append one row, stamp it with the guard's OWN write time, force it to disk.
 
@@ -405,6 +544,12 @@ def _append_and_flush(registry: Path, record: AccessRecord) -> str:
     FR-P1-02-3's ordering requirement unverifiable from the log it is recorded in. This
     field is that defect's fix.
     """
+    if is_closed_access_log(registry):
+        raise LockedTestError(
+            str(registry),
+            "this access log is CLOSED; no row may be appended to it (D-83 revision 7 "
+            "section A7 item 18; W-9). Governed runs write evidence/merge_run_access_log.jsonl",
+        )
     registry.parent.mkdir(parents=True, exist_ok=True)
     row = asdict(record)
     row["logged_at_utc"] = _dt.datetime.now(_dt.timezone.utc).isoformat()

@@ -785,3 +785,42 @@ def verify_release(manifest_path: Path) -> list[str]:
                     f"hex of content_hash (D-29)"
                 )
     return problems
+
+
+def write_once_durable(path: Path, text: str) -> Path:
+    """Exclusive-create `path`, write `text`, flush and fsync before returning.
+
+    The write-once receipt idiom (D-83 revision 7 section A7 items 1-2): an existing file
+    is never overwritten (`FileExistsError` propagates to the caller, which names the
+    refusal), and the bytes are forced to disk before the caller treats the receipt as
+    written, so the durability measurement (W-6) measures the same code path production
+    uses. Line endings are written as LF on every platform.
+
+    Complete-or-absent (GOV-2026-09-30-PV-09 BENCH-02): the bytes go to a unique temporary
+    sibling first, are fsynced, and are then hard-linked to the final name. `os.link`
+    fails if the final name exists, so write-once holds atomically, and a kill before the
+    link leaves only the temporary file, never a partial file at the final name that would
+    consume a one-shot event. The temporary file is removed after the link.
+    """
+    import os
+    import uuid
+
+    final = Path(path)
+    if final.exists():
+        raise FileExistsError(str(final))
+    tmp = final.with_name(f".{final.name}.{uuid.uuid4().hex}.partial")
+    with tmp.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
+        handle.flush()
+        os.fsync(handle.fileno())
+    try:
+        os.link(tmp, final)
+    finally:
+        tmp.unlink(missing_ok=True)
+    if hasattr(os, "O_DIRECTORY"):  # POSIX: persist the new directory entry
+        fd = os.open(final.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+    return final

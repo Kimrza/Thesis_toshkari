@@ -2095,7 +2095,7 @@ def test_b01_generate_partial_month_end_to_end(b01) -> None:
         json.loads(line)
         for line in summary["benchmark_rows"].read_text(encoding="utf-8").splitlines()
     ]
-    assert len(rows) == 3 * 28 * 24 and summary["benchmark_rows"].name.endswith("_partial.jsonl")
+    assert len(rows) == 3 * 28 * 24 and summary["benchmark_rows"].name == "b01_iri2016_rows_P1A_m02.jsonl"
     first = rows[0]
     assert (
         first["phase_id"] == "P1A"
@@ -2138,10 +2138,9 @@ def test_b01_generate_partial_month_end_to_end(b01) -> None:
     assert all(
         r["release_status"].startswith("hindcast-only") for r in prov["benchmark_driver_rows"]
     )
-    manifest = json.loads(
-        (summary["benchmark_rows"].parent / "sha256_manifest.json").read_text(encoding="utf-8")
-    )
-    assert set(manifest) == {"b01_iri2016_rows_partial.jsonl", "b01_provenance.json"}
+    manifest = json.loads(summary["manifest"].read_text(encoding="utf-8"))
+    assert set(manifest) == {"b01_iri2016_rows_P1A_m02.jsonl", "b01_provenance_P1A_m02.json"}
+    assert prov["phase_id"] == "P1A" and prov["script_id"] == "04_build_external_products"
 
 
 def test_b01_generate_refuses_failed_report_and_mismatched_pins(b01) -> None:
@@ -2404,3 +2403,254 @@ def test_ec1_audit_marks_itself_derived_and_keeps_completeness_off_the_exit_code
         "main must still return 0 on a completeness shortfall: shortfalls are non-fatal "
         "by contract and are recorded as report fields, never signalled by exit status"
     )
+
+
+# --- D-83 revision 7 §W7 W-1 / W-2 / W-3: the December limb of B-01 ---------------------
+
+
+def _b01_ready(b01):
+    mod, tmp_path, workspace, _ = b01
+    entry = _b01_entry(mod, _b01_configs(tmp_path), workspace)
+    samples_path = tmp_path / "samples.json"
+    samples_path.write_text(json.dumps(_samples()), encoding="utf-8")
+    report_path = mod._build_validation_report(entry, _ns(build_validation_report=samples_path))[
+        "validation_report"
+    ]
+    return mod, tmp_path, workspace, entry, report_path
+
+
+def _sign_g05(monkeypatch) -> None:
+    import src.data.splits as splits
+
+    monkeypatch.setattr(splits, "verify_g05_signature", lambda snapshot, sig: sig == "SIGNED")
+
+
+def _gen(mod, entry, report, months, **kw):
+    return mod._generate_benchmark(
+        entry, _ns(generate_benchmark=True, validation_report=report, months=months, **kw)
+    )
+
+
+def test_w3_omitted_months_is_refused(b01) -> None:
+    mod, _, _, entry, report = _b01_ready(b01)
+    with pytest.raises(mod.IntegrityError) as exc:
+        _gen(mod, entry, report, None)
+    assert "--months" in str(exc.value)
+
+
+def test_w3_range_syntax_does_not_parse(b01) -> None:
+    mod, _, _, entry, report = _b01_ready(b01)
+    with pytest.raises(mod.IntegrityError):
+        _gen(mod, entry, report, "1..11")
+
+
+@pytest.mark.parametrize("months", ["12", "1,2,3,4,5,6,7,8,9,10,11,12"])
+def test_w3_december_without_g05_signature_is_refused(b01, months) -> None:
+    from src.data.config import BenchmarkError
+
+    mod, _, workspace, entry, report = _b01_ready(b01)
+    with pytest.raises(BenchmarkError) as exc:
+        _gen(mod, entry, report, months, g05_signature="X")
+    assert "G-05" in str(exc.value)
+    assert not list((workspace / "artifacts" / "external" / "b01").glob("b01_iri2016_rows_*"))
+
+
+def test_w3_december_mixed_with_other_months_is_refused_even_when_signed(
+    b01, monkeypatch
+) -> None:
+    from src.data.config import BenchmarkError
+
+    _sign_g05(monkeypatch)
+    mod, _, _, entry, report = _b01_ready(b01)
+    with pytest.raises(BenchmarkError) as exc:
+        _gen(mod, entry, report, "11,12", g05_signature="SIGNED")
+    assert "December-only" in str(exc.value)
+
+
+def test_w1_w2_split_runs_marker_and_assembly(b01, monkeypatch) -> None:
+    """End to end: Jan-Nov before G-05, December after it, admission, one-shot, assembly.
+    The legacy November receipt is never touched; the December run cannot touch the
+    January-November files; a second December generation and admission are refused."""
+    from src.data.release import sha256_of_file
+
+    mod, _, workspace, entry, report = _b01_ready(b01)
+    out = workspace / "artifacts" / "external" / "b01"
+    out.mkdir(parents=True, exist_ok=True)
+    legacy_names = ("b01_provenance.json", "b01_iri2016_rows_partial.jsonl", "sha256_manifest.json")
+    for name in legacy_names:
+        (out / name).write_text("legacy november receipt\n", encoding="utf-8")
+    legacy_hashes = {n: sha256_of_file(out / n) for n in legacy_names}
+
+    jan_nov = _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    assert jan_nov["benchmark_rows"].name == "b01_iri2016_rows_P1A_m01-11.jsonl"
+    jan_nov_hashes = {p.name: sha256_of_file(p) for p in out.glob("*_m01-11.*")}
+    assert len(jan_nov_hashes) == 3
+
+    with pytest.raises(mod.IntegrityError):  # write-once: the half cannot be regenerated
+        _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    with pytest.raises(mod.IntegrityError):  # no assembly before an admitted December
+        mod._assemble_benchmark(entry, _ns(assemble_benchmark=True))
+
+    _sign_g05(monkeypatch)
+    dec = _gen(mod, entry, report, "12", g05_signature="SIGNED")
+    assert dec["benchmark_rows"].name == "b01_iri2016_rows_P1A_m12.jsonl"
+    assert {p.name: sha256_of_file(p) for p in out.glob("*_m01-11.*")} == jan_nov_hashes
+    assert {n: sha256_of_file(out / n) for n in legacy_names} == legacy_hashes
+
+    with pytest.raises(mod.IntegrityError):  # a second December generation in (b)
+        _gen(mod, entry, report, "12", g05_signature="SIGNED")
+
+    admitted = mod._admit_december_receipt(entry, _ns(admit_december_receipt=dec["provenance"], g05_signature="SIGNED"))
+    marker = json.loads(admitted["december_marker"].read_text(encoding="utf-8"))
+    assert marker["phase_id"] == "P1A" and marker["script_id"] == "04_build_external_products"
+
+    # Generation-once (GOV-2026-09-30-PV-09 VAL-02): after admission, a December draw
+    # into a DIFFERENT --out-dir is refused at the entry point by the marker.
+    with pytest.raises(mod.IntegrityError) as exc:
+        _gen(mod, entry, report, "12", g05_signature="SIGNED", out=Path("artifacts/other_b01"))
+    assert "one-shot" in str(exc.value)
+
+    # A rebuilt (b) holding a second copy of a December receipt cannot be admitted: the
+    # marker in (a) is the one-shot key.
+    other = out / "rebuilt"
+    other.mkdir()
+    for p in (dec["benchmark_rows"], dec["provenance"], dec["manifest"]):
+        (other / p.name).write_bytes(p.read_bytes())
+    with pytest.raises(mod.IntegrityError) as exc:
+        mod._admit_december_receipt(
+            entry, _ns(admit_december_receipt=other / dec["provenance"].name, g05_signature="SIGNED")
+        )
+    assert "already admitted" in str(exc.value)
+
+    assembled = mod._assemble_benchmark(entry, _ns(assemble_benchmark=True))
+    manifest = json.loads(assembled["assembly_manifest"].read_text(encoding="utf-8"))
+    assert set(manifest["halves"]) == {
+        "b01_iri2016_rows_P1A_m01-11.jsonl",
+        "b01_iri2016_rows_P1A_m12.jsonl",
+    }
+    n_rows = len(assembled["assembled_rows"].read_text(encoding="utf-8").splitlines())
+    assert n_rows == 3 * 365 * 24
+    assert {n: sha256_of_file(out / n) for n in legacy_names} == legacy_hashes
+
+
+def test_w1_receipt_mismatch_after_transfer_is_refused(b01, monkeypatch) -> None:
+    _sign_g05(monkeypatch)
+    mod, _, _, entry, report = _b01_ready(b01)
+    dec = _gen(mod, entry, report, "12", g05_signature="SIGNED")
+    with dec["benchmark_rows"].open("a", encoding="utf-8") as handle:
+        handle.write("{}\n")
+    with pytest.raises(mod.IntegrityError) as exc:
+        mod._admit_december_receipt(entry, _ns(admit_december_receipt=dec["provenance"], g05_signature="SIGNED"))
+    assert "differs from the receipt" in str(exc.value)
+
+
+def test_w1_receipt_missing_field_is_refused(b01, monkeypatch) -> None:
+    from src.data.release import sha256_of_file
+
+    _sign_g05(monkeypatch)
+    mod, _, _, entry, report = _b01_ready(b01)
+    dec = _gen(mod, entry, report, "12", g05_signature="SIGNED")
+    prov = json.loads(dec["provenance"].read_text(encoding="utf-8"))
+    del prov["script_id"]
+    forged = dec["provenance"].parent / "forged"
+    forged.mkdir()
+    rows = forged / dec["benchmark_rows"].name
+    rows.write_bytes(dec["benchmark_rows"].read_bytes())
+    fp = forged / dec["provenance"].name
+    fp.write_text(json.dumps(prov), encoding="utf-8")
+    (forged / dec["manifest"].name).write_text(
+        json.dumps({rows.name: sha256_of_file(rows), fp.name: sha256_of_file(fp)}),
+        encoding="utf-8",
+    )
+    with pytest.raises(mod.IntegrityError) as exc:
+        mod._admit_december_receipt(entry, _ns(admit_december_receipt=fp, g05_signature="SIGNED"))
+    assert "missing field" in str(exc.value)
+
+
+# --- GOV-2026-09-30-PV-09 remediation: real G-05 signing between the halves --------------
+
+
+def _signed_entry(entry, *, extra_data=None):
+    """The same entry after G-05 is signed: `data.yaml` gains `gates.G-05` (and, for the
+    negative control, some other change). No monkeypatch of verify_g05_signature."""
+    import dataclasses
+    import hashlib
+
+    snap = entry["snapshot"]
+    data = dict(snap.data)
+    data["gates"] = {
+        "G-05": {
+            "status": "signed",
+            "signature_sha256": hashlib.sha256(b"REAL-SIG").hexdigest(),
+            "decision": "D-TEST",
+        }
+    }
+    if extra_data:
+        data.update(extra_data)
+    hashes = dict(snap.hashes)
+    hashes["data.yaml"] = hashlib.sha256(json.dumps(data, sort_keys=True, default=str).encode()).hexdigest()
+    return {**entry, "snapshot": dataclasses.replace(snap, data=data, hashes=hashes)}
+
+
+def test_pv09_tec01_assembly_passes_when_only_gates_differ(b01) -> None:
+    """PV-09 TEC-01: G-05 signing changes data.yaml; assembly allows the `gates` diff only."""
+    mod, _, _, entry, report = _b01_ready(b01)
+    _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    signed = _signed_entry(entry)
+    dec = _gen(mod, signed, report, "12", g05_signature="REAL-SIG")
+    mod._admit_december_receipt(signed, _ns(admit_december_receipt=dec["provenance"], g05_signature="REAL-SIG"))
+    assembled = mod._assemble_benchmark(signed, _ns(assemble_benchmark=True))
+    manifest = json.loads(assembled["assembly_manifest"].read_text(encoding="utf-8"))
+    assert manifest["config_diff"] == {"data.yaml": "differs only under `gates`"}
+
+
+def test_pv09_tec01_assembly_refuses_a_non_gates_data_change(b01) -> None:
+    mod, _, _, entry, report = _b01_ready(b01)
+    _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    signed = _signed_entry(entry, extra_data={"pv09_drift": 1})
+    dec = _gen(mod, signed, report, "12", g05_signature="REAL-SIG")
+    mod._admit_december_receipt(signed, _ns(admit_december_receipt=dec["provenance"], g05_signature="REAL-SIG"))
+    with pytest.raises(mod.IntegrityError) as exc:
+        mod._assemble_benchmark(signed, _ns(assemble_benchmark=True))
+    assert "outside the `gates` node" in str(exc.value)
+
+
+def test_pv09_impl02_forged_receipt_without_signature_is_refused_at_admission(b01) -> None:
+    """A receipt saying g05_verified=true is not enough: (a) re-verifies G-05."""
+    mod, _, _, entry, report = _b01_ready(b01)
+    signed = _signed_entry(entry)
+    dec = _gen(mod, signed, report, "12", g05_signature="REAL-SIG")
+    for sig in (None, "WRONG"):
+        with pytest.raises(mod.IntegrityError) as exc:
+            mod._admit_december_receipt(signed, _ns(admit_december_receipt=dec["provenance"], g05_signature=sig))
+        assert "re-verifies G-05" in str(exc.value)
+
+
+def test_pv09_tec03_run_gated_generation_ignores_a_caller_boolean(b01) -> None:
+    """TEC-03: the guard home verifies G-05 itself; an unsigned snapshot is refused."""
+    mod, _, _, entry, report = _b01_ready(b01)
+    with pytest.raises(mod.IntegrityError):
+        _gen(mod, entry, report, "12", g05_signature="REAL-SIG")  # data.yaml unsigned
+
+
+def test_pv09_tec02_assembly_refuses_a_substituted_december_half(b01) -> None:
+    """TEC-02 / IMPL-03: assembly is bound to the receipt the marker admitted."""
+    from src.data.release import sha256_of_file
+
+    mod, _, workspace, entry, report = _b01_ready(b01)
+    _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    signed = _signed_entry(entry)
+    dec = _gen(mod, signed, report, "12", g05_signature="REAL-SIG")
+    mod._admit_december_receipt(signed, _ns(admit_december_receipt=dec["provenance"], g05_signature="REAL-SIG"))
+    # substitute: rewrite the December rows and re-derive a self-consistent receipt
+    rows = dec["benchmark_rows"]
+    rows.write_text(rows.read_text(encoding="utf-8").replace("1", "2", 1), encoding="utf-8", newline="\n")
+    prov = json.loads(dec["provenance"].read_text(encoding="utf-8"))
+    prov["rows_sha256"] = sha256_of_file(rows)
+    dec["provenance"].write_bytes((json.dumps(prov, indent=2) + "\n").encode("utf-8"))
+    dec["manifest"].write_bytes(
+        json.dumps({rows.name: sha256_of_file(rows), dec["provenance"].name: sha256_of_file(dec["provenance"])}).encode("utf-8")
+    )
+    with pytest.raises(mod.IntegrityError) as exc:
+        mod._assemble_benchmark(signed, _ns(assemble_benchmark=True))
+    assert "not the receipt admitted" in str(exc.value) or "differs" in str(exc.value)

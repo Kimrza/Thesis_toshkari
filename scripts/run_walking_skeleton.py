@@ -180,6 +180,7 @@ from src.data.fixture_outputs import (  # noqa: E402
 )
 from src.data.phase_contract import assert_no_raw_fields, assert_phase_boundary  # noqa: E402
 from src.data.release import sha256_of_file  # noqa: E402
+from src.data.resources import environment_resources, peak_rss_of_popen  # noqa: E402
 
 STAGE = "fixtures-and-reproducibility"
 PHASE = 1
@@ -518,6 +519,7 @@ def _registry_row(
         "code_commit": "",  # populated from the lock by the caller
         "environment_lock_hash": lock_hash,
         "platform": snapshot.platform,
+        "environment_id": snapshot.environment_id,  # D-83 revision 7 W-4
         "dataset_version": "",
         "fold_id": "",
         "mask_id": "",
@@ -657,22 +659,28 @@ def run_command(
     """Run ONE command, recording its argv, exit code, timing and output tails."""
     started = dt.datetime.now(dt.timezone.utc)
     clock = time.monotonic()
+    peak: dict[str, Any] = {"bytes": None, "method": "not measured (process did not start)"}
     try:
-        completed = subprocess.run(  # noqa: S603 - fixed argv, no shell; the interpreter is ours
+        # Popen rather than run: the exited child's handle stays open until the Popen is
+        # released, so its peak RSS can be read after it exits (D-83 revision 7 W-7).
+        proc = subprocess.Popen(  # noqa: S603 - fixed argv, no shell; the interpreter is ours
             list(argv),
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             env=dict(env),
             cwd=str(cwd),
-            timeout=timeout,
-            check=False,
         )
-        returncode = completed.returncode
-        stdout, stderr = completed.stdout, completed.stderr
-    except subprocess.TimeoutExpired as exc:
-        returncode = -1
-        stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
-        stderr = f"timeout after {timeout} s"
+        try:
+            stdout, stderr = proc.communicate(timeout=timeout)
+            returncode = proc.returncode
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            out, _ = proc.communicate()
+            returncode = -1
+            stdout = out if isinstance(out, str) else ""
+            stderr = f"timeout after {timeout} s"
+        peak = peak_rss_of_popen(proc)
     except OSError as exc:
         returncode = -2
         stdout, stderr = "", f"could not start: {exc}"
@@ -684,6 +692,8 @@ def run_command(
         "duration_seconds": time.monotonic() - clock,
         "stdout_tail": stdout[-_TAIL_CHARS:],
         "stderr_tail": stderr[-_TAIL_CHARS:],
+        "peak_rss_bytes": peak["bytes"],
+        "peak_rss_method": peak["method"],
     }
 
 
@@ -800,8 +810,28 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> Path:
     return path
 
 
+#: Archived copies a re-run leaves beside or under the fixture root. They are prior runs'
+#: outputs, not this run's, so `storage_total` excludes them (D-83 revision 7 section A7
+#: item 16; section W7 W-8): before W-8 the measure grew by about 2.3 MB per run.
+ARCHIVED_COPY_MARKER = ".archived-"
+ARCHIVED_RELEASES_DIR = "archived_releases"
+
+
+def is_archived_copy(path: Path, root: Path) -> bool:
+    rel = Path(path).relative_to(root)
+    return ARCHIVED_RELEASES_DIR in rel.parts or any(
+        ARCHIVED_COPY_MARKER in part for part in rel.parts
+    )
+
+
 def _storage_bytes(root: Path) -> int:
-    return sum(p.stat().st_size for p in Path(root).rglob("*") if p.is_file())
+    """This run's storage: every file under the fixture root EXCEPT archived copies (W-8)."""
+    root = Path(root)
+    return sum(
+        p.stat().st_size
+        for p in root.rglob("*")
+        if p.is_file() and not is_archived_copy(p, root)
+    )
 
 
 # =======================================================================================
@@ -1003,6 +1033,17 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         "fixture_root": str(fixture_root),
         "runtime_seconds": runtime_seconds,
         "storage_bytes": storage_bytes,
+        # D-83 revision 7 W-7: the peak RSS over the stage subprocesses, the method that
+        # measured it, and the host resources the TC-03 limbs are read against.
+        "peak_rss_bytes": max(
+            (r["peak_rss_bytes"] for r in sequence if r.get("peak_rss_bytes") is not None),
+            default=None,
+        ),
+        "peak_rss_per_stage": [
+            {"argv1": r["argv"][1] if len(r["argv"]) > 1 else "", "bytes": r.get("peak_rss_bytes"), "method": r.get("peak_rss_method")}
+            for r in sequence
+        ],
+        "environment_resources": environment_resources(),
     }
     if isinstance(scope, FixtureManifest):
         matched = compare_required_outputs(scope, fixture_root)

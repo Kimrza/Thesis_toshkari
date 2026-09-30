@@ -146,6 +146,7 @@ from src.data.fixture_outputs import (  # noqa: E402
 from src.data.locked_test import (  # noqa: E402
     PERSISTENCE_HISTORY_CALLERS,
     AccessRecord,
+    assert_first_locked_evaluation,
     open_restricted,
     read_persistence_history_lookup,
 )
@@ -453,6 +454,7 @@ def _registry_row(
         "code_commit": code_commit,
         "environment_lock_hash": lock_hash,
         "platform": snapshot.platform,
+        "environment_id": snapshot.environment_id,  # D-83 revision 7 W-4
         "dataset_version": "",
         "fold_id": "",
         "mask_id": "",
@@ -1066,13 +1068,23 @@ def _read_target_artifact(path: Path) -> Any:
     return RecordFrame(rows)
 
 
-def _locked_loader(args: argparse.Namespace, *, run_id: str, access_log: Path):
+def _locked_loader(
+    args: argparse.Namespace, *, run_id: str, access_log: Path, phase_id: str
+):
     def loader(locked: Partition) -> Any:
+        # D-83 revision 7 section R4-7 item 3 (A7 item 1; W-1): the 06 DEC run is
+        # once per phase_id; a prior 06 locked_evaluation row for this phase (or one
+        # missing script_id/phase_id) refuses before anything is logged or read.
+        assert_first_locked_evaluation(
+            access_log, run_id=run_id, script_id="06_train_and_predict", phase_id=phase_id
+        )
         record = AccessRecord(
             run_id=run_id,
             retrieved_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
             scope=f"{locked.partition_id} {locked.validation_month.isoformat()} locked evaluation",
             purpose="locked_evaluation",
+            script_id="06_train_and_predict",  # D-83 revision 7 A6 item 20; A7 item 1
+            phase_id=phase_id,  # data.yaml target.identity.phase_id (A6 item 12)
             performance_inspected=False,
             locked_test_accessed=True,
             authorization=str(args.locked_authorization),
@@ -1713,7 +1725,14 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             partition_target = _locked_target(
                 snapshot,
                 g05_signature=args.g05_signature,
-                loader=_locked_loader(args, run_id=run_id, access_log=access_log),
+                loader=_locked_loader(
+            args,
+            run_id=run_id,
+            access_log=access_log,
+            # An absent phase_id is passed as "" and the locked_evaluation AccessRecord
+            # refuses it when the loader is used (D-83 revision 7 A6 item 20).
+            phase_id=str(((snapshot.data.get("target") or {}).get("identity") or {}).get("phase_id") or ""),
+        ),
                 partitions=partitions,
                 released_target=released_target,
             )

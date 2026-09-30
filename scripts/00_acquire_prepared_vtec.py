@@ -325,9 +325,11 @@ def _registry_paths(snapshot: Any) -> tuple[Path, Path]:
     )
     registry_path = registry_root / "experiment_registry.jsonl"
     # Read-only input to the writer's R-20 exploratory derivation: this run performs
-    # no restricted access, and a missing log means none has occurred.
+    # no restricted access, and a missing log means none has occurred. The governed log,
+    # never the CLOSED `evidence/test_run_access_log.jsonl`, which is excluded from the
+    # governed scan set by path (D-83 revision 7 section A7 item 18; W-9).
     access_log = (
-        Path(snapshot.resolved_roots["workspace"]) / "evidence" / ("test_run_access_log.jsonl")
+        Path(snapshot.resolved_roots["workspace"]) / "evidence" / "merge_run_access_log.jsonl"
     )
     return registry_path, access_log
 
@@ -354,6 +356,7 @@ def _registry_row(
         "code_commit": "",  # populated below from the lock
         "environment_lock_hash": lock_hash,
         "platform": snapshot.platform,
+        "environment_id": snapshot.environment_id,  # D-83 revision 7 W-4
         "dataset_version": "",
         "fold_id": "",
         "mask_id": "",

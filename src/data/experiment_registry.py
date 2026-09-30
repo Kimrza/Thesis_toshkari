@@ -133,6 +133,10 @@ EXTENSION_FIELDS: Final[tuple[str, ...]] = (
     "exploratory",
     "exploratory_carveout",
     "durability",
+    # D-83 revision 7 (§A7 item 14; §W7 W-4): the named environment, carried on the
+    # registry row as well as on the run record; `src.data.admission` asserts agreement
+    # and the G-05 preflight refuses a row without it.
+    "environment_id",
 )
 
 #: W-9 / R-39: the registry columns routed through `acquisition`'s ONE declared redaction
@@ -176,6 +180,16 @@ def _validate_row(
     writer_role: str,
 ) -> None:
     """W-6 steps 1-5: every write-time check that needs NO read of prior rows (R-08)."""
+    from src.data.config import ENVIRONMENT_IDS, UNDECLARED_ENVIRONMENT
+
+    env = row.get("environment_id")
+    if env is not None and env not in (*ENVIRONMENT_IDS, UNDECLARED_ENVIRONMENT):
+        raise RegistryError(
+            registry_path,
+            f"environment_id {env!r} is not one of the named environments "
+            f"{sorted(ENVIRONMENT_IDS)} or {UNDECLARED_ENVIRONMENT!r} (D-83 revision 7 "
+            f"section A7 item 14; GOV-2026-09-30-PV-09 DATA-02)",
+        )
     status = row.get("status")
     if status not in STATUSES:
         raise RegistryError(
@@ -287,18 +301,30 @@ def _read_access_records(access_log_path: Path) -> list[Mapping[str, Any]]:
     return records
 
 
-def _access_timestamp(record: Mapping[str, Any]) -> str:
-    """The record's best timestamp, conservatively early when unparseable.
+def _parse_utc(value: str) -> Any:
+    """An aware datetime for an ISO-8601 value carrying an offset, else None."""
+    import datetime as _dt
 
-    `retrieved_at_utc` is preferred; the observed log carries a placeholder string
-    there, in which case `logged_at_utc` is used. A record with neither, or with a
-    non-ISO value in both, sorts as EARLIEST (empty string) — the conservative
-    direction: it can only make later runs exploratory, never hide an exposure.
+    try:
+        parsed = _dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def _access_timestamp(record: Mapping[str, Any]) -> str:
+    """The record's R-20 exposure timestamp: the guard-stamped `logged_at_utc` ONLY.
+
+    D-83 revision 7 (§R5-6 row 31; §W7 W-10; GOV-2026-09-30-PV-07 Rec 5, VAL veto limb 2):
+    `retrieved_at_utc` is caller-supplied and could be forged LATER to delay the exposure
+    clock, so it is never consulted. `logged_at_utc` is stamped by the guard at append
+    time. A record without it, or with a non-ISO value, sorts as EARLIEST (empty string) --
+    the conservative direction: it can only make later runs exploratory, never hide an
+    exposure.
     """
-    for key in ("retrieved_at_utc", "logged_at_utc"):
-        value = record.get(key)
-        if isinstance(value, str) and len(value) >= 10 and value[:4].isdigit():
-            return value
+    value = record.get("logged_at_utc")
+    if isinstance(value, str) and len(value) >= 10 and value[:4].isdigit():
+        return value
     return ""
 
 
@@ -320,7 +346,15 @@ def _derive_exploratory(
 
     earliest = min(_access_timestamp(record) for record in access_records)
     started = str(row.get("started_at_utc", ""))
-    postdates = started > earliest
+    # Parsed, not lexical (GOV-2026-09-30-PV-09 VAL-04): `Z`, `+00:00` and other offsets
+    # order correctly. An unparseable earliest access is treated as earliest-possible.
+    started_dt, earliest_dt = _parse_utc(started), _parse_utc(earliest)
+    if started_dt is not None and earliest_dt is not None:
+        postdates = started_dt > earliest_dt
+    elif started_dt is not None and earliest == "":
+        postdates = True
+    else:
+        postdates = started > earliest
 
     if not postdates:
         return False, ""
@@ -398,6 +432,7 @@ def append_registry_event(
     record["exploratory"] = exploratory
     record["exploratory_carveout"] = carveout
     record["durability"] = durability
+    record["environment_id"] = str(row.get("environment_id", "") or "")
 
     # run_id first (R-08: recoverable from a torn prefix), then the remaining columns in
     # schema order, then the extensions — a stable, documented field order.

@@ -9,6 +9,9 @@
 *.ts                   text eol=lf
 *.md                   text
 
+# D-83 W-4 identity files are hashed for admission; pin LF (GOV-2026-09-30-PV-09 DATA-01).
+environment/identity/*.json text eol=lf
+
 # Governed byte artifacts must never be line-ending normalized, in either
 # direction. Recorded SHA-256 values in sha256_manifest.json and in
 # evidence/audit_ec1_2026-08-15/EC1-AUDIT.md are computed over the exact

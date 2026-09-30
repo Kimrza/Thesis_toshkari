@@ -61,7 +61,12 @@ from src.data.config import BenchmarkError
 from src.data.splits import Partition, PartitionKind
 from src.evaluation.guards import UNTRANSFORMED
 from src.evaluation.masks import prediction_from_payload
-from src.external.iri import BenchmarkContract, _UNTRANSFORMED, predictions_from_benchmark_rows
+from src.external.iri import (
+    BenchmarkContract,
+    _UNTRANSFORMED,
+    predictions_from_benchmark_rows,
+    run_gated_generation,
+)
 
 _UTC = dt.timezone.utc
 
@@ -656,6 +661,25 @@ try:
     raise SystemExit("expected BenchmarkError: AP2 empty under a shared call")
 except BenchmarkError as exc:
     assert "AP2" in str(exc) and "empty" in str(exc)
+"""
+    )
+    _assert_ok(result)
+
+
+def test_w3_bridge_entry_refuses_december_without_signature() -> None:
+    """D-83 revision 7 section W7 W-3, negative control through the library entry: the
+    December guard lives in `run_gated_generation` itself, before any pin check or grid
+    build. Run in the child, like every other `src.external.iri` call in this module."""
+    result = _run(
+        """
+for months in (None, [12], [11, 12]):
+    try:
+        run_gated_generation(contract=None, validation_report={}, stations={}, months=months)
+    except BenchmarkError as exc:
+        assert "months" in str(exc), exc
+    else:
+        raise SystemExit(f"months {months!r} was not refused")
+print("OK")
 """
     )
     _assert_ok(result)

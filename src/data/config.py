@@ -516,6 +516,10 @@ class ConfigSnapshot:
     snapshot_dir: Path
     resolved_roots: Mapping[str, Path]
     platform: str
+    #: D-83 revision 7 (§R4-7 item 1; §A7 item 14; §W7 W-4): the named environment the run
+    #: executes in, from `TEC_ENVIRONMENT_ID`; `UNDECLARED_ENVIRONMENT` when not declared,
+    #: which admission (`src.data.admission`) refuses.
+    environment_id: str = "undeclared"
 
 
 @dataclass(frozen=True)
@@ -559,6 +563,11 @@ class RunRecord:
     input_versions: Sequence[str]
     platform: str
     nondeterministic_ops: Sequence[str]
+    #: D-83 revision 7 (§A7 item 14; §W7 W-4): carried on the run record AND on the
+    #: registry row; `src.data.admission.assert_environment_id_agreement` asserts equality.
+    #: Hashed by `environment_lock_hash`, which derives its payload from
+    #: `dataclasses.fields(RunRecord)` (D-83 revision 6 §A6 item 7).
+    environment_id: str = "undeclared"
 
 
 #: `RequiredFieldsMap` (FU-1 = C; domain-entities 2): `(stage_slug, phase)` -> field
@@ -742,6 +751,56 @@ def _write_snapshot(config_dir: Path, snapshot_dir: Path) -> None:
         shutil.copyfile(config_dir / name, snapshot_dir / name)
 
 
+#: D-83 revision 7 §R4-7 item 1: the three named environments on the one local platform.
+ENVIRONMENT_IDS: Final[frozenset[str]] = frozenset(
+    {"tec-thesis-311", "b01_iri", "g07-clean-run"}
+)
+UNDECLARED_ENVIRONMENT: Final[str] = "undeclared"
+
+
+def resolve_environment_id(env: Mapping[str, str]) -> str:
+    """The run's named environment from `TEC_ENVIRONMENT_ID` (D-83 revision 7; W-4).
+
+    Absent means `undeclared`: recorded as such, never guessed, and refused by admission
+    (`src.data.admission`). A declared value outside the three named environments is
+    refused here.
+    """
+    value = env.get("TEC_ENVIRONMENT_ID")
+    if value is None or not value.strip():
+        return UNDECLARED_ENVIRONMENT
+    value = value.strip()
+    if value not in ENVIRONMENT_IDS:
+        raise PlatformError(
+            "TEC_ENVIRONMENT_ID",
+            f"{value!r} is not one of the named environments {sorted(ENVIRONMENT_IDS)} "
+            "(D-83 revision 7 section R4-7 item 1)",
+        )
+    return value
+
+
+def _kaggle_marker_present(env: Mapping[str, str] | None = None) -> bool:
+    """True when the host carries a Kaggle marker, whatever `TEC_PLATFORM` declares
+    (GOV-2026-09-30-PV-09 BENCH-05: a declared `local` label must not bypass dormancy)."""
+    import os as _os
+
+    source = _os.environ if env is None else env
+    return any(marker in source for marker in _KAGGLE_MARKERS)
+
+
+def assert_platform_not_dormant(label: str) -> None:
+    """Refuse a governed run on Kaggle: the platform is dormant (D-83 revision 7 §R4-7
+    item 2; §A7 item 10; §W7 W-5). Invoking the fallback needs its own D-number and a code
+    ruling adding a non-custody Kaggle identity; until then no governed run resolves there.
+    """
+    if label == "kaggle" or _kaggle_marker_present():
+        raise PlatformError(
+            "TEC_PLATFORM",
+            "Kaggle is dormant under D-83: no governed run executes on Kaggle. The fallback "
+            "needs its own D-number and a code ruling adding a non-custody Kaggle identity "
+            "(D-83 revision 7 section R4-7 item 2)",
+        )
+
+
 def resolve_platform_roots(env: Mapping[str, str]) -> tuple[str, Mapping[str, Path]]:
     """W-8: identify the platform as exactly `kaggle` or `local`, resolve roots.
 
@@ -821,6 +880,8 @@ def load_configs(config_dir: Path, *, phase: int) -> ConfigSnapshot:
         parsed[name.removesuffix(".yaml")] = _parse_yaml(config_dir / name)
 
     label, roots = resolve_platform_roots(os.environ)
+    assert_platform_not_dormant(label)  # D-83 revision 7 W-5
+    environment_id = resolve_environment_id(os.environ)  # D-83 revision 7 W-4
     resolved_roots = dict(roots)
 
     declared_roots = parsed["data"].get("roots", {})
@@ -861,6 +922,7 @@ def load_configs(config_dir: Path, *, phase: int) -> ConfigSnapshot:
         snapshot_dir=snapshot_dir,
         resolved_roots=resolved_roots,
         platform=label,
+        environment_id=environment_id,
     )
 
 
@@ -1238,7 +1300,9 @@ def _pip_freeze() -> str:
     try:
         # Fixed argv, sys.executable, no shell (TE 13.1 per-run pip freeze).
         result = subprocess.run(  # noqa: S603
-            [sys.executable, "-m", "pip", "freeze"],  # noqa: S603
+            # `--all` (D-83 revision 6 A6 item 8; revision 7 A7 item 20): pip, setuptools
+            # and wheel are part of the identity pin conformance compares.
+            [sys.executable, "-m", "pip", "freeze", "--all"],  # noqa: S603
             capture_output=True,
             text=True,
             timeout=300,
@@ -1304,26 +1368,27 @@ def capture_environment_lock(
         input_versions=list(input_versions),
         platform=snapshot.platform,
         nondeterministic_ops=list(determinism.nondeterministic_ops),
+        environment_id=getattr(snapshot, "environment_id", UNDECLARED_ENVIRONMENT),
     )
 
 
 def environment_lock_hash(record: RunRecord) -> str:
     """The hash a registry row's `environment_lock_hash` column points at (R-18 col 6).
 
-    SHA-256 over the canonical JSON of the eight fields, sorted keys, no insignificant
-    whitespace — deterministic across platforms so the same environment yields the same
-    hash.
+    SHA-256 over the canonical JSON of EVERY `RunRecord` field, sorted keys, no
+    insignificant whitespace — deterministic across platforms so the same environment
+    yields the same hash. The payload is derived from `dataclasses.fields(RunRecord)`
+    (D-83 revision 6 §A6 item 7), never a hand-kept list, so a field added to the record
+    (such as `environment_id`) cannot silently escape the hash.
     """
-    payload = {
-        "requirements_hash": record.requirements_hash,
-        "pip_freeze": record.pip_freeze,
-        "runtime_versions": dict(sorted(record.runtime_versions.items())),
-        "code_commit": record.code_commit,
-        "config_hashes": dict(sorted(record.config_hashes.items())),
-        "input_versions": list(record.input_versions),
-        "platform": record.platform,
-        "nondeterministic_ops": list(record.nondeterministic_ops),
-    }
+    payload: dict[str, Any] = {}
+    for field in _dataclass_fields(record):
+        value = getattr(record, field.name)
+        if isinstance(value, Mapping):
+            value = dict(sorted(value.items()))
+        elif isinstance(value, (list, tuple)):
+            value = list(value)
+        payload[field.name] = value
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return _sha256_bytes(canonical.encode("utf-8"))
 
