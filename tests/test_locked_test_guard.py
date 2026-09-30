@@ -969,6 +969,11 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         # above. Derived and printed before assertion: matches `vtec|tecu` 4 times,
         # ZERO `2022-12-DD` dates.
         "r60_gim_gate_inputs/Fixture_TBD_resolution_2026-09-26.md",
+        # 2026-09-30: the tec-thesis-311 environment-identity snapshot README (performance-
+        # validation 4.6; GOV-2026-09-29-PV-02 Rec 7). Prose Markdown, same reason as every
+        # `.md` above. Derived and printed before assertion: matches `vtec|tecu` 0 times,
+        # ZERO `2022-12-DD` dates. Pinned on the Student's ruling at the commit gate.
+        "environment_identity_2026-09-30_tec-thesis-311/README.md",
     }
     assert not [e for e in inventory if e.disposition == "flagged"]
 

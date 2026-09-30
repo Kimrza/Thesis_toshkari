@@ -1,8 +1,0 @@
-{
-  "artifact_id": "breakdown-top1pct_sensitivity_tier3",
-  "kind": "breakdown",
-  "path": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\walking_skeleton\\plumbing_7day\\evaluation\\evaluation-and-comparison-20260929T134312Z-5b6b1406\\FIX-NOV-FOLD-01\\tier3\\breakdown_top1pct_sensitivity_tier3.json",
-  "phase_id": "P1A",
-  "source_id": "GNSS_VTEC",
-  "target_definition_id": "GRIDDed_VTEC_1H"
-}

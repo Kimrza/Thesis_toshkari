@@ -4301,6 +4301,78 @@ required to share the same target lineage. Claim: unchanged.
 
 ---
 
+## D-84 — M-03 climatology: D-55 supersedes the Vision's "station×month×hour" wording; only D-55 applies (owner ruling)
+
+**Decision date:** 2026-09-29. **Decided by:** the project decision owner (Student), ruling on
+`GOV-2026-09-29-PV-01` Recommendation 12, verbatim: *"We need to formally record that the new
+decision(D-55) replaces the old definition, and that only the new decision is to be used and
+applied."* Written to this register on that instruction. It follows the D-74-amendment and D-82
+precedent. **Authority:** D-55, which is supervisor-countersigned as of 2026-09-21. **Supervisor
+countersignature for this entry: OPEN.** The entry annotates how the Vision, the primary
+authority, is read, so the Supervisor's acknowledgement is requested. D-55's content is not
+reopened.
+
+**Conflict being closed.** Three passages still define the M-03 climatology control as
+"station×month×hour":
+- Vision §2.4 tier 2;
+- Vision §8.4 (the M-03 row);
+- `constraint-register.md` PC-03 (`binding: hard`).
+
+D-55 removed month from the key and imposed a mandatory limitation. Until now nothing recorded
+the conflict. A reviewer following the Vision would therefore judge a D-55-compliant M-03 as
+non-compliant, and the reverse.
+
+**Decision.**
+1. D-55 supersedes the "station×month×hour" definition wherever it appears: Vision §2.4 tier 2,
+   Vision §8.4, PC-03, and `aidlc/spaces/default/memory/project.md` Mandated ("fitted
+   station×month×hour climatology").
+2. Only D-55 is used and applied. The key is **station and hour**, fitted on each partition's
+   own training data. D-55's "Limitation, mandatory wherever M-03 is reported" applies to every
+   report of M-03.
+3. Unchanged:
+   - M-03 remains one of the three mandatory difficulty controls, co-reported in the primary
+     results table (Vision §2.4 tier 2; PC-03/PC-04);
+   - the binding honesty rule;
+   - D-58 (persistence is the declared baseline);
+   - D-80's `primary` membership.
+
+**Where the superseded wording still stands, and how it is to be corrected.** Nothing here edits
+the Vision, the constraint register or a memory file in place. Each correction follows its own
+sanctioned path:
+- the Vision and the constraint register: an in-place annotation under
+  `governance/CHANGE_RECORD_PROCEDURE.md`, which requires owner approval for that specific item;
+- `project.md`: the AI-DLC §13 learnings ritual.
+
+Until each is annotated, this entry governs.
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none.
+- Uncertainty: none.
+- Comparability: none, because the code already implements D-55 (`src/models/climatology.py`;
+  `configs/experiment.yaml`).
+- Claim: every M-03 result carries D-55's no-seasonal-term limitation.
+
+Change record: `governance/CHANGE_RECORD_2026-09-29_GOV-PV-01_rulings.md` §3.
+
+**Amendment (2026-09-29, closure verification of `GOV-2026-09-29-PV-01`; approved by the
+Student).** The "Conflict being closed" paragraph listed three passages. The full, grep-derived
+set of passages still carrying "station×month×hour" is:
+
+- **Forward-looking** (superseded by item 1):
+  - Vision l.171 (§2.4 tier 2);
+  - Vision l.294 (§4.1 In Scope);
+  - Vision l.775 (§8.4 M-03 row);
+  - Technical Environment l.458 (its M-03 row);
+  - `constraint-register.md` PC-03;
+  - `aidlc/spaces/default/memory/project.md` l.111.
+- **Historical** (left as record): Vision l.55 (the §1.5 change table, Q-20).
+
+Item 1's "wherever it appears" already covered each forward-looking passage. This amendment
+completes the list so each receives its in-place annotation (O-6). Supervisor acknowledgement
+remains OPEN.
+
+---
+
 ## Supervisor review
 
 D-3/D-144 is countersigned as of 2026-08-15 and **expressly approved 2026-08-21**

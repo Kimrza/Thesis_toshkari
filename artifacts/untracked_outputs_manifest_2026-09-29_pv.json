@@ -1,0 +1,894 @@
+{
+  "manifest_id": "untracked_outputs_2026-09-29_pv",
+  "policy": "CR-2026-09-29-GOV-BT-03-RULINGS §4, option B (Student ruling 2026-09-29); supplement required by CR-2026-09-29-GOV-PV-01-RULINGS Rec 7",
+  "scope": "untracked files (216 git-ignored; 3 untracked but NOT ignored, see ignore_exceptions) created 2026-09-29 by performance-validation (4.6): the *.archived-pv-2026-09-29 rename set and artifacts/run_snapshots entries not in untracked_outputs_manifest_2026-09-29.json; derived at HEAD 2dd36a7 via git ls-files --others --ignored plus find, minus the earlier manifest",
+  "supplements": "artifacts/untracked_outputs_manifest_2026-09-29.json",
+  "file_count": 219,
+  "total_bytes": 3153614,
+  "files": {
+    "artifacts/run_snapshots/20260929T154002Z-e16f7ec5/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T154002Z-e16f7ec5/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T154002Z-e16f7ec5/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T154002Z-e16f7ec5/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T164811Z-26e4993a/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T164811Z-26e4993a/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T164811Z-26e4993a/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T164811Z-26e4993a/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T164825Z-17d739d6/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T164825Z-17d739d6/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T164825Z-17d739d6/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T164825Z-17d739d6/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T164836Z-2411140c/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T164836Z-2411140c/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T164836Z-2411140c/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T164836Z-2411140c/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T164851Z-70efa776/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T164851Z-70efa776/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T164851Z-70efa776/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T164851Z-70efa776/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T164902Z-baba85f9/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T164902Z-baba85f9/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T164902Z-baba85f9/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T164902Z-baba85f9/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T165028Z-78a6234c/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T165028Z-78a6234c/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T165028Z-78a6234c/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T165028Z-78a6234c/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T165042Z-e7ddb39e/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T165042Z-e7ddb39e/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T165042Z-e7ddb39e/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T165042Z-e7ddb39e/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/run_snapshots/20260929T165418Z-4225d556/data.yaml": {
+      "sha256": "9c1fe28da7361856869b3b326509e6cb0896a2ace8a217c421213f04f1f8bb23",
+      "bytes": 45162
+    },
+    "artifacts/run_snapshots/20260929T165418Z-4225d556/experiment.yaml": {
+      "sha256": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "bytes": 43372
+    },
+    "artifacts/run_snapshots/20260929T165418Z-4225d556/features.yaml": {
+      "sha256": "2e77f12f06758f7e0c270bd8c987a97de15aa4cc23185209a435666fd4c3fc0f",
+      "bytes": 21062
+    },
+    "artifacts/run_snapshots/20260929T165418Z-4225d556/seeds.yaml": {
+      "sha256": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166",
+      "bytes": 1517
+    },
+    "artifacts/walking_skeleton/plumbing_7day/bootstrap_summary.json.archived-pv-2026-09-29": {
+      "sha256": "9ad653ab84a3ccff7abf445c8c0fac2f5a0764a5fb7cebd757db99bbeaa39ffc",
+      "bytes": 2395
+    },
+    "artifacts/walking_skeleton/plumbing_7day/checkpoint_manifest.json.archived-pv-2026-09-29": {
+      "sha256": "f1bca1d9af467e427c343a2292316902136be3eafdddb87423b0b110a104ac38",
+      "bytes": 2803
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/gim/comparison_set_gim.skipped.json": {
+      "sha256": "6fa38618b4861e3158c1bb8458871d19dce947fd6cf159d621a38b5acf1ac23d",
+      "bytes": 1471
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/gim/comparison_set_gim.skipped.json.fixture_stamp.json": {
+      "sha256": "abe1c1270258243be3df25b0a36ca17cb1cefaf5f90c11836605676913db94e6",
+      "bytes": 988
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/metrics_primary.json": {
+      "sha256": "ac8edce175369084af00987acdb71638a74f73313d0736af239b386628905e9b",
+      "bytes": 3688
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/metrics_primary.json.fixture_stamp.json": {
+      "sha256": "3ccd16699cbcf1f5c73fef64ff65582702df7440cf5483c41a96190575a401a2",
+      "bytes": 977
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/metrics_tier3.json": {
+      "sha256": "d49f64f244f7609c29453dad0310333538290521d0000598b01d4b4d7fc1ee3c",
+      "bytes": 2079
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/metrics_tier3.json.fixture_stamp.json": {
+      "sha256": "dd1d2f565b823c9c3a4f7898381a1e9882ef26bf33ba06c56696f4de21ebd962",
+      "bytes": 975
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_B-01.skipped.json": {
+      "sha256": "c031c04fe35b688690efb425e1c2851bec4eefdbc234e1d442ad9367958050c6",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_B-01.skipped.json.fixture_stamp.json": {
+      "sha256": "28ab6bee2d894888e03dd00ec8c714ccb912d09c45baf1d2e5bf4fc3fd1b497b",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_M-01.skipped.json": {
+      "sha256": "b26f5d820638fca1c0c6f23a089efc9fb0dca217b26a77b839b63e8a7a990725",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_M-01.skipped.json.fixture_stamp.json": {
+      "sha256": "29c9a62f9770a4b93e823920e7ff43f943bea46ec387ab9cb7592147ad290fb3",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_M-02.skipped.json": {
+      "sha256": "9d42d1d0ff74faf5bcb8d67e299dcb01d5a737ae2b89e418a98059af691a4148",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_M-02.skipped.json.fixture_stamp.json": {
+      "sha256": "8e6501a1e1ccfb053ade7861dcc40962908691d8d17e0c4ee772e64dbfcea0a3",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_M-03.skipped.json": {
+      "sha256": "98a0e702c9a667def81dc00867d7259adc613e4d4f8573213a9708667f3637a1",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/bootstrap_M-06_vs_M-03.skipped.json.fixture_stamp.json": {
+      "sha256": "03d8eed4c807ee04fcda928344481109681f31d4be927a3b22dd8d73e1b8d1f3",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_member_metrics_primary.json": {
+      "sha256": "8e454861f7fe4ed009446de041f77c251f59eb11b61ba36a698eaab0d010b757",
+      "bytes": 6832
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_member_metrics_primary.json.fixture_stamp.json": {
+      "sha256": "830811f3856a141dcc3f088c40c2235250a1061487d2c1f87fd4b8c6f9a60291",
+      "bytes": 994
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_per_station_primary.json": {
+      "sha256": "5befb38356ee89257d9b2e919038fe17a1e52d64edc343b9aee8dedc3ec940b6",
+      "bytes": 4043
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_per_station_primary.json.fixture_stamp.json": {
+      "sha256": "3bbe39cea6918c66af5423ccdc53bd9045a64dc972fca556096aba58d8759f5e",
+      "bytes": 991
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_quality_strata_primary.json": {
+      "sha256": "817d6aa389a7e37aa3c34750f06b7c4c2bb931adb6e31b61caae5ed30ec81cea",
+      "bytes": 2182
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_quality_strata_primary.json.fixture_stamp.json": {
+      "sha256": "eddb977ac2902bc376ff9347cc095639e962e3a4b09fb1feb806c8bb02b582c9",
+      "bytes": 994
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_top1pct_sensitivity_primary.json": {
+      "sha256": "962025d4388d9414aafac1ed1f05c84ad8a9d6725565c34d2bef3d3a0a434871",
+      "bytes": 9280
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/breakdown_top1pct_sensitivity_primary.json.fixture_stamp.json": {
+      "sha256": "89e3a0ccda4e5e3cb07fcdcafbfc053c9a9dbfa7fd9a9d1a3dfaa68807fa4f0a",
+      "bytes": 999
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/conclusion_surfaces/breakdown-member_metrics_primary.json": {
+      "sha256": "df3146266c3ffc70a6445c1ecbdc5418963149f33db0bb993b43ec976bbfac3b",
+      "bytes": 414
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/conclusion_surfaces/breakdown-per_station_primary.json": {
+      "sha256": "ff7346a2cf4cff3d6513280d758499bc8f4972dfd7b609dae163590f086c9d75",
+      "bytes": 408
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/conclusion_surfaces/breakdown-quality_strata_primary.json": {
+      "sha256": "a1ec2069916356cccef2248ef258e6860d4eb815686381fa684ddc8cfe9bcc20",
+      "bytes": 414
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/conclusion_surfaces/breakdown-top1pct_sensitivity_primary.json": {
+      "sha256": "0157cd0f4d083ff4cd792d3ae0bae324a04f2d560a4f12ce8724370708441335",
+      "bytes": 424
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/practical_relevance_primary.json": {
+      "sha256": "cc861d25dd86f6ba5beaa7121c9fd321d1e5bdc4b895823faa60fcea0e540de5",
+      "bytes": 401
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/practical_relevance_primary.json.fixture_stamp.json": {
+      "sha256": "09d12985e4a5f16a9860cd7b00aa327abbbe87130648d3794b174287d766c08c",
+      "bytes": 989
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/primary_table_and_claims_checklist_primary.skipped.json": {
+      "sha256": "a0d446e38334929411f5a70800880bf54ad3b36a455ce62996eb2225fc725aee",
+      "bytes": 1000
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/primary/primary_table_and_claims_checklist_primary.skipped.json.fixture_stamp.json": {
+      "sha256": "67ca3fc0f2df28aee6665ade50bf236563f5752215893660e166497cd483fc91",
+      "bytes": 1012
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/bootstrap_M-06_vs_M-04.skipped.json": {
+      "sha256": "63c694db5dd293d873ed6ea9327386faf62d9dc327e079d27f0fcf2bb526cca8",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/bootstrap_M-06_vs_M-04.skipped.json.fixture_stamp.json": {
+      "sha256": "ec5efc393654a4c1e6c6490741a4da250a3cbb66947d3c922e2e2d0ed0b592de",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/bootstrap_M-06_vs_M-05.skipped.json": {
+      "sha256": "778af8aaef94f5f18304859bb160359ba6012f34a84a6db3cd925738dbc6409d",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/bootstrap_M-06_vs_M-05.skipped.json.fixture_stamp.json": {
+      "sha256": "17ffaa4f397718c8f90262e5b5b4cd46a317684ebe8511bcb08b88d8fa3fadc3",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_member_metrics_tier3.json": {
+      "sha256": "883d578bb6e270fac5e8d6eff860c9c8232145a5d55c365c7f9b05199b9b6441",
+      "bytes": 3946
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_member_metrics_tier3.json.fixture_stamp.json": {
+      "sha256": "2d11da6880aecd1f3ec506a1cc42de3e1fe4b23bf85ab67a53e72463f6b44814",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_per_station_tier3.json": {
+      "sha256": "823b2ed9abebf30da6741813eb807f8ddfd04ebaa1c1ab42cfaa49e9371256a6",
+      "bytes": 2383
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_per_station_tier3.json.fixture_stamp.json": {
+      "sha256": "2ffac1f5395c1a3a95c44e046a69ab22f111f23e9f8cd3530ab60abb958577a2",
+      "bytes": 989
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_quality_strata_tier3.json": {
+      "sha256": "86275adcb8ec39833ecc19400e81ddeb0465c00a6ee5830747f3999e7928f910",
+      "bytes": 2166
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_quality_strata_tier3.json.fixture_stamp.json": {
+      "sha256": "88ad84b5fc980c147759c426febedc1f981df767f701a3437780c9d8dfa80a13",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_top1pct_sensitivity_tier3.json": {
+      "sha256": "cf01cf7a1dc7565e84cd1eec494f460ec608b9f4a4ae84990f7bc9cf3f226189",
+      "bytes": 5907
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/breakdown_top1pct_sensitivity_tier3.json.fixture_stamp.json": {
+      "sha256": "f7cf3280b587977d79d4c774b59c3acad2e47cc8e518d3727918298281798cbd",
+      "bytes": 997
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/conclusion_surfaces/breakdown-member_metrics_tier3.json": {
+      "sha256": "8c9c6bceef195fb5350c8747ec4adb5acadb67419a9cd781ae661956fab878d1",
+      "bytes": 396
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/conclusion_surfaces/breakdown-per_station_tier3.json": {
+      "sha256": "b54aa470bda93513b0348e194a799a824f9b51f3a88c71f59860f448ba562841",
+      "bytes": 390
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/conclusion_surfaces/breakdown-quality_strata_tier3.json": {
+      "sha256": "b241aa00b80efc4acb60795e27688bc68738e73f9b60f0072263bfbcf4a5b0a3",
+      "bytes": 396
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/conclusion_surfaces/breakdown-top1pct_sensitivity_tier3.json": {
+      "sha256": "b859cd78f4e12a448cfebf9c24b242e2ebd4e0fcfb5b85109c6945eda87fe2a1",
+      "bytes": 406
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/practical_relevance_tier3.json": {
+      "sha256": "1bfcc3fc505456a5c24922ad6943ba3a7e0fcdabee8a062842d778582039e597",
+      "bytes": 399
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/practical_relevance_tier3.json.fixture_stamp.json": {
+      "sha256": "3f2b820471685b27abce541c88310b46378bd132a9b01f00efee4120927586fb",
+      "bytes": 987
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/primary_table_and_claims_checklist_tier3.skipped.json": {
+      "sha256": "8a9dff014f73ca76527d8f65174d7f67e64941caeab392cb7d2d502fbca93297",
+      "bytes": 998
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-01/tier3/primary_table_and_claims_checklist_tier3.skipped.json.fixture_stamp.json": {
+      "sha256": "89f8adf1bb8308a77bee567162ab0e278e414947015b4ad49174ae71a0a3606b",
+      "bytes": 1010
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/gim/comparison_set_gim.skipped.json": {
+      "sha256": "cca305d3b27a28aa2d829cbbc22b522896e20eeeaecf2595ea7506a5abcd5b17",
+      "bytes": 1471
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/gim/comparison_set_gim.skipped.json.fixture_stamp.json": {
+      "sha256": "19a75947deeb2ae88e129e425a46ac87cceff7028ba6554d7e74debd4a19d931",
+      "bytes": 988
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/metrics_primary.json": {
+      "sha256": "c0bccb5f4b6625a6d916e848eaeeb7d3f1129376c1ca8aa8d2faea0299d24f28",
+      "bytes": 3688
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/metrics_primary.json.fixture_stamp.json": {
+      "sha256": "ed6ea29de8a6d39a30545b4dcd752133f5b6d2c02319c4f5a721540f1d887875",
+      "bytes": 977
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/metrics_tier3.json": {
+      "sha256": "eb7eba7b66cd6293b175171725db2dc4f94d6b9db39f4fd5076e6eba0e2265b5",
+      "bytes": 2079
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/metrics_tier3.json.fixture_stamp.json": {
+      "sha256": "ffde70cb9bb73c1f736bc872d9ef56ee447e4f5d6b60f0b4d56d90f2fd582bd2",
+      "bytes": 975
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_B-01.skipped.json": {
+      "sha256": "c031c04fe35b688690efb425e1c2851bec4eefdbc234e1d442ad9367958050c6",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_B-01.skipped.json.fixture_stamp.json": {
+      "sha256": "8ad2aa8585a8234a92d3b74549eecb739a17cacf62bfa949c0291effada2cb25",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_M-01.skipped.json": {
+      "sha256": "b26f5d820638fca1c0c6f23a089efc9fb0dca217b26a77b839b63e8a7a990725",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_M-01.skipped.json.fixture_stamp.json": {
+      "sha256": "70b58030251e3c1643eebb69eb4b31c60f5168d0fb8c8ec0fcaef22b625695d8",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_M-02.skipped.json": {
+      "sha256": "9d42d1d0ff74faf5bcb8d67e299dcb01d5a737ae2b89e418a98059af691a4148",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_M-02.skipped.json.fixture_stamp.json": {
+      "sha256": "2764dd9ad8e222e01db3159632148a4eb6b0a86e6ed34b1f30f77a5cea258aa6",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_M-03.skipped.json": {
+      "sha256": "98a0e702c9a667def81dc00867d7259adc613e4d4f8573213a9708667f3637a1",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/bootstrap_M-06_vs_M-03.skipped.json.fixture_stamp.json": {
+      "sha256": "fb80061e86084e10032d0c17bc55c504c78556246b5b0a25986567a330c86677",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_member_metrics_primary.json": {
+      "sha256": "651ef49706e2b2a8c4b772365643400739fa4878b8c48f8736776bb6d217b631",
+      "bytes": 6822
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_member_metrics_primary.json.fixture_stamp.json": {
+      "sha256": "d4de7e69f289e1276fd0a053b0a139f43eab96944b78ffd2ee289453e76ef28e",
+      "bytes": 994
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_per_station_primary.json": {
+      "sha256": "857a3be69987c1be94c5abf694d0eff42392b2d5168eb304074cb221dad50173",
+      "bytes": 4043
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_per_station_primary.json.fixture_stamp.json": {
+      "sha256": "fa9c4992474812e5ff61fa4f1d7fbff5149bb61e316589de4a712b4028e948e7",
+      "bytes": 991
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_quality_strata_primary.json": {
+      "sha256": "d337ac2ab99155b1a4ccf84a8a5e133763117cf4fa0241c70781e5c2e1b257db",
+      "bytes": 2182
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_quality_strata_primary.json.fixture_stamp.json": {
+      "sha256": "967fad91d49e195958b865948297cb6f6c48807f52d023951c4bf0525d654f43",
+      "bytes": 994
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_top1pct_sensitivity_primary.json": {
+      "sha256": "247879dcc575f227fe7dc140af6f0cd005070c9766e32c14f738f0dfdfbd4061",
+      "bytes": 9266
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/breakdown_top1pct_sensitivity_primary.json.fixture_stamp.json": {
+      "sha256": "68a38bbb95a1a25f741d5703ed29e71bf99001fce1de8847b23e2ec059caa3d4",
+      "bytes": 999
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/conclusion_surfaces/breakdown-member_metrics_primary.json": {
+      "sha256": "c57c762ba753b001b140c71f3de6cce9b36c6f02f6b2d186e6b58d03bb1d3937",
+      "bytes": 414
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/conclusion_surfaces/breakdown-per_station_primary.json": {
+      "sha256": "792e52d639beecb359abf153a0bd7b9a223d2bb674d79d6bc7f3992c563f0a4a",
+      "bytes": 408
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/conclusion_surfaces/breakdown-quality_strata_primary.json": {
+      "sha256": "12bbb05bb1a8878882d39dbfdbc25f4237260c347929e5406886071e6d08065e",
+      "bytes": 414
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/conclusion_surfaces/breakdown-top1pct_sensitivity_primary.json": {
+      "sha256": "27a64e5a900af95ee317d7a36e45b699c7255b3f440c8407c2f92912309479df",
+      "bytes": 424
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/practical_relevance_primary.json": {
+      "sha256": "63c12bc9cb7bcc8943e542623950c830fd3a9fc831a3b9150663c89c283cc4c2",
+      "bytes": 401
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/practical_relevance_primary.json.fixture_stamp.json": {
+      "sha256": "f8cf02135fa84658021b904b612c1ec23d6fe065348d53f28cf45eca1cf51240",
+      "bytes": 989
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/primary_table_and_claims_checklist_primary.skipped.json": {
+      "sha256": "30fe1b19d7b106b4a0ac693247ed1435a7d05c13126f125a7ddad89e9cdc3335",
+      "bytes": 1000
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/primary/primary_table_and_claims_checklist_primary.skipped.json.fixture_stamp.json": {
+      "sha256": "781b0d3f01f579811270bf417616bff0ceab8a009f79f13133588fb5bc5a85b2",
+      "bytes": 1012
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/bootstrap_M-06_vs_M-04.skipped.json": {
+      "sha256": "63c694db5dd293d873ed6ea9327386faf62d9dc327e079d27f0fcf2bb526cca8",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/bootstrap_M-06_vs_M-04.skipped.json.fixture_stamp.json": {
+      "sha256": "e301c2ff649383bf081027a0326fd88b1e28a77a3cc329ea19507ce54330cdf7",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/bootstrap_M-06_vs_M-05.skipped.json": {
+      "sha256": "778af8aaef94f5f18304859bb160359ba6012f34a84a6db3cd925738dbc6409d",
+      "bytes": 709
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/bootstrap_M-06_vs_M-05.skipped.json.fixture_stamp.json": {
+      "sha256": "d9481bf9ebf43ab5aeadec050bcd96e105dfbd318c6a1713e804952bab1e8aef",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_member_metrics_tier3.json": {
+      "sha256": "c3c72e881e6bf015a00314339e43f923f6eedcdc288e5c8b483aa26fb1ec1e73",
+      "bytes": 3943
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_member_metrics_tier3.json.fixture_stamp.json": {
+      "sha256": "523ccb0bdc70acfa2ef26a3348bcf0ce2d79ee96954c3c939c8a4099169d2ebb",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_per_station_tier3.json": {
+      "sha256": "f33940d31fc92738d4942e382634a2c75af6693cab85ccab9f3ab701f286f185",
+      "bytes": 2383
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_per_station_tier3.json.fixture_stamp.json": {
+      "sha256": "6919ec3545b4a2f4ed8e4b34fdc6aa6a73404f44985b858e6be085301e9e4231",
+      "bytes": 989
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_quality_strata_tier3.json": {
+      "sha256": "9b6dc2500f79f17c4ce7e3e3bb740f6316c1975708eb04f614b00f26e6c10cdd",
+      "bytes": 2166
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_quality_strata_tier3.json.fixture_stamp.json": {
+      "sha256": "841465750ed29978ec301cb85427217745f3e82b55424be6fce6186c4f50347d",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_top1pct_sensitivity_tier3.json": {
+      "sha256": "0ef3fd480dbb43c0fc519cbe45d010fef854cbdb56f23a26e5f4bc72935a2619",
+      "bytes": 5904
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/breakdown_top1pct_sensitivity_tier3.json.fixture_stamp.json": {
+      "sha256": "bcdbd46d9b799e5f73b7befce7c8e376d06873e5d0925bccb25a956a597a14f8",
+      "bytes": 997
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/conclusion_surfaces/breakdown-member_metrics_tier3.json": {
+      "sha256": "e2b26fb2d2150cc1d10bc020e26fdb13ff154256796780f47325e5d492e68903",
+      "bytes": 396
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/conclusion_surfaces/breakdown-per_station_tier3.json": {
+      "sha256": "9bb56938ea7d66039eff9340dce3a7a68e90784bfd149660816a7c0fbb74843b",
+      "bytes": 390
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/conclusion_surfaces/breakdown-quality_strata_tier3.json": {
+      "sha256": "aee1e258bd3fbd0ba458a590ee48ae03a2693c4579755ad6f11595fe84638940",
+      "bytes": 396
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/conclusion_surfaces/breakdown-top1pct_sensitivity_tier3.json": {
+      "sha256": "17e3d422e2b17ddfc3b4458c4116970efc306d2fb21709c0357eeaf53174dfb5",
+      "bytes": 406
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/practical_relevance_tier3.json": {
+      "sha256": "45e8b3bf87f183d43179752cb1f8c0866e2d44f04c5d7b7b8f2a81754e69bbee",
+      "bytes": 399
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/practical_relevance_tier3.json.fixture_stamp.json": {
+      "sha256": "a4ceaabe3ff3e1c551ed8978e84e133ac05953ccbdda81ef15a745ecf776ecd4",
+      "bytes": 987
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/primary_table_and_claims_checklist_tier3.skipped.json": {
+      "sha256": "a8bf34ccc8c2a7645995cd96b84ef45b36600f88c46dec9c2cdae912f2dd56a0",
+      "bytes": 998
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/FIX-NOV-FOLD-02/tier3/primary_table_and_claims_checklist_tier3.skipped.json.fixture_stamp.json": {
+      "sha256": "e3b89360041bcee866e9493df8fd81b8d2e5795f2824704a05d5a530b760c291",
+      "bytes": 1010
+    },
+    "artifacts/walking_skeleton/plumbing_7day/evaluation/evaluation-and-comparison-20260929T134312Z-5b6b1406.archived-pv-2026-09-29/fixture_measurements.json": {
+      "sha256": "665d3958bc7aab1ec3c2280a6697b58e3feae923d43089937a5e64952cd3f0d0",
+      "bytes": 204
+    },
+    "artifacts/walking_skeleton/plumbing_7day/feature_table.parquet.archived-pv-2026-09-29": {
+      "sha256": "2bb1a6c3f8f6d4bf0ca79c4b917b3b5f7caa699a3a0a470c12920da2c3bcbc2f",
+      "bytes": 72524
+    },
+    "artifacts/walking_skeleton/plumbing_7day/feature_table.parquet.denial_evidence.json.archived-pv-2026-09-29": {
+      "sha256": "170be09bb3c7154ed879c1889695f35d44218ef6f0a8419664ea603c0cf6f264",
+      "bytes": 1673
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__score__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "65feb8eab6305bd1e46b231d247b4ee49c9f1bdb07c2ff61047c926c2826d442",
+      "bytes": 998
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__score__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "10fadb855d7eb8f8924d034ef32bbc8f7c86a8102964c4b220bd885c792525d9",
+      "bytes": 46761
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__score__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/spec.json": {
+      "sha256": "700e426a8b19b577d08725fa36d2190859f2964a0b6742693b7ef67f2a5076ed",
+      "bytes": 11743
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__score__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "5971df2c72c9318c072097cc7f81829c3e624579e961e32c174cca308b347af2",
+      "bytes": 9344
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "e3a6d28aa89b421002df351c8b08658074ec3caa3b7fd738e26b9a5c7b19e3a2",
+      "bytes": 998
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "7f55050d0f23d26001517873d39a9192516192e7dadb471e411f45a7dc3db314",
+      "bytes": 46743
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/spec.json": {
+      "sha256": "e45f3a8e85e732827cd601b296c01ef9f0aa2dac8b7aa29629610cd9eb3808ed",
+      "bytes": 11743
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__T-FIX-NOV-FOLD-01.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "ccba3144dd880129771d763701bf9de358ce16e90f2d25f981f01546fd0e388e",
+      "bytes": 9344
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__untransformed.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "4c2744ddd9151ca77c5b282997726bb996936fdc67c15e9c0cff791de5fbc3fc",
+      "bytes": 994
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__untransformed.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "b6d8db6a1c836f3095e7fc224b019dc1a78f6a61bdc05afdae5d5741353b7059",
+      "bytes": 46601
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__untransformed.archived-pv-2026-09-29/spec.json": {
+      "sha256": "3ac3487dfa34b93c1aaf6869128fece726d306eed63e9c1f8bea7e8a0d859ac6",
+      "bytes": 11728
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-01__train__untransformed.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "0bfe0c179e1d2cd3e7371337ad0b911aafb763e5d84e526df05ed8cd8e28763a",
+      "bytes": 9344
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__score__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "be2df09b1bc7deb0465fb1c4efe67a14e30f2622c52e7a1a262cb06cea645b00",
+      "bytes": 998
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__score__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "116b59b94d8cc7e8aed450426ecd10a5ea67f4f85f029076b7c1f7eff0fcdbac",
+      "bytes": 40389
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__score__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/spec.json": {
+      "sha256": "689cab2be15ed91eb7ffbd9ea1b7cc879ae074142873b65492a2f4ce42cb311f",
+      "bytes": 11743
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__score__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "78f7619947ac6831532410b060cb84d32173f3fd6c6789fec6e691fe80550b1a",
+      "bytes": 4736
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "2743ba243f1bba38df2c84cdc40b34204c76f6c3a9bbb95323600647a92773ba",
+      "bytes": 998
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "773fa7cb397e1c7deec37a3b0eefc7f1ad6ccc2321684ef637ba3a2e4d455327",
+      "bytes": 53408
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/spec.json": {
+      "sha256": "002b488f1b6d2ea81f0cd10cb4754bb14ae051db968b2952d393e4ee77669f33",
+      "bytes": 11743
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__T-FIX-NOV-FOLD-02.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "84e6c549adb9be846a43ce6a0db42801b67cf8bd2a4d19f89ae335d8150a25c1",
+      "bytes": 13952
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__untransformed.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "2338d05b1c42321bd10659117b99cd8a9f40af2127bed60b8e8bde089142ddfd",
+      "bytes": 994
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__untransformed.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "53c1fe71a72b266955232e4cb57a58fa1b0b77128092be6e04f0eff1f2352692",
+      "bytes": 53261
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__untransformed.archived-pv-2026-09-29/spec.json": {
+      "sha256": "52ad8700179acf1c6f01626166fe29a4ceaff05b89afb276236cf9025752d525",
+      "bytes": 11728
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-FOLD-02__train__untransformed.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "347574b8e080081876820a80a24772308477958e380561ed6e8c01d28282440b",
+      "bytes": 13952
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__T-FIX-NOV-REFIT.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "6a5e2902e35c3a33dd8caeb12d5a6ce35deddef08892e118776ae36446e7f5f3",
+      "bytes": 992
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__T-FIX-NOV-REFIT.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "2d024ac03671f8334472f062d3b7aa9e590483e158d7505baef7df4ce3a47a8b",
+      "bytes": 72708
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__T-FIX-NOV-REFIT.archived-pv-2026-09-29/spec.json": {
+      "sha256": "28b6462f93b41a69b3b122b79cce4284193cd734b586b1fb91474e7cde777ed6",
+      "bytes": 11739
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__T-FIX-NOV-REFIT.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "f8d2692e40afdd952f28018b083351448cd46aa8371c5608a5cc3feccf2e4fb5",
+      "bytes": 27776
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__untransformed.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "6ddbf1f1422a092864bc9a57d755da2cc4fcad75c805e8f3160c13078e98064d",
+      "bytes": 990
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__untransformed.archived-pv-2026-09-29/matrix.parquet": {
+      "sha256": "2bb1a6c3f8f6d4bf0ca79c4b917b3b5f7caa699a3a0a470c12920da2c3bcbc2f",
+      "bytes": 72524
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__untransformed.archived-pv-2026-09-29/spec.json": {
+      "sha256": "404d2da32f4ee5c654034239a8310b1fd8d0d2c91339e8055d38fa8794907245",
+      "bytes": 11726
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/FIX-NOV-REFIT__train__untransformed.archived-pv-2026-09-29/tensor.npy": {
+      "sha256": "a9af2f762ddf9ea5337738066699bbb648447169a47ffb3032febffae7e1de0f",
+      "bytes": 27776
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/apparatus_split_manifest.json.archived-pv-2026-09-29": {
+      "sha256": "20b8045ce754b6d04739a6c432a54fe94292b15341d57b8a7a9e6e7029ee0b99",
+      "bytes": 1353
+    },
+    "artifacts/walking_skeleton/plumbing_7day/features/fixture_measurements.json.archived-pv-2026-09-29": {
+      "sha256": "7df51b4b7acc2650d297cae9b45b17887e45d8e9c51642fffccecd8dd538a273",
+      "bytes": 771
+    },
+    "artifacts/walking_skeleton/plumbing_7day/gim_comparator.parquet.archived-pv-2026-09-29": {
+      "sha256": "738124cd27b837ff86bb678a78bc80a1a9778a614a2a8aeacad59835ead1f436",
+      "bytes": 12285
+    },
+    "artifacts/walking_skeleton/plumbing_7day/hourly_vtec.parquet.archived-pv-2026-09-29": {
+      "sha256": "c21c85c03a334de4d9fbcaa069b813e35531e0cac2592aa993804ad23010bc8e",
+      "bytes": 22887
+    },
+    "artifacts/walking_skeleton/plumbing_7day/iri_benchmark.parquet.archived-pv-2026-09-29": {
+      "sha256": "76ddeed8ad2824ea251c89b7b1111ede4a79887fcffa575633657e475fea3482",
+      "bytes": 12110
+    },
+    "artifacts/walking_skeleton/plumbing_7day/mask_manifest.json.archived-pv-2026-09-29": {
+      "sha256": "e8c569cc860c5a26942648d6aac675983fadff17a16bd0ae7d59dad624d935e4",
+      "bytes": 9281
+    },
+    "artifacts/walking_skeleton/plumbing_7day/mask_registry/FIX-NOV-FOLD-01.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "0ad935b468109d15e3cbb90b2c6cc88924961bb30e2d415f86618e8a28ecdf5a",
+      "bytes": 972
+    },
+    "artifacts/walking_skeleton/plumbing_7day/mask_registry/FIX-NOV-FOLD-01.archived-pv-2026-09-29/mask_primary.json": {
+      "sha256": "b0ecf513943f8aa6e68d46db1af4c5712576d5ffb99ef3036ad171b93ccb6d3b",
+      "bytes": 818
+    },
+    "artifacts/walking_skeleton/plumbing_7day/mask_registry/FIX-NOV-FOLD-01.archived-pv-2026-09-29/mask_tier3.json": {
+      "sha256": "35ea1d7cc7a25d9e2430f75982c683f0d77f6acc5be10ce0679dfe48177718fe",
+      "bytes": 756
+    },
+    "artifacts/walking_skeleton/plumbing_7day/mask_registry/FIX-NOV-FOLD-02.archived-pv-2026-09-29/fixture_stamp.json": {
+      "sha256": "bec89cec705e6eda059d7c777c98e45a49cb735db696a66914d69068251c96b6",
+      "bytes": 972
+    },
+    "artifacts/walking_skeleton/plumbing_7day/mask_registry/FIX-NOV-FOLD-02.archived-pv-2026-09-29/mask_primary.json": {
+      "sha256": "8e6364950437964ff96303af6f1d780eb0cf645beba2ae5d10a9b0880407d868",
+      "bytes": 818
+    },
+    "artifacts/walking_skeleton/plumbing_7day/mask_registry/FIX-NOV-FOLD-02.archived-pv-2026-09-29/mask_tier3.json": {
+      "sha256": "78bb842e44de52e20e76c627a8ca2f1dd43e88edb7f518743eb1dbe0fab3cb9f",
+      "bytes": 756
+    },
+    "artifacts/walking_skeleton/plumbing_7day/metrics.json.archived-pv-2026-09-29": {
+      "sha256": "7c399e28b3507d6e1f97bd82bee6782aa5b417b9407169eaa6e96033dc65fe6f",
+      "bytes": 13977
+    },
+    "artifacts/walking_skeleton/plumbing_7day/plots.archived-pv-2026-09-29/plot_manifest.json": {
+      "sha256": "9d4258a98bb5588a4c5250e11f8eb920f5f8c77f5bf535afad0fd91d6e1c51e6",
+      "bytes": 1059
+    },
+    "artifacts/walking_skeleton/plumbing_7day/plots.archived-pv-2026-09-29/predictions.png": {
+      "sha256": "6d8e4380d179208299e6a7c1251d59086a8e1477bd50f4b1b160bcb57685259c",
+      "bytes": 161691
+    },
+    "artifacts/walking_skeleton/plumbing_7day/plots.archived-pv-2026-09-29/quality_diagnostics.png": {
+      "sha256": "bae4825f74814468d7a47b8aa26fd3dff8451fee5c652dc1f7837dcd95542672",
+      "bytes": 112136
+    },
+    "artifacts/walking_skeleton/plumbing_7day/plots.archived-pv-2026-09-29/residuals.png": {
+      "sha256": "a7b8d1175ec3dd12d61a68454fbb851177fb5d3f5c802c6029409f5fe89e55b0",
+      "bytes": 165764
+    },
+    "artifacts/walking_skeleton/plumbing_7day/plots.archived-pv-2026-09-29/target_support.png": {
+      "sha256": "e742a395b552e8a661ffc9c4fbc18e9b476da61c37367fd357b8a057e7fdfee2",
+      "bytes": 103563
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions.parquet.archived-pv-2026-09-29": {
+      "sha256": "22a637e2797f9a0805e7788293335e3404c382fc7c48ce094ceddbe612aa6700",
+      "bytes": 14270
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/B-01.json": {
+      "sha256": "f412fa37e57ef54549ff51dec7ce24d367232e80faee7d204e256c6704e346b4",
+      "bytes": 258578
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-01.json": {
+      "sha256": "3af8c1a0829f2a89d3fc194878707d268b4c8b983224d00eb9cdcc8f02837f99",
+      "bytes": 7260
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-02.json": {
+      "sha256": "d603c4ca632173a5c2a4e061ba8510b11d9cf21a0901acb4acc5a9166b1793f3",
+      "bytes": 7255
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-03.json": {
+      "sha256": "2d4a67959ddbcde1329b5ad4575b9f92d7b4ca2d07e8dbae91a9bd52ffca96c4",
+      "bytes": 7407
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-04.json": {
+      "sha256": "c5f8e6f86008b03271027d5ff9b07afbfd3f18cc3757d86d16022a829922186a",
+      "bytes": 7695
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-05.json": {
+      "sha256": "06529e070dedbe4c9e8867ff0493320b9c596cc978871bf528ede6e799da33c3",
+      "bytes": 7771
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-06_confirmatory.json": {
+      "sha256": "9e48724e247ea7e17f36a431ded50cb928a1eac5bbc31f91cad94664f4b67cb4",
+      "bytes": 7769
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-06_seed1337.json": {
+      "sha256": "4a863b7d0492084cf5ee9f728772fb8a7f598a881c4f2e4783d16f71abf5e592",
+      "bytes": 7737
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-06_seed2024.json": {
+      "sha256": "db1a7a1ead0957c03e90515a2f48ec832167c4b89e3eb53a7f9291c4797b6584",
+      "bytes": 7738
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-01.archived-pv-2026-09-29/M-06_seed7.json": {
+      "sha256": "385a96ee672f1023d753902b72f8e9d1a1d82cfae07804c61b40a5b0848d77d2",
+      "bytes": 7730
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/B-01.json": {
+      "sha256": "6f461a34c34034ae06f866bc90710d264d28d6fc8e28908598a4ac8ed9cc4799",
+      "bytes": 249056
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-01.json": {
+      "sha256": "b2a27ce2edcf9f7bb56aa289814583293442885c1191656376c1bd08f91b7694",
+      "bytes": 4264
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-02.json": {
+      "sha256": "539ab2293937828175ad47f54826de3f1e50c6a7cba5716d4bbf02cf012f0589",
+      "bytes": 4269
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-03.json": {
+      "sha256": "1a395b083c6cfccbd3d31abd2b197c7d69a4c11532c116872d914d6cd1562d92",
+      "bytes": 4396
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-04.json": {
+      "sha256": "0cb57dd1d0e87d36c77e1e2b0982fc9b23304adf8a5bd35945a58faa39fdfc69",
+      "bytes": 4498
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-05.json": {
+      "sha256": "2fb9771d4fdd5dfea0c166b042cb7eddee3224ef4c685114fb6051f3c3015c7d",
+      "bytes": 4573
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-06_confirmatory.json": {
+      "sha256": "5cee790c18bfcdaa4a8f92d66d7d303c6f966497497578e641d4f6c8e2bb5c0a",
+      "bytes": 4603
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-06_seed1337.json": {
+      "sha256": "86ecb9aa6a2282cb4ce41ff51b434da4bab7a35679ccbd21b1e29f67be630e38",
+      "bytes": 4573
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-06_seed2024.json": {
+      "sha256": "c164b8115a1f3909af33c27b47e5da81b4b5cae1547495ba83f9db828dabf09d",
+      "bytes": 4576
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/FIX-NOV-FOLD-02.archived-pv-2026-09-29/M-06_seed7.json": {
+      "sha256": "1bd684b2d613836b8862090957cd1a55024ac2e66950782648932d8d034b77d0",
+      "bytes": 4572
+    },
+    "artifacts/walking_skeleton/plumbing_7day/predictions/fixture_measurements.json.archived-pv-2026-09-29": {
+      "sha256": "332b7570b6dc5e2cc32d7b9e41b0c6fc089d13e4da663ce70f48d385fabaea6c",
+      "bytes": 203
+    },
+    "artifacts/walking_skeleton/plumbing_7day/releases/gim_comparator_C-01_2022.archived-pv-2026-09-29/excluded_rows.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "bytes": 2
+    },
+    "artifacts/walking_skeleton/plumbing_7day/releases/gim_comparator_C-01_2022.archived-pv-2026-09-29/gim_comparator.parquet": {
+      "sha256": "738124cd27b837ff86bb678a78bc80a1a9778a614a2a8aeacad59835ead1f436",
+      "bytes": 12285
+    },
+    "artifacts/walking_skeleton/plumbing_7day/releases/gim_comparator_C-01_2022.archived-pv-2026-09-29/release_manifest.json": {
+      "sha256": "0df5558c2320f9eb4f8ae96fff21956d4440ff05a5ed856a476b2326fe7a6a12",
+      "bytes": 6008
+    },
+    "artifacts/walking_skeleton/plumbing_7day/split_manifest.json.archived-pv-2026-09-29": {
+      "sha256": "20b8045ce754b6d04739a6c432a54fe94292b15341d57b8a7a9e6e7029ee0b99",
+      "bytes": 1353
+    },
+    "artifacts/walking_skeleton/plumbing_7day/stage_measurements.archived-pv-2026-09-29/02_standardize_prepared_target/fixture_measurements.json": {
+      "sha256": "2abb71e8762300ebdce6a540f9b405e23960019de766521d5d8dd6f42514396c",
+      "bytes": 623
+    },
+    "artifacts/walking_skeleton/plumbing_7day/stage_measurements.archived-pv-2026-09-29/04_build_external_products/fixture_measurements.json": {
+      "sha256": "8694492b6f2d05789cb8bcdd9c6a196f3fe42095d59550324ca57c640cd79820",
+      "bytes": 291
+    }
+  },
+  "ignore_exceptions": {
+    "note": "These 3 files sit under releases/gim_comparator_C-01_2022.archived-pv-2026-09-29/. .gitignore l.119-120 (!**/releases/*.archived-* and !**/releases/*.archived-*/**; l.120 is the rule that matches these files per `git check-ignore -v`; citation corrected 2026-09-30 under GOV-2026-09-29-PV-02 Rec 26, previously 'l.118-119', l.118 being the comment) deliberately re-includes archived RELEASES: \"An archived RELEASE is still a release: keep it committed\" (TE 13.3; GOV-2026-09-29-BT-03 Rec 6 policy B). Under that policy they are to be COMMITTED at O-5, and are listed here only so their bytes are hashed before that commit.",
+    "paths": [
+      "artifacts/walking_skeleton/plumbing_7day/releases/gim_comparator_C-01_2022.archived-pv-2026-09-29/excluded_rows.json",
+      "artifacts/walking_skeleton/plumbing_7day/releases/gim_comparator_C-01_2022.archived-pv-2026-09-29/gim_comparator.parquet",
+      "artifacts/walking_skeleton/plumbing_7day/releases/gim_comparator_C-01_2022.archived-pv-2026-09-29/release_manifest.json"
+    ]
+  }
+}

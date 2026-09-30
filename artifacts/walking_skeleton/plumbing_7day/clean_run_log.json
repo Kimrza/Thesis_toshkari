@@ -19,9 +19,7 @@
       "--config",
       "configs",
       "--fixture-manifest",
-      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml",
-      "--code-commit",
-      "208f138652cb66c11801bb0b0059a3c3cc365812"
+      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -31,9 +29,7 @@
       "--phase",
       "1",
       "--fixture-manifest",
-      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml",
-      "--code-commit",
-      "208f138652cb66c11801bb0b0059a3c3cc365812"
+      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -41,9 +37,7 @@
       "--config",
       "configs",
       "--fixture-manifest",
-      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml",
-      "--code-commit",
-      "208f138652cb66c11801bb0b0059a3c3cc365812"
+      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -53,9 +47,7 @@
       "--phase",
       "1",
       "--fixture-manifest",
-      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml",
-      "--code-commit",
-      "208f138652cb66c11801bb0b0059a3c3cc365812"
+      "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -66,8 +58,6 @@
       "1",
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml",
-      "--code-commit",
-      "208f138652cb66c11801bb0b0059a3c3cc365812",
       "--bundles-out",
       "artifacts/walking_skeleton/plumbing_7day/features"
     ],
@@ -80,8 +70,6 @@
       "1",
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml",
-      "--code-commit",
-      "208f138652cb66c11801bb0b0059a3c3cc365812",
       "--bundles-root",
       "artifacts/walking_skeleton/plumbing_7day/features",
       "--predictions-out",
@@ -96,8 +84,6 @@
       "1",
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\identity_declaration.yaml",
-      "--code-commit",
-      "208f138652cb66c11801bb0b0059a3c3cc365812",
       "--predictions-run",
       "artifacts/walking_skeleton/plumbing_7day/predictions",
       "--evaluation-out",
@@ -161,16 +147,16 @@
       "tests/test_train_only_transforms.py",
       "tests/test_split_embargo.py"
     ],
-    "duration_seconds": 1.125,
-    "ended_at_utc": "2026-09-29T13:43:18.734836+00:00",
+    "duration_seconds": 1.2039999999979045,
+    "ended_at_utc": "2026-09-29T16:54:34.760682+00:00",
     "note": "M10 contract fixture (features-and-splits authored; run here, Q12 = C): clean-run evidence, NOT a third receipt; gates no full-year job (TC-03f)",
     "returncode": 0,
-    "started_at_utc": "2026-09-29T13:43:17.613342+00:00",
+    "started_at_utc": "2026-09-29T16:54:33.552425+00:00",
     "stderr_tail": "",
-    "stdout_tail": ".......................................................................  [100%]\n71 passed in 0.51s\n"
+    "stdout_tail": ".......................................................................  [100%]\n71 passed in 0.53s\n"
   },
   "missing_required_outputs": [],
   "platform": "local",
   "pythonhashseed": "0",
-  "run_id": "walking-skeleton-plumbing_7day-20260929T133720Z-4a959333"
+  "run_id": "walking-skeleton-plumbing_7day-20260929T164824Z-d139bf12"
 }
