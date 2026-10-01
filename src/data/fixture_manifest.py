@@ -1776,6 +1776,30 @@ _RANGE_REQUIRED: Final[tuple[tuple[str, str], ...]] = (
 )
 
 
+#: Prior runs' outputs moved aside under the fixture root (see run_walking_skeleton's
+#: ARCHIVED_COPY_MARKER / ARCHIVED_RELEASES_DIR, which these mirror).
+_ARCHIVED_MARKER: Final[str] = ".archived-"
+_ARCHIVED_DIR: Final[str] = "archived_releases"
+
+
+def _live_measurement_blocks(root: Path) -> list[Path]:
+    """Every stage measurement block of THIS run, never one inside an archived copy.
+
+    Defect fixed 2026-10-01 (D-83 item 12 re-measure of plumbing_7day): this was an
+    `rglob` over the whole fixture root, so blocks under `stage_measurements.archived-*`
+    from earlier runs were folded into the current run's min/max envelope, and a nested
+    archive past MAX_PATH aborted the run. The walk now prunes archived directories.
+    """
+    out: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(
+            d for d in dirnames if d != _ARCHIVED_DIR and _ARCHIVED_MARKER not in d
+        )
+        if MEASUREMENTS_NAME in filenames:
+            out.append(Path(dirpath) / MEASUREMENTS_NAME)
+    return sorted(out)
+
+
 def collect_stage_measurements(fixture_root: Path) -> dict[str, dict[str, dict[str, Any]]]:
     """Fold every stage-emitted `fixture_measurements.json` under the fixture root into one
     {area: {key: {"min", "max", "units", "sources"}}} envelope (board Rec 4).
@@ -1787,7 +1811,7 @@ def collect_stage_measurements(fixture_root: Path) -> dict[str, dict[str, dict[s
         declaring the same quantity with disagreeing units.
     """
     merged: dict[str, dict[str, dict[str, Any]]] = {}
-    for path in sorted(Path(fixture_root).rglob(MEASUREMENTS_NAME)):
+    for path in _live_measurement_blocks(Path(fixture_root)):
         try:
             block = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:

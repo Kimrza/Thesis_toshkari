@@ -498,3 +498,23 @@ def test_the_composer_carries_the_record_but_never_overrides_a_declared_value() 
     )
     assert data["inputs"]["prepared_vtec"] == {"x": 1}
     assert data["inputs"]["site_log"] == {"sha256": "a" * 64}
+
+
+def test_stage_measurements_ignore_archived_previous_runs(tmp_path: Path) -> None:
+    """2026-10-01 defect: an archived earlier run's block was folded into the current run's
+    envelope, widening it with values this run never measured."""
+    from src.data.fixture_manifest import collect_stage_measurements
+
+    write_stage_measurements(
+        tmp_path, stage="02_x", measurements={"row_count_ranges": {"hourly_target": {"min": 1, "max": 2, "units": "rows"}}}
+    )
+    old = tmp_path / f"{STAGE_MEASUREMENTS_DIR}.archived-run0" / "02_x"
+    old.mkdir(parents=True)
+    (old / "fixture_measurements.json").write_text(json.dumps(
+        {"stage": "02_x", "measurements": {"row_count_ranges": {"hourly_target": {"min": 1, "max": 99, "units": "rows"}}}}
+    ), encoding="utf-8")
+    nested = tmp_path / "archived_releases" / "x" / STAGE_MEASUREMENTS_DIR / "02_x"
+    nested.mkdir(parents=True)
+    (nested / "fixture_measurements.json").write_text("not json", encoding="utf-8")
+    merged = collect_stage_measurements(tmp_path)
+    assert merged["row_count_ranges"]["hourly_target"]["max"] == 2.0
