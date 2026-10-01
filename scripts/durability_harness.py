@@ -613,9 +613,24 @@ def working_tree_state() -> dict[str, Any]:
     governed = porcelain("--untracked-files=all", "--", *GOVERNED_TREE_PATHS)
     governed = [ln for ln in governed if "__pycache__" not in ln]
     elsewhere = [ln for ln in porcelain("--untracked-files=no") if ln not in governed]
+    # A tracked file whose only difference from HEAD is CR at end of line (seen when WSL git,
+    # without the Windows system `core.autocrlf`, reads a CRLF checkout on /mnt/c) is the
+    # committed content: recorded, not dirty. Any other difference stays dirty.
+    line_ending_only = []
+    for line in list(governed):
+        if line.startswith(" M"):
+            path = line[3:].strip()
+            same = subprocess.run(  # noqa: S603,S607
+                ["git", "diff", "--quiet", "--ignore-cr-at-eol", "HEAD", "--", path],
+                cwd=REPO_ROOT, check=False,
+            )
+            if same.returncode == 0:
+                governed.remove(line)
+                line_ending_only.append(line)
     return {
         "dirty": bool(governed),
         "governed_changes": governed[:50],
+        "line_ending_only": line_ending_only[:50],
         "other_tracked_changes": elsewhere[:50],
     }
 

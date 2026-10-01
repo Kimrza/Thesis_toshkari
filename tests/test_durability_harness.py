@@ -218,3 +218,30 @@ def test_non_governed_interpreter_is_not_labelled_governed(monkeypatch) -> None:
     assert h._campaign_environment_id() == "undeclared"
     monkeypatch.setattr(h.sys, "version_info", (3, 11, 16))
     assert h._campaign_environment_id() == "tec-thesis-311"
+
+
+@pytest.mark.parametrize(("diff_rc", "dirty"), [(0, False), (1, True)])
+def test_cr_only_change_is_recorded_and_content_change_is_dirty(monkeypatch, diff_rc, dirty) -> None:
+    """A governed file differing from HEAD only by CR at end of line (WSL git reading a
+    CRLF checkout) is the committed content; a real content change stays dirty."""
+    h = _harness()
+
+    class _Done:
+        def __init__(self, out="", rc=0):
+            self.stdout = out
+            self.returncode = rc
+
+    def run(argv, **_k):
+        if "diff" in argv:
+            return _Done(rc=diff_rc)
+        if "--" in argv:
+            return _Done(" M environment/bootstrap_env.ps1\n")
+        return _Done("")
+
+    monkeypatch.setattr(h.subprocess, "run", run)
+    state = h.working_tree_state()
+    assert state["dirty"] is dirty
+    if dirty:
+        assert state["governed_changes"] == [" M environment/bootstrap_env.ps1"]
+    else:
+        assert state["line_ending_only"] == [" M environment/bootstrap_env.ps1"]
