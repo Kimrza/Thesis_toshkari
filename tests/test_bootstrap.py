@@ -775,6 +775,39 @@ def test_control_19_fixture_mode_widening_failure_raises_at_construction() -> No
     _guard(vector_width=2.0, comparator_width=1.0, passed=True)  # passing fixture constructs
 
 
+def test_fixture_real_data_mode_discloses_instead_of_raising() -> None:
+    """R-120 on TE 15.3's timing execution: the scientific fixture bootstraps a REAL month,
+    so a narrower vector interval is a mandatory disclosure there, never the synthetic
+    fixture's raise (found 2026-10-01: rehearsal aborted at 18.53 vs 18.73 TECU^2)."""
+    with pytest.raises(BootstrapError):
+        _guard(evaluation_mode="fixture_real_data", passed=False, disclosure=None)
+    disclosure = {
+        "vector_width": 0.5,
+        "comparator_width": 1.0,
+        "comparator_replicates": APPARATUS_REPLICATES,
+        "comparator_derived_seed": "SeedSequence(1234, spawn_key=(1,))",
+        "block_hours": 24,
+        "block_scheme": BLOCK_SCHEME_FIXED_NONOVERLAPPING,
+        "n_blocks": 6,
+        "pairwise_correlations": {"S1-S2": 0.01},
+    }
+    evidence = _guard(
+        evaluation_mode="fixture_real_data",
+        passed=False,
+        vector_width=0.5,
+        comparator_width=1.0,
+        disclosure=disclosure,
+    )
+    assert evidence.passed is False and evidence.disclosure is not None
+
+
+def test_fixture_real_data_mode_keeps_the_protocol_block_length(tmp_path: Path) -> None:
+    """Only the replicate count is reduced at fixture scale; a different block length is
+    refused before any draw."""
+    with pytest.raises(BootstrapError, match="block length"):
+        _run(tmp_path, evaluation_mode="fixture_real_data", block_hours=48)
+
+
 def test_control_22_real_data_failure_without_disclosure_fails() -> None:
     """The mandatory disclosure proven mandatory: absent, or missing the measured
     correlations, the failed real-data evidence is unconstructible."""

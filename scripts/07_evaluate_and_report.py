@@ -1628,10 +1628,12 @@ def _run_fixture_scale(
             target=target,
             out_root=out_root,
             locked=None,  # no locked path at fixture scale, structurally
-            # Rec 18: the reporting layer runs at fixture scale too, in `fixture` mode —
-            # the mode the widening guard's failure semantics key on (R-120; Rec 23).
-            evaluation_mode="fixture",
-            # fixture identity (never evaluation_mode, which is "fixture" for BOTH
+            # Rec 18: the reporting layer runs at fixture scale too. The bootstrap runs on
+            # the fixture's REAL month, so R-120's real-data semantics apply (a failed
+            # widening comparison is a mandatory disclosure); `fixture` mode's raise is for
+            # TA-14's synthetic dataset only. The replicate count is the fixture's (R-118).
+            evaluation_mode="fixture_real_data",
+            # fixture identity (never evaluation_mode, which is the same for BOTH
             # fixtures) is what gates the bootstrap skip for Fixture 1 (TE §15.3).
             fixture_id=scope.fixture_id,
             fixture_bootstrap_replicates=_fixture_bootstrap_replicates(scope),

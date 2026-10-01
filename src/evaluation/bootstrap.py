@@ -136,6 +136,7 @@ __all__ = [
     "INTERVAL_METHOD_PERCENTILE",
     "CORRELATION_SERIES_ID",
     "EVALUATION_MODES",
+    "REAL_DATA_MODES",
     "NUMPY_PIN",
     "BlockGrid",
     "VectorBlockDraw",
@@ -180,7 +181,16 @@ STREAM_ASSIGNMENTS: Mapping[str, str] = {
 BLOCK_SCHEME_FIXED_NONOVERLAPPING: str = "fixed_nonoverlapping"
 INTERVAL_METHOD_PERCENTILE: str = "percentile"
 CORRELATION_SERIES_ID: str = "paired_error_pearson_all_pairs"
-EVALUATION_MODES: tuple[str, ...] = ("fixture", "real_data")
+EVALUATION_MODES: tuple[str, ...] = ("fixture", "fixture_real_data", "real_data")
+#: Modes whose data are REAL, so a failed widening comparison is R-120's mandatory
+#: disclosure, never a raise. `fixture` is reserved for TA-14's synthetic dataset, where
+#: widening holds by construction and a failure raises. `fixture_real_data` is TE 15.3's
+#: reduced-replicate timing execution on the scientific fixture's real month: the replicate
+#: count comes from the fixture declaration (R-118), and the data carry no planted
+#: correlation. Until 2026-10-01 stage 07 ran that execution in `fixture` mode, so a real
+#: month whose cross-station paired-error correlation is near zero aborted the fixture,
+#: although R-120 states such a result is "the expected convergence of two estimators".
+REAL_DATA_MODES: frozenset[str] = frozenset({"fixture_real_data", "real_data"})
 
 #: The pinned numpy requirement named by the lazy-import refusal (requirements.txt).
 NUMPY_PIN: str = "numpy==1.26.4"
@@ -619,7 +629,7 @@ class WideningGuardEvidence:
                 f"TC-19). A serialized fixture-mode result therefore always implies "
                 f"passed",
             )
-        if self.evaluation_mode == "real_data" and not self.passed:
+        if self.evaluation_mode in REAL_DATA_MODES and not self.passed:
             required = (
                 "vector_width",
                 "comparator_width",
@@ -878,6 +888,15 @@ def vector_block_bootstrap(
 
     # --- the declaration: every scientific value from config (R-118, R-119) -------------
     declaration = read_bootstrap_declaration(experiment)
+    if evaluation_mode == "fixture_real_data" and int(block_hours) != int(
+        declaration["block_hours"]
+    ):
+        raise BootstrapError(
+            "fixture timing bootstrap call",
+            f"was passed block_hours={block_hours} but configs/experiment.yaml declares "
+            f"{declaration['block_hours']}; TE 15.3 reduces only the replicate count, so the "
+            f"block length stays the protocol's (R-118)",
+        )
     if evaluation_mode == "real_data" and (
         int(block_hours) != int(declaration["block_hours"])
         or int(replicates) != int(declaration["replicates"])
@@ -1026,7 +1045,7 @@ def vector_block_bootstrap(
 
     passed = not (vector_width < comparator_width)
     disclosure: dict[str, Any] | None = None
-    if not passed and evaluation_mode == "real_data":
+    if not passed and evaluation_mode in REAL_DATA_MODES:
         disclosure = {
             "vector_width": vector_width,
             "comparator_width": comparator_width,
