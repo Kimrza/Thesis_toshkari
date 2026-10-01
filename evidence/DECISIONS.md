@@ -3829,6 +3829,44 @@ the acceptance tolerance is the Student's Q-31 freeze act (TE §18.2). Measured 
 `metrics.json` 0.0 TECU² (32 values) — deterministic execution under NFR-DET-01, not a
 fabricated tolerance.
 
+**Amendment 2, 2026-10-01: TE §13.7 applied field by field to two `exact` outputs (adopted
+by the Student's ruling in session, 2026-10-01).** The question put to the Student was:
+"Amend D-74 by field (Recommended)". The amendment applies to BOTH fixtures.
+
+**The finding.** Two outputs classed `exact` above embed model-output floats.
+`mask_manifest.json`'s `mask_id` is SHA-256 over the masked rows including `y_true` and every
+member's prediction (R-107 limb 1, `src/evaluation/masks.py: compute_mask_id`).
+`checkpoint_manifest.json` records `restored_validation_rmse`. On P-6 both differed between
+(a) `tec-thesis-311` and (c) `g07-clean-run`, by about 1e-6 to 1e-8, which is within the
+frozen prediction tolerance. Consequently:
+- no (c) run could pass a fixture comparison, and so no (c) receipt could exist;
+- R-140 therefore refused every (c) `scientific_1month` run, measuring runs included;
+- D-83 item 11's (c) leg for Fixture 2, and G-07, were blocked by classification rather than
+  by a measured reproducibility failure.
+
+**The amendment.** TE §13.7 classes floats as toleranced and identities as exact. It is now
+applied to the fields inside these two outputs. Each exception is declared in the identity
+declarations' comparison ledgers under `field_exceptions`, citing this amendment, before any
+measuring run:
+
+1. **`mask_manifest.json`** (`partition_membership`). Each mask gains `membership_id`:
+   SHA-256 over the set, its members and the sorted `(station, interval_start_utc)` keys the
+   intersection kept. It carries no value and is compared exactly in every environment.
+   `mask_id` is unchanged (R-107 limb 1 still holds). It is declared `environment_bound`: it is
+   compared exactly between runs of the reference's own environment
+   (`required_outputs.reference_environment_id`), and it is not compared across environments.
+2. **`checkpoint_manifest.json`** (`id`). `restored_validation_rmse` is a declared toleranced
+   field (unit TECU). Its tolerance is the D-83 item 11 per-field tolerance, composed from the
+   (a)/(c) measuring runs and frozen with the manifest. Every other field (model, partition,
+   seed, epochs, checkpoint reference) stays exact.
+3. Every other leaf of both outputs stays exact. Exceptions are admitted on value-exact kinds
+   only. `schema` and `hash` outputs are unchanged.
+
+**Effect.** The fixture manifests frozen before this amendment carry no `membership_id`, so
+`plumbing_7day` is re-measured and re-frozen under its own D-number. No scientific value, mask
+membership rule, tolerance rule or comparison set changes. Implementation and tests:
+`tests/test_d74_field_exceptions.py`.
+
 ---
 
 ## D-75 — `plumbing_7day` fixture: `plots/*` comparison class (owner ruling, Option C conditional)

@@ -94,6 +94,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -1155,6 +1156,14 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         for name in toleranced
         if (fixture_root / name).is_file()
     }
+    # D-74 amendment 2: the declared toleranced FIELDS of an exact output are fingerprinted
+    # too, restricted to their own locators, so their item 11 tolerance is measured.
+    for name, fields in exact_toleranced_fields(template).items():
+        for concrete in sorted(listing):
+            if output_matches(str(concrete), str(name)) and (fixture_root / concrete).is_file():
+                fingerprints[concrete] = restrict_fingerprint(
+                    numeric_fingerprint(fixture_root / concrete), fields
+                )
     write_measuring_result(
         fixture_root,
         run_id=run_id,
@@ -1210,6 +1219,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             reference_dir_for(workspace, args.fixture, run_id),
             manifest_dir=manifest_path_for(workspace, args.fixture).parent,
         ),
+        reference_environment_id=lock.environment_id,
     )
     try:
         written = write_candidate_manifest(
@@ -1245,6 +1255,28 @@ def classified_failure_reason(exc: BaseException) -> str:
     return f"{klass} ({type(exc).__name__}): {exc}"
 
 
+def exact_toleranced_fields(
+    ledger_template: Mapping[str, Any],
+) -> dict[str, list[Mapping[str, Any]]]:
+    """D-74 amendment 2: `{output: toleranced_fields}` for every exact output declaring any."""
+    out: dict[str, list[Mapping[str, Any]]] = {}
+    for name, entry in ledger_template.items():
+        if not isinstance(entry, Mapping) or entry.get("comparison_class") != "exact":
+            continue
+        exceptions = entry.get("field_exceptions")
+        if isinstance(exceptions, Mapping) and exceptions.get("toleranced_fields"):
+            out[str(name)] = list(exceptions["toleranced_fields"])
+    return out
+
+
+def restrict_fingerprint(
+    fingerprint: Mapping[str, float], fields: Sequence[Mapping[str, Any]]
+) -> dict[str, float]:
+    """Only the elements a declared toleranced field's locator matches; the rest stay exact."""
+    patterns = [re.compile(str(f["locator"])) for f in fields]
+    return {k: v for k, v in fingerprint.items() if any(p.fullmatch(k) for p in patterns)}
+
+
 def compose_tolerances(
     results: Sequence[Mapping[str, Any]],
     ledger_template: Mapping[str, Any],
@@ -1272,7 +1304,23 @@ def compose_tolerances(
             )
         environments.add(env)
     if len(environments) > 1:
-        return compose_item11_tolerances(results, ledger_template, list(toleranced))
+        composed = compose_item11_tolerances(results, ledger_template, list(toleranced))
+        # D-74 amendment 2: an exact output's declared toleranced fields, composed by the
+        # same item 11 path over their own field table.
+        for name, fields in exact_toleranced_fields(ledger_template).items():
+            concrete = sorted(
+                {
+                    out
+                    for r in results
+                    for out in r.get("fingerprints", {})
+                    if output_matches(str(out), str(name))
+                }
+            )
+            for out in concrete:
+                composed.update(
+                    compose_item11_tolerances(results, {out: {"fields": fields}}, [out])
+                )
+        return composed
     return {
         name: cross_run_variation(
             {str(r["measuring_run_id"]): r.get("fingerprints", {}).get(name, {}) for r in results}

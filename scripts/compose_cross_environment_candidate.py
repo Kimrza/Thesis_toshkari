@@ -115,6 +115,11 @@ def compose(
             reference_dir_for(workspace, fixture, f"{outputs_run}+{suffix}"),
             manifest_dir=skeleton_path.parent,
         ),
+        reference_environment_id=str(
+            next(r for r in loaded if str(r.get("measuring_run_id")) == outputs_run).get(
+                "environment_id"
+            )
+        ),
     )
     try:
         return write_candidate_manifest(target, candidate)

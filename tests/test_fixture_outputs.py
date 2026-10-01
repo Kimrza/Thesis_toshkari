@@ -421,8 +421,11 @@ def test_the_declared_ledger_classifies_all_nineteen_outputs_and_each_entry_vali
     for name, entry in ledger.items():
         assert any(output_matches(name, r) for r in required)
         assert "fp_tolerance" not in entry  # tolerances are measured, never declared
+        # D-74 amendment 2: an exact output's toleranced FIELDS are declared, never their
+        # tolerance; the template validates as the candidate it is before any measurement.
+        assert "fp_tolerance" not in (entry.get("field_exceptions") or {})
         if entry["comparison_class"] != "toleranced":
-            _validate_ledger_entry(f"ledger[{name}]", entry)  # exact / recorded_presence
+            _validate_ledger_entry(f"ledger[{name}]", entry, status="candidate")
 
 
 def test_fixture1_bootstrap_summary_is_an_exact_schema_status_artifact() -> None:

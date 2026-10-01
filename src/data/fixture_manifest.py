@@ -966,6 +966,19 @@ def _validate_required_outputs(
         _validate_ledger_entry(
             f"{res}.comparison_ledger[{output}]", entry, status=str(data.get("status"))
         )
+    bound = [
+        name
+        for name, entry in ledger.items()
+        if isinstance(entry, Mapping)
+        and isinstance(entry.get("field_exceptions"), Mapping)
+        and entry["field_exceptions"].get("environment_bound")
+    ]
+    if bound and not _nonempty_str(block.get("reference_environment_id")):
+        raise _refuse(
+            f"{res}.reference_environment_id",
+            f"{bound} declare environment-bound fields, so the manifest records which "
+            f"environment produced its reference outputs (D-74 amendment 2)",
+        )
     extra = sorted(set(ledger) - set(listed))
     if extra:
         raise _refuse(f"{res}.comparison_ledger", f"ledger entries for undeclared outputs {extra}")
@@ -1006,6 +1019,8 @@ def _validate_ledger_entry(
                 "an exact entry carries no fp_tolerance: exact classes compare by EQUALITY, "
                 "not tolerance (TE 13.7; NFR-REP-01)",
             )
+        if "field_exceptions" in entry:
+            _validate_field_exceptions(resource, entry, status=status)
         return
     if klass == "recorded_presence":
         if entry.get("image_format") not in RECORDED_PRESENCE_FORMATS:
@@ -1075,6 +1090,74 @@ def _validate_ledger_entry(
             "comparison's R-103 joint contract is adopted by both halves (BLK-08 down-arrow, "
             "checked not inherited; R-139 control 25)",
         )
+
+
+def _validate_field_exceptions(
+    resource: str, entry: Mapping[str, Any], *, status: str
+) -> None:
+    """D-74 amendment 2 (2026-10-01): TE 13.7 applied FIELD by field inside an exact output.
+
+    An exact output may embed a value TE 13.7 does not class as exact. Two forms are
+    admitted, each declared before the measuring runs and cited:
+
+    * `environment_bound`: an identity computed over model output (R-107 limb 1's
+      `mask_id` hashes the masked rows INCLUDING the predictions). It is compared exactly
+      between runs of the reference's own environment and not across environments, where
+      the float-free identity beside it (`membership_id`) carries the comparison.
+    * `toleranced_fields`: a floating-point metric (TE 13.7: "floating-point predictions
+      and metrics use fixture-derived tolerances"), e.g. `restored_validation_rmse`. Its
+      tolerance is the D-83 item 11 per-field tolerance, composed from the (a)/(c)
+      measuring runs and frozen with the manifest under `fp_tolerance`.
+
+    Every other leaf of the output stays exact. Only VALUE-exact kinds take exceptions:
+    `schema` and `hash` outputs already compare on structure and recorded hashes.
+    """
+    block = entry.get("field_exceptions")
+    where = f"{resource}.field_exceptions"
+    if not isinstance(block, Mapping):
+        raise _refuse(where, "a mapping is required")
+    if entry.get("exact_kind") in _SEMANTIC_EXACT_KINDS:
+        raise _refuse(
+            where,
+            f"exact_kind {entry.get('exact_kind')!r} already compares on structure; field "
+            f"exceptions apply to value-exact kinds only (D-74 amendment 2)",
+        )
+    if not _nonempty_str(block.get("citation")):
+        raise _refuse(f"{where}.citation", "the amendment the exception rests on is cited")
+    bound = block.get("environment_bound", [])
+    tolerated = block.get("toleranced_fields", [])
+    if not bound and not tolerated:
+        raise _refuse(where, "declares neither environment_bound nor toleranced_fields")
+    if not isinstance(bound, Sequence) or isinstance(bound, str):
+        raise _refuse(f"{where}.environment_bound", "a list of {locator, reason} is required")
+    for index, item in enumerate(bound):
+        item_where = f"{where}.environment_bound[{index}]"
+        if not isinstance(item, Mapping) or not _nonempty_str(item.get("reason")):
+            raise _refuse(item_where, "each entry states its locator and its reason")
+        try:
+            re.compile(str(item.get("locator") or ""))
+        except re.error as exc:
+            raise _refuse(item_where, f"locator does not compile ({exc})") from exc
+        if not _nonempty_str(item.get("locator")):
+            raise _refuse(item_where, "locator is required")
+    if tolerated:
+        tolerance = block.get("fp_tolerance")
+        if tolerance is None and status == CANDIDATE:
+            from src.data.cross_environment_tolerance import validate_field_table
+
+            validate_field_table(resource, tolerated)
+            return
+        if not isinstance(tolerance, Mapping):
+            raise _refuse(
+                f"{where}.fp_tolerance",
+                "a frozen manifest carries the item 11 per-field tolerance of every declared "
+                "toleranced field (D-74 amendment 2; D-83 item 11)",
+            )
+        _validate_item11_tolerance(
+            f"{where}", {"fields": tolerated}, tolerance, status=status
+        )
+    elif "fp_tolerance" in block:
+        raise _refuse(f"{where}.fp_tolerance", "no toleranced field is declared")
 
 
 def _validate_item11_tolerance(
@@ -1817,8 +1900,99 @@ def _first_value_difference(expected: Any, actual: Any, trail: str = "") -> str 
     return None
 
 
+def _exceptional_value_compare(
+    expected: Any,
+    actual: Any,
+    *,
+    exceptions: Mapping[str, Any],
+    same_environment: bool,
+    produced_environment_id: str | None,
+    produced: Path,
+) -> dict[str, Any]:
+    """Exact value equality, except D-74 amendment 2's declared fields (see the validator)."""
+    from src.data.cross_environment_tolerance import DeterminismFailure, ToleranceFailure
+
+    bound = [re.compile(str(e["locator"])) for e in exceptions.get("environment_bound", [])]
+    tolerated = list(exceptions.get("toleranced_fields", []))
+    tol_patterns = [(str(e["field"]), re.compile(str(e["locator"]))) for e in tolerated]
+    frozen = (exceptions.get("fp_tolerance") or {}).get("fields") or {}
+    if tolerated:
+        shown = (exceptions.get("fp_tolerance") or {}).get("environment_ids") or []
+        if produced_environment_id not in shown:
+            raise DeterminismFailure(
+                f"{produced} produced in {produced_environment_id!r}",
+                f"its toleranced fields were frozen over {shown}; this environment has not "
+                f"shown determinism, so no tolerance applies (D-83 item 9)",
+            )
+    report = {"environment_bound_compared": 0, "environment_bound_skipped": 0,
+              "toleranced_checked": 0, "max_difference_by_field": {}}
+
+    def walk(e: Any, a: Any, trail: str) -> None:
+        if any(p.fullmatch(trail) for p in bound):
+            if same_environment:
+                if e != a:
+                    raise _refuse(
+                        produced,
+                        f"environment-bound field {trail}: {a!r} != frozen {e!r} in the "
+                        f"reference's own environment (D-74 amendment 2; TE 13.7)",
+                    )
+                report["environment_bound_compared"] += 1
+            else:
+                report["environment_bound_skipped"] += 1
+            return
+        hits = [name for name, p in tol_patterns if p.fullmatch(trail)]
+        if hits:
+            name = hits[0]
+            if not isinstance(e, int | float) or not isinstance(a, int | float):
+                raise _refuse(produced, f"toleranced field {trail} is not numeric")
+            if e != e or a != a:
+                if not (e != e and a != a):
+                    raise ToleranceFailure(f"{produced} at {trail}", "NaN in only one")
+                return
+            limit = float(frozen[name]["tolerance"])
+            diff = abs(float(a) - float(e))
+            if diff > limit:
+                raise ToleranceFailure(
+                    f"{produced} at {trail} ({frozen[name]['unit']})",
+                    f"|difference| {diff!r} exceeds field {name!r} tolerance {limit!r}",
+                )
+            worst = report["max_difference_by_field"]
+            worst[name] = max(worst.get(name, 0.0), diff)
+            report["toleranced_checked"] += 1
+            return
+        if isinstance(e, Mapping) and isinstance(a, Mapping):
+            if set(e) != set(a):
+                raise _refuse(produced, f"{trail or '/'}: key sets differ from the frozen expectation")
+            for key in sorted(e, key=str):
+                walk(e[key], a[key], f"{trail}/{key}")
+            return
+        if isinstance(e, list | tuple) and isinstance(a, list | tuple):
+            if len(e) != len(a):
+                raise _refuse(produced, f"{trail}: lengths differ ({len(e)} vs {len(a)})")
+            for index, (x, y) in enumerate(zip(e, a, strict=True)):
+                walk(x, y, f"{trail}[{index}]")
+            return
+        difference = _first_value_difference(e, a, trail)
+        if difference:
+            raise _refuse(
+                produced,
+                f"exact-class content differs from the frozen expectation at {difference} "
+                f"(TE 13.7: exact equality; the expectation is never updated; R-139)",
+            )
+
+    walk(expected, actual, "")
+    return report
+
+
 def _semantic_exact_compare(
-    reference: Path, produced: Path, *, exact_kind: str, frozen_sha256: str
+    reference: Path,
+    produced: Path,
+    *,
+    exact_kind: str,
+    frozen_sha256: str,
+    exceptions: Mapping[str, Any] | None = None,
+    same_environment: bool = True,
+    produced_environment_id: str | None = None,
 ) -> dict[str, Any]:
     """TE 13.7 exactness on a structured output whose bytes differ; raises naming the place.
 
@@ -1843,6 +2017,19 @@ def _semantic_exact_compare(
             reference_stamp, produced_stamp, produced=produced, frozen_sha256=frozen_sha256
         )
     }
+    if exact_kind not in _SEMANTIC_EXACT_KINDS and exceptions:
+        report.update(
+            _exceptional_value_compare(
+                expected,
+                actual,
+                exceptions=exceptions,
+                same_environment=same_environment,
+                produced_environment_id=produced_environment_id,
+                produced=produced,
+            )
+        )
+        report["values_equal_outside_declared_exceptions"] = True
+        return report
     if exact_kind not in _SEMANTIC_EXACT_KINDS:
         difference = _first_value_difference(expected, actual)
         if difference:
@@ -1962,8 +2149,23 @@ def compare_required_outputs(
                     f"not tolerance, and the expectation is never updated (TE 13.7; NFR-REP-01; "
                     f"R-139 control 21/23)",
                 )
+            exceptions = entry.get("field_exceptions")
+            reference_env = manifest.data["required_outputs"].get("reference_environment_id")
+            if exceptions and exceptions.get("environment_bound") and environment_id is None:
+                raise _refuse(
+                    produced,
+                    "environment-bound fields are compared only with the producing run's "
+                    "environment_id; a comparison keyed to no environment is refused "
+                    "(D-74 amendment 2)",
+                )
             semantic = _semantic_exact_compare(
-                reference_file, produced, exact_kind=exact_kind, frozen_sha256=manifest.sha256
+                reference_file,
+                produced,
+                exact_kind=exact_kind,
+                frozen_sha256=manifest.sha256,
+                exceptions=exceptions,
+                same_environment=environment_id is not None and environment_id == reference_env,
+                produced_environment_id=environment_id,
             )
             results[output] = {
                 "comparison_class": "exact",
@@ -2319,6 +2521,7 @@ def compose_candidate_manifest(
     artifact_manifest_ref: str,
     tolerances: Mapping[str, Mapping[str, Any]] | None = None,
     recorded: Mapping[str, Mapping[str, Any]] | None = None,
+    reference_environment_id: str | None = None,
 ) -> dict[str, Any]:
     """Assemble a `status: candidate` mapping from the owner's identity declaration and a
     measuring run's measurements — every measured field stamped with `measuring_run_id`.
@@ -2364,13 +2567,36 @@ def compose_candidate_manifest(
     for output in outputs:
         keys = [k for k in comparison_ledger if output_matches(str(output), str(k))]
         if len(keys) == 1:
-            ledger[str(output)] = dict(comparison_ledger[keys[0]])
+            ledger[str(output)] = json.loads(json.dumps(comparison_ledger[keys[0]]))
     # CR-2026-09-29-Q31-CLOSURE: a `toleranced` entry's fp_tolerance is the cross-run
     # variation MEASURED over the recorded measuring runs (`cross_run_variation`), stamped
     # with those runs' ids — the template never carries one (a tolerance is measured, never
     # declared, TE 15.1 / R-134). The schema below still decides whether it is admissible.
     for name, measured in (tolerances or {}).items():
         entry = ledger.get(name)
+        exceptions = (entry or {}).get("field_exceptions")
+        if (
+            entry is not None
+            and entry.get("comparison_class") == "exact"
+            and isinstance(exceptions, Mapping)
+            and exceptions.get("toleranced_fields")
+            and "fields" in measured
+        ):
+            entry["field_exceptions"] = {
+                **exceptions,
+                "fp_tolerance": {
+                    "fields": measured["fields"],
+                    "environment_ids": measured["environment_ids"],
+                    "measuring_run_id": measuring_run_id,
+                    "measured_over_runs": len(measured["measuring_run_ids"]),
+                    "elements_compared": measured["elements_compared"],
+                    "method": (
+                        "D-83 item 11 via src.data.cross_environment_tolerance over the "
+                        "declared toleranced fields of an exact output (D-74 amendment 2)"
+                    ),
+                },
+            }
+            continue
         if entry is None or entry.get("comparison_class") != "toleranced":
             continue
         if "fields" in measured:
@@ -2403,6 +2629,8 @@ def compose_candidate_manifest(
         "outputs": list(outputs),
         "comparison_ledger": ledger,
     }
+    if reference_environment_id:
+        data["required_outputs"]["reference_environment_id"] = str(reference_environment_id)
     return data
 
 

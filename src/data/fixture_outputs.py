@@ -362,6 +362,7 @@ def export_checkpoint_manifest(
 
 _MASK_MEMBERSHIP_KEYS: Final[tuple[str, ...]] = (
     "mask_id",
+    "membership_id",
     "set_id",
     "partition_id",
     "member_ids",

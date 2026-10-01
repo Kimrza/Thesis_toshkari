@@ -64,6 +64,12 @@
    "train_start": "2022-03-01",
    "train_end": "2022-03-21",
    "validation_month": "2022-03-22"
+  },
+  "FIX-MAR-REFIT": {
+   "kind": "refit",
+   "train_start": "2022-03-01",
+   "train_end": "2022-03-31",
+   "validation_month": null
   }
  },
  "fixture_bootstrap": {
@@ -148,7 +154,16 @@
     "producing_path": {
      "script": "scripts/07_evaluate_and_report.py"
     },
-    "citation": "D-74"
+    "citation": "D-74",
+    "field_exceptions": {
+     "citation": "D-74 amendment 2 (2026-10-01, Student ruling): TE 13.7 applied field by field",
+     "environment_bound": [
+      {
+       "locator": "/masks\\[\\d+\\]/mask_id",
+       "reason": "R-107 limb 1: mask_id hashes the masked rows including y_true and the members' predictions, so it is exact only between runs of the reference's own environment; membership_id, the float-free partition membership, is compared exactly in every environment"
+      }
+     ]
+    }
    },
    "predictions.parquet": {
     "comparison_class": "toleranced",
@@ -260,7 +275,19 @@
     "producing_path": {
      "script": "scripts/06_train_and_predict.py"
     },
-    "citation": "D-74"
+    "citation": "D-74",
+    "field_exceptions": {
+     "citation": "D-74 amendment 2 (2026-10-01, Student ruling): TE 13.7 applied field by field",
+     "toleranced_fields": [
+      {
+       "field": "restored_validation_rmse",
+       "locator": "/entries\\[\\d+\\]/restored_validation_rmse",
+       "unit": "TECU",
+       "meaning": "validation RMSE of the restored best checkpoint: a model-fit float, not an identity",
+       "citation": "TE 13.7 (floating-point metrics use fixture-derived tolerances); D-74 amendment 2; D-83 item 11"
+      }
+     ]
+    }
    },
    "registry_entry.json": {
     "comparison_class": "exact",

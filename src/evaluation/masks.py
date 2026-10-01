@@ -106,6 +106,7 @@ __all__ = [
     "prediction_from_payload",
     "build_comparison_mask",
     "compute_mask_id",
+    "compute_membership_id",
     "assert_mask_id_reproduces",
     "assert_reporting_surface",
 ]
@@ -396,6 +397,7 @@ class ComparisonMask:
     scored_window_statement: str
     window_length_hours: int | None = None
     lag_set: tuple[str, ...] = field(default_factory=tuple)
+    membership_id: str = ""
 
 
 def _canonical_rows(masked_rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -423,6 +425,29 @@ def compute_mask_id(set_id: str, member_ids: Sequence[str], masked_rows: Sequenc
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def compute_membership_id(
+    set_id: str, member_ids: Sequence[str], masked_rows: Sequence[Mapping]
+) -> str:
+    """D-74 amendment 2: the mask's partition-membership identity, carrying no float.
+
+    The declared set, its members and the sorted `(station, interval_start_utc)` keys the
+    intersection kept, and nothing else. `mask_id` (limb 1) also hashes `y_true` and the
+    members' predictions, so it differs between environments whose predictions agree only
+    within their frozen tolerance. This identity does not, which is what lets a clean run in
+    another environment be compared exactly on WHICH rows each comparison scores.
+    """
+    keys = sorted(
+        (str(row["station"]), str(row["interval_start_utc"])) for row in masked_rows
+    )
+    payload = {
+        "set_id": str(set_id),
+        "member_ids": sorted(str(m) for m in member_ids),
+        "keys": [list(k) for k in keys],
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def assert_mask_id_reproduces(mask: ComparisonMask) -> None:
     """R-107 limb 1's executable half: recomputation reproduces the ID or RAISES.
 
@@ -433,6 +458,14 @@ def assert_mask_id_reproduces(mask: ComparisonMask) -> None:
         identity have diverged, and a number computed over it would cite a mask that no
         longer exists (control 12).
     """
+    if mask.membership_id and mask.membership_id != compute_membership_id(
+        mask.set_id, mask.member_ids, mask.masked_rows
+    ):
+        raise FairnessError(
+            f"mask {mask.mask_id}",
+            "the recomputed membership_id differs from the recorded one; the mask's "
+            "membership and its identity disagree (D-74 amendment 2)",
+        )
     recomputed = compute_mask_id(mask.set_id, mask.member_ids, mask.masked_rows)
     if recomputed != mask.mask_id:
         raise FairnessError(
@@ -686,6 +719,7 @@ def build_comparison_mask(
     template = members[0]
     mask = ComparisonMask(
         mask_id=compute_mask_id(set_id, declared, masked_rows),
+        membership_id=compute_membership_id(set_id, declared, masked_rows),
         set_id=str(set_id),
         feature_set_id=str(feature_set_id),
         partition_id=str(getattr(template, "partition_id")),
@@ -818,6 +852,7 @@ class MaskRegistry:
             "artifact_class": "comparison_mask_registration",
             "set_id": mask.set_id,
             "mask_id": mask.mask_id,
+            "membership_id": mask.membership_id,
             "feature_set_id": mask.feature_set_id,
             "partition_id": mask.partition_id,
             "member_ids": list(mask.member_ids),
