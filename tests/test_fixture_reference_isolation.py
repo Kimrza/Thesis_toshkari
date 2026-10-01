@@ -212,3 +212,67 @@ def test_snapshot_refuses_and_leaves_nothing_when_an_output_is_missing(tmp_path)
             manifest_dir=tmp_path,
         )
     assert not destination.exists()
+
+
+STAMP = {
+    "evidence_class": "smoke_only",
+    "fixture_id": PLUMBING_FIXTURE_ID,
+    "frozen_manifest_hash": None,
+    "phase_id": "P1A",
+}
+
+
+def _stamped(document: dict[str, Any], frozen_hash: str | None) -> dict[str, Any]:
+    return {**document, "fixture_stamp": {**STAMP, "frozen_manifest_hash": frozen_hash}}
+
+
+def test_stamp_set_aside_and_bound_to_the_frozen_manifest(tmp_path):
+    """A measuring-run reference stamps null; a comparison run stamps the frozen hash."""
+    membership = {"partitions": {"F1": ["2022-11-01T00:00Z"]}}
+    manifest = _frozen_with_documents(
+        tmp_path,
+        {"split_manifest.json": ("partition_membership", _stamped(membership, None))},
+    )
+    produced = tmp_path / "produced"
+    _copy_tree(manifest, produced)
+    (produced / "split_manifest.json").write_text(
+        json.dumps(_stamped(membership, manifest.sha256)), encoding="utf-8"
+    )
+    report = compare_required_outputs(manifest, produced)
+    entry = report["outputs"]["split_manifest.json"]
+    assert entry["stamp_bound_to_frozen_manifest"] is True and entry["values_equal"] is True
+
+
+@pytest.mark.parametrize(
+    "produced_doc, match",
+    [
+        (lambda h: _stamped({"partitions": {"F1": ["2022-11-01T00:00Z"]}}, "f" * 64), "not the frozen manifest"),
+        (lambda h: {**_stamped({"partitions": {"F1": ["2022-11-01T00:00Z"]}}, h), "fixture_stamp": {**STAMP, "frozen_manifest_hash": h, "evidence_class": "scientific_fixture"}}, "evidence_class"),
+        (lambda h: {"partitions": {"F1": ["2022-11-01T00:00Z"]}}, "one side only"),
+        (lambda h: _stamped({"partitions": {"F1": ["2022-11-01T01:00Z"]}}, h), "content differs"),
+    ],
+)
+def test_stamp_and_content_negative_controls(tmp_path, produced_doc, match):
+    membership = {"partitions": {"F1": ["2022-11-01T00:00Z"]}}
+    manifest = _frozen_with_documents(
+        tmp_path,
+        {"split_manifest.json": ("partition_membership", _stamped(membership, None))},
+    )
+    produced = tmp_path / "produced"
+    _copy_tree(manifest, produced)
+    (produced / "split_manifest.json").write_text(
+        json.dumps(produced_doc(manifest.sha256)), encoding="utf-8"
+    )
+    with pytest.raises(IntegrityError, match=match):
+        compare_required_outputs(manifest, produced)
+
+
+def test_byte_exact_kind_float_must_match_bit_for_bit(tmp_path):
+    checkpoint = {"entries": [{"epoch": 3, "restored_validation_rmse": 16.593359789183356}]}
+    manifest = _frozen_with_documents(tmp_path, {"checkpoint_manifest.json": ("id", checkpoint)})
+    produced = tmp_path / "produced"
+    _copy_tree(manifest, produced)
+    drifted = {"entries": [{"epoch": 3, "restored_validation_rmse": 16.59335993287129}]}
+    (produced / "checkpoint_manifest.json").write_text(json.dumps(drifted), encoding="utf-8")
+    with pytest.raises(IntegrityError, match="restored_validation_rmse"):
+        compare_required_outputs(manifest, produced)

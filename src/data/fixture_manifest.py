@@ -1660,8 +1660,18 @@ def _numeric_leaf_compare(expected: Any, actual: Any, *, tolerance: float, trail
 #: run id, its durations), so whole-file byte equality could never hold between two runs and
 #: a comparison that used it either always fails or -- before 2026-10-01 -- was made against
 #: the run's own freshly written listing and so always passed. A `hash` file is compared on
-#: its schema AND on every SHA-256 it records. Every other kind stays byte-exact.
+#: its schema AND on every SHA-256 it records. Every other kind is compared for exact VALUE
+#: equality of the whole document (every leaf, floats bit for bit), never a schema.
 _SEMANTIC_EXACT_KINDS: Final[frozenset[str]] = frozenset({"schema", "hash"})
+#: Structured outputs whose content can be compared once the stamp is set aside.
+_STRUCTURED_SUFFIXES: Final[frozenset[str]] = frozenset({".json", ".yaml", ".yml"})
+#: `src.data.fixture_evidence.STAMP_KEY` (that module imports this one, so the literal is
+#: repeated here). The stamp is the producing path's provenance freight. Its
+#: `frozen_manifest_hash` is null on a measuring run, whose output becomes the reference, and
+#: is the frozen manifest's hash on a comparison run, so it differs by construction; it is
+#: bound to the frozen manifest instead of being compared with the reference.
+_STAMP_KEY: Final[str] = "fixture_stamp"
+_STAMP_BINDING_FIELD: Final[str] = "frozen_manifest_hash"
 _SHA256_LEAF_RE: Final[re.Pattern[str]] = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
@@ -1734,10 +1744,88 @@ def _parse_exact_document(path: Path) -> Any:
     return json.loads(text)
 
 
+def _split_stamp(document: Any) -> tuple[Any, Any]:
+    if isinstance(document, Mapping) and _STAMP_KEY in document:
+        return {k: v for k, v in document.items() if k != _STAMP_KEY}, document[_STAMP_KEY]
+    return document, None
+
+
+def _check_stamp(
+    reference_stamp: Any, produced_stamp: Any, *, produced: Path, frozen_sha256: str
+) -> bool:
+    """The produced stamp equals the reference's, except that it binds THIS frozen manifest."""
+    if reference_stamp is None and produced_stamp is None:
+        return False
+    if not isinstance(reference_stamp, Mapping) or not isinstance(produced_stamp, Mapping):
+        raise _refuse(
+            produced,
+            f"`{_STAMP_KEY}` is present on one side only; every stamped output carries its stamp "
+            f"(R-136)",
+        )
+    if set(reference_stamp) != set(produced_stamp):
+        raise _refuse(produced, f"`{_STAMP_KEY}` keys differ from the frozen expectation")
+    for key in reference_stamp:
+        if key == _STAMP_BINDING_FIELD:
+            continue
+        if reference_stamp[key] != produced_stamp[key]:
+            raise _refuse(
+                produced,
+                f"`{_STAMP_KEY}.{key}` {produced_stamp[key]!r} differs from the frozen expectation "
+                f"{reference_stamp[key]!r}; the stamp is freight that is never rewritten (R-136)",
+            )
+    if produced_stamp.get(_STAMP_BINDING_FIELD) != frozen_sha256:
+        raise _refuse(
+            produced,
+            f"`{_STAMP_KEY}.{_STAMP_BINDING_FIELD}` is "
+            f"{produced_stamp.get(_STAMP_BINDING_FIELD)!r}, not the frozen manifest this run "
+            f"compared against ({frozen_sha256})",
+        )
+    if reference_stamp.get(_STAMP_BINDING_FIELD) not in (None, frozen_sha256):
+        raise _refuse(
+            produced,
+            f"the reference's `{_STAMP_KEY}.{_STAMP_BINDING_FIELD}` names a different frozen "
+            f"manifest ({reference_stamp.get(_STAMP_BINDING_FIELD)!r})",
+        )
+    return True
+
+
+def _first_value_difference(expected: Any, actual: Any, trail: str = "") -> str | None:
+    if isinstance(expected, Mapping) and isinstance(actual, Mapping):
+        if set(expected) != set(actual):
+            return f"{trail or '/'}: key sets differ"
+        for key in sorted(expected, key=str):
+            found = _first_value_difference(expected[key], actual[key], f"{trail}/{key}")
+            if found:
+                return found
+        return None
+    if isinstance(expected, list | tuple) and isinstance(actual, list | tuple):
+        if len(expected) != len(actual):
+            return f"{trail}: lengths differ ({len(expected)} vs {len(actual)})"
+        for index, (e, a) in enumerate(zip(expected, actual, strict=True)):
+            found = _first_value_difference(e, a, f"{trail}[{index}]")
+            if found:
+                return found
+        return None
+    both_nan = (
+        isinstance(expected, float)
+        and isinstance(actual, float)
+        and expected != expected
+        and actual != actual
+    )
+    if not both_nan and (type(expected) is not type(actual) or expected != actual):
+        return f"{trail}: {actual!r} != frozen {expected!r}"
+    return None
+
+
 def _semantic_exact_compare(
-    reference: Path, produced: Path, *, exact_kind: str
+    reference: Path, produced: Path, *, exact_kind: str, frozen_sha256: str
 ) -> dict[str, Any]:
-    """TE 13.7 exactness for `schema` / `hash` kinds; raises naming the first differences."""
+    """TE 13.7 exactness on a structured output whose bytes differ; raises naming the place.
+
+    The `fixture_stamp` is set aside and bound to the frozen manifest (`_check_stamp`). The
+    rest is compared by kind: `schema` on structure, `hash` on structure and every recorded
+    SHA-256, every other kind on exact value equality of the whole document.
+    """
     try:
         expected = _parse_exact_document(reference)
         actual = _parse_exact_document(produced)
@@ -1748,6 +1836,24 @@ def _semantic_exact_compare(
             f"the pair cannot be read as structured documents ({exc}); an unreadable artifact "
             f"fails rather than being compared loosely (TE 13.7; R-139)",
         ) from exc
+    expected, reference_stamp = _split_stamp(expected)
+    actual, produced_stamp = _split_stamp(actual)
+    report: dict[str, Any] = {
+        "stamp_bound_to_frozen_manifest": _check_stamp(
+            reference_stamp, produced_stamp, produced=produced, frozen_sha256=frozen_sha256
+        )
+    }
+    if exact_kind not in _SEMANTIC_EXACT_KINDS:
+        difference = _first_value_difference(expected, actual)
+        if difference:
+            raise _refuse(
+                produced,
+                f"exact-class ({exact_kind}) mismatch: content differs from the frozen "
+                f"expectation {reference} at {difference} (TE 13.7: exact equality; the "
+                f"expectation is never updated; R-139 control 21/23)",
+            )
+        report["values_equal"] = True
+        return report
     diffs = _schema_diffs(expected, actual, "")
     if diffs:
         raise _refuse(
@@ -1756,10 +1862,12 @@ def _semantic_exact_compare(
             f"{reference} at {diffs[:5]}{' ...' if len(diffs) > 5 else ''} (TE 13.7: exact "
             f"equality for schemas; the expectation is never updated)",
         )
-    report: dict[str, Any] = {"schema_equal": True}
+    report["schema_equal"] = True
     if exact_kind == "hash":
         e_hashes, a_hashes = _sha256_leaves(expected), _sha256_leaves(actual)
-        differing = sorted(k for k in set(e_hashes) | set(a_hashes) if e_hashes.get(k) != a_hashes.get(k))
+        differing = sorted(
+            k for k in set(e_hashes) | set(a_hashes) if e_hashes.get(k) != a_hashes.get(k)
+        )
         if differing:
             raise _refuse(
                 produced,
@@ -1843,7 +1951,10 @@ def compare_required_outputs(
                 }
                 continue
             reference_file = manifest.artifact_manifest_path.parent / output
-            if exact_kind not in _SEMANTIC_EXACT_KINDS or not reference_file.is_file():
+            if (
+                produced.suffix.lower() not in _STRUCTURED_SUFFIXES
+                or not reference_file.is_file()
+            ):
                 raise _refuse(
                     produced,
                     f"exact-class ({exact_kind}) mismatch: produced SHA-256 {actual} != "
@@ -1851,7 +1962,9 @@ def compare_required_outputs(
                     f"not tolerance, and the expectation is never updated (TE 13.7; NFR-REP-01; "
                     f"R-139 control 21/23)",
                 )
-            semantic = _semantic_exact_compare(reference_file, produced, exact_kind=exact_kind)
+            semantic = _semantic_exact_compare(
+                reference_file, produced, exact_kind=exact_kind, frozen_sha256=manifest.sha256
+            )
             results[output] = {
                 "comparison_class": "exact",
                 "exact_kind": exact_kind,
