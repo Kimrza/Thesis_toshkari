@@ -1686,7 +1686,7 @@ _FIXTURE_FIGURE_CAVEATS: tuple[str, ...] = (
 
 def _fixture_bootstrap_replicates(scope: Any) -> int | None:
     """`fixture_bootstrap.replicates` from the fixture scope (Fixture 2 only; R-122)."""
-    block = scope.fixture_bootstrap() if hasattr(scope, "fixture_bootstrap") else None
+    block = getattr(scope, "fixture_bootstrap", None)  # a property on both scope types
     value = block.get("replicates") if isinstance(block, Mapping) else None
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 

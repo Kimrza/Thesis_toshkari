@@ -560,3 +560,20 @@ def test_bootstrap_executed_summary_refuses_empty_and_duplicates(tmp_path: Path)
     a2 = _bootstrap_record(tmp_path, "b2.json", "F", 2.0)
     with pytest.raises(IntegrityError, match="second bootstrap result"):
         export_bootstrap_executed([a, a2], tmp_path, fixture_id="scientific_1month")
+
+
+def test_fixture_bootstrap_replicates_read_from_real_scopes() -> None:
+    """Regression (2026-10-01, P-5): 07 called the `fixture_bootstrap` PROPERTY as a method
+    and both fixture runs aborted in 07. Read through the real loader for both fixtures."""
+    import importlib.util
+
+    from src.data.fixture_manifest import load_fixture_scope
+
+    root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("s07_fb", root / "scripts" / "07_evaluate_and_report.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    sci = load_fixture_scope(root / "tests" / "fixtures" / "scientific_1month" / "identity_declaration.yaml")
+    plu = load_fixture_scope(root / "tests" / "fixtures" / "plumbing_7day" / "identity_declaration.yaml")
+    assert mod._fixture_bootstrap_replicates(sci) == 1000
+    assert mod._fixture_bootstrap_replicates(plu) is None
