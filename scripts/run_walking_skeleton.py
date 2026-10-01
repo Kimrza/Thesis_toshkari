@@ -784,9 +784,8 @@ def collect_required_outputs(
     missing: list[str] = []
     for required in required_outputs_for(scope.fixture_id):
         matches = sorted(
-            p for p in root.rglob("*")
-            if p.is_file()
-            and output_matches(str(p.relative_to(root)).replace("\\", "/"), required)
+            p for p in live_files(root)
+            if output_matches(str(p.relative_to(root)).replace("\\", "/"), required)
         )
         if not matches:
             missing.append(required)
@@ -825,13 +824,36 @@ def is_archived_copy(path: Path, root: Path) -> bool:
     )
 
 
+def live_files(root: Path) -> list[Path]:
+    """Every file under the fixture root that is not an archived copy, never DESCENDING into
+    an archived directory.
+
+    Found 2026-10-01 re-measuring `plumbing_7day` (D-83 item 12): `rglob` walked into
+    archived run copies whose nested paths exceed Windows MAX_PATH (LongPathsEnabled = 0
+    on (a); section R5-5 item 17's long-path limb) and the run aborted on a
+    FileNotFoundError from inside an archive it would have discarded anyway. Pruning
+    the walk keeps archived copies out of every scan by construction (W-8), so their
+    depth can no longer break a live run.
+    """
+    root = Path(root)
+    out: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(
+            d for d in dirnames
+            if d != ARCHIVED_RELEASES_DIR and ARCHIVED_COPY_MARKER not in d
+        )
+        for name in filenames:
+            if ARCHIVED_COPY_MARKER not in name:
+                out.append(Path(dirpath) / name)
+    return out
+
+
 def _storage_bytes(root: Path) -> int:
     """This run's storage: every file under the fixture root EXCEPT archived copies (W-8)."""
     root = Path(root)
     return sum(
         p.stat().st_size
-        for p in root.rglob("*")
-        if p.is_file() and not is_archived_copy(p, root)
+        for p in live_files(root)
     )
 
 

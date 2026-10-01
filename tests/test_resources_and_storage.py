@@ -112,3 +112,41 @@ def test_storage_is_unchanged_by_adding_an_archive(tmp_path) -> None:
     before = mod._storage_bytes(root)
     (root / "predictions.parquet.archived-run9").write_bytes(b"p" * 100)
     assert mod._storage_bytes(root) == before
+
+
+def test_live_files_never_descends_into_archived_directories(tmp_path, monkeypatch) -> None:
+    """2026-10-01: a nested archive past MAX_PATH aborted a measuring run from inside
+    `rglob`. The live walk must prune archived directories without visiting them."""
+    import os
+
+    mod = _skeleton()
+    (tmp_path / "metrics.json").write_text("{}", encoding="utf-8")
+    deep = tmp_path / "archived_releases" / "evaluation.archived-x" / "a"
+    deep.mkdir(parents=True)
+    (deep / "metrics.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "plots.archived-y").mkdir()
+    (tmp_path / "metrics.json.archived-z").write_text("{}", encoding="utf-8")
+
+    visited: list[str] = []
+    real_walk = os.walk
+
+    def spy(top, *a, **k):
+        for dirpath, dirnames, filenames in real_walk(top, *a, **k):
+            visited.append(dirpath)
+            yield dirpath, dirnames, filenames
+
+    monkeypatch.setattr(mod.os, "walk", spy)
+    files = mod.live_files(tmp_path)
+    assert [p.name for p in files] == ["metrics.json"]
+    assert not any(".archived-" in v or "archived_releases" in v for v in visited)
+
+
+def test_live_files_still_finds_nested_live_outputs(tmp_path) -> None:
+    """Negative control: pruning is by archive marker only; a live nested output is kept."""
+    mod = _skeleton()
+    nested = tmp_path / "plots"
+    nested.mkdir()
+    (nested / "residuals.png").write_bytes(b"x")
+    assert [p.relative_to(tmp_path).as_posix() for p in mod.live_files(tmp_path)] == [
+        "plots/residuals.png"
+    ]
