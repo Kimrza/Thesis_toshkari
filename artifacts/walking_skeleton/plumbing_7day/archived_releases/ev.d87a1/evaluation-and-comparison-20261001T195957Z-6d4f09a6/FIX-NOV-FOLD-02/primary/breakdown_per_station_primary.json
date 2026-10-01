@@ -1,0 +1,103 @@
+{
+  "aggregation": "equal_station_macro",
+  "artifact_class": "breakdown",
+  "artifact_id": "breakdown-per_station_primary",
+  "breakdown_id": "per_station_primary",
+  "completeness_shortfalls": [],
+  "driver_identity_caveat": "Every external driver value is identical across all three cells by construction; no station performance difference may be attributed to local forcing the dataset does not contain",
+  "exclusion_counts": {
+    "BSHM": 140
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "kind": "breakdown",
+  "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+  "partial": false,
+  "partition_id": "FIX-NOV-FOLD-02",
+  "payload": {
+    "comparisons": [
+      {
+        "beats_model": true,
+        "benchmark_id": "B-01",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -243.71384514595943
+        },
+        "phase_id": "P1A",
+        "scalar": -243.71384514595943,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "spatial_representativeness_sentence": "Phase 1 compares a grid cell against a station-coordinate evaluation, and part of any measured difference is a geometry and sampling artefact rather than skill",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-01",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -239.20904128454055
+        },
+        "phase_id": "P1A",
+        "scalar": -239.20904128454055,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-02",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -237.06239488480162
+        },
+        "phase_id": "P1A",
+        "scalar": -237.06239488480162,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-03",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -247.49279855691768
+        },
+        "phase_id": "P1A",
+        "scalar": -247.49279855691768,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      }
+    ]
+  },
+  "per_station": true,
+  "phase_id": "P1A",
+  "role_label": "supplementary",
+  "scored_window_statement": "6\u201330 November 2022, 25 days, first 24 h excluded and counted",
+  "source_id": "GNSS_VTEC+IRI2016_B01",
+  "surviving_row_counts": {
+    "BSHM": 18
+  },
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "units": "TECU"
+}

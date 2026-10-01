@@ -1,0 +1,121 @@
+{
+  "aggregation": "equal_station_macro",
+  "artifact_class": "breakdown",
+  "artifact_id": "breakdown-member_metrics_tier3",
+  "breakdown_id": "member_metrics_tier3",
+  "completeness_shortfalls": [],
+  "exclusion_counts": {
+    "BSHM": 115
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "kind": "breakdown",
+  "mask_id": "9187fdd84e24f1f9da3b7b96a551b3bf0062449a9c3f630ff3e271d688738626",
+  "partial": false,
+  "partition_id": "FIX-NOV-FOLD-01",
+  "payload": {
+    "derived_percentage_rmse_reductions": {
+      "M-04": {
+        "definition": "1 - RMSE_model/RMSE_reference",
+        "derived": true,
+        "name": "derived_percentage_rmse_reduction",
+        "value": -3.56303180218141
+      },
+      "M-05": {
+        "definition": "1 - RMSE_model/RMSE_reference",
+        "derived": true,
+        "name": "derived_percentage_rmse_reduction",
+        "value": -4.614273589733528
+      }
+    },
+    "member_metrics": {
+      "M-04": {
+        "correlation": 0.9813889038103697,
+        "mae": 2.6516504904142812,
+        "mean_error_bias": 2.0038044217673927,
+        "median_absolute_error": 2.0080307659126664,
+        "member_id": "M-04",
+        "pct90_95_absolute_error": {
+          "p90": 5.908076685071723,
+          "p95": 7.715360094728688
+        },
+        "r_squared": 0.9199174511571006,
+        "rmse": 3.6264288578773147
+      },
+      "M-05": {
+        "correlation": 0.9741064760918373,
+        "mae": 2.423198693779074,
+        "mean_error_bias": 0.4113173630250997,
+        "median_absolute_error": 1.989263982142873,
+        "member_id": "M-05",
+        "pct90_95_absolute_error": {
+          "p90": 5.519351433333309,
+          "p95": 5.599860039861122
+        },
+        "r_squared": 0.9470997488892341,
+        "rmse": 2.9474000406930645
+      },
+      "M-06": {
+        "correlation": 0.9205930945808238,
+        "mae": 12.038916227133107,
+        "mean_error_bias": -10.497700710028122,
+        "median_absolute_error": 4.833167633565267,
+        "member_id": "M-06",
+        "pct90_95_absolute_error": {
+          "p90": 29.348370659383143,
+          "p95": 30.345512020874025
+        },
+        "r_squared": -0.6674195090744719,
+        "rmse": 16.547510206842595
+      }
+    },
+    "model_id": "M-06",
+    "rows": [
+      {
+        "beats_model": true,
+        "benchmark_id": "M-04",
+        "mask_id": "9187fdd84e24f1f9da3b7b96a551b3bf0062449a9c3f630ff3e271d688738626",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-01",
+        "per_station": {
+          "BSHM": -260.66910778431463
+        },
+        "phase_id": "P1A",
+        "scalar": -260.66910778431463,
+        "set_id": "tier3",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-05",
+        "mask_id": "9187fdd84e24f1f9da3b7b96a551b3bf0062449a9c3f630ff3e271d688738626",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-01",
+        "per_station": {
+          "BSHM": -265.1329270456825
+        },
+        "phase_id": "P1A",
+        "scalar": -265.1329270456825,
+        "set_id": "tier3",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      }
+    ]
+  },
+  "per_station": false,
+  "phase_id": "P1A",
+  "role_label": "supplementary",
+  "scored_window_statement": "5\u201330 November 2022, 26 days, first 24 h excluded and counted",
+  "source_id": "GNSS_VTEC",
+  "surviving_row_counts": {
+    "BSHM": 43
+  },
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "units": "TECU"
+}

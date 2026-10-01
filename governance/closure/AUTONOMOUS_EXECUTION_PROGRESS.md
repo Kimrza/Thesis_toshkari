@@ -219,3 +219,22 @@ reproducibility failure.
   - `reference_environment_id` is recorded on candidates.
 
   Then plumbing is re-measured (P-8) and re-frozen as D-87, with verification in (a) and (c).
+
+### D-87 verification, first attempts (2026-10-01/02)
+
+- **(a)** `governance/closure/d87_verification/a.log` (run concurrently with the (c) clone and
+  run) and `a2.log` (run alone) both MATCHED all 19 outputs. They were refused on runtime: 663 s
+  and 635 s against the frozen [363.96, 504.95] s. Every stage was about 1.5x slower than in
+  P-8. A performance counter read the CPU at about 46 % of nominal under light load, which
+  points to the vendor "Silent" power scheme capping clocks, more so after hours of
+  continuous load. That is an environmental runtime failure. The agent may not change system
+  settings.
+- **(c)** `governance/closure/d87c_verification/verify_plumbing_7day.log` was refused on
+  `feature_table.parquet`. A value-level diff of every output against the (a) reference found:
+  - 3 cyclical columns differ by 1 ULP (libm `sin`/`cos`);
+  - `hourly_vtec.parquet` and `gim_comparator.parquet` are value-identical but byte-different;
+  - `iri_benchmark.parquet` is byte-equal.
+
+  The Student ruled D-74 amendment 3: parquet is compared by value, with 2 ULP across
+  environments for deterministic floats and bit-identity within an environment. An offline
+  comparison of the (c) outputs with the new code passes on every output.

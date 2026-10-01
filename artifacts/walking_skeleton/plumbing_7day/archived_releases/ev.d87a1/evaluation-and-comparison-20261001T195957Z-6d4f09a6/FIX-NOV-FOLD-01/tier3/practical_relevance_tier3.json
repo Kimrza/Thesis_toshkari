@@ -1,0 +1,6 @@
+{
+  "kind": "practical_relevance_not_produced",
+  "partition_id": "FIX-NOV-FOLD-01",
+  "reason": "no --threshold-record was supplied. Under D-34 no numeric practical-relevance threshold is approved and practical relevance is reported DESCRIPTIVELY; Vision \u00a75.3's two conjuncts are therefore NOT evaluated in this run. This is a recorded state, not a skipped check",
+  "set_id": "tier3"
+}

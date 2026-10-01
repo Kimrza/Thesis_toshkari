@@ -1,0 +1,12 @@
+{
+  "artifact": "reporting_surface_skip_note",
+  "fixture_id": "plumbing_7day",
+  "partition_id": "FIX-NOV-FOLD-01",
+  "reason": "skipped: TE \u00a715.3 exhaustively names Fixture 1's (plumbing_7day) required execution (M-01..M-05, a minimal M-06, B-01, C-01 sample generation) and TE \u00a715.4 exhaustively names its required outputs (target_uncertainty_budget.json explicitly 'fixture 2 only'; no claims_checklist or ConclusionSurfaceArtifact entry for either fixture) -- neither requires the primary table's budget adjacency or the claims-and-limitations checklist for Fixture 1. This is a student-owned execution-scoping exemption (mirrors the TE \u00a715.3 bootstrap exemption applied above in this same function), not a change to R-126 control (36), which stays fail-closed, unchanged, for every fixture_id != 'plumbing_7day' run.",
+  "set_id": "tier3",
+  "skipped": [
+    "primary_table_budget_adjacency",
+    "claims_checklist",
+    "ConclusionSurfaceArtifact_requirement"
+  ]
+}

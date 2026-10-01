@@ -1,0 +1,234 @@
+{
+  "aggregation": "equal_station_macro",
+  "artifact_class": "breakdown",
+  "artifact_id": "breakdown-top1pct_sensitivity_primary",
+  "breakdown_id": "top1pct_sensitivity_primary",
+  "completeness_shortfalls": [],
+  "exclusion_counts": {
+    "BSHM": 140
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "kind": "breakdown",
+  "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+  "partial": false,
+  "partition_id": "FIX-NOV-FOLD-02",
+  "payload": {
+    "blocks": [
+      {
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "member_id": "M-01",
+        "parent": {
+          "correlation": 0.9494581135703323,
+          "mae": 3.390128611111111,
+          "mean_error_bias": -1.6346202777777783,
+          "median_absolute_error": 3.4269,
+          "member_id": "M-01",
+          "pct90_95_absolute_error": {
+            "p90": 6.991449999999999,
+            "p95": 8.291549999999997
+          },
+          "r_squared": 0.8819270312344024,
+          "rmse": 4.250447794626893
+        },
+        "sensitivity": {
+          "correlation": 0.9568484453039301,
+          "label": "sensitivity",
+          "mae": 3.1018097058823524,
+          "mean_error_bias": -1.2430361764705886,
+          "median_absolute_error": 3.4269,
+          "member_id": "M-01",
+          "pct90_95_absolute_error": {
+            "p90": 6.722150000000003,
+            "p95": 6.991449999999999
+          },
+          "r_squared": 0.9019489259387043,
+          "removal_rule": "absolute errors |y_hat - y_true| ranked descending (ties broken by station then interval_start_utc, ascending); the first ceil(0.01 x n) rows removed, n and the ranking taken over comparison_wide; the parent figure is always computed over the registered mask IN FULL and the sensitivity is a separate labelled field beside it, never merged (FR-P1-05-10)",
+          "removed_fraction": 0.01,
+          "removed_keys": [
+            [
+              "BSHM",
+              "2022-11-07T07:00:00+00:00"
+            ]
+          ],
+          "rmse": 3.8839315646782975,
+          "rows_removed": 1,
+          "scope": "comparison_wide"
+        }
+      },
+      {
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "member_id": "M-02",
+        "parent": {
+          "correlation": 0.971815119436147,
+          "mae": 3.703931388888889,
+          "mean_error_bias": -2.9885369444444443,
+          "median_absolute_error": 2.6473999999999975,
+          "member_id": "M-02",
+          "pct90_95_absolute_error": {
+            "p90": 7.76547,
+            "p95": 7.974374999999999
+          },
+          "r_squared": 0.8678975496721029,
+          "rmse": 4.495881766081877
+        },
+        "sensitivity": {
+          "correlation": 0.973681721169487,
+          "label": "sensitivity",
+          "mae": 3.452728823529412,
+          "mean_error_bias": -2.6952523529411763,
+          "median_absolute_error": 2.6473999999999975,
+          "member_id": "M-02",
+          "pct90_95_absolute_error": {
+            "p90": 6.794490000000001,
+            "p95": 7.76547
+          },
+          "r_squared": 0.8884668935607424,
+          "removal_rule": "absolute errors |y_hat - y_true| ranked descending (ties broken by station then interval_start_utc, ascending); the first ceil(0.01 x n) rows removed, n and the ranking taken over comparison_wide; the parent figure is always computed over the registered mask IN FULL and the sensitivity is a separate labelled field beside it, never merged (FR-P1-05-10)",
+          "removed_fraction": 0.01,
+          "removed_keys": [
+            [
+              "BSHM",
+              "2022-11-07T21:00:00+00:00"
+            ]
+          ],
+          "rmse": 4.202537711920585,
+          "rows_removed": 1,
+          "scope": "comparison_wide"
+        }
+      },
+      {
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "member_id": "M-03",
+        "parent": {
+          "correlation": 0.984935117687827,
+          "mae": 2.573205833333334,
+          "mean_error_bias": -1.3018845370370364,
+          "median_absolute_error": 1.6462683333333334,
+          "member_id": "M-03",
+          "pct90_95_absolute_error": {
+            "p90": 5.626934999999999,
+            "p95": 6.310270000000001
+          },
+          "r_squared": 0.936065812513665,
+          "rmse": 3.1277066970020466
+        },
+        "sensitivity": {
+          "correlation": 0.9868919806400094,
+          "label": "sensitivity",
+          "mae": 2.3533785294117653,
+          "mean_error_bias": -1.0072736274509797,
+          "median_absolute_error": 1.6462683333333334,
+          "member_id": "M-03",
+          "pct90_95_absolute_error": {
+            "p90": 4.82165,
+            "p95": 5.626934999999999
+          },
+          "r_squared": 0.9493802087089166,
+          "removal_rule": "absolute errors |y_hat - y_true| ranked descending (ties broken by station then interval_start_utc, ascending); the first ceil(0.01 x n) rows removed, n and the ranking taken over comparison_wide; the parent figure is always computed over the registered mask IN FULL and the sensitivity is a separate labelled field beside it, never merged (FR-P1-05-10)",
+          "removed_fraction": 0.01,
+          "removed_keys": [
+            [
+              "BSHM",
+              "2022-11-07T21:00:00+00:00"
+            ]
+          ],
+          "rmse": 2.8311957337906684,
+          "rows_removed": 1,
+          "scope": "comparison_wide"
+        }
+      },
+      {
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "member_id": "M-06",
+        "parent": {
+          "correlation": 0.9541229052418481,
+          "mae": 11.987522658109311,
+          "mean_error_bias": -10.232051318647597,
+          "median_absolute_error": 5.83235169514974,
+          "member_id": "M-06",
+          "pct90_95_absolute_error": {
+            "p90": 28.394558466084796,
+            "p95": 28.439709398396808
+          },
+          "r_squared": -0.681431906057286,
+          "rmse": 16.039805102911604
+        },
+        "sensitivity": {
+          "correlation": 0.9503201189552122,
+          "label": "sensitivity",
+          "mae": 11.019746967504163,
+          "mean_error_bias": -9.161012608074115,
+          "median_absolute_error": 5.83235169514974,
+          "member_id": "M-06",
+          "pct90_95_absolute_error": {
+            "p90": 25.77836556040446,
+            "p95": 28.394558466084796
+          },
+          "r_squared": -0.5910484958172662,
+          "removal_rule": "absolute errors |y_hat - y_true| ranked descending (ties broken by station then interval_start_utc, ascending); the first ceil(0.01 x n) rows removed, n and the ranking taken over comparison_wide; the parent figure is always computed over the registered mask IN FULL and the sensitivity is a separate labelled field beside it, never merged (FR-P1-05-10)",
+          "removed_fraction": 0.01,
+          "removed_keys": [
+            [
+              "BSHM",
+              "2022-11-07T11:00:00+00:00"
+            ]
+          ],
+          "rmse": 14.994389516717373,
+          "rows_removed": 1,
+          "scope": "comparison_wide"
+        }
+      },
+      {
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "member_id": "B-01",
+        "parent": {
+          "correlation": 0.9746689759879535,
+          "mae": 3.053883849058133,
+          "mean_error_bias": -1.746611625311289,
+          "median_absolute_error": 1.9803580621055978,
+          "member_id": "B-01",
+          "pct90_95_absolute_error": {
+            "p90": 6.954026260377592,
+            "p95": 8.013474525747199
+          },
+          "r_squared": 0.9113683321972615,
+          "rmse": 3.682594546434596
+        },
+        "sensitivity": {
+          "correlation": 0.9785214340264838,
+          "label": "sensitivity",
+          "mae": 2.7621432210175993,
+          "mean_error_bias": -1.3779726311680003,
+          "median_absolute_error": 1.9803580621055978,
+          "member_id": "B-01",
+          "pct90_95_absolute_error": {
+            "p90": 5.8920205682432,
+            "p95": 6.954026260377592
+          },
+          "r_squared": 0.9331745744933252,
+          "removal_rule": "absolute errors |y_hat - y_true| ranked descending (ties broken by station then interval_start_utc, ascending); the first ceil(0.01 x n) rows removed, n and the ranking taken over comparison_wide; the parent figure is always computed over the registered mask IN FULL and the sensitivity is a separate labelled field beside it, never merged (FR-P1-05-10)",
+          "removed_fraction": 0.01,
+          "removed_keys": [
+            [
+              "BSHM",
+              "2022-11-07T21:00:00+00:00"
+            ]
+          ],
+          "rmse": 3.2529739579339294,
+          "rows_removed": 1,
+          "scope": "comparison_wide"
+        }
+      }
+    ]
+  },
+  "per_station": false,
+  "phase_id": "P1A",
+  "role_label": "supplementary",
+  "scored_window_statement": "6\u201330 November 2022, 25 days, first 24 h excluded and counted",
+  "source_id": "GNSS_VTEC+IRI2016_B01",
+  "surviving_row_counts": {
+    "BSHM": 18
+  },
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "units": "TECU"
+}
