@@ -346,10 +346,25 @@ def _non_provider_release_dirs() -> frozenset[str]:
     a wrong file, but the file should never have been offered to this loader
     at all. This was a real gap in the exclusion set, not a bug in the D-17
     column check that caught it.
+
+    A third gap, found 2026-10-01 when re-measuring `plumbing_7day` under D-83 item 12:
+    stage 04 also publishes the evaluation-only CODE GIM comparator release
+    (`GIM_COMPARATOR_RELEASE_DIR`) into the same root. Earlier measuring runs passed only
+    because the previous comparator release had been archived by hand before each run;
+    the first run without that manual step refused on two dataset_versions. The
+    comparator is never provider-VTEC input (Mandated: GIM is evaluation-time only).
     """
     from src.external.spaceweather import DRIVER_PRODUCERS
 
-    return frozenset({TARGET_RELEASE_DIR, *DRIVER_PRODUCERS.values()})
+    return frozenset(
+        {TARGET_RELEASE_DIR, GIM_COMPARATOR_RELEASE_DIR, *DRIVER_PRODUCERS.values()}
+    )
+
+
+#: The release directory stage 04 publishes the CODE GIM comparator under
+#: (`scripts/04_build_external_products.py` `_GIM_COMPARATOR_ARTIFACT`). Spelled here, not
+#: imported, so `src.data` gains no import edge toward the GIM producer.
+GIM_COMPARATOR_RELEASE_DIR: Final[str] = "gim_comparator_C-01_2022"
 
 
 def _is_archived_release_dirname(name: str) -> bool:

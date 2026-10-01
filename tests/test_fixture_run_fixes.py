@@ -208,3 +208,41 @@ def test_load_released_provider_rows_skips_archived_release_dirs(tmp_path: Path)
     with pytest.raises(Exception) as exc_info:
         load_released_provider_rows(release_root)
     assert "no released provider input exists" in str(exc_info.value)
+
+
+def test_gim_comparator_release_is_excluded_and_matches_stage_04_name(tmp_path: Path) -> None:
+    """Third gap, found 2026-10-01 re-measuring plumbing_7day (D-83 item 12): stage 04
+    publishes the CODE GIM comparator release into the shared root, and a live provider
+    release beside it refused on two dataset_versions. The comparator must be excluded,
+    and the excluded name must equal the name stage 04 actually writes."""
+    import re
+
+    from src.data.prepared import GIM_COMPARATOR_RELEASE_DIR
+
+    stage04 = (REPO_ROOT / "scripts" / "04_build_external_products.py").read_text(
+        encoding="utf-8"
+    )
+    produced = re.search(r'_GIM_COMPARATOR_ARTIFACT: Final\[str\] = "([^"]+)"', stage04)
+    assert produced is not None
+    assert produced.group(1) == GIM_COMPARATOR_RELEASE_DIR
+    assert GIM_COMPARATOR_RELEASE_DIR in _non_provider_release_dirs()
+
+    release_root = tmp_path / "releases"
+    version = _write_valid_provider_release(release_root / "run_a", row_marker="7.0")
+    other = _write_valid_provider_release(
+        release_root / GIM_COMPARATOR_RELEASE_DIR, row_marker="9.0"
+    )
+    assert version != other, "test setup: the comparator must carry a different version"
+    rows = load_released_provider_rows(release_root)
+    assert len(rows) == 1, "only the provider release may be read"
+
+
+def test_unknown_non_provider_release_still_refuses_as_ambiguous(tmp_path: Path) -> None:
+    """Negative control: the exclusion is by exact name only. A differently-named second
+    release with another dataset_version is still genuine ambiguity and refuses."""
+    release_root = tmp_path / "releases"
+    _write_valid_provider_release(release_root / "run_a", row_marker="7.0")
+    _write_valid_provider_release(release_root / "gim_comparator_other", row_marker="9.0")
+    with pytest.raises(Exception) as exc_info:
+        load_released_provider_rows(release_root)
+    assert "DIFFERENT dataset_version" in str(exc_info.value)
