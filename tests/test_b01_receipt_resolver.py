@@ -69,3 +69,38 @@ def test_month_range_tag_covers_inner_months(tmp_path: Path) -> None:
     _touch(tmp_path, "b01_iri2016_rows_P1A_m01-11.jsonl")
     rows, _ = m.resolve_b01_receipt(tmp_path, rows=None, provenance=None, months=[3, 11])
     assert rows.name == "b01_iri2016_rows_P1A_m01-11.jsonl"
+
+
+def _write(p: Path, text: str) -> str:
+    import hashlib
+
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def test_validation_report_recorded_path_is_used_when_its_hash_matches(tmp_path: Path) -> None:
+    m = _mod()
+    sha = _write(tmp_path / "iri_implementation_validation_report.json", "legacy")
+    assert m.locate_validation_report(
+        tmp_path, tmp_path / "iri_implementation_validation_report.json", sha
+    ).name == "iri_implementation_validation_report.json"
+
+
+def test_validation_report_is_found_by_hash_in_the_transfer_record(tmp_path: Path) -> None:
+    m = _mod()
+    _write(tmp_path / "iri_implementation_validation_report.json", "legacy")
+    sha = _write(tmp_path / "transfer_20261001" / "iri_implementation_validation_report.json", "new")
+    found = m.locate_validation_report(
+        tmp_path, tmp_path / "iri_implementation_validation_report.json", sha
+    )
+    assert found.parent.name == "transfer_20261001"
+
+
+def test_validation_report_with_no_matching_hash_refuses(tmp_path: Path) -> None:
+    m = _mod()
+    _write(tmp_path / "iri_implementation_validation_report.json", "legacy")
+    with pytest.raises(m.IntegrityError, match="not found"):
+        m.locate_validation_report(
+            tmp_path, tmp_path / "iri_implementation_validation_report.json", "0" * 64
+        )

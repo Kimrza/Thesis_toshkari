@@ -1830,6 +1830,34 @@ def resolve_b01_receipt(
     return covering[0], covering[0].with_name(f"b01_provenance_{stem}.json")
 
 
+def locate_validation_report(out: Path, recorded: Path, recorded_sha256: str) -> Path:
+    """The R-59 validation report a B-01 provenance records, located BY CONTENT HASH.
+
+    Every `--build-validation-report` session writes the same fixed filename, so two
+    receipts (the superseded legacy November one and a W-2 re-generation) record the same
+    path with different bytes, and the legacy file must stay untouched (D-83 A8 item 12).
+    The recorded path is used when its bytes match; otherwise exactly one
+    `iri_implementation_validation_report*.json` under the B-01 directory (including a
+    `transfer_*` record) whose SHA-256 equals the recorded one is used. None or several
+    refuse. Verification stays by hash: nothing is accepted on name alone (closure
+    2026-10-01).
+    """
+    if recorded.is_file() and sha256_of_file(recorded) == recorded_sha256:
+        return recorded
+    candidates = sorted(
+        {*Path(out).glob("iri_implementation_validation_report*.json"),
+         *Path(out).glob("transfer_*/iri_implementation_validation_report*.json")}
+    )
+    matching = [c for c in candidates if sha256_of_file(c) == recorded_sha256]
+    if len(matching) != 1:
+        raise IntegrityError(
+            str(recorded),
+            f"validation report with the recorded sha256 {recorded_sha256!r} not found "
+            f"uniquely ({len(matching)} match among {[str(c) for c in candidates]})",
+        )
+    return matching[0]
+
+
 def _fixture_months(entry: Mapping[str, Any], args: argparse.Namespace) -> list[int] | None:
     """The months of the fixture named by --fixture-manifest, or None outside a fixture."""
     manifest = getattr(args, "fixture_manifest", None)
@@ -2742,6 +2770,9 @@ def _emit_prediction_payload(entry: Mapping[str, Any], args: argparse.Namespace)
     validation_report_file = provenance.get("validation_report_file")
     if not validation_report_file:
         raise IntegrityError(str(prov_path), "provenance carries no validation_report_file")
+    validation_report_file = locate_validation_report(
+        out, Path(validation_report_file), str(provenance.get("validation_report_sha256", ""))
+    )
     actual_report_hash = sha256_of_file(Path(validation_report_file))
     if actual_report_hash != provenance.get("validation_report_sha256"):
         raise IntegrityError(
