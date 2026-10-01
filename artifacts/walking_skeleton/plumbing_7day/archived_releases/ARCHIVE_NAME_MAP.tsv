@@ -71,3 +71,8 @@ ex.d85a1	external (outputs of aborted D-85 verification run V-1, walking-skeleto
 fe.d85a1	features (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)
 mr.d85a1	mask_registry (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)
 pr.d85a1	predictions (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)
+ev.d85a2	evaluation (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)
+ex.d85a2	external (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)
+fe.d85a2	features (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)
+mr.d85a2	mask_registry (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)
+pr.d85a2	predictions (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)

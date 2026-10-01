@@ -96,3 +96,25 @@ against the frozen manifest would refuse on these.
   `tests/test_fixture_reference_isolation.py`, `tests/test_clean_run.py` green.
 - V-1 outputs moved aside with suffix `.archived-aborted-d85v1` (directories
   `archived_releases/*.d85a1`).
+
+### Verification run V-2: aborted on storage_total (measurement defect, fixed in `91da686`)
+
+- Run `walking-skeleton-plumbing_7day-20261001T164940Z-50846483`, code `5a9839b`, started
+  2026-10-01T16:49:21Z; log `governance/closure/d85_verification/run2.log`; registry row
+  `aborted`, `integrity_refusal`.
+- All 19 required outputs MATCHED the frozen expectation: the 13 exact outputs (8 byte-equal,
+  5 schema/hash/value-equal with the stamp bound to `92aa38c0...`), the 2 toleranced outputs
+  under the D-83 item 11 per-field tolerances, and the 4 plots by presence. Runtime was in range
+  (wall time about 451 s; stage sum 428 s).
+- Refused: `storage_total` 6,533,878 bytes against [6,146,225, 6,327,309]. Breakdown of the
+  live root: 43 accumulated `releases/plumbing_7day_<utc>` directories held 3,714,039 bytes,
+  and 7 live measuring-result files held 431,574 bytes. The measurement summed run history, so
+  the D-85 storage range is itself defective.
+- Fix `91da686`: the run snapshots the live root before its first write and counts only the
+  files it created or rewrote. Tests are in `tests/test_resources_and_storage.py`.
+- Consequence: plumbing_7day must be re-measured (precommitment P-7) and re-frozen. A re-freeze
+  is a new freeze act on a manifest D-85 already froze. Its form (a new or sub-numbered
+  D-number) is routed to the Student; the agent writes no new D-number unasked.
+- Environment note: the active power scheme on LAPTOP-TV4UGFBC is the vendor "Silent" scheme
+  (AC power, 99 %). V-1's stage 06 took 556 s against 225-253 s in P-6. The agent may not
+  change system settings.
