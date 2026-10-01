@@ -94,6 +94,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -169,7 +170,9 @@ from src.data.fixture_manifest import (  # noqa: E402
     manifest_path_for,
     output_matches,
     promote_candidate_manifest,
+    reference_dir_for,
     required_outputs_for,
+    snapshot_reference_outputs,
     window_days,
     write_candidate_manifest,
     write_measuring_result,
@@ -1175,14 +1178,21 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         comparison_ledger=template,
         tolerances=tolerances,
         recorded=recorded,
-        artifact_manifest_ref=os.path.relpath(
-            fixture_root / ARTIFACT_MANIFEST_NAME,
-            manifest_path_for(workspace, args.fixture).parent,
+        artifact_manifest_ref=snapshot_reference_outputs(
+            fixture_root,
+            sorted(listing),
+            template,
+            reference_dir_for(workspace, args.fixture, run_id),
+            manifest_dir=manifest_path_for(workspace, args.fixture).parent,
         ),
     )
-    written = write_candidate_manifest(
-        candidate_path_for(workspace, args.fixture, run_id), candidate
-    )
+    try:
+        written = write_candidate_manifest(
+            candidate_path_for(workspace, args.fixture, run_id), candidate
+        )
+    except IntegrityError:
+        shutil.rmtree(reference_dir_for(workspace, args.fixture, run_id), ignore_errors=True)
+        raise
     summary["candidate_manifest"] = str(written)
     summary["candidate_is_reference"] = False
     summary["measuring_run_ids"] = sorted(seen_run_ids)

@@ -13,8 +13,11 @@ CLI convention), `--fixture`, `--identity` (the owner's identity declaration), a
 more `--result` paths (measuring_result_<run_id>.json). The fixture root's live outputs
 must be those of one of the named runs (their hash listing and recorded quantities are
 read from it); `--outputs-run` names which, and it must be one of the results.
-Re-run behaviour: writes `fixture_manifest.candidate_<outputs-run>+xenv.yaml` beside the
-reference manifest and refuses if that file exists. Never writes `frozen` (the owner's
+Re-run behaviour: writes `fixture_manifest.candidate_<outputs-run>+<suffix>.yaml` (suffix
+`xenv` by default) beside the reference manifest and refuses if that file exists; the outputs
+run's hash listing and its compared outputs are copied once into
+`reference_<outputs-run>-<suffix>/` beside it, which the candidate cites, so no later run can
+overwrite the expectation. Never writes `frozen` (the owner's
 Q-31 act) and never touches the reference manifest.
 """
 from __future__ import annotations
@@ -22,7 +25,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
-import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -34,6 +37,8 @@ from src.data.fixture_manifest import (  # noqa: E402
     compose_candidate_manifest,
     compose_measurement_ranges,
     load_identity_declaration,
+    reference_dir_for,
+    snapshot_reference_outputs,
     write_candidate_manifest,
 )
 
@@ -48,7 +53,7 @@ def _runner():
 
 
 def compose(
-    *, fixture: str, identity: Path, results: list[Path], outputs_run: str
+    *, fixture: str, identity: Path, results: list[Path], outputs_run: str, suffix: str = "xenv"
 ) -> Path:
     rws = _runner()
     workspace = REPO_ROOT
@@ -72,6 +77,11 @@ def compose(
     listing, missing = rws.collect_required_outputs(fixture_root, scope)
     if missing:
         raise IntegrityError(fixture_root, f"required outputs missing: {missing}")
+    target = rws.manifest_path_for(workspace, fixture).parent / (
+        f"fixture_manifest.candidate_{outputs_run}+{suffix}.yaml"
+    )
+    if target.exists():
+        raise IntegrityError(target, "already exists; a candidate is written once")
     composed = compose_measurement_ranges(loaded)
     tolerances = rws.compose_tolerances(loaded, template, toleranced)
     skeleton_path = rws.manifest_path_for(workspace, fixture)
@@ -98,14 +108,21 @@ def compose(
         comparison_ledger=template,
         tolerances=tolerances,
         recorded=recorded,
-        artifact_manifest_ref=os.path.relpath(
-            fixture_root / rws.ARTIFACT_MANIFEST_NAME, skeleton_path.parent
+        artifact_manifest_ref=snapshot_reference_outputs(
+            fixture_root,
+            sorted(listing),
+            template,
+            reference_dir_for(workspace, fixture, f"{outputs_run}+{suffix}"),
+            manifest_dir=skeleton_path.parent,
         ),
     )
-    target = skeleton_path.parent / f"fixture_manifest.candidate_{outputs_run}+xenv.yaml"
-    if target.exists():
-        raise IntegrityError(target, "already exists; a candidate is written once")
-    return write_candidate_manifest(target, candidate)
+    try:
+        return write_candidate_manifest(target, candidate)
+    except IntegrityError:
+        shutil.rmtree(
+            reference_dir_for(workspace, fixture, f"{outputs_run}+{suffix}"), ignore_errors=True
+        )
+        raise
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -115,11 +132,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--identity", required=True, type=Path)
     parser.add_argument("--result", required=True, action="append", type=Path)
     parser.add_argument("--outputs-run", required=True)
+    parser.add_argument(
+        "--suffix",
+        default="xenv",
+        help="candidate name suffix; a re-composition takes a new one, never an existing name",
+    )
     args = parser.parse_args(argv)
     try:
         written = compose(
             fixture=args.fixture, identity=args.identity,
-            results=args.result, outputs_run=args.outputs_run,
+            results=args.result, outputs_run=args.outputs_run, suffix=args.suffix,
         )
     except IntegrityError as exc:
         print(f"compose_cross_environment_candidate: refused: {exc}", file=sys.stderr)

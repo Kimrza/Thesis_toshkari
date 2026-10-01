@@ -152,6 +152,8 @@ __all__ = [
     "write_candidate_manifest",
     "manifest_path_for",
     "candidate_path_for",
+    "reference_dir_for",
+    "snapshot_reference_outputs",
     "promote_candidate_manifest",
     "CANDIDATE_NAME_TEMPLATE",
     "SUPERSEDED_NAME_TEMPLATE",
@@ -594,6 +596,63 @@ def candidate_path_for(workspace: Path, fixture_id: str, run_id: str) -> Path:
         / fixture_id
         / CANDIDATE_NAME_TEMPLATE.format(run_id=safe)
     )
+
+
+def reference_dir_for(workspace: Path, fixture_id: str, candidate_id: str) -> Path:
+    """`<workspace>/tests/fixtures/<fixture_id>/reference_<candidate_id>/`: a candidate's
+    frozen-expectation copy, written once at composition and never by a run."""
+    _require_fixture_id(fixture_id, resource="fixture_id")
+    return Path(workspace) / FIXTURES_ROOT / fixture_id / f"reference_{_safe_run_id(candidate_id)}"
+
+
+def snapshot_reference_outputs(
+    source_root: Path,
+    outputs: Sequence[str],
+    comparison_ledger: Mapping[str, Mapping[str, Any]],
+    destination: Path,
+    *,
+    manifest_dir: Path,
+) -> str:
+    """Copy a run's hash listing and its compared outputs out of the run tree; return the ref.
+
+    Until 2026-10-01 a candidate's `artifact_manifest_ref` pointed at the live
+    `artifacts/walking_skeleton/<fixture>/artifact_manifest.json`, the file every run
+    rewrites, so a comparison run compared its outputs against themselves. The expectation now
+    lives in `destination`, written once (refuses an existing directory). The listing is
+    copied byte for byte, with every output except `recorded_presence` images (D-75 compares
+    those by presence and format, never by content). The returned ref is the POSIX path
+    relative to `manifest_dir`, so a Linux checkout resolves it too.
+    """
+    source_root, destination = Path(source_root), Path(destination)
+    if destination.exists():
+        raise _refuse(
+            destination,
+            "a reference snapshot already exists here; a frozen expectation is written once and "
+            "never overwritten (R-134 obligation 3)",
+        )
+    listing = source_root / "artifact_manifest.json"
+    if not listing.is_file():
+        raise _refuse(listing, "no hash listing to snapshot (TE 15.4)")
+    copies: list[tuple[Path, Path]] = [(listing, destination / listing.name)]
+    for output in outputs:
+        keys = [k for k in comparison_ledger if output_matches(str(output), str(k))]
+        classes = {comparison_ledger[k].get("comparison_class") for k in keys}
+        if classes == {"recorded_presence"}:
+            continue
+        source = source_root / str(output)
+        if not source.is_file():
+            raise _refuse(source, "a listed output is absent; the reference snapshot is complete or refused")
+        copies.append((source, destination / str(output)))
+    try:
+        for source, target in copies:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+            if sha256_of_file(target) != sha256_of_file(source):
+                raise _refuse(target, "copy does not hash to its source")
+    except BaseException:
+        shutil.rmtree(destination, ignore_errors=True)
+        raise
+    return (destination / listing.name).relative_to(Path(manifest_dir)).as_posix()
 
 
 def _safe_run_id(run_id: object) -> str:
@@ -1596,6 +1655,122 @@ def _numeric_leaf_compare(expected: Any, actual: Any, *, tolerance: float, trail
         raise _refuse(trail, f"non-numeric leaf {actual!r} differs from expectation {expected!r}")
 
 
+#: `exact_kind`s compared on their TE 13.7 meaning once the bytes differ. A `schema` file
+#: (a run log, a registry row, a pass/fail report) carries run-specific values by design (its
+#: run id, its durations), so whole-file byte equality could never hold between two runs and
+#: a comparison that used it either always fails or -- before 2026-10-01 -- was made against
+#: the run's own freshly written listing and so always passed. A `hash` file is compared on
+#: its schema AND on every SHA-256 it records. Every other kind stays byte-exact.
+_SEMANTIC_EXACT_KINDS: Final[frozenset[str]] = frozenset({"schema", "hash"})
+_SHA256_LEAF_RE: Final[re.Pattern[str]] = re.compile(r"^[0-9a-fA-F]{64}$")
+
+
+def _json_type(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, int | float):
+        return "number"
+    if isinstance(value, str):
+        return "string"
+    if isinstance(value, Mapping):
+        return "object"
+    if isinstance(value, list | tuple):
+        return "array"
+    return type(value).__name__
+
+
+def _schema_diffs(expected: Any, actual: Any, trail: str) -> list[str]:
+    """Structural differences: key sets, JSON types, array element shapes.
+
+    A key whose value is `null` on one side is a nullable field: its PRESENCE is still
+    compared, its type is not (a measuring run's log records `freeze_record_agreement: null`,
+    a comparison run's records the agreement object). Arrays compare the set of element
+    schemas, not their length.
+    """
+    if expected is None or actual is None:
+        return []
+    e_type, a_type = _json_type(expected), _json_type(actual)
+    if e_type != a_type:
+        return [f"{trail}: type {a_type} where the frozen schema has {e_type}"]
+    if e_type == "object":
+        diffs = [
+            f"{trail}/{key}: key {'absent from the produced file' if key in expected else 'not in the frozen schema'}"
+            for key in sorted(set(expected) ^ set(actual), key=str)
+        ]
+        for key in sorted(set(expected) & set(actual), key=str):
+            diffs.extend(_schema_diffs(expected[key], actual[key], f"{trail}/{key}"))
+        return diffs
+    if e_type == "array" and expected and actual:
+        diffs = []
+        for index, element in enumerate(actual):
+            if all(_schema_diffs(ref, element, "") for ref in expected):
+                diffs.append(f"{trail}[{index}]: element matches no frozen element schema")
+        for index, element in enumerate(expected):
+            if all(_schema_diffs(element, prod, "") for prod in actual):
+                diffs.append(f"{trail}[{index}]: frozen element schema absent from the produced array")
+        return diffs
+    return []
+
+
+def _sha256_leaves(value: Any, trail: str = "") -> dict[str, str]:
+    found: dict[str, str] = {}
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            found.update(_sha256_leaves(item, f"{trail}/{key}"))
+    elif isinstance(value, list | tuple):
+        for index, item in enumerate(value):
+            found.update(_sha256_leaves(item, f"{trail}[{index}]"))
+    elif isinstance(value, str) and _SHA256_LEAF_RE.match(value):
+        found[trail] = value.lower()
+    return found
+
+
+def _parse_exact_document(path: Path) -> Any:
+    text = path.read_text(encoding="utf-8")
+    if path.suffix.lower() in (".yaml", ".yml"):
+        return _parse_yaml_text(path, text)
+    return json.loads(text)
+
+
+def _semantic_exact_compare(
+    reference: Path, produced: Path, *, exact_kind: str
+) -> dict[str, Any]:
+    """TE 13.7 exactness for `schema` / `hash` kinds; raises naming the first differences."""
+    try:
+        expected = _parse_exact_document(reference)
+        actual = _parse_exact_document(produced)
+    except (OSError, ValueError, IntegrityError) as exc:
+        raise _refuse(
+            produced,
+            f"exact-class ({exact_kind}) mismatch: bytes differ from the frozen expectation and "
+            f"the pair cannot be read as structured documents ({exc}); an unreadable artifact "
+            f"fails rather than being compared loosely (TE 13.7; R-139)",
+        ) from exc
+    diffs = _schema_diffs(expected, actual, "")
+    if diffs:
+        raise _refuse(
+            produced,
+            f"exact-class ({exact_kind}) mismatch: schema differs from the frozen expectation "
+            f"{reference} at {diffs[:5]}{' ...' if len(diffs) > 5 else ''} (TE 13.7: exact "
+            f"equality for schemas; the expectation is never updated)",
+        )
+    report: dict[str, Any] = {"schema_equal": True}
+    if exact_kind == "hash":
+        e_hashes, a_hashes = _sha256_leaves(expected), _sha256_leaves(actual)
+        differing = sorted(k for k in set(e_hashes) | set(a_hashes) if e_hashes.get(k) != a_hashes.get(k))
+        if differing:
+            raise _refuse(
+                produced,
+                f"exact-class (hash) mismatch: recorded SHA-256 value(s) differ from the frozen "
+                f"expectation {reference} at {differing[:5]} (TE 13.7: exact equality for "
+                f"hashes; the expectation is never updated)",
+            )
+        report["sha256_leaves_equal"] = len(e_hashes)
+    return report
+
+
 def _read_values(path: Path) -> Any:
     if path.suffix.lower() in (".json", ".jsonl"):
         text = path.read_text(encoding="utf-8")
@@ -1627,9 +1802,28 @@ def compare_required_outputs(
             "a comparison is made against a FROZEN expectation only; a candidate manifest "
             "cannot produce WS-20/TA-17 evidence (R-134 control 5)",
         )
-    expected = manifest.expected_hashes()
-    ledger = manifest.comparison_ledger
     root = Path(produced_root)
+    reference_dir = manifest.artifact_manifest_path.parent.resolve()
+    produced_dir = root.resolve()
+    if reference_dir == produced_dir or produced_dir in reference_dir.parents:
+        raise _refuse(
+            manifest.artifact_manifest_path,
+            f"the frozen hash listing lives inside the produced tree {produced_dir}; the run "
+            f"overwrites it before comparing, so every output would be compared against itself "
+            f"and the comparison could never fail. A frozen expectation is read from a "
+            f"reference directory the run never writes (R-139: the clean run compares, it does "
+            f"not merely succeed)",
+        )
+    expected = manifest.expected_hashes()
+    for name in manifest.reference_files_present:
+        reference_file = manifest.artifact_manifest_path.parent / name
+        if not reference_file.is_file() or sha256_of_file(reference_file) != expected.get(name):
+            raise _refuse(
+                reference_file,
+                "the frozen reference artifact changed or vanished after the manifest was "
+                "loaded; the expectation is never updated (TE 13.7; R-139 control 23)",
+            )
+    ledger = manifest.comparison_ledger
     results: dict[str, Any] = {}
     for output in manifest.outputs:
         entry = ledger[output]
@@ -1638,15 +1832,34 @@ def compare_required_outputs(
             raise _refuse(produced, "required output absent from the produced tree (TE 15.4)")
         actual = sha256_of_file(produced)
         if entry["comparison_class"] == "exact":
-            if actual != expected[output]:
+            exact_kind = str(entry["exact_kind"])
+            if actual == expected[output]:
+                results[output] = {
+                    "comparison_class": "exact",
+                    "exact_kind": exact_kind,
+                    "sha256": actual,
+                    "byte_equal": True,
+                    "matched": True,
+                }
+                continue
+            reference_file = manifest.artifact_manifest_path.parent / output
+            if exact_kind not in _SEMANTIC_EXACT_KINDS or not reference_file.is_file():
                 raise _refuse(
                     produced,
-                    f"exact-class ({entry['exact_kind']}) mismatch: produced SHA-256 {actual} != "
+                    f"exact-class ({exact_kind}) mismatch: produced SHA-256 {actual} != "
                     f"frozen expectation {expected[output]}; exact classes compare for equality, "
                     f"not tolerance, and the expectation is never updated (TE 13.7; NFR-REP-01; "
                     f"R-139 control 21/23)",
                 )
-            results[output] = {"comparison_class": "exact", "sha256": actual, "matched": True}
+            semantic = _semantic_exact_compare(reference_file, produced, exact_kind=exact_kind)
+            results[output] = {
+                "comparison_class": "exact",
+                "exact_kind": exact_kind,
+                "sha256": actual,
+                "byte_equal": False,
+                **semantic,
+                "matched": True,
+            }
             continue
         if entry["comparison_class"] == "recorded_presence":
             # D-75: existence + readable-as-declared-format + recorded identity. NEVER a
