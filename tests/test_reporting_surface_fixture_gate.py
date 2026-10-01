@@ -164,6 +164,11 @@ def _common_kwargs(*, tmp_path: Path, fixture_id: str | None) -> dict[str, Any]:
         locked=None,
         evaluation_mode="fixture" if fixture_id else "real_data",
         fixture_id=fixture_id,
+        # TE 15.3 / R-122 (closure 2026-10-01): Fixture 2's reduced replicate count comes from
+        # its identity declaration's fixture_bootstrap block (1000), never the governed 10,000.
+        fixture_bootstrap_replicates=(
+            1000 if fixture_id == MODULE.SCIENTIFIC_FIXTURE_ID else None
+        ),
     )
 
 

@@ -79,3 +79,49 @@ So:
 4. Only then any full-year job, including LSTM training on January–November.
 
 Model performance has not been validated by anything in this session.
+
+---
+
+## Update, end of the 2026-10-01 closure session (appended; the text above is kept as written)
+
+### Closure matrix
+
+| ID | Reference | Start status | Done this session | Evidence / commit | Final status |
+|---|---|---|---|---|---|
+| Plumbing re-measure | D-83 item 12 | pre-W-4, non-comparable | Six defects found and fixed on the way (below); P-6 runs (a)x2 + (c)x2 completed | ded3661; PROGRESS_2026-10-01.md | **Measured** |
+| (a)/(c) tolerance | §R5-5 item 4; A8 items 9, 10, 17 | OPEN | Determinism held per leg; per-field item-11 tolerances composed (identical in P-3 and P-6) | PROPOSED_D-85; plumbing_item11/ | **Measured; freeze OPEN (Student act)** |
+| plumbing freeze | Q-31; TE 18.2 | OPEN | Candidate installed as reference; freeze edit refused by session permission control | PROPOSED_D-85 | **OPEN: Student** |
+| scientific_1month field table | A8 item 16 | OPEN | Ledger + 10-field unit table declared before runs; missing producers built (reduced bootstrap, bootstrap_summary) | edfc3fa, 4f66ec6 | **Declared; verification against real output OPEN (needs plumbing receipt)** |
+| scientific_1month runs | TE 9.2 | never run | Not runnable before the plumbing receipt (R-140) | — | **BLOCKED on plumbing freeze** |
+| (c) environment + linux lock | §R5-5 item 15 | OPEN | Hashed linux-64 locks, bootstrap, fresh-clone procedure; verified end to end | dc1e72d, 0c7cfae | **CLOSED** |
+| (b) identity, locks, pytest | §R5-5 item 16; R6-5 steps 2-3 | OPEN | Measured glibc 2.43, libgfortran5 16.2.0, iricore RECORD 92/0; locks + bootstrap; env rebuilt | 5e65a15, d08fdc3 | **CLOSED** |
+| (b) critical subset | §R5-5 item 23 | OPEN | Measured: full set minus test_fixture_outputs (pandas absent by D-49); 1540 pass / 3 skip / 0 fail | 58139fe | **CLOSED** |
+| Config renormalisation | R6-5 step 5 | OPEN | data/features to LF; all four equal LF blob hashes | PROGRESS log | **CLOSED** |
+| November B-01 re-run | D-83 item 12; §R5-5 item 13 | superseded receipt | Re-generated Mar+Nov in b01_iri, R-59 PASSED, pins stable, smoke bit-identical, Nov bit-identical | bfe5fd3 | **CLOSED** |
+| §R5-5 item 3 | peak-RSS/CPU capture | due with W-7 | Verified on every P-run (peak_rss per stage, cpu_model recorded) | measuring results | **CLOSED (verified in use)** |
+| §R5-5 item 11 + Auditor reservation | §R4-7 preamble | RESERVED | Depends on item 4 freeze and rows 30-31 (W-1, W-10) | — | **OPEN** |
+| PV-10 Rec 11 | IMPL-14 | OPEN | classified failure reasons recorded | ea6d96a | **Implemented, pending board** |
+| PV-10 Rec 12 | TEC-02 | OPEN | timestamp/index fields refused as tolerance fields | ea6d96a | **Implemented, pending board** |
+| PV-10 Rec 21 | IMPL-17 | OPEN | exact exception types; zero-tolerance edges | ea6d96a | **Implemented, pending board** |
+| PV-10 Rec 24 | CHAIR-06 | OPEN | Stated: item 24 D-number limb satisfied by D-83 item 12; refusal-scope limb open | ded3661 (CR annotation) | **Closed (limb); refusal-scope OPEN** |
+| PV-10 Rec 25 | ML-11 | OPEN | -0.0 disclosure | ea6d96a | **Implemented, pending board** |
+| Full-board review rev 8 + today | §R5-8 row 42 | OPEN | Not run | — | **OPEN** |
+| Power-loss | A8 item 3 (330 = 300 kill + 30 power-off, NTFS, power button, AC off, hashed backup) | not run by ruling | Not run: physical, risks the thesis machine; no safe NTFS isolate; VM analogue would crash the shared WSL VM holding (b)/(c) | — | **OPEN: external (physical act + spare hardware)** |
+| Push | — | 16 ahead | Blocked by session permission control | — | **OPEN: `git push origin main`** |
+| graphify-out | CLAUDE.md | stale | No graphify CLI | — | **Maintenance limitation** |
+| B015 test defects | ruff | 2 missing asserts | asserted | ea6d96a | **CLOSED** |
+
+### Defects found and fixed by executing the runs (each with tests)
+
+189ca1f GIM release read as provider input; 1580e55 and e5d59d3 archive scans past MAX_PATH and
+archived measurements folded into a new run's envelope; 4bf7d3b / 4e4b5ac / a9c8851 target
+release carried a driver's processing block and cited releases it never reads (run-order
+dependent hash); d08fdc3 custody timestamp parsing differed on Python 3.10; e3bcd9d B-01
+validation report path collision; 4f66ec6 a regression of mine in 07.
+
+### Readiness decision
+
+**NOT READY.** Ordered blockers: (1) the Student's plumbing freeze (D-85) and verification
+run; (2) scientific_1month rehearsal, 2+2 designated runs, unit-table verification, freeze;
+(3) governed full-year Phase 1 acquisition and B-01 January–November; then 06. See
+RUNBOOK_phase1_training.md.

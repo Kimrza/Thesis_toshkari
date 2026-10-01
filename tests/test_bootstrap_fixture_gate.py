@@ -37,6 +37,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from src.data.config import IntegrityError  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -95,6 +96,11 @@ def _common_kwargs(*, tmp_path: Path, fixture_id: str | None) -> dict[str, Any]:
         locked=None,
         evaluation_mode="fixture" if fixture_id else "real_data",
         fixture_id=fixture_id,
+        # TE 15.3 / R-122 (closure 2026-10-01): Fixture 2's reduced replicate count comes from
+        # its identity declaration's fixture_bootstrap block (1000), never the governed 10,000.
+        fixture_bootstrap_replicates=(
+            1000 if fixture_id == MODULE.SCIENTIFIC_FIXTURE_ID else None
+        ),
     )
 
 
@@ -156,7 +162,9 @@ def test_scientific_1month_still_invokes_bootstrap_unchanged(tmp_path, monkeypat
     assert len(calls) == 1
     kwargs = calls[0]
     assert kwargs["block_hours"] == 24
-    assert kwargs["replicates"] == 10000
+    # Fixture 2 runs TE 15.3's REDUCED replicate count (fixture_bootstrap.replicates), not
+    # the governed 10,000 that this assertion carried before 2026-10-01.
+    assert kwargs["replicates"] == 1000
     assert kwargs["seed"] == 20221201
     assert kwargs["evaluation_mode"] == "fixture"
     assert len(written) == 1
@@ -206,3 +214,21 @@ def test_r116_untouched_zero_support_still_raises_when_bootstrap_is_invoked(tmp_
         MODULE._run_bootstrap_step(
             **_common_kwargs(tmp_path=tmp_path, fixture_id=MODULE.SCIENTIFIC_FIXTURE_ID)
         )
+
+
+def test_scientific_1month_without_fixture_bootstrap_refuses(tmp_path):
+    """Negative control (closure 2026-10-01): Fixture 2 never falls back to the governed
+    replicate count; an absent fixture_bootstrap block refuses by name."""
+    kwargs = _common_kwargs(tmp_path=tmp_path, fixture_id=MODULE.SCIENTIFIC_FIXTURE_ID)
+    kwargs["fixture_bootstrap_replicates"] = None
+    with pytest.raises(IntegrityError, match="fixture_bootstrap.replicates"):
+        MODULE._run_bootstrap_step(**kwargs)
+
+
+def test_governed_path_keeps_the_declared_replicates(tmp_path, monkeypatch):
+    """The governed/full-year path (fixture_id None) still uses experiment.bootstrap.replicates."""
+    calls = []
+    monkeypatch.setattr(MODULE, "vector_block_bootstrap", lambda *a, **k: calls.append(k) or (_ for _ in ()).throw(RuntimeError("stop")))
+    with pytest.raises(RuntimeError, match="stop"):
+        MODULE._run_bootstrap_step(**_common_kwargs(tmp_path=tmp_path, fixture_id=None))
+    assert calls and calls[0]["replicates"] == 10000
