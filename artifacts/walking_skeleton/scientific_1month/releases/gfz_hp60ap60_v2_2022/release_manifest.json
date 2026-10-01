@@ -1,0 +1,81 @@
+{
+  "change_record_id": "CR-2026-09-23-DRIVER-RELEASE-OPTION-A",
+  "content_hash": "a14451168f4a952246161e8ee9c8b4376e75d04e069f989ab197f1cfbbd59978",
+  "covered_window": {
+    "end": "2022-03-31",
+    "start": "2022-02-27"
+  },
+  "created_at_utc": "2026-10-01T17:47:20.882477+00:00",
+  "dataset_version": "a14451168f4a",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 0,
+      "reason": "provider value absent at this epoch: released as an explicit empty cell, never as the provider's sentinel and never filled (D-5; D-10.2)"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "scientific_1month",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "hp60_ap60_1h.csv": "18fa5f8da437c82eb35f2e84cbf68f4552eccf0a2625d71dffd364f960707497"
+  },
+  "processing": {
+    "hourly_aggregation": "none: values are released at the provider's own cadence, unaggregated",
+    "parameters": [
+      "ap60",
+      "hp60"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "selected_cell_bounds": {
+      "time_indexed_only": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here"
+    },
+    "station_coordinate_to_cell_rule": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "producing_artifact": "gfz_hp60ap60_v2_2022",
+  "release_status": "hpo_v2.0_contemporaneous",
+  "row_counts": {
+    "by_month": {
+      "2022-02": 48,
+      "2022-03": 744
+    },
+    "by_qc_stage": {
+      "as_provided_no_qc_applied": 792
+    },
+    "by_split": {
+      "unsplit_stage_04": 792
+    },
+    "by_station": {
+      "time_indexed_no_station_axis": 792
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "D-40 (Hp60ap60doi_2022.txt V2.0, DOI 10.5880/Hpo.0002; V3.0 is a comparator only)",
+      "filename": "hp60ap60doi_2022_v2.txt",
+      "location_date": "audit_gfz_2026-09-18 (2022-03-01..2022-03-31)",
+      "provider": "GFZ",
+      "retrieval_date": "2026-09-18",
+      "sha256": "0ad71bf0eab1412852dd57ade1f7e2fdf5ff18f1cf9d20ebab8babc1fe471ad6"
+    }
+  ],
+  "source_manifest_id": "gfz_hp60ap60_v2_2022:D-40 (Hp60ap60doi_2022.txt V2.0, DOI 10.5880/Hpo.0002; V3.0 is a comparator only)",
+  "units": {
+    "ap60": "nT",
+    "hp60": "dimensionless (thirds)"
+  },
+  "window": {
+    "end": "2022-03-31",
+    "start": "2022-03-01"
+  }
+}

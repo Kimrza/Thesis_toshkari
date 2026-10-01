@@ -187,3 +187,35 @@ differs by about 1e-8. Without a (c) plumbing receipt, R-140 refuses every (c)
 `scientific_1month` run, including measuring runs, so the D-83 item 11 (c) leg for
 `scientific_1month` and G-07 are blocked by D-74's classification, not by a measured
 reproducibility failure.
+
+## Stage 2: scientific_1month
+
+### Rehearsals (undesignated, environment (a), bound to `f14be43`)
+
+- **Rehearsal 1** (`governance/closure/sci/rehearsal1.log`) aborted in stage 05:
+  "the fixture declares no refit apparatus partition". TE 15.4's `feature_table.parquet` is
+  exported from the refit partition. The scientific declaration had fold partitions only, so
+  `FIX-MAR-REFIT` (2022-03-01..31, `validation_month` null) was added. It mirrors the owner's
+  Option A for plumbing (`FIX-NOV-REFIT`, CR-2026-09-21 closure pass, Addendum 2). Apparatus
+  constants are not scientific values (R-122), and the D-14 window is unchanged.
+- **Rehearsal 2** (`governance/closure/sci/rehearsal2.log`) completed stages 00-06 and aborted
+  in stage 07 on R-120's widening guard. On 1,000 replicates the vector interval width was
+  18.530, against the naive comparator's 18.726. Stage 07 ran the scientific fixture's
+  bootstrap in `fixture` mode. That mode raises on non-widening, a rule R-120 reserves for
+  TA-14's SYNTHETIC planted-correlation dataset. The scientific fixture bootstraps REAL March
+  data, and R-120 states that a real-data non-widening result is a mandatory disclosure. Fix:
+  a new `fixture_real_data` mode (the fixture's reduced replicate count, the protocol's block
+  length, and real-data disclosure semantics). Stage 07 passes it at fixture scale. TA-14's
+  synthetic raise is unchanged.
+
+### Student rulings (2026-10-01)
+
+- Disk cleanup: `pip cache purge` approved and done (1.36 GB). C: then showed 55.6 GB free.
+- (c) blocker: "Amend D-74 by field". Recorded as D-74 Amendment 2 in `evidence/DECISIONS.md`.
+  The mechanism:
+  - `membership_id` is added to each mask;
+  - `mask_id` becomes environment-bound;
+  - `restored_validation_rmse` becomes an item-11 toleranced field;
+  - `reference_environment_id` is recorded on candidates.
+
+  Then plumbing is re-measured (P-8) and re-frozen as D-87, with verification in (a) and (c).

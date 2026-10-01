@@ -1,0 +1,81 @@
+{
+  "change_record_id": "CR-2026-09-23-DRIVER-RELEASE-OPTION-A",
+  "content_hash": "da7846d7136ea7b93f44ff79a2c9fc26975764b56372fc307df35f9f5e6cbda7",
+  "covered_window": {
+    "end": "2022-03-31",
+    "start": "2021-12-10"
+  },
+  "created_at_utc": "2026-10-01T17:47:21.805194+00:00",
+  "dataset_version": "da7846d7136e",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 0,
+      "reason": "provider value absent at this epoch: released as an explicit empty cell, never as the provider's sentinel and never filled (D-5; D-10.2)"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "scientific_1month",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "f107_daily_median.csv": "c61d3558dd4ca99ef41d87274e420c50e1a3be73f357312275cacbe70e29a339"
+  },
+  "processing": {
+    "hourly_aggregation": "project-derived daily median of the observed flux (D-21/D-22/D-23)",
+    "parameters": [
+      "f107_daily_median"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "selected_cell_bounds": {
+      "time_indexed_only": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here"
+    },
+    "station_coordinate_to_cell_rule": "not applicable to a driver release: driver series are TIME-INDEXED ONLY, one value per epoch identical across all three cells (TC-12, binding: hard) — no cell is selected, no provider experiment/kindat applies, and no hourly target aggregation is performed here",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "producing_artifact": "nrcan_f107_observed_daily_median_2022",
+  "release_status": "observed",
+  "row_counts": {
+    "by_month": {
+      "2021-12": 22,
+      "2022-01": 31,
+      "2022-02": 28,
+      "2022-03": 31
+    },
+    "by_qc_stage": {
+      "as_provided_no_qc_applied": 112
+    },
+    "by_split": {
+      "unsplit_stage_04": 112
+    },
+    "by_station": {
+      "time_indexed_no_station_axis": 112
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "D-21/D-22/D-23 (NRCan observed flux; project-derived daily median)",
+      "filename": "fluxtable.txt",
+      "location_date": "nrcan_f107 (2022-03-01..2022-03-31)",
+      "provider": "NRCAN",
+      "retrieval_date": "f107",
+      "sha256": "4b7fbfde3b9d0140ef43e7487f5986fe18f93182dac5e1ee37a93fb6ebd690b9"
+    }
+  ],
+  "source_manifest_id": "nrcan_f107_observed_daily_median_2022:D-21/D-22/D-23 (NRCan observed flux; project-derived daily median)",
+  "units": {
+    "f107_daily_median": "sfu"
+  },
+  "window": {
+    "end": "2022-03-31",
+    "start": "2022-03-01"
+  }
+}

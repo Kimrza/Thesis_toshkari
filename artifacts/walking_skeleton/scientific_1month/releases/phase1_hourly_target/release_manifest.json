@@ -1,0 +1,108 @@
+{
+  "change_record_id": "CR-2026-09-23-TARGET-RELEASE-OPTION-A",
+  "content_hash": "131131fc64f77aa444e653c7c04da070c021178fd515ee4ebd4ccf51d35c255c",
+  "created_at_utc": "2026-10-01T17:47:03.603361+00:00",
+  "dataset_version": "131131fc64f7",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 107,
+      "reason": "largest_internal_gap_s above D-19 maximum 1800.0"
+    },
+    {
+      "count": 145,
+      "reason": "valid_observation_count below D-19 minimum 3.0"
+    },
+    {
+      "count": 16,
+      "reason": "within_hour_spread_tecu above D-19 range bound 10.0"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "scientific_1month",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "hourly_target_phase1.csv": "3d70d425fc3222f0b97cac0ef32d909f65cdf2d9cddaff7b8f334dd7bc9fed9e"
+  },
+  "processing": {
+    "hourly_aggregation": "median",
+    "parameters": [
+      "ut1_unix",
+      "gdlat",
+      "glon",
+      "tec",
+      "dtec"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "8000/3500",
+    "selected_cell_bounds": {
+      "ARUC": {
+        "cell_gdlat": 40,
+        "cell_glon": 44,
+        "cell_lat_bounds": "[40, 41)",
+        "cell_lon_bounds": "[44, 45)",
+        "resolved": true,
+        "rule": "floor-half-open-d1"
+      },
+      "BSHM": {
+        "cell_gdlat": 32,
+        "cell_glon": 35,
+        "cell_lat_bounds": "[32, 33)",
+        "cell_lon_bounds": "[35, 36)",
+        "resolved": true,
+        "rule": "floor-half-open-d1"
+      },
+      "NICO": {
+        "cell_gdlat": 35,
+        "cell_glon": 33,
+        "cell_lat_bounds": "[35, 36)",
+        "cell_lon_bounds": "[33, 34)",
+        "resolved": true,
+        "rule": "floor-half-open-d1"
+      }
+    },
+    "station_coordinate_to_cell_rule": "floor-half-open-d1",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "row_counts": {
+    "by_month": {
+      "2022-03": 2211
+    },
+    "by_qc_stage": {
+      "post_documented_qc_invalid": 258,
+      "post_documented_qc_valid": 1953
+    },
+    "by_split": {
+      "unsplit_stage_02": 2211
+    },
+    "by_station": {
+      "ARUC": 740,
+      "BSHM": 743,
+      "NICO": 728
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "consumed release dataset_version a6fdd6a41d29, content_hash a6fdd6a41d29735c46145e3ee40b51bc11038b468842b4919c93b0a5e6be089d",
+      "filename": "prepared_vtec_records.csv",
+      "location_date": "scientific_1month_20261001T174631Z (created 2026-10-01T17:46:31.726697+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-10-01T17:46:31.726697+00:00",
+      "sha256": "62a0a41d5f60cace4128c94866dc7e3f2fad50e176d9bd14535bf3e5d22907e1"
+    }
+  ],
+  "source_manifest_id": "a6fdd6a41d29",
+  "units": {
+    "largest_internal_gap_s": "s",
+    "vtec_tecu": "TECU",
+    "within_hour_spread_tecu": "TECU"
+  }
+}

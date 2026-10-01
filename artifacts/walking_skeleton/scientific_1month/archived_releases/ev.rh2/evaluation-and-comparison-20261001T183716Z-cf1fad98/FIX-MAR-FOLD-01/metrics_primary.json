@@ -1,0 +1,104 @@
+{
+  "artifact_class": "metrics_artifact",
+  "comparisons": [
+    {
+      "beats_model": true,
+      "benchmark_id": "B-01",
+      "mask_id": "9c566dc49f5d1f0eb12afaf7c0aca0f7b4553ac5ace1def89202e00529872654",
+      "model_id": "M-06",
+      "orientation": "benchmark_minus_model",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "per_station": {
+        "ARUC": 3.8985786522507513,
+        "BSHM": -11.22985062314405,
+        "NICO": -0.68370014606091
+      },
+      "phase_id": "P1A",
+      "scalar": -2.6716573723180694,
+      "set_id": "primary",
+      "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+      "source_id": "GNSS_VTEC+IRI2016_B01",
+      "spatial_representativeness_sentence": "Phase 1 compares a grid cell against a station-coordinate evaluation, and part of any measured difference is a geometry and sampling artefact rather than skill",
+      "target_definition_id": "GRIDDed_VTEC_1H",
+      "weighting": "equal_station"
+    },
+    {
+      "beats_model": true,
+      "benchmark_id": "M-01",
+      "mask_id": "9c566dc49f5d1f0eb12afaf7c0aca0f7b4553ac5ace1def89202e00529872654",
+      "model_id": "M-06",
+      "orientation": "benchmark_minus_model",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "per_station": {
+        "ARUC": 2.6798965143637195,
+        "BSHM": -19.899565878754416,
+        "NICO": 2.6648982976035334
+      },
+      "phase_id": "P1A",
+      "scalar": -4.851590355595721,
+      "set_id": "primary",
+      "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+      "source_id": "GNSS_VTEC+IRI2016_B01",
+      "target_definition_id": "GRIDDed_VTEC_1H",
+      "weighting": "equal_station"
+    },
+    {
+      "beats_model": true,
+      "benchmark_id": "M-02",
+      "mask_id": "9c566dc49f5d1f0eb12afaf7c0aca0f7b4553ac5ace1def89202e00529872654",
+      "model_id": "M-06",
+      "orientation": "benchmark_minus_model",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "per_station": {
+        "ARUC": 0.3058436289179715,
+        "BSHM": -17.262031870713116,
+        "NICO": -2.6215075086000414
+      },
+      "phase_id": "P1A",
+      "scalar": -6.525898583465062,
+      "set_id": "primary",
+      "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+      "source_id": "GNSS_VTEC+IRI2016_B01",
+      "target_definition_id": "GRIDDed_VTEC_1H",
+      "weighting": "equal_station"
+    },
+    {
+      "beats_model": false,
+      "benchmark_id": "M-03",
+      "mask_id": "9c566dc49f5d1f0eb12afaf7c0aca0f7b4553ac5ace1def89202e00529872654",
+      "model_id": "M-06",
+      "orientation": "benchmark_minus_model",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "per_station": {
+        "ARUC": 4.732038664400579,
+        "BSHM": -4.426870980293344,
+        "NICO": 2.961284619570536
+      },
+      "phase_id": "P1A",
+      "scalar": 1.088817434559257,
+      "set_id": "primary",
+      "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+      "source_id": "GNSS_VTEC+IRI2016_B01",
+      "target_definition_id": "GRIDDed_VTEC_1H",
+      "weighting": "equal_station"
+    }
+  ],
+  "emitted_at_utc": "2026-10-01T18:37:17.210168+00:00",
+  "exclusion_counts": {
+    "ARUC": 416,
+    "BSHM": 406,
+    "NICO": 451
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "mask_id": "9c566dc49f5d1f0eb12afaf7c0aca0f7b4553ac5ace1def89202e00529872654",
+  "model_id": "M-06",
+  "phase2_not_independent_statement": "Phase 2 is a fixed-protocol replication on a new target lineage, not a second statistically independent blind test, because it reuses the December timestamps after Phase 1 has already reported them",
+  "row_counts": {
+    "ARUC": 241,
+    "BSHM": 313,
+    "NICO": 126
+  },
+  "scored_window_statement": "16\u201331 March 2022, 16 days, first 24 h excluded and counted",
+  "set_id": "primary",
+  "units": "TECU"
+}
