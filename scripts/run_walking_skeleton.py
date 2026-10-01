@@ -851,13 +851,37 @@ def live_files(root: Path) -> list[Path]:
     return out
 
 
-def _storage_bytes(root: Path) -> int:
-    """This run's storage: every file under the fixture root EXCEPT archived copies (W-8)."""
+def live_file_states(root: Path) -> dict[str, tuple[int, int]]:
+    """(size, mtime_ns) of every live file under the fixture root, keyed by relative path."""
     root = Path(root)
-    return sum(
-        p.stat().st_size
-        for p in live_files(root)
-    )
+    if not root.is_dir():
+        return {}
+    states: dict[str, tuple[int, int]] = {}
+    for path in live_files(root):
+        stat = path.stat()
+        states[path.relative_to(root).as_posix()] = (stat.st_size, stat.st_mtime_ns)
+    return states
+
+
+def _storage_bytes(root: Path, before: Mapping[str, tuple[int, int]] | None = None) -> int:
+    """This run's storage: live files under the fixture root, archived copies excluded (W-8).
+
+    With `before` (the run's own pre-run `live_file_states`), only files this run created or
+    rewrote count. Found 2026-10-01 by the D-85 verification run V-2 (50846483): without it,
+    every live file counted, including one `releases/plumbing_7day_<utc>` directory left by
+    every earlier run (43 of them, 3.7 MB of the 6.5 MB measured) and earlier runs' measuring
+    results, so the figure grew with run history and no later run could stay inside a range
+    measured earlier.
+    """
+    root = Path(root)
+    total = 0
+    for path in live_files(root):
+        stat = path.stat()
+        key = path.relative_to(root).as_posix()
+        if before is not None and before.get(key) == (stat.st_size, stat.st_mtime_ns):
+            continue
+        total += stat.st_size
+    return total
 
 
 # =======================================================================================
@@ -873,6 +897,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     registry_path, access_log = _registry_paths(snapshot)
     scope_path: Path = entry["scope_path"]
     clock = time.monotonic()
+    storage_before = live_file_states(fixture_root_for(workspace, args.fixture))
 
     # 1. The manifest, ONLY through the loader (a missing one refuses naming the path).
     scope = load_fixture_scope(scope_path)
@@ -1046,7 +1071,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         ),
     )
     runtime_seconds = time.monotonic() - clock
-    storage_bytes = _storage_bytes(fixture_root)
+    storage_bytes = _storage_bytes(fixture_root, storage_before)
     if missing:
         raise IntegrityError(
             fixture_root / ARTIFACT_MANIFEST_NAME,

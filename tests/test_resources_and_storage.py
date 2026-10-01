@@ -150,3 +150,37 @@ def test_live_files_still_finds_nested_live_outputs(tmp_path) -> None:
     assert [p.relative_to(tmp_path).as_posix() for p in mod.live_files(tmp_path)] == [
         "plots/residuals.png"
     ]
+
+def test_storage_counts_only_what_this_run_wrote(tmp_path) -> None:
+    """D-85 V-2 (2026-10-01): files left live by earlier runs are not this run's storage."""
+    import os
+
+    mod = _skeleton()
+    root = tmp_path / "fixture"
+    (root / "releases" / "plumbing_7day_20261001T120000Z").mkdir(parents=True)
+    (root / "releases" / "plumbing_7day_20261001T120000Z" / "f.parquet").write_bytes(b"o" * 500)
+    (root / "measuring_result_old.json").write_bytes(b"m" * 300)
+    (root / "metrics.json").write_bytes(b"x" * 40)
+    before = mod.live_file_states(root)
+    (root / "releases" / "plumbing_7day_20261001T130000Z").mkdir(parents=True)
+    (root / "releases" / "plumbing_7day_20261001T130000Z" / "f.parquet").write_bytes(b"n" * 70)
+    (root / "metrics.json").write_bytes(b"y" * 45)
+    stat = (root / "metrics.json").stat()
+    os.utime(root / "metrics.json", ns=(stat.st_atime_ns, stat.st_mtime_ns + 10_000_000))
+    (root / "metrics.json.archived-run1").write_bytes(b"a" * 900)
+    assert mod._storage_bytes(root, before) == 70 + 45
+    assert mod._storage_bytes(root) == 500 + 300 + 70 + 45
+
+
+def test_storage_counts_a_rewrite_with_unchanged_size(tmp_path) -> None:
+    import os
+
+    mod = _skeleton()
+    root = tmp_path / "fixture"
+    root.mkdir()
+    (root / "registry_entry.json").write_bytes(b"r" * 64)
+    before = mod.live_file_states(root)
+    stat = (root / "registry_entry.json").stat()
+    os.utime(root / "registry_entry.json", ns=(stat.st_atime_ns, stat.st_mtime_ns + 10_000_000))
+    assert mod._storage_bytes(root, before) == 64
+    assert mod.live_file_states(tmp_path / "absent") == {}
