@@ -4465,6 +4465,99 @@ Item 1's "wherever it appears" already covered each forward-looking passage. Thi
 completes the list so each receives its in-place annotation (O-6). Supervisor acknowledgement
 remains OPEN.
 
+## D-85 — `plumbing_7day` fixture manifest: Q-31 freeze (adopted 2026-10-01)
+
+**Decision date:** 2026-10-01. **Decided by:** the Student (Q-31 owner, TE §18.2; R-134
+obligation 2), by explicit written instruction in session on 2026-10-01: *"I explicitly provide
+my final approval for Part 1: D-85 plumbing_7day freeze."* The instruction authorised the agent
+to perform the freeze act on the Student's behalf: promote the validated candidate, set
+`status: frozen`, add `identity.freeze_citation`, write the sibling SHA-256, record this entry,
+and run the post-freeze verification. The agent wrote this entry on that instruction, following
+the D-82, D-83 and D-84 precedent. **Supervisor approval:** reported by the Student on
+2026-10-01 as covering the (a)/(c) measuring runs and the tolerance freeze. Form: verbal,
+reported by the Student; no written artifact exists and no words of the Supervisor's are quoted.
+
+**Decision.** `tests/fixtures/plumbing_7day/fixture_manifest.yaml` is frozen as the reference for
+every later `plumbing_7day` comparison run.
+
+- **Source.** The manifest was composed by `scripts/compose_cross_environment_candidate.py` from
+  exactly the four P-6 designated runs (precommitment P-6,
+  `governance/closure/PROGRESS_2026-10-01.md`). Those runs executed at code commit `14e09f2`:
+  - (a) `tec-thesis-311`: `walking-skeleton-plumbing_7day-20261001T141835Z-e79b04b2` and
+    `walking-skeleton-plumbing_7day-20261001T142715Z-12195f9f`;
+  - (c) `g07-clean-run` (lock-built environment, fresh clone):
+    `walking-skeleton-plumbing_7day-20261001T141915Z-32dfaa64` and
+    `walking-skeleton-plumbing_7day-20261001T142500Z-3a3f9119`.
+- **Why the frozen candidate is `+xenv2`, not the first `+xenv` composition.** Before freezing,
+  the agent found that the first composition (`...12195f9f+xenv.yaml`, SHA-256 `74292c93...`,
+  promoted 2026-10-01T14:35:01Z) cited its expectation at
+  `artifacts/walking_skeleton/plumbing_7day/artifact_manifest.json`. That is the directory every
+  comparison run rewrites before it compares, so a verification run would have compared its
+  outputs against themselves and could not fail (R-139). The citation was also a Windows path
+  that a Linux checkout cannot resolve. Fixed in `51f81f7`, with tests. The same four measuring
+  results were then re-composed as `...12195f9f+xenv2.yaml`. It differs from `+xenv` in exactly
+  one field, `required_outputs.artifact_manifest_ref`, which now reads
+  `reference_walking-skeleton-plumbing_7day-20261001T142715Z-12195f9f-xenv2/artifact_manifest.json`.
+  That directory is a write-once copy of run `12195f9f`'s hash listing and its compared outputs,
+  and no run writes to it. No measured value changed, and nothing under `src/`, `scripts/`,
+  `configs/` or `environment/` that produces an output changed between `14e09f2` and the
+  re-composition; the fix touches only composition and comparison.
+- **Promotion.** It was installed by `run_walking_skeleton.py --promote-candidate`
+  (`fixture_manifest.promotions.jsonl`, `promoted_at_utc` `20261001T161830Z`, candidate SHA-256
+  `44b15c9dbc088c34d60508217c376db763e05c970a1fe490f1b4cdb93fe74e23`). The earlier `+xenv`
+  installation is preserved as `fixture_manifest.superseded_20261001T161830Z.yaml` and is never
+  frozen.
+- **Freeze edit.** Exactly two changes were made, after verifying that the serialisation
+  round-trips byte for byte: `status` went from `candidate` to `frozen`, and
+  `identity.freeze_citation` = `{"decision": "D-85"}` was added.
+- **Acceptance tolerances.** These are the D-83 item 11 per-field tolerances the manifest
+  records. They were derived by the adopted rule max(statistic, 2^-23 x max|x| over that field's
+  (a) elements); they were not chosen. They were recomputed independently from the four
+  measuring results on 2026-10-01 before the freeze, and they agree exactly:
+
+  | Output | Field | Unit | max abs (c)-(a) | floor | tolerance |
+  |---|---|---|---|---|---|
+  | predictions.parquet | y_hat (648) | TECU | 1.9073e-06 | 5.6447e-06 | 5.6447e-06 |
+  | metrics.json | paired_loss_differential (24) | TECU^2 | 6.5978e-06 | 3.4519e-05 | 3.4519e-05 |
+  | metrics.json | row_count (4) | count | 0 | 5.1260e-06 | 5.1260e-06 |
+  | metrics.json | exclusion_count (4) | count | 0 | 1.6689e-05 | 1.6689e-05 |
+
+  The determinism precondition (D-83 §A8 item 9) passed on both legs: within each
+  `environment_id` the two runs are identical, and NaN positions match in all four runs. The
+  same four tolerances were measured independently by P-3 at `a9c8851`.
+- **Measured ranges.** Runtime `cpu_total` is 331.80 to 502.88 s. `storage_total` is 6,146,225
+  to 6,327,309 bytes.
+- **Inputs.** The inputs are B-01 as re-generated in `b01_iri` on 2026-10-01 (`bfe5fd3`), and
+  configs LF-renormalised (`871be23b`, `1b1ebdfd`, `8427794f`, `c951f949`).
+- **Superseded measurements.** This freeze discharges the D-83 item 12 re-run owed for the
+  pre-W-4 `plumbing_7day` candidate (`9710daf`). That candidate and the P-1 to P-5 measurements
+  stay on record and are never frozen.
+
+**Evidence class.** Smoke evidence only, never scientific evidence (TC-03f; TE §15.1). No
+`plumbing_7day` result may be cited, plotted as a result, or interpreted as skill. The D-11
+limitation applies: the window is not representative of December.
+
+fixture_manifest_sha256: `92aa38c0edb05edd62d4a35901375c42d164496b6c9c452c587fbaa88cc48933`
+
+**Known limitation, carried to G-07, not to this freeze.** On the P-6 outputs, the (c) leg's
+`exact` outputs `split_manifest.json`, `mask_manifest.json` and `checkpoint_manifest.json`
+differ in bytes from (a). The causes found are CRLF versus LF, mask ids that differ, and a float
+validation RMSE differing at about 1e-8. A (c) comparison run against this manifest would
+therefore refuse on those outputs. This does not affect the (a) verification run this freeze
+opens. It is an open G-07 reproducibility item, recorded in
+`governance/closure/AUTONOMOUS_EXECUTION_PROGRESS.md`.
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none. No feature, split or model input changes.
+- Uncertainty: none.
+- Comparability: every later `plumbing_7day` run is compared against this manifest under its
+  per-field tolerances, keyed to `environment_id`.
+- Claim: none. The fixture is smoke evidence only.
+
+**Opens:** the post-freeze verification run, which produces the plumbing receipt that
+`scientific_1month` requires (R-140). Its result is recorded in
+`governance/closure/AUTONOMOUS_EXECUTION_PROGRESS.md`.
+
 ---
 
 ## Supervisor review

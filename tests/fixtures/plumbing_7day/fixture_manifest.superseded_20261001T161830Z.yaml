@@ -234,9 +234,6 @@
       "source": "evidence/audit_evidence_2022-11/madrigal_coverage_raw_records.csv (D-11/D-20 measured basis: BSHM 168/168 hourly bins, 7/7 days)"
     },
     "fixture_id": "plumbing_7day",
-    "freeze_citation": {
-      "decision": "D-85"
-    },
     "limitations": {
       "clauses": [
         "This window does not reproduce December's winter-solstice regime or its activity distribution and must not be treated as representative of the locked month.",
@@ -429,7 +426,7 @@
     }
   },
   "required_outputs": {
-    "artifact_manifest_ref": "reference_walking-skeleton-plumbing_7day-20261001T142715Z-12195f9f-xenv2/artifact_manifest.json",
+    "artifact_manifest_ref": "..\\..\\..\\artifacts\\walking_skeleton\\plumbing_7day\\artifact_manifest.json",
     "comparison_ledger": {
       "bootstrap_summary.json": {
         "citation": "D-74 amendment, CR-2026-09-29-Q31-CLOSURE",
@@ -781,7 +778,7 @@
       "units": "bytes"
     }
   },
-  "status": "frozen",
+  "status": "candidate",
   "support_missingness": {
     "comparator": {
       "max": 43.0,
