@@ -470,22 +470,23 @@ def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str
     # exclude archived dirs; for the actual provider-VTEC releases specifically,
     # dedupe multiple identical-dataset_version citations down to the earliest one
     # (deterministic, not "whichever re-run happened to exist last").
-    from src.data.prepared import GIM_COMPARATOR_RELEASE_DIR, _is_archived_release_dirname
+    from src.data.prepared import _is_archived_release_dirname, _non_provider_release_dirs
 
+    # Defects fixed 2026-10-01 (D-83 item 12 re-measure): this enumeration cited the GIM
+    # comparator and the four driver releases as sources of the target. Stage 02 reads
+    # neither (stage 04 publishes them later into the same root). Citing them was false
+    # provenance, and it made the target's content_hash depend on run history: on a fresh
+    # clone (the G-07 case) run 1 and run 2 published different targets. The cited set is
+    # now exactly the set `load_released_provider_rows` reads: the same exclusion
+    # (`_non_provider_release_dirs`, archived copies) and the same dataset_version dedup.
+    excluded = _non_provider_release_dirs()
     seen_provider_versions: set[str] = set()
     out: list[tuple[Path, dict[str, Any]]] = []
     manifests = sorted(release_root.rglob(MANIFEST_NAME)) if release_root.is_dir() else []
     for manifest_path in manifests:
-        if manifest_path.parent.name == TARGET_RELEASE_DIR:
-            continue  # this stage's own output is never its own input
-        if manifest_path.parent.name == GIM_COMPARATOR_RELEASE_DIR:
-            # The CODE GIM comparator is evaluation-time only (Mandated) and never an input
-            # to the target. Citing it made the target misstate its provenance, and, since
-            # the comparator is republished write-once per run, changed the target's
-            # content_hash on every run (found 2026-10-01, D-83 item 12 re-measure).
-            continue
-        if _is_archived_release_dirname(manifest_path.parent.name):
-            continue  # provenance history, never a live input (same reasoning as target)
+        name = manifest_path.parent.name
+        if name in excluded or _is_archived_release_dirname(name):
+            continue  # not an input to this stage (its own output, drivers, comparator)
         problems = verify_release(manifest_path)
         if problems:
             raise IntegrityError(
@@ -495,16 +496,9 @@ def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str
             )
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         version = str(manifest.get("dataset_version", ""))
-        # Only dedupe the PROVIDER release citations (this stage's actual scientific
-        # input, always published as exactly this filename by stage 00); driver
-        # releases are singular by construction (one per D-63 identity) and always
-        # worth citing individually.
-        output_files = manifest.get("output_files")
-        is_provider_shaped = isinstance(output_files, Mapping) and "prepared_vtec_records.csv" in output_files
-        if is_provider_shaped:
-            if version in seen_provider_versions:
-                continue  # identical-content duplicate from a repeated stage-00 run
-            seen_provider_versions.add(version)
+        if version in seen_provider_versions:
+            continue  # identical-content duplicate from a repeated stage-00 run
+        seen_provider_versions.add(version)
         out.append((manifest_path, manifest))
     return out
 

@@ -310,11 +310,27 @@ def test_target_never_cites_the_gim_comparator_release(tmp_path: Path) -> None:
     assert cited == ["plumbing_7day_x"]
 
 
-def test_target_still_cites_a_non_comparator_second_release(tmp_path: Path) -> None:
-    """Negative control: only the comparator is dropped; another release stays cited."""
+def test_target_cites_only_the_provider_release_it_consumes(tmp_path: Path) -> None:
+    """2026-10-01: drivers (published later by stage 04) were cited as target sources, so a
+    fresh clone's first and second runs published different targets. Only the
+    provider-shaped release is cited, whatever else exists under the root."""
     mod = _stage02()
     release_root = tmp_path / "releases"
     _write_valid_provider_release(release_root / "plumbing_7day_x", row_marker="7.0")
-    _write_valid_provider_release(release_root / "some_driver_2022", row_marker="9.0")
-    cited = sorted(p.parent.name for p, _m in mod._consumed_release_manifests(release_root))
-    assert cited == ["plumbing_7day_x", "some_driver_2022"]
+    driver = release_root / "gfz_hp60ap60_v2_2022"
+    driver.mkdir(parents=True)
+    (driver / "release_manifest.json").write_text("{}", encoding="utf-8")
+    before = [p.parent.name for p, _m in mod._consumed_release_manifests(release_root)]
+    assert before == ["plumbing_7day_x"]
+
+
+def test_target_citation_refuses_an_unverifiable_provider_release(tmp_path: Path) -> None:
+    """Negative control: narrowing the citation does not skip verification of the
+    provider release itself."""
+    mod = _stage02()
+    release_root = tmp_path / "releases"
+    _write_valid_provider_release(release_root / "plumbing_7day_x", row_marker="7.0")
+    csv = next((release_root / "plumbing_7day_x").glob("*.csv"))
+    csv.write_text(csv.read_text(encoding="utf-8") + "tampered\n", encoding="utf-8")
+    with pytest.raises(Exception):
+        mod._consumed_release_manifests(release_root)
