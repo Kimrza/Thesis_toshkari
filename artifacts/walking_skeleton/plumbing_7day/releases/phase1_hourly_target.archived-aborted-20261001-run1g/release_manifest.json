@@ -1,0 +1,126 @@
+{
+  "change_record_id": "CR-2026-09-23-TARGET-RELEASE-OPTION-A",
+  "content_hash": "628ea3c14076912d329742eb4b7e5ffa9969bd875e3bc522bf02d75b7baf0871",
+  "created_at_utc": "2026-10-01T11:25:43.636369+00:00",
+  "dataset_version": "628ea3c14076",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 5,
+      "reason": "largest_internal_gap_s above D-19 maximum 1800.0"
+    },
+    {
+      "count": 5,
+      "reason": "within_hour_spread_tecu above D-19 range bound 10.0"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "plumbing_7day",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_02_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "hourly_target_phase1.csv": "b9078695dc329a7655bc782cc1f09f822cf53a259fb60a6dd428ac56ff98e667"
+  },
+  "processing": {
+    "hourly_aggregation": "median",
+    "parameters": [
+      "ut1_unix",
+      "gdlat",
+      "glon",
+      "tec",
+      "dtec"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "8000/3500",
+    "selected_cell_bounds": {
+      "BSHM": {
+        "cell_gdlat": 32,
+        "cell_glon": 35,
+        "cell_lat_bounds": "[32, 33)",
+        "cell_lon_bounds": "[35, 36)",
+        "resolved": true,
+        "rule": "floor-half-open-d1"
+      }
+    },
+    "station_coordinate_to_cell_rule": "floor-half-open-d1",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "row_counts": {
+    "by_month": {
+      "2022-11": 168
+    },
+    "by_qc_stage": {
+      "post_documented_qc_invalid": 10,
+      "post_documented_qc_valid": 158
+    },
+    "by_split": {
+      "unsplit_stage_02": 168
+    },
+    "by_station": {
+      "BSHM": 168
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "consumed release dataset_version b9b59a1371b9, content_hash b9b59a1371b97307322fadbeba188fcb8f5025f4c7555b4ffcbc9cc29dcd8f16",
+      "filename": "hp60_ap60_1h.csv",
+      "location_date": "gfz_hp60ap60_v2_2022 (created 2026-10-01T10:54:36.796943+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-10-01T10:54:36.796943+00:00",
+      "sha256": "8fcb5435a6a2566a668056cf75d81ca750757910752c3b6bbebd9899d6dbdc9f"
+    },
+    {
+      "citation": "consumed release dataset_version b23eb09c9e7c, content_hash b23eb09c9e7ce2bb45caa4301a622938321dc70924ae89bbb45cd269a6875c33",
+      "filename": "kp_ap_3h.csv",
+      "location_date": "gfz_kp_ap_nowcast_2022 (created 2026-10-01T10:54:36.651301+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-10-01T10:54:36.651301+00:00",
+      "sha256": "2df7238eb765be76be95bba625afa14c0bacee1b7039da8f0ae3dc408d20d491"
+    },
+    {
+      "citation": "consumed release dataset_version f04fc0e27f7d, content_hash f04fc0e27f7daff295dc2bbb457c65363956cffc56b80ab8e6c00b54b9ec83ad",
+      "filename": "gim_comparator.parquet",
+      "location_date": "gim_comparator_C-01_2022 (created 2026-10-01T11:01:08.954450+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-10-01T11:01:08.954450+00:00",
+      "sha256": "738124cd27b837ff86bb678a78bc80a1a9778a614a2a8aeacad59835ead1f436"
+    },
+    {
+      "citation": "consumed release dataset_version c81ad6afe8bf, content_hash c81ad6afe8bf42b4a89bc6b61a71f60a55625c13040590efc70b8292f3187956",
+      "filename": "dst_1h.csv",
+      "location_date": "kyoto_wdc_dst_2022 (created 2026-10-01T10:54:37.836858+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-10-01T10:54:37.836858+00:00",
+      "sha256": "eb34b6ec5350902fc96d58eb310a172a6c9bdcc46cc0055f720eb6c7072f87ae"
+    },
+    {
+      "citation": "consumed release dataset_version c97d14efce2f, content_hash c97d14efce2fbfce784ad594959f3efe7e99854888209501c74c41cf6f3d8664",
+      "filename": "f107_daily_median.csv",
+      "location_date": "nrcan_f107_observed_daily_median_2022 (created 2026-10-01T10:54:37.773303+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-10-01T10:54:37.773303+00:00",
+      "sha256": "ef72e689d8c4b29e139a6f8676abce698d144d43b0cf83be498d5ce97cf78e85"
+    },
+    {
+      "citation": "consumed release dataset_version ed246781688c, content_hash ed246781688ca77e4a2b4fe2804d96f4f873693fd68eeee66e92cabac148d135",
+      "filename": "prepared_vtec_records.csv",
+      "location_date": "plumbing_7day_20260926T064829Z (created 2026-09-26T06:48:29.448960+00:00)",
+      "provider": "project release (stage 00 acquisition)",
+      "retrieval_date": "2026-09-26T06:48:29.448960+00:00",
+      "sha256": "fac835fca6b4d928cee468eecca452c0cfdfa4640342d0aafb321788a9f7899a"
+    }
+  ],
+  "source_manifest_id": "b23eb09c9e7c;b9b59a1371b9;c81ad6afe8bf;c97d14efce2f;ed246781688c;f04fc0e27f7d",
+  "units": {
+    "largest_internal_gap_s": "s",
+    "vtec_tecu": "TECU",
+    "within_hour_spread_tecu": "TECU"
+  }
+}

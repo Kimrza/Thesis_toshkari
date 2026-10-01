@@ -1,0 +1,17 @@
+{
+  "measurements": {
+    "timestamp_tolerances": {
+      "gim": {
+        "max": 0.0,
+        "min": 0.0,
+        "units": "s"
+      },
+      "iri": {
+        "max": 0.0,
+        "min": 0.0,
+        "units": "s"
+      }
+    }
+  },
+  "stage": "04_build_external_products"
+}
