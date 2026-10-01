@@ -153,6 +153,7 @@ __all__ = [
     "manifest_path_for",
     "candidate_path_for",
     "reference_dir_for",
+    "CROSS_ENVIRONMENT_MAX_ULP",
     "snapshot_reference_outputs",
     "promote_candidate_manifest",
     "CANDIDATE_NAME_TEMPLATE",
@@ -2066,6 +2067,90 @@ def _semantic_exact_compare(
     return report
 
 
+#: D-74 amendment 3 (2026-10-01, Student ruling): across environments, a float64 column of a
+#: `deterministic_cpu_transformation` table may differ by at most this many units in the last
+#: place. Each conforming libm returns sin/cos within 1 ULP of the true value, so two of them
+#: differ by at most 2; glibc against the Windows runtime measured exactly 1 on the
+#: cyclical-encoding columns of `feature_table.parquet`. Within one environment, the bits must
+#: be identical.
+CROSS_ENVIRONMENT_MAX_ULP: Final[int] = 2
+
+
+def _ulp_distance(left: Any, right: Any) -> Any:
+    import numpy as np
+
+    a = np.ascontiguousarray(left, dtype=np.float64).view(np.int64)
+    b = np.ascontiguousarray(right, dtype=np.float64).view(np.int64)
+    # map the sign-magnitude IEEE ordering onto a monotone integer line
+    a = np.where(a < 0, np.int64(-(2**63)) - a, a)
+    b = np.where(b < 0, np.int64(-(2**63)) - b, b)
+    return np.abs(a.astype(object) - b.astype(object))
+
+
+def _parquet_value_compare(
+    reference: Path, produced: Path, *, exact_kind: str, same_environment: bool
+) -> dict[str, Any]:
+    """TE 13.7 exactness of a parquet table by VALUE (D-74 amendment 3).
+
+    Schema, row count, column order and every non-float column must be equal. A float column
+    must be bit-identical (NaN by position) within one environment; across environments, a
+    `deterministic_cpu_transformation` column may differ by at most `CROSS_ENVIRONMENT_MAX_ULP`.
+    File bytes are not compared: parquet's writer may lay the same values out differently.
+    """
+    import numpy as np
+    import pyarrow.parquet as pq
+
+    try:
+        expected, actual = pq.read_table(reference), pq.read_table(produced)
+    except Exception as exc:  # noqa: BLE001 - any reader failure is the same refusal
+        raise _refuse(
+            produced,
+            f"exact-class ({exact_kind}) mismatch: bytes differ from the frozen expectation and "
+            f"the pair cannot be read as parquet tables ({exc}); an unreadable artifact fails "
+            f"rather than being compared loosely (TE 13.7; R-139)",
+        ) from exc
+    if not expected.schema.equals(actual.schema, check_metadata=False):
+        raise _refuse(produced, f"exact-class ({exact_kind}) mismatch: parquet schema differs")
+    if expected.num_rows != actual.num_rows:
+        raise _refuse(
+            produced,
+            f"exact-class ({exact_kind}) mismatch: {actual.num_rows} rows where the frozen "
+            f"expectation has {expected.num_rows}",
+        )
+    allowance = CROSS_ENVIRONMENT_MAX_ULP if (
+        not same_environment and exact_kind == "deterministic_cpu_transformation"
+    ) else 0
+    worst: dict[str, int] = {}
+    for name in expected.column_names:
+        left = expected[name].to_numpy(zero_copy_only=False)
+        right = actual[name].to_numpy(zero_copy_only=False)
+        if left.dtype.kind == "f" and right.dtype.kind == "f":
+            left_nan, right_nan = np.isnan(left), np.isnan(right)
+            if not np.array_equal(left_nan, right_nan):
+                raise _refuse(produced, f"column {name}: NaN positions differ (TE 13.7)")
+            distance = _ulp_distance(left[~left_nan], right[~right_nan])
+            largest = int(max(distance)) if len(distance) else 0
+            if largest > allowance:
+                raise _refuse(
+                    produced,
+                    f"exact-class ({exact_kind}) mismatch: column {name} differs by {largest} "
+                    f"ULP; {'none is' if allowance == 0 else f'at most {allowance} are'} "
+                    f"admitted {'within one environment' if allowance == 0 else 'across environments'} "
+                    f"(TE 13.7; D-74 amendment 3)",
+                )
+            if largest:
+                worst[name] = largest
+        elif left.tolist() != right.tolist():
+            raise _refuse(
+                produced, f"exact-class ({exact_kind}) mismatch: column {name} values differ"
+            )
+    return {
+        "values_equal": not worst,
+        "ulp_by_column": worst,
+        "ulp_allowance": allowance,
+    }
+
+
 def _read_values(path: Path) -> Any:
     if path.suffix.lower() in (".json", ".jsonl"):
         text = path.read_text(encoding="utf-8")
@@ -2138,6 +2223,25 @@ def compare_required_outputs(
                 }
                 continue
             reference_file = manifest.artifact_manifest_path.parent / output
+            reference_env = manifest.data["required_outputs"].get("reference_environment_id")
+            same_environment = (
+                environment_id is None or reference_env is None or environment_id == reference_env
+            )
+            if produced.suffix.lower() == ".parquet" and reference_file.is_file():
+                results[output] = {
+                    "comparison_class": "exact",
+                    "exact_kind": exact_kind,
+                    "sha256": actual,
+                    "byte_equal": False,
+                    **_parquet_value_compare(
+                        reference_file,
+                        produced,
+                        exact_kind=exact_kind,
+                        same_environment=same_environment,
+                    ),
+                    "matched": True,
+                }
+                continue
             if (
                 produced.suffix.lower() not in _STRUCTURED_SUFFIXES
                 or not reference_file.is_file()
@@ -2150,7 +2254,6 @@ def compare_required_outputs(
                     f"R-139 control 21/23)",
                 )
             exceptions = entry.get("field_exceptions")
-            reference_env = manifest.data["required_outputs"].get("reference_environment_id")
             if exceptions and exceptions.get("environment_bound") and environment_id is None:
                 raise _refuse(
                     produced,

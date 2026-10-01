@@ -3867,6 +3867,35 @@ measuring run:
 membership rule, tolerance rule or comparison set changes. Implementation and tests:
 `tests/test_d74_field_exceptions.py`.
 
+**Amendment 3, 2026-10-01: parquet exactness by value, and a 2 ULP cross-environment allowance
+for `deterministic_cpu_transformation` floats (adopted by the Student's ruling in session,
+2026-10-01: "Amend: ≤2 ULP across envs (Recommended)").**
+
+**The finding.** The first (c) `g07-clean-run` comparison against D-87 was refused on
+`feature_table.parquet`. A value-level diff of every output, (c) against the (a) reference,
+measured four kinds of difference:
+- three cyclical-encoding columns (`utc_hour_sin`, `doy_sin`, `lst_cos`) differ by exactly
+  1 ULP (1.1e-16), because glibc and the Windows runtime compute `sin`/`cos` differently;
+- `hourly_vtec.parquet` and `gim_comparator.parquet` are value-identical but not byte-identical;
+- `iri_benchmark.parquet` is byte-identical;
+- every other difference was already covered by amendment 2.
+
+**The amendment.**
+1. A parquet `exact` output is compared by VALUE. Schema, row count, column order, NaN
+   positions and every non-float column must be equal. File bytes are not compared, because
+   the writer may lay the same values out differently.
+2. Within one environment (the run's `environment_id` equals the manifest's
+   `reference_environment_id`, or either is absent), every float column must be bit-identical.
+3. Across environments, a float64 column of a `deterministic_cpu_transformation` output may
+   differ by at most **2 ULP**. That bound follows from each conforming libm being within 1 ULP
+   of the true value; the measured difference is 1. No other kind gains an allowance.
+
+Same-environment exactness, the toleranced outputs, and amendment 2 are unchanged. The
+manifests frozen under D-87 need no re-measurement, because the rule changes only how bytes
+are read, and the code change is verified by fresh comparison runs. Implementation:
+`src/data/fixture_manifest.py: _parquet_value_compare`, `CROSS_ENVIRONMENT_MAX_ULP`. Tests:
+`tests/test_d74_parquet_values.py`.
+
 ---
 
 ## D-75 — `plumbing_7day` fixture: `plots/*` comparison class (owner ruling, Option C conditional)
