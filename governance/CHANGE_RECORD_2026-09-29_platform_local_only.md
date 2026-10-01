@@ -1,12 +1,14 @@
-# CR-2026-09-29-PLATFORM-LOCAL-ONLY: local as the sole execution platform (proposed; not enacted)
+# CR-2026-09-29-PLATFORM-LOCAL-ONLY: local as the sole execution platform (proposed 2026-09-29; adopted 2026-10-01 as D-83, revision 8)
 
 ## Revision 8 (2026-10-01): the current draft
 
-**Status: DRAFT, NOT ENACTED.** No D-number has been written. Adoption needs the following, per §A8 item 1:
+**Status: ADOPTED 2026-10-01 as D-83** (`evidence/DECISIONS.md`, "## D-83"). Every prerequisite below was checked on the record before adoption; the D-83 entry tabulates the evidence.
 
-- the Student's adoption act;
-- the Supervisor's countersignature (§A8 item 2);
-- §R5-5 items 2 and 7, where item 2 is a full-board review of the revision-8 delta.
+- the Student's adoption act: given by instruction on 2026-10-01;
+- the Supervisor's countersignature (§A8 item 2, and the revision-8 record "Supervisor countersignature for revision 8"): verbal, reported by the Student, scope §A8 items 1–13;
+- §R5-5 items 2 and 7: item 2 met by `GOV-2026-10-01-PV-10` (CONDITIONAL PASS); item 7 met by the countersignature above.
+
+*Before adoption this block read: "Status: DRAFT, NOT ENACTED. No D-number has been written." It is kept here so the history is not rewritten.*
 
 **Form.** Revision 8 is a **delta revision** on revision 7, which is retained verbatim below.
 

@@ -4301,6 +4301,100 @@ required to share the same target lineage. Claim: unchanged.
 
 ---
 
+## D-83 — Execution platform: local (native Windows plus WSL2 on the Student's laptop) as the sole platform for new governed runs; Kaggle dormant (adopted 2026-10-01, CR-2026-09-29-PLATFORM-LOCAL-ONLY revision 8)
+
+**Decision date:** 2026-10-01 (adoption).
+
+**Decided by:** the Student, on 2026-09-29 (FU-1R = A). Revised under the Student's rulings on:
+- `GOV-2026-09-29-PV-02`;
+- `GOV-2026-09-30-PV-03`, `GOV-2026-09-30-PV-04`, `GOV-2026-09-30-PV-07`, `GOV-2026-09-30-PV-08` and `GOV-2026-09-30-PV-09`;
+- `GOV-2026-10-01-PV-10`.
+
+**Adoption act:** the Student, in session on 2026-10-01, by explicit instruction to complete the adoption act if and only if every adoption prerequisite was satisfied. Those prerequisites were checked on the record before this entry was written; see "Adoption prerequisites" below. The agent wrote this entry to the register on that instruction, following the D-82 and D-84 precedent.
+
+**Adopted text.** The full text is the D-text in `governance/CHANGE_RECORD_2026-09-29_platform_local_only.md` §R4-7 (revision 7), as amended by:
+- revision 8 §A8 items 1 to 13;
+- the revision-8 "Corrections" of 2026-10-01 (PV-10 Recs 9, 10, 15 and 19).
+
+That change record is the authoritative full text; where §A8 and revision 7 disagree, §A8 governs. Revision 8 §A8 items 14 to 17 are measurement criteria and mechanism records that make items 3, 9 to 11 and 13 executable. They are referenced here but are not D-text.
+
+**Authority amended:** every forward-looking surface in CR-2026-09-29-PLATFORM-LOCAL-ONLY §R2 and §R2-5, plus TE §13.1's "eight items" definition. **Ratifies:** D-49 addendum 2.
+
+**Supervisor countersignature:** recorded as given, by the Student's direction; the Supervisor's approval was given verbally and reported by the Student on 2026-09-30 ("i have it but verbally consider it equal to a signature"); no written artifact exists.
+
+**Supervisor countersignature for revision 8.**
+- On 2026-10-01, in session, the Student reported that the Supervisor confirms the approval already given also covers revision 8 as then amended, including §A8 items 9 to 13. By the Student's direction this is recorded as the revision-8 countersignature.
+- **Form:** verbal, reported by the Student. No written artifact exists, no words of the Supervisor's are quoted, and no timestamp is recorded beyond the date of the report.
+- **Scope:** §A8 items 1 to 13, and the revision-7 text they amend, as they stood when reported. The countersignature does **not** cover the wording of §A8 items 14 to 17 or the "Corrections", which were written afterwards the same day under the Student's rulings and relax no rule.
+- The countersignature's form is stated wherever the countersignature is relied on.
+
+**Adoption preconditions** (revision 8 §A8 item 1): §R5-5 items 2 and 7. **Adoption accepts the protocol, not the durability results:** the durability claims (D-text item 11 "Durability", items 3 and 13) stay unaccepted until §R5-6 row 32 and §R5-8 row 41 pass. Both passed on 2026-10-01; see "Evidence".
+
+**Content, in summary** (the change record governs):
+
+1. **Platform.** New governed runs execute on `LAPTOP-TV4UGFBC` in three named environments, each recorded per run as `environment_id` on both the run record and the registry row, which must agree. The literals are pinned (§A8 item 11):
+   - **(a)** `tec-thesis-311` (native Windows): every stage script, the confirmatory set, December re-acquisition, and the evaluation-time IRI/GIM join;
+   - **(b)** `b01_iri` (WSL2): only under D-49 and its addenda, and only for B-01 generation and `verify_runtime`. Its receipts are written to NTFS through `/mnt/c` (the WSL2 9P drvfs mount);
+   - **(c)** `g07-clean-run` (WSL2): only for G-07 reproduction.
+
+   `undeclared` is recorded and never admitted. Comparisons, pins, admission keys and tolerance legs are keyed to the `environment_id` literal, never to a prose label. **An environment record made before W-4 (one with no `environment_id`) is not comparable governed evidence**, however similar its package or version values. It is refused by name and never upcast. This makes owed a re-run of `plumbing_7day` Q-31 (`9710daf`) and of the November B-01, and the November supersession is recorded in this D-number (§A8 item 12; it replaces §R5-5 item 29's separate D-number).
+2. **Kaggle is dormant, including in code.** A fallback is allowed only on the closed terms of revision-7 D-text item 2.
+3. **Locked test.** As in revision-7 D-text item 3 (the cutoff and the custody rules). Revision 8 §A8 item 5 adds:
+   - December generation happens once (generation-once);
+   - G-05 is re-verified in (a), and a receipt's own claim to it is never accepted;
+   - assembly is bound to the admitted receipt;
+   - `run_gated_generation` is the guard home, with script 04 as a defence-in-depth pre-check (§A8 item 8).
+4. **B-01.** D-49 addendum 2 is ratified. Assembly asserts equal index SHA-256 and equal hashes for every config file except `data.yaml`. For `data.yaml` it asserts equality with the `gates` node removed (`data_yaml_sans_gates_sha256`): the only permitted difference is the G-05 signature, recorded in `config_diff` (§A8 item 4).
+5. **Preflight and G-07**, 6. **Transfers**, 7. **CI**, 8. **Unchanged** and 9. **If rejected or amended**: all as in revision 7.
+10. **TC-03 replaced** by the measured local envelope and its limit rule, as in revision 7.
+11. **Precommitted values**, as in revision 7, with these amendments:
+    - **(c) tolerance:** per **field**, tolerance = max(statistic, floor). The floor is 2⁻²³ × max|x| over **that field's** (a) elements. Every field declares its unit before the measuring runs, no field inherits another's floor or tolerance, and units are never mixed across fields (§A8 item 10; Corrections).
+    - **Determinism precondition:** the tolerance is computed, and any run is checked against it, only after that run's `environment_id` has shown determinism (at least two runs with identical element sets and values, NaN matching by position). A failure there is a **reproducibility failure** and is never rescued by the tolerance. Only a deterministic run can give a **tolerance failure**. The two are recorded under distinct names (§A8 item 9).
+    - **Durability:** on NTFS, process-kill N = 100 per write type (access log, registry, receipt), with a one-sided 95 % zero-failure bound of 2.95 % per write type. Power-loss trials are not run, by the Student's direction of 2026-09-30, and admission rests on detection plus the kill-fault evidence. **Limitation, stated wherever durability is relied on:** a process kill leaves the operating-system page cache intact, so it does not exercise `fsync` against power loss. The bound covers kills at the points the campaign reached, and nothing about power loss is claimed. The kill campaign must include torn (mid-write) faults, and readers must detect every torn record they produce (§A8 item 3). Revision 8 §A8 item 13 adds a fourth limb: the `/mnt/c` receipt campaign from `b01_iri`, N = 100, under the same governed identity and provenance.
+
+**Adoption prerequisites, checked 2026-10-01 against the record:**
+
+| Prerequisite | Evidence |
+|---|---|
+| §R5-5 item 2 / §R5-8 row 38: full-board review of revision 8 | `GOV-2026-10-01-PV-10`: seven seats, CONDITIONAL PASS, no blocker and no veto |
+| §R5-5 item 7: Supervisor countersigns the durability protocol | revision-8 countersignature record above (scope: §A8 items 1–13, which contain the durability protocol, items 3 and 13) |
+| PV-10 Rec 1: countersignature scope | as above |
+| PV-10 Rec 2: mechanism committed, SHA cited | `42a1ca1`, `25ad0f7` |
+| PV-10 Rec 9: stale `/mnt/c` wording | dated annotations beside revision-7 §A7 item 6 and D-text item 1(b); "Corrections" |
+| PV-10 Rec 10: "per file" | "Corrections"; item 11 above |
+| PV-10 Rec 15: superseded countersignature lines | annotations beside revision-7 lines; this entry carries the §A8 item 2 line verbatim (closure check performed) |
+| PV-10 Rec 16: unlisted campaign | `campaign_kill_20260930T170510Z-ba301519/NON_GOVERNED_NOTE.md`; row in the evidence table |
+| PV-10 Rec 19: adoption scope sentence | "Adoption preconditions" above |
+| The Student's adoption act | instruction of 2026-10-01 |
+
+**Governing commits:**
+- `42a1ca1`: item-11 implementation on the runtime path; field table; `kill-torn` harness.
+- `25ad0f7`: harness line-ending classification.
+- `24bc96e`: revision-8 text, rulings, PV-10 report and remediation status, and campaign evidence.
+
+**Evidence (governed, `evidence/durability/`):**
+- `campaign_kill_20260930T212721Z-8054af1f`: native NTFS random kill, `f9078c4`, 300/300.
+- `campaign_kill-torn_20261001T084415Z-95cf3417`: native NTFS `kill-torn`, `25ad0f7`, 300/300. 200 torn records were produced and every one was detected; receipts came out 67 `intact_old` and 33 `intact_new`, with 0 partial. **§R5-6 row 32 passes** under the kill-only protocol.
+- `campaign_kill_20261001T084637Z-9aaebb13` and `campaign_kill-torn_20261001T085943Z-edad9609`: `/mnt/c` receipt limbs from `b01_iri`, `25ad0f7`, 100/100 each. **Item 15's criterion gives PASS, and §R5-8 row 41 passes.**
+- Not governed: `ba301519` (superseded) and `3820c087` (Python 3.14).
+
+**Residual and open items, which this adoption does not close:**
+- §R5-5 item 4: the (a)/(c) measuring runs and the frozen per-field tolerance (OPEN).
+- §R5-5 items 3 and 11, and the remaining §W7 rows, on their own due dates.
+- The `scientific_1month` field table: its units are a Student-owned Q-31 `"TBD — freeze gate"` value (OPEN).
+- §R5-8 row 42: a board pass over §A8 items 14–17 and their commits.
+- §R5-8 row 43: PV-10 Recs 11, 12, 21, 24 and 25 (OPEN).
+- §R5-8 row 40 (PV-09 open mechanism findings), as dated.
+- The Validation Auditor's reservation on §R5-5 item 11 stands until W-1 and §R5-6 rows 30 and 31 pass. Row 32 is passed by the evidence above.
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none; no feature or model input changes.
+- Uncertainty: none.
+- Comparability: tolerances are per field and keyed to `environment_id`, and pre-W-4 records are not comparable.
+- Claim: nothing about power-loss durability.
+
+---
+
 ## D-84 — M-03 climatology: D-55 supersedes the Vision's "station×month×hour" wording; only D-55 applies (owner ruling)
 
 **Decision date:** 2026-09-29. **Decided by:** the project decision owner (Student), ruling on
