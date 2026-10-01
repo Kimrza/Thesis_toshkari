@@ -457,7 +457,7 @@ def test_no_window_crosses_a_boundary() -> None:
 def test_membership_passes_rows_inside_the_declared_range() -> None:
     f1 = partition_by_id(synthetic_partitions(), "F1")
     rows = [{"interval_start_utc": _ts(2, 15, h).isoformat()} for h in range(5)]
-    assert_membership_from_timestamps(rows, partition=f1, role="train") is None
+    assert assert_membership_from_timestamps(rows, partition=f1, role="train") is None
 
 
 def test_membership_raises_on_a_row_filed_under_the_wrong_partition() -> None:
@@ -477,7 +477,7 @@ def test_membership_raises_on_a_row_filed_under_the_wrong_partition() -> None:
 def test_membership_score_role_uses_the_validation_month() -> None:
     f1 = partition_by_id(synthetic_partitions(), "F1")
     ok = [{"interval_start_utc": _ts(4, 10, 3).isoformat()}]
-    assert_membership_from_timestamps(ok, partition=f1, role="score") is None
+    assert assert_membership_from_timestamps(ok, partition=f1, role="score") is None
     bad = [{"interval_start_utc": _ts(5, 1, 0).isoformat()}]
     with pytest.raises(PartitionError):
         assert_membership_from_timestamps(bad, partition=f1, role="score")

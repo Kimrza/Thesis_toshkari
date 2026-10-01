@@ -1189,6 +1189,27 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     return summary
 
 
+#: D-83 revision 8 section A8 item 9: the two failures are recorded under DISTINCT names
+#: and never merged (GOV-2026-10-01-PV-10 Rec 11, IMPL-14: the module refuses; the caller
+#: records). Anything else is an integrity refusal.
+FAILURE_CLASS_DETERMINISM: Final[str] = "reproducibility_failure"
+FAILURE_CLASS_TOLERANCE: Final[str] = "tolerance_failure"
+FAILURE_CLASS_INTEGRITY: Final[str] = "integrity_refusal"
+
+
+def classified_failure_reason(exc: BaseException) -> str:
+    """The registry `reason` for an aborted run, prefixed by its item 9 failure class."""
+    from src.data.cross_environment_tolerance import DeterminismFailure, ToleranceFailure
+
+    if isinstance(exc, DeterminismFailure):
+        klass = FAILURE_CLASS_DETERMINISM
+    elif isinstance(exc, ToleranceFailure):
+        klass = FAILURE_CLASS_TOLERANCE
+    else:
+        klass = FAILURE_CLASS_INTEGRITY
+    return f"{klass} ({type(exc).__name__}): {exc}"
+
+
 def compose_tolerances(
     results: Sequence[Mapping[str, Any]],
     ledger_template: Mapping[str, Any],
@@ -1287,7 +1308,8 @@ def main() -> int:
         summary = _run(entry, args, run_id=run_id)
     except IntegrityError as exc:
         aborted = _registry_row(
-            run_id, status="aborted", lock_hash=lock_hash, snapshot=snapshot, reason=str(exc)
+            run_id, status="aborted", lock_hash=lock_hash, snapshot=snapshot,
+            reason=classified_failure_reason(exc),
         )
         aborted["code_commit"] = lock.code_commit
         record_abort_honestly(

@@ -75,6 +75,14 @@ class ToleranceFailure(IntegrityError):
 
 
 def _same(x: float, y: float) -> bool:
+    """Exact equality with NaN matching NaN by position.
+
+    Disclosed (GOV-2026-10-01-PV-10 Rec 25, ML-11): IEEE-754 equality treats `-0.0` and
+    `0.0` as EQUAL, and so does this check. A run producing `-0.0` where another produced
+    `0.0` therefore satisfies the determinism precondition. The two are the same real
+    number and no output field in the governed table assigns meaning to the sign of zero.
+    The minimum of two runs per environment matches the precommitted K = 2.
+    """
     return (math.isnan(x) and math.isnan(y)) or x == y
 
 
@@ -251,6 +259,18 @@ def check_candidate(
 FIELD_KEYS: Final[tuple[str, ...]] = ("field", "locator", "unit", "meaning", "citation")
 
 
+#: PV-10 Rec 12 (TEC-02): units and field-name tokens that mark a timestamp or an index.
+#: Such a field is offset-dominated, so 2^-23 x max|x| would grant a large silent tolerance.
+EXACT_ONLY_UNITS: Final[frozenset[str]] = frozenset(
+    {"s_since_epoch", "unix_s", "epoch_s", "epoch", "timestamp", "utc", "index", "id"}
+)
+_EXACT_ONLY_NAME = re.compile(r"(^|_)(time|timestamp|epoch|utc|index|idx|id)(_|$)", re.I)
+
+
+def _is_exact_only(name: str, unit: str) -> bool:
+    return unit.strip().lower() in EXACT_ONLY_UNITS or bool(_EXACT_ONLY_NAME.search(name))
+
+
 def validate_field_table(output: str, fields: Any) -> tuple[dict[str, Any], ...]:
     """Validate one output's declared field table; returns it as a tuple of entries."""
     resource = f"field table of {output}"
@@ -277,6 +297,14 @@ def validate_field_table(output: str, fields: Any) -> tuple[dict[str, Any], ...]
             re.compile(str(entry["locator"]))
         except re.error as exc:
             raise IntegrityError(where, f"locator does not compile ({exc})") from exc
+        if _is_exact_only(name, str(entry["unit"])):
+            raise IntegrityError(
+                where,
+                f"field {name!r} (unit {entry['unit']!r}) is a timestamp or index field: such "
+                "fields are exact-only and never floor-toleranced, because the floor scales "
+                "with magnitude (epoch seconds near 1.67e9 would be granted about 199 s); "
+                "compare them under D-74 exact_fields instead (GOV-2026-10-01-PV-10 Rec 12)",
+            )
         out.append(dict(entry))
     return tuple(out)
 

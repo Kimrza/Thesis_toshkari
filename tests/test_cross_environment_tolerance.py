@@ -388,3 +388,113 @@ def test_single_environment_measurement_is_not_an_item11_tolerance() -> None:
     out = skeleton.compose_tolerances(results, LEDGER, ["m.json"])
     assert "fields" not in out["m.json"]
     assert out["m.json"]["value"] == 0.0
+
+
+# --- PV-10 Rec 21 (IMPL-17): exact exception types, and the zero-tolerance edges ------------
+
+
+def _exactly_integrity(call) -> IntegrityError:
+    """The refusal is the INTEGRITY type itself, never a Determinism/Tolerance subclass."""
+    with pytest.raises(IntegrityError) as exc:
+        call()
+    assert type(exc.value) is IntegrityError, type(exc.value).__name__
+    return exc.value
+
+
+def test_rec21_integrity_refusals_are_exactly_integrity_error() -> None:
+    runs = _runs()
+    for env in runs.values():
+        for fp in env.values():
+            fp["newfield/0"] = 1.0
+    _exactly_integrity(lambda: tol.freeze_tolerance(runs, field_of=field_of, field_units=UNITS))
+    _exactly_integrity(lambda: tol.freeze_tolerance(
+        _runs(), field_of=field_of, field_units={"vtec": "TECU", "mse": " "}))
+    relabelled = _runs()
+    relabelled["b01_iri"] = relabelled.pop(C)
+    _exactly_integrity(lambda: tol.freeze_tolerance(relabelled, field_of=field_of, field_units=UNITS))
+    frozen = tol.freeze_tolerance(_runs(), field_of=field_of, field_units=UNITS)
+    frozen.pop("mse")
+    candidate = {"r0": _fp(20.0, 4.0), "r1": _fp(20.0, 4.0)}
+    _exactly_integrity(lambda: tol.check_candidate(
+        frozen, _fp(20.0, 4.0), C, candidate, field_of=field_of))
+
+
+def test_rec21_nondeterminism_is_exactly_determinism_failure() -> None:
+    runs = _runs(a=(_fp(20.0, 4.0), _fp(20.5, 4.0)))
+    with pytest.raises(tol.DeterminismFailure) as exc:
+        tol.freeze_tolerance(runs, field_of=field_of, field_units=UNITS)
+    assert type(exc.value) is tol.DeterminismFailure
+
+
+@pytest.mark.parametrize("value", [0.0, float("nan")])
+def test_rec21_all_zero_or_all_nan_field_freezes_to_zero_and_refuses_any_difference(value) -> None:
+    """An all-zero (or all-NaN) field has max|x| = 0, so its floor and tolerance are 0.0:
+    the field is then compared EXACTLY. Stated and tested, so a 0.0 tolerance is never read
+    as 'no check'."""
+    fp = {"vtec/0": value, "vtec/1": value, "mse/0": 4.0}
+    runs = {A: {"a0": dict(fp), "a1": dict(fp)}, C: {"c0": dict(fp), "c1": dict(fp)}}
+    frozen = tol.freeze_tolerance(runs, field_of=field_of, field_units=UNITS)
+    assert frozen["vtec"]["tolerance"] == 0.0
+    if value == 0.0:
+        shifted = {"vtec/0": 1e-30, "vtec/1": 0.0, "mse/0": 4.0}
+        with pytest.raises(tol.ToleranceFailure):
+            tol.check_candidate(frozen, fp, C, {"r0": dict(shifted), "r1": dict(shifted)},
+                                field_of=field_of)
+
+
+# --- PV-10 Rec 12 (TEC-02): timestamp and index fields are exact-only --------------------
+
+
+@pytest.mark.parametrize(
+    ("field", "unit"),
+    [("interval_start_utc", "s"), ("t", "unix_s"), ("row", "index"), ("epoch_seconds", "s")],
+)
+def test_rec12_timestamp_or_index_field_cannot_be_floor_toleranced(field, unit) -> None:
+    entry = {"field": field, "locator": ".*", "unit": unit, "meaning": "m", "citation": "c"}
+    with pytest.raises(IntegrityError, match="exact-only"):
+        tol.validate_field_table("x.parquet", [entry])
+
+
+def test_rec12_the_governed_plumbing_table_is_unaffected() -> None:
+    """Negative control: the four declared fields (TECU, TECU^2, count) still validate."""
+    declaration = json.loads(
+        (Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "plumbing_7day"
+         / "identity_declaration.yaml").read_text(encoding="utf-8")
+    )
+    ledger = declaration["required_outputs"]["comparison_ledger"]
+    for output in ("predictions.parquet", "metrics.json"):
+        assert tol.validate_field_table(output, ledger[output]["fields"])
+
+
+# --- PV-10 Rec 11 (IMPL-14): the caller records the two failures under distinct names -------
+
+
+def _runner():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "rws_rec11", Path(__file__).resolve().parents[1] / "scripts" / "run_walking_skeleton.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_rec11_failures_are_recorded_under_distinct_names() -> None:
+    rws = _runner()
+    det = rws.classified_failure_reason(tol.DeterminismFailure("env", "runs differ"))
+    tolf = rws.classified_failure_reason(tol.ToleranceFailure("x", "exceeds"))
+    integ = rws.classified_failure_reason(IntegrityError("x", "bad"))
+    assert det.startswith("reproducibility_failure (DeterminismFailure): ")
+    assert tolf.startswith("tolerance_failure (ToleranceFailure): ")
+    assert integ.startswith("integrity_refusal (IntegrityError): ")
+    assert len({det.split(" ")[0], tolf.split(" ")[0], integ.split(" ")[0]}) == 3
+
+
+def test_rec11_abort_path_writes_the_classified_reason() -> None:
+    """The runner's abort handler uses the classifier, so the registry row carries the name."""
+    source = (Path(__file__).resolve().parents[1] / "scripts" / "run_walking_skeleton.py").read_text(
+        encoding="utf-8"
+    )
+    assert "reason=classified_failure_reason(exc)" in source
+    assert "reason=str(exc)" not in source.split("def main", 1)[-1]
