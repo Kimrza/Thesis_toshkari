@@ -66,3 +66,8 @@ ex.d85v1	external (moved aside before d85v1, the D-85 post-freeze verification r
 fe.d85v1	features (moved aside before d85v1, the D-85 post-freeze verification run; outputs of P-6 run 12195f9f)
 mr.d85v1	mask_registry (moved aside before d85v1, the D-85 post-freeze verification run; outputs of P-6 run 12195f9f)
 pr.d85v1	predictions (moved aside before d85v1, the D-85 post-freeze verification run; outputs of P-6 run 12195f9f)
+ev.d85a1	evaluation (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)
+ex.d85a1	external (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)
+fe.d85a1	features (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)
+mr.d85a1	mask_registry (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)
+pr.d85a1	predictions (outputs of aborted D-85 verification run V-1, walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8)

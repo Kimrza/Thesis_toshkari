@@ -76,3 +76,23 @@ against the frozen manifest would refuse on these.
 - Fixture root cleaned for the verification run: A10's live outputs moved aside with suffix
   `.archived-d85v1` (directories to `archived_releases/{ev,ex,fe,mr,pr}.d85v1`, mapped in
   `ARCHIVE_NAME_MAP.tsv`; GIM release to `releases/gim_comparator_C-01_2022.archived-d85v1`).
+
+### Verification run V-1: aborted (comparator defect, fixed in `147654f`)
+
+- Command (a) `tec-thesis-311`, `PYTHONHASHSEED=0 TEC_PLATFORM=local`:
+  `python scripts/run_walking_skeleton.py --config configs/ --fixture plumbing_7day --code-commit 6fa8f1a...`
+- Run `walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8`, code `6fa8f1a`; registry row
+  `aborted`, reason `integrity_refusal (IntegrityError)`; log
+  `governance/closure/d85_verification/run1.log`.
+- The comparison was real this time and refused on `input_manifest.yaml` at
+  `/fixture_stamp/frozen_manifest_hash` (null in the measuring-run reference, the frozen hash in
+  a comparison run: different by construction; also embedded in byte-exact
+  `split_manifest.json`). Full diff of V-1's outputs against the reference: content identical;
+  only the stamp, `processing_config_snapshot.snapshot_dir` and `metrics.json` timestamps
+  differed.
+- Fix `147654f`: stamp set aside, required equal to the reference stamp except
+  `frozen_manifest_hash`, which must equal the frozen manifest's SHA-256; structured exact
+  outputs then compared by kind (schema / hash / exact value equality). Tests 19 in
+  `tests/test_fixture_reference_isolation.py`, `tests/test_clean_run.py` green.
+- V-1 outputs moved aside with suffix `.archived-aborted-d85v1` (directories
+  `archived_releases/*.d85a1`).
