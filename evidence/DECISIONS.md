@@ -4687,6 +4687,74 @@ difference was CRLF only and is now compared on values.
 **Opens:** the post-freeze verification run, which writes the plumbing receipt that
 `scientific_1month` requires (R-140).
 
+## D-87 — `plumbing_7day` fixture manifest: re-freeze under D-74 amendment 2 (supersedes D-86's manifest)
+
+**Decision date:** 2026-10-01. **Decided by:** the Student, the Q-31 owner (TE §18.2), in session
+on 2026-10-01. The Student ruled on the (c) blocker with "Amend D-74 by field". The option
+ruled on stated that plumbing would be re-measured (P-8, both legs), re-frozen as D-87, and
+verified in (a) and (c). The agent wrote this entry on that ruling, under the Student's D-85
+authorization of the same day to perform the freeze procedure. **Supervisor approval:** reported
+by the Student on 2026-10-01 as covering the (a)/(c) measuring runs and the tolerance freeze.
+Form: verbal; no written artifact exists.
+
+**Why the D-86 manifest is superseded.** D-74 amendment 2 (`998f937`) changes two things:
+- each mask gains a float-free `membership_id`;
+- `mask_manifest.json` and `checkpoint_manifest.json` are compared field by field.
+
+The D-86 reference carries no `membership_id` and no field exceptions, so it no longer describes
+current outputs. It is preserved as `fixture_manifest.superseded_20261001T194521Z.yaml` beside
+its sibling hash. No `plumbing_7day` result changes meaning.
+
+**Decision.** `tests/fixtures/plumbing_7day/fixture_manifest.yaml` is frozen as the reference
+for every later `plumbing_7day` comparison run.
+
+- **Source.** `scripts/compose_cross_environment_candidate.py` composed it from exactly the four
+  P-8 designated runs at `d8b2bcb` (precommitment P-8, `governance/closure/PROGRESS_2026-10-01.md`):
+  - (a) `tec-thesis-311`: `walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362` and
+    `walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c` (the outputs run);
+  - (c) `g07-clean-run`, from a lock-built environment and a fresh clone:
+    `walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4` and
+    `walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d`.
+- **Reference.** The reference is the write-once snapshot
+  `reference_walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c-xenv/`, with
+  `reference_environment_id` `tec-thesis-311`.
+- **Promotion.** The candidate was installed by `--promote-candidate`
+  (`promoted_at_utc` `20261001T194521Z`, candidate SHA-256
+  `4debeec77e58b568b48b8c92628292ee9ab92de960ff5360f2408a8a952b6d75`). Exactly two fields were
+  then changed: `status` is now `frozen`, and `identity.freeze_citation` is now `{"decision": "D-87"}`.
+- **Acceptance tolerances.** These are the D-83 item 11 per-field tolerances, derived by
+  max(statistic, 2^-23 x max|x|) and not chosen:
+
+  | Output | Field | Unit | max abs (c)-(a) | tolerance |
+  |---|---|---|---|---|
+  | predictions.parquet | y_hat (648) | TECU | 1.9073e-06 | 5.6447e-06 |
+  | metrics.json | paired_loss_differential (24) | TECU^2 | 6.5978e-06 | 3.4519e-05 |
+  | metrics.json | row_count (4) | count | 0 | 5.1260e-06 |
+  | metrics.json | exclusion_count (4) | count | 0 | 1.6689e-05 |
+  | checkpoint_manifest.json | restored_validation_rmse (6) | TECU | 3.5027e-07 | 2.0108e-06 |
+
+  The first four values are identical in P-3, P-6, P-7 and P-8. The fifth is new under
+  amendment 2. The determinism precondition passed on both legs.
+- **Environment-bound field.** `mask_manifest.json` `/masks[i]/mask_id` is compared exactly in
+  `tec-thesis-311` only. `membership_id` and every other leaf are exact everywhere.
+- **Measured ranges.** Runtime `cpu_total` is 363.96 to 504.95 s. `storage_total` is 2,311,682
+  to 2,345,881 bytes.
+
+**Evidence class.** Smoke evidence only, never scientific evidence (TC-03f; TE §15.1). The D-11
+limitation applies.
+
+fixture_manifest_sha256: `3bd4b8a5c0c47209da88def5ea229372b714b70695f5c0928575ada18d0b8bb3`
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none.
+- Uncertainty: none.
+- Comparability: comparison now succeeds by construction in (c), where it had been blocked by
+  classification.
+- Claim: none.
+
+**Opens:** the verification runs in (a) and in (c). The (c) receipt is what R-140 requires
+before any (c) `scientific_1month` run.
+
 ---
 
 ## Supervisor review
