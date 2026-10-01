@@ -238,3 +238,11 @@ reproducibility failure.
   The Student ruled D-74 amendment 3: parquet is compared by value, with 2 ULP across
   environments for deterministic floats and bit-identity within an environment. An offline
   comparison of the (c) outputs with the new code passes on every output.
+
+### D-87 verification (a), third attempt, at `63b0778` (amendment 3)
+
+`governance/closure/d87_verification/a3.log` matched all 19 outputs and was refused on runtime
+(641.9 s). `a3.cpu_performance.csv` sampled the processor performance counter every 5 s during
+the run: mean 45.1 % of nominal, range 42.3-48.8 %. The Student was asked and chose to switch
+the laptop's vendor power profile out of "Silent" themselves; the agent may not change system
+settings. Verification resumes once the profile changes. No re-freeze is needed.
