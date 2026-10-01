@@ -1,0 +1,31 @@
+{
+  "measurements": {
+    "row_count_ranges": {
+      "hourly_target": {
+        "max": 168.0,
+        "min": 168.0,
+        "units": "rows"
+      }
+    },
+    "support_missingness": {
+      "invalid_hour": {
+        "max": 10.0,
+        "min": 10.0,
+        "units": "hours"
+      },
+      "target_support": {
+        "max": 12.0,
+        "min": 4.0,
+        "units": "samples per hourly bin"
+      }
+    },
+    "timestamp_tolerances": {
+      "hourly_boundary": {
+        "max": 0.0,
+        "min": 0.0,
+        "units": "s"
+      }
+    }
+  },
+  "stage": "02_standardize_prepared_target"
+}

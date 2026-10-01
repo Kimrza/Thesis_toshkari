@@ -1,0 +1,8 @@
+{
+  "artifact": "bootstrap_skip_note",
+  "benchmark_id": "M-01",
+  "fixture_id": "plumbing_7day",
+  "model_id": "M-06",
+  "reason": "bootstrap skipped: TE \u00a715.3 does not require Fixture 1 (plumbing_7day) to execute the vector time-block bootstrap -- Fixture 1 is scoped to M-01..M-05 plus a minimal M-06 checkpoint save/restore and B-01/C-01 sample generation; bootstrap is named only for Fixture 2 (scientific_1month). D-20 also froze plumbing_7day to a single station (BSHM), which is structurally mismatched with the bootstrap's three-station, equal-station-weighted mechanism. This is a student-owned Q-31 execution-scoping decision, not a change to any scientific value.",
+  "skipped": true
+}
