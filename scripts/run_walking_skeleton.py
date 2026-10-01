@@ -127,6 +127,7 @@ from src.data.config import (  # noqa: E402
     required_fields_for,
     seed_everything,
 )
+from src.data.cross_environment_tolerance import compose_item11_tolerances  # noqa: E402
 from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
@@ -1046,7 +1047,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         "environment_resources": environment_resources(),
     }
     if isinstance(scope, FixtureManifest):
-        matched = compare_required_outputs(scope, fixture_root)
+        matched = compare_required_outputs(
+            scope, fixture_root, environment_id=lock.environment_id
+        )
         assert_run_level_ranges(
             scope, runtime_seconds=runtime_seconds, storage_bytes=storage_bytes
         )
@@ -1103,7 +1106,11 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
         if (fixture_root / name).is_file()
     }
     write_measuring_result(
-        fixture_root, run_id=run_id, measurements=run_measurements, fingerprints=fingerprints
+        fixture_root,
+        run_id=run_id,
+        measurements=run_measurements,
+        fingerprints=fingerprints,
+        environment_id=lock.environment_id,
     )
     results = load_measuring_results(fixture_root)
     for extra in args.measuring_runs or []:
@@ -1120,12 +1127,7 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             )
         seen_run_ids.add(rid)
     composed = compose_measurement_ranges(results)  # refuses a zero-width range (Rec 5)
-    tolerances = {
-        name: cross_run_variation(
-            {str(r["measuring_run_id"]): r.get("fingerprints", {}).get(name, {}) for r in results}
-        )
-        for name in toleranced
-    }
+    tolerances = compose_tolerances(results, template, toleranced)
     # CR-2026-09-29-Q31-CLOSURE: the run's record of TE 15.2's non-measured quantities
     # (inputs, processing, schemas, units, reference samples), read from the artifacts this
     # run produced or consumed and from the owner's skeleton's frozen citations.
@@ -1163,6 +1165,42 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
     summary["candidate_is_reference"] = False
     summary["measuring_run_ids"] = sorted(seen_run_ids)
     return summary
+
+
+def compose_tolerances(
+    results: Sequence[Mapping[str, Any]],
+    ledger_template: Mapping[str, Any],
+    toleranced: Sequence[str],
+) -> dict[str, dict[str, Any]]:
+    """The one routing point for a measuring run's toleranced outputs.
+
+    Every recorded result must name its `environment_id`: a pre-W-4 result is not comparable
+    (D-83 revision 8 section A8 item 12). Results spanning more than one environment are a
+    cross-environment comparison, and D-83 item 11 is governed ONLY by
+    `src.data.cross_environment_tolerance` (section A8 items 9-11; GOV-2026-10-01-PV-10
+    Recs 3-4). Results from one environment record that environment's measured run-to-run
+    variation for the Q-31 candidate (`cross_run_variation`), which is never an item 11
+    tolerance.
+    """
+    environments: set[str] = set()
+    for result in results:
+        env = result.get("environment_id")
+        if not isinstance(env, str) or not env.strip():
+            raise IntegrityError(
+                f"measuring result {result.get('measuring_run_id')}",
+                "carries no environment_id: a record made before W-4 is not comparable "
+                "governed evidence and is re-recorded under the current code, never "
+                "composed (D-83 revision 8 section A8 item 12)",
+            )
+        environments.add(env)
+    if len(environments) > 1:
+        return compose_item11_tolerances(results, ledger_template, list(toleranced))
+    return {
+        name: cross_run_variation(
+            {str(r["measuring_run_id"]): r.get("fingerprints", {}).get(name, {}) for r in results}
+        )
+        for name in toleranced
+    }
 
 
 def main() -> int:

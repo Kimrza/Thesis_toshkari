@@ -970,6 +970,9 @@ def _validate_ledger_entry(
             "a toleranced entry carries fp_tolerance {value, units, measuring_run_id} — the "
             "tolerance lives in the manifest and nowhere else (R-139 control 22)",
         )
+    if "fields" in tolerance:
+        _validate_item11_tolerance(resource, entry, tolerance, status=status)
+        return
     value = tolerance.get("value")
     if isinstance(value, bool) or not isinstance(value, int | float) or value != value:
         raise _refuse(f"{resource}.fp_tolerance.value", f"{value!r} is not a number")
@@ -1012,6 +1015,58 @@ def _validate_ledger_entry(
             "checked against output no design path returns to TECU until evaluation-and-"
             "comparison's R-103 joint contract is adopted by both halves (BLK-08 down-arrow, "
             "checked not inherited; R-139 control 25)",
+        )
+
+
+def _validate_item11_tolerance(
+    resource: str, entry: Mapping[str, Any], tolerance: Mapping[str, Any], *, status: str
+) -> None:
+    """The D-83 item 11 per-field form (revision 8 section A8 items 9-11).
+
+    One tolerance per declared field, each in that field's own unit; no scalar `value`
+    (a single number across fields is exactly the shared floor ML-05 forbids); the
+    `environment_id`s whose determinism was shown; every field of the governed table
+    present and no other.
+    """
+    from src.data.cross_environment_tolerance import (
+        A_ENVIRONMENT,
+        C_ENVIRONMENT,
+        validate_field_table,
+    )
+
+    if "value" in tolerance:
+        raise _refuse(
+            f"{resource}.fp_tolerance",
+            "a per-field (item 11) tolerance carries no scalar value: one number across "
+            "fields of different units is a shared floor (D-83 revision 8 section A8 item 10)",
+        )
+    table = validate_field_table(resource, entry.get("fields"))
+    declared = {str(e["field"]): str(e["unit"]) for e in table}
+    fields = tolerance.get("fields")
+    if not isinstance(fields, Mapping) or set(fields) != set(declared):
+        raise _refuse(
+            f"{resource}.fp_tolerance.fields",
+            f"per-field tolerances {sorted(fields) if isinstance(fields, Mapping) else fields!r} "
+            f"must cover exactly the governed field table {sorted(declared)}",
+        )
+    for name, block in fields.items():
+        where = f"{resource}.fp_tolerance.fields[{name}]"
+        if not isinstance(block, Mapping) or str(block.get("unit")) != declared[name]:
+            raise _refuse(where, f"unit must be the governed table's {declared[name]!r}")
+        limit = block.get("tolerance")
+        if isinstance(limit, bool) or not isinstance(limit, int | float) or limit != limit:
+            raise _refuse(where, f"tolerance {limit!r} is not a number")
+        if limit < 0 or limit == float("inf") or (status != CANDIDATE and limit <= 0):
+            raise _refuse(where, f"tolerance {limit!r} is not admissible in a {status} manifest")
+    if sorted(tolerance.get("environment_ids") or []) != sorted([A_ENVIRONMENT, C_ENVIRONMENT]):
+        raise _refuse(
+            f"{resource}.fp_tolerance.environment_ids",
+            f"an item 11 tolerance is composed over exactly {[A_ENVIRONMENT, C_ENVIRONMENT]}",
+        )
+    if not _nonempty_str(tolerance.get("measuring_run_id")):
+        raise _refuse(
+            f"{resource}.fp_tolerance.measuring_run_id",
+            "tolerance provenance (the measuring runs' registry ids) is required (R-134)",
         )
 
 
@@ -1555,7 +1610,9 @@ def _read_values(path: Path) -> Any:
     )
 
 
-def compare_required_outputs(manifest: FixtureManifest, produced_root: Path) -> dict[str, Any]:
+def compare_required_outputs(
+    manifest: FixtureManifest, produced_root: Path, *, environment_id: str | None = None
+) -> dict[str, Any]:
     """R-139: compare a produced output tree against the frozen expectations; NEVER update them.
 
     `exact` -> `sha256_of_file(produced) == listing[output]`; `toleranced` -> every numeric leaf
@@ -1617,6 +1674,36 @@ def compare_required_outputs(manifest: FixtureManifest, produced_root: Path) -> 
             }
             continue
         reference = manifest.artifact_manifest_path.parent / output
+        if "fields" in entry["fp_tolerance"]:
+            # D-83 item 11: the ONLY governing implementation is
+            # `src.data.cross_environment_tolerance` (revision 8 section A8 items 9-11).
+            from src.data.cross_environment_tolerance import check_produced_output
+            from src.data.fixture_outputs import numeric_fingerprint
+
+            if environment_id is None:
+                raise _refuse(
+                    produced,
+                    "a per-field (item 11) comparison needs the producing run's "
+                    "environment_id; a comparison keyed to no environment is refused "
+                    "(D-83 revision 8 section A8 item 11)",
+                )
+            checked = check_produced_output(
+                output,
+                numeric_fingerprint(reference),
+                numeric_fingerprint(produced),
+                produced_environment_id=environment_id,
+                fp_tolerance=entry["fp_tolerance"],
+                fields=entry.get("fields"),
+            )
+            results[output] = {
+                "comparison_class": "toleranced",
+                "governing_implementation": "src.data.cross_environment_tolerance",
+                "environment_id": environment_id,
+                "fields": checked,
+                "sha256": actual,
+                "matched": True,
+            }
+            continue
         tolerance = float(entry["fp_tolerance"]["value"])
         _numeric_leaf_compare(
             _read_values(reference),
@@ -1741,12 +1828,17 @@ def write_measuring_result(
     run_id: str,
     measurements: Mapping[str, Mapping[str, Any]],
     fingerprints: Mapping[str, Mapping[str, float]] | None = None,
+    environment_id: str | None = None,
 ) -> Path:
     """Persist ONE measuring run's raw measurement set (write-once; board Rec 5).
 
     `fingerprints` (CR-2026-09-29-Q31-CLOSURE): each `toleranced` output's numeric values
     from this run, kept so a later composition can MEASURE cross-run variation from the
-    recorded runs themselves (TE 13.7 "fixture-derived tolerances")."""
+    recorded runs themselves (TE 13.7 "fixture-derived tolerances").
+
+    `environment_id` (D-83 revision 8 section A8 items 11-12): the run's named environment,
+    recorded so the item 11 composition can group runs by environment. A result without it
+    is a pre-W-4 record and is refused by that composition."""
     if not _nonempty_str(run_id):
         raise _refuse("measuring_run_id", "a measuring result carries its run's registry id")
     target = Path(fixture_root) / f"{MEASURING_RESULT_PREFIX}{run_id}.json"
@@ -1758,6 +1850,8 @@ def write_measuring_result(
         "measuring_run_id": run_id,
         "measurements": {a: dict(q) for a, q in measurements.items()},
     }
+    if environment_id is not None:
+        payload["environment_id"] = environment_id
     if fingerprints:
         payload["fingerprints"] = {name: dict(values) for name, values in fingerprints.items()}
     target.write_text(
@@ -1928,6 +2022,22 @@ def compose_candidate_manifest(
     for name, measured in (tolerances or {}).items():
         entry = ledger.get(name)
         if entry is None or entry.get("comparison_class") != "toleranced":
+            continue
+        if "fields" in measured:
+            # D-83 item 11, composed by `cross_environment_tolerance` (revision 8 A8 items
+            # 9-11): one tolerance per governed field, each in its own unit; no scalar.
+            entry["fp_tolerance"] = {
+                "fields": measured["fields"],
+                "environment_ids": measured["environment_ids"],
+                "measuring_run_id": measuring_run_id,
+                "measured_over_runs": len(measured["measuring_run_ids"]),
+                "elements_compared": measured["elements_compared"],
+                "method": (
+                    "D-83 item 11 via src.data.cross_environment_tolerance: determinism per "
+                    "environment_id first, then per field max(max |(c) - (a)|, 2^-23 x "
+                    "max |(a)|)"
+                ),
+            }
             continue
         entry["fp_tolerance"] = {
             "value": measured["value"],

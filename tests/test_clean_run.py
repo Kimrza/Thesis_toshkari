@@ -1064,6 +1064,121 @@ def test_control_20_pythonhashseed_unset_or_late_fails():
 # =========================================================================================
 
 
+# --- D-83 revision 8 section A8 items 9-11: the per-field item 11 form on the real path ----
+
+ITEM11_FIELDS = [
+    {
+        "field": "synthetic_metric",
+        "locator": "/synthetic_metric",
+        "unit": "dimensionless",
+        "meaning": "the synthetic ledger's one numeric leaf (apparatus, not a scientific value)",
+        "citation": "test apparatus",
+    }
+]
+
+
+def _item11_manifest(tmp_path: Path, *, tolerance: float = 0.25, **fp_overrides: Any):
+    root = tmp_path / PLUMBING_FIXTURE_ID
+    root.mkdir(parents=True, exist_ok=True)
+    data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=FROZEN)
+    entry = data["required_outputs"]["comparison_ledger"][TOLERANCED_OUTPUT]
+    entry["fields"] = ITEM11_FIELDS
+    entry["fp_tolerance"] = {
+        "fields": {
+            "synthetic_metric": {
+                "unit": "dimensionless",
+                "statistic": 0.0,
+                "floor": tolerance,
+                "tolerance": tolerance,
+                "elements": 1,
+            }
+        },
+        "environment_ids": ["g07-clean-run", "tec-thesis-311"],
+        "measuring_run_id": RUN_ID,
+        "measured_over_runs": 4,
+        **fp_overrides,
+    }
+    manifest_path = root / MANIFEST_NAME
+    manifest_path.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
+    (root / SIBLING_HASH_NAME).write_text(sha256_of_file(manifest_path) + "\n", encoding="utf-8")
+    return load_fixture_manifest(manifest_path, parsed=data), data
+
+
+def _produce(manifest: FixtureManifest, tmp_path: Path, metric: float) -> Path:
+    produced = tmp_path / "produced"
+    for name in manifest.outputs:
+        dst = produced / name
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_bytes((manifest.artifact_manifest_path.parent / name).read_bytes())
+    (produced / TOLERANCED_OUTPUT).write_text(
+        json.dumps({"synthetic_metric": metric}), encoding="utf-8"
+    )
+    return produced
+
+
+def test_item11_comparison_runs_through_cross_environment_tolerance(tmp_path, monkeypatch):
+    """Rec 3: the real comparison path invokes the governing module, keyed to environment."""
+    import src.data.cross_environment_tolerance as tol
+
+    manifest, _ = _item11_manifest(tmp_path)
+    produced = _produce(manifest, tmp_path, 1.2)
+    calls = []
+    real = tol.check_produced_output
+    monkeypatch.setattr(
+        tol, "check_produced_output", lambda *a, **k: calls.append(k) or real(*a, **k)
+    )
+    report = compare_required_outputs(manifest, produced, environment_id="g07-clean-run")
+    entry = report["outputs"][TOLERANCED_OUTPUT]
+    assert entry["governing_implementation"] == "src.data.cross_environment_tolerance"
+    assert calls and calls[0]["produced_environment_id"] == "g07-clean-run"
+
+
+def test_item11_comparison_beyond_field_tolerance_is_a_tolerance_failure(tmp_path):
+    from src.data.cross_environment_tolerance import DeterminismFailure, ToleranceFailure
+
+    manifest, _ = _item11_manifest(tmp_path)
+    produced = _produce(manifest, tmp_path, 2.0)
+    with pytest.raises(ToleranceFailure) as exc:
+        compare_required_outputs(manifest, produced, environment_id="g07-clean-run")
+    assert not isinstance(exc.value, DeterminismFailure)
+
+
+@pytest.mark.parametrize("env", ["b01_iri", None])
+def test_item11_comparison_refuses_an_environment_that_showed_no_determinism(tmp_path, env):
+    """A run from an environment outside the frozen determinism set is not rescued by the
+    tolerance, even with an identical value; no environment at all is refused too."""
+    from src.data.cross_environment_tolerance import DeterminismFailure
+
+    manifest, _ = _item11_manifest(tmp_path)
+    produced = _produce(manifest, tmp_path, 1.0)
+    expected = DeterminismFailure if env else IntegrityError
+    with pytest.raises(expected):
+        compare_required_outputs(manifest, produced, environment_id=env)
+
+
+@pytest.mark.parametrize(
+    "overrides, match",
+    [
+        ({"value": 0.25}, "no scalar value"),
+        ({"environment_ids": ["tec-thesis-311", "b01_iri"]}, "environment_ids"),
+        ({"fields": {}}, "governed field table"),
+        (
+            {"fields": {"synthetic_metric": {"unit": "TECU", "tolerance": 0.25}}},
+            "unit must be",
+        ),
+        (
+            {"fields": {"synthetic_metric": {"unit": "dimensionless", "tolerance": float("inf")}}},
+            "not admissible",
+        ),
+    ],
+)
+def test_item11_ledger_schema_refusals(tmp_path, overrides, match):
+    """ML-05 at the schema: no scalar across fields, exact field coverage, the field's own
+    unit, a finite tolerance, and exactly the (a)/(c) environment_ids."""
+    with pytest.raises(IntegrityError, match=match):
+        _item11_manifest(tmp_path, **overrides)
+
+
 def test_control_21_single_bit_plant_in_exact_artifact_fails(tmp_path):
     """(21) A planted single-bit change in an exact-class artifact fails; the untouched
     tree matches (must-not-fire: the matched-artifact report renders)."""
@@ -1089,9 +1204,12 @@ def test_control_22_no_tolerance_lives_in_a_test_body(tmp_path):
     argument (only the manifest's ledger), and a toleranced entry without a manifest
     tolerance refuses at validation."""
     signature = inspect.signature(compare_required_outputs)
-    assert list(signature.parameters) == ["manifest", "produced_root"], (
+    # `environment_id` (D-83 revision 8 section A8 item 11) keys the item 11 comparison to
+    # the producing environment; it is not a tolerance and carries no number.
+    assert list(signature.parameters) == ["manifest", "produced_root", "environment_id"], (
         "compare_required_outputs must accept no caller tolerance (R-139 control 22)"
     )
+    assert signature.parameters["environment_id"].kind is inspect.Parameter.KEYWORD_ONLY
     root = tmp_path / "notol"
     root.mkdir()
     data = build_manifest_mapping(PLUMBING_FIXTURE_ID, root, status=CANDIDATE)

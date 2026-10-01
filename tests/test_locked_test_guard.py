@@ -959,6 +959,11 @@ def test_r26_driver_exclusions_are_exactly_five_and_content_gated(tmp_path: Path
         # the same disposition as every `.md` above. Derived and printed before assertion:
         # it matches `vtec|tecu` 0 times and carries no `2022-12-DD` date.
         "durability/campaign_kill_20260930T164532Z-3820c087/NON_GOVERNED_NOTE.md",
+        # 2026-10-01 (later): the sidecar note marking the pre-clean-commit 3.11 kill campaign
+        # superseded and not governed (GOV-2026-10-01-PV-10 Rec 16, BENCH-14 / DATA-14). Prose,
+        # same disposition as the note above. Derived and printed before assertion: it
+        # matches `vtec|tecu` 0 times and carries no `2022-12-DD` date.
+        "durability/campaign_kill_20260930T170510Z-ba301519/NON_GOVERNED_NOTE.md",
         "r60_gim_gate_inputs/HANDBACK_2026-09-26.md",
         "r60_gim_gate_inputs/R60_handcheck_2026-09-26.md",
         "r60_gim_gate_inputs/R60_overlap_audit_input_2026-09-26.md",

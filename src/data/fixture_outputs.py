@@ -539,6 +539,13 @@ def cross_run_variation(
 ) -> dict[str, Any]:
     """Max absolute element-wise difference of one output across >= 2 measuring runs.
 
+    Scope: the measured run-to-run variation of ONE environment's measuring runs, recorded
+    on a Q-31 candidate manifest. It is **not** the D-83 item 11 cross-environment
+    tolerance and never governs it: item 11 is computed only by
+    `src.data.cross_environment_tolerance` (determinism per `environment_id` first, then a
+    per-field floor; D-83 revision 8 section A8 items 9-11). `run_walking_skeleton.
+    compose_tolerances` routes any multi-environment composition there.
+
     Refuses when fewer than two runs are supplied or when the runs do not carry the same
     element set (a tolerance measured over different elements measures nothing).
     """

@@ -12,3 +12,11 @@ edited). It is NOT D-83 W-6 acceptance evidence. The governed campaign is
 Source: GOV-2026-09-30-PV-09 findings ML-03 and DATA-05. The harness now labels a run on a
 non-governed interpreter `undeclared` (`_campaign_environment_id`), with a negative
 control in `tests/test_durability_harness.py`.
+
+## Current status (appended 2026-10-01; the text above is unchanged)
+
+The sentence above naming `campaign_kill_20260930T170510Z-ba301519` as "the governed
+campaign" was true when written and is superseded. That campaign has no clean-tree record
+and is itself marked superseded and not governed (its own `NON_GOVERNED_NOTE.md`;
+GOV-2026-10-01-PV-10 Recommendation 16). The governed native-NTFS kill campaign is
+`campaign_kill_20260930T212721Z-8054af1f` (clean commit `f9078c4`).

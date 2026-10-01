@@ -166,7 +166,8 @@ def lock_items(lock: RunRecord | Mapping[str, Any]) -> dict[str, Any]:
             raise _refuse(
                 "environment lock",
                 "recorded before D-83 revision 7 W-4: it carries no environment_id and is "
-                "non-comparable with a post-W-4 lock (D-83 section R5-5 item 29); re-record "
+                "non-comparable with a post-W-4 lock (D-83 section R5-5 item 29; revision 8 "
+                "section A8 item 12), however similar its package/version values; re-record "
                 "it under the current code rather than comparing it",
             )
     missing = [name for name in LOCK_ITEMS if name not in source]
