@@ -1,0 +1,39 @@
+{
+  "completed_at_utc": "2026-10-01T17:41:30.181828+00:00",
+  "environment_identity": "1089a426548679ab381a00eac67a6bbe7b6d2570e3894025adf9f596bc39d176",
+  "environment_lock": {
+    "code_commit": "f14be43b78522af404c32485e5e673f0a6bbe3da",
+    "config_hashes": {
+      "data.yaml": "871be23b73dea85b16ebbaf4b4d7b3032440ab594e142807b2bf11a4e9c4509f",
+      "experiment.yaml": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+      "features.yaml": "1b1ebdfd009010742bf22bf1f608dc5df5e6b1fbb36981d1b2936f3b6c92d28c",
+      "seeds.yaml": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166"
+    },
+    "environment_id": "tec-thesis-311",
+    "input_versions": [
+      "fixture_manifest:plumbing_7day:dddf933bd6ed35088eb3fa95c0daf8c5c195805dfb04a220e5e1c356ad2d6b64"
+    ],
+    "nondeterministic_ops": [],
+    "pip_freeze": "absl-py==2.5.0\nastunparse==1.6.3\ncertifi==2026.7.22\ncharset-normalizer==3.5.1\ncloudpickle==3.1.2\ncolorama==0.4.6\ncontourpy==1.3.3\ncycler==0.12.1\ndistlib==0.4.3\nfilelock==3.32.7\nflatbuffers==25.12.19\nfonttools==4.65.0\ngast==0.7.0\ngoogle-pasta==0.2.0\ngrpcio==1.84.0\nh5py==3.14.0\nidna==3.20\niniconfig==2.3.0\njoblib==1.6.0\nkeras==3.15.1\nkiwisolver==1.5.1\nlibclang==18.1.1\nmarkdown-it-py==4.2.0\nmatplotlib==3.9.0\nmdurl==0.1.2\nml_dtypes==0.5.4\nnamex==0.1.0\nnumpy==1.26.4\nopt_einsum==3.4.0\noptree==0.20.0\npackaging==26.3\npandas==2.1.4\npillow==12.3.0\npip @ file:///home/task_178792879927882/croot/pip_1787928831568/work\nplatformdirs==4.11.11\npluggy==1.6.0\nprotobuf==7.36.2\npyarrow==16.1.0\nPygments==2.21.0\npyparsing==3.3.3\npytest==8.2.2\npython-dateutil==2.9.0.post0\npython-discovery==1.6.1\npytz==2026.3.post1\nPyYAML==6.0.1\nrequests==2.34.2\nrich==15.0.0\nruff==0.4.8\nscikit-learn==1.4.2\nscipy==1.17.1\nsetuptools==83.0.0\nsix==1.17.0\ntensorflow==2.21.0\ntermcolor==3.3.0\nthreadpoolctl==3.7.0\ntyping_extensions==4.16.0\ntzdata==2026.4\nurllib3==2.8.0\nuv==0.12.17\nvirtualenv==21.7.16\nwheel==0.47.0\nwrapt==2.4.1\n",
+    "platform": "local",
+    "requirements_hash": "ac4548caf4f7dca4118d2315ec5c2e39de9b651993936018ffb0058b21069b3d",
+    "runtime_versions": {
+      "cpu": "AMD64",
+      "numpy": "1.26.4",
+      "os": "Windows-10-10.0.26200-SP0",
+      "python": "3.11.16",
+      "tensorflow": "2.21.0"
+    }
+  },
+  "environment_lock_hash": "d39ab4b5e6a275747e39a801b3edd7b809cc02e8318022a56da9b105a4d4595a",
+  "fixture_id": "plumbing_7day",
+  "frozen_manifest_hash": "dddf933bd6ed35088eb3fa95c0daf8c5c195805dfb04a220e5e1c356ad2d6b64",
+  "frozen_manifest_path": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
+  "kind": "fixture_pass_receipt",
+  "platform": "local",
+  "plumbing_receipt": null,
+  "receipt_run_id": "walking-skeleton-plumbing_7day-20261001T173450Z-859ebaf1/receipt/plumbing_7day",
+  "receipt_set": "exactly two: plumbing_7day, scientific_1month; the M10 contract-fixture result is clean-run evidence, never a third receipt (TC-03f; Q12 = C)",
+  "registry_run_id": "walking-skeleton-plumbing_7day-20261001T173450Z-859ebaf1",
+  "result": "PASS"
+}

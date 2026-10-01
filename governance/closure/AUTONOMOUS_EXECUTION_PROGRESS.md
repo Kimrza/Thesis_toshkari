@@ -145,3 +145,45 @@ against the frozen manifest would refuse on these.
   the identity check PASS.
 - A13's live outputs are moved aside with `scripts/archive_fixture_outputs.sh` (tag
   `p7a13-before-d86v1`). That script is the helper used between P-7 runs, now committed.
+
+### Verification run V-3 (D-86): PASS. Stage 1 exit criteria met.
+
+- Run `walking-skeleton-plumbing_7day-20261001T173450Z-859ebaf1`, code `f14be43`, environment
+  (a) `tec-thesis-311`. Log: `governance/closure/d85_verification/run3_d86.log`.
+- Matched-artifact report: all 19 outputs matched the D-86 frozen expectation. The runtime
+  was 399.20 s, inside [358.58, 469.19], and the storage was 2,316,033 bytes, inside
+  [2,310,936, 2,345,165].
+- Receipt `artifacts/walking_skeleton/plumbing_7day/fixture_pass_receipt.json`: `result: PASS`,
+  `frozen_manifest_hash` `dddf933b...`, `environment_lock_hash` `d39ab4b5...`, receipt run id
+  `...859ebaf1/receipt/plumbing_7day`.
+- Stage 1 exit criteria:
+  - the official frozen manifest exists (D-86);
+  - the manifest hash equals its sibling;
+  - the D-86 record is valid, and F7 passes;
+  - the post-freeze verification succeeded (V-3);
+  - the fixture is recorded as frozen.
+
+  D-85 is superseded for its manifest hash, as recorded in the D-85 addendum.
+
+### Constraint discovered for Stages 2-6 (receipt lock binding)
+
+`fixture_gate.verify_receipt` accepts a receipt only when
+`environment_identity(recorded_lock) == environment_identity(caller_lock)`. That identity
+covers the requirements hash, pip freeze, versions, code commit, config hashes, platform and
+nondeterministic ops. Every stage script 00-07 calls `require_receipts_for_snapshot` on a
+full-year invocation. So the full-year pipeline must run in (a), at a code commit that both
+receipts were written at, and any code change means re-running both verification runs. The
+project's P-1 rule ("or a later commit touching no file under src/, scripts/, configs/,
+environment/, pyproject.toml") is applied by passing `--code-commit` explicitly when only
+evidence files changed.
+
+### G-07 / (c) blocker found (routed to the Student, not yet ruled)
+
+A (c) plumbing comparison would refuse on two `exact` outputs. `mask_manifest.json`'s `mask_id`
+is a SHA-256 over the masked rows INCLUDING the float predictions `y_hats`
+(`src/evaluation/masks.py:414`), so it differs whenever (c) predictions differ within their
+frozen tolerance. `checkpoint_manifest.json` carries `restored_validation_rmse`, a float that
+differs by about 1e-8. Without a (c) plumbing receipt, R-140 refuses every (c)
+`scientific_1month` run, including measuring runs, so the D-83 item 11 (c) leg for
+`scientific_1month` and G-07 are blocked by D-74's classification, not by a measured
+reproducibility failure.

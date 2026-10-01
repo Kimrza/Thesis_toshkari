@@ -1,0 +1,196 @@
+{
+  "aggregation": "equal_station_macro",
+  "artifact_class": "breakdown",
+  "artifact_id": "breakdown-member_metrics_primary",
+  "breakdown_id": "member_metrics_primary",
+  "completeness_shortfalls": [],
+  "exclusion_counts": {
+    "BSHM": 140
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "kind": "breakdown",
+  "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+  "partial": false,
+  "partition_id": "FIX-NOV-FOLD-02",
+  "payload": {
+    "derived_percentage_rmse_reductions": {
+      "B-01": {
+        "definition": "1 - RMSE_model/RMSE_reference",
+        "derived": true,
+        "name": "derived_percentage_rmse_reduction",
+        "value": -3.3555718395447514
+      },
+      "M-01": {
+        "definition": "1 - RMSE_model/RMSE_reference",
+        "derived": true,
+        "name": "derived_percentage_rmse_reduction",
+        "value": -2.7736741816210424
+      },
+      "M-02": {
+        "definition": "1 - RMSE_model/RMSE_reference",
+        "derived": true,
+        "name": "derived_percentage_rmse_reduction",
+        "value": -2.567666130350701
+      },
+      "M-03": {
+        "definition": "1 - RMSE_model/RMSE_reference",
+        "derived": true,
+        "name": "derived_percentage_rmse_reduction",
+        "value": -4.128295795218265
+      }
+    },
+    "member_metrics": {
+      "B-01": {
+        "correlation": 0.9746689759879535,
+        "mae": 3.053883849058133,
+        "mean_error_bias": -1.746611625311289,
+        "median_absolute_error": 1.9803580621055978,
+        "member_id": "B-01",
+        "pct90_95_absolute_error": {
+          "p90": 6.954026260377592,
+          "p95": 8.013474525747199
+        },
+        "r_squared": 0.9113683321972615,
+        "rmse": 3.682594546434596
+      },
+      "M-01": {
+        "correlation": 0.9494581135703323,
+        "mae": 3.390128611111111,
+        "mean_error_bias": -1.6346202777777783,
+        "median_absolute_error": 3.4269,
+        "member_id": "M-01",
+        "pct90_95_absolute_error": {
+          "p90": 6.991449999999999,
+          "p95": 8.291549999999997
+        },
+        "r_squared": 0.8819270312344024,
+        "rmse": 4.250447794626893
+      },
+      "M-02": {
+        "correlation": 0.971815119436147,
+        "mae": 3.703931388888889,
+        "mean_error_bias": -2.9885369444444443,
+        "median_absolute_error": 2.6473999999999975,
+        "member_id": "M-02",
+        "pct90_95_absolute_error": {
+          "p90": 7.76547,
+          "p95": 7.974374999999999
+        },
+        "r_squared": 0.8678975496721029,
+        "rmse": 4.495881766081877
+      },
+      "M-03": {
+        "correlation": 0.984935117687827,
+        "mae": 2.573205833333334,
+        "mean_error_bias": -1.3018845370370364,
+        "median_absolute_error": 1.6462683333333334,
+        "member_id": "M-03",
+        "pct90_95_absolute_error": {
+          "p90": 5.626934999999999,
+          "p95": 6.310270000000001
+        },
+        "r_squared": 0.936065812513665,
+        "rmse": 3.1277066970020466
+      },
+      "M-06": {
+        "correlation": 0.9541229052418481,
+        "mae": 11.987522658109311,
+        "mean_error_bias": -10.232051318647597,
+        "median_absolute_error": 5.83235169514974,
+        "member_id": "M-06",
+        "pct90_95_absolute_error": {
+          "p90": 28.394558466084796,
+          "p95": 28.439709398396808
+        },
+        "r_squared": -0.681431906057286,
+        "rmse": 16.039805102911604
+      }
+    },
+    "model_id": "M-06",
+    "rows": [
+      {
+        "beats_model": true,
+        "benchmark_id": "B-01",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -243.71384514595943
+        },
+        "phase_id": "P1A",
+        "scalar": -243.71384514595943,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "spatial_representativeness_sentence": "Phase 1 compares a grid cell against a station-coordinate evaluation, and part of any measured difference is a geometry and sampling artefact rather than skill",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-01",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -239.20904128454055
+        },
+        "phase_id": "P1A",
+        "scalar": -239.20904128454055,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-02",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -237.06239488480162
+        },
+        "phase_id": "P1A",
+        "scalar": -237.06239488480162,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-03",
+        "mask_id": "544eb0d7f8f9fb96bdca2732003e0dabe52e958b28cc72b906620f582264cc47",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-02",
+        "per_station": {
+          "BSHM": -247.49279855691768
+        },
+        "phase_id": "P1A",
+        "scalar": -247.49279855691768,
+        "set_id": "primary",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC+IRI2016_B01",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      }
+    ]
+  },
+  "per_station": false,
+  "phase_id": "P1A",
+  "role_label": "supplementary",
+  "scored_window_statement": "6\u201330 November 2022, 25 days, first 24 h excluded and counted",
+  "source_id": "GNSS_VTEC+IRI2016_B01",
+  "surviving_row_counts": {
+    "BSHM": 18
+  },
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "units": "TECU"
+}
