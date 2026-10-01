@@ -118,3 +118,30 @@ against the frozen manifest would refuse on these.
 - Environment note: the active power scheme on LAPTOP-TV4UGFBC is the vendor "Silent" scheme
   (AC power, 99 %). V-1's stage 06 took 556 s against 225-253 s in P-6. The agent may not
   change system settings.
+
+### Student rulings, 2026-10-01 (in session, AskUserQuestion)
+
+1. Re-freeze recorded as a NEW D-number, D-86, plus a D-85 addendum. D-85's text is not edited.
+2. The `scientific_1month` Q-31 freeze is pre-authorized on the same terms as D-85, provided
+   every check passes (next free D-number).
+3. The Stage 3 DATA-07 re-acquisition is AUTHORIZED, with identity supplied through environment
+   variables (`MADRIGAL_USER_FULLNAME`, `MADRIGAL_USER_EMAIL`, `MADRIGAL_USER_AFFILIATION`) that
+   the Student sets. Identity is sent only in requests and never written to disk.
+4. G-05: the Student stated "G-05 is signed and approved by supervisor consider this as a
+   signature record and proceed". Recorded as given. Form: reported by the Student in session;
+   no written artifact, no quoted words of the Supervisor, no timestamp beyond the date. G-05's
+   own evidence items (signed config bundle, traceability table, December regime-count audit
+   report, Vision §13.1) do not yet exist and are produced before any December access. The
+   reported signature is applied to that bundle as completed and is not read as having frozen
+   values that do not yet exist.
+
+### D-86 re-freeze (performed)
+
+- P-7 candidate `...dd68a044+xenv.yaml` (SHA-256 `78fb77d7...`), promoted at `20261001T173141Z`
+  (authorization D-86). The D-85 manifest is preserved as
+  `fixture_manifest.superseded_20261001T173141Z.yaml` with its `.sha256`.
+- Frozen SHA-256 `dddf933bd6ed35088eb3fa95c0daf8c5c195805dfb04a220e5e1c356ad2d6b64`. D-86 and the
+  D-85 addendum are in `evidence/DECISIONS.md`. F7 `assert_freeze_record_agrees` PASS (D-86) and
+  the identity check PASS.
+- A13's live outputs are moved aside with `scripts/archive_fixture_outputs.sh` (tag
+  `p7a13-before-d86v1`). That script is the helper used between P-7 runs, now committed.

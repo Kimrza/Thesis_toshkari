@@ -4558,6 +4558,97 @@ opens. It is an open G-07 reproducibility item, recorded in
 `scientific_1month` requires (R-140). Its result is recorded in
 `governance/closure/AUTONOMOUS_EXECUTION_PROGRESS.md`.
 
+## D-85 addendum — the D-85 manifest is superseded by D-86 (2026-10-01)
+
+D-85's text above is left exactly as adopted. Its post-freeze verification ran twice.
+
+- **V-1** (`walking-skeleton-plumbing_7day-20261001T162304Z-964ce8a8`, `6fa8f1a`) was refused on
+  the fixture stamp's `frozen_manifest_hash`. That was a comparison defect, fixed in `147654f`.
+- **V-2** (`walking-skeleton-plumbing_7day-20261001T164940Z-50846483`, `5a9839b`) matched all 19
+  required outputs and its runtime, then was refused on `storage_total`: 6,533,878 bytes against
+  the frozen [6,146,225, 6,327,309].
+
+The storage measurement summed every live file left by earlier runs, including 43 per-run
+release directories that held 3.7 MB of the 6.5 MB. D-85's frozen storage range therefore
+measured run history rather than the run. Fixed in `91da686`. The D-85 manifest
+(`92aa38c0...`) is preserved as
+`tests/fixtures/plumbing_7day/fixture_manifest.superseded_20261001T173141Z.yaml`, beside its
+sibling hash. It is no longer the reference, and no `plumbing_7day` receipt was ever written
+against it. **D-86** freezes its replacement.
+
+---
+
+## D-86 — `plumbing_7day` fixture manifest: re-freeze on the P-7 measurement (supersedes D-85's manifest)
+
+**Decision date:** 2026-10-01. **Decided by:** the Student, Q-31 owner (TE §18.2; R-134
+obligation 2). The Student ruled in session on 2026-10-01 to record the re-freeze as a new
+D-number, D-86, after D-85's verification runs exposed the defects in the D-85 addendum. The
+agent wrote this entry on that ruling and on the Student's D-85 authorization of the same day to
+perform the freeze procedure on the Student's behalf. **Supervisor approval:** reported by the
+Student on 2026-10-01 as covering the (a)/(c) measuring runs and the tolerance freeze. Form:
+verbal, reported by the Student; no written artifact exists.
+
+**Decision.** `tests/fixtures/plumbing_7day/fixture_manifest.yaml` is frozen as the reference for
+every later `plumbing_7day` comparison run, replacing the D-85 manifest.
+
+- **Source.** The manifest was composed by `scripts/compose_cross_environment_candidate.py` from
+  exactly the four P-7 designated runs (precommitment P-7,
+  `governance/closure/PROGRESS_2026-10-01.md`), all at code commit `bb5eb63`:
+  - (a) `tec-thesis-311`: `walking-skeleton-plumbing_7day-20261001T170518Z-10767458` and
+    `walking-skeleton-plumbing_7day-20261001T171656Z-dd68a044`;
+  - (c) `g07-clean-run` (lock-built environment, fresh clone):
+    `walking-skeleton-plumbing_7day-20261001T170545Z-1e74a380` and
+    `walking-skeleton-plumbing_7day-20261001T171702Z-0b4eaba2`.
+
+  The runs A12 (`ba08369e`) and C12 aborted in stage 02 because the previous run's outputs had
+  not been moved aside. Both stay visible, and under P-7's replacement rule each was replaced by
+  the next run.
+- **Reference.** The manifest cites the write-once reference snapshot
+  `reference_walking-skeleton-plumbing_7day-20261001T171656Z-dd68a044-xenv/` (`51f81f7`). No run
+  writes there.
+- **Promotion.** Installed by `run_walking_skeleton.py --promote-candidate`
+  (`promoted_at_utc` `20261001T173141Z`, candidate SHA-256
+  `78fb77d7f70d3485f119efaa851ba92c57ae1d38fe4d92918defe7a27f23c865`). The freeze edit changed
+  exactly two fields, after the serialisation was verified to round-trip byte for byte:
+  `status` went to `frozen`, and `identity.freeze_citation` = `{"decision": "D-86"}`.
+- **Acceptance tolerances.** These are the D-83 item 11 per-field tolerances, derived by the
+  adopted rule max(statistic, 2^-23 x max|x| over that field's (a) elements), not chosen. They
+  are identical in P-3, P-6 and P-7:
+
+  | Output | Field | Unit | max abs (c)-(a) | floor | tolerance |
+  |---|---|---|---|---|---|
+  | predictions.parquet | y_hat (648) | TECU | 1.9073e-06 | 5.6447e-06 | 5.6447e-06 |
+  | metrics.json | paired_loss_differential (24) | TECU^2 | 6.5978e-06 | 3.4519e-05 | 3.4519e-05 |
+  | metrics.json | row_count (4) | count | 0 | 5.1260e-06 | 5.1260e-06 |
+  | metrics.json | exclusion_count (4) | count | 0 | 1.6689e-05 | 1.6689e-05 |
+
+  The determinism precondition (D-83 §A8 item 9) passed on both legs.
+- **Measured ranges.**
+  - Runtime `cpu_total`: 358.58 to 469.19 s.
+  - `storage_total`: 2,310,936 to 2,345,165 bytes, measured as the bytes each run wrote
+    (`91da686`).
+- **Inputs.** The inputs are unchanged from D-85: B-01 as re-generated in `b01_iri`
+  (`bfe5fd3`), and the LF-renormalised configs.
+
+**Evidence class.** Smoke evidence only, never scientific evidence (TC-03f; TE §15.1). The D-11
+limitation applies: the window is not representative of December.
+
+fixture_manifest_sha256: `dddf933bd6ed35088eb3fa95c0daf8c5c195805dfb04a220e5e1c356ad2d6b64`
+
+**Known limitation carried to G-07** (unchanged from D-85): a (c) comparison run would refuse on
+the `exact` byte outputs `mask_manifest.json` and `checkpoint_manifest.json`. On P-6, the
+`mask_id` values and a float validation RMSE (about 1e-8) differed from (a). The `split_manifest.json`
+difference was CRLF only and is now compared on values.
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none.
+- Uncertainty: none.
+- Comparability: every later `plumbing_7day` run is compared against this manifest.
+- Claim: none; the fixture is smoke evidence only.
+
+**Opens:** the post-freeze verification run, which writes the plumbing receipt that
+`scientific_1month` requires (R-140).
+
 ---
 
 ## Supervisor review
