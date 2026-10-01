@@ -1,0 +1,37 @@
+{
+  "fixture_id": "plumbing_7day",
+  "fixture_stamp": {
+    "apparatus_partition_id": null,
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified \u2014 no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md \u00a7 Walking Skeleton).",
+    "december_representativeness": "not_representative",
+    "evidence_class": "smoke_only",
+    "fixture_id": "plumbing_7day",
+    "frozen_manifest_hash": null,
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "kind": "artifact_manifest",
+  "missing_required_outputs": [],
+  "outputs": {
+    "bootstrap_summary.json": "9ad653ab84a3ccff7abf445c8c0fac2f5a0764a5fb7cebd757db99bbeaa39ffc",
+    "checkpoint_manifest.json": "f1bca1d9af467e427c343a2292316902136be3eafdddb87423b0b110a104ac38",
+    "clean_run_log.json": "a1c850452e871642e3c51162558c266bb687237b74c3029b351ab7e2b40d4389",
+    "feature_table.parquet": "2bb1a6c3f8f6d4bf0ca79c4b917b3b5f7caa699a3a0a470c12920da2c3bcbc2f",
+    "gim_comparator.parquet": "738124cd27b837ff86bb678a78bc80a1a9778a614a2a8aeacad59835ead1f436",
+    "hourly_vtec.parquet": "8f019e37408e1b972e7caf0978d4cb2ee0f0bd40afcd6ecbf7017f067fc14832",
+    "input_manifest.yaml": "2061b3ea4b07e453f9b01f1fc3ba1987ff4c5b3288d8451ae71c6e3416266899",
+    "iri_benchmark.parquet": "76ddeed8ad2824ea251c89b7b1111ede4a79887fcffa575633657e475fea3482",
+    "mask_manifest.json": "6a0b5999bcfc3a22dcc0fd33790479e578e772c46cda9c245ac14633a487b3d2",
+    "metrics.json": "42f4dceb1fe790311c56fc6bc74e5119d5dd27a39e7a330c83215f0beaef72ff",
+    "plots/predictions.png": "6d8e4380d179208299e6a7c1251d59086a8e1477bd50f4b1b160bcb57685259c",
+    "plots/quality_diagnostics.png": "bae4825f74814468d7a47b8aa26fd3dff8451fee5c652dc1f7837dcd95542672",
+    "plots/residuals.png": "a7b8d1175ec3dd12d61a68454fbb851177fb5d3f5c802c6029409f5fe89e55b0",
+    "plots/target_support.png": "e742a395b552e8a661ffc9c4fbc18e9b476da61c37367fd357b8a057e7fdfee2",
+    "predictions.parquet": "22a637e2797f9a0805e7788293335e3404c382fc7c48ce094ceddbe612aa6700",
+    "processing_config_snapshot.yaml": "743558c27c82dd5d79f1b04cd0ea9f92bdb9805eeabbcce63dedab26cc9061cf",
+    "registry_entry.json": "bbbb3f2d87761e30aef3da1c3ee4a19fa5f8d6a880c8b4523d308e5be7bb2202",
+    "split_manifest.json": "20b8045ce754b6d04739a6c432a54fe94292b15341d57b8a7a9e6e7029ee0b99",
+    "test_report.json": "c46746388433019dc9fdeae6acfda50d499549cf7cabcecdfbfb51837d546080"
+  }
+}

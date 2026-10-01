@@ -76,3 +76,8 @@ ex.d85a2	external (outputs of aborted D-85 verification run V-2, walking-skeleto
 fe.d85a2	features (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)
 mr.d85a2	mask_registry (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)
 pr.d85a2	predictions (outputs of aborted D-85 verification run V-2, walking-skeleton-plumbing_7day-20261001T164940Z-50846483)
+ev.p7a12	evaluation (moved aside: aborted-p7a12)
+ex.p7a12	external (moved aside: aborted-p7a12)
+fe.p7a12	features (moved aside: aborted-p7a12)
+mr.p7a12	mask_registry (moved aside: aborted-p7a12)
+pr.p7a12	predictions (moved aside: aborted-p7a12)

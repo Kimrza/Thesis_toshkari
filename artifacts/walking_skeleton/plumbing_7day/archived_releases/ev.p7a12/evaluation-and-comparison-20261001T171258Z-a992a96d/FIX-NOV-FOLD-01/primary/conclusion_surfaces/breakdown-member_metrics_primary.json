@@ -1,0 +1,8 @@
+{
+  "artifact_id": "breakdown-member_metrics_primary",
+  "kind": "breakdown",
+  "path": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\walking_skeleton\\plumbing_7day\\evaluation\\evaluation-and-comparison-20261001T171258Z-a992a96d\\FIX-NOV-FOLD-01\\primary\\breakdown_member_metrics_primary.json",
+  "phase_id": "P1A",
+  "source_id": "GNSS_VTEC+IRI2016_B01",
+  "target_definition_id": "GRIDDed_VTEC_1H"
+}

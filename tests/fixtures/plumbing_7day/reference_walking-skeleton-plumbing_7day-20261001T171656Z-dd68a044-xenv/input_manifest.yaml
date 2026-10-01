@@ -1,0 +1,38 @@
+{
+  "assembly_assertion": {
+    "days_present": 7,
+    "december_excluded_on": "record dates (acquisition.assert_no_locked_month_records)",
+    "folder_name_consulted": false,
+    "records": 1810,
+    "records_read_from_month_file": 18183,
+    "stations": [
+      "BSHM"
+    ],
+    "window_days": 7,
+    "window_end": "2022-11-07",
+    "window_start": "2022-11-01"
+  },
+  "declared_inputs": {
+    "evidence_dir": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\evidence\\audit_evidence_2022-11",
+    "records_file": "madrigal_coverage_raw_records.csv",
+    "sha256_manifest": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\evidence\\audit_evidence_2022-11\\sha256_manifest.json",
+    "verified": {
+      "madrigal_coverage_monthly.csv": "ab14a2c23868dd6d1402e3903d8d665a7250d525d27efb4952aed54be46af2a8",
+      "madrigal_coverage_raw_records.csv": "570d1be5e22191bc3248873e711610b580a77ffb5dcbf7988eca92011e7baff9",
+      "madrigal_coverage_summary.csv": "02269afef517d719f9696625ca5aa0764466e6fc1c732d8836a7b792aa49e370",
+      "request_manifest.json": "ba13717f6e3e56203c07f7cab491edfedf64f6a6ea2530ed3af106340e12825e"
+    }
+  },
+  "fixture_stamp": {
+    "apparatus_partition_id": null,
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified \u2014 no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md \u00a7 Walking Skeleton).",
+    "december_representativeness": "not_representative",
+    "evidence_class": "smoke_only",
+    "fixture_id": "plumbing_7day",
+    "frozen_manifest_hash": null,
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "kind": "input_manifest"
+}
