@@ -436,6 +436,78 @@ def export_metrics(
     )
 
 
+def export_bootstrap_executed(
+    results: Sequence[Path], fixture_root: Path, *, fixture_id: str
+) -> Path:
+    """`bootstrap_summary.json` for Fixture 2, where TE 15.3 EXECUTES the reduced-replicate
+    vector time-block bootstrap (added 2026-10-01; no producer existed before).
+
+    One entry per (partition, set, model, benchmark) result this run wrote, keyed
+    ``/pairs/<partition>/<set>/<model>/<benchmark>/``. Numeric leaves, each a declared field
+    of the scientific_1month comparison ledger (D-83 revision 8 section A8 item 10):
+
+    * ``point_estimate``, ``ci_lower``, ``ci_upper`` -- TECU^2 (paired squared-error loss
+      differential, benchmark minus model; equal-station weighted);
+    * ``per_station_components/<station>`` -- TECU^2;
+    * ``pairwise_correlations/<pair>`` -- dimensionless (cross-station paired-error);
+    * ``replicates`` -- count; ``block_hours`` -- h; ``ci_level`` -- dimensionless fraction.
+
+    Non-numeric identity (``replicate_hash``, ``seed_key``) is carried as strings for the
+    record. Deterministic by construction: no timestamp, run id or absolute path.
+    """
+    if not results:
+        raise IntegrityError(
+            fixture_root,
+            "no per-pair bootstrap result exists; Fixture 2 executes the bootstrap (TE 15.3), "
+            "so an empty summary would record a check that never ran",
+        )
+    pairs: dict[str, Any] = {}
+    for path in sorted(Path(p) for p in results):
+        record = json.loads(path.read_text(encoding="utf-8"))
+        if record.get("artifact_class") != "bootstrap_result":
+            raise IntegrityError(path, "is not a serialized bootstrap_result")
+        node = pairs
+        for part in (
+            str(record["partition_id"]), str(record["set_id"]),
+            str(record["model_id"]), str(record["benchmark_id"]),
+        ):
+            node = node.setdefault(part, {})
+        if node:
+            raise IntegrityError(path, "a second bootstrap result for the same pair")
+        node.update(
+            {
+                "point_estimate": float(record["point_estimate"]),
+                "ci_lower": float(record["ci_lower"]),
+                "ci_upper": float(record["ci_upper"]),
+                "ci_level": float(record["ci_level"]),
+                "replicates": int(record["replicates"]),
+                "block_hours": int(record["block_hours"]),
+                "per_station_components": {
+                    str(k): float(v) for k, v in sorted(record["per_station_components"].items())
+                },
+                "pairwise_correlations": {
+                    str(k): float(v) for k, v in sorted(record["pairwise_correlations"].items())
+                },
+                "replicate_hash": str(record["replicate_hash"]),
+                "seed_key": str(record["seed_key"]),
+            }
+        )
+    return write_json_once(
+        Path(fixture_root) / "bootstrap_summary.json",
+        {
+            "artifact": "bootstrap_summary",
+            "fixture_id": fixture_id,
+            "status": "executed",
+            "units": {
+                "point_estimate": "TECU^2", "ci_lower": "TECU^2", "ci_upper": "TECU^2",
+                "per_station_components": "TECU^2", "pairwise_correlations": "dimensionless",
+                "replicates": "count", "block_hours": "h", "ci_level": "dimensionless",
+            },
+            "pairs": pairs,
+        },
+    )
+
+
 def export_bootstrap_not_executed(
     skipped_pairs: Sequence[Mapping[str, Any]], fixture_root: Path, *, fixture_id: str
 ) -> Path:

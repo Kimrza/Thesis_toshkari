@@ -131,6 +131,7 @@ from src.data.experiment_registry import (  # noqa: E402
 )
 from src.data.fixture_evidence import stamp_for_manifest, write_sibling_stamp  # noqa: E402
 from src.data.fixture_outputs import (  # noqa: E402
+    export_bootstrap_executed,
     export_bootstrap_not_executed,
     export_mask_manifest,
     export_metrics,
@@ -874,6 +875,7 @@ def _run_bootstrap_step(
     locked: LockedContext | None,
     evaluation_mode: str,
     fixture_id: str | None,
+    fixture_bootstrap_replicates: int | None = None,
 ) -> list[str]:
     """W-1's vector time-block bootstrap, per (model, benchmark) pair -- GATED on fixture
     identity (Q-31, student-owned execution-scoping decision; TE §15.3 "Minimal model
@@ -930,13 +932,25 @@ def _run_bootstrap_step(
 
     declaration = read_bootstrap_declaration(snapshot.experiment)
     seed = _bootstrap_seed(snapshot, seed_key=str(declaration["seed_key"]))
+    replicates = int(declaration["replicates"])
+    if fixture_id == SCIENTIFIC_FIXTURE_ID:
+        # TE 15.3: Fixture 2 runs "one bootstrap execution at REDUCED replicate count for
+        # timing". The count is the owner's apparatus constant `fixture_bootstrap.replicates`
+        # (R-122), never the governed `experiment.bootstrap.replicates`; absent, refuse.
+        if not isinstance(fixture_bootstrap_replicates, int) or fixture_bootstrap_replicates < 1:
+            raise IntegrityError(
+                "fixture_bootstrap.replicates",
+                "scientific_1month runs its reduced-replicate bootstrap from the identity "
+                "declaration's fixture_bootstrap block (TE 15.3; R-122); it is absent here",
+            )
+        replicates = fixture_bootstrap_replicates
     for benchmark_id in declared["benchmark_ids"]:
         result = vector_block_bootstrap(
             model,
             members_by_id[benchmark_id],
             mask=mask,
             block_hours=int(declaration["block_hours"]),
-            replicates=int(declaration["replicates"]),
+            replicates=replicates,
             seed=seed,
             declared_sets=declared_sets,
             registry=registry,
@@ -977,6 +991,7 @@ def _report_set(
     locked: LockedContext | None,
     evaluation_mode: str,
     fixture_id: str | None = None,
+    fixture_bootstrap_replicates: int | None = None,
 ) -> list[str]:
     """The inference and reporting layer for ONE comparison set (Recommendation 18).
 
@@ -1026,6 +1041,7 @@ def _report_set(
             locked=locked,
             evaluation_mode=evaluation_mode,
             fixture_id=fixture_id,
+            fixture_bootstrap_replicates=fixture_bootstrap_replicates,
         )
     )
 
@@ -1379,6 +1395,7 @@ def _evaluate_partition(
     locked: LockedContext | None,
     evaluation_mode: str = "real_data",
     fixture_id: str | None = None,
+    fixture_bootstrap_replicates: int | None = None,
 ) -> list[str]:
     """Masks, estimands, the metrics artifact AND the reporting layer for one partition.
 
@@ -1541,6 +1558,7 @@ def _evaluate_partition(
                 locked=locked,
                 evaluation_mode=evaluation_mode,
                 fixture_id=fixture_id,
+                fixture_bootstrap_replicates=fixture_bootstrap_replicates,
             )
         )
     return written
@@ -1616,6 +1634,7 @@ def _run_fixture_scale(
             # fixture identity (never evaluation_mode, which is "fixture" for BOTH
             # fixtures) is what gates the bootstrap skip for Fixture 1 (TE §15.3).
             fixture_id=scope.fixture_id,
+            fixture_bootstrap_replicates=_fixture_bootstrap_replicates(scope),
         )
         write_sibling_stamp(registry.registry_dir, stamp)  # the stamp beside the entries
         for artifact in artifacts:
@@ -1663,6 +1682,13 @@ _FIXTURE_FIGURE_CAVEATS: tuple[str, ...] = (
     "walking-skeleton fixture: smoke evidence only, never scientific evidence (TE §15.1; TC-03f)",
     "target: location-sampled gridded VTEC (Madrigal cell), not receiver-specific station VTEC",
 )
+
+
+def _fixture_bootstrap_replicates(scope: Any) -> int | None:
+    """`fixture_bootstrap.replicates` from the fixture scope (Fixture 2 only; R-122)."""
+    block = scope.fixture_bootstrap() if hasattr(scope, "fixture_bootstrap") else None
+    value = block.get("replicates") if isinstance(block, Mapping) else None
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
 def _fixture_report_outputs(
@@ -1723,6 +1749,18 @@ def _fixture_report_outputs(
             export_bootstrap_not_executed(
                 skipped_pairs, fixture_root, fixture_id=scope.fixture_id
             )
+        )
+    else:
+        # Fixture 2 (2026-10-01 closure): TE 15.3 executes the reduced-replicate bootstrap,
+        # so TE 15.4's bootstrap_summary.json aggregates every per-pair result this run
+        # wrote. Before this, no producer existed and Fixture 2 could not complete.
+        results = sorted(
+            p for p in paths
+            if p.name.startswith("bootstrap_") and p.name.endswith(".json")
+            and not p.name.endswith(".skipped.json")
+        )
+        outputs["bootstrap_summary"] = str(
+            export_bootstrap_executed(results, fixture_root, fixture_id=scope.fixture_id)
         )
     outputs.update(_render_fixture_plots(fixture_root))
     return outputs

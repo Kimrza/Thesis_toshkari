@@ -518,3 +518,45 @@ def test_stage_measurements_ignore_archived_previous_runs(tmp_path: Path) -> Non
     (nested / "fixture_measurements.json").write_text("not json", encoding="utf-8")
     merged = collect_stage_measurements(tmp_path)
     assert merged["row_count_ranges"]["hourly_target"]["max"] == 2.0
+
+
+def _bootstrap_record(tmp_path: Path, name: str, pid: str, value: float) -> Path:
+    record = {
+        "artifact_class": "bootstrap_result", "partition_id": pid, "set_id": "primary",
+        "model_id": "M-06", "benchmark_id": "B-01", "point_estimate": value,
+        "ci_lower": value - 1.0, "ci_upper": value + 1.0, "ci_level": 0.95,
+        "replicates": 1000, "block_hours": 24,
+        "per_station_components": {"ARUC": value, "BSHM": value, "NICO": value},
+        "pairwise_correlations": {"ARUC|BSHM": 0.5}, "replicate_hash": "h", "seed_key": "k",
+    }
+    path = tmp_path / name
+    path.write_text(json.dumps(record), encoding="utf-8")
+    return path
+
+
+def test_bootstrap_executed_summary_aggregates_pairs_and_is_deterministic(tmp_path: Path) -> None:
+    from src.data.fixture_outputs import export_bootstrap_executed, numeric_fingerprint
+
+    a = _bootstrap_record(tmp_path, "b1.json", "FIX-MAR-FOLD-01", 2.0)
+    b = _bootstrap_record(tmp_path, "b2.json", "FIX-MAR-FOLD-02", 3.0)
+    out1 = tmp_path / "r1"
+    out2 = tmp_path / "r2"
+    out1.mkdir()
+    out2.mkdir()
+    p1 = export_bootstrap_executed([a, b], out1, fixture_id="scientific_1month")
+    p2 = export_bootstrap_executed([b, a], out2, fixture_id="scientific_1month")
+    assert p1.read_bytes() == p2.read_bytes()
+    fp = numeric_fingerprint(p1)
+    assert fp["/pairs/FIX-MAR-FOLD-01/primary/M-06/B-01/point_estimate"] == 2.0
+    assert all(not k.startswith("/units") for k in fp)
+
+
+def test_bootstrap_executed_summary_refuses_empty_and_duplicates(tmp_path: Path) -> None:
+    from src.data.fixture_outputs import export_bootstrap_executed
+
+    with pytest.raises(IntegrityError, match="never ran"):
+        export_bootstrap_executed([], tmp_path, fixture_id="scientific_1month")
+    a = _bootstrap_record(tmp_path, "b1.json", "F", 2.0)
+    a2 = _bootstrap_record(tmp_path, "b2.json", "F", 2.0)
+    with pytest.raises(IntegrityError, match="second bootstrap result"):
+        export_bootstrap_executed([a, a2], tmp_path, fixture_id="scientific_1month")

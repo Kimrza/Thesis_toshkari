@@ -75,5 +75,284 @@
    "24h": 14,
    "48h": 7
   }
+ },
+ "required_outputs": {
+  "comparison_ledger": {
+   "input_manifest.yaml": {
+    "comparison_class": "exact",
+    "exact_kind": "hash",
+    "units": "not applicable (manifest of identifiers and SHA-256 hashes)",
+    "producing_path": {
+     "script": "scripts/run_walking_skeleton.py"
+    },
+    "citation": "D-74"
+   },
+   "processing_config_snapshot.yaml": {
+    "comparison_class": "exact",
+    "exact_kind": "hash",
+    "units": "not applicable (config hashes and identifiers)",
+    "producing_path": {
+     "script": "scripts/run_walking_skeleton.py"
+    },
+    "citation": "D-74"
+   },
+   "hourly_vtec.parquet": {
+    "comparison_class": "exact",
+    "exact_kind": "deterministic_cpu_transformation",
+    "units": "vtec_tecu, within_hour_spread_tecu: TECU; largest_internal_gap_s: s; valid_observation_count: count (releases/phase1_hourly_target/release_manifest.json units)",
+    "producing_path": {
+     "script": "scripts/02_standardize_prepared_target.py"
+    },
+    "citation": "D-74"
+   },
+   "feature_table.parquet": {
+    "comparison_class": "exact",
+    "exact_kind": "deterministic_cpu_transformation",
+    "units": "vtec lags/sequence: TECU (untransformed); cyclical encodings: dimensionless; station_lat: degrees",
+    "producing_path": {
+     "script": "scripts/05_build_features_and_splits.py"
+    },
+    "citation": "D-74"
+   },
+   "iri_benchmark.parquet": {
+    "comparison_class": "exact",
+    "exact_kind": "deterministic_cpu_transformation",
+    "units": "iri2016_t_plus_1_tecu: TECU; htop_km: km; lat/lon: degrees",
+    "producing_path": {
+     "script": "scripts/04_build_external_products.py"
+    },
+    "citation": "D-74"
+   },
+   "gim_comparator.parquet": {
+    "comparison_class": "exact",
+    "exact_kind": "deterministic_cpu_transformation",
+    "units": "value_tecu: TECU; f_t: dimensionless [0,1]; exact_epoch_match, gim_network_overlap_flag: boolean; remaining columns identifiers",
+    "producing_path": {
+     "script": "scripts/04_build_external_products.py"
+    },
+    "citation": "D-74; D-72"
+   },
+   "split_manifest.json": {
+    "comparison_class": "exact",
+    "exact_kind": "partition_membership",
+    "units": "not applicable (partition membership)",
+    "producing_path": {
+     "script": "scripts/05_build_features_and_splits.py"
+    },
+    "citation": "D-74"
+   },
+   "mask_manifest.json": {
+    "comparison_class": "exact",
+    "exact_kind": "partition_membership",
+    "units": "not applicable (mask membership)",
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py"
+    },
+    "citation": "D-74"
+   },
+   "predictions.parquet": {
+    "comparison_class": "toleranced",
+    "units": "TECU",
+    "fields": [
+     {
+      "field": "y_hat",
+      "locator": "[^|]+\\|[^|]+\\|[^|]+\\|[^|]+",
+      "unit": "TECU",
+      "meaning": "hourly VTEC prediction y_hat, one element per (partition_id, payload_file, station, interval_start_utc) row; primary target untransformed (D-27/D-37)",
+      "citation": "this entry's declared units 'TECU'; TE Domain Glossary (TECU is the unit of every VTEC quantity); D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5); D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     }
+    ],
+    "producing_path": {
+     "script": "scripts/06_train_and_predict.py",
+     "inverse_route": "identity (D-27/D-37: primary target untransformed)"
+    },
+    "citation": "D-74"
+   },
+   "metrics.json": {
+    "comparison_class": "toleranced",
+    "units": "TECU^2 (paired squared-error loss differential, benchmark minus model)",
+    "fields": [
+     {
+      "field": "paired_loss_differential",
+      "locator": "/evaluated/[^/]+/[^/]+/comparisons\\[\\d+\\]/(scalar|per_station/[^/]+)",
+      "unit": "TECU^2",
+      "meaning": "paired squared-error loss differential, benchmark minus model, positive favours the model; the scalar is the equal-station-weighted combination, per_station the within-station value (Vision 2.3)",
+      "citation": "this entry's declared units 'TECU^2 (paired squared-error loss differential, benchmark minus model)'; project.md Mandated (confirmatory estimand); D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5); D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     },
+     {
+      "field": "row_count",
+      "locator": "/evaluated/[^/]+/[^/]+/row_counts/[^/]+",
+      "unit": "count",
+      "meaning": "rows surviving the comparison-wide mask, per station (R-107 limb 6; src/evaluation/masks.py RegisteredMask.row_counts, Mapping[str, int])",
+      "citation": "src/evaluation/masks.py RegisteredMask; the count unit as recorded for valid_observation_count on the measuring run's record; D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5); D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     },
+     {
+      "field": "exclusion_count",
+      "locator": "/evaluated/[^/]+/[^/]+/exclusion_counts/[^/]+",
+      "unit": "count",
+      "meaning": "rows dropped by the comparison-wide intersection, per station (R-107 limb 6; src/evaluation/masks.py RegisteredMask.exclusion_counts, Mapping[str, int])",
+      "citation": "src/evaluation/masks.py RegisteredMask; the count unit as recorded for valid_observation_count on the measuring run's record; D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5); D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     }
+    ],
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py",
+     "inverse_route": "identity (D-27/D-37: primary target untransformed)"
+    },
+    "citation": "D-74"
+   },
+   "bootstrap_summary.json": {
+    "comparison_class": "toleranced",
+    "units": "TECU^2 (paired squared-error loss differential, benchmark minus model) for estimates, bounds and station components; dimensionless for correlations and ci_level; count for replicates; h for block_hours",
+    "fields": [
+     {
+      "field": "bootstrap_paired_loss_differential",
+      "locator": "/pairs/[^/]+/[^/]+/[^/]+/[^/]+/(point_estimate|ci_lower|ci_upper)",
+      "unit": "TECU^2",
+      "meaning": "equal-station-weighted paired squared-error loss differential, benchmark minus model: point estimate and the 95% percentile interval bounds of the vector time-block bootstrap (TE 13.6; Vision 2.3)",
+      "citation": "src/data/fixture_outputs.py export_bootstrap_executed units block; src/evaluation/bootstrap.py BootstrapResult; D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     },
+     {
+      "field": "bootstrap_station_component",
+      "locator": "/pairs/[^/]+/[^/]+/[^/]+/[^/]+/per_station_components/[^/]+",
+      "unit": "TECU^2",
+      "meaning": "within-station paired loss differential component, benchmark minus model",
+      "citation": "BootstrapResult.per_station_components; D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     },
+     {
+      "field": "bootstrap_cross_station_correlation",
+      "locator": "/pairs/[^/]+/[^/]+/[^/]+/[^/]+/pairwise_correlations/[^/]+",
+      "unit": "dimensionless",
+      "meaning": "cross-station paired-error correlation reported with the interval (project.md Mandated; R-121)",
+      "citation": "BootstrapResult.pairwise_correlations; D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     },
+     {
+      "field": "bootstrap_replicates",
+      "locator": "/pairs/[^/]+/[^/]+/[^/]+/[^/]+/replicates",
+      "unit": "count",
+      "meaning": "replicates executed (the reduced Fixture 2 count, fixture_bootstrap.replicates)",
+      "citation": "TE 15.3; R-122; D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     },
+     {
+      "field": "bootstrap_block_hours",
+      "locator": "/pairs/[^/]+/[^/]+/[^/]+/[^/]+/block_hours",
+      "unit": "h",
+      "meaning": "block length of the vector time-block resampling",
+      "citation": "experiment.yaml bootstrap.block_hours (D-79); D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     },
+     {
+      "field": "bootstrap_ci_level",
+      "locator": "/pairs/[^/]+/[^/]+/[^/]+/[^/]+/ci_level",
+      "unit": "dimensionless",
+      "meaning": "confidence level of the interval as a fraction",
+      "citation": "experiment.yaml bootstrap.confidence_level (D-79); D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+     }
+    ],
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py",
+     "inverse_route": "identity (D-27/D-37: primary target untransformed)"
+    },
+    "citation": "D-74 (Fixture 2 bootstrap_summary toleranced, unchanged by the 2026-09-29 amendment); D-83 revision 8 section A8 item 16 (scientific_1month field table, declared 2026-10-01 before its measuring runs under the Student's closure instruction with the Supervisor's reported approval)"
+   },
+   "checkpoint_manifest.json": {
+    "comparison_class": "exact",
+    "exact_kind": "id",
+    "units": "not applicable (checkpoint identities and epoch facts)",
+    "producing_path": {
+     "script": "scripts/06_train_and_predict.py"
+    },
+    "citation": "D-74"
+   },
+   "registry_entry.json": {
+    "comparison_class": "exact",
+    "exact_kind": "schema",
+    "units": "not applicable (TE 13.4 registry row)",
+    "producing_path": {
+     "script": "scripts/run_walking_skeleton.py"
+    },
+    "citation": "D-74"
+   },
+   "plots/target_support.*": {
+    "comparison_class": "recorded_presence",
+    "image_format": "png",
+    "units": "not applicable (image; existence + format + recorded SHA-256, D-75)",
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py"
+    },
+    "citation": "D-75"
+   },
+   "plots/predictions.*": {
+    "comparison_class": "recorded_presence",
+    "image_format": "png",
+    "units": "not applicable (image; existence + format + recorded SHA-256, D-75)",
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py"
+    },
+    "citation": "D-75"
+   },
+   "plots/residuals.*": {
+    "comparison_class": "recorded_presence",
+    "image_format": "png",
+    "units": "not applicable (image; existence + format + recorded SHA-256, D-75)",
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py"
+    },
+    "citation": "D-75"
+   },
+   "plots/quality_diagnostics.*": {
+    "comparison_class": "recorded_presence",
+    "image_format": "png",
+    "units": "not applicable (image; existence + format + recorded SHA-256, D-75)",
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py"
+    },
+    "citation": "D-75"
+   },
+   "test_report.*": {
+    "comparison_class": "exact",
+    "exact_kind": "schema",
+    "units": "not applicable (pass/fail schema)",
+    "producing_path": {
+     "script": "scripts/run_walking_skeleton.py"
+    },
+    "citation": "D-74"
+   },
+   "clean_run_log.*": {
+    "comparison_class": "exact",
+    "exact_kind": "schema",
+    "units": "not applicable (log schema)",
+    "producing_path": {
+     "script": "scripts/run_walking_skeleton.py"
+    },
+    "citation": "D-74"
+   }
+  }
+ },
+ "apparatus_hyperparameters": {
+  "ridge": {
+   "params": {
+    "alpha": 0.01
+   },
+   "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale apparatus only; never a prior, default, ranking signal, or shortlist for the governed selection, which stays models.selected, produced only by the governed January-November F1-F4 tuning run under D-124.",
+   "citation": "D-70"
+  },
+  "random_forest": {
+   "params": {
+    "n_estimators": 300,
+    "max_depth": 8,
+    "min_samples_leaf": 1
+   },
+   "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale apparatus only; never a prior, default, ranking signal, or shortlist for the governed selection.",
+   "citation": "D-70"
+  },
+  "lstm": {
+   "params": {
+    "layers": 1,
+    "units": 32,
+    "learning_rate": 0.001,
+    "batch_size": 64
+   },
+   "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale apparatus only; never a prior, default, ranking signal, or shortlist for the governed selection.",
+   "citation": "D-70"
+  }
  }
 }
