@@ -216,3 +216,28 @@ def test_pv09_val04_exploratory_derivation_uses_parsed_times() -> None:
     # started in +03:30 before the access instant: does not postdate
     flag, _ = _derive_exploratory({"run_id": "r", "started_at_utc": "2026-10-01T03:29:00+03:30"}, access)
     assert flag is False
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("2026-10-01T00:00:00.5+00:00", "2026-10-01T00:00:00.500000+00:00"),
+        ("2026-10-01T00:00:00.75Z", "2026-10-01T00:00:00.750000+00:00"),
+        ("2026-10-01T00:00:00.1234567+03:30", "2026-10-01T00:00:00.123456+03:30"),
+        ("2026-10-01T00:00:00Z", "2026-10-01T00:00:00+00:00"),
+    ],
+)
+def test_parse_iso8601_utc_is_interpreter_independent(text: str, expected: str) -> None:
+    """2026-10-01: Python 3.10 (environment (b)) rejected `.5` and `Z`, so custody ordering
+    fell back to string comparison there. The helper must parse these on 3.10 and 3.11."""
+    from src.data.config import parse_iso8601_utc
+
+    parsed = parse_iso8601_utc(text)
+    assert parsed is not None and parsed.isoformat() == expected
+
+
+@pytest.mark.parametrize("text", ["2026-10-01T00:00:00", "not-a-time", "", "2026-13-01T00:00:00Z"])
+def test_parse_iso8601_utc_refuses_naive_and_malformed(text: str) -> None:
+    from src.data.config import parse_iso8601_utc
+
+    assert parse_iso8601_utc(text) is None

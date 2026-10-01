@@ -736,6 +736,36 @@ def _parse_yaml(path: Path) -> Mapping[str, Any]:
     return loaded
 
 
+_ISO_FRACTION = __import__("re").compile(r"(T\d{2}:\d{2}:\d{2})\.(\d+)")
+
+
+def parse_iso8601_utc(value: Any) -> datetime | None:
+    """An AWARE datetime for an ISO-8601 timestamp carrying an offset, else None.
+
+    Identical on Python 3.10 (environment (b) `b01_iri`) and 3.11 ((a), (c)). Found
+    2026-10-01 running the critical set in (b): 3.10's `datetime.fromisoformat` rejects a
+    `Z` suffix AND any fractional second that is not exactly 3 or 6 digits (`.5`, `.75`),
+    so custody-ordering code that parsed `00:00:00.5+00:00` fell back to a lexical
+    comparison in (b) -- the defect GOV-2026-09-30-PV-09 VAL-04 had fixed for 3.11. Here
+    `Z` becomes `+00:00` and the fraction is right-padded (or truncated) to microseconds,
+    which preserves the instant to the microsecond. A naive value returns None.
+    """
+    try:
+        parsed = datetime.fromisoformat(normalise_iso8601(value))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def normalise_iso8601(value: Any) -> str:
+    """`Z` to `+00:00` and the fractional second to exactly six digits, so the same text
+    parses identically under Python 3.10 and 3.11 (see `parse_iso8601_utc`)."""
+    text = str(value).strip()
+    if text.endswith(("Z", "z")):
+        text = text[:-1] + "+00:00"
+    return _ISO_FRACTION.sub(lambda m: f"{m.group(1)}.{(m.group(2) + '000000')[:6]}", text)
+
+
 def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 

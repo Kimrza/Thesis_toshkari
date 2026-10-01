@@ -421,11 +421,10 @@ def _assert_parseable_retrieved_at(value: str) -> None:
     accepts it from 3.11; the repository pins 3.11, and the suffix is normalised here so
     the rule does not silently depend on the interpreter's patch level).
     """
-    text = value.strip()
-    if text.endswith("Z"):
-        text = text[:-1] + "+00:00"
+    from src.data.config import normalise_iso8601
+
     try:
-        _dt.datetime.fromisoformat(text)
+        _dt.datetime.fromisoformat(normalise_iso8601(value))
     except ValueError as exc:
         raise LockedTestError(
             "AccessRecord",
@@ -486,12 +485,7 @@ def _logged_before(logged: Any, cutoff_utc: str) -> bool:
     """
     import datetime as _dt
 
-    def parse(value: Any) -> Any:
-        try:
-            out = _dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-        except ValueError:
-            return None
-        return out if out.tzinfo is not None else None
+    from src.data.config import parse_iso8601_utc as parse
 
     a, b = parse(logged), parse(cutoff_utc)
     return a is not None and b is not None and a < b

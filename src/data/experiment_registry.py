@@ -303,13 +303,9 @@ def _read_access_records(access_log_path: Path) -> list[Mapping[str, Any]]:
 
 def _parse_utc(value: str) -> Any:
     """An aware datetime for an ISO-8601 value carrying an offset, else None."""
-    import datetime as _dt
+    from src.data.config import parse_iso8601_utc
 
-    try:
-        parsed = _dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    return parsed if parsed.tzinfo is not None else None
+    return parse_iso8601_utc(value)
 
 
 def _access_timestamp(record: Mapping[str, Any]) -> str:
