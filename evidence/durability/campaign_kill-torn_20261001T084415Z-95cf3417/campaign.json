@@ -1,0 +1,41 @@
+{
+  "campaign_id": "20261001T084415Z-95cf3417",
+  "decision": "D-83 revision 7 section A7 item 6; section R4-7 item 11; W-6; revision 8 section A8 items 3, 13 and 14",
+  "fault": "kill-torn",
+  "write_types": [
+    "access",
+    "registry",
+    "receipt"
+  ],
+  "trials_per_write_type": 100,
+  "required_per_write_type": 100,
+  "seed": 20260930,
+  "code_commit": "25ad0f70a529068c72f7f6b1d7d76e734cccd191",
+  "working_tree_dirty": false,
+  "working_tree": {
+    "dirty": false,
+    "governed_changes": [],
+    "line_ending_only": [],
+    "other_tracked_changes": [
+      " M aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/laptop-tv4ugfbc-2742bd6d5bde.md",
+      " M governance/CHANGE_RECORD_2026-09-29_platform_local_only.md",
+      " M governance/CHANGE_RECORD_2026-10-01_GOV-PV-09_rulings.md"
+    ]
+  },
+  "governed": true,
+  "environment": {
+    "environment_id": "tec-thesis-311",
+    "declared_environment_id": "tec-thesis-311",
+    "python": "3.11.16 | packaged by Anaconda, Inc. | (main, Aug 27 2026, 14:36:16) [MSC v.1942 64 bit (AMD64)]",
+    "executable": "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H"
+  },
+  "filesystem_under_test": {
+    "path": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\durability_scratch",
+    "drive": "C:\\",
+    "filesystem": "NTFS",
+    "volume_serial": "CE383450"
+  },
+  "started_at_utc": "2026-10-01T08:44:15.646748+00:00"
+}

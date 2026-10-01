@@ -22,6 +22,7 @@
   - (2) "Record as countersigned";
   - (3) "Kill-only admission";
   - (4) "Diff allows only gates".
+- The Student's second rulings of 2026-10-01 (ML-01, ML-05, DATA-09, DATA-12, DATA-11), recorded in the same file § "Second rulings" and carried as §A8 items 9 to 13.
 
 ### A8. Amendments (PV-09 Rec numbers in brackets)
 
@@ -55,20 +56,165 @@
 6. **Write-once receipts are complete-or-absent [Rec 12].** A receipt is written to a temporary sibling, fsynced, and hard-linked to its final name, so a kill never leaves a partial file at the final name.
 7. **Floor wording [Rec 32; ML-04, ML-06].**
    - The floor in item 11 is stated once: "floor = 2⁻²³ × max|x| over that file's (a) elements", where 2⁻²³ is the coarsest compute precision in the pipeline (float32 machine epsilon).
+     *[Superseded 2026-10-01 by item 10: "that field's" for "that file's"; the factor 2⁻²³ stands.]*
    - §A7 item 8 is read with that wording.
    - [ML-07] Row 7R states that power-loss is not run, per item 3 above.
 8. **Guard home [Rec 32; IMPL-07].**
    - `run_gated_generation` is the guard home for the December limb.
    - Script 04 calls the same function earlier, as a pre-check. That call is defence in depth and is not a second home.
 
+**Items 9 to 13 carry the Student's second set of rulings on `GOV-2026-09-30-PV-09`, given in session on 2026-10-01 and recorded in `governance/CHANGE_RECORD_2026-10-01_GOV-PV-09_rulings.md` § "Second rulings". They close §R5-8 row 39 and the scope limb of row 41.**
+
+9. **Determinism first [Rec 21; ML-01].** In D-text item 11, the "(c) tolerance" bullet gains, before its first sentence:
+
+   > **Determinism precondition.** The tolerance is computed, and any run is checked against it, only after that run's `environment_id` has satisfied the determinism precondition: at least two measuring runs in that `environment_id`, carrying the same element set and exactly equal values, NaN matching NaN by position. A run set that fails is a **reproducibility failure**, recorded as such with status and reason; it is never rescued by the tolerance, and the tolerance is never widened to absorb ordinary nondeterministic variation. Only a run set that passes can produce a **tolerance failure** (a deterministic difference exceeding a field's frozen tolerance). The two failures are recorded under distinct names and are never merged.
+
+   - Mechanism (committed in `42a1ca1`; on the runtime path per item 17): `src/data/cross_environment_tolerance.py` (`DeterminismFailure` and `ToleranceFailure` are distinct types; `assert_deterministic` runs before `freeze_tolerance` and `check_candidate` compute anything). Negative controls: `tests/test_cross_environment_tolerance.py`, including a nondeterministic candidate whose every value lies inside the tolerance and still fails the precondition.
+   - Consequence stated, not hidden: if a (a) or (c) run set is not deterministic, no tolerance can be frozen until the cause is fixed under the "Cause fixed" bullet.
+10. **One floor per field [Rec 22; ML-05].** In D-text item 11 and §A8 item 7, "floor = 2⁻²³ × max|x| over that file's (a) elements" is replaced by:
+
+    > floor = 2⁻²³ × max|x| over **that field's** (a) elements, computed separately for every field. A field is a set of elements sharing one declared unit and scale; every field declares its unit before the measuring runs (for example `TECU` and `TECU²` are separate fields even inside one file). An element whose field is undeclared, or a field without a declared unit, is refused; no field inherits another field's floor or tolerance, and a field added later has none until it is declared and measured.
+
+    - "Units are never mixed across files" is extended to "units are never mixed across fields". Mechanism and negative controls as item 9; the governed field table is item 16.
+11. **`environment_id` literals [Rec 23; DATA-09].** In D-text item 1, the variable is `environment_id` and the three environments are pinned by the literals already established in `src/data/config.py` `ENVIRONMENT_IDS` (committed with W-4 in `67eda2b`) and used by `src/data/admission.py` and the registry:
+    - **(a)** `tec-thesis-311` (native Windows);
+    - **(b)** `b01_iri` (WSL2, D-49 and addenda only);
+    - **(c)** `g07-clean-run` (WSL2, G-07 reproduction only).
+
+    No other literal is admitted; `undeclared` is recorded, never admitted. "(a)", "(b)", "(c)", "native-Windows" and "G-07 clean-run" are prose labels only. Every comparison, pin, admission key and tolerance leg is keyed to the `environment_id` literal, never to a label; the tolerance legs are exactly `tec-thesis-311` and `g07-clean-run`, and `b01_iri` is not a tolerance leg.
+12. **Pre-W-4 non-comparability in D-83 [Rec 24; DATA-12].** The §R5-5 item 29 ruling is recorded **in D-83 itself**, not under a separate D-number (the Student found no governance structure making D-83 the wrong record). Add to D-text item 1:
+
+    > An environment record made before W-4 (one carrying no `environment_id`) is **not comparable** governed evidence with any post-W-4 record, and cannot be treated as comparable because its package or version values appear similar. It is refused by name, never upcast to `undeclared`, and re-recorded under the current code. The re-runs this makes owed are those named in §R6-5 row 29: `plumbing_7day` Q-31 (`9710daf`) and the November B-01, the November supersession recorded in this D-number.
+
+    - §R5-5 item 29's "Issue the D-number" becomes "adopted with D-83". Mechanism: `src/data/fixture_gate.py` `lock_items` (the refusal exists since W-4; its message citing this item, and the negative control `test_pre_w4_lock_with_identical_pins_is_still_non_comparable`, are new and committed in `42a1ca1`); and, on the measuring path, `run_walking_skeleton.compose_tolerances` and `compose_item11_tolerances` refuse a measuring result without `environment_id` (`42a1ca1`, item 17).
+13. **`/mnt/c` in scope [Rec 14; DATA-11].** The (b) receipt path on `/mnt/c` is **in scope** for the BENCH durability measurement. D-text item 11's "Durability" bullet (as replaced by §A8 item 3) gains:
+
+    > A fourth limb, the `/mnt/c` receipt campaign: process-kill N = 100 on the receipt write type, written from `b01_iri` onto the `/mnt/c` NTFS path through the WSL2 9P boundary, with the same governed identity and provenance as the NTFS campaigns (clean commit, `environment_id` recorded, campaign/summary/trials files, torn-fault detection). Until it is run it is **OPEN, pending measurement**, and no durability claim covers the `/mnt/c` receipt path.
+
+    - §R5-8 row 41 is restated as the required campaign (below). It is not run in this revision; no result is inferred from the native-NTFS campaign.
+
+**Items 14 to 17, and the corrections and countersignature record that follow, carry the Student's third set of rulings of 2026-10-01 on the board `GOV-2026-10-01-PV-10`. They are recorded in `governance/CHANGE_RECORD_2026-10-01_GOV-PV-09_rulings.md` § "Third rulings". Items 14 to 17 are measurement criteria and mechanism records. They make items 3, 9 to 11 and 13 executable and checkable, they relax none of them, and they are not D-text (see "Supervisor countersignature for revision 8" below).**
+
+14. **Deterministic in-write interruption (`kill-torn`) [PV-10 Rec 7; BENCH-10].**
+    - **Why.** Three random-kill campaigns (900 trials) produced 0 torn records. Every production write is a single small system call, so a kill at a random time almost never lands inside one. Running more random kills cannot be relied on to satisfy item 3.
+    - **Method.** `scripts/durability_harness.py --fault kill-torn`. After a seeded random number (1–150) of acknowledged writes, the child arms one injection point and performs the next write through the unmodified production function. At the injection point the write is split at a fixed byte boundary, the written prefix is fsynced, the child reports `INJECTED` and blocks, and the parent kills it (`TerminateProcess` / `SIGKILL`). The trial index selects the point:
+      - appends (`access`, `registry`): `mid-record`, where the first half of the record's bytes reach the file;
+      - receipts: `mid-temp-write`, `before-link` and `after-link`, cycled across trials.
+    - **Safety.** Only the per-trial scratch directory is written. A watchdog kills a child that does not reach its injection point within 120 s, and that trial **fails**.
+    - **Outcome classes (explicit, per trial):**
+      - `intact_old`: only the acknowledged writes are present;
+      - `intact_new`: the interrupted write is complete;
+      - `torn_detected`: a partial final record that the production reader detects;
+      - `torn_undetected` and `partial_final`: failures.
+    - **Governed outcome per point:** `mid-record` → `torn_detected`; `mid-temp-write` and `before-link` → `intact_old`; `after-link` → `intact_new`. Any other outcome fails the trial.
+    - **Detection, per reader.** The registry reader, `check_registry_integrity`, must report the torn final record with its `run_id`. The access reader, `assert_first_locked_evaluation`, must refuse the log (fail-closed).
+    - **What this establishes for item 3.** The appends produce torn records deterministically, and each must be detected. Receipts are complete-or-absent by construction (item 6): a temporary sibling is fsynced and then hard-linked to its final name. A receipt therefore has no torn state at its final name to detect, and its governed claim is **old-or-new, never partial**. Item 3's "readers must detect every torn record they produce" is satisfied by the appends. For the receipt write type it is satisfied by the absence of any `partial_final` outcome. Item 3's text is unchanged.
+    - **Pass criterion.** N = 100 `kill-torn` trials per write type. Every trial must pass, giving a one-sided 95 % zero-failure bound of 2.95 % per write type.
+    - **Provenance.** The campaign must run from a clean commit. "Dirty" means any tracked change or untracked file under `src/`, `scripts/`, `tests/`, `configs/`, `environment/` or `pyproject.toml`; the harness refuses a dirty tree unless `--allow-dirty` is passed, and a run with that flag is recorded as `governed: false`. Tracked changes elsewhere (governance prose, the AI-DLC audit shard) are recorded under `other_tracked_changes`. The record also carries `environment_id` (checked against its pinned interpreter: `tec-thesis-311` is 3.11, `b01_iri` is 3.10), and the `campaign.json`, `trials.jsonl` and `summary.json` files with SHA-256 hashes.
+    - **Mechanism.** Code commits `42a1ca1` (method, outcome classes, governed-path dirty refusal, WSL mount identity, `b01_iri` pin, watchdog) and `25ad0f7` (a CR-only difference from HEAD, as WSL git reports for a CRLF checkout, is recorded as `line_ending_only`, not dirty). Negative controls in `tests/test_durability_harness.py`:
+      - an undetected torn registry record fails;
+      - an unreached injection point fails;
+      - a partial receipt at a final name fails;
+      - a dirty governed tree is refused.
+15. **`/mnt/c` receipt campaign: pass criterion, fixed before it runs [PV-10 Rec 8; BENCH-11, BENCH-12, VAL-06].** This criterion makes item 13 executable.
+    - **What is tested.** Write-once receipts written by the production `write_once_durable`, run from `environment_id` `b01_iri` (Python 3.10.12), into a scratch directory on the `/mnt/c` drvfs mount, through the WSL2 9P boundary, onto the NTFS volume.
+    - **Two limbs, both required:**
+      - (i) `--fault kill`, receipt write type, N = 100 (random process kill);
+      - (ii) `--fault kill-torn`, receipt write type, N = 100 (item 14's three receipt injection points, cycled).
+    - **The properties are separate:**
+      - (a) **receipt creation and readback:** every acknowledged receipt is present at its final name and reads back as complete JSON;
+      - (b) **integrity and identity:** the bytes of every acknowledged receipt equal the SHA-256 the child acknowledged;
+      - (c) **atomicity (complete-or-absent through 9P):** no trial leaves a partial file at a final name (`partial_final` = 0). The `os.link` publication step succeeds through drvfs, because a receipt reaching `intact_new` at `after-link` shows it. Every `kill-torn` outcome equals its governed outcome;
+      - (d) **provenance completeness:** see the evidence list below.
+    - **Evidence that must exist** (property (d)):
+      - `campaign.json`, `trials.jsonl` and `summary.json`, with the trials and campaign SHA-256 recorded in the summary;
+      - `code_commit` with `governed: true` (a clean governed tree);
+      - `environment_id` = `b01_iri`, with no downgrade to `undeclared`;
+      - `filesystem_under_test` recording the mount point `/mnt/c`, mount type `9p`, mount options including `aname=drvfs`, backing filesystem `NTFS`, and the backing volume serial.
+    - **PASS:** both limbs reach N = 100, with every trial passing and properties (a)–(d) all met.
+    - **FAIL:** any trial fails property (a), (b) or (c). A failure is recorded with its kept scratch files, never discarded, and a re-run is a new campaign that leaves the failed one visible.
+    - **INCONCLUSIVE (not PASS):** any of the following:
+      - a limb with fewer than 100 trials;
+      - a dirty tree (`governed: false`);
+      - `environment_id` not `b01_iri`, or downgraded;
+      - a mount that is not `9p` drvfs over NTFS, or a filesystem record that is missing;
+      - a missing file or a hash mismatch.
+    - **Recorded in** `evidence/durability/` and in the "Evidence status at revision 8" table. Until a PASS is recorded, row 41 is OPEN and no durability claim covers (b) receipts.
+16. **Governed field-to-unit table [PV-10 Rec 5; TEC-01, ML-10, IMPL-15, TEC-03].**
+    - **Where the table lives.** Each toleranced output's ledger entry in the fixture's identity declaration (`tests/fixtures/<fixture_id>/identity_declaration.yaml`, `required_outputs.comparison_ledger.<output>.fields`) carries a `fields` list. Each entry has `field`, `locator`, `unit`, `meaning` and `citation`, where `locator` is a regular expression matched in full against each element locator from `numeric_fingerprint`. That ledger is where this project's per-output units are already declared, and the measuring run reads it, so the table travels into every candidate manifest's ledger.
+    - **`plumbing_7day`, declared 2026-10-01 from existing governed sources only:**
+
+      | Output | Field | Locator (full match) | Unit | Meaning | Source of the unit |
+      |---|---|---|---|---|---|
+      | `predictions.parquet` | `y_hat` | `[^\|]+\|[^\|]+\|[^\|]+\|[^\|]+` (one row) | `TECU` | hourly VTEC prediction, one element per (partition, payload, station, interval) row; target untransformed (D-27/D-37) | the entry's declared units `TECU`; TE Domain Glossary |
+      | `metrics.json` | `paired_loss_differential` | `/evaluated/<fold>/<set>/comparisons[<i>]/(scalar\|per_station/<station>)` | `TECU^2` | paired squared-error loss differential, benchmark minus model; the scalar is equal-station weighted | the entry's declared units `TECU^2 (paired squared-error loss differential, benchmark minus model)`; Vision §2.3 |
+      | `metrics.json` | `row_count` | `/evaluated/<fold>/<set>/row_counts/<station>` | `count` | rows surviving the comparison-wide mask, per station | `src/evaluation/masks.py` `RegisteredMask.row_counts` (int); the count unit on the measuring run's record |
+      | `metrics.json` | `exclusion_count` | `/evaluated/<fold>/<set>/exclusion_counts/<station>` | `count` | rows dropped by the comparison-wide intersection, per station | `src/evaluation/masks.py` `RegisteredMask.exclusion_counts` (int); as above |
+
+    - **Coverage of the real outputs.** Every element of the recorded plumbing outputs resolves to exactly one field: 648 `y_hat`; 24 `paired_loss_differential`, 4 `row_count` and 4 `exclusion_count`. These counts were derived from `artifacts/walking_skeleton/plumbing_7day/` on 2026-10-01 and equal the candidate's recorded `elements_compared`, 648 and 32.
+    - **Unit spelling.** The unit is spelled `TECU^2`, the literal already declared in the ledger. The superscript form `TECU²` in this record's prose is the same unit, and it is not used as a literal anywhere (TEC-03).
+    - **No inheritance.** An element matching no declared field is refused by name, and so is an element matching two fields. A table entry lacking any of the five keys, or with a blank unit, is refused. A new field therefore has no unit, floor or tolerance until it is declared. Mechanism: `src/data/cross_environment_tolerance.py` (`validate_field_table`, `field_resolver`). Negative controls: `tests/test_cross_environment_tolerance.py`, including a new `metrics.json` leaf that is refused.
+    - **`scientific_1month`: OPEN.** Its identity declaration carries no comparison ledger, and its skeleton manifest's ledger units read `"TBD — freeze gate"`. Those units are a Student-owned Q-31 freeze value, and an agent may not fill them by convenience (project.md Forbidden). The table is owed with that fixture's declaration. Until then the item 11 composition for that fixture is refused by construction, because no field is declared.
+17. **Item 11 runs on the governed runtime path, through one implementation only [PV-10 Recs 3, 4 and 6].**
+    - **The authoritative implementation of item 11 is `src/data/cross_environment_tolerance.py`.** No other function computes or applies an item 11 tolerance.
+    - **Measuring runs** (`scripts/run_walking_skeleton.py` step 9):
+      - every measuring result now records its run's `environment_id` (`write_measuring_result`);
+      - `compose_tolerances` is the single routing point. It refuses any result without an `environment_id` (a pre-W-4 record; item 12);
+      - when the recorded results span more than one environment, it calls `compose_item11_tolerances`. That function requires exactly `tec-thesis-311` and `g07-clean-run`, asserts determinism per leg (item 9), and freezes one tolerance per governed field (items 10 and 16);
+      - the candidate manifest records that per-field tolerance (`fp_tolerance.fields`, with `environment_ids`) and never a scalar across fields. The manifest schema refuses a scalar `value` beside per-field tolerances, a field set different from the governed table, a unit different from the table's, an infinite tolerance, and any `environment_ids` other than the (a)/(c) pair.
+    - **Comparison against a frozen manifest** (`compare_required_outputs`, the G-07 reproduction check): a per-field entry is checked only by `check_produced_output`, keyed to the producing run's `environment_id`. A run from an environment that did not show determinism when the tolerance was frozen is refused as a determinism failure (item 9). A missing `environment_id` is refused.
+    - **`cross_run_variation`** (`src/data/fixture_outputs.py`) is retained only for a single environment's measured run-to-run variation on a Q-31 candidate. It is **not authoritative for item 11**, its docstring says so, and a test fails if the item 11 route ever reaches it.
+    - **Non-finite values [Rec 6; ML-08].** `±inf` in any (a), (c), reference or produced element is refused as invalid input. That refusal is an integrity violation, distinct from both a determinism failure and a tolerance failure. A non-finite element can therefore never produce an infinite floor or tolerance. NaN keeps its meaning: a recorded gap, matched by position.
+    - **Code commit:** `42a1ca1`. Tests:
+      - `tests/test_cross_environment_tolerance.py`;
+      - `tests/test_clean_run.py` `test_item11_*`, which drive the real `compare_required_outputs` path and spy that it invokes the module.
+
+**Corrections of revision-7 text (2026-10-01; PV-10 Recs 9, 10, 15 and 19).** The revision-7 sentences are retained verbatim, each with a dated annotation beside it. Nothing historical is rewritten.
+
+- **[Rec 9; VAL-05]** Two revision-7 statements are superseded:
+  - §A7 item 6's "(b) receipts are written to an NTFS path (via `/mnt/c`), so the NTFS measurement covers them";
+  - D-text item 1(b)'s unqualified "its receipts are written to an NTFS path".
+
+  The native-NTFS campaigns are **not** the `/mnt/c` receipt campaign. `/mnt/c` has its own required campaign and criterion (items 13 and 15), and evidence from one limb is never substituted for the other. The native-NTFS campaigns stand as the evidence they are for native NTFS.
+- **[Rec 10; ML-09]** In D-text item 11, the "(c) tolerance" bullet's "per file, tolerance = max(statistic, floor)" now reads "**per field**, tolerance = max(statistic, floor)". Under the determinism precondition (item 9), every (a)×(c) run pair gives the same difference, so "the maximum over all (a)×(c) run pairs" is that single difference. "Units are never mixed across files" now reads "**across fields**" (item 10).
+- **[Rec 15; VAL-07]** Revision-7 lines still carry superseded wording: "Supervisor countersignature: REQUIRED, OPEN" and "the authority equivalence is not invoked". The adopted D-83 entry carries instead the §A8 item 2 line verbatim, together with the revision-8 countersignature record below. A closure check at adoption confirms this.
+- **[Rec 19; CHAIR-03]** The D-text's adoption-preconditions line gains this sentence: "**Adoption accepts the protocol, not the durability results:** the durability claims (D-text item 11 'Durability', items 3 and 13) stay unaccepted until §R5-6 row 32 and §R5-8 row 41 pass."
+
+**Supervisor countersignature for revision 8 [PV-10 Rec 1; CHAIR-01].**
+
+- **What is recorded.** On 2026-10-01, in session, the Student reported that the Supervisor confirms the approval already given also covers revision 8 as then amended, including §A8 items 9 to 13. By the Student's direction this confirmation is recorded as the countersignature for revision 8.
+- **Form.** The confirmation is verbal and reported by the Student. No written artifact exists. No words of the Supervisor's are quoted, because none were supplied. No timestamp is recorded beyond the date of the report.
+- **Scope.** §A8 items 1 to 13, and the revision-7 text they amend, as they stood when the confirmation was reported.
+- **Outside the scope.** Items 14 to 17 and the corrections above were written afterwards, the same day, under the Student's rulings. They are measurement criteria and mechanism records that make items 3, 9 to 11 and 13 executable without relaxing them, and the corrections bring revision-7 wording into line with items 10 and 13. The Supervisor's confirmation is not claimed to have reviewed their wording.
+- **Effect on the CHAIR-01 contradiction.** The Status block's "Supervisor's countersignature" precondition and §A8 item 2's "recorded as given" no longer disagree. Both now refer to this record.
+
+#### Evidence status at revision 8 (updated 2026-10-01, after the PV-10 remediation)
+
+All rows below were derived from each campaign's own `summary.json`, `campaign.json` and `trials.jsonl` on 2026-10-01. Recorded trial and campaign SHA-256 values were re-verified against the files.
+
+| Evidence | Status |
+|---|---|
+| `campaign_kill_20260930T212721Z-8054af1f`: native NTFS, random kill, `tec-thesis-311` (Python 3.11.16), clean commit `f9078c4`, 300/300 PASS, recorded in `16a5a2c` | **governed**. On its own it does not satisfy item 3, because it produced 0 torn records; it is satisfied together with the next row |
+| `campaign_kill-torn_20261001T084415Z-95cf3417`: native NTFS (`C:\`, volume serial recorded), `kill-torn` (item 14), `tec-thesis-311` (Python 3.11.16), clean governed tree at `25ad0f7`, 300/300 PASS | **governed**. `access`: 100 `torn_detected`; `registry`: 100 `torn_detected`; `receipt`: 67 `intact_old`, 33 `intact_new`, 0 `partial_final`. Bound 2.95 % per write type. **Item 3 is satisfied** for the kill-only admission: torn faults were produced, and every one was detected |
+| `campaign_kill_20261001T084637Z-9aaebb13`: `/mnt/c` receipt limb (i), random kill, `b01_iri` (Python 3.10.12), mount `/mnt/c` `9p` drvfs, backing NTFS, serial `CE38-3450`, clean governed tree at `25ad0f7`, 100/100 PASS | **governed**. 100 `intact_old`, 0 `partial_final` |
+| `campaign_kill-torn_20261001T085943Z-edad9609`: `/mnt/c` receipt limb (ii), `kill-torn`, same identity, 100/100 PASS | **governed**. 67 `intact_old`, 33 `intact_new` (`os.link` publishes through drvfs), 0 `partial_final` |
+| `/mnt/c` receipt campaign verdict under item 15 | **PASS**. Both limbs have N = 100 with every trial passing; properties (a)–(d) were checked against the records listed above |
+| `campaign_kill_20260930T170510Z-ba301519` (Python 3.11.16 at `37ae2f7`, no clean-tree record) | **superseded, not governed** (`NON_GOVERNED_NOTE.md`; PV-10 Rec 16) |
+| `campaign_kill_20260930T164532Z-3820c087` (Python 3.14, mislabelled) | **provisional, not governed** (`NON_GOVERNED_NOTE.md`) |
+| Power-loss trials | not run, by ruling 3; nothing about power loss is claimed |
+| (a)/(c) measuring runs and the frozen per-field tolerance | **OPEN**: §R5-5 item 4 |
+| `scientific_1month` field table | **OPEN**: owed with that fixture's Q-31 declaration (item 16) |
+
 ### R5-8. Open items (added; §R5-5 to §R5-7 otherwise stand)
 
 | # | Item | Owner | Due |
 |---|---|---|---|
-| 38 | Full-board review of the revision-8 delta (replaces §R5-7 row 2) | per `/review-tec-governance` | before adoption |
-| 39 | PV-09 Recs 21–24: determinism precondition (ML-01); per-field floor (ML-05); `environment_id` literals and variable (DATA-09); D-number for item 29 (DATA-12) | Student | before §R5-5 item 4 |
+| 38 | Full-board review of the revision-8 delta (replaces §R5-7 row 2). **Done:** `GOV-2026-10-01-PV-10`, seven seats, CONDITIONAL PASS, no blocker and no veto. Its findings' dispositions are in `GOV-2026-10-01-PV-10-REMEDIATION-STATUS.md` | per `/review-tec-governance` | before adoption |
+| 39 | **Ruled 2026-10-01** (§A8 items 9–12): determinism precondition (ML-01); per-field floor (ML-05); `environment_id` literals and variable (DATA-09); item 29 recorded in D-83, no separate D-number (DATA-12). **Closed 2026-10-01:** the rulings were reviewed by the board in PV-10, and the mechanism was committed in `42a1ca1` and wired into the runtime path (item 17). The PV-10 remediation code (items 14–17) has not had a board pass of its own; see row 42 | Student | before §R5-5 item 4 |
 | 40 | PV-09 open mechanism findings (Recs 10, 11, 13–15, 19, 20, 27–29, 33): a governed code-generation pass as §W7 | Student | per W rows; Rec 15's clean-commit campaign before §R5-6 row 32 |
-| 41 | (b) receipt path on `/mnt/c` (Rec 14; DATA-11 scope) | Student | before §R5-7 row 35 |
+| 41 | **Scope ruled in (§A8 item 13); PASS 2026-10-01 under item 15.** Campaigns `campaign_kill_20261001T084637Z-9aaebb13` and `campaign_kill-torn_20261001T085943Z-edad9609` (both 100/100, governed) | Student | before §R5-7 row 35 and before any reliance on (b) receipts |
+| 42 | Board pass over the PV-10 remediation code and criteria (§A8 items 14–17; commits `42a1ca1`, `25ad0f7`). These are measurement criteria and mechanism records, not D-text, and they relax no adopted rule | per `/review-tec-governance` | before §R5-5 item 4 |
+| 43 | PV-10 findings the 2026-10-01 rulings did not name: Recs 11–14, 17, 18 and 20–26. Implemented by the remediation, pending the row-42 board pass: 13, 14, 17, 18, 20, 22 and 23. **Not acted on:** 11 (failure recording owed by the caller), 12 (offset-dominated fields), 21 (exact exception types), 24 (§R5-5 item 24 D-number limb) and 25 (`-0.0` disclosure). 26 needs no action. Detail is in the remediation-status file | Student | per row |
 
 ---
 
@@ -77,6 +223,7 @@
 **Status: DRAFT, NOT ENACTED.** No D-number has been written. Adoption needs:
 - the Student's adoption act;
 - the Supervisor's countersignature (the authority equivalence is not invoked);
+  *[Annotation 2026-10-01 (PV-10 Rec 15): superseded by revision 8 §A8 item 2 and the revision-8 countersignature record.]*
 - a **full-board review scoped to the revision-7 policy delta** (§A7 and §R4-7), under route (b);
 - completion of the §W7 code-generation work package **before the dates in its rows**, not before
   adoption. The Validation Auditor's code-level reservation (veto limb 3, and §R5-5 item 11) is
@@ -128,6 +275,10 @@ in §R4-7 means that D-text item.
    full as §R5-7 rows 7R, 20R and 25R. Every cross-reference in §R4-7 and §R5-7 is qualified.
 6. **Durability scope (Rec 6; P + W).** (b) receipts are written to an **NTFS path** (via `/mnt/c`),
    so the NTFS measurement covers them; the 330-trial NTFS scope stands. Before any power-loss trial:
+   *[Annotation 2026-10-01, revision 8 §A8 item 13 and "Corrections" (PV-10 Rec 9): the coverage
+   clause "so the NTFS measurement covers them" is superseded. The native-NTFS campaigns do not
+   constitute the `/mnt/c` receipt campaign, which is separately required (§A8 items 13 and 15).
+   The sentence is kept as written.]*
    a verified backup of the repository and `evidence/`, plus a SHA-256 snapshot of both. **One
    injection method:** forced power-off by holding the power button, with AC power disconnected. Mechanism: the durability harness, §W7 W-6.
 7. **January–November B-01 before §R5-5 item 4 (Rec 7; P).** New §R5-7 row 35: the
@@ -233,6 +384,8 @@ in §R4-7 means that D-text item.
 > Validation Auditor's reservation on §R5-5 item 11 stands until W-1 and rows 30–31 pass.
 >
 > **Supervisor countersignature: REQUIRED, OPEN.**
+> *[Annotation 2026-10-01 (PV-10 Rec 15): superseded by revision 8 §A8 item 2 and the revision-8
+> countersignature record; the adopted D-83 entry carries those, not this line.]*
 >
 > 1. **Platform.** New governed runs execute on `LAPTOP-TV4UGFBC` in three named environments,
 >    each recorded per run as `environment_id`, on both the run record and the registry row, which
@@ -241,6 +394,8 @@ in §R4-7 means that D-text item.
 >      re-acquisition, and the evaluation-time IRI/GIM join;
 >    - **(b)** WSL2 `b01_iri`: only under D-49 and its addenda, only for B-01 generation and
 >      `verify_runtime`; its receipts are written to an NTFS path;
+>      *[Annotation 2026-10-01 (revision 8 §A8 items 13, 15; PV-10 Rec 9): through `/mnt/c`;
+>      no durability claim covers them until the `/mnt/c` receipt campaign passes.]*
 >    - **(c)** WSL2 G-07 clean-run: only for G-07 reproduction.
 >
 >    TE §9.1's "exactly two execution environments" is read as "one platform with three named
@@ -314,6 +469,8 @@ in §R4-7 means that D-text item.
 >       the measuring runs, computed only from a `storage_total` that excludes archived copies.
 >       Disclosure: the plumbing storage values were seen before this rule was set.
 >     - **K = 2.** **(c) measuring runs = 2.**
+>     - *[Annotation 2026-10-01 (revision 8 §A8 items 10 and "Corrections", PV-10 Rec 10): read
+>       "per field" for "per file" and "across fields" for "across files" in the bullet below.]*
 >     - **(c) tolerance:** per file, tolerance = max(statistic, floor), where the statistic is the
 >       maximum element-wise |(c) − (a)| over all (a)×(c) run pairs, the floor is 2⁻²³ × max|x|
 >       over that file's (a) elements, and the files are every output D-74 tolerances for the

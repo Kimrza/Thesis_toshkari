@@ -1,0 +1,53 @@
+{
+  "campaign_id": "20261001T084637Z-9aaebb13",
+  "decision": "D-83 revision 7 section A7 item 6; section R4-7 item 11; W-6; revision 8 section A8 items 3, 13 and 14",
+  "fault": "kill",
+  "write_types": [
+    "receipt"
+  ],
+  "trials_per_write_type": 100,
+  "required_per_write_type": 100,
+  "seed": 20260930,
+  "code_commit": "25ad0f70a529068c72f7f6b1d7d76e734cccd191",
+  "working_tree_dirty": false,
+  "working_tree": {
+    "dirty": false,
+    "governed_changes": [],
+    "line_ending_only": [
+      " M environment/bootstrap_env.ps1",
+      " M environment/install_wheels.ps1"
+    ],
+    "other_tracked_changes": [
+      " M .githooks/commit-msg",
+      " M .gitignore",
+      " M aidlc/spaces/default/intents/260813-tec-hourly-forecast/audit/laptop-tv4ugfbc-2742bd6d5bde.md",
+      " M governance/CHANGE_RECORD_2026-09-29_platform_local_only.md",
+      " M governance/CHANGE_RECORD_2026-10-01_GOV-PV-09_rulings.md",
+      " M kaggle/b01_validation_samples.DRAFT.json",
+      " M kaggle/b01_validation_samples.TEMPLATE.json",
+      " M kaggle/b01_validation_samples.json",
+      " M kaggle/kaggle_iri2016_benchmark.ipynb",
+      " M kaggle/kaggle_iri2016_verification.ipynb",
+      " M kaggle/kaggle_tf_matplotlib_pin_verification.ipynb"
+    ]
+  },
+  "governed": true,
+  "environment": {
+    "environment_id": "b01_iri",
+    "declared_environment_id": "b01_iri",
+    "python": "3.10.12 | packaged by conda-forge | (main, Jun 23 2023, 22:40:32) [GCC 12.3.0]",
+    "executable": "/home/kimia_rezaee/miniconda3/envs/b01_iri/bin/python",
+    "platform": "Linux-6.18.33.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i9-12900H"
+  },
+  "filesystem_under_test": {
+    "path": "/mnt/c/Users/LOTUS/Desktop/Thesis_toshkari/artifacts/durability_scratch_mntc",
+    "df": "C:\\            9p   475420996 461017876  14403120  97% /mnt/c",
+    "mount_point": "/mnt/c",
+    "mount_type": "9p",
+    "mount_options": "rw,noatime,aname=drvfs;path=C:\\;uid=1000;gid=1000;symlinkroot=/mnt/,cache=0x5,access=client,msize=65536,trans=fd,rfd=6,wfd=6",
+    "backing_filesystem": "NTFS",
+    "backing_volume_serial": "CE38-3450"
+  },
+  "started_at_utc": "2026-10-01T08:46:42.090821+00:00"
+}
