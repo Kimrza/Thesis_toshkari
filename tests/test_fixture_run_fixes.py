@@ -295,3 +295,26 @@ def test_target_processing_refuses_disagreeing_provider_releases() -> None:
     ]
     with pytest.raises(Exception, match="disagree"):
         mod._provider_processing(consumed)
+
+
+def test_target_never_cites_the_gim_comparator_release(tmp_path: Path) -> None:
+    """2026-10-01: the target cited the evaluation-only GIM comparator as a source, and its
+    per-run republication changed the target's content_hash every run."""
+    from src.data.prepared import GIM_COMPARATOR_RELEASE_DIR
+
+    mod = _stage02()
+    release_root = tmp_path / "releases"
+    _write_valid_provider_release(release_root / "plumbing_7day_x", row_marker="7.0")
+    _write_valid_provider_release(release_root / GIM_COMPARATOR_RELEASE_DIR, row_marker="9.0")
+    cited = [p.parent.name for p, _m in mod._consumed_release_manifests(release_root)]
+    assert cited == ["plumbing_7day_x"]
+
+
+def test_target_still_cites_a_non_comparator_second_release(tmp_path: Path) -> None:
+    """Negative control: only the comparator is dropped; another release stays cited."""
+    mod = _stage02()
+    release_root = tmp_path / "releases"
+    _write_valid_provider_release(release_root / "plumbing_7day_x", row_marker="7.0")
+    _write_valid_provider_release(release_root / "some_driver_2022", row_marker="9.0")
+    cited = sorted(p.parent.name for p, _m in mod._consumed_release_manifests(release_root))
+    assert cited == ["plumbing_7day_x", "some_driver_2022"]

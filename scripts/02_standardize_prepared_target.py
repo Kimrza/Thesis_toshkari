@@ -470,7 +470,7 @@ def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str
     # exclude archived dirs; for the actual provider-VTEC releases specifically,
     # dedupe multiple identical-dataset_version citations down to the earliest one
     # (deterministic, not "whichever re-run happened to exist last").
-    from src.data.prepared import _is_archived_release_dirname
+    from src.data.prepared import GIM_COMPARATOR_RELEASE_DIR, _is_archived_release_dirname
 
     seen_provider_versions: set[str] = set()
     out: list[tuple[Path, dict[str, Any]]] = []
@@ -478,6 +478,12 @@ def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str
     for manifest_path in manifests:
         if manifest_path.parent.name == TARGET_RELEASE_DIR:
             continue  # this stage's own output is never its own input
+        if manifest_path.parent.name == GIM_COMPARATOR_RELEASE_DIR:
+            # The CODE GIM comparator is evaluation-time only (Mandated) and never an input
+            # to the target. Citing it made the target misstate its provenance, and, since
+            # the comparator is republished write-once per run, changed the target's
+            # content_hash on every run (found 2026-10-01, D-83 item 12 re-measure).
+            continue
         if _is_archived_release_dirname(manifest_path.parent.name):
             continue  # provenance history, never a live input (same reasoning as target)
         problems = verify_release(manifest_path)
