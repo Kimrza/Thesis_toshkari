@@ -8,6 +8,8 @@
 *.yml                  text eol=lf
 *.ts                   text eol=lf
 *.md                   text
+*.sh                   text eol=lf
+environment/*-linux64.lock text eol=lf
 
 # D-83 W-4 identity files are hashed for admission; pin LF (GOV-2026-09-30-PV-09 DATA-01).
 environment/identity/*.json text eol=lf
