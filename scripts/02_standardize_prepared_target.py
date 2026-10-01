@@ -503,6 +503,36 @@ def _consumed_release_manifests(release_root: Path) -> list[tuple[Path, dict[str
     return out
 
 
+PROVIDER_RECORDS_FILENAME = "prepared_vtec_records.csv"
+
+
+def _provider_processing(consumed: list[tuple[Path, dict[str, Any]]]) -> dict[str, Any]:
+    """The `processing` block of the consumed PROVIDER release, never a driver's.
+
+    Refuses when no provider-shaped release was consumed, or when two consumed provider
+    releases disagree on it: either would make the target's provenance a guess.
+    """
+    blocks = [
+        dict(manifest.get("processing") or {})
+        for _path, manifest in consumed
+        if isinstance(manifest.get("output_files"), Mapping)
+        and PROVIDER_RECORDS_FILENAME in manifest["output_files"]
+    ]
+    if not blocks:
+        raise IntegrityError(
+            "target release",
+            "no consumed PROVIDER release carries a processing block; the target's "
+            "processing is the provider release's, never a driver release's (TE 13.3)",
+        )
+    if any(block != blocks[0] for block in blocks[1:]):
+        raise IntegrityError(
+            "target release",
+            "consumed provider releases disagree on their processing block; refusing to "
+            "choose one as the target's provenance",
+        )
+    return blocks[0]
+
+
 def _target_release_manifest(
     *,
     snapshot: Any,
@@ -544,8 +574,15 @@ def _target_release_manifest(
     # `processing`: the consumed release's own seven Phase 1 keys, with the identity
     # re-resolved from config (never carried) and the aggregation statistic recorded as the
     # one this run APPLIED -- stage 00 records it as a destination, stage 02 performs it.
+    #
+    # Defect fixed 2026-10-01 (found re-measuring plumbing_7day under D-83 item 12): this
+    # read `consumed[0]`, and `consumed` is in sorted path order, so whenever a driver
+    # release (`gfz_*`, `kyoto_*`, `nrcan_*`) was present it sorted first and the VTEC
+    # target was published carrying a DRIVER's processing block (`parameters` ap60/hp60,
+    # "not applicable to a driver release"). The processing block is the provider
+    # release's only; drivers stay cited in `source_files` as provenance.
     identity = result.identity
-    first = dict(consumed[0][1].get("processing") or {})
+    first = _provider_processing(consumed)
     processing = {
         "phase_id": identity["phase_id"],
         "target_definition_id": identity["target_definition_id"],

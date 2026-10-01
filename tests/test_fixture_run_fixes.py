@@ -246,3 +246,52 @@ def test_unknown_non_provider_release_still_refuses_as_ambiguous(tmp_path: Path)
     with pytest.raises(Exception) as exc_info:
         load_released_provider_rows(release_root)
     assert "DIFFERENT dataset_version" in str(exc_info.value)
+
+
+def _stage02():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("stage02_under_test", SCRIPT02)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_PROVIDER_PROCESSING = {"parameters": ["ut1_unix", "gdlat", "glon", "tec", "dtec"],
+                        "hourly_aggregation": "median"}
+_DRIVER_PROCESSING = {"parameters": ["ap60", "hp60"],
+                      "hourly_aggregation": "none: values are released at the provider's own cadence"}
+
+
+def test_target_processing_is_the_providers_even_when_a_driver_sorts_first() -> None:
+    """2026-10-01 defect: `consumed[0]` was a driver release (sorts before
+    `plumbing_7day_*`), so the VTEC target carried the driver's processing block."""
+    mod = _stage02()
+    consumed = [
+        (Path("releases/gfz_hp60ap60_v2_2022/release_manifest.json"),
+         {"output_files": {"hp60_ap60_1h.csv": "x"}, "processing": _DRIVER_PROCESSING}),
+        (Path("releases/plumbing_7day_20261001T000000Z/release_manifest.json"),
+         {"output_files": {"prepared_vtec_records.csv": "y"}, "processing": _PROVIDER_PROCESSING}),
+    ]
+    assert mod._provider_processing(consumed) == _PROVIDER_PROCESSING
+
+
+def test_target_processing_refuses_without_a_provider_release() -> None:
+    mod = _stage02()
+    consumed = [(Path("releases/gfz/release_manifest.json"),
+                 {"output_files": {"hp60_ap60_1h.csv": "x"}, "processing": _DRIVER_PROCESSING})]
+    with pytest.raises(Exception, match="PROVIDER release"):
+        mod._provider_processing(consumed)
+
+
+def test_target_processing_refuses_disagreeing_provider_releases() -> None:
+    mod = _stage02()
+    other = {**_PROVIDER_PROCESSING, "hourly_aggregation": "mean"}
+    consumed = [
+        (Path("a/release_manifest.json"),
+         {"output_files": {"prepared_vtec_records.csv": "y"}, "processing": _PROVIDER_PROCESSING}),
+        (Path("b/release_manifest.json"),
+         {"output_files": {"prepared_vtec_records.csv": "z"}, "processing": other}),
+    ]
+    with pytest.raises(Exception, match="disagree"):
+        mod._provider_processing(consumed)
