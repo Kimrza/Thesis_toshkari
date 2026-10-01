@@ -1,0 +1,66 @@
+{
+  "aggregation": "equal_station_macro",
+  "artifact_class": "breakdown",
+  "artifact_id": "breakdown-per_station_tier3",
+  "breakdown_id": "per_station_tier3",
+  "completeness_shortfalls": [],
+  "driver_identity_caveat": "Every external driver value is identical across all three cells by construction; no station performance difference may be attributed to local forcing the dataset does not contain",
+  "exclusion_counts": {
+    "BSHM": 115
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "kind": "breakdown",
+  "mask_id": "9187fdd84e24f1f9da3b7b96a551b3bf0062449a9c3f630ff3e271d688738626",
+  "partial": false,
+  "partition_id": "FIX-NOV-FOLD-01",
+  "payload": {
+    "comparisons": [
+      {
+        "beats_model": true,
+        "benchmark_id": "M-04",
+        "mask_id": "9187fdd84e24f1f9da3b7b96a551b3bf0062449a9c3f630ff3e271d688738626",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-01",
+        "per_station": {
+          "BSHM": -260.66910778431463
+        },
+        "phase_id": "P1A",
+        "scalar": -260.66910778431463,
+        "set_id": "tier3",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      },
+      {
+        "beats_model": true,
+        "benchmark_id": "M-05",
+        "mask_id": "9187fdd84e24f1f9da3b7b96a551b3bf0062449a9c3f630ff3e271d688738626",
+        "model_id": "M-06",
+        "orientation": "benchmark_minus_model",
+        "partition_id": "FIX-NOV-FOLD-01",
+        "per_station": {
+          "BSHM": -265.1329270456825
+        },
+        "phase_id": "P1A",
+        "scalar": -265.1329270456825,
+        "set_id": "tier3",
+        "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+        "source_id": "GNSS_VTEC",
+        "target_definition_id": "GRIDDed_VTEC_1H",
+        "weighting": "equal_station"
+      }
+    ]
+  },
+  "per_station": true,
+  "phase_id": "P1A",
+  "role_label": "supplementary",
+  "scored_window_statement": "5\u201330 November 2022, 26 days, first 24 h excluded and counted",
+  "source_id": "GNSS_VTEC",
+  "surviving_row_counts": {
+    "BSHM": 43
+  },
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "units": "TECU"
+}

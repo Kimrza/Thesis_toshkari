@@ -85,7 +85,7 @@ import math
 import re
 import sys
 import uuid
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, Final
 
@@ -1773,6 +1773,74 @@ def _month_tag(months: list[int]) -> str:
     return "m" + "_".join(f"{m:02d}" for m in ordered)
 
 
+#: The legacy November receipt D-83 revision 8 section A8 item 12 declares SUPERSEDED (made
+#: before W-4, no environment_id). Never consumed by default; an explicit
+#: --benchmark-rows naming it still is, so historical evidence stays re-checkable.
+LEGACY_B01_ROWS: Final[tuple[str, ...]] = ("b01_iri2016_rows.jsonl", "b01_iri2016_rows_partial.jsonl")
+_W2_ROWS = __import__("re").compile(r"^b01_iri2016_rows_(?P<phase>[A-Za-z0-9]+)_m(?P<tag>[0-9_-]+)\.jsonl$")
+
+
+def _months_of_tag(tag: str) -> set[int]:
+    if "-" in tag:
+        lo, hi = (int(x) for x in tag.split("-"))
+        return set(range(lo, hi + 1))
+    return {int(x) for x in tag.split("_")}
+
+
+def resolve_b01_receipt(
+    out: Path,
+    *,
+    rows: Path | None,
+    provenance: Path | None,
+    months: Sequence[int] | None,
+) -> tuple[Path, Path]:
+    """The B-01 rows and provenance a bridge or fixture run consumes (closure 2026-10-01).
+
+    Explicit paths win. Otherwise the per-month-set receipt written by `--generate-benchmark`
+    (W-2 names, `b01_output_names`) whose months cover `months` is selected; two covering
+    receipts are ambiguity and refuse by name. The legacy November receipt is superseded
+    (D-83 A8 item 12) and is never selected by default: with no covering W-2 receipt the
+    call refuses, naming the re-generation that is owed.
+    """
+    if rows is not None:
+        prov = provenance or Path(rows).with_name("b01_provenance.json")
+        return Path(rows), Path(prov)
+    wanted = set(months or [])
+    covering = []
+    for path in sorted(Path(out).glob("b01_iri2016_rows_*.jsonl")):
+        match = _W2_ROWS.match(path.name)
+        if match is None or path.name in LEGACY_B01_ROWS:
+            continue
+        if wanted and wanted <= _months_of_tag(match.group("tag")):
+            covering.append(path)
+    if len(covering) > 1:
+        raise IntegrityError(
+            str(out),
+            f"more than one B-01 receipt covers months {sorted(wanted)}: "
+            f"{[p.name for p in covering]}; name one with --benchmark-rows",
+        )
+    if not covering:
+        raise IntegrityError(
+            str(out),
+            f"no B-01 receipt (W-2 naming) covers months {sorted(wanted)}; the legacy "
+            "November receipt is superseded (D-83 revision 8 section A8 item 12) and is never "
+            "consumed by default -- run --generate-benchmark for these months in b01_iri",
+        )
+    stem = covering[0].name[len("b01_iri2016_rows_"):-len(".jsonl")]
+    return covering[0], covering[0].with_name(f"b01_provenance_{stem}.json")
+
+
+def _fixture_months(entry: Mapping[str, Any], args: argparse.Namespace) -> list[int] | None:
+    """The months of the fixture named by --fixture-manifest, or None outside a fixture."""
+    manifest = getattr(args, "fixture_manifest", None)
+    if manifest is None:
+        return None
+    scope = load_fixture_scope(Path(manifest))
+    start = dt.date.fromisoformat(str(scope.identity["window_citation"]["start_utc"]))
+    end = dt.date.fromisoformat(str(scope.identity["window_citation"]["end_utc"]))
+    return sorted({start.month, end.month})
+
+
 def b01_output_names(phase_id: str, months: list[int]) -> dict[str, str]:
     """Per-month-set, per-`phase_id` B-01 output names (D-83 revision 7 §A7 item 2; W-2).
 
@@ -2642,11 +2710,12 @@ def _emit_prediction_payload(entry: Mapping[str, Any], args: argparse.Namespace)
             "--emit-prediction-payload", "no 06 predictions-run directory was named"
         )
     out = _b01_out_dir(entry, args)
-    rows_path = args.benchmark_rows
-    if rows_path is None:
-        candidate = out / "b01_iri2016_rows.jsonl"
-        rows_path = candidate if candidate.is_file() else out / "b01_iri2016_rows_partial.jsonl"
-    prov_path = args.benchmark_provenance or (out / "b01_provenance.json")
+    rows_path, prov_path = resolve_b01_receipt(
+        out,
+        rows=args.benchmark_rows,
+        provenance=args.benchmark_provenance,
+        months=_fixture_months(entry, args),
+    )
     if not Path(rows_path).is_file():
         raise IntegrityError(str(rows_path), "no B-01 raw rows file; run --generate-benchmark first")
     if not Path(prov_path).is_file():
@@ -2794,10 +2863,12 @@ def _fixture_external_outputs(entry: Mapping[str, Any], args: argparse.Namespace
     bridged = _emit_prediction_payload(entry, bridge_args)
 
     out = _b01_out_dir(entry, args)
-    rows_path = args.benchmark_rows
-    if rows_path is None:
-        candidate = out / "b01_iri2016_rows.jsonl"
-        rows_path = candidate if candidate.is_file() else out / "b01_iri2016_rows_partial.jsonl"
+    rows_path, _prov = resolve_b01_receipt(
+        out,
+        rows=args.benchmark_rows,
+        provenance=args.benchmark_provenance,
+        months=sorted({start.month, end.month}),
+    )
     iri_rows = [
         row
         for station in stations

@@ -1,0 +1,55 @@
+{
+  "artifact_class": "metrics_artifact",
+  "comparisons": [
+    {
+      "beats_model": true,
+      "benchmark_id": "M-04",
+      "mask_id": "8862829a648c348abcbe51b6a16308ad278f6a7785b11f36bc7aedc1e17b29c0",
+      "model_id": "M-06",
+      "orientation": "benchmark_minus_model",
+      "partition_id": "FIX-NOV-FOLD-02",
+      "per_station": {
+        "BSHM": -183.11082882009646
+      },
+      "phase_id": "P1A",
+      "scalar": -183.11082882009646,
+      "set_id": "tier3",
+      "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+      "source_id": "GNSS_VTEC",
+      "target_definition_id": "GRIDDed_VTEC_1H",
+      "weighting": "equal_station"
+    },
+    {
+      "beats_model": true,
+      "benchmark_id": "M-05",
+      "mask_id": "8862829a648c348abcbe51b6a16308ad278f6a7785b11f36bc7aedc1e17b29c0",
+      "model_id": "M-06",
+      "orientation": "benchmark_minus_model",
+      "partition_id": "FIX-NOV-FOLD-02",
+      "per_station": {
+        "BSHM": -215.1395523161181
+      },
+      "phase_id": "P1A",
+      "scalar": -215.1395523161181,
+      "set_id": "tier3",
+      "sign_convention_sentence": "positive values favour the model: the differential is benchmark minus model",
+      "source_id": "GNSS_VTEC",
+      "target_definition_id": "GRIDDed_VTEC_1H",
+      "weighting": "equal_station"
+    }
+  ],
+  "emitted_at_utc": "2026-10-01T12:12:59.209064+00:00",
+  "exclusion_counts": {
+    "BSHM": 137
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "mask_id": "8862829a648c348abcbe51b6a16308ad278f6a7785b11f36bc7aedc1e17b29c0",
+  "model_id": "M-06",
+  "phase2_not_independent_statement": "Phase 2 is a fixed-protocol replication on a new target lineage, not a second statistically independent blind test, because it reuses the December timestamps after Phase 1 has already reported them",
+  "row_counts": {
+    "BSHM": 21
+  },
+  "scored_window_statement": "6\u201330 November 2022, 25 days, first 24 h excluded and counted",
+  "set_id": "tier3",
+  "units": "TECU"
+}

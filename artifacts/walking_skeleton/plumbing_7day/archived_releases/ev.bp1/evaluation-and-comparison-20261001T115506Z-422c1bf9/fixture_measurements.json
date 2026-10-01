@@ -1,0 +1,12 @@
+{
+  "measurements": {
+    "support_missingness": {
+      "comparator": {
+        "max": 43,
+        "min": 18,
+        "units": "rows"
+      }
+    }
+  },
+  "stage": "07_evaluate_and_report"
+}
