@@ -2897,9 +2897,9 @@ def test_rec2_00_out_of_window_acquisition_exemption_refuses(tmp_path):
     # entry's audit_window through R-31's one reader — asserted structurally here because
     # 00 retrieves nothing today by design (no live transport until DATA-07); the
     # behavioural half lives in tests/test_acquisition.py against the shared predicate.
-    run_source = inspect.getsource(module._run)
-    assert "assert_records_within_window(" in run_source and "audit_window" in run_source, (
-        "scripts/00::_run lost its fixture-window record bound "
+    fixture_source = inspect.getsource(module._run_fixture_scoped)
+    assert "assert_records_within_window(" in fixture_source and "audit_window" in fixture_source, (
+        "scripts/00::_run_fixture_scoped lost its fixture-window record bound "
         "(CR-2026-09-13-000102-FIXTURE-WINDOW)"
     )
 

@@ -1193,15 +1193,18 @@ def test_stage_00_passes_gap_accounting_so_the_conservation_loop_is_not_empty() 
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    for func, label in ((module._run, "_run"), (module._run_fixture_scoped, "_run_fixture_scoped")):
+    for func, label in (
+        (module._run_reacquired, "_run_reacquired"),
+        (module._run_fixture_scoped, "_run_fixture_scoped"),
+    ):
         source = inspect.getsource(func)
         assert "_gap_accounting_for(" in source, (
             f"scripts/00::{label} composes no gap-accounting entry, so the NaN-count "
             f"conservation invariant is unenforced on that path (board finding 26)"
         )
-    run_source = inspect.getsource(module._run)
+    run_source = inspect.getsource(module._run_reacquired)
     assert "gap_accounting=gap_accounting" in run_source, (
-        "scripts/00::_run must PASS its gap accounting to write_request_manifest; "
+        "scripts/00::_run_reacquired must PASS its gap accounting to write_request_manifest; "
         "composing entries and not passing them leaves the loop iterating zero entries"
     )
     helper = inspect.getsource(module._gap_accounting_for)
@@ -1511,18 +1514,20 @@ def test_optionb_00_record_window_bound_behavioural_and_wired(tmp_path) -> None:
     spec = importlib.util.spec_from_file_location("stage_00_under_test", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    # 2026-10-02 (DATA-07 re-acquisition): `_run` now dispatches -- a fixture run to
+    # `_run_fixture_scoped`, a full-year run to `_run_reacquired` -- and each binds its
+    # records to its own window through R-31's one date reader.
     run_source = inspect.getsource(module._run)
-    bound_at = run_source.find("assert_records_within_window(")
-    assert bound_at != -1, (
-        "scripts/00::_run lost its fixture-window record bound "
+    assert "_run_fixture_scoped(" in run_source and "_run_reacquired(" in run_source
+    fixture_source = inspect.getsource(module._run_fixture_scoped)
+    assert "assert_records_within_window(" in fixture_source and "audit_window" in fixture_source, (
+        "scripts/00::_run_fixture_scoped lost its fixture-window record bound "
         "(CR-2026-09-13-000102-FIXTURE-WINDOW)"
     )
-    assert 'timestamp_key="timestamp"' in run_source and "audit_window" in run_source, (
-        "the record bound must consume the entry's audit_window through R-31's one date "
-        "reader on the record timestamp key"
+    full_year = inspect.getsource(module._run_reacquired)
+    assert "assert_records_within_window(" in full_year and '"REFIT"' in full_year, (
+        "scripts/00::_run_reacquired must bind every record to the REFIT training window"
     )
-    guard_at = run_source.find("if audit_window is not None")
-    assert guard_at != -1 and guard_at < bound_at, (
-        "the record bound must be guarded on the fixture window so non-fixture runs are "
-        "byte-identical to the pre-repair behaviour"
+    assert "assert_no_locked_month_records(" in full_year, (
+        "scripts/00::_run_reacquired must screen the locked month on record dates (R-31)"
     )

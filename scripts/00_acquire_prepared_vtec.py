@@ -44,10 +44,12 @@ Boundaries this script holds
 * The TE 18.3 preflight REFUSES while the D-144 acquisition identity is not yet
   transcribed into `configs/data.yaml` (two of D-144's four attached freezes remain
   open): stop and report, never default (TE 18.2/18.3).
-* No live provider call is made in this environment: the transport is injected, and
-  `_build_transport` refuses with a recorded reason (TE 8.1 permits `requests` only
-  where provider terms permit; the retrieval client's rate bound is that permission's
-  mechanical form).
+* No provider call is made by this stage. The DATA-07 re-acquisition (authorized
+  2026-10-01) is retrieved by `scripts/acquire_madrigal_reacquisition_2022.py`; a
+  full-year run of this stage verifies that evidence against its manifest, parses the
+  three frozen cells, screens December and the REFIT window on record dates, records the
+  DATA-07 comparison with the earlier derived evidence, and publishes the provider release
+  (`_run_reacquired`). `_build_transport` remains a refusing guard.
 """
 
 from __future__ import annotations
@@ -69,7 +71,6 @@ if str(REPO_ROOT) not in sys.path:
 
 from src.data.acquisition import (  # noqa: E402
     AcquisitionError,
-    RetrievalClient,
     assert_no_locked_month_records,
     assert_records_within_window,
     cited_stations,
@@ -428,24 +429,19 @@ def _gap_accounting_for(series: str, raw_values: Sequence[Any]) -> dict[str, Any
 
 
 def _build_transport() -> Any:
-    """The live provider transport — deliberately NOT constructed in this environment.
+    """No provider transport is ever built inside the pipeline.
 
-    Raises
-    ------
-    AcquisitionError
-        always, with the recorded reason: no live provider call is made while the
-        network is unavailable and BLK-07 stands; retrieval runs against injected
-        recorded-response transports only (TS-A-01), and TE 8.1 permits `requests`
-        only where provider terms permit — wiring a real transport is the deferred
-        re-acquisition work, with DATA-07's suffix-recording obligations attached.
+    The DATA-07 re-acquisition (authorized by the Student on 2026-10-01) is retrieved by
+    `scripts/acquire_madrigal_reacquisition_2022.py`, which owns the network, the identity
+    and the resumable 16-hour schedule; this stage only verifies and releases what that
+    script stored (`_run_reacquired`). Kept as a refusing guard so a future caller cannot
+    reintroduce network retrieval into a stage script by accident.
     """
     raise AcquisitionError(
         "provider transport",
-        "no live provider transport is configured in this environment: retrieval is "
-        "exercised against injected recorded-response transports only (TS-A-01), no "
-        "network call is authorised here, and the re-acquisition is deferred work "
-        "(DATA-07) — supply a transport via RetrievalClient when that work is "
-        "authorised; this refusal is recorded rather than defaulted (TE 18.3)",
+        "stage 00 never contacts a provider: retrieval is "
+        "scripts/acquire_madrigal_reacquisition_2022.py's, and this stage reads its "
+        "verified evidence (DATA-07; TE 18.3)",
     )
 
 
@@ -794,46 +790,95 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
     _assert_phase1_field_contract()  # R-24: before the first write, always
 
     snapshot = entry["snapshot"]
-    acquisition_cfg = snapshot.data["acquisition"]  # present: preflight asserted it
-
     workspace = Path(snapshot.resolved_roots["workspace"])
     out_dir = Path(snapshot.resolved_roots["artifacts"]) / "acquisition"
 
     if entry.get("fixture_scope") is not None:
         return _run_fixture_scoped(entry, workspace=workspace, out_dir=out_dir)
 
-    client = RetrievalClient(_build_transport())  # raises: no live transport here
-    retrieved_records: list[Mapping[str, Any]] = []
+    return _run_reacquired(entry, workspace=workspace, out_dir=out_dir)
 
-    # Membership from record timestamps, never from a name (R-31); no acquisition
-    # run may touch calendar 2022-12 while BLK-07 stands.
-    assert_no_locked_month_records(retrieved_records, timestamp_key="timestamp")
 
-    # Option B reads-narrowing (CR-2026-09-13-000102-FIXTURE-WINDOW): on a fixture run
-    # every retrieved/read record must lie inside the scope's cited window — an
-    # out-of-window record REFUSES (R-31's record-date assertion consumed, never
-    # copied). Non-fixture runs are unchanged: no window bound beyond R-31.
-    audit_window = entry.get("audit_window")
-    if audit_window is not None:
-        assert_records_within_window(
-            retrieved_records,
-            start=audit_window[0],
-            end=audit_window[1],
-            timestamp_key="timestamp",
+#: The DATA-07 re-acquisition this stage reads on a full-year run (written by
+#: `scripts/acquire_madrigal_reacquisition_2022.py`; see that script's docstring).
+REACQUISITION_DIR: Final[Path] = Path("evidence") / "madrigal_reacquisition_2022"
+
+
+def _run_reacquired(entry: Mapping[str, Any], *, workspace: Path, out_dir: Path) -> dict[str, Any]:
+    """The full-year stage 00 over the verified re-acquisition (no network in the pipeline).
+
+    The retrieval itself is the dedicated acquisition script's (resumable, about 16 h at the
+    provider's measured cost); this stage VERIFIES what it stored, parses the three frozen cells,
+    screens the locked month and the window on RECORD dates (R-31), records the DATA-07
+    comparison against the derived evidence relied on until now, and publishes the provider
+    release stages 01 and 02 consume (D-61 option A). The window is the REFIT partition's
+    training range from `configs/data.yaml` (2022-01-01..2022-11-30; R-80), asserted equal to
+    the re-acquisition's own recorded window, so no new config value is introduced.
+    """
+    from src.data.reacquisition import (
+        compare_with_prior_records,
+        parse_isprint,
+        select_cell_records,
+        verify_reacquisition,
+    )
+    from src.data.splits import build_partitions, partition_by_id
+
+    snapshot = entry["snapshot"]
+    acquisition_cfg = snapshot.data["acquisition"]
+    refit = partition_by_id(build_partitions(snapshot), "REFIT")
+    window = (refit.train_start, refit.train_end)
+    window = tuple(
+        value.date() if isinstance(value, dt.datetime) else value for value in window
+    )
+    evidence = verify_reacquisition(workspace / REACQUISITION_DIR)
+    recorded_window = tuple(dt.date.fromisoformat(d) for d in evidence["request"]["window"])
+    if recorded_window != window:
+        raise IntegrityError(
+            workspace / REACQUISITION_DIR / "request_manifest.json",
+            f"re-acquisition window {recorded_window} is not the REFIT training range {window}",
         )
-
+    stations_cfg = snapshot.data["stations"]
+    cells = {
+        name: cell_of(float(cfg["lat"]), float(cfg["lon"])) for name, cfg in stations_cfg.items()
+    }
+    records: list[dict[str, Any]] = []
+    outside_cells = 0
+    provider_files: list[dict[str, Any]] = []
+    for day, record in sorted(evidence["complete"].items()):
+        raw = workspace / REACQUISITION_DIR / "raw" / record["logical_name"]
+        kept, outside = select_cell_records(
+            parse_isprint(raw.read_text(encoding="utf-8")), cells
+        )
+        stray = [r for r in kept if r["date"] != day]
+        if stray:
+            raise IntegrityError(raw, f"{len(stray)} record(s) dated off {day}; first {stray[0]['timestamp']}")
+        records.extend(kept)
+        outside_cells += outside
+        provider_files.append(
+            {
+                "provider": "CEDAR Madrigal (cedar.openmadrigal.org)",
+                "permanent_citation": record.get("permanent_citation", ""),
+                "location_date": day,
+                "provider_filename": record["provider_filename"],
+                "retrieval_date": record["retrieval_date"],
+                "sha256": record["sha256"],
+                "logical_name": f"raw/{record['logical_name']}",
+            }
+        )
+    assert_no_locked_month_records(records, timestamp_key="date")
+    assert_records_within_window(records, start=window[0], end=window[1], timestamp_key="date")
+    comparison = compare_with_prior_records(records, workspace / "evidence", window=window)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    comparison_path = out_dir / "reacquisition_comparison.json"
+    comparison_path.write_text(json.dumps(comparison, indent=2, sort_keys=True) + "\
+", encoding="utf-8")
+    missing_months = sorted({d[:7] for d in evidence["not_complete"]})
     stamps = _resolve_stamps(entry)
-    # W-7 gap accounting, one entry per retrieved series (board finding 26). Composed from
-    # what was retrieved, so a run that retrieved nothing emits nothing and a run that
-    # retrieved a series cannot leave the conservation invariant unenforced by omission.
     gap_accounting = [
-        _gap_accounting_for(
-            str(record.get("logical_name") or record.get("provider_filename") or "<series>"),
-            list(record.get("values", ())),
-        )
-        for record in retrieved_records
-        if "values" in record
+        _gap_accounting_for(f"reacquisition:{column}", [r.get(column) for r in records])
+        for column in ("tec", "dtec")
     ]
+    import requests
 
     request_manifest = write_request_manifest(
         out_dir / "request_manifest.json",
@@ -841,29 +886,131 @@ def _run(entry: Mapping[str, Any]) -> dict[str, Any]:
             "experiment": acquisition_cfg["experiment"],
             "kindat": acquisition_cfg["kindat"],
             "parameters": acquisition_cfg["parameters"],
-            "madrigalWeb_version": str(acquisition_cfg.get("madrigalWeb_version", "")),
+            "madrigalWeb_version": f"not used: isprintService.py over HTTP, requests {requests.__version__}",
         },
         stamps=stamps,
-        provider_files=retrieved_records,
+        provider_files=provider_files,
         gap_accounting=gap_accounting,
         provenance_class="full",
         producing_interpreter=sys.version,
-        missing_months=[],
+        missing_months=missing_months,
     )
     sha256_manifest = write_sha256_manifest(
         out_dir / "sha256_manifest.json",
-        provider_files=retrieved_records,
-        derived_artifacts={},
+        provider_files=provider_files,
+        derived_artifacts={comparison_path.name: sha256_of_file(comparison_path)},
         provenance_class="full",
         producing_interpreter=sys.version,
         stamps=stamps,
+    )
+    release = _write_reacquired_release(
+        snapshot=snapshot,
+        workspace=workspace,
+        records=records,
+        provider_files=provider_files,
+        outside_cells=outside_cells,
+        window=window,
     )
     return {
         "workspace": str(workspace),
         "request_manifest": str(request_manifest),
         "sha256_manifest": str(sha256_manifest),
-        "client": type(client).__name__,
+        "reacquisition_comparison": str(comparison_path),
+        "days_complete": len(evidence["complete"]),
+        "days_not_complete": evidence["not_complete"],
+        "records": len(records),
+        "release": release,
     }
+
+
+def _write_reacquired_release(
+    *,
+    snapshot: Any,
+    workspace: Path,
+    records: Sequence[Mapping[str, Any]],
+    provider_files: Sequence[Mapping[str, Any]],
+    outside_cells: int,
+    window: tuple[dt.date, dt.date],
+) -> dict[str, Any]:
+    """The full-year provider release (D-61 option A) under the GOVERNED release root."""
+    release_root = release_root_for(
+        workspace, artifacts_root=Path(snapshot.resolved_roots["artifacts"]), fixture_id=None
+    )
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    directory = release_root / f"madrigal_vtec_phase1_2022_{stamp}"
+    directory.mkdir(parents=True, exist_ok=False)
+    rows_path = directory / "prepared_vtec_records.csv"
+    columns = sorted(PROVIDER_COLUMNS)
+    ordered = sorted(records, key=lambda r: (str(r["station"]), float(r["ut1_unix"])))
+    with rows_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore")
+        writer.writeheader()
+        for record in ordered:
+            writer.writerow({column: record[column] for column in columns})
+    identity = resolve_target_identity(snapshot.data)
+    data_cfg = snapshot.data
+    acquisition_cfg = data_cfg["acquisition"]
+    by_station: dict[str, int] = {}
+    by_month: dict[str, int] = {}
+    for record in records:
+        by_station[str(record["station"])] = by_station.get(str(record["station"]), 0) + 1
+        by_month[str(record["date"])[:7]] = by_month.get(str(record["date"])[:7], 0) + 1
+    manifest = {
+        "source_manifest_id": "madrigal_reacquisition_2022:sha256_manifest.json",
+        "source_files": [
+            {
+                "provider": f["provider"],
+                "citation": "D-6 (Madrigal / MIT Haystack citation and acknowledgement)",
+                "location_date": f["location_date"],
+                "filename": f["provider_filename"],
+                "retrieval_date": f["retrieval_date"],
+                "sha256": f["sha256"],
+            }
+            for f in provider_files
+        ],
+        "processing": {
+            "phase_id": identity["phase_id"],
+            "target_definition_id": identity["target_definition_id"],
+            "provider_experiment_kindat": f"{acquisition_cfg['experiment']}/{acquisition_cfg['kindat']}",
+            "parameters": list(acquisition_cfg["parameters"]),
+            "station_coordinate_to_cell_rule": str(data_cfg["cell_rule"]),
+            "selected_cell_bounds": {
+                station: _cell_descriptor(cfg) for station, cfg in sorted(data_cfg["stations"].items())
+            },
+            "hourly_aggregation": D16_STATISTIC,
+        },
+        "schema_version": str(data_cfg.get("schema_version", "")),
+        "units": {"tec": "TECU", "dtec": "TECU", "ut1_unix": "s"},
+        "row_counts": {
+            "by_station": dict(sorted(by_station.items())),
+            "by_month": dict(sorted(by_month.items())),
+            "by_split": {"unsplit_stage_00": len(records)},
+            "by_qc_stage": {"pre_documented_qc": len(records)},
+        },
+        "exclusions_qc_summary": [
+            {
+                "reason": (
+                    "rows of the union bounding box outside the three frozen cells (D-1/D-33 "
+                    "floor rule); the provider request covers a box, the target is the cells"
+                ),
+                "count": int(outside_cells),
+            }
+        ],
+        "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "fold_ids": [_STAGE00_ID_PLACEHOLDER],
+        "mask_ids": [_STAGE00_ID_PLACEHOLDER],
+        "feature_set_ids": [_STAGE00_ID_PLACEHOLDER],
+        "output_files": {rows_path.name: sha256_of_file(rows_path)},
+        "change_record_id": "CR-2026-10-02-DATA07-REACQUISITION",
+    }
+    written = write_release(directory, manifest, release_root=release_root)
+    return {
+        "release_dir": str(directory.relative_to(workspace)),
+        "dataset_version": written["dataset_version"],
+        "rows_released": len(records),
+        "window": [window[0].isoformat(), window[1].isoformat()],
+    }
+
 
 
 def main() -> int:
