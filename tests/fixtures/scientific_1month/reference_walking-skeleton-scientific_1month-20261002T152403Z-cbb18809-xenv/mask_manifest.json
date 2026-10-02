@@ -1,0 +1,187 @@
+{
+  "artifact": "mask_manifest",
+  "fixture_id": "scientific_1month",
+  "masks": [
+    {
+      "exclusion_counts": {
+        "ARUC": 375,
+        "BSHM": 393,
+        "NICO": 394
+      },
+      "feature_set_id": "FS-P1-2022-v1",
+      "mask_id": "ba4818ccde3526bd1d71ba6e94921c6c5b027fcf8c54b76ec7beb73e9df58566",
+      "member_ids": [
+        "M-06",
+        "C-01"
+      ],
+      "member_transform_ids": [
+        "T-FIX-MAR-FOLD-01",
+        "untransformed"
+      ],
+      "membership_id": "7a85189ac4127d8ac6049197fa9963be480acf912e7a631a5be8c0055a03798a",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "phase_id": "P1A",
+      "row_counts": {
+        "ARUC": 282,
+        "BSHM": 326,
+        "NICO": 183
+      },
+      "scored_window_statement": "16–31 March 2022, 16 days, first 24 h excluded and counted",
+      "set_id": "gim",
+      "source_id": "GNSS_VTEC+gim_comparator_C-01_2022",
+      "target_definition_id": "GRIDDed_VTEC_1H"
+    },
+    {
+      "exclusion_counts": {
+        "ARUC": 416,
+        "BSHM": 406,
+        "NICO": 451
+      },
+      "feature_set_id": "FS-P1-2022-v1",
+      "mask_id": "9c566dc49f5d1f0eb12afaf7c0aca0f7b4553ac5ace1def89202e00529872654",
+      "member_ids": [
+        "M-01",
+        "M-02",
+        "M-03",
+        "M-06",
+        "B-01"
+      ],
+      "member_transform_ids": [
+        "T-FIX-MAR-FOLD-01",
+        "untransformed"
+      ],
+      "membership_id": "9efe8b2b3d45f07ff8383c25161fd3d629d0f7031f1ab86e59ac4ce2a5788468",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "phase_id": "P1A",
+      "row_counts": {
+        "ARUC": 241,
+        "BSHM": 313,
+        "NICO": 126
+      },
+      "scored_window_statement": "16–31 March 2022, 16 days, first 24 h excluded and counted",
+      "set_id": "primary",
+      "source_id": "GNSS_VTEC+IRI2016_B01",
+      "target_definition_id": "GRIDDed_VTEC_1H"
+    },
+    {
+      "exclusion_counts": {
+        "ARUC": 375,
+        "BSHM": 393,
+        "NICO": 394
+      },
+      "feature_set_id": "FS-P1-2022-v1",
+      "mask_id": "4d8504c01567ca477f2ac45818f8d6c1989a5fad2850b740790ad34d9100e9b4",
+      "member_ids": [
+        "M-04",
+        "M-05",
+        "M-06"
+      ],
+      "member_transform_ids": [
+        "T-FIX-MAR-FOLD-01"
+      ],
+      "membership_id": "dd60c2604c625b002d1c09772e5a5da50e56f9d5423d36ec9d0e9b7dedab2070",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "phase_id": "P1A",
+      "row_counts": {
+        "ARUC": 282,
+        "BSHM": 326,
+        "NICO": 183
+      },
+      "scored_window_statement": "16–31 March 2022, 16 days, first 24 h excluded and counted",
+      "set_id": "tier3",
+      "source_id": "GNSS_VTEC",
+      "target_definition_id": "GRIDDed_VTEC_1H"
+    },
+    {
+      "exclusion_counts": {
+        "ARUC": 487,
+        "BSHM": 509,
+        "NICO": 467
+      },
+      "feature_set_id": "FS-P1-2022-v1",
+      "mask_id": "3d4113234b038276b1b4bf48d0a5080182ca6546eabcad68169e1d813bb32062",
+      "member_ids": [
+        "M-06",
+        "C-01"
+      ],
+      "member_transform_ids": [
+        "T-FIX-MAR-FOLD-02",
+        "untransformed"
+      ],
+      "membership_id": "6bbc2c0b287106c5cdf0ee957c08a264090fb2848513145c03bb421e53b44585",
+      "partition_id": "FIX-MAR-FOLD-02",
+      "phase_id": "P1A",
+      "row_counts": {
+        "ARUC": 170,
+        "BSHM": 210,
+        "NICO": 110
+      },
+      "scored_window_statement": "22–31 March 2022, 10 days, first 24 h excluded and counted",
+      "set_id": "gim",
+      "source_id": "GNSS_VTEC+gim_comparator_C-01_2022",
+      "target_definition_id": "GRIDDed_VTEC_1H"
+    },
+    {
+      "exclusion_counts": {
+        "ARUC": 517,
+        "BSHM": 515,
+        "NICO": 498
+      },
+      "feature_set_id": "FS-P1-2022-v1",
+      "mask_id": "1e2e99a6195c2211d8a9e58da2c994b69c685ba619838a09ff8911a86288d3c3",
+      "member_ids": [
+        "M-01",
+        "M-02",
+        "M-03",
+        "M-06",
+        "B-01"
+      ],
+      "member_transform_ids": [
+        "T-FIX-MAR-FOLD-02",
+        "untransformed"
+      ],
+      "membership_id": "870a1363d853ae0b287ab481d30eb42e09d620f6950ddbad2c7e15f554ecb6a0",
+      "partition_id": "FIX-MAR-FOLD-02",
+      "phase_id": "P1A",
+      "row_counts": {
+        "ARUC": 140,
+        "BSHM": 204,
+        "NICO": 79
+      },
+      "scored_window_statement": "22–31 March 2022, 10 days, first 24 h excluded and counted",
+      "set_id": "primary",
+      "source_id": "GNSS_VTEC+IRI2016_B01",
+      "target_definition_id": "GRIDDed_VTEC_1H"
+    },
+    {
+      "exclusion_counts": {
+        "ARUC": 487,
+        "BSHM": 509,
+        "NICO": 467
+      },
+      "feature_set_id": "FS-P1-2022-v1",
+      "mask_id": "3959ee360f41a31768de1c56b5c32c810745d11db711f7deb33eea4640403d1b",
+      "member_ids": [
+        "M-04",
+        "M-05",
+        "M-06"
+      ],
+      "member_transform_ids": [
+        "T-FIX-MAR-FOLD-02"
+      ],
+      "membership_id": "b5f0ec114ccad9bdee0243b2c4cc1bae233bc424ccd34c39d9add78fce820b1e",
+      "partition_id": "FIX-MAR-FOLD-02",
+      "phase_id": "P1A",
+      "row_counts": {
+        "ARUC": 170,
+        "BSHM": 210,
+        "NICO": 110
+      },
+      "scored_window_statement": "22–31 March 2022, 10 days, first 24 h excluded and counted",
+      "set_id": "tier3",
+      "source_id": "GNSS_VTEC",
+      "target_definition_id": "GRIDDed_VTEC_1H"
+    }
+  ],
+  "skipped_comparison_sets": []
+}

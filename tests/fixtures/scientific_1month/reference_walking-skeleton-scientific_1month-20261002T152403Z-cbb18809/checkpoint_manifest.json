@@ -1,0 +1,80 @@
+{
+  "artifact": "checkpoint_manifest",
+  "change_record": "CR-2026-09-29-Q31-CLOSURE",
+  "entries": [
+    {
+      "checkpoint_payload_ref": "epoch-100-99",
+      "checkpoint_selected": true,
+      "epoch_source": "early_stopping_on_validation_bundle",
+      "epochs_run": 100,
+      "model_id": "M-06",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "restored_epoch": 100,
+      "restored_validation_rmse": 4.161346740499224,
+      "seed": 1337,
+      "validation_partition_id": "FIX-MAR-FOLD-01"
+    },
+    {
+      "checkpoint_payload_ref": "epoch-100-99",
+      "checkpoint_selected": true,
+      "epoch_source": "early_stopping_on_validation_bundle",
+      "epochs_run": 100,
+      "model_id": "M-06",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "restored_epoch": 100,
+      "restored_validation_rmse": 4.199000976641645,
+      "seed": 2024,
+      "validation_partition_id": "FIX-MAR-FOLD-01"
+    },
+    {
+      "checkpoint_payload_ref": "epoch-99-98",
+      "checkpoint_selected": true,
+      "epoch_source": "early_stopping_on_validation_bundle",
+      "epochs_run": 100,
+      "model_id": "M-06",
+      "partition_id": "FIX-MAR-FOLD-01",
+      "restored_epoch": 99,
+      "restored_validation_rmse": 4.075107370413025,
+      "seed": 7,
+      "validation_partition_id": "FIX-MAR-FOLD-01"
+    },
+    {
+      "checkpoint_payload_ref": "epoch-100-99",
+      "checkpoint_selected": true,
+      "epoch_source": "early_stopping_on_validation_bundle",
+      "epochs_run": 100,
+      "model_id": "M-06",
+      "partition_id": "FIX-MAR-FOLD-02",
+      "restored_epoch": 100,
+      "restored_validation_rmse": 4.419453691650634,
+      "seed": 1337,
+      "validation_partition_id": "FIX-MAR-FOLD-02"
+    },
+    {
+      "checkpoint_payload_ref": "epoch-99-98",
+      "checkpoint_selected": true,
+      "epoch_source": "early_stopping_on_validation_bundle",
+      "epochs_run": 100,
+      "model_id": "M-06",
+      "partition_id": "FIX-MAR-FOLD-02",
+      "restored_epoch": 99,
+      "restored_validation_rmse": 4.49834168107329,
+      "seed": 2024,
+      "validation_partition_id": "FIX-MAR-FOLD-02"
+    },
+    {
+      "checkpoint_payload_ref": "epoch-100-99",
+      "checkpoint_selected": true,
+      "epoch_source": "early_stopping_on_validation_bundle",
+      "epochs_run": 100,
+      "model_id": "M-06",
+      "partition_id": "FIX-MAR-FOLD-02",
+      "restored_epoch": 100,
+      "restored_validation_rmse": 4.3510617423787865,
+      "seed": 7,
+      "validation_partition_id": "FIX-MAR-FOLD-02"
+    }
+  ],
+  "fixture_id": "scientific_1month",
+  "persistence": "in-memory only: fold-fit checkpoints have no approved on-disk format (TS-M-01 freezes the REFIT format only); no file hash exists and none is recorded"
+}

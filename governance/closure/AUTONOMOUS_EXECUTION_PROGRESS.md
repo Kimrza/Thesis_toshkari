@@ -412,3 +412,41 @@ tuning ran:
 - **P-S2 progress:** (c) plumbing verification PASSED in ~/g07_clone_s3c (receipt
   `walking-skeleton-plumbing_7day-20261002T130814Z-f18cabb8`, code `58b7a0b`). SA1 and SC1
   are running.
+
+### State at the usage-limit stop (2026-10-02 ~14:05Z), not yet committed
+
+- **P-S3 (scientific_1month)** did not complete. (c) SC1 (590.03 s) ended as a normal first
+  run. SC2 was refused at composition: `runtime.widening_guard_cpu` lacks its quantity.
+  That quantity, and `numerical_variation.planted_correlation_recovery_tolerance`, are
+  scientific-only measured quantities (R-120 clause 4; R-121 control 23), and no stage
+  produces either. By P-S3's rule this ends the series: two producers must be implemented
+  (code), plumbing re-verified, and a new series P-S4 run. The in-memory dry run missed
+  this because it skipped `write_candidate_manifest`'s full validation. The next dry run
+  must call `validate_manifest_mapping` and enumerate every quantity before any series.
+  (a) SA2 was still running at the stop.
+- **Madrigal re-acquisition:** the identity is set and was detected. The 2-day pilot exited
+  2: both days are `incomplete` after 5 attempts (`rows=None`). Requests and provider files
+  are as recorded in `evidence/madrigal_reacquisition_2022/day_records.jsonl`; no raw bytes
+  were stored. The cause still needs diagnosis, for example the isprint response or a
+  timeout. The full run has not been started.
+
+### Resumed session (2026-10-02 ~14:05Z onward)
+
+- **Madrigal re-acquisition (DATA-07), root cause found and fixed.** I probed one request
+  directly. The server's response was an escaped traceback: `OSError: Illegal parameter:
+  ut1_unix,gdlat,glon,tec,dtec`. `isprintService.py` takes parameters space-separated, but the
+  script sent them comma-joined. Fixed in `f934511` with a regression test. The 2-day pilot
+  then completed: 2022-01-01 had 21,819 rows and 2022-01-02 had 21,947. The full Jan-Nov run
+  (334 days, roughly 160-180 s per day) was started in the background at about 14:10Z, in env
+  `tec-thesis-311`, with the Student's identity read from the user environment. Its log is
+  `%TEMP%\madrigal_full.log`.
+- **P-S3 ended by a code defect.** Two scientific-only quantities had no producer. Both are
+  produced in `b357ec6` and tested. A full-validation dry run passed. The P-S3 record and the
+  P-S4 precommitment are in `PROGRESS_2026-10-01.md` (`8c5de9f`).
+- **P-S4 started at about 14:30Z.**
+  - (a): plumbing re-verify at `b357ec6`, then SA1 and SA2. Logs are in
+    `governance/closure/ps4/`.
+  - (c): fresh clone `~/g07_clone_s4c` at `8c5de9f`, plumbing verify, then SC1 and SC2. Logs
+    are in `~/s4c_logs` and `~/ps4c_logs`.
+  - Condition disclosed: the Madrigal download ran concurrently in (a). It is network-bound
+    with low CPU, and is recorded here because (a)'s runtime is a measured range.

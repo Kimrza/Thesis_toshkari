@@ -1,0 +1,325 @@
+{
+  "artifact": "bootstrap_summary",
+  "fixture_id": "scientific_1month",
+  "pairs": {
+    "FIX-MAR-FOLD-01": {
+      "gim": {
+        "M-06": {
+          "C-01": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": 25.519404814809093,
+            "ci_upper": 51.65606752648775,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.4596429775140164,
+              "ARUC-NICO": 0.4509050747120527,
+              "BSHM-NICO": 0.7877662871270599
+            },
+            "per_station_components": {
+              "ARUC": 31.97359068895909,
+              "BSHM": 31.35233644939883,
+              "NICO": 55.03000233968025
+            },
+            "point_estimate": 39.45197649267939,
+            "replicate_hash": "cac02886a159820057fc732df7aa0d1d5cfad6b8ba6854543990ac8c325d7884",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          }
+        }
+      },
+      "primary": {
+        "M-06": {
+          "B-01": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -8.666917099242687,
+            "ci_upper": 2.1423713325612397,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.03717170996144985,
+              "ARUC-NICO": -0.06720054167888566,
+              "BSHM-NICO": 0.8873808376796464
+            },
+            "per_station_components": {
+              "ARUC": 3.8985786522507513,
+              "BSHM": -11.22985062314405,
+              "NICO": -0.68370014606091
+            },
+            "point_estimate": -2.6716573723180694,
+            "replicate_hash": "a6f65c9244a49cfde793e897efd9ff8cc05388b079aadf4cf50047d8e272f430",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-01": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -15.97071640169377,
+            "ci_upper": 2.5592451493638797,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.270249011351206,
+              "ARUC-NICO": 0.5646780589467889,
+              "BSHM-NICO": 0.8500296596698304
+            },
+            "per_station_components": {
+              "ARUC": 2.6798965143637195,
+              "BSHM": -19.899565878754416,
+              "NICO": 2.6648982976035334
+            },
+            "point_estimate": -4.851590355595721,
+            "replicate_hash": "e9750ac6f3bcb7d48bd42cd06570077595df784d2a56ab8a2d73cb7c809a3729",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-02": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -13.669091215363384,
+            "ci_upper": -1.1742519591753582,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.15170904286050613,
+              "ARUC-NICO": -0.12285265017850446,
+              "BSHM-NICO": 0.8048072117935039
+            },
+            "per_station_components": {
+              "ARUC": 0.3058436289179715,
+              "BSHM": -17.262031870713116,
+              "NICO": -2.6215075086000414
+            },
+            "point_estimate": -6.525898583465062,
+            "replicate_hash": "090da42b568689ef8e717c90a6877c8de797725ad84f3a46bc0ed09ebc3d2f51",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-03": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -0.2565605037380668,
+            "ci_upper": 2.8332284035866206,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.23471218010505243,
+              "ARUC-NICO": 0.5933568000219137,
+              "BSHM-NICO": 0.3891748258387722
+            },
+            "per_station_components": {
+              "ARUC": 4.732038664400579,
+              "BSHM": -4.426870980293344,
+              "NICO": 2.961284619570536
+            },
+            "point_estimate": 1.088817434559257,
+            "replicate_hash": "f42d5f10660cc0025c25102cb41c8e7c8fa3d912962e9ea0afc6b3211de95190",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          }
+        }
+      },
+      "tier3": {
+        "M-06": {
+          "M-04": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -17.868675841103105,
+            "ci_upper": 0.3166112666371897,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.27793884781858347,
+              "ARUC-NICO": 0.27649723459874803,
+              "BSHM-NICO": 0.8583745307684719
+            },
+            "per_station_components": {
+              "ARUC": 1.9061624094975607,
+              "BSHM": -22.536540607378825,
+              "NICO": -1.0493154880026112
+            },
+            "point_estimate": -7.226564561961292,
+            "replicate_hash": "03196ee26f093535a36b8adcdcbbed50685be80ed7b39d8eaec1ade7b4c7cc26",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-05": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -10.550107067760043,
+            "ci_upper": -3.5691681058805407,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.2645960683774724,
+              "ARUC-NICO": 0.2567475548305306,
+              "BSHM-NICO": 0.8588288830303255
+            },
+            "per_station_components": {
+              "ARUC": -1.4612544047567253,
+              "BSHM": -14.730365850357332,
+              "NICO": -3.7670750716478576
+            },
+            "point_estimate": -6.652898442253971,
+            "replicate_hash": "53fb809b941ad61783a6c10a2ad24f84d04cbaf2753efb529070c9536029fdc6",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          }
+        }
+      }
+    },
+    "FIX-MAR-FOLD-02": {
+      "gim": {
+        "M-06": {
+          "C-01": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": 21.361799944867297,
+            "ci_upper": 59.29621164169357,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.46685832860510423,
+              "ARUC-NICO": 0.5315620847851688,
+              "BSHM-NICO": 0.805889971540138
+            },
+            "per_station_components": {
+              "ARUC": 32.77778091593167,
+              "BSHM": 31.771894713754474,
+              "NICO": 57.85288244498431
+            },
+            "point_estimate": 40.80085269155682,
+            "replicate_hash": "5000595645a260a36b8bcccbe591e436d57352aafe79f4f8384472d7a3df2396",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          }
+        }
+      },
+      "primary": {
+        "M-06": {
+          "B-01": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -7.2770780547224225,
+            "ci_upper": 4.734352710460471,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.036937871745192995,
+              "ARUC-NICO": -0.22543311369836125,
+              "BSHM-NICO": 0.8827388149907113
+            },
+            "per_station_components": {
+              "ARUC": 6.26568642937955,
+              "BSHM": -10.124011128713578,
+              "NICO": 2.338120179922577
+            },
+            "point_estimate": -0.506734839803817,
+            "replicate_hash": "a1690507524dec8c5da57d782bfd98f942d86c1c59d3a81760ffb009dc2fcee5",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-01": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -21.198121723259813,
+            "ci_upper": 3.567563804802183,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.29182325563803857,
+              "ARUC-NICO": 0.46808138051054865,
+              "BSHM-NICO": 0.8299913733286921
+            },
+            "per_station_components": {
+              "ARUC": 3.056905628053679,
+              "BSHM": -23.36006400831882,
+              "NICO": 3.499781944475481
+            },
+            "point_estimate": -5.601125478596553,
+            "replicate_hash": "bdc4d69a6950ccf94413e28c7429c429217ae8ee6a6d364f1d9b191bf7d12f0a",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-02": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -14.586438487149591,
+            "ci_upper": 0.1028244112173842,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.28409564703002993,
+              "ARUC-NICO": 0.3226019603404252,
+              "BSHM-NICO": 0.6830496027833876
+            },
+            "per_station_components": {
+              "ARUC": 0.7040214397909995,
+              "BSHM": -17.146904285564037,
+              "NICO": -0.6967806902476208
+            },
+            "point_estimate": -5.713221178673553,
+            "replicate_hash": "5e0e6831655a51d0b957611ca3f591c3275baa6ea8f8f3d29c78c5378f0a02a6",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-03": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": 1.2538552144745643,
+            "ci_upper": 7.897561430734889,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.42047951468109784,
+              "ARUC-NICO": 0.7384867530848067,
+              "BSHM-NICO": 0.07242208404018184
+            },
+            "per_station_components": {
+              "ARUC": 8.274979800691513,
+              "BSHM": 0.7335477229212035,
+              "NICO": 3.543077769866712
+            },
+            "point_estimate": 4.1838684311598096,
+            "replicate_hash": "f1aad837c672be7eff12aa89fcf8ad917ab540b5d344606f88aa8376343fce93",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          }
+        }
+      },
+      "tier3": {
+        "M-06": {
+          "M-04": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -23.598362337523078,
+            "ci_upper": -3.2174822997547965,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.11638313893493005,
+              "ARUC-NICO": 0.09776409467365292,
+              "BSHM-NICO": 0.8909772783720915
+            },
+            "per_station_components": {
+              "ARUC": -1.256512074161083,
+              "BSHM": -27.739921408656596,
+              "NICO": -3.059802917669274
+            },
+            "point_estimate": -10.685412133495651,
+            "replicate_hash": "68f019aab2e0027e7db054edb97fcd0fd6a7f0a816b892dcdb704bf3cb70d4e8",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          },
+          "M-05": {
+            "block_hours": 24,
+            "ci_level": 0.95,
+            "ci_lower": -9.608714072489306,
+            "ci_upper": -2.6291613238483595,
+            "pairwise_correlations": {
+              "ARUC-BSHM": 0.20675816932276167,
+              "ARUC-NICO": 0.22491686032058525,
+              "BSHM-NICO": 0.8679948392087903
+            },
+            "per_station_components": {
+              "ARUC": -1.3059547570646521,
+              "BSHM": -12.462176167487595,
+              "NICO": -3.001664844575496
+            },
+            "point_estimate": -5.589931923042581,
+            "replicate_hash": "5e8c11567d7afe763e3c4011a81f16cc908126208c78e02f1b6a31edc16f1025",
+            "replicates": 1000,
+            "seed_key": "seeds.bootstrap"
+          }
+        }
+      }
+    }
+  },
+  "status": "executed",
+  "units": {
+    "block_hours": "h",
+    "ci_level": "dimensionless",
+    "ci_lower": "TECU^2",
+    "ci_upper": "TECU^2",
+    "pairwise_correlations": "dimensionless",
+    "per_station_components": "TECU^2",
+    "point_estimate": "TECU^2",
+    "replicates": "count"
+  }
+}

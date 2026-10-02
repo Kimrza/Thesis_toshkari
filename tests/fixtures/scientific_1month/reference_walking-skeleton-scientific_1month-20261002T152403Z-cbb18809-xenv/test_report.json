@@ -1,0 +1,183 @@
+{
+  "fixture_stamp": {
+    "apparatus_partition_id": null,
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified \u2014 no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md \u00a7 Walking Skeleton).",
+    "december_representativeness": "not_representative",
+    "evidence_class": "scientific_fixture",
+    "fixture_id": "scientific_1month",
+    "frozen_manifest_hash": null,
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "kind": "test_report",
+  "m10_contract_fixture": null,
+  "sequence": [
+    {
+      "argv": [
+        "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\scripts\\00_acquire_prepared_vtec.py",
+        "--config",
+        "configs",
+        "--fixture-manifest",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\scientific_1month\\identity_declaration.yaml",
+        "--code-commit",
+        "b357ec6743b6b7b40439236280888abc97119796"
+      ],
+      "duration_seconds": 5.610000000044238,
+      "ended_at_utc": "2026-10-02T15:24:09.120110+00:00",
+      "peak_rss_bytes": 389808128,
+      "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
+      "returncode": 0,
+      "started_at_utc": "2026-10-02T15:24:03.503015+00:00",
+      "stderr_tail": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954643.952015   47880 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954646.064703   47880 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\n",
+      "stdout_tail": "00_acquire_prepared_vtec: completed: C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\acquisition\\fixture_read_manifest.json\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\scripts\\01_inventory_and_registry.py",
+        "--config",
+        "configs",
+        "--phase",
+        "1",
+        "--fixture-manifest",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\scientific_1month\\identity_declaration.yaml",
+        "--code-commit",
+        "b357ec6743b6b7b40439236280888abc97119796"
+      ],
+      "duration_seconds": 7.60899999999674,
+      "ended_at_utc": "2026-10-02T15:24:16.729467+00:00",
+      "peak_rss_bytes": 408186880,
+      "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
+      "returncode": 0,
+      "started_at_utc": "2026-10-02T15:24:09.121114+00:00",
+      "stderr_tail": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954649.584970   37604 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954651.587161   37604 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\n",
+      "stdout_tail": "01_inventory_and_registry: completed: {'source_inventory': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\inventory\\\\source_inventory.json', 'release_manifests_found': 30, 'entries_written': 11}\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\scripts\\02_standardize_prepared_target.py",
+        "--config",
+        "configs",
+        "--fixture-manifest",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\scientific_1month\\identity_declaration.yaml",
+        "--code-commit",
+        "b357ec6743b6b7b40439236280888abc97119796"
+      ],
+      "duration_seconds": 7.0939999999827705,
+      "ended_at_utc": "2026-10-02T15:24:23.816896+00:00",
+      "peak_rss_bytes": 401539072,
+      "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
+      "returncode": 0,
+      "started_at_utc": "2026-10-02T15:24:16.729467+00:00",
+      "stderr_tail": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954657.173099   45084 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954659.139185   45084 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\n",
+      "stdout_tail": "02_standardize_prepared_target: completed: {'fixture_outputs': {'hourly_vtec': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\hourly_vtec.parquet', 'measurements': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\stage_measurements\\\\02_standardize_prepared_target\\\\fixture_measurements.json'}, 'target': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\prepared_target\\\\hourly_target_phase1.csv', 'coverage_report': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\prepared_target\\\\coverage_report.json', 'data_quality_block': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\prepared_target\\\\data_quality_block.json', 'uncertainty_budget': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\prepared_target\\\\uncertainty_budget.json', 'rows': 2211, 'release': {'release_dir': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\releases\\\\phase1_hourly_target', 'dataset_version': '131131fc64f7', 'rows_released': 2211, 'republished': False, 'note': 'a release with identical content is already published here; R-13 refuses an overwrite and none was attempted (the content hash excludes created_at_utc, so an identical run is identical by construction)'}}\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\scripts\\04_build_external_products.py",
+        "--config",
+        "configs",
+        "--phase",
+        "1",
+        "--fixture-manifest",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\scientific_1month\\identity_declaration.yaml",
+        "--code-commit",
+        "b357ec6743b6b7b40439236280888abc97119796"
+      ],
+      "duration_seconds": 444.71899999998277,
+      "ended_at_utc": "2026-10-02T15:31:48.534852+00:00",
+      "peak_rss_bytes": 407609344,
+      "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
+      "returncode": 0,
+      "started_at_utc": "2026-10-02T15:24:23.816896+00:00",
+      "stderr_tail": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954664.287794   46824 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790954666.492158   46824 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\n04_build_external_products: WARNING -- bridging a PARTIAL B-01 artifact (months [3, 11]); some months will have no B-01 rows\n",
+      "stdout_tail": "04_build_external_products: B-01 payload -> C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\walking_skeleton\\scientific_1month\\predictions\\FIX-MAR-FOLD-01\\B-01.json\n04_build_external_products: B-01 payload -> C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\walking_skeleton\\scientific_1month\\predictions\\FIX-MAR-FOLD-02\\B-01.json\n04_build_external_products: C-01 payload -> C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\walking_skeleton\\scientific_1month\\predictions\\FIX-MAR-FOLD-01\\C-01.json\n04_build_external_products: C-01 payload -> C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\walking_skeleton\\scientific_1month\\predictions\\FIX-MAR-FOLD-02\\C-01.json\n04_build_external_products: completed: {'driver_manifest': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\external\\\\ec1_driver_audit_manifest.json', 'missing_month_entries': 2, 'series_audited': 2, 'driver_releases': [{'artifact': 'gfz_kp_ap_nowcast_2022', 'published': False, 'dataset_version': '3d889f0de459', 'rows': 264, 'reason': 'identical content already published; R-13 refuses an overwrite and none was attempted'}, {'artifact': 'gfz_hp60ap60_v2_2022', 'published': False, 'dataset_version': 'a14451168f4a', 'rows': 792, 'reason': 'identical content already published; R-13 refuses an overwrite and none was attempted'}, {'artifact': 'nrcan_f107_observed_daily_median_2022', 'published': False, 'dataset_version': 'da7846d7136e', 'rows': 112, 'reason': 'identical content already published; R-13 refuses an overwrite and none was attempted', 'readings_read': 337, 'days_released': 112, 'days_absent': 0, 'duplicate_days': 1, 'high_spread_days': 2}, {'artifact': 'kyoto_wdc_dst_2022', 'published': False, 'dataset_version': '1c5a3cb67f66', 'rows': 768, 'reason': 'identical content already published; R-13 refuses an overwrite and none was attempted'}], 'evidence_class': 'fixture_plumbing', 'fixture_scope_id': 'scientific_1month', 'audit_window': {'start': '2022-03-01', 'end': '2022-03-31'}, 'plumbing_statement': 'fixture-scoped driver audit: plumbing/fixture evidence only, never scientific governed-run evidence (TC-03f; the seven-day fixture is a smoke test, TE 9.2)', 'fixture_b01_payloads': ['C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\B-01.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\B-01.json'], 'fixture_c01_payloads': ['C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\C-01.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\C-01.json'], 'iri_benchmark': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\iri_benchmark.parquet', 'gim_comparator': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\gim_comparator.parquet', 'gim_release': {'release_dir': 'artifacts\\\\walking_skeleton\\\\scientific_1month\\\\releases\\\\gim_comparator_C-01_2022', 'dataset_version': 'f048baa520a6', 'rows_written': 2232, 'rows_excluded': 0, 'stations_covered': ['ARUC', 'BSHM', 'NICO'], 'window': {'start': '2022-03-01', 'end': '2022-03-31'}, 'parquet_sha256': '98dd8c0bb89729c094aebb04ea60dd0b88c0ff190b28139501375323b999258a'}, 'fixture_measurements': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\stage_measurements\\\\04_build_external_products\\\\fixture_measurements.json'}\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\scripts\\05_build_features_and_splits.py",
+        "--config",
+        "configs",
+        "--phase",
+        "1",
+        "--fixture-manifest",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\scientific_1month\\identity_declaration.yaml",
+        "--code-commit",
+        "b357ec6743b6b7b40439236280888abc97119796",
+        "--bundles-out",
+        "artifacts/walking_skeleton/scientific_1month/features"
+      ],
+      "duration_seconds": 9.828000000037719,
+      "ended_at_utc": "2026-10-02T15:31:58.364516+00:00",
+      "peak_rss_bytes": 408264704,
+      "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
+      "returncode": 0,
+      "started_at_utc": "2026-10-02T15:31:48.534852+00:00",
+      "stderr_tail": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790955109.070561   42468 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790955111.510593   42468 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\n",
+      "stdout_tail": "05_build_features_and_splits: completed: {'split_manifest': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\apparatus_split_manifest.json', 'bundles_written': ['C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-FOLD-01__train__untransformed', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-FOLD-01__train__T-FIX-MAR-FOLD-01', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-FOLD-01__score__T-FIX-MAR-FOLD-01', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-FOLD-02__train__untransformed', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-FOLD-02__train__T-FIX-MAR-FOLD-02', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-FOLD-02__score__T-FIX-MAR-FOLD-02', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-REFIT__train__untransformed', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\FIX-MAR-REFIT__train__T-FIX-MAR-REFIT', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\features\\\\fixture_measurements.json'], 'fixture_outputs': {'feature_table': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\feature_table.parquet', 'split_manifest': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\split_manifest.json'}}\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\scripts\\06_train_and_predict.py",
+        "--config",
+        "configs",
+        "--phase",
+        "1",
+        "--fixture-manifest",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\scientific_1month\\identity_declaration.yaml",
+        "--code-commit",
+        "b357ec6743b6b7b40439236280888abc97119796",
+        "--bundles-root",
+        "artifacts/walking_skeleton/scientific_1month/features",
+        "--predictions-out",
+        "artifacts/walking_skeleton/scientific_1month/predictions"
+      ],
+      "duration_seconds": 170.28099999995902,
+      "ended_at_utc": "2026-10-02T15:34:48.647277+00:00",
+      "peak_rss_bytes": 608878592,
+      "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
+      "returncode": 0,
+      "started_at_utc": "2026-10-02T15:31:58.364516+00:00",
+      "stderr_tail": "the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=\"\"> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}\nE0000 00:00:1790955262.470445   49468 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=\"\"> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_14}}\nE0000 00:00:1790955267.534932   49468 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=\"\"> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_14}}\nE0000 00:00:1790955272.588440   49468 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=\"\"> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_14}}\nE0000 00:00:1790955277.655835   49468 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=\"\"> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_14}}\nE0000 00:00:1790955282.687617   49468 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=\"\"> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_14}}\n",
+      "stdout_tail": "06_train_and_predict: completed: {'horizon_hours': 1, 'grid_counts': {'ridge': 6, 'random_forest': 18, 'lstm': 16}, 'predictions_written': ['C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-01.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-02.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-03.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-04.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-05.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-06_seed7.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-06_seed1337.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-06_seed2024.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-01\\\\M-06_confirmatory.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-01.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-02.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-03.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-04.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-05.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-06_seed7.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-06_seed1337.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-06_seed2024.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\FIX-MAR-FOLD-02\\\\M-06_confirmatory.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions\\\\fixture_measurements.json'], 'fixture_outputs': {'predictions': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\predictions.parquet', 'checkpoint_manifest': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\checkpoint_manifest.json'}}\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\scripts\\07_evaluate_and_report.py",
+        "--config",
+        "configs",
+        "--phase",
+        "1",
+        "--fixture-manifest",
+        "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\scientific_1month\\identity_declaration.yaml",
+        "--code-commit",
+        "b357ec6743b6b7b40439236280888abc97119796",
+        "--predictions-run",
+        "artifacts/walking_skeleton/scientific_1month/predictions",
+        "--evaluation-out",
+        "artifacts/walking_skeleton/scientific_1month/evaluation",
+        "--target-release-manifest",
+        "artifacts/walking_skeleton/scientific_1month/releases/phase1_hourly_target/release_manifest.json",
+        "--budget-artifact",
+        "artifacts/prepared_target/uncertainty_budget.json",
+        "--table-caption",
+        "GNSS-derived TEC extends farther into the plasmasphere than a 2000 km IRI ceiling. Reported IRI\u2013GNSS discrepancies therefore contain a physical, structured, time-varying component that is not forecast error. This must be disclosed wherever the primary comparison is interpreted, and it is why the mandatory difficulty controls of Section 2.4 tier 2 exist."
+      ],
+      "duration_seconds": 14.03100000001723,
+      "ended_at_utc": "2026-10-02T15:35:02.684192+00:00",
+      "peak_rss_bytes": 465784832,
+      "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
+      "returncode": 0,
+      "started_at_utc": "2026-10-02T15:34:48.648276+00:00",
+      "stderr_tail": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790955289.476856   45204 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1790955291.692522   45204 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\n",
+      "stdout_tail": "s_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\gim\\\\practical_relevance_gim.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\gim\\\\claims_checklist_gim.skipped.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\metrics_tier3.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\bootstrap_M-06_vs_M-04.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\bootstrap_M-06_vs_M-05.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\primary_table_tier3.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\breakdown_member_metrics_tier3.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\breakdown_per_station_tier3.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\breakdown_quality_strata_tier3.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\breakdown_top1pct_sensitivity_tier3.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\practical_relevance_tier3.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\FIX-MAR-FOLD-02\\\\tier3\\\\claims_checklist_tier3.skipped.json', 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\evaluation\\\\evaluation-and-comparison-20261002T153453Z-dfc2f1e7\\\\fixture_measurements.json'], 'fixture_outputs': {'mask_manifest': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\mask_manifest.json', 'metrics': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\metrics.json', 'bootstrap_summary': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\bootstrap_summary.json', 'target_uncertainty_budget': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\target_uncertainty_budget.json', 'plot_target_support': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\plots\\\\target_support.png', 'plot_predictions': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\plots\\\\predictions.png', 'plot_residuals': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\plots\\\\residuals.png', 'plot_quality_diagnostics': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\plots\\\\quality_diagnostics.png', 'plot_manifest': 'C:\\\\Users\\\\LOTUS\\\\Desktop\\\\Thesis_toshkari\\\\artifacts\\\\walking_skeleton\\\\scientific_1month\\\\plots\\\\plot_manifest.json'}}\n"
+    }
+  ]
+}
