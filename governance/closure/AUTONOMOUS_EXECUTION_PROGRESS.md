@@ -298,3 +298,46 @@ Log: `governance/closure/d87_verification/a4.log`, with the counter trace in
   `governance/closure/d88c2_verification/`).
 - The plumbing_7day receipts now exist in both environments at code `749d743`. That
   satisfies R-140 for `scientific_1month` runs in (a) and in that (c) clone.
+
+### Stage 5 rulings recorded ahead of tuning (Student, 2026-10-02)
+
+No governed record defined two inputs D-124 needs, so the Student ruled on them before any
+tuning ran:
+- **"Simpler" ordering:** the proposed proxies (ridge 1/alpha; random forest
+  n_estimators x (max_depth, with None counted as 32); LSTM layers x units). Ties at equal
+  complexity go to the higher mean skill, then to params-string order.
+- **The 1% margin:** absolute, 0.01 skill units (one percentage point). The code's relative
+  reading (0.01 x |best skill|) is to be replaced.
+- **Pre-authorization:** the agent writes the D-entries for `models.selected`,
+  `models.refit.epochs` and config-forced fixture re-freezes, when each is the mechanical
+  output of an approved rule and every check passes. It stops on any failure or judgement
+  call.
+- **Tuning seed:** Vision line 837 states "Development seed: 42, used for tuning only" (and
+  TE line 834). The fixture-scale `--tune` used `final_seeds[0]`. Full-year tuning uses 42.
+  This is a defect fix against the governing text, not a decision.
+
+### Scientific rehearsal 4: C-01 never produced (2026-10-02)
+
+- Rehearsal 4 (`governance/closure/sci/rehearsal4.log`, code `749d743`) passed stages 00-06
+  and aborted in 07: the `gim` set had no C-01 prediction.
+- Root cause: no step ever bridged `gim_comparator.parquet` into a `06`-shaped C-01
+  prediction. 07 also never passed the D-73 audit to the metrics builder, and the
+  per-station audit hashes would have refused ARUC.
+- Fixed in `3684b64` (CR-2026-10-02-C01-GIM-BRIDGE), with
+  `tests/test_c01_prediction_adapter.py`. Rehearsal-4 outputs are archived as `aborted-rh4`.
+- The change touches `src/` and `scripts/`, so plumbing is re-verified at `3684b64` in (a)
+  and in a fresh (c) clone (`~/g07_clone_d88v3c`). The (a) receipt at `749d743` is preserved
+  as `fixture_pass_receipt.json.archived-d88v2` (`bfa8805`).
+
+### D-88 re-verified at `3684b64`: PASS in (a) and (c)
+
+- (a) `walking-skeleton-plumbing_7day-20261002T121135Z-b00cb63d`: all outputs matched; 272.75 s
+  against the (a) limit 307.46 s (range 202.08-254.77 s plus its own width); storage
+  2,343,362 bytes. Receipt PASS. Logs: `governance/closure/d88v3/`.
+- (c) `walking-skeleton-plumbing_7day-20261002T121201Z-7d9bf6ac`: fresh clone
+  ~/g07_clone_d88v3c at `bfa8805`, code `3684b64`; all outputs matched; 172.56 s; storage
+  2,376,932 bytes. Receipt PASS (copy and logs in `governance/closure/d88v3c_verification/`).
+- The new `predictions/<fold>/C-01.json` files did not change any compared output, as
+  expected. The plumbing outputs committed at `9406f57` are replaced in the tree by this
+  verification's outputs; the earlier set stays in history at `9406f57` and locally as
+  `*.archived-pre-d88v3`.
