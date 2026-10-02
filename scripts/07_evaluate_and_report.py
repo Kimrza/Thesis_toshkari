@@ -163,6 +163,8 @@ from src.data.splits import (  # noqa: E402
     validation_month_range,
 )
 from src.evaluation.bootstrap import (  # noqa: E402
+    WIDENING_COMPARATOR_CPU_KEY,
+    planted_correlation_recovery,
     read_bootstrap_declaration,
     vector_block_bootstrap,
     write_bootstrap_result,
@@ -188,6 +190,7 @@ from src.evaluation.metrics import (  # noqa: E402
     LockedContext,
     assert_metrics_artifact,
     build_metrics_artifact,
+    paired_difference_series,
     paired_loss_differential,
     write_metrics_artifact,
 )
@@ -978,7 +981,18 @@ def _run_bootstrap_step(
             month_end=month_end,
             embargo_hours=embargo_hours,
             locked=locked,
+            # R-120 limb 4: the comparator's CPU cost, measured on Fixture 2 only.
+            timings=(
+                _SCIENTIFIC_INSTRUMENTS["timings"] if fixture_id == SCIENTIFIC_FIXTURE_ID else None
+            ),
         )
+        if fixture_id == SCIENTIFIC_FIXTURE_ID:
+            # R-121 control (23) on this fixture's own masked series (scientific-only slot),
+            # after the bootstrap so its own refusals (R-116) surface first and unchanged.
+            control = planted_correlation_recovery(
+                paired_difference_series(model_id, benchmark_id, mask)
+            )
+            _SCIENTIFIC_INSTRUMENTS["planted_deviations"].append(control["max_abs_deviation"])
         written.append(
             str(
                 write_bootstrap_result(
@@ -1633,6 +1647,13 @@ def _evaluate_partition(
     return written
 
 
+#: The two scientific_1month-only measured quantities (R-120 limb 4: the widening guard's
+#: CPU cost; R-121 control (23): the planted-correlation recovery), accumulated across this
+#: process's bootstrap calls and emitted in the stage's measurement block. One stage-07
+#: invocation is one run, and `_run_fixture_scale` resets this before any partition.
+_SCIENTIFIC_INSTRUMENTS: dict[str, Any] = {"timings": {}, "planted_deviations": []}
+
+
 def _run_fixture_scale(
     entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
 ) -> dict[str, Any]:
@@ -1681,6 +1702,8 @@ def _run_fixture_scale(
 
     written: list[str] = []
     surviving_counts: list[int] = []
+    _SCIENTIFIC_INSTRUMENTS["timings"] = {}
+    _SCIENTIFIC_INSTRUMENTS["planted_deviations"] = []
     for partition in partitions:
         if partition.validation_month is None:
             continue  # an apparatus refit is scored nowhere, like the frozen one
@@ -1719,22 +1742,22 @@ def _run_fixture_scale(
                 surviving_counts.extend(int(v) for v in row_counts.values())
         written.extend(artifacts)
     if surviving_counts:  # Rec 4: measurable here — per-station surviving mask rows
+        measurements: dict[str, Any] = {
+            "support_missingness": {
+                "comparator": {
+                    "min": min(surviving_counts),
+                    "max": max(surviving_counts),
+                    "units": "rows",
+                }
+            }
+        }
+        if scope.fixture_id == SCIENTIFIC_FIXTURE_ID:
+            measurements.update(_scientific_measurements())
         measurements_path = out_root / MEASUREMENTS_NAME
         measurements_path.parent.mkdir(parents=True, exist_ok=True)
         measurements_path.write_text(
             json.dumps(
-                {
-                    "stage": "07_evaluate_and_report",
-                    "measurements": {
-                        "support_missingness": {
-                            "comparator": {
-                                "min": min(surviving_counts),
-                                "max": max(surviving_counts),
-                                "units": "rows",
-                            }
-                        }
-                    },
-                },
+                {"stage": "07_evaluate_and_report", "measurements": measurements},
                 indent=2,
                 sort_keys=True,
             )
@@ -1758,6 +1781,34 @@ _FIXTURE_FIGURE_CAVEATS: tuple[str, ...] = (
     "walking-skeleton fixture: smoke evidence only, never scientific evidence (TE §15.1; TC-03f)",
     "target: location-sampled gridded VTEC (Madrigal cell), not receiver-specific station VTEC",
 )
+
+
+def _scientific_measurements() -> dict[str, Any]:
+    """Fixture 2's two scientific-only measured quantities, or a refusal when unmeasured.
+
+    Until 2026-10-02 no stage produced either, so composing a scientific candidate refused
+    at `runtime.widening_guard_cpu` (P-S3 SC2). Both are MEASURED here; nothing is chosen.
+    """
+    cpu = _SCIENTIFIC_INSTRUMENTS["timings"].get(WIDENING_COMPARATOR_CPU_KEY)
+    deviations = _SCIENTIFIC_INSTRUMENTS["planted_deviations"]
+    if cpu is None or not deviations:
+        raise IntegrityError(
+            "07_evaluate_and_report scientific_1month measurements",
+            "no bootstrap call measured the widening comparator's CPU cost or the planted-"
+            "correlation recovery; both are scientific_1month-only measured quantities "
+            "(R-120 limb 4; R-121 control (23)) and are never invented",
+        )
+    return {
+        "runtime": {"widening_guard_cpu": {"min": cpu, "max": cpu, "units": "s"}},
+        "numerical_variation": {
+            "planted_correlation_recovery_tolerance": {
+                "min": min(deviations),
+                "max": max(deviations),
+                "units": "dimensionless",
+                "measured_over_bootstrap_calls": len(deviations),
+            }
+        },
+    }
 
 
 def _fixture_bootstrap_replicates(scope: Any) -> int | None:

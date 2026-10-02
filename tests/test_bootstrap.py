@@ -80,7 +80,9 @@ from src.evaluation.bootstrap import (  # noqa: E402
     GENERATOR_IDENTITY,
     INTERVAL_METHOD_PERCENTILE,
     NUMPY_PIN,
+    PLANTED_CORRELATION,
     STREAM_ASSIGNMENTS,
+    WIDENING_COMPARATOR_CPU_KEY,
     BootstrapResult,
     SensitivityResult,
     VectorBlockDraw,
@@ -88,6 +90,7 @@ from src.evaluation.bootstrap import (  # noqa: E402
     build_block_grid,
     pairwise_pearson,
     percentile_interval,
+    planted_correlation_recovery,
     read_bootstrap_declaration,
     replicate_hash,
     serialize_bootstrap_result,
@@ -261,6 +264,7 @@ def _run(
     evaluation_mode: str = "fixture",
     experiment: dict[str, Any] | None = None,
     target=None,
+    timings: dict[str, float] | None = None,
 ) -> BootstrapResult:
     members = members if members is not None else _planted_members()
     if mask is None or registry is None:
@@ -280,6 +284,7 @@ def _run(
         month_start=MONTH_START,
         month_end=MONTH_END,
         embargo_hours=EMBARGO_HOURS,
+        timings=timings,
     )
 
 
@@ -477,6 +482,33 @@ def test_control_23_pairwise_pearson_recovers_planted_correlation() -> None:
     assert set(out) == {"S1-S2", "S1-S3", "S2-S3"}  # all three pairs, sorted names
     assert out["S1-S2"] == pytest.approx(1.0, abs=CORRELATION_TOLERANCE)
     assert out["S1-S3"] == pytest.approx(-1.0, abs=CORRELATION_TOLERANCE)
+
+
+def test_control_23_planted_recovery_on_a_fixture_series_keeps_its_gaps() -> None:
+    """The fixture-side control: plant the reference station's d(t) on every station's
+    OWN masked timestamps (gaps kept), recover it with the production estimator, and
+    report the deviation the fixture manifest freezes."""
+    stamps = [_ts(d, 0) for d in (2, 3, 4, 5, 6, 7)]
+    base = [1.0, 9.0, 4.0, 16.0, 25.0, 2.25]
+    series = {
+        "S1": list(zip(stamps, base, strict=True)),
+        "S2": list(zip(stamps[1:], [0.5, -3.0, 7.0, 1.0, 2.0], strict=True)),  # one gap
+        "S3": list(zip(stamps, [-v for v in base], strict=True)),  # anti-correlated as given
+    }
+    out = planted_correlation_recovery(series)
+    assert out["planted_correlation"] == PLANTED_CORRELATION
+    assert out["reference_station"] == "S1"
+    assert set(out["recovered"]) == {"S1-S2", "S1-S3", "S2-S3"}
+    assert out["max_abs_deviation"] == pytest.approx(0.0, abs=CORRELATION_TOLERANCE)
+    with pytest.raises(BootstrapError, match="at least two stations"):
+        planted_correlation_recovery({"S1": series["S1"]})
+
+
+def test_control_23_planted_recovery_refuses_a_degenerate_reference() -> None:
+    stamps = [_ts(d, 0) for d in (2, 3, 4)]
+    flat = {s: [(t, 1.0) for t in stamps] for s in ("S1", "S2", "S3")}
+    with pytest.raises(BootstrapError, match="zero-variance"):
+        planted_correlation_recovery(flat)
 
 
 def test_pearson_degenerate_pairs_refuse() -> None:
@@ -1005,6 +1037,19 @@ def test_widening_holds_on_planted_fixture_and_evidence_records_the_run(
         ids["M-C"], ids["M-A"], mask=mask, declared_sets=SYNTH_SETS, registry=registry
     )
     assert result.point_estimate == estimand.scalar
+
+
+def test_widening_comparator_cpu_accumulates_and_is_never_serialized(tmp_path: Path) -> None:
+    """R-120 limb 4: the comparator's CPU cost is measured into the caller's mapping and
+    accumulates across calls; it never reaches the serialized result."""
+    pytest.importorskip("numpy")
+    timings: dict[str, float] = {}
+    result = _run(tmp_path / "a", timings=timings)
+    first = timings[WIDENING_COMPARATOR_CPU_KEY]
+    assert first >= 0.0
+    _run(tmp_path / "b", timings=timings)
+    assert timings[WIDENING_COMPARATOR_CPU_KEY] >= first
+    assert "cpu" not in json.dumps(serialize_bootstrap_result(result)).lower()
 
 
 def test_control_10_zero_support_replicate_raises_through_draws(tmp_path: Path) -> None:

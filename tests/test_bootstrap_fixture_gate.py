@@ -154,6 +154,15 @@ def test_scientific_1month_still_invokes_bootstrap_unchanged(tmp_path, monkeypat
 
     monkeypatch.setattr(MODULE, "vector_block_bootstrap", _spy)
     monkeypatch.setattr(MODULE, "write_bootstrap_result", _write_stub)
+    # The duck-typed mask carries no rows; the planted-correlation control (R-121 control
+    # (23)) is fed an apparatus series instead and asserted recorded below.
+    stamps = ["2001-03-02T00:00:00Z", "2001-03-03T00:00:00Z", "2001-03-04T00:00:00Z"]
+    monkeypatch.setattr(
+        MODULE,
+        "paired_difference_series",
+        lambda *a: {s: list(zip(stamps, [1.0, 4.0, 2.0], strict=True)) for s in ("A", "B", "C")},
+    )
+    MODULE._SCIENTIFIC_INSTRUMENTS["planted_deviations"] = []
 
     written = MODULE._run_bootstrap_step(
         **_common_kwargs(tmp_path=tmp_path, fixture_id=MODULE.SCIENTIFIC_FIXTURE_ID)
@@ -167,6 +176,8 @@ def test_scientific_1month_still_invokes_bootstrap_unchanged(tmp_path, monkeypat
     assert kwargs["replicates"] == 1000
     assert kwargs["seed"] == 20221201
     assert kwargs["evaluation_mode"] == "fixture"
+    assert kwargs["timings"] is MODULE._SCIENTIFIC_INSTRUMENTS["timings"]  # R-120 limb 4
+    assert MODULE._SCIENTIFIC_INSTRUMENTS["planted_deviations"] == [pytest.approx(0.0)]
     assert len(written) == 1
     assert Path(written[0]).name == "bootstrap_lstm_primary_vs_iri_benchmark.json"
 
@@ -192,6 +203,7 @@ def test_full_year_path_fixture_id_none_still_invokes_bootstrap(tmp_path, monkey
     assert len(calls) == 1
     assert calls[0]["block_hours"] == 24
     assert calls[0]["replicates"] == 10000
+    assert calls[0]["timings"] is None  # the fixture-only measurement never runs governed
     assert len(written) == 1
 
 
@@ -232,3 +244,18 @@ def test_governed_path_keeps_the_declared_replicates(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="stop"):
         MODULE._run_bootstrap_step(**_common_kwargs(tmp_path=tmp_path, fixture_id=None))
     assert calls and calls[0]["replicates"] == 10000
+
+
+def test_scientific_measurements_refuse_when_unmeasured_and_emit_when_measured():
+    """P-S3 SC2's refusal cause: both scientific-only quantities are MEASURED by stage 07
+    or the stage refuses; nothing is invented."""
+    MODULE._SCIENTIFIC_INSTRUMENTS["timings"] = {}
+    MODULE._SCIENTIFIC_INSTRUMENTS["planted_deviations"] = []
+    with pytest.raises(IntegrityError, match="never invented"):
+        MODULE._scientific_measurements()
+    MODULE._SCIENTIFIC_INSTRUMENTS["timings"] = {MODULE.WIDENING_COMPARATOR_CPU_KEY: 2.5}
+    MODULE._SCIENTIFIC_INSTRUMENTS["planted_deviations"] = [1e-16, 0.0]
+    out = MODULE._scientific_measurements()
+    assert out["runtime"]["widening_guard_cpu"] == {"min": 2.5, "max": 2.5, "units": "s"}
+    planted = out["numerical_variation"]["planted_correlation_recovery_tolerance"]
+    assert (planted["min"], planted["max"], planted["units"]) == (0.0, 1e-16, "dimensionless")

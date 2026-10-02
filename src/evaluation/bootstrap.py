@@ -106,6 +106,7 @@ import json
 import math
 import os
 import struct
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -196,6 +197,15 @@ REAL_DATA_MODES: frozenset[str] = frozenset({"fixture_real_data", "real_data"})
 NUMPY_PIN: str = "numpy==1.26.4"
 
 _DECLARATION_FIELD: str = "configs/experiment.yaml: bootstrap"
+
+#: The `timings` key under which `vector_block_bootstrap` accumulates the W-6 comparator's
+#: process CPU seconds (R-120 limb 4).
+WIDENING_COMPARATOR_CPU_KEY: str = "widening_comparator_cpu_seconds"
+#: R-121 control (23)'s planted cross-station correlation: a declared constant OF THE TEST
+#: APPARATUS (R-122), explicitly not a scientific value. It is the TA-14 shape
+#: `tests/test_bootstrap.py` already plants (identical d_s(t) across stations, correlation
+#: 1.0), now planted on a fixture's own masked timestamps and temporal structure.
+PLANTED_CORRELATION: float = 1.0
 
 
 def _require_numpy() -> Any:
@@ -585,6 +595,49 @@ def pairwise_pearson(
     return out
 
 
+def planted_correlation_recovery(
+    series: Mapping[str, Sequence[tuple[str, float]]],
+) -> dict[str, Any]:
+    """R-121 control (23) on a fixture: plant a known correlation, measure its recovery.
+
+    The reference station (first by sorted name) keeps its own paired-difference series;
+    every other station is given the reference's value at each of ITS OWN masked timestamps
+    the reference also covers, so the stations' gap patterns and the series' temporal
+    correlation are the fixture's own and the planted cross-station correlation is exactly
+    `PLANTED_CORRELATION`. `pairwise_pearson` (the production estimator, one copy) then
+    recovers it, and the largest absolute deviation over the pairs is the MEASURED value
+    the fixture manifest's `numerical_variation.planted_correlation_recovery_tolerance`
+    freezes (R-121: the tolerance lives in the fixture manifest, never in the rule; TE 15.1:
+    measured, never invented).
+
+    Raises
+    ------
+    BootstrapError
+        fewer than two stations, or `pairwise_pearson`'s refusals (fewer than two common
+        timestamps, a zero-variance series) on the planted data.
+    """
+    stations = sorted(series)
+    if len(stations) < 2:
+        raise BootstrapError(
+            "planted-correlation control",
+            f"needs at least two stations to plant a cross-station correlation; got "
+            f"{stations} (R-121 control (23))",
+        )
+    reference = {stamp: diff for stamp, diff in series[stations[0]]}
+    planted = {
+        station: [(stamp, reference[stamp]) for stamp, _ in series[station] if stamp in reference]
+        for station in stations
+    }
+    recovered = pairwise_pearson(planted)
+    deviation = max(abs(value - PLANTED_CORRELATION) for value in recovered.values())
+    return {
+        "planted_correlation": PLANTED_CORRELATION,
+        "reference_station": stations[0],
+        "recovered": recovered,
+        "max_abs_deviation": deviation,
+    }
+
+
 # =======================================================================================
 # Guard evidence, sensitivity, and the result (domain-entities §§ 5-7)
 # =======================================================================================
@@ -822,6 +875,7 @@ def vector_block_bootstrap(
     month_end: dt.datetime,
     embargo_hours: int,
     locked: LockedContext | None = None,
+    timings: dict[str, float] | None = None,
 ) -> BootstrapResult:
     """W-1: the vector time-block bootstrap, a metric entry point in full (TE §13.6).
 
@@ -860,6 +914,12 @@ def vector_block_bootstrap(
         evidence-incomplete result shapes.
     TypeError
         a call without `seed` — by signature, unrepresentable rather than checked.
+
+    `timings`, when a mapping is passed, is incremented in place under
+    `WIDENING_COMPARATOR_CPU_KEY` by the process CPU seconds the W-6 comparator consumed:
+    R-120 limb 4's "doubled CPU cost", MEASURED at fixture time for the fixture manifest's
+    `runtime.widening_guard_cpu`. It is never written onto `BootstrapResult`, so no
+    serialized artifact carries a run-variable timing.
     """
     if evaluation_mode not in EVALUATION_MODES:
         raise BootstrapError(
@@ -1018,6 +1078,7 @@ def vector_block_bootstrap(
     # The rejected Q-27 method, present solely to be beaten: SAME masked data, SAME block
     # length, SAME replicate count as this primary call — independent per-station index
     # sequences are exactly the property the vector draw forbids.
+    comparator_cpu_start = time.process_time()
     comparator_rng = np.random.Generator(np.random.PCG64(child_comparator))
     stations = sorted(block_values)
     comparator_indices = comparator_rng.integers(
@@ -1042,6 +1103,10 @@ def vector_block_bootstrap(
         comparator_stats.append(scalar)
     comparator_lower, comparator_upper = percentile_interval(comparator_stats, ci_level=ci_level)
     comparator_width = comparator_upper - comparator_lower  # width ONLY — never bounds
+    if timings is not None:
+        timings[WIDENING_COMPARATOR_CPU_KEY] = timings.get(WIDENING_COMPARATOR_CPU_KEY, 0.0) + (
+            time.process_time() - comparator_cpu_start
+        )
 
     passed = not (vector_width < comparator_width)
     disclosure: dict[str, Any] | None = None
