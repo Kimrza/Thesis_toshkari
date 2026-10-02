@@ -210,11 +210,19 @@ units:
       (D-17's row contract)
     source: D-17; src/data/prepared.py
   coordinates:
-    value: "TBD — freeze gate"
+    value: >-
+      geodetic: D-1 (ARUC 40.286 N, 44.086 E; BSHM 32.778987 N, 35.022987 E; NICO
+      35.140989 N, 33.396450 E); geomagnetic (centered-dipole, IGRF-13, epoch 2022.5,
+      Hapgood-1992 MAG frame): D-65; coordinate-to-cell rule (floor convention, half-open
+      [floor, floor+1)): D-1, governance condition closed 2026-08-21 (D-1 addendum)
     source: >-
-      the station registry's geodetic AND IGRF geomagnetic coordinates for all three
-      cells, plus the coordinate-to-cell rule. Both are §18.2 forbidden-choice items
-      (station coordinates: Student; cell-selection rule: Student + Supervisor).
+      configs/data.yaml: stations.{ARUC,BSHM,NICO}.{lat,lon,geomagnetic_lat,geomagnetic_lon};
+      evidence/DECISIONS.md D-1, D-1 addendum, D-33, D-33 addendum, D-65. Transcribed
+      2026-10-02 from the frozen register, as plumbing_7day's frozen manifest (D-88) carries
+      it for BSHM; no value is chosen here. The station coordinates (Student) and the
+      cell-selection rule (Student + Supervisor) are §18.2 forbidden-choice items already
+      frozen under those D-numbers. Found missing by P-S2's composition refusal
+      (units.coordinates was the sentinel).
   tecu:
     value: TECU
     source: TE § Domain Glossary — the unit of every VTEC quantity in this project.
