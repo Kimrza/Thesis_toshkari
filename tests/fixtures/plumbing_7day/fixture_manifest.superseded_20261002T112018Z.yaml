@@ -1,0 +1,970 @@
+{
+  "apparatus_hyperparameters": {
+    "lstm": {
+      "citation": "D-70",
+      "params": {
+        "batch_size": 64,
+        "layers": 1,
+        "learning_rate": 0.001,
+        "units": 32
+      },
+      "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale plumbing apparatus only (TC-03f); never a prior, default, ranking signal, or shortlist for the governed selection."
+    },
+    "random_forest": {
+      "citation": "D-70",
+      "params": {
+        "max_depth": 8,
+        "min_samples_leaf": 1,
+        "n_estimators": 300
+      },
+      "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale plumbing apparatus only (TC-03f); never a prior, default, ranking signal, or shortlist for the governed selection."
+    },
+    "ridge": {
+      "citation": "D-70",
+      "params": {
+        "alpha": 0.01
+      },
+      "reason": "D-70 positional rule: the first transcribed element of each D-121 grid axis in configs/experiment.yaml, selected with zero discretion before any result exists. Fixture-scale plumbing apparatus only (TC-03f: smoke evidence, never scientific evidence); never a prior, default, ranking signal, or shortlist for the governed selection, which stays models.selected, produced only by the governed January-November F1-F4 tuning run under D-124."
+    }
+  },
+  "apparatus_normalization": {
+    "station_lat": {
+      "normalization": "none",
+      "reason": "plumbing_7day runs ONE station (D-20: BSHM, cell 32/35), so station_lat holds a single distinct value in every row and there is no station spread to scale by. configs/features.yaml declares it train_only_standardize, which is right for the governed run and for scientific_1month, where three stations make it genuinely variable; fit_transforms correctly refuses to invent a scale for a constant column (TE 18.2). Apparatus constant (R-122), not a scientific value: the governed dictionary, D-60 and the producing artifact are untouched, and a governed run carries no fixture scope to read this from. The claim that the column IS constant is verified by fit_transforms against this fixture's own values, not taken on trust. Owner ruling 2026-09-23, RULING_REQUEST_2026-09-23_CONSTRUCTION_STOPS.md section 5 option 1."
+    }
+  },
+  "apparatus_partitions": {
+    "FIX-NOV-FOLD-01": {
+      "kind": "fold",
+      "train_end": "2022-11-03",
+      "train_start": "2022-11-01",
+      "validation_month": "2022-11-04"
+    },
+    "FIX-NOV-FOLD-02": {
+      "kind": "fold",
+      "train_end": "2022-11-04",
+      "train_start": "2022-11-01",
+      "validation_month": "2022-11-05"
+    },
+    "FIX-NOV-REFIT": {
+      "kind": "refit",
+      "train_end": "2022-11-07",
+      "train_start": "2022-11-01",
+      "validation_month": null
+    }
+  },
+  "expected_schema": {
+    "benchmark": {
+      "columns": {
+        "benchmark_id": "object",
+        "cell_id": "object",
+        "htop_km": "float64",
+        "iri2016_t_plus_1_tecu": "float64",
+        "iri_version": "int64",
+        "lat": "float64",
+        "lon": "float64",
+        "phase_id": "object",
+        "source_id": "object",
+        "station_id": "object",
+        "status": "object",
+        "target_definition_id": "object",
+        "target_time_utc": "object",
+        "units": "object"
+      },
+      "file": "iri_benchmark.parquet",
+      "rows": 168,
+      "sha256": "76ddeed8ad2824ea251c89b7b1111ede4a79887fcffa575633657e475fea3482"
+    },
+    "comparator": {
+      "columns": {
+        "exact_epoch_match": "bool",
+        "f_t": "float64",
+        "gim_network_overlap_flag": "bool",
+        "ionex_file": "object",
+        "ionex_sha256": "object",
+        "overlap_audit_id": "object",
+        "overlap_audit_sha256": "object",
+        "phase_id": "object",
+        "rule": "object",
+        "station": "object",
+        "target_epoch_utc": "object",
+        "value_tecu": "float64"
+      },
+      "file": "gim_comparator.parquet",
+      "rows": 168,
+      "sha256": "738124cd27b837ff86bb678a78bc80a1a9778a614a2a8aeacad59835ead1f436"
+    },
+    "feature": {
+      "columns": {
+        "ap60_safe": "float64",
+        "ap_safe": "float64",
+        "doy_cos": "float64",
+        "doy_sin": "float64",
+        "f107_81_trailing": "float64",
+        "f107_safe": "float64",
+        "hp60_safe": "float64",
+        "interval_start_utc": "object",
+        "kp_safe": "float64",
+        "lst_cos": "float64",
+        "lst_sin": "float64",
+        "station_id": "object",
+        "station_lat": "float64",
+        "station_onehot_ARUC": "float64",
+        "station_onehot_BSHM": "float64",
+        "station_onehot_NICO": "float64",
+        "utc_hour_cos": "float64",
+        "utc_hour_sin": "float64",
+        "vtec_lag_1h": "float64",
+        "vtec_lag_24h": "float64",
+        "vtec_lag_2h": "float64",
+        "vtec_lag_3h": "float64",
+        "vtec_seq_24_t-1": "float64",
+        "vtec_seq_24_t-10": "float64",
+        "vtec_seq_24_t-11": "float64",
+        "vtec_seq_24_t-12": "float64",
+        "vtec_seq_24_t-13": "float64",
+        "vtec_seq_24_t-14": "float64",
+        "vtec_seq_24_t-15": "float64",
+        "vtec_seq_24_t-16": "float64",
+        "vtec_seq_24_t-17": "float64",
+        "vtec_seq_24_t-18": "float64",
+        "vtec_seq_24_t-19": "float64",
+        "vtec_seq_24_t-2": "float64",
+        "vtec_seq_24_t-20": "float64",
+        "vtec_seq_24_t-21": "float64",
+        "vtec_seq_24_t-22": "float64",
+        "vtec_seq_24_t-23": "float64",
+        "vtec_seq_24_t-24": "float64",
+        "vtec_seq_24_t-3": "float64",
+        "vtec_seq_24_t-4": "float64",
+        "vtec_seq_24_t-5": "float64",
+        "vtec_seq_24_t-6": "float64",
+        "vtec_seq_24_t-7": "float64",
+        "vtec_seq_24_t-8": "float64",
+        "vtec_seq_24_t-9": "float64"
+      },
+      "file": "feature_table.parquet",
+      "rows": 144,
+      "sha256": "2bb1a6c3f8f6d4bf0ca79c4b917b3b5f7caa699a3a0a470c12920da2c3bcbc2f"
+    },
+    "hourly_target": {
+      "authoritative_copy": "src/data/prepared.py D17_FIELDS",
+      "contract": "D-17 (evidence/DECISIONS.md): exactly sixteen row fields",
+      "drift_guard": "tests/test_phase_boundary.py::test_d17_target_fields_match_the_producer_contract",
+      "permitted_extra": "lineage_caveat",
+      "produced": {
+        "columns": {
+          "aggregation_config_id": "object",
+          "cell_gdlat": "int64",
+          "cell_glon": "int64",
+          "cell_lat_bounds": "object",
+          "cell_lon_bounds": "object",
+          "interval_start_utc": "object",
+          "largest_internal_gap_s": "float64",
+          "lineage_caveat": "object",
+          "phase_id": "object",
+          "provider_dtec_summary": "float64",
+          "source_id": "object",
+          "station_id": "object",
+          "target_definition_id": "object",
+          "target_valid": "bool",
+          "valid_observation_count": "int64",
+          "vtec_tecu": "float64",
+          "within_hour_spread_tecu": "float64"
+        },
+        "file": "hourly_vtec.parquet",
+        "rows": 168,
+        "sha256": "8f019e37408e1b972e7caf0978d4cb2ee0f0bd40afcd6ecbf7017f067fc14832"
+      }
+    },
+    "intermediate": {
+      "reason": "Phase 2 only — STEC/mapping intermediates (TE §7.0).",
+      "status": "not_applicable"
+    },
+    "metric": {
+      "file": "metrics.json",
+      "sha256": "df44e7f828b3aec1951fc4079e32eb091f2d60c09f95c3399d8eba1c39ca5732",
+      "top_level_keys": [
+        "artifact",
+        "evaluated",
+        "fixture_id",
+        "not_evaluated"
+      ]
+    },
+    "prediction": {
+      "columns": {
+        "confirmatory": "bool",
+        "horizon_hours": "int64",
+        "interval_start_utc": "object",
+        "model_id": "object",
+        "partition_id": "object",
+        "payload_file": "object",
+        "phase_id": "object",
+        "seed": "Int64",
+        "source_id": "object",
+        "station": "object",
+        "target_definition_id": "object",
+        "transform_id": "object",
+        "y_hat": "float64"
+      },
+      "file": "predictions.parquet",
+      "rows": 648,
+      "sha256": "22a637e2797f9a0805e7788293335e3404c382fc7c48ce094ceddbe612aa6700"
+    },
+    "raw": {
+      "reason": "Phase 2 only — raw observation schema (TE §7.0).",
+      "status": "not_applicable"
+    },
+    "registry": {
+      "authoritative_copy": "src/data/experiment_registry.py REGISTRY_COLUMNS",
+      "contract": "TE §13.4: the twenty-column experiment-registry row"
+    }
+  },
+  "fixture_id": "plumbing_7day",
+  "identity": {
+    "approval_status": "adopted 2026-09-13 under Q-31 (student-owned; owner FINAL RULING of 2026-09-13, CR-2026-09-13-000102-FIXTURE-WINDOW; no supervisor countersignature required per team.md § Walking Skeleton)",
+    "aruc_shortfall_status": {
+      "reactivation_condition": "D-11 (verbatim): ARUC is short exactly one bin on five of the seven days (3-7 November), a uniformity that suggests a systematic single-bin gap rather than random loss and should be explained before the manifest is frozen (BLK-02 lineage).",
+      "status": "dormant"
+    },
+    "creator": "Kimia Rezaei (student; Q-31 assigns fixture station, dates and acceptance tolerances to the Student, TE §18.2)",
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified — no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md § Walking Skeleton).",
+    "eligibility_evidence": {
+      "decision": "D-11",
+      "source": "evidence/audit_evidence_2022-11/madrigal_coverage_raw_records.csv (D-11/D-20 measured basis: BSHM 168/168 hourly bins, 7/7 days)"
+    },
+    "fixture_id": "plumbing_7day",
+    "freeze_citation": {
+      "decision": "D-87"
+    },
+    "limitations": {
+      "clauses": [
+        "This window does not reproduce December's winter-solstice regime or its activity distribution and must not be treated as representative of the locked month.",
+        "Provisional values may characterise fixture selection only. They must not become modelling inputs, frozen tolerances, or G-05 regime counts."
+      ],
+      "december_representativeness": "not_representative"
+    },
+    "phase_id": "P1A",
+    "selection_rule": "D-11 (verbatim rationale): November is the closest eligible late-year month to the locked test month, and 2022-11-01..07 is deliberately stress-bearing rather than quiet: it is November's most disturbed seven-day window, carrying the month's minimum provisional Dst of -92 nT. Eligibility judged on derived-artifact verification (team.md § Walking Skeleton); smoke test only, never scientific evidence (TC-03f).",
+    "source_id": "GNSS_VTEC",
+    "station_citation": {
+      "cell": "32/35",
+      "decision": "D-20",
+      "station_id": "BSHM"
+    },
+    "stations": [
+      "BSHM"
+    ],
+    "target_definition_id": "GRIDDed_VTEC_1H",
+    "utc_dates": "2022-11-01..2022-11-07",
+    "window_citation": {
+      "decision": "D-11",
+      "end_utc": "2022-11-07",
+      "start_utc": "2022-11-01"
+    }
+  },
+  "independent_reference_checks": {
+    "hand_worked_dcb_pass": {
+      "reason": "Phase 2 only. The hand-worked DCB pass and its reversed-sign negative control are WS-04/TA-07, deferred to G-P3A.",
+      "status": "not_applicable"
+    },
+    "sample_iri_gim_values": {
+      "note": "first, middle and last GIM epoch of the window with the IRI value at the same epoch, read from this run's iri_benchmark.parquet and gim_comparator.parquet (evaluation-time only, NFR-IRI-01)",
+      "samples": [
+        {
+          "epoch_utc": "2022-11-01T00:00:00+00:00",
+          "gim_value_tecu": 12.998747809186705,
+          "iri_value_tecu": 7.5128476008447995,
+          "station": "BSHM"
+        },
+        {
+          "epoch_utc": "2022-11-04T12:00:00+00:00",
+          "gim_value_tecu": 47.62670266756012,
+          "iri_value_tecu": 41.72724106690559,
+          "station": "BSHM"
+        },
+        {
+          "epoch_utc": "2022-11-07T23:00:00+00:00",
+          "gim_value_tecu": 14.639248069186706,
+          "iri_value_tecu": 8.0766942183424,
+          "station": "BSHM"
+        }
+      ],
+      "units": "TECU"
+    },
+    "stec_vtec_intermediates": {
+      "reason": "Phase 2 only — STEC/VTEC intermediates are raw-processing (TE §7.0).",
+      "status": "not_applicable"
+    }
+  },
+  "inputs": {
+    "dcb": {
+      "reason": "Phase 2 only. DCB handling is inside TE §7.0's Phase 1 hard prohibition.",
+      "status": "not_applicable"
+    },
+    "ionex": {
+      "files": {
+        "codg3050.22i.Z": "39ebce86f59b636f04c4e65898832d3336c2b782a634f2b71b9be52a215e5977",
+        "codg3060.22i.Z": "c44a8b3470b193a09698e5221e9d955dd2114549f5db50a38c113b11f6cfb8f3",
+        "codg3070.22i.Z": "d19a521e30d65c9132d7b3389d65e67fb9ddba886e92fcc7dcc6b27cdfc4cb28",
+        "codg3080.22i.Z": "6c187810fd03b5753a14feedf3e91dcee93f02f6f3bcf9b23bdcef99b1939dde",
+        "codg3090.22i.Z": "a2b078addbad3291679e426d2b5d3d01f5e2746efe2347fb9e04107c63d04e0f",
+        "codg3100.22i.Z": "ea5319645a38b64e6a28715fe2850463e07b9b694bb02b266d998b942181d53d",
+        "codg3110.22i.Z": "64837ab92ef2e8fa76ec650a72f7e02394568f195599cada663e3c3368431baf"
+      },
+      "release": "gim_comparator_C-01_2022",
+      "release_content_hash": "f04fc0e27f7daff295dc2bbb457c65363956cffc56b80ab8e6c00b54b9ec83ad"
+    },
+    "iri": {
+      "artifact_hashes": {
+        "b01_runtime_identity.json": "b90e7c7a2693928d491178e76d105e489a1531f52df00144153587d5fdf2ea65"
+      },
+      "benchmark_id": "B-01",
+      "fixture_rows_file": "iri_benchmark.parquet",
+      "fixture_rows_sha256": "76ddeed8ad2824ea251c89b7b1111ede4a79887fcffa575633657e475fea3482",
+      "recorded_in": "artifacts/external/b01/sha256_manifest.json"
+    },
+    "prepared_vtec": {
+      "citation": "the month's four declared derived artifacts and their SHA-256 as recorded in evidence/audit_evidence_2022-11/sha256_manifest.json (team.md § Walking Skeleton eligibility criterion; R-135 limb 2); DATA-07 caveat applies — derived-artifact verification, not retrieval verification",
+      "evidence_dir": "evidence/audit_evidence_2022-11",
+      "files": {
+        "madrigal_coverage_monthly.csv": "ab14a2c23868dd6d1402e3903d8d665a7250d525d27efb4952aed54be46af2a8",
+        "madrigal_coverage_raw_records.csv": "570d1be5e22191bc3248873e711610b580a77ffb5dcbf7988eca92011e7baff9",
+        "madrigal_coverage_summary.csv": "02269afef517d719f9696625ca5aa0764466e6fc1c732d8836a7b792aa49e370",
+        "request_manifest.json": "ba13717f6e3e56203c07f7cab491edfedf64f6a6ea2530ed3af106340e12825e"
+      },
+      "records_file": "madrigal_coverage_raw_records.csv",
+      "sha256_manifest": "sha256_manifest.json"
+    },
+    "rinex_crx": {
+      "reason": "Phase 2 only. TE §7.0's Phase 1 hard prohibition bars RINEX parsing; the Phase 1 fixture reads prepared provider VTEC only (TE §15.1). Recorded not-applicable rather than emitted empty (Q3 = A, the FR-P1-03-5 precedent).",
+      "status": "not_applicable"
+    },
+    "site_log": {
+      "file": "evidence/station_registry_sources_2026-09-19/bshm00isr_20260422.log",
+      "recorded_in": "evidence/station_registry_sources_2026-09-19/sha256_manifest.json",
+      "sha256": "d0dae80429fac5cc065b6bfdec87d2f948754d3d243b9e8dfb74c1005d37770f"
+    },
+    "space_weather": {
+      "gfz_hp60ap60_v2_2022": {
+        "content_hash": "b9b59a1371b97307322fadbeba188fcb8f5025f4c7555b4ffcbc9cc29dcd8f16",
+        "output_files": {
+          "hp60_ap60_1h.csv": "8fcb5435a6a2566a668056cf75d81ca750757910752c3b6bbebd9899d6dbdc9f"
+        },
+        "release_status": "hpo_v2.0_contemporaneous"
+      },
+      "gfz_kp_ap_nowcast_2022": {
+        "content_hash": "b23eb09c9e7ce2bb45caa4301a622938321dc70924ae89bbb45cd269a6875c33",
+        "output_files": {
+          "kp_ap_3h.csv": "2df7238eb765be76be95bba625afa14c0bacee1b7039da8f0ae3dc408d20d491"
+        },
+        "release_status": "nowcast"
+      },
+      "kyoto_wdc_dst_2022": {
+        "content_hash": "c81ad6afe8bf42b4a89bc6b61a71f60a55625c13040590efc70b8292f3187956",
+        "output_files": {
+          "dst_1h.csv": "eb34b6ec5350902fc96d58eb310a172a6c9bdcc46cc0055f720eb6c7072f87ae"
+        },
+        "release_status": "provisional (per the retrieved file names; D-10.1's grade rule)"
+      },
+      "nrcan_f107_observed_daily_median_2022": {
+        "content_hash": "c97d14efce2fbfce784ad594959f3efe7e99854888209501c74c41cf6f3d8664",
+        "output_files": {
+          "f107_daily_median.csv": "ef72e689d8c4b29e139a6f8676abce698d144d43b0cf83be498d5ce97cf78e85"
+        },
+        "release_status": "observed"
+      }
+    }
+  },
+  "numerical_variation": {
+    "exact_fields": {
+      "source": "the comparison_ledger template's `exact` entries (D-74 and its CR-2026-09-29-Q31-CLOSURE amendment; TE 13.7)",
+      "value": [
+        "bootstrap_summary.json",
+        "checkpoint_manifest.json",
+        "clean_run_log.*",
+        "feature_table.parquet",
+        "gim_comparator.parquet",
+        "hourly_vtec.parquet",
+        "input_manifest.yaml",
+        "iri_benchmark.parquet",
+        "mask_manifest.json",
+        "processing_config_snapshot.yaml",
+        "registry_entry.json",
+        "split_manifest.json",
+        "test_report.*"
+      ]
+    },
+    "floating_point_tolerances": {
+      "max": 0.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 0.0,
+      "units": "TECU"
+    }
+  },
+  "processing": {
+    "calibration_layer_commit": {
+      "reason": "Phase 2 only — the calibration layer is raw-processing (TE §7.0).",
+      "status": "not_applicable"
+    },
+    "full_config_id": {
+      "config_hashes": {
+        "data.yaml": "871be23b73dea85b16ebbaf4b4d7b3032440ab594e142807b2bf11a4e9c4509f",
+        "experiment.yaml": "8427794fcafd90ea371228a966aba77c96ca2c10d26982beb42c2f0eb512e4e6",
+        "features.yaml": "1b1ebdfd009010742bf22bf1f608dc5df5e6b1fbb36981d1b2936f3b6c92d28c",
+        "seeds.yaml": "c951f949ae6069edf476b2680bda8825d047169841c707f34f81e2c94775f166"
+      },
+      "method": "sha256 over the sorted `name=sha256` lines of the four governed configs",
+      "value": "e9854c80128a3c7f9ba891292570bb526738c336ddc18a11b8c93bf22088eb2a"
+    },
+    "gnss_tec_version": {
+      "reason": "Phase 2 only — `gnss-tec` is a raw-processing dependency (TE §7.0).",
+      "status": "not_applicable"
+    }
+  },
+  "required_outputs": {
+    "artifact_manifest_ref": "reference_walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c-xenv/artifact_manifest.json",
+    "comparison_ledger": {
+      "bootstrap_summary.json": {
+        "citation": "D-74 amendment, CR-2026-09-29-Q31-CLOSURE",
+        "comparison_class": "exact",
+        "exact_kind": "schema",
+        "producing_path": {
+          "script": "scripts/07_evaluate_and_report.py"
+        },
+        "units": "not applicable (status record: not_executed on Fixture 1, TE 15.3)"
+      },
+      "checkpoint_manifest.json": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "id",
+        "field_exceptions": {
+          "citation": "D-74 amendment 2 (2026-10-01, Student ruling): TE 13.7 applied field by field",
+          "fp_tolerance": {
+            "elements_compared": 6,
+            "environment_ids": [
+              "g07-clean-run",
+              "tec-thesis-311"
+            ],
+            "fields": {
+              "restored_validation_rmse": {
+                "elements": 6,
+                "floor": 2.010830366740404e-06,
+                "statistic": 3.5026512001934407e-07,
+                "tolerance": 2.010830366740404e-06,
+                "unit": "TECU"
+              }
+            },
+            "measured_over_runs": 4,
+            "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+            "method": "D-83 item 11 via src.data.cross_environment_tolerance over the declared toleranced fields of an exact output (D-74 amendment 2)"
+          },
+          "toleranced_fields": [
+            {
+              "citation": "TE 13.7 (floating-point metrics use fixture-derived tolerances); D-74 amendment 2; D-83 item 11",
+              "field": "restored_validation_rmse",
+              "locator": "/entries\\[\\d+\\]/restored_validation_rmse",
+              "meaning": "validation RMSE of the restored best checkpoint: a model-fit float, not an identity",
+              "unit": "TECU"
+            }
+          ]
+        },
+        "producing_path": {
+          "script": "scripts/06_train_and_predict.py"
+        },
+        "units": "not applicable (checkpoint identities and epoch facts)"
+      },
+      "clean_run_log.json": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "schema",
+        "producing_path": {
+          "script": "scripts/run_walking_skeleton.py"
+        },
+        "units": "not applicable (log schema)"
+      },
+      "feature_table.parquet": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "deterministic_cpu_transformation",
+        "producing_path": {
+          "script": "scripts/05_build_features_and_splits.py"
+        },
+        "units": "vtec lags/sequence: TECU (untransformed); cyclical encodings: dimensionless; station_lat: degrees"
+      },
+      "gim_comparator.parquet": {
+        "citation": "D-74; D-72",
+        "comparison_class": "exact",
+        "exact_kind": "deterministic_cpu_transformation",
+        "producing_path": {
+          "script": "scripts/04_build_external_products.py"
+        },
+        "units": "value_tecu: TECU; f_t: dimensionless [0,1]; exact_epoch_match, gim_network_overlap_flag: boolean; remaining columns identifiers"
+      },
+      "hourly_vtec.parquet": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "deterministic_cpu_transformation",
+        "producing_path": {
+          "script": "scripts/02_standardize_prepared_target.py"
+        },
+        "units": "vtec_tecu, within_hour_spread_tecu: TECU; largest_internal_gap_s: s; valid_observation_count: count (releases/phase1_hourly_target/release_manifest.json units)"
+      },
+      "input_manifest.yaml": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "hash",
+        "producing_path": {
+          "script": "scripts/run_walking_skeleton.py"
+        },
+        "units": "not applicable (manifest of identifiers and SHA-256 hashes)"
+      },
+      "iri_benchmark.parquet": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "deterministic_cpu_transformation",
+        "producing_path": {
+          "script": "scripts/04_build_external_products.py"
+        },
+        "units": "iri2016_t_plus_1_tecu: TECU; htop_km: km; lat/lon: degrees"
+      },
+      "mask_manifest.json": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "partition_membership",
+        "field_exceptions": {
+          "citation": "D-74 amendment 2 (2026-10-01, Student ruling): TE 13.7 applied field by field",
+          "environment_bound": [
+            {
+              "locator": "/masks\\[\\d+\\]/mask_id",
+              "reason": "R-107 limb 1: mask_id hashes the masked rows including y_true and the members' predictions, so it is exact only between runs of the reference's own environment; membership_id, the float-free partition membership, is compared exactly in every environment"
+            }
+          ]
+        },
+        "producing_path": {
+          "script": "scripts/07_evaluate_and_report.py"
+        },
+        "units": "not applicable (mask membership)"
+      },
+      "metrics.json": {
+        "citation": "D-74",
+        "comparison_class": "toleranced",
+        "fields": [
+          {
+            "citation": "this entry's declared units 'TECU^2 (paired squared-error loss differential, benchmark minus model)'; project.md Mandated (confirmatory estimand); D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5)",
+            "field": "paired_loss_differential",
+            "locator": "/evaluated/[^/]+/[^/]+/comparisons\\[\\d+\\]/(scalar|per_station/[^/]+)",
+            "meaning": "paired squared-error loss differential, benchmark minus model, positive favours the model; the scalar is the equal-station-weighted combination, per_station the within-station value (Vision 2.3)",
+            "unit": "TECU^2"
+          },
+          {
+            "citation": "src/evaluation/masks.py RegisteredMask; the count unit as recorded for valid_observation_count on the measuring run's record; D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5)",
+            "field": "row_count",
+            "locator": "/evaluated/[^/]+/[^/]+/row_counts/[^/]+",
+            "meaning": "rows surviving the comparison-wide mask, per station (R-107 limb 6; src/evaluation/masks.py RegisteredMask.row_counts, Mapping[str, int])",
+            "unit": "count"
+          },
+          {
+            "citation": "src/evaluation/masks.py RegisteredMask; the count unit as recorded for valid_observation_count on the measuring run's record; D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5)",
+            "field": "exclusion_count",
+            "locator": "/evaluated/[^/]+/[^/]+/exclusion_counts/[^/]+",
+            "meaning": "rows dropped by the comparison-wide intersection, per station (R-107 limb 6; src/evaluation/masks.py RegisteredMask.exclusion_counts, Mapping[str, int])",
+            "unit": "count"
+          }
+        ],
+        "fp_tolerance": {
+          "elements_compared": 32,
+          "environment_ids": [
+            "g07-clean-run",
+            "tec-thesis-311"
+          ],
+          "fields": {
+            "exclusion_count": {
+              "elements": 4,
+              "floor": 1.6689300537109375e-05,
+              "statistic": 0.0,
+              "tolerance": 1.6689300537109375e-05,
+              "unit": "count"
+            },
+            "paired_loss_differential": {
+              "elements": 24,
+              "floor": 3.4518555001273005e-05,
+              "statistic": 6.5977969825326e-06,
+              "tolerance": 3.4518555001273005e-05,
+              "unit": "TECU^2"
+            },
+            "row_count": {
+              "elements": 4,
+              "floor": 5.125999450683594e-06,
+              "statistic": 0.0,
+              "tolerance": 5.125999450683594e-06,
+              "unit": "count"
+            }
+          },
+          "measured_over_runs": 4,
+          "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+          "method": "D-83 item 11 via src.data.cross_environment_tolerance: determinism per environment_id first, then per field max(max |(c) - (a)|, 2^-23 x max |(a)|)"
+        },
+        "producing_path": {
+          "inverse_route": "identity (D-27/D-37: primary target untransformed)",
+          "script": "scripts/07_evaluate_and_report.py"
+        },
+        "units": "TECU^2 (paired squared-error loss differential, benchmark minus model)"
+      },
+      "plots/predictions.png": {
+        "citation": "D-75",
+        "comparison_class": "recorded_presence",
+        "image_format": "png",
+        "producing_path": {
+          "script": "scripts/07_evaluate_and_report.py"
+        },
+        "units": "not applicable (image; existence + format + recorded SHA-256, D-75)"
+      },
+      "plots/quality_diagnostics.png": {
+        "citation": "D-75",
+        "comparison_class": "recorded_presence",
+        "image_format": "png",
+        "producing_path": {
+          "script": "scripts/07_evaluate_and_report.py"
+        },
+        "units": "not applicable (image; existence + format + recorded SHA-256, D-75)"
+      },
+      "plots/residuals.png": {
+        "citation": "D-75",
+        "comparison_class": "recorded_presence",
+        "image_format": "png",
+        "producing_path": {
+          "script": "scripts/07_evaluate_and_report.py"
+        },
+        "units": "not applicable (image; existence + format + recorded SHA-256, D-75)"
+      },
+      "plots/target_support.png": {
+        "citation": "D-75",
+        "comparison_class": "recorded_presence",
+        "image_format": "png",
+        "producing_path": {
+          "script": "scripts/07_evaluate_and_report.py"
+        },
+        "units": "not applicable (image; existence + format + recorded SHA-256, D-75)"
+      },
+      "predictions.parquet": {
+        "citation": "D-74",
+        "comparison_class": "toleranced",
+        "fields": [
+          {
+            "citation": "this entry's declared units 'TECU'; TE Domain Glossary (TECU is the unit of every VTEC quantity); D-83 revision 8 section A8 item 10 (governed field table, PV-10 Rec 5)",
+            "field": "y_hat",
+            "locator": "[^|]+\\|[^|]+\\|[^|]+\\|[^|]+",
+            "meaning": "hourly VTEC prediction y_hat, one element per (partition_id, payload_file, station, interval_start_utc) row; primary target untransformed (D-27/D-37)",
+            "unit": "TECU"
+          }
+        ],
+        "fp_tolerance": {
+          "elements_compared": 648,
+          "environment_ids": [
+            "g07-clean-run",
+            "tec-thesis-311"
+          ],
+          "fields": {
+            "y_hat": {
+              "elements": 648,
+              "floor": 5.644682211970213e-06,
+              "statistic": 1.9073486328125e-06,
+              "tolerance": 5.644682211970213e-06,
+              "unit": "TECU"
+            }
+          },
+          "measured_over_runs": 4,
+          "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+          "method": "D-83 item 11 via src.data.cross_environment_tolerance: determinism per environment_id first, then per field max(max |(c) - (a)|, 2^-23 x max |(a)|)"
+        },
+        "producing_path": {
+          "inverse_route": "identity (D-27/D-37: primary target untransformed)",
+          "script": "scripts/06_train_and_predict.py"
+        },
+        "units": "TECU"
+      },
+      "processing_config_snapshot.yaml": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "hash",
+        "producing_path": {
+          "script": "scripts/run_walking_skeleton.py"
+        },
+        "units": "not applicable (config hashes and identifiers)"
+      },
+      "registry_entry.json": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "schema",
+        "producing_path": {
+          "script": "scripts/run_walking_skeleton.py"
+        },
+        "units": "not applicable (TE 13.4 registry row)"
+      },
+      "split_manifest.json": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "partition_membership",
+        "producing_path": {
+          "script": "scripts/05_build_features_and_splits.py"
+        },
+        "units": "not applicable (partition membership)"
+      },
+      "test_report.json": {
+        "citation": "D-74",
+        "comparison_class": "exact",
+        "exact_kind": "schema",
+        "producing_path": {
+          "script": "scripts/run_walking_skeleton.py"
+        },
+        "units": "not applicable (pass/fail schema)"
+      }
+    },
+    "outputs": [
+      "bootstrap_summary.json",
+      "checkpoint_manifest.json",
+      "clean_run_log.json",
+      "feature_table.parquet",
+      "gim_comparator.parquet",
+      "hourly_vtec.parquet",
+      "input_manifest.yaml",
+      "iri_benchmark.parquet",
+      "mask_manifest.json",
+      "metrics.json",
+      "plots/predictions.png",
+      "plots/quality_diagnostics.png",
+      "plots/residuals.png",
+      "plots/target_support.png",
+      "predictions.parquet",
+      "processing_config_snapshot.yaml",
+      "registry_entry.json",
+      "split_manifest.json",
+      "test_report.json"
+    ],
+    "reference_environment_id": "tec-thesis-311"
+  },
+  "row_count_ranges": {
+    "feature_window": {
+      "max": 48.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 24.0,
+      "units": "rows"
+    },
+    "hourly_target": {
+      "max": 168.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 168.0,
+      "units": "rows"
+    },
+    "parsing": {
+      "reason": "Phase 2 only — no parsing stage exists in Phase 1 (TE §7.0).",
+      "status": "not_applicable"
+    },
+    "split": {
+      "max": 144.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 48.0,
+      "units": "rows"
+    },
+    "valid_observation": {
+      "reason": "Phase 2 only — per-observation validity is a raw-processing quantity.",
+      "status": "not_applicable"
+    }
+  },
+  "runtime": {
+    "cpu_total": {
+      "max": 504.9530000000086,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 363.95933299800004,
+      "units": "s"
+    },
+    "storage_total": {
+      "max": 2345881.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 2311682.0,
+      "units": "bytes"
+    }
+  },
+  "status": "frozen",
+  "support_missingness": {
+    "comparator": {
+      "max": 43.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 18.0,
+      "units": "rows"
+    },
+    "external_feature": {
+      "max": 0.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 0.0,
+      "units": "rows"
+    },
+    "invalid_hour": {
+      "max": 10.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 10.0,
+      "units": "hours"
+    },
+    "target_support": {
+      "max": 12.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 4.0,
+      "units": "samples per hourly bin"
+    }
+  },
+  "timestamp_tolerances": {
+    "feature_alignment": {
+      "max": 0.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 0.0,
+      "units": "s"
+    },
+    "gim": {
+      "max": 0.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 0.0,
+      "units": "s"
+    },
+    "hourly_boundary": {
+      "max": 0.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 0.0,
+      "units": "s"
+    },
+    "iri": {
+      "max": 0.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_ids": [
+        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
+        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
+        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+      ],
+      "min": 0.0,
+      "units": "s"
+    },
+    "parser": {
+      "reason": "Phase 2 only — there is no parser in the Phase 1 path (TE §7.0).",
+      "status": "not_applicable"
+    }
+  },
+  "units": {
+    "coordinates": {
+      "source": "configs/data.yaml: stations.BSHM.{lat,lon,geomagnetic_lat,geomagnetic_lon}; evidence/DECISIONS.md D-1, D-1 addendum, D-33, D-33 addendum, D-65. Corrected 2026-09-27 under GOV-2026-09-27-BT-02 R4 (Student-approved; execution record governance/CHANGE_RECORD_2026-09-27_GOV-BT-02_remediation.md section 2): the 2026-09-26 note here claimed both halves were \"already frozen and countersigned\", which overstated the register at the time -- coordinates are frozen (D-1, closed 2026-08-21 under the recorded student/supervisor authority equivalence, with NO signature artifact existing or claimed; D-65 Student-owned), and the coordinate-to-cell rule is frozen (D-1 addendum / D-33), with D-33's TE 18.2 governance condition CLOSED 2026-09-27 (D-33 addendum, evidence/DECISIONS.md): the Student verbally confirmed the decision in-session and directed that verbal confirmation as her approval mechanism, closing it under the same recorded student/supervisor authority equivalence that closed D-1's identical condition -- again with NO supervisor signature artifact existing or claimed. The rule VALUE is unchanged throughout; only the signature-status claim changed, twice, each time recorded rather than silently updated.",
+      "value": "geodetic: D-1 (BSHM 32.778987 N, 35.022987 E); geomagnetic (centered-dipole, IGRF-13, epoch 2022.5, Hapgood-1992 MAG frame): D-65; coordinate-to-cell rule (floor convention, half-open [floor, floor+1)): D-1, governance condition closed 2026-08-21 (D-1 addendum)"
+    },
+    "external_index_units": {
+      "source": "each consumed driver release's own `units`",
+      "value": {
+        "gfz_hp60ap60_v2_2022": {
+          "ap60": "nT",
+          "hp60": "dimensionless (thirds)"
+        },
+        "gfz_kp_ap_nowcast_2022": {
+          "ap": "nT",
+          "kp": "dimensionless (thirds)"
+        },
+        "kyoto_wdc_dst_2022": {
+          "dst_nt": "nT"
+        },
+        "nrcan_f107_observed_daily_median_2022": {
+          "f107_daily_median": "sfu"
+        }
+      }
+    },
+    "seconds_counts": {
+      "source": "releases/phase1_hourly_target/release_manifest.json `units`; the count column's dtype as produced in hourly_vtec.parquet",
+      "value": {
+        "largest_internal_gap_s": "s",
+        "valid_observation_count": "count (int64)"
+      }
+    },
+    "tecu": {
+      "source": "TE § Domain Glossary — the unit of every VTEC quantity in this project.",
+      "value": "TECU"
+    },
+    "utc_convention": {
+      "source": "D-17; src/data/prepared.py",
+      "value": "all timestamps are UTC; `interval_start_utc` labels the START of the hourly bin (D-17's row contract)"
+    }
+  }
+}

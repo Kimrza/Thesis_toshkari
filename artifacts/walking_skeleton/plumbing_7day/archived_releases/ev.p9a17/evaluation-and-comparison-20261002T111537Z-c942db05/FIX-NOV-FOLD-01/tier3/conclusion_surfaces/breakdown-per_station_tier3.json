@@ -1,0 +1,8 @@
+{
+  "artifact_id": "breakdown-per_station_tier3",
+  "kind": "breakdown",
+  "path": "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\artifacts\\walking_skeleton\\plumbing_7day\\evaluation\\evaluation-and-comparison-20261002T111537Z-c942db05\\FIX-NOV-FOLD-01\\tier3\\breakdown_per_station_tier3.json",
+  "phase_id": "P1A",
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H"
+}

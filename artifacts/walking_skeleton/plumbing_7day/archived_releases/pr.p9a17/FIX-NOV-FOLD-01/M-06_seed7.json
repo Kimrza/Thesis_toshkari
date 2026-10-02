@@ -1,0 +1,271 @@
+{
+  "confirmatory": false,
+  "fixture_stamp": {
+    "apparatus_partition_id": "FIX-NOV-FOLD-01",
+    "data07_caveat": "DATA-07: this month's provenance is unverifiable in principle, not merely unverified \u2014 no provider byte stream exists anywhere in the workspace, and the provider-side term of the hash arithmetic is zero. Three of the twelve months (2022-04, 2022-07 and 2022-12, the locked month) hold no raw_isprint_cache/ at all. The 2026-08-16 corrected extracts were produced under Python 3.14, outside the governed 3.11 pin. FULL must not be relied on at a freeze gate while its provenance chain points at superseded per-month hashes (team.md \u00a7 Walking Skeleton).",
+    "december_representativeness": "not_representative",
+    "evidence_class": "smoke_only",
+    "fixture_id": "plumbing_7day",
+    "frozen_manifest_hash": null,
+    "phase_id": "P1A",
+    "source_id": "GNSS_VTEC",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "horizon_hours": 1,
+  "hyperparameters": {
+    "batch_size": 64,
+    "layers": 1,
+    "learning_rate": 0.001,
+    "units": 32
+  },
+  "model_id": "M-06",
+  "partition_id": "FIX-NOV-FOLD-01",
+  "phase_id": "P1A",
+  "rows": [
+    {
+      "interval_start_utc": "2022-11-06T00:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.287067413330078
+    },
+    {
+      "interval_start_utc": "2022-11-06T01:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.282194137573242
+    },
+    {
+      "interval_start_utc": "2022-11-06T02:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.28227424621582
+    },
+    {
+      "interval_start_utc": "2022-11-06T03:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.278121948242188
+    },
+    {
+      "interval_start_utc": "2022-11-06T04:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.279922485351562
+    },
+    {
+      "interval_start_utc": "2022-11-06T05:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.294720649719238
+    },
+    {
+      "interval_start_utc": "2022-11-06T06:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.308358192443848
+    },
+    {
+      "interval_start_utc": "2022-11-06T07:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.317813873291016
+    },
+    {
+      "interval_start_utc": "2022-11-06T08:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.328615188598633
+    },
+    {
+      "interval_start_utc": "2022-11-06T09:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.337126731872559
+    },
+    {
+      "interval_start_utc": "2022-11-06T10:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.334081649780273
+    },
+    {
+      "interval_start_utc": "2022-11-06T11:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.335805892944336
+    },
+    {
+      "interval_start_utc": "2022-11-06T12:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.33652400970459
+    },
+    {
+      "interval_start_utc": "2022-11-06T13:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.331933975219727
+    },
+    {
+      "interval_start_utc": "2022-11-06T14:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.327016830444336
+    },
+    {
+      "interval_start_utc": "2022-11-06T15:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.314111709594727
+    },
+    {
+      "interval_start_utc": "2022-11-06T16:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.294626235961914
+    },
+    {
+      "interval_start_utc": "2022-11-06T17:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.288206100463867
+    },
+    {
+      "interval_start_utc": "2022-11-06T18:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.285874366760254
+    },
+    {
+      "interval_start_utc": "2022-11-06T19:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.285595893859863
+    },
+    {
+      "interval_start_utc": "2022-11-06T20:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.284235000610352
+    },
+    {
+      "interval_start_utc": "2022-11-06T21:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.282464981079102
+    },
+    {
+      "interval_start_utc": "2022-11-06T22:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.284473419189453
+    },
+    {
+      "interval_start_utc": "2022-11-06T23:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.283733367919922
+    },
+    {
+      "interval_start_utc": "2022-11-07T00:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.283370018005371
+    },
+    {
+      "interval_start_utc": "2022-11-07T01:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.28512954711914
+    },
+    {
+      "interval_start_utc": "2022-11-07T02:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.287466049194336
+    },
+    {
+      "interval_start_utc": "2022-11-07T03:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.28415584564209
+    },
+    {
+      "interval_start_utc": "2022-11-07T04:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.28518295288086
+    },
+    {
+      "interval_start_utc": "2022-11-07T05:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.296936988830566
+    },
+    {
+      "interval_start_utc": "2022-11-07T06:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.30983829498291
+    },
+    {
+      "interval_start_utc": "2022-11-07T07:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.319011688232422
+    },
+    {
+      "interval_start_utc": "2022-11-07T08:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.33062744140625
+    },
+    {
+      "interval_start_utc": "2022-11-07T09:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.336221694946289
+    },
+    {
+      "interval_start_utc": "2022-11-07T10:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.328838348388672
+    },
+    {
+      "interval_start_utc": "2022-11-07T11:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.334253311157227
+    },
+    {
+      "interval_start_utc": "2022-11-07T12:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.339160919189453
+    },
+    {
+      "interval_start_utc": "2022-11-07T13:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.33934211730957
+    },
+    {
+      "interval_start_utc": "2022-11-07T14:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.335317611694336
+    },
+    {
+      "interval_start_utc": "2022-11-07T15:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.326329231262207
+    },
+    {
+      "interval_start_utc": "2022-11-07T16:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.310264587402344
+    },
+    {
+      "interval_start_utc": "2022-11-07T17:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.30516242980957
+    },
+    {
+      "interval_start_utc": "2022-11-07T18:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.29623031616211
+    },
+    {
+      "interval_start_utc": "2022-11-07T19:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.296845436096191
+    },
+    {
+      "interval_start_utc": "2022-11-07T20:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.298215866088867
+    },
+    {
+      "interval_start_utc": "2022-11-07T21:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.298659324645996
+    },
+    {
+      "interval_start_utc": "2022-11-07T22:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.301025390625
+    },
+    {
+      "interval_start_utc": "2022-11-07T23:00:00+00:00",
+      "station": "BSHM",
+      "y_hat": 9.295225143432617
+    }
+  ],
+  "seed": 7,
+  "seeds_averaged": null,
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "transform_id": "T-FIX-NOV-FOLD-01"
+}

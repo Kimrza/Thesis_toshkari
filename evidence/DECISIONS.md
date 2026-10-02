@@ -4784,6 +4784,78 @@ fixture_manifest_sha256: `3bd4b8a5c0c47209da88def5ea229372b714b70695f5c0928575ad
 **Opens:** the verification runs in (a) and in (c). The (c) receipt is what R-140 requires
 before any (c) `scientific_1month` run.
 
+## D-88 — `plumbing_7day` fixture manifest: re-freeze with per-environment runtime ranges (supersedes D-87's manifest)
+
+**Decision date:** 2026-10-02. **Decided by:** the Student, the Q-31 owner (TE §18.2), in session
+on 2026-10-02, in two rulings.
+- **Ruling 1** ("Per-environment ranges (Recommended)"): runtime and storage acceptance is per
+  `environment_id`, plumbing is re-measured (P-9) under the Performance power profile, and it
+  is re-frozen as D-88.
+- **Ruling 2** ("Runtime per-env, storage pooled (Recommended)"): once P-9 showed
+  per-environment storage ranges only 2 to 25 bytes wide, the Student narrowed ruling 1 to
+  runtime; storage stays pooled.
+
+The agent wrote this entry on those rulings, under the Student's D-85 authorization to perform
+the freeze procedure. **Supervisor approval:** reported by the Student on 2026-10-01 as covering
+the (a)/(c) measuring runs and the tolerance freeze. Form: verbal; no written artifact exists.
+
+**Why the D-87 manifest is superseded.** Both D-87 verifications matched all 19 outputs. They
+were refused only by TA-17's runtime range (R-139 control 24): one range pooled over (a)
+Windows and (c) Linux and measured under the earlier power profile.
+- (a) was refused at 635 to 663 s while the CPU was capped at about 45 % of nominal. It then
+  passed at 392.5 s (`...1603083c`) once the Student changed the profile.
+- (c) was refused at 173.3 s under the Performance profile, below the pooled minimum of 363.96 s.
+
+The D-87 manifest is preserved as `fixture_manifest.superseded_20261002T112018Z.yaml` with its
+sibling hash.
+
+**The rule now applied** (`519bbe3`, `697ab90`, tests `tests/test_runtime_per_environment.py`):
+- `runtime.cpu_total` carries a measured range per `environment_id`. Each environment needs two
+  distinct runs, and a run is checked only against its own environment's range.
+- `runtime.storage_total` stays one pooled range over every designated run.
+- A manifest without per-environment ranges keeps the pooled check.
+
+**Decision.** `tests/fixtures/plumbing_7day/fixture_manifest.yaml` is frozen as the reference
+for every later `plumbing_7day` comparison run.
+
+- **Source.** The manifest was composed from exactly the four P-9 designated runs at code
+  `d402c6f` (precommitment P-9, `governance/closure/PROGRESS_2026-10-01.md`). The power
+  profile was "Performance".
+  - (a) `tec-thesis-311`: `walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219` (254.77 s)
+    and `walking-skeleton-plumbing_7day-20261002T111219Z-b438c062` (202.08 s, the outputs run);
+  - (c) `g07-clean-run`, in a fresh clone: `walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b`
+    (155.18 s) and `walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8` (179.20 s).
+
+  The candidate was re-composed at `697ab90` as `...b438c062+xenv2`, after ruling 2; the first
+  composition `...+xenv` (per-environment storage) is kept and never promoted.
+- **Reference.** `reference_walking-skeleton-plumbing_7day-20261002T111219Z-b438c062-xenv2/`,
+  with `reference_environment_id` `tec-thesis-311`.
+- **Promotion.** `promoted_at_utc` `20261002T112018Z`, candidate SHA-256
+  `6363a7c248304b1436ad50b7bdc7f28401d7955866988ed0f45bbccd00ecde05`. Two fields were then
+  changed: `status` is now `frozen`, and `identity.freeze_citation` is now `{"decision": "D-88"}`.
+- **Acceptance tolerances.** These are unchanged from D-87. The D-83 item 11 per-field values
+  are y_hat 5.6447e-06 TECU, paired_loss_differential 3.4519e-05 TECU^2, row_count 5.1260e-06,
+  exclusion_count 1.6689e-05 and restored_validation_rmse 2.0108e-06 TECU. The first four are
+  identical in P-3, P-6, P-7, P-8 and P-9.
+- **Measured ranges.**
+  - Runtime in `tec-thesis-311`: 202.08 to 254.77 s.
+  - Runtime in `g07-clean-run`: 155.18 to 179.20 s.
+  - Storage, pooled: 2,311,641 to 2,345,873 bytes.
+
+**Condition carried forward.** These runtime ranges were measured under the Performance power
+profile. A governed or verification run under another profile is expected to fall outside them,
+and that is an environmental runtime failure, recorded as such.
+
+**Evidence class.** Smoke evidence only (TC-03f; TE §15.1). The D-11 limitation applies.
+
+fixture_manifest_sha256: `b4b7cd6e5caecfbf28b3ef2b5f6d3c70afca517e341a7bfa0b280a5bbc81982d`
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none.
+- Uncertainty: none.
+- Comparability: runtime acceptance is per environment; outputs and tolerances are unchanged.
+- Claim: none.
+
 ---
 
 ## Supervisor review

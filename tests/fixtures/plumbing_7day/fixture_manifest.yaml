@@ -183,7 +183,7 @@
     },
     "metric": {
       "file": "metrics.json",
-      "sha256": "df44e7f828b3aec1951fc4079e32eb091f2d60c09f95c3399d8eba1c39ca5732",
+      "sha256": "6f1f7122922d128ac8f8ed5abee7f8931187643f8b07cb6fa7e5959ab21e5802",
       "top_level_keys": [
         "artifact",
         "evaluated",
@@ -235,7 +235,7 @@
     },
     "fixture_id": "plumbing_7day",
     "freeze_citation": {
-      "decision": "D-87"
+      "decision": "D-88"
     },
     "limitations": {
       "clauses": [
@@ -397,12 +397,12 @@
     },
     "floating_point_tolerances": {
       "max": 0.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 0.0,
       "units": "TECU"
@@ -429,7 +429,7 @@
     }
   },
   "required_outputs": {
-    "artifact_manifest_ref": "reference_walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c-xenv/artifact_manifest.json",
+    "artifact_manifest_ref": "reference_walking-skeleton-plumbing_7day-20261002T111219Z-b438c062-xenv2/artifact_manifest.json",
     "comparison_ledger": {
       "bootstrap_summary.json": {
         "citation": "D-74 amendment, CR-2026-09-29-Q31-CLOSURE",
@@ -462,7 +462,7 @@
               }
             },
             "measured_over_runs": 4,
-            "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+            "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
             "method": "D-83 item 11 via src.data.cross_environment_tolerance over the declared toleranced fields of an exact output (D-74 amendment 2)"
           },
           "toleranced_fields": [
@@ -608,7 +608,7 @@
             }
           },
           "measured_over_runs": 4,
-          "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+          "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
           "method": "D-83 item 11 via src.data.cross_environment_tolerance: determinism per environment_id first, then per field max(max |(c) - (a)|, 2^-23 x max |(a)|)"
         },
         "producing_path": {
@@ -681,7 +681,7 @@
             }
           },
           "measured_over_runs": 4,
-          "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+          "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
           "method": "D-83 item 11 via src.data.cross_environment_tolerance: determinism per environment_id first, then per field max(max |(c) - (a)|, 2^-23 x max |(a)|)"
         },
         "producing_path": {
@@ -753,24 +753,24 @@
   "row_count_ranges": {
     "feature_window": {
       "max": 48.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 24.0,
       "units": "rows"
     },
     "hourly_target": {
       "max": 168.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 168.0,
       "units": "rows"
@@ -781,12 +781,12 @@
     },
     "split": {
       "max": 144.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 48.0,
       "units": "rows"
@@ -798,27 +798,47 @@
   },
   "runtime": {
     "cpu_total": {
-      "max": 504.9530000000086,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "by_environment": {
+        "g07-clean-run": {
+          "max": 179.19630832699997,
+          "measuring_run_ids": [
+            "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+            "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
+          ],
+          "min": 155.175976814,
+          "units": "s"
+        },
+        "tec-thesis-311": {
+          "max": 254.76600000000326,
+          "measuring_run_ids": [
+            "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+            "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062"
+          ],
+          "min": 202.0779999999795,
+          "units": "s"
+        }
+      },
+      "max": 254.76600000000326,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
-      "min": 363.95933299800004,
+      "min": 155.175976814,
       "units": "s"
     },
     "storage_total": {
-      "max": 2345881.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "max": 2345873.0,
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
-      "min": 2311682.0,
+      "min": 2311641.0,
       "units": "bytes"
     }
   },
@@ -826,48 +846,48 @@
   "support_missingness": {
     "comparator": {
       "max": 43.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 18.0,
       "units": "rows"
     },
     "external_feature": {
       "max": 0.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 0.0,
       "units": "rows"
     },
     "invalid_hour": {
       "max": 10.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 10.0,
       "units": "hours"
     },
     "target_support": {
       "max": 12.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 4.0,
       "units": "samples per hourly bin"
@@ -876,48 +896,48 @@
   "timestamp_tolerances": {
     "feature_alignment": {
       "max": 0.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 0.0,
       "units": "s"
     },
     "gim": {
       "max": 0.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 0.0,
       "units": "s"
     },
     "hourly_boundary": {
       "max": 0.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 0.0,
       "units": "s"
     },
     "iri": {
       "max": 0.0,
-      "measuring_run_id": "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362+walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4+walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d+walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
+      "measuring_run_id": "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219+walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b+walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8+walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
       "measuring_run_ids": [
-        "walking-skeleton-plumbing_7day-20261001T192736Z-b67e9362",
-        "walking-skeleton-plumbing_7day-20261001T193618Z-cba7016c",
-        "walking-skeleton-plumbing_7day-20261001T192801Z-10d3ddd4",
-        "walking-skeleton-plumbing_7day-20261001T193430Z-0978b56d"
+        "walking-skeleton-plumbing_7day-20261002T110755Z-d37a2219",
+        "walking-skeleton-plumbing_7day-20261002T111219Z-b438c062",
+        "walking-skeleton-plumbing_7day-20261002T110809Z-cf4ac45b",
+        "walking-skeleton-plumbing_7day-20261002T111049Z-36f1dbf8"
       ],
       "min": 0.0,
       "units": "s"
