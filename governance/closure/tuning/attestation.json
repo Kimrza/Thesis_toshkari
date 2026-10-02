@@ -1,0 +1,8 @@
+{
+  "artifact": "tuning_attestation",
+  "attested_at_utc": "2026-10-02T12:48:59.002487+00:00",
+  "attested_by": "Kimia Rezaei (Student)",
+  "attests_criterion_hash": "24174625e26daf3355465247acef0c3997bd2ae1ee29e620bdc572f5ca64f9c3",
+  "given": "in session on 2026-10-02, by selecting 'I attest' on the statement above; recorded verbatim by the agent (SD-M-01)",
+  "statement": "I, Kimia Rezaei (Student), attest that no December 2022 figure - no model performance on December and no December-derived statistic - informed the tuning selection criterion with SHA-256 24174625e26daf3355465247acef0c3997bd2ae1ee29e620bdc572f5ca64f9c3."
+}

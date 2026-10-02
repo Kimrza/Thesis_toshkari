@@ -366,3 +366,27 @@ tuning ran:
   F4 (November) score 29 days, so a fold-level bootstrap would refuse the same way. The
   confirmatory bootstrap belongs to DEC (TE §13.6), and per-fold validation skill comes from
   the tuning record.
+
+### D-89, the tuning criterion, and rehearsal 6 (2026-10-02)
+
+- **D-89** records the Student's Stage 5 rulings: the absolute, strict 0.01 margin; the
+  complexity proxy with its tie-break; the development seed for tuning (Vision line 837);
+  and the `.keras`/joblib refit format.
+- **Criterion declared** at 2026-10-02T12:48:59Z with SHA-256 `24174625…f9c3`
+  (`governance/closure/tuning/criterion_declaration.json`).
+- **Attestation:** the Student attested that no December figure informed it
+  (`governance/closure/tuning/attestation.json`; SD-M-01).
+- **Rehearsal 6** (`sci/rehearsal6.log`, code `3684b64`, with FOLD-02 shifted) passed
+  stages 00-07 in full, including the `gim` set and both folds' bootstraps. The walking
+  skeleton then refused at the artifact listing: TE §15.4's Fixture-2-only
+  `target_uncertainty_budget.json` had no producer. The fix is a write-once byte copy, in
+  07, of the stage-02 budget artifact the reporting layer already reads.
+- **Stage 5 code** is written and tested in a separate dev clone, so the governed tree
+  stayed clean while runs executed. It covers:
+  - the governed `--tune` with the D-56 refit-epoch derivation;
+  - the M-06 fold path through `lstm.fit_predict_rows` with a checkpoint backend;
+  - REFIT re-deriving `models.refit.epochs` from the same invocation's fold fits;
+  - `ModelFileStateBackend`.
+
+  It lands in the same commit as the budget fix, so the scientific freeze runs on code
+  that already contains Stage 5.

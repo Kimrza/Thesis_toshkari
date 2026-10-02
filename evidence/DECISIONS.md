@@ -4856,6 +4856,83 @@ fixture_manifest_sha256: `b4b7cd6e5caecfbf28b3ef2b5f6d3c70afca517e341a7bfa0b280a
 - Comparability: runtime acceptance is per environment; outputs and tolerances are unchanged.
 - Claim: none.
 
+## D-89 — Full-year tuning: D-124 made executable, and the refit persistence format
+
+**Decision date:** 2026-10-02. **Decided by:** the Student (Kimia Rezaei), in session on
+2026-10-02, in four rulings. The agent wrote this entry under the Student's
+pre-authorization of the same day to write D-entries for Stage 5. **Supervisor approval:**
+none is claimed for this entry. The Student reported G-05 as signed by the supervisor; that
+report covers G-05, not this entry.
+
+**Why these rulings were needed.** D-124 (Vision §14.2, Approved) reads: "Select on mean
+per-fold skill versus a declared baseline across F1–F4; prefer the simpler configuration
+within 1%; refit without changing hyperparameters." Two of its terms had no governed
+definition:
+- "simpler": `_proposed_complexity` in `scripts/06_train_and_predict.py` was marked
+  PROPOSED, and CR-2026-09-25 recorded that no governed record states a formula;
+- "within 1%": the code read it as relative (0.01 x |best skill|).
+
+Separately, the governed REFIT-to-December path could not persist ridge, random forest or
+LSTM models. `JsonStateBackend` refused them as "a governed choice that does not exist yet".
+TE line 437 allows "SavedModel/`.keras`" for M-06 and names no format for M-04/M-05.
+
+**Decision.**
+1. **The 1% margin is absolute.** Two candidates are "within 1%" when their mean per-fold
+   skills differ by strictly less than `models.selection.simplicity_margin` (0.01) skill
+   units, i.e. one percentage point of skill, where skill = 1 − RMSE_model / RMSE_baseline
+   (Vision §8.7: "differs by less than 1%"). The code identifier is `SELECTION_MARGIN_RULE` =
+   `absolute_skill_units_strictly_less_than_margin`.
+2. **"Simpler" is the complexity proxy; lower is simpler.**
+   - Ridge: 1/alpha.
+   - Random forest: n_estimators x max_depth, with an unbounded depth counted as 32.
+   - LSTM: layers x units.
+   - Ties at equal complexity go to the higher mean skill, then to the canonical params
+     string.
+
+   The code identifier is `COMPLEXITY_PROXY_RULE`.
+3. **Tuning seed.** The LSTM is tuned with the development seed (42). This is not a new
+   choice: Vision line 837 reads "Development seed: **42**, used for tuning only", and TE
+   line 834 reads "The development seed supports tuning only". The fixture-scale `--tune`
+   had used `final_seeds[0]`, which is now corrected.
+4. **Refit persistence format.**
+   - M-06: a native Keras `.keras` file, with a JSON sidecar holding the rest of the fitted
+     state and the `.keras` SHA-256.
+   - M-04 and M-05: joblib, which ships with scikit-learn, so no new dependency.
+   - M-03: JSON, unchanged.
+
+   Every file is write-once and hashed at write. It is re-hashed before every load, so a
+   joblib file is never deserialised unless its bytes are the ones the pipeline wrote and
+   hashed (`train.ModelFileStateBackend`).
+
+**The declared criterion.** These rulings, D-124, D-58 (persistence as the declared baseline)
+and D-121 (the grids) together make the tuning criterion. It is declared in
+`governance/closure/tuning/criterion_declaration.json` at 2026-10-02T12:48:59Z, before any
+full-year tuning fit, with:
+
+criterion_sha256: `24174625e26daf3355465247acef0c3997bd2ae1ee29e620bdc572f5ca64f9c3`
+
+Each (track, fold) is scored on one comparison-wide mask: the rows every candidate of the
+track and the baseline predicted and the target holds (NFR-FAIR-01). The governed tuning run
+recomputes the criterion from configuration and code and refuses unless the hashes agree
+(R-95 mechanism 2).
+
+**Attestation (SD-M-01).** The Student attested, in session on 2026-10-02, in these words:
+"I, Kimia Rezaei (Student), attest that no December 2022 figure - no model performance on
+December and no December-derived statistic - informed the tuning selection criterion with
+SHA-256 24174625e26daf3355465247acef0c3997bd2ae1ee29e620bdc572f5ca64f9c3." The attestation
+is recorded in `governance/closure/tuning/attestation.json`.
+
+**What this does not decide.** No grid point is selected here and no refit epoch count is
+fixed. Those are the tuning run's outputs (`models.selected`, D-56's `models.refit.epochs`),
+frozen under their own D-number and transcribed by a separate, recorded config change.
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none. Only F1–F4 are read, the criterion is declared and attested before any
+  fit, and a logged December performance read since the declaration refuses the run.
+- Uncertainty: none.
+- Comparability: the margin and complexity rules apply identically to all three tracks.
+- Claim: none.
+
 ---
 
 ## Supervisor review

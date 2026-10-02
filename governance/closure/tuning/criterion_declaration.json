@@ -1,0 +1,30 @@
+{
+  "artifact": "tuning_criterion_declaration",
+  "criterion": {
+    "baseline_model_id": "M-01",
+    "complexity_proxy_rule": "ridge:1/alpha;random_forest:n_estimators*max_depth(None=32);lstm:layers*units;tie:higher_mean_skill_then_params_json",
+    "criterion": "mean_per_fold_skill_vs_declared_baseline",
+    "december_may_influence": false,
+    "declared_baseline": "persistence",
+    "folds": [
+      "F1",
+      "F2",
+      "F3",
+      "F4"
+    ],
+    "grids_decision": "D-121",
+    "grids_sha256": "506cd4cea9df97eeb98ba39351f49a6ea9ca8899260209b29d0578a3fe7b1803",
+    "refit_epoch_rule": "median_best_validation_epoch_across_folds_and_seeds_round_half_up",
+    "refit_epoch_seeds_source": "seeds.final",
+    "selection_decision": "D-124",
+    "selection_margin_rule": "absolute_skill_units_strictly_less_than_margin",
+    "simplicity_margin": 0.01,
+    "skill_definition": "1 - RMSE_model / RMSE_baseline, both over one comparison-wide mask per (track, fold): the rows every candidate of the track and the baseline predicted and the target holds",
+    "tuning_seed_source": "seeds.development (Vision line 837: tuning only)"
+  },
+  "criterion_sha256": "24174625e26daf3355465247acef0c3997bd2ae1ee29e620bdc572f5ca64f9c3",
+  "decision": "D-89",
+  "declared_at_utc": "2026-10-02T12:48:59.002487+00:00",
+  "declared_by": "the agent, transcribing D-124, D-58, D-121 and the Student's rulings of 2026-10-02 (D-89)",
+  "note": "Declared before any full-year tuning fit. 06_train_and_predict --tune (governed) recomputes this criterion from configs/experiment.yaml and the code's rule identifiers and refuses unless the hashes agree (R-95 mechanism 2)."
+}
