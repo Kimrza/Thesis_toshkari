@@ -84,19 +84,28 @@ def _manifest_with_ranges(tmp_path: Path):
 
 
 def test_a_run_is_checked_against_its_own_environment(tmp_path):
+    """Runtime limit = own environment's max + its width: (a) 420 + 30, (c) 180 + 10."""
     manifest = _manifest_with_ranges(tmp_path)
-    assert assert_run_level_ranges(
-        manifest, runtime_seconds=175.0, storage_bytes=2_345_500, environment_id=C
-    )["range_scope"] == C
-    with pytest.raises(IntegrityError, match="outside the frozen range"):
-        assert_run_level_ranges(manifest, runtime_seconds=175.0, storage_bytes=2_311_500, environment_id=A)
+    ok = assert_run_level_ranges(manifest, runtime_seconds=185.0, storage_bytes=2_345_500, environment_id=C)
+    assert ok["range_scope"] == C and ok["runtime_limit"] == 190.0
+    with pytest.raises(IntegrityError, match="exceeds the frozen range"):
+        assert_run_level_ranges(manifest, runtime_seconds=195.0, storage_bytes=2_345_500, environment_id=C)
+    assert assert_run_level_ranges(  # 195 s is fine in (a): its own limit is 450 s
+        manifest, runtime_seconds=195.0, storage_bytes=2_311_500, environment_id=A
+    )["runtime_limit"] == 450.0
+    with pytest.raises(IntegrityError, match="exceeds the frozen range"):
+        assert_run_level_ranges(manifest, runtime_seconds=460.0, storage_bytes=2_311_500, environment_id=A)
     assert assert_run_level_ranges(  # storage is pooled: an (a)-sized figure is fine in (c)
         manifest, runtime_seconds=175.0, storage_bytes=2_311_500, environment_id=C
     )["within"]
     with pytest.raises(IntegrityError, match="storage"):
         assert_run_level_ranges(manifest, runtime_seconds=175.0, storage_bytes=2_400_000, environment_id=C)
-    with pytest.raises(IntegrityError, match="outside the frozen range"):
-        assert_run_level_ranges(manifest, runtime_seconds=400.0, storage_bytes=2_345_500, environment_id=C)
+
+
+def test_faster_or_smaller_is_never_a_resource_failure(tmp_path):
+    """The Student's ruling of 2026-10-02: TA-17 bounds overruns, not speed."""
+    manifest = _manifest_with_ranges(tmp_path)
+    assert assert_run_level_ranges(manifest, runtime_seconds=1.0, storage_bytes=1, environment_id=A)["within"]
 
 
 def test_unknown_or_missing_environment_refuses(tmp_path):

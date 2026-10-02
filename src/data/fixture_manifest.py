@@ -2400,34 +2400,47 @@ def assert_run_level_ranges(
     storage_bytes: int,
     environment_id: str | None = None,
 ) -> dict[str, Any]:
-    """R-139 control 24: runtime and storage inside the manifest's MEASURED ranges (TA-17).
+    """R-139 control 24: runtime and storage against the manifest's MEASURED ranges (TA-17).
 
-    A manifest frozen with per-environment ranges (D-88) checks a run against the range its
-    own `environment_id` measured; an older manifest's pooled range applies otherwise.
+    The Student's ruling of 2026-10-02: a run fails only when it EXCEEDS the measured maximum
+    by more than the measured range's own width (`max + (max - min)`); a faster or smaller
+    run is never a resource failure. The raw min-max of n exchangeable runs contains a new
+    run with probability (n-1)/(n+1), only 1/3 for two runs, so a raw envelope fails most
+    verifications by chance; the widening is derived from the measured values, nothing is
+    chosen. Runtime is read from the run's own environment's range when the manifest is
+    frozen with per-environment ranges (D-88); storage from the pooled range.
     """
     runtime = manifest.data["runtime"]
     resource = f"{manifest.path}: runtime"
     lo, hi, scope = _environment_range(
         runtime, "cpu_total", resource=resource, environment_id=environment_id
     )
-    if not (lo <= runtime_seconds <= hi):
+    runtime_limit = hi + (hi - lo)
+    if runtime_seconds > runtime_limit:
         raise _refuse(
             f"{resource}.cpu_total",
-            f"measured runtime {runtime_seconds} s is outside the frozen range [{lo}, {hi}] s "
-            f"(TA-17's declared runtime tolerance; R-139 control 24)",
+            f"measured runtime {runtime_seconds} s exceeds the frozen range [{lo}, {hi}] s by "
+            f"more than its own width (limit {runtime_limit} s; TA-17's declared runtime "
+            f"tolerance; R-139 control 24)",
         )
     slo, shi, _ = _environment_range(
         runtime, "storage_total", resource=resource, environment_id=environment_id
     )
-    if not (slo <= storage_bytes <= shi):
+    storage_limit = shi + (shi - slo)
+    if storage_bytes > storage_limit:
         raise _refuse(
             f"{resource}.storage_total",
-            f"measured storage {storage_bytes} bytes is outside the frozen range [{slo}, {shi}] "
-            f"(TA-17's declared storage tolerance; R-139 control 24)",
+            f"measured storage {storage_bytes} bytes exceeds the frozen range [{slo}, {shi}] by "
+            f"more than its own width (limit {storage_limit}; TA-17's declared storage "
+            f"tolerance; R-139 control 24)",
         )
     return {
         "runtime_seconds": runtime_seconds,
+        "runtime_range": [lo, hi],
+        "runtime_limit": runtime_limit,
         "storage_bytes": storage_bytes,
+        "storage_range": [slo, shi],
+        "storage_limit": storage_limit,
         "range_scope": scope,
         "within": True,
     }
