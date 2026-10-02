@@ -2431,6 +2431,18 @@ def _gen(mod, entry, report, months, **kw):
     )
 
 
+def _env(entry, environment_id: str):
+    """The same entry with its lock re-labelled to a pinned D-83 environment literal."""
+    import dataclasses
+
+    return {**entry, "lock": dataclasses.replace(entry["lock"], environment_id=environment_id)}
+
+
+def _admit_jn(mod, entry, prov):
+    """Admit the January-November half in (a) (src/data/b01_handoff.py)."""
+    return mod._admit_b01_receipt(_env(entry, "tec-thesis-311"), _ns(admit_b01_receipt=prov))
+
+
 def test_w3_omitted_months_is_refused(b01) -> None:
     mod, _, _, entry, report = _b01_ready(b01)
     with pytest.raises(mod.IntegrityError) as exc:
@@ -2481,7 +2493,7 @@ def test_w1_w2_split_runs_marker_and_assembly(b01, monkeypatch) -> None:
         (out / name).write_text("legacy november receipt\n", encoding="utf-8")
     legacy_hashes = {n: sha256_of_file(out / n) for n in legacy_names}
 
-    jan_nov = _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    jan_nov = _gen(mod, _env(entry, "b01_iri"), report, "1,2,3,4,5,6,7,8,9,10,11")
     assert jan_nov["benchmark_rows"].name == "b01_iri2016_rows_P1A_m01-11.jsonl"
     jan_nov_hashes = {p.name: sha256_of_file(p) for p in out.glob("*_m01-11.*")}
     assert len(jan_nov_hashes) == 3
@@ -2522,6 +2534,10 @@ def test_w1_w2_split_runs_marker_and_assembly(b01, monkeypatch) -> None:
         )
     assert "already admitted" in str(exc.value)
 
+    with pytest.raises(mod.IntegrityError) as exc:  # Jan-Nov half not yet admitted in (a)
+        mod._assemble_benchmark(entry, _ns(assemble_benchmark=True))
+    assert "admit it in (a)" in str(exc.value)
+    _admit_jn(mod, entry, jan_nov["provenance"])
     assembled = mod._assemble_benchmark(entry, _ns(assemble_benchmark=True))
     manifest = json.loads(assembled["assembly_manifest"].read_text(encoding="utf-8"))
     assert set(manifest["halves"]) == {
@@ -2595,7 +2611,8 @@ def _signed_entry(entry, *, extra_data=None):
 def test_pv09_tec01_assembly_passes_when_only_gates_differ(b01) -> None:
     """PV-09 TEC-01: G-05 signing changes data.yaml; assembly allows the `gates` diff only."""
     mod, _, _, entry, report = _b01_ready(b01)
-    _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    jn = _gen(mod, _env(entry, "b01_iri"), report, "1,2,3,4,5,6,7,8,9,10,11")
+    _admit_jn(mod, entry, jn["provenance"])
     signed = _signed_entry(entry)
     dec = _gen(mod, signed, report, "12", g05_signature="REAL-SIG")
     mod._admit_december_receipt(signed, _ns(admit_december_receipt=dec["provenance"], g05_signature="REAL-SIG"))
@@ -2606,7 +2623,8 @@ def test_pv09_tec01_assembly_passes_when_only_gates_differ(b01) -> None:
 
 def test_pv09_tec01_assembly_refuses_a_non_gates_data_change(b01) -> None:
     mod, _, _, entry, report = _b01_ready(b01)
-    _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    jn = _gen(mod, _env(entry, "b01_iri"), report, "1,2,3,4,5,6,7,8,9,10,11")
+    _admit_jn(mod, entry, jn["provenance"])
     signed = _signed_entry(entry, extra_data={"pv09_drift": 1})
     dec = _gen(mod, signed, report, "12", g05_signature="REAL-SIG")
     mod._admit_december_receipt(signed, _ns(admit_december_receipt=dec["provenance"], g05_signature="REAL-SIG"))
@@ -2638,7 +2656,8 @@ def test_pv09_tec02_assembly_refuses_a_substituted_december_half(b01) -> None:
     from src.data.release import sha256_of_file
 
     mod, _, workspace, entry, report = _b01_ready(b01)
-    _gen(mod, entry, report, "1,2,3,4,5,6,7,8,9,10,11")
+    jn = _gen(mod, _env(entry, "b01_iri"), report, "1,2,3,4,5,6,7,8,9,10,11")
+    _admit_jn(mod, entry, jn["provenance"])
     signed = _signed_entry(entry)
     dec = _gen(mod, signed, report, "12", g05_signature="REAL-SIG")
     mod._admit_december_receipt(signed, _ns(admit_december_receipt=dec["provenance"], g05_signature="REAL-SIG"))

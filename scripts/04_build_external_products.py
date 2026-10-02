@@ -109,7 +109,7 @@ from src.data.experiment_registry import (  # noqa: E402
     append_registry_event,
     record_abort_honestly,
 )
-from src.data.fixture_gate import require_receipts_for_snapshot  # noqa: E402
+from src.data.fixture_gate import lock_items, require_receipts_for_snapshot  # noqa: E402
 from src.data.fixture_manifest import (  # noqa: E402
     WALKING_SKELETON_ROOT,
     build_apparatus_partitions,
@@ -327,6 +327,28 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "run in environment (a): re-verify a December B-01 receipt (its provenance "
             "JSON) after transfer and write the one-shot December-generation marker; a "
             "second admission for the same phase_id is refused (D-83 revision 7 A7 item 1)"
+        ),
+    )
+    parser.add_argument(
+        "--receipts-environment",
+        type=str,
+        default=None,
+        help=(
+            "with --generate-benchmark in (b) b01_iri: accept the fixture receipts written in "
+            "this environment (tec-thesis-311) when code commit, config hashes and platform "
+            "agree; REFUSES unless a D-number in evidence/DECISIONS.md carries the "
+            "cross-environment receipt marker (src/data/b01_handoff.py)"
+        ),
+    )
+    parser.add_argument(
+        "--admit-b01-receipt",
+        type=Path,
+        default=None,
+        help=(
+            "run in environment (a): re-verify a transferred January-November B-01 receipt "
+            "(provenance JSON) -- transfer hashes, generating environment b01_iri, code commit, "
+            "config hashes, exact target-grid coverage, duplicates, values -- and write the "
+            "write-once admission marker assembly requires (src/data/b01_handoff.py)"
         ),
     )
     parser.add_argument(
@@ -593,6 +615,7 @@ def _stage_entry(
     code_commit: str | None,
     fixture_manifest: Path | None = None,
     full_year_job: bool = True,
+    receipts_environment: str | None = None,
 ) -> dict[str, Any]:
     """Steps 2-6 of the stage entry contract (step 1, determinism, ran in main()).
 
@@ -634,8 +657,19 @@ def _stage_entry(
         audit_window = _declared_data_window()
         fixture_scope_id = None
         declared_window = None
-    if full_year_job:
-        receipts_gate: Any = require_receipts_for_snapshot(
+    if full_year_job and receipts_environment is not None:
+        # B-01 generation in (b): (a)'s receipts, bound by code/configs/platform, under an
+        # authorizing D-number; refuses without one (src/data/b01_handoff.py).
+        from src.data.b01_handoff import require_cross_environment_receipts
+
+        receipts_gate: Any = require_cross_environment_receipts(
+            snapshot,
+            lock,
+            decisions_path=Path(snapshot.resolved_roots["workspace"]) / "evidence" / "DECISIONS.md",
+            receipt_environment_id=receipts_environment,
+        )
+    elif full_year_job:
+        receipts_gate = require_receipts_for_snapshot(
             snapshot,
             lock,
             fixture_manifest=fixture_manifest,
@@ -2009,6 +2043,9 @@ def _generate_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> d
     prov["validation_report_file"] = str(args.validation_report)
     prov["validation_report_sha256"] = sha256_of_file(Path(args.validation_report))
     prov["environment_lock_hash"] = environment_lock_hash(entry["lock"])
+    prov["environment_lock"] = lock_items(entry["lock"])  # the handoff re-verifies it in (a)
+    prov["environment_id"] = entry["lock"].environment_id
+    prov["receipts_gate"] = _gate_summary(entry.get("receipts_gate"))
     prov["config_hashes"] = dict(snapshot.hashes)
     prov["data_yaml_sans_gates_sha256"] = data_sans_gates_sha256(snapshot)
     prov["g05_verified"] = bool(g05_verified)
@@ -2140,6 +2177,49 @@ def _admit_december_receipt(entry: Mapping[str, Any], args: argparse.Namespace) 
     return {"december_marker": marker}
 
 
+def _gate_summary(gate: Any) -> Any:
+    """The receipts gate as recorded on provenance: JSON-safe, receipts by run id only."""
+    if not isinstance(gate, Mapping):
+        return gate
+    summary = {k: v for k, v in gate.items() if k != "receipts"}
+    receipts = gate.get("receipts")
+    if isinstance(receipts, Mapping):
+        summary["receipts"] = {
+            fid: {"receipt_run_id": r.get("receipt_run_id"), "frozen_manifest_hash": r.get("frozen_manifest_hash")}
+            for fid, r in receipts.items()
+            if isinstance(r, Mapping)
+        }
+    return json.loads(json.dumps(summary, default=str))
+
+
+def _admit_b01_receipt(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    """Admit the transferred January-November B-01 half in (a) (src/data/b01_handoff.py).
+
+    The expected grid comes from `iri.build_target_grid` over the resolved station registry,
+    so coverage is checked against the same grid generation uses, never re-derived by hand."""
+    from src.data.b01_handoff import JAN_NOV, admit_jan_nov_receipt
+    from src.data.registry import load_registry
+    from src.external import iri  # allowlisted importer; deferred by design
+
+    snapshot = entry["snapshot"]
+    contract = iri.read_benchmark_contract(snapshot)
+    points = iri.build_target_grid(
+        load_registry(snapshot),
+        year=contract.year,
+        cadence_hours=contract.cadence_hours,
+        months=JAN_NOV,
+    )
+    return admit_jan_nov_receipt(
+        Path(args.admit_b01_receipt),
+        snapshot=snapshot,
+        lock=entry["lock"],
+        phase_id=_data_phase_id(snapshot),
+        expected_keys=[(p["station_id"], p["target_time_utc"].isoformat()) for p in points],
+        output_field=contract.output_field,
+        data_yaml_sans_gates_sha256=data_sans_gates_sha256(snapshot),
+    )
+
+
 def _assemble_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     """Join the two B-01 halves for this phase_id into one manifested product (W-2)."""
     snapshot = entry["snapshot"]
@@ -2155,6 +2235,9 @@ def _assemble_benchmark(entry: Mapping[str, Any], args: argparse.Namespace) -> d
         b01_output_names(phase_id, list(range(1, 12))),
         b01_output_names(phase_id, [12]),
     ]
+    from src.data.b01_handoff import require_jan_nov_admission
+
+    require_jan_nov_admission(workspace, phase_id, prov_path=out / halves[0]["provenance"])
     provs = [_verify_receipt(out / h["provenance"]) for h in halves]
     for prov, want in zip(provs, (list(range(1, 12)), [DECEMBER_MONTH])):
         if prov.get("months") != want or prov.get("phase_id") != phase_id or not prov.get("script_id"):
@@ -3084,6 +3167,7 @@ def main() -> int:
             phase=args.phase,
             code_commit=args.code_commit,
             fixture_manifest=args.fixture_manifest,
+            receipts_environment=getattr(args, "receipts_environment", None),
             full_year_job=not (
                 args.verify_runtime
                 or args.build_validation_report is not None
@@ -3127,6 +3211,8 @@ def main() -> int:
             summary = _generate_benchmark(entry, args)
         elif args.admit_december_receipt is not None:
             summary = _admit_december_receipt(entry, args)
+        elif getattr(args, "admit_b01_receipt", None) is not None:
+            summary = _admit_b01_receipt(entry, args)
         elif args.assemble_benchmark:
             summary = _assemble_benchmark(entry, args)
         elif args.attempt_comparator:
