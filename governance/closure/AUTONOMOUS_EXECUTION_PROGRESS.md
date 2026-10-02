@@ -285,3 +285,16 @@ Log: `governance/closure/d87_verification/a4.log`, with the counter trace in
 - **Ruling (Student):** TA-17 fails a run only when it exceeds the max plus the range's own
   width (`749d743`). A raw min-max of n runs contains a new run with probability
   (n-1)/(n+1). Frozen values are unchanged. Both verifications are re-run at `749d743`.
+
+### D-88 re-verification at `749d743`: PASS in (a) and (c). Stage 1 complete.
+
+- (a) `walking-skeleton-plumbing_7day-20261002T113401Z-2a117243`: all 19 outputs matched;
+  238.25 s against the (a) range 202.08-254.77 s; storage 2,316,776 bytes. Receipt PASS.
+- (c) `walking-skeleton-plumbing_7day-20261002T113419Z-553c6196`: fresh clone
+  ~/g07_clone_d88c2 at `952887b`, code `749d743`; all 19 outputs matched, including the
+  amendment-2 field rules (`mask_id` environment-bound, checkpoint RMSE toleranced) and the
+  amendment-3 parquet value/ULP rule; 191.27 s against the limit 203.22 s; storage 2,351,249
+  bytes against the limit 2,380,105. Receipt PASS (copy in
+  `governance/closure/d88c2_verification/`).
+- The plumbing_7day receipts now exist in both environments at code `749d743`. That
+  satisfies R-140 for `scientific_1month` runs in (a) and in that (c) clone.
