@@ -21,7 +21,7 @@
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
       "--code-commit",
-      "3684b64b2a62d63e0dbc22655f57d9b0d52ab327"
+      "58b7a0b640560bd230ab287256dc1552ce85b004"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -33,7 +33,7 @@
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
       "--code-commit",
-      "3684b64b2a62d63e0dbc22655f57d9b0d52ab327"
+      "58b7a0b640560bd230ab287256dc1552ce85b004"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -43,7 +43,7 @@
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
       "--code-commit",
-      "3684b64b2a62d63e0dbc22655f57d9b0d52ab327"
+      "58b7a0b640560bd230ab287256dc1552ce85b004"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -55,7 +55,7 @@
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
       "--code-commit",
-      "3684b64b2a62d63e0dbc22655f57d9b0d52ab327"
+      "58b7a0b640560bd230ab287256dc1552ce85b004"
     ],
     [
       "C:\\Users\\LOTUS\\anaconda3\\envs\\tec-thesis-311\\python.exe",
@@ -67,7 +67,7 @@
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
       "--code-commit",
-      "3684b64b2a62d63e0dbc22655f57d9b0d52ab327",
+      "58b7a0b640560bd230ab287256dc1552ce85b004",
       "--bundles-out",
       "artifacts/walking_skeleton/plumbing_7day/features"
     ],
@@ -81,7 +81,7 @@
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
       "--code-commit",
-      "3684b64b2a62d63e0dbc22655f57d9b0d52ab327",
+      "58b7a0b640560bd230ab287256dc1552ce85b004",
       "--bundles-root",
       "artifacts/walking_skeleton/plumbing_7day/features",
       "--predictions-out",
@@ -97,7 +97,7 @@
       "--fixture-manifest",
       "C:\\Users\\LOTUS\\Desktop\\Thesis_toshkari\\tests\\fixtures\\plumbing_7day\\fixture_manifest.yaml",
       "--code-commit",
-      "3684b64b2a62d63e0dbc22655f57d9b0d52ab327",
+      "58b7a0b640560bd230ab287256dc1552ce85b004",
       "--predictions-run",
       "artifacts/walking_skeleton/plumbing_7day/predictions",
       "--evaluation-out",
@@ -163,18 +163,18 @@
       "tests/test_train_only_transforms.py",
       "tests/test_split_embargo.py"
     ],
-    "duration_seconds": 0.5940000000409782,
-    "ended_at_utc": "2026-10-02T12:16:06.856304+00:00",
+    "duration_seconds": 0.625,
+    "ended_at_utc": "2026-10-02T13:04:57.828007+00:00",
     "note": "M10 contract fixture (features-and-splits authored; run here, Q12 = C): clean-run evidence, NOT a third receipt; gates no full-year job (TC-03f)",
-    "peak_rss_bytes": 40423424,
+    "peak_rss_bytes": 40361984,
     "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
     "returncode": 0,
-    "started_at_utc": "2026-10-02T12:16:06.253111+00:00",
+    "started_at_utc": "2026-10-02T13:04:57.201769+00:00",
     "stderr_tail": "",
-    "stdout_tail": ".......................................................................  [100%]\n71 passed in 0.27s\n"
+    "stdout_tail": ".......................................................................  [100%]\n71 passed in 0.29s\n"
   },
   "missing_required_outputs": [],
   "platform": "local",
   "pythonhashseed": "0",
-  "run_id": "walking-skeleton-plumbing_7day-20261002T121135Z-b00cb63d"
+  "run_id": "walking-skeleton-plumbing_7day-20261002T130103Z-b5934536"
 }

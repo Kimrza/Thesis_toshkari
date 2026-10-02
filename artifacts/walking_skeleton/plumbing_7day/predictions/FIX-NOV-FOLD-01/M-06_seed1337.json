@@ -1,4 +1,10 @@
 {
+  "checkpoint": {
+    "epoch_source": "early_stopping_on_validation_bundle",
+    "epochs_run": 100,
+    "restored_epoch": 100,
+    "restored_validation_rmse": 16.593359789183356
+  },
   "confirmatory": false,
   "fixture_stamp": {
     "apparatus_partition_id": "FIX-NOV-FOLD-01",

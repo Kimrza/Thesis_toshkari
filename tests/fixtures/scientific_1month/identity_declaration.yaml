@@ -298,6 +298,15 @@
     },
     "citation": "D-74"
    },
+   "target_uncertainty_budget.json": {
+    "comparison_class": "exact",
+    "exact_kind": "deterministic_cpu_transformation",
+    "units": "provider_dtec_summary and within_hour_spread_tecu statistics: TECU (D-19); budget_value: TECU (D-67 rule: p95, sum); text fields: not applicable",
+    "producing_path": {
+     "script": "scripts/07_evaluate_and_report.py"
+    },
+    "citation": "D-74; TE 15.4 'target_uncertainty_budget.json  # fixture 2 only' (byte copy of the stage-02 budget artifact, CR-2026-10-02-STAGE5)"
+   },
    "plots/target_support.*": {
     "comparison_class": "recorded_presence",
     "image_format": "png",
