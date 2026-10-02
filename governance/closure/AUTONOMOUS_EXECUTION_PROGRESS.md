@@ -274,3 +274,14 @@ Log: `governance/closure/d87_verification/a4.log`, with the counter trace in
   and skips the claims checklist with a record (`5d07581`). Governed runs remain fail-closed.
 - Stage 3 code is committed (`d402c6f`): the DATA-07 downloader and stage 00's full-year
   read path, with tests. Retrieval waits for the Student's Madrigal environment variables.
+
+### D-88 freeze, first verification, TA-17 ruling (2026-10-02)
+
+- D-88 is frozen (`b4b7cd6e...`) on P-9, with per-environment runtime ranges: (a) 202.08-254.77 s,
+  (c) 155.18-179.20 s. Storage is pooled at 2,311,641-2,345,873 bytes (Student's two rulings).
+  F7 passes.
+- Verification at `697ab90`. (a) PASSED at 233.5 s (`...112149Z-73f6261b`). (c) matched every
+  output and was refused at 190.4 s.
+- **Ruling (Student):** TA-17 fails a run only when it exceeds the max plus the range's own
+  width (`749d743`). A raw min-max of n runs contains a new run with probability
+  (n-1)/(n+1). Frozen values are unchanged. Both verifications are re-run at `749d743`.

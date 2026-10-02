@@ -1,0 +1,29 @@
+{
+  "artifact_class": "comparison_mask_registration",
+  "exclusion_counts": {
+    "BSHM": 115
+  },
+  "feature_set_id": "FS-P1-2022-v1",
+  "lag_set": [],
+  "mask_id": "9187fdd84e24f1f9da3b7b96a551b3bf0062449a9c3f630ff3e271d688738626",
+  "member_ids": [
+    "M-04",
+    "M-05",
+    "M-06"
+  ],
+  "member_transform_ids": [
+    "T-FIX-NOV-FOLD-01"
+  ],
+  "membership_id": "68a7fef9c1d5f57b965ce3c7f49ca16063eab0a6789dcbfae05db1a295e17185",
+  "partition_id": "FIX-NOV-FOLD-01",
+  "phase_id": "P1A",
+  "registered_at_utc": "2026-10-02T11:25:38.541803+00:00",
+  "row_counts": {
+    "BSHM": 43
+  },
+  "scored_window_statement": "5\u201330 November 2022, 26 days, first 24 h excluded and counted",
+  "set_id": "tier3",
+  "source_id": "GNSS_VTEC",
+  "target_definition_id": "GRIDDed_VTEC_1H",
+  "window_length_hours": null
+}
