@@ -58,4 +58,63 @@ After step 1, the agent can do steps 2-5 if the permission is granted.
 ### Proposed D-90 entry
 
 ```markdown
+## D-90 — `scientific_1month` fixture manifest: Q-31 freeze
+
+**Decision date:** 2026-10-02. **Decided by:** the Student, the Q-31 owner (TE §18.2). On
+2026-10-01 the Student pre-authorized this freeze "on the same terms as D-85, provided every
+check passes" (`governance/closure/AUTONOMOUS_EXECUTION_PROGRESS.md`, Student rulings
+2026-10-01, item 2). On 2026-10-02 the Student instructed the agent to perform the prepared act
+(`governance/closure/PROPOSED_D-90_scientific_1month_freeze.md`). The agent performed the
+two-field edit (`725b2bb`). **Supervisor approval:** none recorded for this freeze
+specifically. Q-31 is Student-owned (team.md § Walking Skeleton).
+
+**Source.** The manifest was composed from exactly the four P-S5 designated runs at code
+`b357ec6`, under precommitment P-S5 (`governance/closure/PROGRESS_2026-10-01.md`):
+- (a) `tec-thesis-311`: `walking-skeleton-scientific_1month-20261002T151259Z-0d0342c7` and
+  `walking-skeleton-scientific_1month-20261002T152403Z-cbb18809` (the outputs run);
+- (c) `g07-clean-run`, in a fresh clone: `walking-skeleton-scientific_1month-20261002T151800Z-57d1687c`
+  and `walking-skeleton-scientific_1month-20261002T152642Z-fa0a06b5`.
+
+Both plumbing_7day (D-88) receipts were re-verified at `b357ec6` and passed, in (a) and in (c).
+
+**Promotion.** The cross-environment candidate was
+`fixture_manifest.candidate_walking-skeleton-scientific_1month-20261002T152403Z-cbb18809+xenv.yaml`,
+with candidate SHA-256 `3a2550eef04df9eced7195842ad6066cbe2eeae76b43f142bb6dbf621091031c`. It was
+promoted at `promoted_at_utc` `20261002T153643Z`. The previous installation is preserved as
+`fixture_manifest.superseded_20261002T153643Z.yaml`. Exactly two fields were then changed:
+`status` is now `frozen`, and `identity.freeze_citation` is now `{"decision": "D-90"}`. The
+serialization is unchanged: JSON with indent 2, sorted keys, and CRLF line endings. A parsed
+comparison confirms that no other field differs.
+
+**Identity change (Student ruling, 2026-10-02).** FIX-MAR-FOLD-02 is shifted by one day. It
+trains on 03-01..03-20, with validation from 03-21, giving 10 scored days (240 h: ten 24 h
+blocks, five 48 h blocks). Reason: the earlier scored range [03-23, 04-01) is 216 h, which the
+predeclared 48 h sensitivity (TE §13.6) cannot tile, and R-115 refuses partial blocks
+(Rehearsal 5). The protocol is unchanged. Code `f619d69`.
+
+**Measured values.**
+- Runtime in `tec-thesis-311`: 650.22 to 659.92 s.
+- Runtime in `g07-clean-run`: 488.36 to 498.15 s.
+- Storage, pooled: 10,332,588 to 11,464,573 bytes.
+- `widening_guard_cpu` max: 0.234 s.
+- Planted-correlation recovery deviation: 0.0.
+- `y_hat` cross-environment tolerance: 0.0022459 TECU over 12,681 elements.
+
+The determinism precondition held in both legs. The manifest contains 0 `TBD`.
+
+**Condition carried forward (as D-88).** These runtime ranges were measured under the
+Performance power profile. A run under another profile is expected to fall outside them, and
+that is an environmental runtime failure, recorded as such.
+
+**Evidence class.** Fixture evidence on March 2022 only. D-14's limitation clauses apply: March
+is an equinox month, is not representative of December, and no fixture result may be read as
+evidence about December behaviour. The DATA-07 caveat in the manifest identity applies.
+
+fixture_manifest_sha256: `355774957e023b86f98b34668ff373e045d3159924e965188cf9926d275e752e`
+
+**Effect on leakage / uncertainty / comparability / claim.**
+- Leakage: none.
+- Uncertainty: none.
+- Comparability: FIX-MAR-FOLD-02's scored window changes, as stated above.
+- Claim: none.
 ```
