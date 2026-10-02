@@ -390,3 +390,25 @@ tuning ran:
 
   It lands in the same commit as the budget fix, so the scientific freeze runs on code
   that already contains Stage 5.
+
+### Stage 4: PV-10 Recs 11, 12, 21, 24, 25 ruled (2026-10-02)
+
+- **Rulings (Student):** Rec 11 approve (a) then (b); Rec 12 approve with guard; Recs 21, 24
+  and 25 approve.
+- **The code already existed.** I found that `ea6d96a` (2026-10-01) had already committed the
+  code for Recs 11(b), 12, 21 and 25, before any ruling. The governance overlay forbids
+  applying a finding before the human decides. This is disclosed in the remediation-status
+  file. The rulings adopt the code unchanged.
+- **Records:**
+  - Revision 8 gains dated annotations for Rec 11(a) and Rec 12.
+  - Rec 24 closes by accepting the existing annotation beside item 12.
+  - `GOV-2026-10-01-PV-10-REMEDIATION-STATUS.md` rows 11, 12, 21, 24 and 25 are now Closed.
+  - Row 42's board pass over the remediation is still owed.
+- **Data:** the Student asked to "download all the data that you need". The only download
+  outstanding is the Madrigal re-acquisition (DATA-07). The GIM IONEX year is complete (365
+  days), and drivers and IRI inputs are on disk. The Student is setting the three
+  `MADRIGAL_USER_*` variables themselves, with instructions given; a 12 h watcher starts
+  the download when they are present.
+- **P-S2 progress:** (c) plumbing verification PASSED in ~/g07_clone_s3c (receipt
+  `walking-skeleton-plumbing_7day-20261002T130814Z-f18cabb8`, code `58b7a0b`). SA1 and SC1
+  are running.

@@ -22,8 +22,8 @@
 | 8 | BENCH-11: `/mnt/c` criterion | Ruled | **Closed: PASS** | Item 15 was fixed before the runs. `campaign_kill_20261001T084637Z-9aaebb13` and `campaign_kill-torn_20261001T085943Z-edad9609` were each 100/100 and governed |
 | 9 | VAL-05: stale revision-7 wording | Ruled | **Closed** | Dated annotations beside the §A7 item 6 and D-text item 1(b) wording, plus "Corrections" |
 | 10 | ML-09: "per file" | Inspected | **Closed** | "Corrections" now reads "per field" and "across fields", with an annotation beside the D-text bullet |
-| 11 | IMPL-14: recording status/reason | Not ruled | **OPEN** | The module refuses. Recording the outcome in the registry is still owed by the caller |
-| 12 | TEC-02: offset-dominated fields | Not ruled | **OPEN** | No such field is in the current table. The rule is not yet written |
+| 11 | IMPL-14: recording status/reason | Approve (a) then (b), 2026-10-02 | **Closed** | (a) revision 8 item 9 annotation: the module refuses; the caller records. (b) `run_walking_skeleton.main` writes the aborted row with `classified_failure_reason` (`reproducibility_failure` / `tolerance_failure` / `integrity_refusal`). Tests `test_rec11_*`. Code `ea6d96a`, committed before the ruling and adopted by it |
+| 12 | TEC-02: offset-dominated fields | Approve + guard, 2026-10-02 | **Closed** | Revision 8 item 10 annotation (timestamp and index fields are exact-only). `validate_field_table` refuses them. Tests `test_rec12_*`. Code `ea6d96a`, committed before the ruling and adopted by it |
 | 13 | TEC-03: unit spelling | Not ruled | **Implemented** (pending row 42) | One literal, `TECU^2` (item 16) |
 | 14 | VAL-06: `os.link` through drvfs | Not ruled | **Implemented** (pending row 42) | Item 15 property (c): 33 `after-link` trials reached `intact_new` through 9P |
 | 15 | VAL-07: superseded countersignature lines | Inspected | **Closed** | Annotations beside both revision-7 lines. The adopted D-83 entry carries the §A8 item 2 line verbatim; checked at adoption |
@@ -32,9 +32,11 @@
 | 18 | BENCH-13: clean-commit check | Not ruled | **Implemented** (pending row 42) | Refusal of a dirty governed tree, including untracked files; CR-only differences recorded and not dirty (`42a1ca1`, `25ad0f7`) |
 | 19 | CHAIR-03: adoption scope sentence | Inspected | **Closed** | "Corrections", carried into the D-83 entry |
 | 20 | CHAIR-04: reference binding | Not ruled | **Implemented** (pending row 42) | On the runtime path the reference is the frozen manifest's hash-listed artifact (`compare_required_outputs`) |
-| 21 | IMPL-17: exact exception types | Not ruled | **OPEN** | — |
+| 21 | IMPL-17: exact exception types | Approve, 2026-10-02 | **Closed** | `test_rec21_integrity_refusals_are_exactly_integrity_error`, `test_rec21_nondeterminism_is_exactly_determinism_failure`, `test_rec21_all_zero_or_all_nan_field_freezes_to_zero_and_refuses_any_difference` (`ea6d96a`, committed before the ruling and adopted by it) |
 | 22 | DATA-15: `b01_iri` as candidate | Not ruled | **Implemented** (pending row 42) | A run from `b01_iri` is refused on the item-11 comparison (`test_item11_comparison_refuses_an_environment_that_showed_no_determinism`) |
 | 23 | BENCH-15: `b01_iri` interpreter | Not ruled | **Implemented** (pending row 42) | `GOVERNED_PYTHON` pin, with a negative control |
-| 24 | CHAIR-06: item 24 D-number limb | Not ruled | **OPEN** | — |
-| 25 | ML-11: `-0.0` disclosure | Not ruled | **OPEN** | — |
+| 24 | CHAIR-06: item 24 D-number limb | Approve (accept the annotation), 2026-10-02 | **Closed** | The dated annotation beside revision 8 item 12: §R5-5 item 24's D-number limb is satisfied by D-83 item 12. Item 24's other limb (scope of the `environment_id` refusal and its relation to `TEC_PLATFORM`) stays open as its own row |
+| 25 | ML-11: `-0.0` disclosure | Approve, 2026-10-02 | **Closed** | `cross_environment_tolerance._same` docstring (`ea6d96a`, committed before the ruling and adopted by it) |
 | 26 | VAL-09: custody-neutral | — | No action | — |
+
+**Rulings of 2026-10-02.** The Student ruled on Recs 11, 12, 21, 24 and 25 in session on 2026-10-02 (Stage 4 of the autonomous closure). **Disclosure:** the code for Recs 11(b), 12, 21 and 25 had been committed in `ea6d96a` on 2026-10-01, before any ruling. That is contrary to the governance overlay's rule that a finding is applied only after the human decides. This file nevertheless kept those rows OPEN until today. The 2026-10-02 rulings adopt the committed code unchanged. The annotations for Recs 11(a) and 12 were added to revision 8 on 2026-10-02, after the rulings. Row 42's board pass over the remediation remains owed.
