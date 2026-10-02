@@ -119,6 +119,8 @@ __all__ = [
     "fit_state",
     "predict_rows_from_state",
     "fit_predict_rows",
+    "save_keras_model",
+    "KerasFileCheckpointBackend",
 ]
 
 GRID_TRACK: Final[str] = "lstm"
@@ -629,3 +631,65 @@ def fit_predict_rows(
             "checkpoint_payload_ref": state.get("payload_ref"),
         },
     )
+
+
+# --- the refit persistence format (Student ruling 2026-10-02) -------------------------------
+
+
+def save_keras_model(
+    state: Mapping[str, Any],
+    weights: Any,
+    path: Path,
+    *,
+    requirements_path: Path | None = None,
+) -> str:
+    """Persist a fitted M-06 as a native Keras `.keras` file and return its SHA-256.
+
+    The model is rebuilt from the fitted state's own grid point, feature count, window and
+    fixed settings by `build_keras_model` (the one architecture definition), given the
+    weights the fit selected, and saved write-once. TE line 437 names "SavedModel/`.keras`
+    checkpoints"; the Student chose `.keras` (ruling of 2026-10-02).
+    """
+    from src.data.release import sha256_of_file
+
+    path = Path(path)
+    if path.exists():
+        raise IntegrityError(
+            path, "a persisted .keras model already exists; it is written once (TE 13.3)"
+        )
+    model = build_keras_model(
+        dict(state["hyperparameters"]),
+        n_features=int(state["n_features"]),
+        window_steps=int(state["window_steps"]),
+        settings=dict(state["fixed_settings"]),
+        requirements_path=requirements_path,
+    )
+    model.set_weights(weights)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    model.save(str(path))
+    return sha256_of_file(path)
+
+
+class KerasFileCheckpointBackend:
+    """The inference-only `CheckpointBackend` for a persisted `.keras` model.
+
+    `predict_rows_from_state` loads weights through `backend.load(payload_ref)`; here the
+    reference is the `.keras` file path, which `train.ModelFileStateBackend.load_state` has
+    already re-hashed against the recorded value. Saving is refused: nothing trains on the
+    path that uses this backend (December is inference-only, Vision 8.3).
+    """
+
+    def save(self, *, epoch: int, weights: Any) -> str:
+        raise IntegrityError(
+            "KerasFileCheckpointBackend",
+            "is inference-only; no epoch is trained on the path that loads a persisted model",
+        )
+
+    def load(self, payload_ref: str) -> Any:
+        require_frozen_pin()
+        import tensorflow as tf  # guarded import
+
+        path = Path(payload_ref)
+        if not path.is_file():
+            raise IntegrityError(path, "no persisted .keras model at this path")
+        return tf.keras.models.load_model(str(path), compile=False).get_weights()

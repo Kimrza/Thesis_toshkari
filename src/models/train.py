@@ -127,6 +127,10 @@ __all__ = [
     "FittedModelRecord",
     "FittedStateBackend",
     "JsonStateBackend",
+    "ModelFileStateBackend",
+    "SELECTION_MARGIN_RULE",
+    "COMPLEXITY_PROXY_RULE",
+    "complexity_proxy",
     "fit_and_persist",
     "load_fitted_model",
     "assert_fitted_payload_unchanged",
@@ -1347,6 +1351,38 @@ def _read_selection_block(snapshot: ConfigSnapshot) -> Mapping[str, Any]:
     return block
 
 
+#: How D-124's "within 1%" is measured (Student ruling of 2026-10-02, recorded under its
+#: D-number): an ABSOLUTE margin in skill units, strictly less than `simplicity_margin`
+#: (Vision 8.7: "Where mean skill differs by less than 1%"). Skill is
+#: `1 - RMSE_model / RMSE_baseline`, so 0.01 is one percentage point of skill.
+SELECTION_MARGIN_RULE: Final[str] = "absolute_skill_units_strictly_less_than_margin"
+
+#: The ordering behind "the simpler configuration" (same ruling): lower is simpler.
+#: Ridge `1/alpha`; random forest `n_estimators * max_depth` with an unbounded depth counted
+#: as 32; LSTM `layers * units`. Equal complexity goes to the higher mean skill, then to the
+#: canonical params string, so the choice is deterministic.
+COMPLEXITY_PROXY_RULE: Final[str] = (
+    "ridge:1/alpha;random_forest:n_estimators*max_depth(None=32);lstm:layers*units;"
+    "tie:higher_mean_skill_then_params_json"
+)
+
+#: The depth an unbounded random forest (`max_depth: null`) counts as in the proxy.
+_UNBOUNDED_DEPTH_PROXY: Final[float] = 32.0
+
+
+def complexity_proxy(track: str, params: Mapping[str, Any]) -> float:
+    """`COMPLEXITY_PROXY_RULE`, implemented: lower is simpler (Student ruling 2026-10-02)."""
+    if track == "ridge":
+        return 1.0 / float(params["alpha"])
+    if track == "random_forest":
+        depth = params["max_depth"]
+        depth_factor = _UNBOUNDED_DEPTH_PROXY if depth is None else float(depth)
+        return float(params["n_estimators"]) * depth_factor
+    if track == "lstm":
+        return float(params["layers"]) * float(params["units"])
+    raise IntegrityError(f"grid track {track!r}", "no complexity proxy is defined for it")
+
+
 def select_configuration(
     candidates: Sequence[CandidateScore],
     *,
@@ -1354,8 +1390,12 @@ def select_configuration(
     fold_ids: Sequence[str],
     weights: Mapping[str, float] | None = None,
 ) -> CandidateScore:
-    """R-101 / Vision 8.7: highest mean per-fold skill; within the configured tolerance the
+    """R-101 / Vision 8.7: highest mean per-fold skill; within the configured margin the
     simpler configuration wins; row-count weighting is refused outright.
+
+    The margin is absolute and strict (`SELECTION_MARGIN_RULE`); "simpler" is
+    `CandidateScore.complexity`, which the caller fills from `complexity_proxy`; equal
+    complexity goes to the higher mean skill (`COMPLEXITY_PROXY_RULE`).
 
     Raises
     ------
@@ -1371,16 +1411,18 @@ def select_configuration(
     if not candidates:
         raise IntegrityError("select_configuration", "no candidates")
     block = _read_selection_block(snapshot)
-    tolerance = float(block["simplicity_margin"])
+    margin = float(block["simplicity_margin"])
     scored = [(mean_per_fold_skill(c, fold_ids=fold_ids), c) for c in candidates]
     best_skill = max(s for s, _ in scored)
-    within = [c for s, c in scored if best_skill - s <= tolerance * abs(best_skill)]
+    # The best candidate always qualifies, including under a zero margin.
+    within = [(s, c) for s, c in scored if s == best_skill or best_skill - s < margin]
 
-    def _order(candidate: CandidateScore) -> tuple[float, str]:
+    def _order(item: tuple[float, CandidateScore]) -> tuple[float, float, str]:
+        skill, candidate = item
         ordered = json.dumps(dict(candidate.params), sort_keys=True, default=str)
-        return candidate.complexity, ordered
+        return candidate.complexity, -skill, ordered
 
-    return min(within, key=_order)
+    return min(within, key=_order)[1]
 
 
 def assert_refit_unchanged(
@@ -1847,6 +1889,110 @@ class JsonStateBackend:
             raise IntegrityError(path, f"persisted fitted model is malformed ({exc})") from exc
 
 
+class ModelFileStateBackend:
+    """The refit persistence format (Student ruling of 2026-10-02, under its D-number).
+
+    * M-03: JSON, exactly as `JsonStateBackend` (its fitted state is a mean table).
+    * M-04 / M-05: `joblib` (ships with scikit-learn; no new dependency) -- the fitted
+      estimator, its columns and its grid point, one write-once `.joblib` file.
+    * M-06: a native Keras `.keras` file (TE §8.1 line 437: "SavedModel/`.keras`
+      checkpoints") plus a JSON sidecar holding the rest of the fitted state and the `.keras`
+      file's SHA-256. The record's `payload_ref` is the sidecar.
+
+    Integrity: `predict_from_fitted` re-hashes the record's payload BEFORE `load_state`
+    (`assert_fitted_payload_unchanged`), so a joblib file is never deserialised unless its
+    bytes are the ones this pipeline wrote and hashed. For M-06, `load_state` re-hashes the
+    `.keras` file against the sidecar's recorded value before the model is ever loaded.
+    Every file is write-once (TE 13.3).
+
+    `checkpoint_backend` is the per-epoch weight store the M-06 fit wrote into; the
+    persisted `.keras` file is built from the weights the fit selected.
+    """
+
+    def __init__(self, root: Path, *, checkpoint_backend: Any = None) -> None:
+        self.root = Path(root)
+        self.checkpoint_backend = checkpoint_backend
+
+    def _stem(self, model_id: str, seed: int | None) -> str:
+        return model_id if seed is None else f"{model_id}_seed{seed}"
+
+    def _refuse_existing(self, path: Path) -> None:
+        if path.exists():
+            raise IntegrityError(
+                path,
+                "a persisted fitted model already exists at this path; a fitted model is "
+                "written once and never overwritten (TE 13.3)",
+            )
+
+    def save_state(self, *, model_id: str, seed: int | None, state: Any) -> tuple[str, str]:
+        if model_id == "M-03":
+            return JsonStateBackend(self.root).save_state(model_id=model_id, seed=seed, state=state)
+        stem = self._stem(model_id, seed)
+        if model_id in ("M-04", "M-05"):
+            import joblib  # scikit-learn's own persistence dependency
+
+            path = self.root / f"{stem}.joblib"
+            self._refuse_existing(path)
+            self.root.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(".joblib.tmp")
+            joblib.dump(dict(state), tmp)
+            os.replace(tmp, path)
+            return str(path), sha256_of_file(path)
+        if model_id == "M-06":
+            from src.models import lstm  # TensorFlow loads only on this branch
+
+            if self.checkpoint_backend is None:
+                raise IntegrityError(
+                    f"fitted state for {model_id}",
+                    "no checkpoint backend was supplied to read the selected weights from; "
+                    "the .keras file is built from the weights the fit selected",
+                )
+            keras_path = self.root / f"{stem}.keras"
+            sidecar_path = self.root / f"{stem}.state.json"
+            self._refuse_existing(keras_path)
+            self._refuse_existing(sidecar_path)
+            weights = self.checkpoint_backend.load(str(state["payload_ref"]))
+            keras_sha256 = lstm.save_keras_model(state, weights, keras_path)
+            sidecar = {
+                **dict(state),
+                "payload_ref": keras_path.name,  # resolved against the sidecar's directory
+                "keras_file": keras_path.name,
+                "keras_sha256": keras_sha256,
+                "persistence_format": "keras",
+            }
+            _durable_write_bytes(
+                sidecar_path,
+                (json.dumps(sidecar, indent=2, sort_keys=True) + "\n").encode("utf-8"),
+            )
+            return str(sidecar_path), sha256_of_file(sidecar_path)
+        raise IntegrityError(f"fitted state for {model_id}", "no persistence format is defined")
+
+    def load_state(self, payload_ref: str) -> Any:
+        path = Path(payload_ref)
+        if not path.is_file():
+            raise IntegrityError(path, "no persisted fitted model at this path")
+        if path.suffix == ".joblib":
+            import joblib
+
+            return joblib.load(path)
+        if path.name.endswith(".state.json"):
+            state = json.loads(path.read_text(encoding="utf-8"))
+            keras_path = path.parent / str(state["keras_file"])
+            if not keras_path.is_file():
+                raise IntegrityError(keras_path, "the persisted .keras model is absent")
+            actual = sha256_of_file(keras_path)
+            if actual != state.get("keras_sha256"):
+                raise IntegrityError(
+                    keras_path,
+                    f"sha256 {actual[:12]}… does not match the sidecar's recorded "
+                    f"{str(state.get('keras_sha256'))[:12]}…; the model on disk is not the one "
+                    f"that was fitted and hashed",
+                )
+            state["payload_ref"] = str(keras_path)  # what M-06's loader opens
+            return state
+        return JsonStateBackend(self.root).load_state(payload_ref)
+
+
 def _durable_write_bytes(path: Path, payload: bytes) -> None:
     """`.tmp` -> fsync -> atomic rename; a reader never sees a partial file (SD-M-04)."""
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -1878,9 +2024,14 @@ def fit_and_persist(
     seed: int | None = None,
     params: Mapping[str, Any] | None = None,
     horizon_hours: int | None = None,
+    checkpoint_backend: Any = None,
     **family_kwargs: Any,
 ) -> FittedModelRecord:
     """FIT a family and PERSIST it, hashed, without predicting on anything.
+
+    `checkpoint_backend` is M-06's per-epoch weight store (`checkpoint.CheckpointBackend`),
+    forwarded to the family as its `backend` argument. It is a separate parameter because
+    `backend` here is the fitted-state backend.
 
     The REFIT half of the locked path (owner ruling 2026-09-20: "Retrain from scratch on
     January-November, save and hash the models, and make December strictly inference-only").
@@ -1925,6 +2076,8 @@ def fit_and_persist(
             "overwritten (TE 13.3; NFR-AUD-01)",
         )
     horizon = resolve_horizon(snapshot, horizon_hours)
+    if checkpoint_backend is not None:
+        family_kwargs["backend"] = checkpoint_backend
     family = _family_module(model_id, "fit_state")
     state, attrs = family.fit_state(
         model_id,
@@ -2027,9 +2180,13 @@ def predict_from_fitted(
     backend: FittedStateBackend,
     target: Any = None,
     horizon_hours: int | None = None,
+    checkpoint_backend: Any = None,
     **family_kwargs: Any,
 ) -> Prediction:
     """LOAD a persisted fit and PREDICT. Nothing here fits, on any partition.
+
+    `checkpoint_backend` is forwarded to the family as its `backend` (M-06 loads its
+    persisted weights through it), separate from the fitted-state `backend`.
 
     The locked half of the path. The record's `transform_id` must equal the scored bundle's:
     the December bundle carries the REFIT transform (`expected_transform_id`, R-74's one
@@ -2052,6 +2209,8 @@ def predict_from_fitted(
             f"same fitted state the model was fitted under (R-74 element 4)",
         )
     horizon = resolve_horizon(snapshot, horizon_hours)
+    if checkpoint_backend is not None:
+        family_kwargs["backend"] = checkpoint_backend
     family = _family_module(record.model_id, "predict_rows_from_state")
     state = backend.load_state(record.payload_ref)
     rows, attrs = family.predict_rows_from_state(

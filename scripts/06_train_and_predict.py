@@ -57,17 +57,18 @@ What this script can and cannot run today
   identity, so the access-logged read is the data the receipt's prediction was computed from
   (R-102a; SD-M-04; W-12).
 * **The TensorFlow pin is FROZEN at `tensorflow==2.21.0` (D-36) and `require_frozen_pin`
-  PASSES.** What stops an M-06 run here is the ENVIRONMENT, not the guard: TensorFlow has
-  never been installed or imported on this clone (PyPI unreachable), TE 8.1's both-platform
-  check has not run, and TA-26 stays `Pending`. Separately, this script supplies no
-  `CheckpointBackend`, so M-06 refuses for that reason too. M-04/M-05 refuse by name without
-  `scikit-learn` installed.
-* **Persisting M-04, M-05 and M-06 refuses by design.** `train.JsonStateBackend` serves any
-  family whose fitted state is JSON-serialisable (M-03's mean table is). A fitted
-  scikit-learn estimator and a set of Keras weights are not, and choosing a binary
-  serialization format for them is a governed decision that does not exist yet (TS-M-01
-  freezes the Keras checkpoint format at pin-freeze). The refusal names that, rather than
-  reaching for pickle.
+  PASSES.** M-06 fold fits (governed F1-F4, the fixture path and the tuning run) go through
+  `lstm.fit_predict_rows` with an in-memory `CheckpointBackend`, because `train.fit_predict`
+  carries none and so cannot reach R-94's best-checkpoint restoration (Stage 5,
+  2026-10-02).
+* **Persistence (Student ruling of 2026-10-02).** `train.ModelFileStateBackend` persists
+  the refit: `.keras` for M-06 (TE line 437), joblib for M-04/M-05, JSON for M-03. Every
+  file is hashed as written and re-hashed before it is loaded, so a joblib file is never
+  deserialised unless its bytes are the ones this pipeline wrote. Before the ruling,
+  `JsonStateBackend` refused the fitted estimators and weights by name.
+* **The governed tuning run (`--tune` without `--fixture-manifest`).** D-124 over F1-F4
+  with the development seed, then D-56's refit epoch rule over the selected LSTM and the
+  final seeds. It writes a tuning record and never writes `configs/experiment.yaml`.
 
 Inputs
 ------
@@ -99,6 +100,7 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
+import hashlib
 import json
 import sys
 import uuid
@@ -170,17 +172,23 @@ from src.features._frames import frame_attrs, frame_from_records, records_of  # 
 from src.features.build import FrameSpec, bundle_directory_name, load_bundle  # noqa: E402
 from src.features.transforms import transform_id_for  # noqa: E402
 from src.models.train import (  # noqa: E402
+    COMPLEXITY_PROXY_RULE,
     FITTED_MODEL_IDS,
     GRID_TRACKS,
     MODEL_IDS,
+    REFIT_EPOCH_RULE_ID,
+    SELECTION_MARGIN_RULE,
     TBD_SENTINEL,
     CandidateScore,
-    JsonStateBackend,
+    ModelFileStateBackend,
     Prediction,
     assert_grid_content,
     assert_in_grid,
     assert_locked_exit_allowed,
+    assert_refit_epochs_match_rule,
     assert_stamp_match,
+    complexity_proxy,
+    criterion_hash,
     enumerate_grid,
     expected_transform_id,
     fit_and_persist,
@@ -188,6 +196,8 @@ from src.models.train import (  # noqa: E402
     load_fitted_model,
     mean_per_fold_skill,
     predict_from_fitted,
+    record_tuning,
+    refit_epoch_count,
     resolve_horizon,
     select_configuration,
     target_series,
@@ -248,6 +258,17 @@ PRODUCED_FIELDS: tuple[str, ...] = (
     "restored_epoch",
     "epochs_run",
     "validation_partition_id",
+    # the governed tuning record and the refit persistence format (Stage 5, 2026-10-02)
+    "tuning_record",
+    "candidate_audit",
+    "fold_skill",
+    "mean_skill",
+    "complexity",
+    "refit_epoch_derivation",
+    "transcription",
+    "keras_file",
+    "keras_sha256",
+    "persistence_format",
 )
 
 
@@ -341,10 +362,31 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help=(
             "run D-124's selection (mean per-fold skill vs the declared baseline, per grid "
-            "track) over the fixture's own apparatus folds instead of a governed fit/predict "
-            "run. FIXTURE-SCALE ONLY (requires --fixture-manifest): proves the selection "
-            "mechanism on real fixture data without writing the governed models.selected "
-            "field, which only a full-year F1-F4 run may freeze (build-and-test item 3)"
+            "track). With --fixture-manifest it runs over the fixture's apparatus folds and "
+            "writes an advisory result. Without it, it is the GOVERNED full-year run over "
+            "F1-F4 (January-November only): it needs --tune-criterion and --tune-attestation, "
+            "the two fixture receipts (TE 9.2), and writes the tuning record from which "
+            "models.selected and models.refit.epochs are transcribed under their D-numbers. "
+            "It never writes configs/experiment.yaml itself"
+        ),
+    )
+    parser.add_argument(
+        "--tune-criterion",
+        type=Path,
+        default=None,
+        help=(
+            "governed --tune: the criterion declaration (JSON: criterion, declared_at_utc), "
+            "written and committed BEFORE tuning; its hash must equal the criterion this run "
+            "applies (R-95 mechanism 2)"
+        ),
+    )
+    parser.add_argument(
+        "--tune-attestation",
+        type=Path,
+        default=None,
+        help=(
+            "governed --tune: the named, dated attestation that no December figure informed "
+            "the criterion, bound to its hash (SD-M-01)"
         ),
     )
     parser.add_argument(
@@ -367,10 +409,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "--fixture-manifest runs the manifest's declared apparatus partitions; a frozen "
             "--partition id alongside it is a contradiction (R-137's two-way quarantine)"
         )
-    if args.tune and args.fixture_manifest is None:
+    if args.tune and args.fixture_manifest is None and not args.probe and (
+        args.tune_criterion is None or args.tune_attestation is None
+    ):
         parser.error(
-            "--tune runs at fixture scale only, per the owner's resolution of the fixture / "
-            "models.selected deadlock (build-and-test item 3): it needs --fixture-manifest"
+            "the governed --tune (no --fixture-manifest) needs --tune-criterion and "
+            "--tune-attestation: the criterion is declared and attested before tuning "
+            "(R-95; SD-M-01)"
         )
     if args.probe and not args.tune:
         parser.error("--probe only means something with --tune")
@@ -715,6 +760,18 @@ def _prediction_payload(prediction: Prediction, *, horizon_hours: int) -> dict[s
         "confirmatory": bool(attrs.get("confirmatory", False)),
         "seeds_averaged": attrs.get("seeds_averaged"),
         "rows": records_of(prediction.frame),
+        **(
+            {
+                "checkpoint": {
+                    "restored_epoch": attrs.get("restored_epoch"),
+                    "restored_validation_rmse": attrs.get("restored_validation_rmse"),
+                    "epochs_run": attrs.get("epochs_run"),
+                    "epoch_source": attrs.get("epoch_source"),
+                }
+            }
+            if prediction.model_id == "M-06" and attrs.get("restored_epoch") is not None
+            else {}
+        ),
     }
 
 
@@ -837,7 +894,8 @@ def _refit_and_persist(
     """The REFIT iteration: FIT on January-November and PERSIST, hashed. Nothing is scored.
 
     Every fitted family is refitted from scratch on the refit partition's training range and
-    written through `JsonStateBackend`, which hashes the payload as written. M-06 is refitted
+    written through `ModelFileStateBackend` (Student ruling of 2026-10-02: `.keras` for M-06,
+    joblib for M-04/M-05, JSON for M-03), which hashes each file as written. M-06 is refitted
     once per configured final seed, each seed its own persisted model and its own registry
     run (TE 13.5), for exactly the frozen `models.refit.epochs` count with no validation set
     — so no epoch, checkpoint or hyperparameter is selected here and December cannot reach
@@ -847,7 +905,6 @@ def _refit_and_persist(
     M-01 and M-02 are skipped: they carry no fitted state and are recomputed from the target
     series wherever they are scored.
     """
-    backend = JsonStateBackend(models_root)
     persisted: list[tuple[str, int | None, Any, Path]] = []
     for model_id in MODEL_IDS:
         if model_id not in FITTED_MODEL_IDS:
@@ -858,18 +915,22 @@ def _refit_and_persist(
         )
         for seed in seeds:
             record_path = _fitted_record_path(models_root, model_id, seed)
+            # M-06's per-epoch weights live in memory for the fit; the persisted `.keras`
+            # file is built from the weights the refit ends on (no selection at refit).
+            checkpoint = _InMemoryCheckpointBackend() if model_id == "M-06" else None
             record = fit_and_persist(
                 model_id,
                 bundle=train_bundle,
                 partition=partition,
                 snapshot=snapshot,
                 target=refit_target,
-                backend=backend,
+                backend=ModelFileStateBackend(models_root, checkpoint_backend=checkpoint),
                 record_path=record_path,
                 validation_bundle=None,  # the refit selects nothing (frozen epoch count)
                 seed=seed,
                 params=params,
                 horizon_hours=horizon,
+                checkpoint_backend=checkpoint,
             )
             persisted.append((model_id, seed, record, record_path))
     return persisted
@@ -971,7 +1032,7 @@ def _locked_predictions(
     full D-28/D-59 30-day scored set. Every other family, and M-01/M-02 when any of the
     three is omitted, is unaffected -- `locked_target` itself passes through unchanged.
     """
-    backend = JsonStateBackend(models_root)
+    backend = ModelFileStateBackend(models_root)  # re-hashes before every load
     produced: list[Prediction] = []
     seeded: list[Prediction] = []
     for model_id in MODEL_IDS:
@@ -1012,6 +1073,7 @@ def _locked_predictions(
                     backend=backend,
                     target=locked_target,
                     horizon_hours=horizon,
+                    checkpoint_backend=_keras_checkpoint_backend() if model_id == "M-06" else None,
                 )
             else:
                 prediction = fit_predict(
@@ -1419,20 +1481,13 @@ class _InMemoryCheckpointBackend:
         return self._store[payload_ref]
 
 
-#: PROPOSED complexity ordering for R-101's "prefer the simpler configuration within the
-#: margin" rule -- no governed record (functional design, business rules, or a change
-#: record) states a formula. Lower is simpler. Flagged as proposed, not committed; the
-#: owner may replace it without touching the selection mechanism itself.
-def _proposed_complexity(track: str, params: Mapping[str, Any]) -> float:
-    if track == "ridge":
-        return 1.0 / float(params["alpha"])  # smaller alpha = less regularised = more complex
-    if track == "random_forest":
-        depth = params["max_depth"]
-        depth_factor = 32.0 if depth is None else float(depth)
-        return float(params["n_estimators"]) * depth_factor
-    if track == "lstm":
-        return float(params["layers"]) * float(params["units"])
-    raise IntegrityError(f"grid track {track!r}", "no complexity proxy defined")
+def _development_seed(snapshot: Any) -> int:
+    """`seeds.development` (D-122). Vision line 837: "Development seed: **42**, used for
+    tuning only"; TE line 834: "The development seed supports tuning only." Read through
+    the one validated reader."""
+    from src.models.random_forest import development_seed
+
+    return development_seed(snapshot)
 
 
 def _rmse(
@@ -1559,7 +1614,7 @@ def _run_tune(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
     bundle_root = _fixture_bundle_root(snapshot, args)
     tune_target = _load_target_by_manifest(snapshot, fixture_scope_id=entry.get("fixture_scope_id"))
     series = target_series(tune_target)
-    final_seeds = sorted(_final_seeds(snapshot))
+    tuning_seed = _development_seed(snapshot)  # Vision line 837: tuning only
 
     baseline_block = snapshot.experiment.get("models", {}).get("declared_baseline_per_track")
     baseline = baseline_block.get("all_tracks") if isinstance(baseline_block, Mapping) else None
@@ -1600,7 +1655,7 @@ def _run_tune(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
                 if score_bundle is None:
                     continue
                 assert_stamp_match(score_bundle, fold)
-                seed = final_seeds[0] if model_id == "M-06" else None
+                seed = tuning_seed if model_id == "M-06" else None
                 t0 = dt.datetime.now(dt.timezone.utc)
                 prediction = _fit_candidate(
                     track=track, model_id=model_id, params=params,
@@ -1635,7 +1690,7 @@ def _run_tune(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
                 scored.append(
                     CandidateScore(
                         params=params, fold_skill=fold_skill,
-                        complexity=_proposed_complexity(track, params),
+                        complexity=complexity_proxy(track, params),
                     )
                 )
         if args.probe:
@@ -1685,9 +1740,526 @@ def _run_tune(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
     return {"tune_result_path": str(out_path), "tracks_run": list(tracks), "probe": args.probe}
 
 
+# =======================================================================================
+# The governed full-year tuning run (Stage 5): D-124 over F1-F4, January-November only
+# =======================================================================================
+
+
+def _restored_epoch(prediction: Prediction) -> int:
+    """The best-validation epoch an M-06 fold fit restored (R-94), as a positive integer."""
+    epoch = frame_attrs(prediction.frame).get("restored_epoch")
+    if isinstance(epoch, bool) or not isinstance(epoch, int) or epoch <= 0:
+        raise IntegrityError(
+            f"M-06 fold fit {prediction.partition_id}/seed {prediction.seed}",
+            f"records restored_epoch {epoch!r}, not a positive integer; D-56's refit rule takes "
+            f"its median over the restored epochs (R-94)",
+        )
+    return epoch
+
+
+def _assert_refit_epochs_from_folds(
+    snapshot: Any,
+    fold_epochs: Sequence[int],
+    *,
+    partitions: Sequence[Partition],
+    expected_seeds: frozenset[int],
+) -> None:
+    """Before the refit: the transcribed `models.refit.epochs` must be what D-56's rule
+    produces from THIS invocation's F1-F4 M-06 fits (every fold x every final seed). The
+    value is never trusted from the config alone; a refit run without its folds refuses."""
+    folds = [p for p in partitions if p.kind == PartitionKind.fold]
+    expected = len(folds) * len(expected_seeds)
+    if len(fold_epochs) != expected:
+        raise IntegrityError(
+            REFIT_ID,
+            f"{len(fold_epochs)} restored M-06 fold epochs were recorded in this invocation, "
+            f"not {expected} ({len(folds)} folds x {len(expected_seeds)} final seeds); "
+            f"{REFIT_EPOCH_RULE_ID} is re-derived from the F1-F4 fits that run before REFIT in "
+            f"the same invocation, so the transcribed models.refit.epochs is checked against "
+            f"fresh fits rather than trusted",
+        )
+    assert_refit_epochs_match_rule(snapshot, list(fold_epochs))
+
+
+def _keras_checkpoint_backend() -> Any:
+    """M-06's inference-only weight loader for a persisted `.keras` model (lazy: TF)."""
+    from src.models.lstm import KerasFileCheckpointBackend
+
+    return KerasFileCheckpointBackend()
+
+
+def _prediction_values(prediction: Prediction) -> dict[tuple[str, dt.datetime], float]:
+    """`(station, interval_start_utc) -> y_hat` for every row with a finite prediction.
+    A missing prediction (`None`/NaN, D-5) is simply absent from the map: the comparison-wide
+    mask below is built from what every member actually predicted, never imputed."""
+    values: dict[tuple[str, dt.datetime], float] = {}
+    for row in records_of(prediction.frame):
+        y_hat = row["y_hat"]
+        if y_hat is None or (isinstance(y_hat, float) and y_hat != y_hat):
+            continue
+        stamp = dt.datetime.fromisoformat(str(row["interval_start_utc"]).replace("Z", "+00:00"))
+        values[(str(row["station"]), stamp)] = float(y_hat)
+    return values
+
+
+def _mask_rmse(
+    values: Mapping[tuple[str, dt.datetime], float],
+    series: Mapping[tuple[str, dt.datetime], float],
+    keys: Sequence[tuple[str, dt.datetime]],
+) -> float:
+    """RMSE over exactly `keys` (one comparison-wide mask, NFR-FAIR-01)."""
+    if not keys:
+        raise IntegrityError(
+            "tuning comparison mask",
+            "is empty; an RMSE over zero rows is not a measurement",
+        )
+    total = sum((values[key] - series[key]) ** 2 for key in keys)
+    return (total / len(keys)) ** 0.5
+
+
+def _criterion_used(snapshot: Any) -> dict[str, Any]:
+    """The selection criterion this run applies: the governed config's D-124/D-58/D-121
+    blocks plus the code's rule identifiers. Its hash must equal the declared criterion's
+    (R-95 mechanism 2), so a criterion edited after declaration cannot pass silently."""
+    models = snapshot.experiment.get("models") or {}
+    selection = models.get("selection") or {}
+    baseline = (models.get("declared_baseline_per_track") or {}).get("all_tracks")
+    grids = snapshot.experiment.get("grids") or {}
+    return {
+        "selection_decision": selection.get("decision"),
+        "criterion": selection.get("criterion"),
+        "folds": list(selection.get("folds") or []),
+        "simplicity_margin": selection.get("simplicity_margin"),
+        "selection_margin_rule": SELECTION_MARGIN_RULE,
+        "complexity_proxy_rule": COMPLEXITY_PROXY_RULE,
+        "declared_baseline": baseline,
+        "baseline_model_id": "M-01",
+        "skill_definition": (
+            "1 - RMSE_model / RMSE_baseline, both over one comparison-wide mask per "
+            "(track, fold): the rows every candidate of the track and the baseline predicted "
+            "and the target holds"
+        ),
+        "december_may_influence": selection.get("december_may_influence"),
+        "grids_decision": grids.get("decision"),
+        "grids_sha256": criterion_hash(grids),
+        "tuning_seed_source": "seeds.development (Vision line 837: tuning only)",
+        "refit_epoch_rule": REFIT_EPOCH_RULE_ID,
+        "refit_epoch_seeds_source": "seeds.final",
+    }
+
+
+def _december_accesses_since(workspace: Path, declared_at: dt.datetime) -> list[dict[str, Any]]:
+    """Every logged locked-test access at or after the criterion declaration.
+
+    Read from the two ACTIVE access logs (`locked_test.GOVERNED_ACCESS_LOG`, where every
+    governed December read is recorded, and `TEST_SUITE_ACCESS_LOG`); the closed log
+    refuses appends and so cannot gain a row after any declaration. A performance-blind
+    coverage access is recorded and disclosed (`audit_access_since_declaration`); a
+    malformed log line refuses, because an unreadable custody record cannot be shown to
+    contain no December performance read.
+    """
+    from src.data.locked_test import GOVERNED_ACCESS_LOG, TEST_SUITE_ACCESS_LOG
+
+    hits: list[dict[str, Any]] = []
+    for name in (GOVERNED_ACCESS_LOG, TEST_SUITE_ACCESS_LOG):
+        path = workspace / name
+        if not path.is_file():
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise IntegrityError(
+                    f"{path}:{number}",
+                    f"is not valid JSON ({exc}); the access log is custody evidence and must "
+                    f"be readable before tuning can claim no December performance was seen",
+                ) from exc
+            if not row.get("locked_test_accessed"):
+                continue
+            stamp = str(row.get("logged_at_utc") or "")
+            try:
+                when = dt.datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+            except ValueError as exc:
+                raise IntegrityError(
+                    f"{path}:{number}", f"logged_at_utc {stamp!r} is not an ISO timestamp"
+                ) from exc
+            if when.tzinfo is None:
+                raise IntegrityError(f"{path}:{number}", "logged_at_utc carries no timezone")
+            if when >= declared_at:
+                hits.append(
+                    {
+                        "log": name,
+                        "line": number,
+                        "run_id": row.get("run_id"),
+                        "logged_at_utc": stamp,
+                        "purpose": row.get("purpose"),
+                        "performance_inspected": bool(row.get("performance_inspected")),
+                    }
+                )
+    return hits
+
+
+def _load_json_file(path: Path | None, *, what: str) -> dict[str, Any]:
+    if path is None or not Path(path).is_file():
+        raise IntegrityError(str(path), f"no {what} file")
+    payload = json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    if not isinstance(payload, dict):
+        raise IntegrityError(str(path), f"the {what} must be a JSON object")
+    return payload
+
+
+def _append_jsonl(path: Path, row: Mapping[str, Any]) -> None:
+    with Path(path).open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, sort_keys=True, default=str) + "\n")
+        handle.flush()
+
+
+def _run_tune_governed(
+    entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str
+) -> dict[str, Any]:
+    """D-124's selection (R-101) over the governed F1-F4 folds, January-November only.
+
+    For each grid track (ridge M-04, random forest M-05, LSTM M-06) every grid point is
+    fitted on each fold's training range and scored on its validation month against the
+    declared baseline (D-58: persistence, M-01). Skill is `1 - RMSE_model/RMSE_baseline`
+    over ONE comparison-wide mask per (track, fold): the rows every candidate of that track
+    and the baseline predicted and the target holds (NFR-FAIR-01). The selection is
+    `select_configuration` (mean per-fold skill; the absolute margin and the complexity
+    ordering the Student ruled on 2026-10-02). The LSTM is tuned with the development seed
+    (Vision line 837: "used for tuning only").
+
+    Then D-56's refit rule is evaluated: the SELECTED LSTM configuration is fitted on every
+    fold with every final seed, and the median restored (best-validation) epoch, rounded half
+    up, is the refit epoch count. The governed F1-F4 run re-derives the same value before
+    REFIT and refuses if the transcribed one differs.
+
+    Preconditions, all checked before any fit: the criterion declaration and the named
+    attestation (R-95; SD-M-01, through `record_tuning`); no December performance read
+    logged since the declaration; the two fixture receipts (TE 9.2, in `_stage_entry`).
+    DEC is never read: `build_partitions`' fold partitions and the January-November
+    released target are the only inputs.
+
+    Writes the tuning record (write-once, with a SHA-256 sidecar) and a per-fit progress
+    log beside it. Writes NOTHING to `configs/experiment.yaml`: `models.selected` and
+    `models.refit.epochs` are frozen only under their D-number and transcribed by a
+    separate, recorded config change.
+    """
+    from src.data.config import LeakageError
+
+    _assert_phase1_field_contract(args.phase)
+    snapshot = entry["snapshot"]
+    lock = entry["lock"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    run_at = dt.datetime.now(dt.timezone.utc)
+
+    partitions = build_partitions(snapshot)
+    folds = [p for p in partitions if p.kind == PartitionKind.fold]
+    fold_ids = [p.partition_id for p in folds]
+    criterion = _criterion_used(snapshot)
+    if criterion["folds"] != fold_ids:
+        raise IntegrityError(
+            "configs/experiment.yaml: models.selection.folds",
+            f"is {criterion['folds']}, but the governed fold partitions are {fold_ids}",
+        )
+    if criterion["declared_baseline"] != "persistence":
+        raise IntegrityError(
+            "configs/experiment.yaml: models.declared_baseline_per_track.all_tracks",
+            f"is {criterion['declared_baseline']!r}, not 'persistence' (D-58; M-01)",
+        )
+    if criterion["december_may_influence"] is not False:
+        raise LeakageError(
+            "configs/experiment.yaml: models.selection.december_may_influence",
+            "must be false: no December result may influence the criterion (Vision 8.7)",
+        )
+
+    horizon = resolve_horizon(snapshot, args.horizon)
+    grid_counts = assert_grid_content(snapshot)  # R-96 before any fit
+    bundle_root = _bundle_root(snapshot, args)
+    tune_target = _load_target_by_manifest(snapshot, fixture_scope_id=None)  # Jan-Nov only
+    series = target_series(tune_target)
+    tuning_seed = _development_seed(snapshot)
+    final_seeds = sorted(_final_seeds(snapshot))
+
+    bundles: dict[str, tuple[Any, Any]] = {}
+    for fold in folds:
+        train_bundle, score_bundle = _bundle_pair(bundle_root, fold, partitions)
+        if score_bundle is None:
+            raise IntegrityError(f"partition {fold.partition_id}", "carries no score bundle")
+        assert_stamp_match(score_bundle, fold)
+        bundles[fold.partition_id] = (train_bundle, score_bundle)
+
+    if args.probe:
+        fold = folds[0]
+        params = list(enumerate_grid(snapshot, "lstm"))[0]
+        t0 = dt.datetime.now(dt.timezone.utc)
+        prediction = _fit_candidate(
+            track="lstm", model_id="M-06", params=params,
+            train_bundle=bundles[fold.partition_id][0],
+            score_bundle=bundles[fold.partition_id][1], partition=fold,
+            snapshot=snapshot, tune_target=tune_target, horizon=horizon, seed=tuning_seed,
+        )
+        seconds = (dt.datetime.now(dt.timezone.utc) - t0).total_seconds()
+        attrs = frame_attrs(prediction.frame)
+        print(
+            f"06_train_and_predict --tune --probe: {params} on {fold.partition_id}: "
+            f"{seconds:.1f}s, epochs_run={attrs.get('epochs_run')}, "
+            f"restored_epoch={attrs.get('restored_epoch')}"
+        )
+        return {"probe": True, "seconds": seconds, "fold_id": fold.partition_id}
+
+    # --- the declaration and the attestation, before any fit (R-95; SD-M-01) ------------
+    declaration = _load_json_file(args.tune_criterion, what="criterion declaration")
+    attestation = _load_json_file(args.tune_attestation, what="tuning attestation")
+    declared_at = dt.datetime.fromisoformat(
+        str(declaration.get("declared_at_utc", "")).replace("Z", "+00:00")
+    )
+    accesses = _december_accesses_since(workspace, declared_at)
+    inspected = [a for a in accesses if a["performance_inspected"]]
+    if inspected:
+        raise LeakageError(
+            "tuning run",
+            f"{len(inspected)} locked-test access(es) with performance_inspected=true are "
+            f"logged since the criterion was declared ({inspected[0]}); December performance "
+            f"may not inform selection (Vision 8.3, 8.7)",
+        )
+    tuning_record = record_tuning(
+        run_id=run_id,
+        partitions_read=fold_ids,
+        criterion_declared=declaration.get("criterion") or {},
+        criterion_declared_at=str(declaration.get("declared_at_utc")),
+        criterion_used=criterion,
+        run_at=run_at.isoformat(),
+        attested_by=str(attestation.get("attested_by", "")),
+        attested_at_utc=str(attestation.get("attested_at_utc", "")),
+        attests_criterion_hash=str(attestation.get("attests_criterion_hash", "")),
+        audit_access_since_declaration=bool(accesses),
+    )
+
+    record_path = Path(args.tune_out) if args.tune_out is not None else (
+        Path("artifacts") / "tuning" / run_id / "tuning_record.json"
+    )
+    if not record_path.is_absolute():
+        record_path = workspace / record_path
+    if record_path.exists():
+        raise IntegrityError(record_path, "a tuning record is written once (TE 13.3)")
+    record_path.parent.mkdir(parents=True, exist_ok=True)
+    fits_log = record_path.with_name("fits.jsonl")
+    print(
+        f"06_train_and_predict --tune (governed): folds {fold_ids}, tracks "
+        f"{list(GRID_TRACKS)}, tuning seed {tuning_seed}, record {record_path}",
+        flush=True,
+    )
+
+    # --- the declared baseline, once per fold ------------------------------------------
+    baseline_values: dict[str, dict[tuple[str, dt.datetime], float]] = {}
+    for fold in folds:
+        train_bundle, score_bundle = bundles[fold.partition_id]
+        baseline = fit_predict(
+            "M-01", bundle=train_bundle, partition=fold, snapshot=snapshot,
+            target=tune_target, score_bundle=score_bundle, validation_bundle=score_bundle,
+            seed=None, params=None, horizon_hours=horizon,
+        )
+        baseline_values[fold.partition_id] = _prediction_values(baseline)
+
+    per_track: dict[str, Any] = {}
+    candidate_audit: list[dict[str, Any]] = []
+    for track, model_id in GRID_TRACKS.items():
+        candidates = list(enumerate_grid(snapshot, track))
+        values: dict[tuple[int, str], dict[tuple[str, dt.datetime], float]] = {}
+        facts: dict[tuple[int, str], dict[str, Any]] = {}
+        for index, params in enumerate(candidates):
+            assert_in_grid(snapshot, track, params)
+            for fold in folds:
+                train_bundle, score_bundle = bundles[fold.partition_id]
+                assert_stamp_match(score_bundle, fold)
+                t0 = dt.datetime.now(dt.timezone.utc)
+                prediction = _fit_candidate(
+                    track=track, model_id=model_id, params=params,
+                    train_bundle=train_bundle, score_bundle=score_bundle, partition=fold,
+                    snapshot=snapshot, tune_target=tune_target, horizon=horizon,
+                    seed=tuning_seed,
+                )
+                seconds = (dt.datetime.now(dt.timezone.utc) - t0).total_seconds()
+                key = (index, fold.partition_id)
+                values[key] = _prediction_values(prediction)
+                attrs = frame_attrs(prediction.frame)
+                facts[key] = {
+                    "stage": "grid",
+                    "track": track,
+                    "model_id": model_id,
+                    "params": dict(params),
+                    "fold_id": fold.partition_id,
+                    "seed": tuning_seed if model_id == "M-06" else None,
+                    "seconds": seconds,
+                    "rows_predicted": len(values[key]),
+                    "restored_epoch": attrs.get("restored_epoch"),
+                    "epochs_run": attrs.get("epochs_run"),
+                    "restored_validation_rmse": attrs.get("restored_validation_rmse"),
+                }
+                _append_jsonl(fits_log, facts[key])
+                print(
+                    f"  {track} {index + 1}/{len(candidates)} {dict(params)} "
+                    f"{fold.partition_id}: {seconds:.1f}s",
+                    flush=True,
+                )
+        masks: dict[str, list[tuple[str, dt.datetime]]] = {}
+        for fold_id in fold_ids:
+            keys = set(baseline_values[fold_id]) & set(series)
+            for index in range(len(candidates)):
+                keys &= set(values[(index, fold_id)])
+            masks[fold_id] = sorted(keys)
+        baseline_rmse = {
+            fold_id: _mask_rmse(baseline_values[fold_id], series, masks[fold_id])
+            for fold_id in fold_ids
+        }
+        scored: list[CandidateScore] = []
+        for index, params in enumerate(candidates):
+            fold_skill: dict[str, float] = {}
+            for fold_id in fold_ids:
+                rmse = _mask_rmse(values[(index, fold_id)], series, masks[fold_id])
+                fold_skill[fold_id] = 1.0 - rmse / baseline_rmse[fold_id]
+                candidate_audit.append(
+                    {
+                        **facts[(index, fold_id)],
+                        "mask_rows": len(masks[fold_id]),
+                        "rmse": rmse,
+                        "baseline_rmse": baseline_rmse[fold_id],
+                        "skill": fold_skill[fold_id],
+                    }
+                )
+            scored.append(
+                CandidateScore(
+                    params=params,
+                    fold_skill=fold_skill,
+                    complexity=complexity_proxy(track, params),
+                )
+            )
+        winner = select_configuration(scored, snapshot=snapshot, fold_ids=fold_ids)
+        ranking = sorted(
+            (
+                {
+                    "params": dict(c.params),
+                    "mean_skill": mean_per_fold_skill(c, fold_ids=fold_ids),
+                    "complexity": c.complexity,
+                }
+                for c in scored
+            ),
+            key=lambda item: -item["mean_skill"],
+        )
+        per_track[track] = {
+            "model_id": model_id,
+            "selected": dict(winner.params),
+            "mean_skill": mean_per_fold_skill(winner, fold_ids=fold_ids),
+            "fold_skill": dict(winner.fold_skill),
+            "complexity": winner.complexity,
+            "best_mean_skill": ranking[0]["mean_skill"],
+            "candidates_evaluated": len(scored),
+            "mask_rows": {fold_id: len(masks[fold_id]) for fold_id in fold_ids},
+            "baseline_rmse": baseline_rmse,
+            "ranking": ranking,
+        }
+        print(
+            f"  {track}: selected {dict(winner.params)} mean skill "
+            f"{per_track[track]['mean_skill']:.5f} (best {ranking[0]['mean_skill']:.5f})",
+            flush=True,
+        )
+
+    # --- D-56: the refit epoch count from the selected LSTM x F1-F4 x final seeds --------
+    lstm_selected = per_track["lstm"]["selected"]
+    derivation: list[dict[str, Any]] = []
+    for fold in folds:
+        train_bundle, score_bundle = bundles[fold.partition_id]
+        for seed in final_seeds:
+            t0 = dt.datetime.now(dt.timezone.utc)
+            prediction = _fit_candidate(
+                track="lstm", model_id="M-06", params=lstm_selected,
+                train_bundle=train_bundle, score_bundle=score_bundle, partition=fold,
+                snapshot=snapshot, tune_target=tune_target, horizon=horizon, seed=seed,
+            )
+            attrs = frame_attrs(prediction.frame)
+            row = {
+                "stage": "refit_epoch_rule",
+                "fold_id": fold.partition_id,
+                "seed": seed,
+                "params": dict(lstm_selected),
+                "restored_epoch": _restored_epoch(prediction),
+                "epochs_run": attrs.get("epochs_run"),
+                "restored_validation_rmse": attrs.get("restored_validation_rmse"),
+                "seconds": (dt.datetime.now(dt.timezone.utc) - t0).total_seconds(),
+            }
+            derivation.append(row)
+            _append_jsonl(fits_log, row)
+            print(
+                f"  refit-epoch rule {fold.partition_id} seed {seed}: restored epoch "
+                f"{row['restored_epoch']}",
+                flush=True,
+            )
+    refit_epochs = refit_epoch_count([row["restored_epoch"] for row in derivation])
+
+    record = {
+        "artifact": "tuning_record",
+        "governed": True,
+        "run_id": run_id,
+        "code_commit": lock.code_commit,
+        "environment_lock_hash": environment_lock_hash(lock),
+        "run_at_utc": run_at.isoformat(),
+        "completed_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "partitions_read": fold_ids,
+        "fold_validation_windows": {
+            fold.partition_id: [t.isoformat() for t in validation_month_range(fold)]
+            for fold in folds
+        },
+        "horizon_hours": horizon,
+        "grid_counts": grid_counts,
+        "tuning_seed": tuning_seed,
+        "criterion": criterion,
+        "criterion_sha256": criterion_hash(criterion),
+        "tuning_record": {
+            name: getattr(tuning_record, name) for name in tuning_record.__dataclass_fields__
+        },
+        "december_accesses_since_declaration": accesses,
+        "baseline": {"declared": "persistence", "model_id": "M-01"},
+        "per_track": per_track,
+        "candidate_audit": candidate_audit,
+        "refit_epoch_derivation": {
+            "rule": REFIT_EPOCH_RULE_ID,
+            "configuration": dict(lstm_selected),
+            "seeds": final_seeds,
+            "fits": derivation,
+            "refit_epochs": refit_epochs,
+        },
+        "transcription": {
+            "models.selected": {track: per_track[track]["selected"] for track in per_track},
+            "models.refit.epochs": refit_epochs,
+        },
+        "note": (
+            "Nothing here is written into configs/experiment.yaml. The values under "
+            "`transcription` are frozen only under their D-number and transcribed by a "
+            "separate, recorded config change."
+        ),
+    }
+    payload = (json.dumps(record, indent=2, sort_keys=True, default=str) + "\n").encode("utf-8")
+    record_path.write_bytes(payload)
+    digest = hashlib.sha256(payload).hexdigest()
+    record_path.with_name(record_path.name + ".sha256").write_text(
+        f"{digest}  {record_path.name}\n", encoding="utf-8"
+    )
+    print(f"06_train_and_predict --tune (governed): wrote {record_path} ({digest})", flush=True)
+    return {
+        "tuning_record": str(record_path),
+        "tuning_record_sha256": digest,
+        "selected": record["transcription"]["models.selected"],
+        "refit_epochs": refit_epochs,
+    }
+
+
 def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> dict[str, Any]:
     if args.tune:
-        return _run_tune(entry, args, run_id=run_id)  # fixture-scale D-124 selection only
+        if args.fixture_manifest is not None:
+            return _run_tune(entry, args, run_id=run_id)  # fixture-scale, advisory
+        return _run_tune_governed(entry, args, run_id=run_id)  # full-year F1-F4
     if args.fixture_manifest is not None:
         return _run_fixture_scale(entry, args, run_id=run_id)  # Q4 = A: the ONE fixture entry
     _assert_phase1_field_contract(args.phase)  # R-24: before the first write, always
@@ -1712,6 +2284,10 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
 
     written: list[str] = []
     locked_models_predicted = 0
+    # The restored (best-validation) epoch of every (fold, final seed) M-06 fit in this
+    # invocation: the inputs D-56's refit rule takes its median over, re-derived here so the
+    # transcribed `models.refit.epochs` is checked against fresh fold fits before the refit.
+    fold_epochs: list[int] = []
     for pid in args.partitions:
         partition = partition_by_id(partitions, pid)
         # The bundles load FIRST, so a missing DEC bundle refuses before any locked read is
@@ -1743,6 +2319,9 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             # FIT AND PERSIST. The refit is scored nowhere (FR-P1-04-14) so it writes no
             # prediction -- but it is NOT skipped: the hashed model it persists here is the
             # ONLY model the DEC iteration is allowed to predict with (Vision 8.3).
+            _assert_refit_epochs_from_folds(
+                snapshot, fold_epochs, partitions=partitions, expected_seeds=expected_seeds
+            )
             for model_id, seed, record, record_path in _refit_and_persist(
                 snapshot=snapshot,
                 partition=partition,
@@ -1797,20 +2376,43 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
                 params = _selected_params(snapshot, model_id)  # refuses while selected is TBD
                 for seed in seeds:
                     assert_stamp_match(score_bundle, partition)
-                    prediction = fit_predict(
-                        model_id,
-                        bundle=train_bundle,
-                        partition=partition,
-                        snapshot=snapshot,
-                        target=partition_target,
-                        score_bundle=score_bundle,
-                        # on a FOLD the validation bundle and the scored bundle legitimately
-                        # coincide; naming it is what stops them coinciding on DEC
-                        validation_bundle=score_bundle,
-                        seed=seed,
-                        params=params,
-                        horizon_hours=horizon,
-                    )
+                    if model_id == "M-06":
+                        # `fit_predict` carries no CheckpointBackend, so it cannot reach a
+                        # fold's best-checkpoint restoration (R-94; the gap CR-2026-09-25
+                        # records). M-06 is fit through its family module with the in-memory
+                        # backend, exactly as the fixture path and the tuning run do.
+                        from src.models import lstm as _lstm  # lazy import (R-05)
+
+                        prediction = _lstm.fit_predict_rows(
+                            model_id,
+                            bundle=train_bundle,
+                            score_bundle=score_bundle,
+                            partition=partition,
+                            snapshot=snapshot,
+                            target=partition_target,
+                            seed=seed,
+                            params=params,
+                            horizon_hours=horizon,
+                            validation_bundle=score_bundle,
+                            backend=_InMemoryCheckpointBackend(),
+                        )
+                        fold_epochs.append(_restored_epoch(prediction))
+                    else:
+                        prediction = fit_predict(
+                            model_id,
+                            bundle=train_bundle,
+                            partition=partition,
+                            snapshot=snapshot,
+                            target=partition_target,
+                            score_bundle=score_bundle,
+                            # on a FOLD the validation bundle and the scored bundle
+                            # legitimately coincide; naming it is what stops them coinciding
+                            # on DEC
+                            validation_bundle=score_bundle,
+                            seed=seed,
+                            params=params,
+                            horizon_hours=horizon,
+                        )
                     if model_id == "M-06":
                         seeded.append(prediction)
                     name = f"{model_id}" + (f"_seed{seed}" if seed is not None else "") + ".json"

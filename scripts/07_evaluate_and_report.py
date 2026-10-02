@@ -131,6 +131,7 @@ from src.data.experiment_registry import (  # noqa: E402
 )
 from src.data.fixture_evidence import stamp_for_manifest, write_sibling_stamp  # noqa: E402
 from src.data.fixture_outputs import (  # noqa: E402
+    copy_once,
     export_bootstrap_executed,
     export_bootstrap_not_executed,
     export_mask_manifest,
@@ -1741,7 +1742,12 @@ def _run_fixture_scale(
             encoding="utf-8",
         )
         written.append(str(measurements_path))
-    fixture_outputs = _fixture_report_outputs(scope, fixture_root, written)
+    budget_source = Path(args.budget_artifact) if args.budget_artifact is not None else None
+    if budget_source is not None and not budget_source.is_absolute():
+        budget_source = Path(snapshot.resolved_roots["workspace"]) / budget_source
+    fixture_outputs = _fixture_report_outputs(
+        scope, fixture_root, written, budget_source=budget_source
+    )
     return {"sets": list(set_ids), "artifacts_written": written, "fixture_outputs": fixture_outputs}
 
 
@@ -1762,9 +1768,18 @@ def _fixture_bootstrap_replicates(scope: Any) -> int | None:
 
 
 def _fixture_report_outputs(
-    scope: Any, fixture_root: Path, written: Sequence[str]
+    scope: Any,
+    fixture_root: Path,
+    written: Sequence[str],
+    *,
+    budget_source: Path | None = None,
 ) -> dict[str, str]:
     """TE §15.4's evaluation-side fixture outputs (CR-2026-09-29-Q31-CLOSURE).
+
+    On Fixture 2, `target_uncertainty_budget.json` (TE §15.4 "fixture 2 only") is a
+    byte-for-byte copy of the stage-02 budget artifact this run's reporting layer read
+    (`--budget-artifact`); nothing is recomputed. Found missing by scientific rehearsal 6
+    (2026-10-02): no step had ever produced it.
 
     `mask_manifest.json` and `metrics.json` aggregate what this run registered and emitted;
     every comparison set the run skipped is carried as skipped, never as data. On the
@@ -1831,6 +1846,15 @@ def _fixture_report_outputs(
         )
         outputs["bootstrap_summary"] = str(
             export_bootstrap_executed(results, fixture_root, fixture_id=scope.fixture_id)
+        )
+        if budget_source is None:
+            raise IntegrityError(
+                "--budget-artifact",
+                "Fixture 2 exports target_uncertainty_budget.json (TE §15.4) from the budget "
+                "artifact this run read, and none was named",
+            )
+        outputs["target_uncertainty_budget"] = str(
+            copy_once(budget_source, fixture_root / "target_uncertainty_budget.json")
         )
     outputs.update(_render_fixture_plots(fixture_root))
     return outputs
