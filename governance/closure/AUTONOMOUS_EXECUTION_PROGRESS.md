@@ -341,3 +341,28 @@ tuning ran:
   expected. The plumbing outputs committed at `9406f57` are replaced in the tree by this
   verification's outputs; the earlier set stays in history at `9406f57` and locally as
   `*.archived-pre-d88v3`.
+
+### Rehearsal 5 and two further Student rulings (2026-10-02)
+
+- **Rehearsal 5** (`governance/closure/sci/rehearsal5.log`, code `3684b64`): stages 00-06
+  passed, and in 07 FIX-MAR-FOLD-01 passed every set including `gim`. FIX-MAR-FOLD-02 then
+  refused in the bootstrap: its scored range [03-23, 04-01) is 216 h, which the predeclared
+  48 h sensitivity (TE §13.6) cannot tile, and R-115 refuses partial blocks.
+- **Ruling (Student):** shift FIX-MAR-FOLD-02 by one day. It now trains 03-01..03-20 with
+  validation from 03-21, giving 10 scored days (240 h; 10 x 24 h, 5 x 48 h blocks). This is a
+  fixture identity change, recorded in the scientific freeze D-entry. The protocol is
+  unchanged.
+- **Ruling (Student):** refit persistence format. M-06 uses `.keras` (TE line 437 allows
+  "SavedModel/`.keras`"); M-04 and M-05 use joblib (ships with scikit-learn). A SHA-256 is
+  recorded at write and verified before every load. Before this ruling the governed
+  REFIT/DEC path could not persist ridge, RF or LSTM: `JsonStateBackend` refused them as "a
+  governed choice that does not exist yet" (TS-M-04).
+- **Found while planning Stage 5, to fix in the Stage 5 code:**
+  - the governed F1-F4 path calls `fit_predict("M-06")` with no checkpoint backend, so
+    `lstm.fit_state` refuses (the "second gap" in CR-2026-09-25);
+  - REFIT and DEC pass no checkpoint backend to M-06;
+  - `assert_refit_epochs_match_rule` has no caller.
+- **Governed 07 scope:** DEC tiles both block lengths (30 scored days). Folds F1 (April) and
+  F4 (November) score 29 days, so a fold-level bootstrap would refuse the same way. The
+  confirmatory bootstrap belongs to DEC (TE §13.6), and per-fold validation skill comes from
+  the tuning record.
