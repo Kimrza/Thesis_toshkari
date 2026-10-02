@@ -1349,7 +1349,39 @@ def _report_set(
     # exemption); `fixture_id != PLUMBING_FIXTURE_ID` is unchanged from before this fix —
     # the checklist still fails closed on an absent ConclusionSurfaceArtifact exactly as
     # designed, for Fixture 2 and every governed/full-year run.
-    if fixture_id != PLUMBING_FIXTURE_ID:
+    if fixture_id == SCIENTIFIC_FIXTURE_ID:
+        # The Student's ruling of 2026-10-02: Fixture 2 builds its primary table (the
+        # PC-03/PC-04 co-reporting path, captioned with Vision 6.11's Required-disclosure
+        # paragraph transcribed verbatim) and SKIPS the claims-and-limitations checklist,
+        # which TE 15.4 lists for neither fixture and whose ConclusionSurfaceArtifact is the
+        # Student's authored conclusion prose -- a fixture result is never a claim (D-14
+        # clause (ii)). Governed runs (fixture_id None) are unchanged and fail closed.
+        skip_path = report_dir / f"claims_checklist_{set_id}.skipped.json"
+        skip_path.parent.mkdir(parents=True, exist_ok=True)
+        skip_path.write_text(
+            json.dumps(
+                {
+                    "artifact": "reporting_surface_skip_note",
+                    "set_id": set_id,
+                    "partition_id": partition.partition_id,
+                    "fixture_id": fixture_id,
+                    "skipped": ["claims_checklist", "ConclusionSurfaceArtifact_requirement"],
+                    "built": ["primary_table"],
+                    "reason": (
+                        "the Student's execution-scope ruling of 2026-10-02: TE 15.4 lists "
+                        "no claims_checklist or ConclusionSurfaceArtifact for either "
+                        "fixture, and a fixture result is never a claim (D-14 clause "
+                        "(ii)); R-126 control (36) is unchanged and stays fail-closed for "
+                        "every governed run"
+                    ),
+                },
+                indent=2,
+                sort_keys=True,
+            ),
+            encoding="utf-8",
+        )
+        written.append(str(skip_path))
+    elif fixture_id != PLUMBING_FIXTURE_ID:
         checklist_path = report_dir / f"claims_checklist_{set_id}.json"
         build_claims_checklist(
             registry=surfaces,

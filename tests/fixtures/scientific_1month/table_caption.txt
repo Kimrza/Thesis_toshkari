@@ -1,0 +1,1 @@
+GNSS-derived TEC extends farther into the plasmasphere than a 2000 km IRI ceiling. Reported IRI–GNSS discrepancies therefore contain a physical, structured, time-varying component that is not forecast error. This must be disclosed wherever the primary comparison is interpreted, and it is why the mandatory difficulty controls of Section 2.4 tier 2 exist.

@@ -19,11 +19,12 @@ function, `_report_set`:
     auditable skip record is written naming TE §15.3/§15.4. The mask/comparison/metric
     work upstream of this boundary (already exercised by `_run_bootstrap_step`, W-5's
     breakdowns, and W-6's practical-relevance record) is untouched.
-(b) Fixture 2 (`scientific_1month`) and the governed/full-year path (`fixture_id=None`):
-    `build_primary_table` and `build_claims_checklist` are STILL called, with the same
-    arguments as before this change (budget_artifact, table, breakdowns,
-    conclusion_surface resolved from `--conclusion-surface` exactly as before) --
-    R-126 control (36) stays fail-closed, unweakened, for these runs.
+(b) Fixture 2 (`scientific_1month`), by the Student's ruling of 2026-10-02:
+    `build_primary_table` is STILL called (captioned with Vision 6.11's Required-disclosure
+    paragraph, transcribed verbatim); the claims checklist is skipped with a record.
+(c) The governed/full-year path (`fixture_id=None`): `build_primary_table` and
+    `build_claims_checklist` are STILL called exactly as before -- R-126 control (36)
+    stays fail-closed, unweakened, for every governed run.
 
 CONSTANTS CONVENTION. All ids, station tokens and declared members below are test
 apparatus (R-122) -- no scientific value, no December 2022 content, no restricted path.
@@ -216,10 +217,11 @@ def test_plumbing_7day_skips_primary_table_and_claims_checklist(tmp_path, monkey
     assert relevance["kind"] == "practical_relevance_not_produced"
 
 
-def test_scientific_1month_still_builds_table_and_checklist_unchanged(tmp_path, monkeypatch) -> None:
-    """(b) Fixture 2: build_primary_table and build_claims_checklist ARE still called,
-    with the real budget_artifact / table / breakdowns forwarded exactly as before --
-    R-126 control (36) is not weakened for this run."""
+def test_scientific_1month_builds_table_and_skips_checklist(tmp_path, monkeypatch) -> None:
+    """(b) Fixture 2, the Student's ruling of 2026-10-02: build_primary_table IS called
+    with the real budget_artifact (the co-reporting path is exercised); the claims
+    checklist is NOT run and an explicit skip record says why. The governed path below is
+    unchanged and still fails closed."""
     calls: dict[str, list[Any]] = {"_fixture_id": [MODULE.SCIENTIFIC_FIXTURE_ID]}
     _apply_common_stubs(monkeypatch, calls=calls)
 
@@ -230,18 +232,13 @@ def test_scientific_1month_still_builds_table_and_checklist_unchanged(tmp_path, 
     assert "build_primary_table" in calls, "the primary table must still be built for Fixture 2"
     table_args, table_kwargs = calls["build_primary_table"][0]
     assert table_kwargs["budget_artifact"] == {"artifact_id": "uncertainty_budget"}
-
-    assert "build_claims_checklist" in calls, "the claims checklist must still run for Fixture 2"
-    checklist_args, checklist_kwargs = calls["build_claims_checklist"][0]
-    # conclusion_surface=None is NOT a skip -- it is forwarded through exactly as
-    # before, and the real `build_claims_checklist` fails closed on it (R-126 control
-    # (36)); this stub only proves the CALL still happens, not the fail-closed body
-    # (covered by `test_conclusion_surface_none_still_fails_closed_for_governed_runs`).
-    assert checklist_kwargs["conclusion_surface"] is None
-
-    assert not any(Path(p).name.endswith(".skipped.json") for p in written), (
-        "no reporting-surface skip record for a Fixture 2 run"
-    )
+    assert "build_claims_checklist" not in calls, "Fixture 2 skips the checklist by ruling"
+    skips = [Path(p) for p in written if Path(p).name == "claims_checklist_primary.skipped.json"]
+    assert len(skips) == 1
+    record = json.loads(skips[0].read_text(encoding="utf-8"))
+    assert record["fixture_id"] == MODULE.SCIENTIFIC_FIXTURE_ID
+    assert record["built"] == ["primary_table"] and "claims_checklist" in record["skipped"]
+    assert "2026-10-02" in record["reason"]
 
 
 def test_full_year_governed_path_fixture_id_none_still_builds_table_and_checklist(
