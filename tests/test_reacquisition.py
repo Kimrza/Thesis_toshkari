@@ -113,6 +113,19 @@ def test_downloader_filters_and_body_completeness():
     assert acq.check_isprint_body(b"<html>error</html>", DAY)["complete"] is False
 
 
+def test_downloader_sends_space_separated_parms():
+    # Regression: the server refused a comma-joined list as one illegal parameter, and the
+    # escaped traceback it returned must read as incomplete, never as data.
+    acq = _script()
+    parms = acq.isprint_parms(["ut1_unix", "gdlat", "glon", "tec", "dtec"])
+    assert parms == "ut1_unix gdlat glon tec dtec"
+    refused = (
+        b"  File &quot;/opt/openmadrigal/madroot/bin/isprint&quot;, line 126, in &lt;module&gt;\n"
+        b"OSError: Illegal parameter: ut1_unix,gdlat,glon,tec,dtec\n"
+    )
+    assert acq.check_isprint_body(refused, DAY)["complete"] is False
+
+
 def test_downloader_plans_exactly_the_recorded_files():
     acq = _script()
     plan = acq.recorded_files_by_day(REPO_ROOT / "evidence")

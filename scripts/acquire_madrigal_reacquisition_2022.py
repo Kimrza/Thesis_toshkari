@@ -201,6 +201,13 @@ def list_file_rows(session: Any, experiment_id: str) -> list[dict[str, str]]:
     return rows
 
 
+def isprint_parms(parameters: list[str]) -> str:
+    """`isprintService.py` takes parameters space-separated; a comma-joined value reaches
+    the server as one name and is refused ("OSError: Illegal parameter: ut1_unix,gdlat,...",
+    measured 2026-10-02, which made every pilot day `incomplete`)."""
+    return " ".join(parameters)
+
+
 def isprint_filters(day: dt.date, bbox: Mapping[str, int]) -> str:
     stamp = day.strftime("%m/%d/%Y")
     return (
@@ -241,7 +248,7 @@ def make_transport(session: Any, identity: Mapping[str, str], parameters: list[s
         del offset, timeout  # isprint is not resumable; its read bound is ISPRINT_READ_TIMEOUT_S
         params = {
             "file": spec["provider_path"],
-            "parms": ",".join(parameters),
+            "parms": isprint_parms(parameters),
             "filters": spec["filters"],
             **identity,
         }
@@ -363,7 +370,7 @@ def run(config_dir: Path, *, plan_only: bool, max_days: int | None) -> int:
             "logical_name": logical,
             "request": {
                 "service": "isprintService.py",
-                "parms": ",".join(ident["parameters"]),
+                "parms": isprint_parms(ident["parameters"]),
                 "filters": isprint_filters(day, bbox),
             },
         }
