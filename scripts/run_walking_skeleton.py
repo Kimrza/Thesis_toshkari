@@ -1102,7 +1102,10 @@ def _run(entry: Mapping[str, Any], args: argparse.Namespace, *, run_id: str) -> 
             scope, fixture_root, environment_id=lock.environment_id
         )
         assert_run_level_ranges(
-            scope, runtime_seconds=runtime_seconds, storage_bytes=storage_bytes
+            scope,
+            runtime_seconds=runtime_seconds,
+            storage_bytes=storage_bytes,
+            environment_id=lock.environment_id,
         )
         receipt = write_fixture_pass_receipt(
             manifest=scope,

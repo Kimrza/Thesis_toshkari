@@ -2367,27 +2367,70 @@ def _range_of(block: Mapping[str, Any], key: str, *, resource: str) -> tuple[flo
         raise _refuse(f"{resource}.{key}", "measured range needs numeric min and max") from exc
 
 
+def _environment_range(
+    block: Mapping[str, Any], key: str, *, resource: str, environment_id: str | None
+) -> tuple[float, float, str]:
+    entry = block.get(key)
+    by_environment = entry.get("by_environment") if isinstance(entry, Mapping) else None
+    if not isinstance(by_environment, Mapping):
+        lo, hi = _range_of(block, key, resource=resource)
+        return lo, hi, "pooled"
+    if environment_id is None:
+        raise _refuse(
+            f"{resource}.{key}",
+            "the frozen range is per environment_id; a run naming no environment has no range "
+            "to be checked against (D-88)",
+        )
+    own = by_environment.get(environment_id)
+    if not isinstance(own, Mapping):
+        raise _refuse(
+            f"{resource}.{key}",
+            f"no range was measured for environment_id {environment_id!r} "
+            f"(measured: {sorted(by_environment)}); a run is checked only against its own "
+            f"environment's measured range (D-88)",
+        )
+    lo, hi = _range_of({key: own}, key, resource=resource)
+    return lo, hi, environment_id
+
+
 def assert_run_level_ranges(
-    manifest: FixtureManifest, *, runtime_seconds: float, storage_bytes: int
+    manifest: FixtureManifest,
+    *,
+    runtime_seconds: float,
+    storage_bytes: int,
+    environment_id: str | None = None,
 ) -> dict[str, Any]:
-    """R-139 control 24: runtime and storage inside the manifest's MEASURED ranges (TA-17)."""
+    """R-139 control 24: runtime and storage inside the manifest's MEASURED ranges (TA-17).
+
+    A manifest frozen with per-environment ranges (D-88) checks a run against the range its
+    own `environment_id` measured; an older manifest's pooled range applies otherwise.
+    """
     runtime = manifest.data["runtime"]
     resource = f"{manifest.path}: runtime"
-    lo, hi = _range_of(runtime, "cpu_total", resource=resource)
+    lo, hi, scope = _environment_range(
+        runtime, "cpu_total", resource=resource, environment_id=environment_id
+    )
     if not (lo <= runtime_seconds <= hi):
         raise _refuse(
             f"{resource}.cpu_total",
             f"measured runtime {runtime_seconds} s is outside the frozen range [{lo}, {hi}] s "
             f"(TA-17's declared runtime tolerance; R-139 control 24)",
         )
-    slo, shi = _range_of(runtime, "storage_total", resource=resource)
+    slo, shi, _ = _environment_range(
+        runtime, "storage_total", resource=resource, environment_id=environment_id
+    )
     if not (slo <= storage_bytes <= shi):
         raise _refuse(
             f"{resource}.storage_total",
             f"measured storage {storage_bytes} bytes is outside the frozen range [{slo}, {shi}] "
             f"(TA-17's declared storage tolerance; R-139 control 24)",
         )
-    return {"runtime_seconds": runtime_seconds, "storage_bytes": storage_bytes, "within": True}
+    return {
+        "runtime_seconds": runtime_seconds,
+        "storage_bytes": storage_bytes,
+        "range_scope": scope,
+        "within": True,
+    }
 
 
 # --- board Recs 4-5 (owner-authorised, CR §11.5): stage measurements and multi-run ranges --
@@ -2591,6 +2634,12 @@ def compose_measurement_ranges(
                     slot.update(
                         {"min": low, "max": high, "units": units, "measuring_run_ids": [run_id]}
                     )
+    # D-88 ruling (2026-10-02): runtime and storage are ranged PER environment_id, as D-83
+    # item 11 keys every comparison to the environment. Windows (a) and Linux (c) runtimes
+    # differ about 2x by construction, so a pooled range was both too wide for each and,
+    # once the power profile changed, failed in both directions.
+    environments = {str(r.get("environment_id") or "") for r in results}
+    per_environment = "" not in environments
     for area, key in _RANGE_REQUIRED:
         slot = composed.get(area, {}).get(key)
         if slot is None:
@@ -2599,6 +2648,27 @@ def compose_measurement_ranges(
                 "the run-level quantity was never measured; a candidate cannot compose "
                 "without it (TE 15.2 Runtime block)",
             )
+        if per_environment:
+            by_environment: dict[str, dict[str, Any]] = {}
+            for result in results:
+                env = str(result["environment_id"])
+                value = result["measurements"][area][key]
+                low, high = float(value["min"]), float(value["max"])
+                entry = by_environment.setdefault(
+                    env, {"min": low, "max": high, "units": slot["units"], "measuring_run_ids": []}
+                )
+                entry["min"], entry["max"] = min(entry["min"], low), max(entry["max"], high)
+                entry["measuring_run_ids"].append(str(result["measuring_run_id"]))
+            for env, entry in by_environment.items():
+                if entry["min"] == entry["max"]:
+                    raise _refuse(
+                        f"measuring results: {area}.{key} in {env}",
+                        f"zero-width range [{entry['min']}, {entry['max']}] over run(s) "
+                        f"{entry['measuring_run_ids']}; each environment's range needs at "
+                        f"least two measuring runs with distinct measurements (board Rec 5; "
+                        f"D-88 per-environment ranges)",
+                    )
+            slot["by_environment"] = dict(sorted(by_environment.items()))
         if float(slot["min"]) == float(slot["max"]):
             raise _refuse(
                 f"measuring results: {area}.{key}",
