@@ -256,3 +256,21 @@ inside [363.96, 504.95], and storage was 2,316,788 bytes, inside [2,311,682, 2,3
 receipt `artifacts/walking_skeleton/plumbing_7day/fixture_pass_receipt.json` reads `PASS`.
 Log: `governance/closure/d87_verification/a4.log`, with the counter trace in
 `a4.cpu_performance.csv`.
+
+### D-87 verification (c), and three rulings (2026-10-02)
+
+- `governance/closure/d87c2_verification/verify_plumbing_7day.log` covers the (c) run in a
+  fresh clone at `0f1d82f`, code `63b0778`, environment `g07-clean-run`. It matched all 19
+  outputs under amendments 2 and 3, and was refused on runtime: 173.3 s under the
+  Performance profile, below the pooled frozen [363.96, 504.95]. An earlier attempt in the
+  same clone aborted in stage 02 because the checkout carried (a)'s committed live outputs;
+  the (c) scripts now move the checkout's live outputs aside first.
+- **Ruling (Student):** runtime and storage ranges are per `environment_id` (`519bbe3`).
+  Plumbing is re-measured (P-9) under the Performance profile and re-frozen as D-88.
+- **Scientific rehearsal 3** (`governance/closure/sci/rehearsal3.log`, code `63b0778`) passed
+  stages 00-06 and stopped in 07 on the primary-table caption and the claims checklist's
+  ConclusionSurfaceArtifact, both Student-owned prose. **Ruling (Student):** Fixture 2 builds
+  the primary table with Vision 6.11's Required-disclosure paragraph verbatim as its caption,
+  and skips the claims checklist with a record (`5d07581`). Governed runs remain fail-closed.
+- Stage 3 code is committed (`d402c6f`): the DATA-07 downloader and stage 00's full-year
+  read path, with tests. Retrieval waits for the Student's Madrigal environment variables.

@@ -1,0 +1,326 @@
+{
+  "change_record_id": "D-72,D-73 (evidence/DECISIONS.md)",
+  "content_hash": "f048baa520a6d5997e1d36d27ea40542918b354ccf23e9d1f6253d0fd3a240f9",
+  "covered_window": {
+    "end": "2022-03-31T23:00:00+00:00",
+    "start": "2022-03-01T00:00:00+00:00"
+  },
+  "created_at_utc": "2026-10-02T10:33:45.211258+00:00",
+  "dataset_version": "f048baa520a6",
+  "evidence_class": "fixture_plumbing",
+  "exclusions_qc_summary": [
+    {
+      "count": 0,
+      "reason": "generation refused for this station-epoch (gate violation, missing grid data, or out-of-range coordinate); excluded rather than silently substituted or defaulted (R-60)"
+    }
+  ],
+  "feature_set_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "fixture_scope_id": "scientific_1month",
+  "fold_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "map_to_map_statement": "The Phase 1 GIM comparison is explicitly a map-product-to-map-product comparison; it cannot validate receiver-level station VTEC or serve as an independent target check.",
+  "mask_ids": [
+    "NOT_YET_ASSIGNED_stage_04_precedes_splits_masks_features"
+  ],
+  "output_files": {
+    "gim_comparator.parquet": "98dd8c0bb89729c094aebb04ea60dd0b88c0ff190b28139501375323b999258a"
+  },
+  "processing": {
+    "hourly_aggregation": "none: one interpolated value per requested station-epoch, generated on demand, not aggregated from finer-grained readings",
+    "parameters": [
+      "value_tecu"
+    ],
+    "phase_id": "P1A",
+    "provider_experiment_kindat": "not applicable: CODE final GIM IONEX product, not a Madrigal experiment",
+    "selected_cell_bounds": {
+      "not_applicable": "see station_coordinate_to_cell_rule"
+    },
+    "station_coordinate_to_cell_rule": "not applicable: GIM comparator reads the grid at the station's own D-1 coordinate via bilinear interpolation (rule C, D-72), never a cell assignment",
+    "target_definition_id": "GRIDDed_VTEC_1H"
+  },
+  "producing_artifact": "gim_comparator_C-01_2022",
+  "release_status": "generated_not_trained",
+  "row_counts": {
+    "by_month": {
+      "2022-03": 2232
+    },
+    "by_qc_stage": {
+      "generated_rule_c_gated": 2232
+    },
+    "by_split": {
+      "unsplit_stage_04": 2232
+    },
+    "by_station": {
+      "ARUC": 744,
+      "BSHM": 744,
+      "NICO": 744
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_files": [
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0600.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "6af8b4a26a16798595fbb0c6204d7896099d74445c867ad47253b90d4600f76c"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0610.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "f94f74bbdba3d93c631c701ff6246e198b4b74ed5de09ba98a27cb18f9b91718"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0620.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "a1e830717b7987e3c2b935dce13cf50e26531d143bda8dfbd90e240a1094779f"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0630.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "c24bffc83520291448a6fb66e50784a3f2862a8037bbc32e34acc7d31baeda5e"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0640.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "01b9a744678eac3fec14e4018eae45e592d7361420f7ea1e0a65ccfa10a5298d"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0650.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "b9c9c9abd5da88fc2bb4720ff70aa5ddc9fc409461e1e15f4206e9351c322400"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0660.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "da18026a4832891a949ed04c5017e2172a004d509f223769aebd9ed03672f3af"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0670.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "369582a0f6dfb38291b8481d84a67f8aa82d059a99cd0845daf7d2102c45f378"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0680.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "8fbb576da626621998ecf86faf1a08aeafc2d31607d100ea750cdecaa1a851e0"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0690.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "f217715880e83e942aa6cb9d0848c380929297bc00832929e15c52a53d9c31bf"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0700.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "6be43e07731bfc8a161a1b54e238697361b0a35c5ca701f903c14eb82efa89f7"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0710.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "c0f9615e45ce5ee59a8b791ce7542a91ed4d179e90ca0371f83efa5033f79c6b"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0720.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "242cc825280fc31dc9f61e3bac29a41f448d72a48d46f2c6e1465b0c75042fad"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0730.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "d2ed278252128e75a010c2316d29715b9bdf8ede135aadc74a3411db20896f53"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0740.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "6be08adc4f0094c13f0a36abf87685296c1affe51f079d402bc5e62d3d90350b"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0750.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "bfae5bbea043177882cfd157f536a1984e0c5ec90f798d9e1bac2e91ab908d1b"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0760.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "bd56cf81a3de1495d205e175f053615a048e1c015aa277db49991b3ab910ee8c"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0770.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "88d4a87b0ddb1763e5665d437f0708b62c185a3165ffe836ef644a771c90e256"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0780.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "bcd4e5ff7f283fa42af7e3eeb2c63bbe9e07fa222f7d4073928c61031b985645"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0790.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "b273ac71bf88a7de5614e37b348f63c7582c4ec9a634eea17d58330436948877"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0800.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "426442f5a69b7df03e55df4504eb4409c66e7cbd1248233a93b5e19d83e838fd"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0810.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "a04740cb0fceff2aa8abc4bd0e2680976b0392ea3f5ad3a8f4ce72e4774bc9f2"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0820.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "82428d1991d80a57b7fbd07c44aea9f096042e0db4de24155cec5161153968bf"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0830.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "350d6b8800724d9568d1a1be8dec67dc05d827d61fa548cc82d1845befbb9779"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0840.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "5618db5dfba532bc1e326c714f7c485e72dab5d34fd476883e81a630748b3ded"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0850.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "8175d1208c02404d787456dacaa12c7c26acc84192ed3979bf837f1f06804375"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0860.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "b49781b9bf6bc288aaa3c058b72a6bb340bd44917b2bea9b2569a311d039a6ad"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0870.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "e2867e326fb064318d5966bf9ad266a0f31c027b62f10823e6c50482c3df5e65"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0880.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "d7d611c01b7d72c5c68f6ddf71aa1ea91de9bf1c832f2252af62490ff89019c0"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0890.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "28d345bc2313a63bb641d59371ff81e188529cbae6ae8c68afdd79e478422533"
+    },
+    {
+      "citation": "https://cddis.nasa.gov/archive/gnss/products/ionex/2022/ (permanent archive path; per-day directory + verbatim filename below)",
+      "filename": "codg0900.22i.Z",
+      "location_date": "evidence/gim_code_final_2022/ (acquired 2026-09-26)",
+      "provider": "CODE (AIUB), acquired via CDDIS anonymous GNSS archive",
+      "retrieval_date": "2026-09-26",
+      "sha256": "c1d9f9ad783306fdca9fda91115e0461095a5419b19b6c7e4b2869fecce25a67"
+    }
+  ],
+  "source_manifest_id": "gim_comparator_C-01_2022:D-72,D-73",
+  "stations_covered": [
+    "ARUC",
+    "BSHM",
+    "NICO"
+  ],
+  "units": {
+    "value_tecu": "TECU"
+  },
+  "window": {
+    "end": "2022-03-31T23:00:00+00:00",
+    "start": "2022-03-01T00:00:00+00:00"
+  }
+}
