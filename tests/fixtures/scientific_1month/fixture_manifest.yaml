@@ -234,6 +234,9 @@
       "source": "evidence/audit_evidence_2022-03/madrigal_coverage_raw_records.csv (D-14 measured basis: in-month hourly coverage ARUC 99.5%, BSHM 99.9%, NICO 97.8%)"
     },
     "fixture_id": "scientific_1month",
+    "freeze_citation": {
+      "decision": "D-90"
+    },
     "limitations": {
       "clauses": [
         "March 2022 is an equinox month and does not reproduce December's winter-solstice regime or its activity distribution.",
@@ -997,7 +1000,7 @@
       "units": "s"
     }
   },
-  "status": "candidate",
+  "status": "frozen",
   "support_missingness": {
     "comparator": {
       "max": 326.0,

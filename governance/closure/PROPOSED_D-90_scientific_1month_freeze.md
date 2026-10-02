@@ -47,3 +47,15 @@ passes" (see `AUTONOMOUS_EXECUTION_PROGRESS.md`, Student rulings item 2).
    Neither run uses `--emit-candidate`. Each writes the scientific receipt.
 
 After step 1, the agent can do steps 2-5 if the permission is granted.
+
+## Performed 2026-10-02 (cloud session): step 1 and step 2
+
+- Step 1 is done. The manifest edit was applied to the `3a2550ee...031c` file: `status` is now `frozen`, `identity.freeze_citation` is now `{"decision": "D-90"}`, the CRLF / indent-2 / sorted-keys serialization is kept, and a parsed comparison shows no other field changed. The new SHA-256 is `355774957e023b86f98b34668ff373e045d3159924e965188cf9926d275e752e`.
+- Step 2 is done. The sibling `fixture_manifest.sha256` has been written.
+- Step 3 is NOT done. Appending D-90 to `evidence/DECISIONS.md` was refused by the session permission control, and project rule `code-generation:c31` makes the register the Student's. The proposed entry is below for the Student to append verbatim (CRLF, as the file uses).
+- Steps 4 and 5 are pending. F7 `assert_freeze_record_agrees` will refuse until step 3 lands, by design. Step 5 needs (a) `tec-thesis-311` and (c) `g07-clean-run`, the laptop environments.
+
+### Proposed D-90 entry
+
+```markdown
+```
