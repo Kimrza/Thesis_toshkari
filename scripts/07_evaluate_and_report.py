@@ -203,6 +203,14 @@ WRITER_ROLE = "evaluate"  # R-18: never `train`, never `bootstrap`
 #: the Fixture 1 execution-scope gate below has exactly one place to read it from.
 GIM_COMPARISON_SET_ID: Final[str] = "gim"
 
+#: The registered D-73 overlap-audit result: the same file
+#: `04_build_external_products.py --overlap-audit-file` generates every C-01 value
+#: against. The `gim` set's disclosure checks each station's recorded containment
+#: against it (SD-C-04; control 32); overridable with `--gim-overlap-audit`.
+DEFAULT_GIM_OVERLAP_AUDIT: Final[str] = (
+    "evidence/r60_gim_gate_inputs/R60_overlap_audit_result_2026-09-26.json"
+)
+
 #: The artifact field names this run can produce, screened through R-23's produced-field
 #: limb BEFORE the first write (R-24).
 PRODUCED_FIELDS: tuple[str, ...] = (
@@ -385,6 +393,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help=(
             "the target uncertainty budget artifact placed adjacent to the primary result "
             "(FR-P1-05-10; TA-19), produced by target-standardization"
+        ),
+    )
+    parser.add_argument(
+        "--gim-overlap-audit",
+        type=Path,
+        default=Path(DEFAULT_GIM_OVERLAP_AUDIT),
+        help=(
+            "the registered D-73 overlap-audit result the `gim` comparison set's "
+            "mandatory disclosure is checked against (workspace-relative)"
         ),
     )
     parser.add_argument(
@@ -1557,6 +1574,24 @@ def _evaluate_partition(
             )
             for benchmark_id in declared["benchmark_ids"]
         ]
+        gim_inputs: dict[str, Any] = {}
+        if set_id == GIM_COMPARISON_SET_ID:
+            # The mandatory, fail-closed overlap disclosure (control 26) needs the
+            # registered audit and the comparator's own containment evidence
+            # (control 32); both are READ here, never asserted.
+            audit_path = Path(args.gim_overlap_audit)
+            if not audit_path.is_absolute():
+                audit_path = Path(snapshot.resolved_roots["workspace"]) / audit_path
+            gim_inputs = {
+                "gim_overlap_audit": json.loads(audit_path.read_text(encoding="utf-8-sig")),
+                "gim_comparator_provenance": next(
+                    (
+                        members_by_id[b].frame.attrs.get("c01_generation_provenance")
+                        for b in declared["benchmark_ids"]
+                    ),
+                    None,
+                ),
+            }
         artifact = build_metrics_artifact(
             set_id=set_id,
             declared_sets=declared_sets,
@@ -1564,6 +1599,7 @@ def _evaluate_partition(
             registry=registry,
             estimands=estimands,
             target_release_manifest=target_release_manifest,
+            **gim_inputs,
         )
         assert_metrics_artifact(artifact, declared_sets=declared_sets)
         path = write_metrics_artifact(

@@ -480,6 +480,11 @@ def _gim_disclosure_block(
             "found at generation — and a comparator without that evidence cannot prove the "
             "audit preceded it (SD-C-04; control 32)",
         )
+    per_station = comparator_provenance.get("per_station")
+    if isinstance(per_station, Mapping) and per_station:
+        return _gim_disclosure_block_per_station(
+            overlap_audit=overlap_audit, per_station=per_station, set_id=set_id
+        )
     recorded_id = comparator_provenance.get("overlap_audit_id")
     recorded_hash = comparator_provenance.get("overlap_audit_sha256")
     if not recorded_id or not recorded_hash:
@@ -511,6 +516,59 @@ def _gim_disclosure_block(
     )
     rendered["overlap_audit_id"] = actual_id
     rendered["overlap_audit_sha256"] = actual_hash
+    return rendered
+
+
+def _gim_disclosure_block_per_station(
+    *,
+    overlap_audit: Mapping[str, Any],
+    per_station: Mapping[str, Any],
+    set_id: str,
+) -> dict[str, Any]:
+    """SD-C-04's containment check, per station, for a comparator generated per station.
+
+    `scripts/04_build_external_products.py` generates each station's comparator against
+    the registered D-73 audit with the flag set to that station's own receiver presence
+    (`gim.station_overlap_audit`), so the content hash each station's rows record is the
+    hash of that per-station record, not of the audit file. Each station's recorded id,
+    hash and flag must equal what the SAME function yields from the registered audit;
+    any mismatch fails exactly as the single-record check does (control 32). The rendered
+    disclosure states the network-level flag AND every station's own flag, so ARUC's
+    absence from CODE's network is never reported under the network-level True.
+    """
+    from src.external import gim  # evaluation-time-only import (R-112)
+
+    actual_id = str(overlap_audit.get("audit_id", ""))
+    station_flags: dict[str, bool] = {}
+    station_hashes: dict[str, str] = {}
+    for station in sorted(per_station):
+        recorded = per_station[station]
+        effective = gim.station_overlap_audit(overlap_audit, str(station))
+        expected_hash = _audit_content_hash(effective)
+        if not isinstance(recorded, Mapping) or (
+            str(recorded.get("overlap_audit_id", "")) != actual_id
+            or str(recorded.get("overlap_audit_sha256", "")) != expected_hash
+            or bool(recorded.get("gim_network_overlap_flag"))
+            != bool(effective["gim_network_overlap_flag"])
+        ):
+            raise FairnessError(
+                f"GIM comparison in set {set_id}",
+                f"station {station}'s recorded audit containment {recorded!r} does not match "
+                f"the registered overlap-audit result ({actual_id!r}, "
+                f"{expected_hash[:12]}…, flag {effective['gim_network_overlap_flag']}); an "
+                f"audit registered AFTER comparator generation cannot appear in the "
+                f"comparator's provenance, so a mismatch fails (SD-C-04; control 32)",
+            )
+        station_flags[str(station)] = bool(effective["gim_network_overlap_flag"])
+        station_hashes[str(station)] = expected_hash
+    rendered = gim.render_comparison_report(
+        comparison={"set_id": set_id, "comparator": _GIM_COMPARATOR_ID},
+        overlap_audit=overlap_audit,
+    )
+    rendered["overlap_audit_id"] = actual_id
+    rendered["overlap_audit_sha256"] = _audit_content_hash(overlap_audit)
+    rendered["per_station_gim_network_overlap_flag"] = station_flags
+    rendered["per_station_overlap_audit_sha256"] = station_hashes
     return rendered
 
 

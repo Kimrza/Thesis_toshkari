@@ -113,6 +113,9 @@ __all__ = [
     "IMPLEMENTED_RULES",
     "assert_no_registered_tuning_for_gim",
     "overlap_audit_content_hash",
+    "C01_MODEL_ID",
+    "station_overlap_audit",
+    "predictions_from_comparator_rows",
 ]
 
 #: Obligation 3's sentence, emitted by the reporting path itself because Vision 6.10
@@ -1192,3 +1195,206 @@ def render_comparison_report(
         "overlap_audit_recorded_at_utc": str(overlap_audit.get("recorded_at_utc", "")),
         "no_tuning_statement": tuning_statement,
     }
+
+
+# =======================================================================================
+# The C-01-to-`Prediction` bridge (the `gim` comparison set's comparator member)
+# =======================================================================================
+
+#: C-01's member id in `configs/experiment.yaml: comparison_sets.gim` (D-80), and the id
+#: `src.evaluation.metrics` keys the overlap disclosure on.
+C01_MODEL_ID: str = "C-01"
+
+#: The reserved transform-identity literal for a generated (never fitted) comparison
+#: member -- B-01 and C-01 (`evaluation-and-comparison` business-rules.md: "B-01 and C-01
+#: ... stamped with ... the reserved literal `untransformed`"). Duplicated, as
+#: `src/external/iri.py` duplicates it, to avoid a `src/external` -> `src/evaluation`
+#: import edge (TE 12; TA-07); `tests/test_c01_prediction_adapter.py` asserts the literals
+#: agree.
+_UNTRANSFORMED: str = "untransformed"
+
+
+def station_overlap_audit(overlap_audit: Mapping[str, Any], station: str) -> dict[str, Any]:
+    """The overlap-audit record a comparator for `station` is generated against.
+
+    D-73's audit carries one network-level `gim_network_overlap_flag` plus a
+    `per_station` block of direct receiver presence. A station's comparator is generated
+    against the audit with the flag set to THAT station's own presence, so ARUC (absent
+    from CODE's network) is not disclosed under the network-level True. This one function
+    is used by the generator (`scripts/04_build_external_products.py`) and by the
+    containment check (`src.evaluation.metrics`), so both hash the same dict.
+    A station absent from `per_station` keeps the network-level record unchanged.
+    """
+    effective = dict(overlap_audit)
+    per_station = overlap_audit.get("per_station")
+    record = per_station.get(station) if isinstance(per_station, Mapping) else None
+    if isinstance(record, Mapping) and "present_in_network" in record:
+        effective["gim_network_overlap_flag"] = bool(record["present_in_network"])
+    return effective
+
+
+def predictions_from_comparator_rows(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    stamps: Mapping[str, Any],
+    stations: Iterable[str],
+    partitions: Iterable[Any],
+) -> dict[str, dict[str, Any]]:
+    """Bridge the verified `gim_comparator.parquet` rows into the eight-field `Prediction`
+    payload `06` writes and `07` reads (`src.evaluation.masks.prediction_from_payload`),
+    one payload per fold partition -- the C-01 counterpart of
+    `src.external.iri.predictions_from_benchmark_rows`.
+
+    Partition scoping follows the same Student/Owner ruling as B-01 (2026-09-26, Option B):
+    each partition receives only the rows inside its own `[validation_month, next_month)`
+    window. Only fold partitions are accepted: REFIT is scored nowhere (FR-P1-04-14) and
+    DEC is reachable only through the one-door `open_restricted` (R-109).
+
+    Envelope, every field traced to a recorded source: `model_id` "C-01" (D-80);
+    `seed` None (domain-entities: "B-01 and C-01 are producible as `Prediction`s with
+    `seed = None`"); `transform_id` the reserved "untransformed"; `phase_id`,
+    `source_id`, `target_definition_id` from `stamps`, which the caller resolves from
+    recorded identities and this function never defaults. Rows are renamed only:
+    `target_epoch_utc` -> `interval_start_utc`, `value_tecu` -> `y_hat`.
+
+    `c01_generation_provenance` carries the SD-C-04 containment evidence per station
+    (the overlap audit's id, the content hash of the per-station record the value was
+    generated against, and that station's flag), plus row accounting: rows outside every
+    supplied partition's window are counted in `unmatched_partition_row_count`, never
+    dropped silently.
+
+    Raises
+    ------
+    ComparatorError
+        a non-fold partition; a missing stamp; an unparseable or naive timestamp; a
+        station outside `stations`; a duplicate (station, epoch); a non-finite
+        `value_tecu`; a row without containment evidence; a station whose rows disagree
+        on overlap provenance; more than one overlap audit across the rows; or a
+        partition whose filtered row set is empty.
+    """
+    from src.data.splits import PartitionKind, validation_month_range
+
+    partitions = list(partitions)
+    for partition in partitions:
+        if partition.kind is not PartitionKind.fold:
+            raise ComparatorError(
+                f"partition {partition.partition_id}",
+                "is not a fold partition; REFIT has no validation month (scored nowhere, "
+                "FR-P1-04-14) and DEC is reachable only through the one-door "
+                "open_restricted (R-109) -- this bridge accepts fold partitions only",
+            )
+    required = ("phase_id", "source_id", "target_definition_id")
+    missing = [key for key in required if not stamps.get(key)]
+    if missing:
+        raise ComparatorError(
+            "C-01 prediction stamps",
+            f"missing {missing}; the identity stamps travel with every prediction and are "
+            f"never defaulted (TE 13; R-105)",
+        )
+    known_stations = set(stations)
+    windows = {p.partition_id: validation_month_range(p) for p in partitions}
+    buckets: dict[str, list[dict[str, Any]]] = {p.partition_id: [] for p in partitions}
+    seen: set[tuple[str, str]] = set()
+    per_station: dict[str, dict[str, Any]] = {}
+    audit_ids: set[str] = set()
+    total = 0
+    unmatched = 0
+    for row in rows:
+        total += 1
+        station = str(row.get("station"))
+        if station not in known_stations:
+            raise ComparatorError(
+                "gim_comparator rows",
+                f"station {station!r} is not in the station registry (configs/data.yaml: "
+                f"stations, D-1); a comparator row for an unregistered station cannot be "
+                f"scored",
+            )
+        epoch = _parse_utc(
+            row.get("target_epoch_utc"), resource="gim_comparator rows", field="target_epoch_utc"
+        )
+        key = (station, epoch.isoformat())
+        if key in seen:
+            raise ComparatorError(
+                "gim_comparator rows", f"duplicate row for (station, target_epoch_utc) = {key}"
+            )
+        seen.add(key)
+        value = row.get("value_tecu")
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, int | float)
+            or not math.isfinite(float(value))
+        ):
+            raise ComparatorError(
+                "gim_comparator rows",
+                f"row for {key} carries value_tecu {value!r}, not a finite number; an "
+                f"excluded station-epoch is recorded in excluded_rows.json, never written "
+                f"as a row",
+            )
+        provenance = {
+            "overlap_audit_id": str(row.get("overlap_audit_id") or ""),
+            "overlap_audit_sha256": str(row.get("overlap_audit_sha256") or ""),
+            "gim_network_overlap_flag": bool(row.get("gim_network_overlap_flag")),
+        }
+        if not provenance["overlap_audit_id"] or not provenance["overlap_audit_sha256"]:
+            raise ComparatorError(
+                "gim_comparator rows",
+                f"row for {key} records no overlap_audit_id / overlap_audit_sha256; the "
+                f"audit's precedence is proven by containment and absent evidence fails "
+                f"(SD-C-04; control 32)",
+            )
+        prior = per_station.setdefault(station, provenance)
+        if prior != provenance:
+            raise ComparatorError(
+                "gim_comparator rows",
+                f"station {station!r} carries more than one overlap provenance "
+                f"({prior} vs {provenance}); one comparator is generated against one "
+                f"audit record per station",
+            )
+        audit_ids.add(provenance["overlap_audit_id"])
+        if len(audit_ids) > 1:
+            raise ComparatorError(
+                "gim_comparator rows",
+                f"rows cite more than one overlap audit {sorted(audit_ids)}; a comparator "
+                f"release is generated against one registered audit",
+            )
+        for partition_id, (start, end) in windows.items():
+            if start <= epoch < end:
+                buckets[partition_id].append(
+                    {
+                        "station": station,
+                        "interval_start_utc": epoch.isoformat(),
+                        "y_hat": float(value),
+                    }
+                )
+                break
+        else:
+            unmatched += 1  # a valid row no supplied partition scores: counted, not an error
+
+    payloads: dict[str, dict[str, Any]] = {}
+    for partition in partitions:
+        member_rows = buckets[partition.partition_id]
+        if not member_rows:
+            raise ComparatorError(
+                f"partition {partition.partition_id}",
+                "the C-01 rows filtered to this partition's validation window are empty; an "
+                "empty comparison member masks nothing and is refused rather than written",
+            )
+        payloads[partition.partition_id] = {
+            "model_id": C01_MODEL_ID,
+            "seed": None,
+            "partition_id": partition.partition_id,
+            "transform_id": _UNTRANSFORMED,
+            "phase_id": str(stamps["phase_id"]),
+            "source_id": str(stamps["source_id"]),
+            "target_definition_id": str(stamps["target_definition_id"]),
+            "confirmatory": False,
+            "rows": member_rows,
+            "c01_generation_provenance": {
+                "label": "generated, not trained",
+                "overlap_audit_id": next(iter(audit_ids)),
+                "per_station": {s: dict(per_station[s]) for s in sorted(per_station)},
+                "unmatched_partition_row_count": unmatched,
+                "total_row_count": total,
+            },
+        }
+    return payloads

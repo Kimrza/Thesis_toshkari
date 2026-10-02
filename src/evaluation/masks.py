@@ -201,7 +201,13 @@ def prediction_from_payload(payload: Mapping[str, Any], *, resource: str) -> Loa
     if not isinstance(rows, Sequence) or isinstance(rows, str):
         raise IntegrityError(resource, "prediction payload carries no `rows` list")
     frame = RecordFrame(dict(r) for r in rows)
-    for key in ("horizon_hours", "hyperparameters", "confirmatory", "seeds_averaged"):
+    for key in (
+        "horizon_hours",
+        "hyperparameters",
+        "confirmatory",
+        "seeds_averaged",
+        "c01_generation_provenance",  # SD-C-04 containment evidence, C-01 only
+    ):
         if key in payload:
             frame.attrs[key] = payload[key]
     missing = [

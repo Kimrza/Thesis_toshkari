@@ -532,6 +532,24 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--emit-gim-payload",
+        type=Path,
+        default=None,
+        help=(
+            "the C-01-to-Prediction bridge: re-verifies the gim_comparator release named by "
+            "--gim-release-dir against its own manifest, filters its rows into each F1-F4 "
+            "fold partition's validation-month window (the B-01 Option B scoping), and "
+            "writes one `06`-shaped C-01.json per partition under this workspace-relative "
+            "06 predictions-run directory (write-once; REFIT and DEC refused)"
+        ),
+    )
+    parser.add_argument(
+        "--gim-release-dir",
+        type=Path,
+        default=None,
+        help="the gim_comparator release directory --emit-gim-payload bridges from",
+    )
+    parser.add_argument(
         "--benchmark-rows",
         type=Path,
         default=None,
@@ -2560,7 +2578,6 @@ def _build_gim_comparator_release(
     overlap_audit_full = json.loads(
         (workspace / args.overlap_audit_file).read_text(encoding="utf-8-sig")
     )
-    per_station_overlap = overlap_audit_full.get("per_station", {})
 
     start_date = dt.date.fromisoformat(args.start_date)
     end_date = dt.date.fromisoformat(args.end_date)
@@ -2588,12 +2605,9 @@ def _build_gim_comparator_release(
         for station in requested_stations:
             lat = float(stations_cfg[station]["lat"])
             lon = float(stations_cfg[station]["lon"])
-            per_station = per_station_overlap.get(station)
-            overlap_audit = dict(overlap_audit_full)
-            if per_station is not None:
-                overlap_audit["gim_network_overlap_flag"] = bool(
-                    per_station["present_in_network"]
-                )
+            # The station's own presence, through the one function the evaluation-time
+            # containment check also hashes (`gim.station_overlap_audit`).
+            overlap_audit = gim.station_overlap_audit(overlap_audit_full, station)
             for hour in range(24):
                 target_epoch = dt.datetime(
                     cursor.year, cursor.month, cursor.day, hour, 0, 0, tzinfo=dt.timezone.utc
@@ -2850,6 +2864,107 @@ def _emit_prediction_payload(entry: Mapping[str, Any], args: argparse.Namespace)
     return {"written": written}
 
 
+def _emit_gim_prediction_payload(
+    entry: Mapping[str, Any],
+    *,
+    phase: int,
+    release_dir: Path,
+    run_dir: Path,
+    fixture_scope: Any = None,
+) -> dict[str, Any]:
+    """The C-01-to-`Prediction` bridge: the `gim` comparison set's comparator member
+    (D-80: `{M-06, C-01}`), the counterpart of `_emit_prediction_payload` for B-01.
+
+    Re-verifies the release at consumption (never trusts the build step alone): the
+    release manifest must exist, name this script's producing artifact, and its recorded
+    SHA-256 for `gim_comparator.parquet` must match the bytes read. Then delegates the
+    pure row-to-payload conversion to `gim.predictions_from_comparator_rows` and writes
+    one `06`-shaped `C-01.json` per fold partition, write-once.
+
+    Stamps, none invented: `phase_id` and `target_definition_id` are the released
+    target's identity (`resolve_target_identity`, the same source the release manifest
+    records); `source_id` is the release's own producing-artifact identity
+    (`_GIM_COMPARATOR_ARTIFACT`), the comparator's provenance -- `source_id` is
+    provenance, not comparison-context identity (`src/evaluation/masks.py`).
+    With `fixture_scope`, the scope's apparatus fold partitions are targeted, one adapter
+    call per fold (their validation ranges overlap), and each payload is fixture-stamped,
+    exactly as the B-01 bridge does; otherwise the governed F1-F4.
+    """
+    _assert_phase1_field_contract(phase)
+    import pandas as pd  # deferred: only the comparator paths need it
+    from src.data.registry import load_registry  # station coordinates (D-1)
+    from src.data.splits import PartitionKind, build_partitions
+    from src.external import gim  # allowlisted importer; deferred by design
+
+    snapshot = entry["snapshot"]
+    workspace = Path(snapshot.resolved_roots["workspace"])
+    release_dir = Path(release_dir)
+    if not release_dir.is_absolute():
+        release_dir = workspace / release_dir
+    manifest_path = release_dir / "release_manifest.json"
+    parquet_path = release_dir / "gim_comparator.parquet"
+    if not manifest_path.is_file() or not parquet_path.is_file():
+        raise IntegrityError(
+            str(release_dir),
+            "no gim_comparator release (release_manifest.json + gim_comparator.parquet); "
+            "build it with --build-gim-comparator-release first",
+        )
+    manifest = _load_json_object(manifest_path, what="gim_comparator release manifest")
+    if not isinstance(manifest, Mapping) or manifest.get("producing_artifact") != _GIM_COMPARATOR_ARTIFACT:
+        raise IntegrityError(
+            str(manifest_path),
+            f"producing_artifact is not {_GIM_COMPARATOR_ARTIFACT!r}; refusing to bridge a "
+            f"differently-labelled release",
+        )
+    recorded = (manifest.get("output_files") or {}).get("gim_comparator.parquet")
+    actual = sha256_of_file(parquet_path)
+    if actual != recorded:
+        raise IntegrityError(
+            str(parquet_path),
+            f"hash {actual} does not match the release manifest's recorded {recorded!r}; "
+            f"the comparator changed after release or the manifest does not describe it",
+        )
+    rows = pd.read_parquet(parquet_path).to_dict(orient="records")
+    identity = resolve_target_identity(snapshot.data)
+    stamps = {
+        "phase_id": identity["phase_id"],
+        "source_id": _GIM_COMPARATOR_ARTIFACT,
+        "target_definition_id": identity["target_definition_id"],
+    }
+    stations = list(load_registry(snapshot))
+
+    if fixture_scope is not None:
+        from src.data.fixture_evidence import stamp_fixture_artifact, stamp_for_manifest
+
+        apparatus = build_apparatus_partitions(
+            fixture_scope, embargo_hours=read_embargo_hours(snapshot)
+        )
+        folds = [p for p in apparatus if p.kind is PartitionKind.fold]
+        payloads = {
+            p.partition_id: gim.predictions_from_comparator_rows(
+                rows, stamps=stamps, stations=stations, partitions=[p]
+            )[p.partition_id]
+            for p in folds
+        }
+    else:
+        folds = [p for p in build_partitions(snapshot) if p.kind is PartitionKind.fold]
+        payloads = gim.predictions_from_comparator_rows(
+            rows, stamps=stamps, stations=stations, partitions=folds
+        )
+
+    written: list[str] = []
+    for partition_id, payload in payloads.items():
+        if fixture_scope is not None:
+            payload = stamp_fixture_artifact(
+                dict(payload),
+                stamp_for_manifest(fixture_scope, apparatus_partition_id=partition_id),
+            )
+        path = _write_prediction_once(Path(run_dir) / partition_id / "C-01.json", payload)
+        written.append(str(path))
+        print(f"04_build_external_products: C-01 payload -> {path}")
+    return {"written": written, "release_dir": str(release_dir), "release_parquet_sha256": actual}
+
+
 def _fixture_external_outputs(entry: Mapping[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     """TE §15.4's external outputs of a FIXTURE run (CR-2026-09-29-Q31-CLOSURE).
 
@@ -2919,6 +3034,15 @@ def _fixture_external_outputs(entry: Mapping[str, Any], args: argparse.Namespace
 
     release = _build_gim_comparator_release(entry, gim_args)
     release_parquet = workspace / release["release_dir"] / "gim_comparator.parquet"
+    # TE 15.3 "C-01 sample generation": the comparator member the `gim` set evaluates
+    # (D-80), bridged from the release just built and re-verified at consumption.
+    gim_bridged = _emit_gim_prediction_payload(
+        entry,
+        phase=args.phase,
+        release_dir=workspace / release["release_dir"],
+        run_dir=fixture_root / "predictions",
+        fixture_scope=scope,
+    )
     gim_path = copy_once(release_parquet, fixture_root / "gim_comparator.parquet")
     first_ionex = (
         workspace
@@ -2942,6 +3066,7 @@ def _fixture_external_outputs(entry: Mapping[str, Any], args: argparse.Namespace
     )
     return {
         "fixture_b01_payloads": bridged["written"],
+        "fixture_c01_payloads": gim_bridged["written"],
         "iri_benchmark": str(iri_path),
         "gim_comparator": str(gim_path),
         "gim_release": release,
@@ -3018,6 +3143,17 @@ def main() -> int:
             summary = _build_gim_comparator_release(entry, args)
         elif args.emit_prediction_payload is not None:
             summary = _emit_prediction_payload(entry, args)
+        elif args.emit_gim_payload is not None:
+            if args.gim_release_dir is None:
+                raise IntegrityError(
+                    "--emit-gim-payload", "names no --gim-release-dir to bridge from"
+                )
+            summary = _emit_gim_prediction_payload(
+                entry,
+                phase=args.phase,
+                release_dir=args.gim_release_dir,
+                run_dir=Path(args.emit_gim_payload),
+            )
         else:
             summary = _run_driver_audit(entry, args)
             if entry.get("fixture_scope_id"):
