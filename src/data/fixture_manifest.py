@@ -2448,6 +2448,8 @@ _RANGE_REQUIRED: Final[tuple[tuple[str, str], ...]] = (
     ("runtime", "cpu_total"),
     ("runtime", "storage_total"),
 )
+#: The run-level quantities ranged per environment_id (D-88 rulings): runtime only.
+_PER_ENVIRONMENT_RANGES: Final[frozenset[tuple[str, str]]] = frozenset({("runtime", "cpu_total")})
 
 
 #: Prior runs' outputs moved aside under the fixture root (see run_walking_skeleton's
@@ -2634,10 +2636,13 @@ def compose_measurement_ranges(
                     slot.update(
                         {"min": low, "max": high, "units": units, "measuring_run_ids": [run_id]}
                     )
-    # D-88 ruling (2026-10-02): runtime and storage are ranged PER environment_id, as D-83
-    # item 11 keys every comparison to the environment. Windows (a) and Linux (c) runtimes
-    # differ about 2x by construction, so a pooled range was both too wide for each and,
-    # once the power profile changed, failed in both directions.
+    # D-88 rulings (2026-10-02): RUNTIME is ranged per environment_id, as D-83 item 11 keys
+    # every comparison to the environment -- Windows (a) and Linux (c) runtimes differ about
+    # 2x by construction, so a pooled range was too wide for each and, once the power
+    # profile changed, failed in both directions. STORAGE stays pooled: within one
+    # environment two runs differ by a few bytes while sessions drift by hundreds to
+    # thousands (variable-length timing fields), so a per-environment storage range would
+    # fail on byte noise; the pooled range spans both environments' measured values.
     environments = {str(r.get("environment_id") or "") for r in results}
     per_environment = "" not in environments
     for area, key in _RANGE_REQUIRED:
@@ -2648,7 +2653,7 @@ def compose_measurement_ranges(
                 "the run-level quantity was never measured; a candidate cannot compose "
                 "without it (TE 15.2 Runtime block)",
             )
-        if per_environment:
+        if per_environment and (area, key) in _PER_ENVIRONMENT_RANGES:
             by_environment: dict[str, dict[str, Any]] = {}
             for result in results:
                 env = str(result["environment_id"])

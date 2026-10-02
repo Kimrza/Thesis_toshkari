@@ -1,4 +1,4 @@
-"""D-88 ruling (2026-10-02): runtime and storage ranges are measured and checked per environment.
+"""D-88 rulings (2026-10-02): runtime ranges per environment; storage stays pooled.
 
 Purpose
 -------
@@ -7,8 +7,10 @@ Linux differ by about 2x, and the range was measured under one power profile. Th
 verifications matched every output and still failed TA-17 in both directions: (a) at
 635-663 s under a capped profile, and (c) at 173 s under the Performance profile. These tests
 cover the remedy: composition keeps a range per `environment_id`, and a run is checked
-against its own environment's range. Inputs: synthetic measuring results. Re-run behaviour:
-pure.
+against its own environment's runtime range. Storage stays pooled (second ruling): within one
+environment two runs differ by a few bytes, while sessions drift by hundreds to thousands, so a
+per-environment storage range would fail on byte noise. Inputs: synthetic measuring results.
+Re-run behaviour: pure.
 """
 
 from __future__ import annotations
@@ -54,10 +56,15 @@ def test_ranges_are_composed_per_environment():
     assert (cpu["min"], cpu["max"]) == (170.0, 420.0)
     assert cpu["by_environment"][A]["min"] == 390.0 and cpu["by_environment"][A]["max"] == 420.0
     assert cpu["by_environment"][C]["measuring_run_ids"] == ["c1", "c2"]
+    storage = composed["runtime"]["storage_total"]
+    assert "by_environment" not in storage
+    assert (storage["min"], storage["max"]) == (2_311_000, 2_346_000)
 
 
 def test_zero_width_range_in_one_environment_refuses():
     flat = [*RESULTS[:2], _result("c1", C, 170.0, 2_345_000), _result("c2", C, 170.0, 2_345_500)]
+    same_storage = [*RESULTS[:2], _result("c1", C, 170.0, 2_345_000), _result("c2", C, 180.0, 2_345_000)]
+    compose_measurement_ranges(same_storage)  # a flat per-environment STORAGE range is fine
     with pytest.raises(IntegrityError, match="in g07-clean-run"):
         compose_measurement_ranges(flat)
 
@@ -83,6 +90,11 @@ def test_a_run_is_checked_against_its_own_environment(tmp_path):
     )["range_scope"] == C
     with pytest.raises(IntegrityError, match="outside the frozen range"):
         assert_run_level_ranges(manifest, runtime_seconds=175.0, storage_bytes=2_311_500, environment_id=A)
+    assert assert_run_level_ranges(  # storage is pooled: an (a)-sized figure is fine in (c)
+        manifest, runtime_seconds=175.0, storage_bytes=2_311_500, environment_id=C
+    )["within"]
+    with pytest.raises(IntegrityError, match="storage"):
+        assert_run_level_ranges(manifest, runtime_seconds=175.0, storage_bytes=2_400_000, environment_id=C)
     with pytest.raises(IntegrityError, match="outside the frozen range"):
         assert_run_level_ranges(manifest, runtime_seconds=400.0, storage_bytes=2_345_500, environment_id=C)
 
