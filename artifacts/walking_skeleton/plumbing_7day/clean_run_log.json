@@ -163,18 +163,18 @@
       "tests/test_train_only_transforms.py",
       "tests/test_split_embargo.py"
     ],
-    "duration_seconds": 1.3589999999967404,
-    "ended_at_utc": "2026-10-01T20:54:44.983999+00:00",
+    "duration_seconds": 0.8429999999934807,
+    "ended_at_utc": "2026-10-02T10:23:31.009745+00:00",
     "note": "M10 contract fixture (features-and-splits authored; run here, Q12 = C): clean-run evidence, NOT a third receipt; gates no full-year job (TC-03f)",
-    "peak_rss_bytes": 41164800,
+    "peak_rss_bytes": 40079360,
     "peak_rss_method": "GetProcessMemoryInfo.PeakWorkingSetSize (this child)",
     "returncode": 0,
-    "started_at_utc": "2026-10-01T20:54:43.618982+00:00",
+    "started_at_utc": "2026-10-02T10:23:30.158711+00:00",
     "stderr_tail": "",
-    "stdout_tail": ".......................................................................  [100%]\n71 passed in 0.65s\n"
+    "stdout_tail": ".......................................................................  [100%]\n71 passed in 0.35s\n"
   },
   "missing_required_outputs": [],
   "platform": "local",
   "pythonhashseed": "0",
-  "run_id": "walking-skeleton-plumbing_7day-20261001T204406Z-6b5d84b9"
+  "run_id": "walking-skeleton-plumbing_7day-20261002T101659Z-1603083c"
 }

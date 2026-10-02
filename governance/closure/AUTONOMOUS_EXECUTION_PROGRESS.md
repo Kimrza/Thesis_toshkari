@@ -246,3 +246,13 @@ reproducibility failure.
 the run: mean 45.1 % of nominal, range 42.3-48.8 %. The Student was asked and chose to switch
 the laptop's vendor power profile out of "Silent" themselves; the agent may not change system
 settings. Verification resumes once the profile changes. No re-freeze is needed.
+
+### D-87 verification (a), attempt 4: PASS (2026-10-02)
+
+The Student changed the laptop's performance profile, and the counter then read about 89 %
+of nominal under load. Run `walking-skeleton-plumbing_7day-20261002T101659Z-1603083c`, code
+`63b0778`, environment `tec-thesis-311`, matched all 19 outputs of D-87. Runtime was 392.5 s,
+inside [363.96, 504.95], and storage was 2,316,788 bytes, inside [2,311,682, 2,345,881]. The
+receipt `artifacts/walking_skeleton/plumbing_7day/fixture_pass_receipt.json` reads `PASS`.
+Log: `governance/closure/d87_verification/a4.log`, with the counter trace in
+`a4.cpu_performance.csv`.

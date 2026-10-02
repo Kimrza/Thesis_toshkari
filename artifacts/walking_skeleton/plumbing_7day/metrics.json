@@ -79,7 +79,7 @@
             "weighting": "equal_station"
           }
         ],
-        "emitted_at_utc": "2026-10-01T20:54:32.817969+00:00",
+        "emitted_at_utc": "2026-10-02T10:23:27.219956+00:00",
         "exclusion_counts": {
           "BSHM": 121
         },
@@ -134,7 +134,7 @@
             "weighting": "equal_station"
           }
         ],
-        "emitted_at_utc": "2026-10-01T20:54:32.964650+00:00",
+        "emitted_at_utc": "2026-10-02T10:23:27.267832+00:00",
         "exclusion_counts": {
           "BSHM": 115
         },
@@ -228,7 +228,7 @@
             "weighting": "equal_station"
           }
         ],
-        "emitted_at_utc": "2026-10-01T20:54:33.220052+00:00",
+        "emitted_at_utc": "2026-10-02T10:23:27.356748+00:00",
         "exclusion_counts": {
           "BSHM": 140
         },
@@ -283,7 +283,7 @@
             "weighting": "equal_station"
           }
         ],
-        "emitted_at_utc": "2026-10-01T20:54:33.349259+00:00",
+        "emitted_at_utc": "2026-10-02T10:23:27.403220+00:00",
         "exclusion_counts": {
           "BSHM": 137
         },
